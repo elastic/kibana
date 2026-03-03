@@ -7,15 +7,6 @@
 import type { VulnSeverity } from './types/vulnerabilities';
 import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
-export const ORGANIZATION_ACCOUNT = 'organization-account';
-export const SINGLE_ACCOUNT = 'single-account';
-export const AZURE_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const AZURE_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
-export const AWS_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const AWS_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
-export const GCP_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const GCP_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
-
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS =
@@ -119,3 +110,61 @@ export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
   'entity_store_field_retention_generic_<space>_v1.0.0';
 
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
+
+/**
+ * Entity store latest index pattern for LOOKUP JOIN queries.
+ * The <space> placeholder should be replaced with the actual space ID.
+ */
+export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
+
+/**
+ * Relationship fields available in the generic entities index.
+ * These represent static/configuration-based relationships between entities.
+ *
+ * WARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,
+ * the relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated
+ * to batch the FORK queries.
+ */
+export const ENTITY_RELATIONSHIP_FIELDS = [
+  'Accesses_frequently',
+  'Communicates_with',
+  'Depends_on',
+  'Owns',
+  'Supervises',
+] as const;
+
+// Keys must match ENTITY_RELATIONSHIP_FIELDS values which use Entity Store naming convention
+/* eslint-disable @typescript-eslint/naming-convention */
+export const ENTITY_RELATIONSHIP_LABELS: Record<
+  (typeof ENTITY_RELATIONSHIP_FIELDS)[number],
+  string
+> = {
+  Accesses_frequently: 'Accesses frequently',
+  Communicates_with: 'Communicates with',
+  Depends_on: 'Depends on',
+  Owns: 'Owns',
+  Supervises: 'Supervises',
+};
+/* eslint-enable @typescript-eslint/naming-convention */
+
+/**
+ * ECS entity actor fields used for graph visualization.
+ * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
+ */
+export const GRAPH_ACTOR_ENTITY_FIELDS = [
+  'user.entity.id',
+  'host.entity.id',
+  'service.entity.id',
+  'entity.id',
+] as const;
+
+/**
+ * ECS entity target fields used for graph visualization.
+ * NOTE: The order does NOT have meaning - all target fields are captured and aggregated together.
+ */
+export const GRAPH_TARGET_ENTITY_FIELDS = [
+  'user.target.entity.id',
+  'host.target.entity.id',
+  'service.target.entity.id',
+  'entity.target.id',
+] as const;

@@ -17,8 +17,6 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import type { CreateSLOForm } from '../../../types';
 import { getDataViewPatternOrId, useAdhocDataViews } from './use_adhoc_data_views';
 
-const BTN_MAX_WIDTH = 515;
-
 export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
 const INDEX_FIELD = 'indicator.params.index';
 const INDICATOR_TIMESTAMP_FIELD = 'indicator.params.timestampField';
@@ -87,7 +85,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
               color: fieldState.invalid ? 'danger' : 'primary',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
-              style: { width: '100%', maxWidth: BTN_MAX_WIDTH },
+              fullWidth: true,
             }}
             onChangeDataView={(newId: string) => {
               field.onChange(newId);

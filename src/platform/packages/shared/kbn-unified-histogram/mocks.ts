@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
 import type { UnifiedHistogramApi } from './hooks/use_unified_histogram';
+import { createStateService } from './services/state_service';
+import { unifiedHistogramServicesMock } from './__mocks__/services';
 
 export const createMockUnifiedHistogramApi = () => {
   const api: UnifiedHistogramApi = {
-    state$: new Observable(),
+    state$: createStateService({
+      services: unifiedHistogramServicesMock,
+    }).state$,
     setChartHidden: jest.fn(),
     setTopPanelHeight: jest.fn(),
-    setTimeInterval: jest.fn(),
     setTotalHits: jest.fn(),
     fetch: jest.fn(),
   };

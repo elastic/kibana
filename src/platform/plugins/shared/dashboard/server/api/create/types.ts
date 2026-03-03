@@ -8,7 +8,15 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { getCreateRequestBody, getCreateResponseBody } from './schemas';
+import type {
+  createRequestParamsSchema,
+  getCreateRequestBodySchema,
+  getCreateResponseBodySchema,
+} from './schemas';
 
-export type DashboardCreateRequestBody = TypeOf<ReturnType<typeof getCreateRequestBody>>;
-export type DashboardCreateResponseBody = TypeOf<ReturnType<typeof getCreateResponseBody>>;
+/** The request params type for creating a dashboard. */
+export type DashboardCreateRequestParams = TypeOf<typeof createRequestParamsSchema>;
+/** The request body type for creating a dashboard. */
+export type DashboardCreateRequestBody = TypeOf<ReturnType<typeof getCreateRequestBodySchema>>;
+/** The response body type for creating a dashboard. */
+export type DashboardCreateResponseBody = TypeOf<ReturnType<typeof getCreateResponseBodySchema>>;

@@ -60,20 +60,19 @@
     "@kbn/shared-ux-utility",
     "@kbn/stack-alerts-plugin",
     "@kbn/std",
-    "@kbn/task-manager-plugin",
-    "@kbn/telemetry-plugin",
     "@kbn/timerange",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-theme",
     "@kbn/unified-histogram",
     "@kbn/unified-search-plugin",
-    "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
     "@kbn/failure-store-modal",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/streams-schema",
+    "@kbn/streams-plugin"
   ],
   "exclude": [
     "target/**/*"

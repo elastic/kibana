@@ -3,23 +3,22 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
+  "exclude": ["target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "tasks/**/*",
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -107,13 +106,11 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/automatic-import-plugin",
+    "@kbn/automatic-import-v2-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
     "@kbn/zod",
-    "@kbn/reporting-public",
-    "@kbn/field-formats-plugin",
     "@kbn/core-security-server",
-    "@kbn/core-http-server-utils",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/handlebars",
     "@kbn/lock-manager",
@@ -125,6 +122,16 @@
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
+    "@kbn/setup-node-env",
     "@kbn/react-query",
+    "@kbn/fs",
+    "@kbn/kql",
+    "@kbn/scout",
+    "@kbn/reporting-common",
+    "@kbn/reporting-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/css-utils",
+    "@kbn/rison",
+    "@kbn/rule-data-utils"
   ]
 }

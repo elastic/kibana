@@ -12,12 +12,12 @@ import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/e
 import { isEqual } from 'lodash';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
-import type { DiscoverAppStateContainer } from '../discover_app_state_container';
-import type { InternalStateStore, TabActionInjector } from '../redux';
+import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
+const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
  * Takes care of ES|QL state transformations when a new result is returned
@@ -25,13 +25,13 @@ const ESQL_MAX_NUM_OF_COLUMNS = 50;
  */
 export const buildEsqlFetchSubscribe = ({
   internalState,
-  appStateContainer,
   dataSubjects,
+  getCurrentTab,
   injectCurrentTab,
 }: {
   internalState: InternalStateStore;
-  appStateContainer: DiscoverAppStateContainer;
   dataSubjects: SavedSearchData;
+  getCurrentTab: () => TabState;
   injectCurrentTab: TabActionInjector;
 }) => {
   let prevEsqlData: {
@@ -79,7 +79,7 @@ export const buildEsqlFetchSubscribe = ({
     if (next.fetchStatus === FetchStatus.LOADING) {
       // We have to grab the current query from appState
       // here since nextQuery has not been updated yet
-      const appStateQuery = appStateContainer.get().query;
+      const appStateQuery = getCurrentTab().appState.query;
 
       if (isOfAggregateQueryType(appStateQuery)) {
         if (prevEsqlData.initialFetch) {
@@ -124,7 +124,10 @@ export const buildEsqlFetchSubscribe = ({
     if (next.result?.length) {
       nextAllColumns = Object.keys(next.result[0].raw);
 
-      if (hasTransformationalCommand(nextQuery.esql)) {
+      if (
+        hasTransformationalCommand(nextQuery.esql) ||
+        nextAllColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
+      ) {
         nextDefaultColumns = nextAllColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
       } else {
         nextDefaultColumns = [];
@@ -135,7 +138,12 @@ export const buildEsqlFetchSubscribe = ({
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
-      prevEsqlData.defaultColumns = nextDefaultColumns;
+
+      const appStateColumns = getCurrentTab().appState.columns;
+      const hasNoKnownAppStateColumns = appStateColumns === undefined;
+      const shouldTriggerColumnsUpdate = nextDefaultColumns.length > 0 && hasNoKnownAppStateColumns;
+
+      prevEsqlData.defaultColumns = shouldTriggerColumnsUpdate ? [] : nextDefaultColumns;
     }
 
     const indexPatternChanged =
@@ -147,7 +155,7 @@ export const buildEsqlFetchSubscribe = ({
     const changeDefaultColumns =
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
 
-    const { viewMode } = appStateContainer.get();
+    const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
     // If the index pattern hasn't changed, but the available columns have changed
@@ -178,7 +186,11 @@ export const buildEsqlFetchSubscribe = ({
           ...(changeViewMode && { viewMode: undefined }),
         };
 
-        await appStateContainer.replaceUrlState(nextState);
+        await internalState.dispatch(
+          injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+            appState: nextState,
+          })
+        );
       }
     }
 

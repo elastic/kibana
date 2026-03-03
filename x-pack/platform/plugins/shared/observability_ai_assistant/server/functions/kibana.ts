@@ -90,6 +90,7 @@ export function registerKibanaFunction({
         'accept-encoding',
         'accept-language',
         'accept',
+        'authorization',
         'content-type',
         'cookie',
         'kbn-build-number',

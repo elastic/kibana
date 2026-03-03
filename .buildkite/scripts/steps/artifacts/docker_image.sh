@@ -14,6 +14,19 @@ else
   KIBANA_IMAGE_TAG="pr-$BUILDKITE_PULL_REQUEST-$GIT_ABBREV_COMMIT"
 fi
 
+# CDN readiness file - uploaded at the very end of successful CDN asset validation
+CDN_READINESS_FILE="$GIT_ABBREV_COMMIT/.ready"
+CDN_READINESS_URL="$GCS_SA_CDN_URL/$CDN_READINESS_FILE"
+
+check_cdn_assets_ready() {
+  local url="$1"
+  if curl --output /dev/null --silent --head --fail "$url"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
@@ -23,7 +36,7 @@ export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_BASE_IMAGE:$KIBANA_IMAGE_
 KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
 export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
-KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-search"
+KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-elasticsearch"
 export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
@@ -51,17 +64,33 @@ create_and_push_manifest() {
   docker manifest push "$image"
 }
 
-echo "--- Verify manifest does not already exist"
+echo "--- Verify manifest and CDN assets do not already exist"
 echo "Checking manifest for $KIBANA_IMAGE"
+MANIFEST_EXISTS=false
+CDN_ASSETS_READY=false
 SKIP_BUILD=false
+
 if docker manifest inspect "$KIBANA_IMAGE" &> /dev/null; then
+  MANIFEST_EXISTS=true
+  echo "Manifest exists: $KIBANA_IMAGE"
+fi
+
+echo "Checking CDN readiness at $CDN_READINESS_URL"
+if check_cdn_assets_ready "$CDN_READINESS_URL"; then
+  CDN_ASSETS_READY=true
+  echo "CDN assets ready: $CDN_READINESS_URL"
+fi
+
+if [[ "$MANIFEST_EXISTS" == "true" ]]; then
   # If a staging build manifest already exists, there's a workflow error and the root cause should be investigated.
   if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
     echo "Manifest already exists, exiting"
     exit 1
-  else
-    echo "Manifest already exists, skipping build.  Look up previous build for artifacts."
+  elif [[ "$CDN_ASSETS_READY" == "true" ]]; then
+    echo "Manifest and CDN assets already exist, skipping build. Look up previous build for artifacts."
     SKIP_BUILD=true
+  else
+    echo "Manifest exists but CDN assets are not ready (readiness file missing), rebuilding..."
   fi
 fi
 
@@ -79,7 +108,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-elasticsearch-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
@@ -130,12 +159,19 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
   gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
-  gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
   echo "--- Validate CDN assets"
   ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
     "$GCS_SA_CDN_URL" \
     "$CDN_ASSETS_FOLDER"
+
+  echo "--- Upload CDN readiness file"
+  # Upload readiness file to mark CDN assets as complete
+  # This file is checked at the start to determine if a rebuild is needed
+  echo "ready" | gsutil cp - "gs://$GCS_SA_CDN_BUCKET/$CDN_READINESS_FILE"
+  echo "Readiness file uploaded to gs://$GCS_SA_CDN_BUCKET/$CDN_READINESS_FILE"
+
+  gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 fi
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
@@ -175,6 +211,7 @@ steps:
         SERVICE: kibana
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
         GPCTL_PROMOTE_DRY_RUN: ${DRY_RUN:-false}
+        CHANGE_WINDOW_OVERRIDE: true
 EOF
 
 else

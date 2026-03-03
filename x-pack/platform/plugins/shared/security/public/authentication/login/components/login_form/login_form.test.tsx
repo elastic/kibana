@@ -22,7 +22,8 @@ import {
   shallowWithIntl,
 } from '@kbn/test-jest-helpers';
 
-import { LoginForm, MessageType, PageMode } from './login_form';
+import { LoginForm, PageMode } from './login_form';
+import { MessageType } from '../../../components';
 
 function getPageModeAssertions(mode: PageMode): Array<[string, boolean]> {
   return mode === PageMode.Form
@@ -421,6 +422,7 @@ describe('LoginForm', () => {
 
       const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
 
+      // @ts-expect-error upgrade typescript v5.9.3
       window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
       const wrapper = renderWithI18n(
         <EuiProvider>
@@ -490,6 +492,7 @@ describe('LoginForm', () => {
         '/some-base-path/app/kibana#/home?_g=()'
       )}`;
 
+      // @ts-expect-error upgrade typescript v5.9.3
       window.location = {
         ...window.location,
         href: currentURL,

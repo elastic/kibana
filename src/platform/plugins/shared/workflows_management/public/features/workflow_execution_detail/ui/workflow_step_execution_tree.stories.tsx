@@ -11,11 +11,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { SafeParseReturnType } from '@kbn/zod';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,
@@ -94,24 +92,9 @@ steps:
     with:
       message: '--------------------------'
 `;
-const result = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data as WorkflowYaml;
-
-// export interface WorkflowExecutionDto {
-//   spaceId: string;
-//   id: string;
-//   status: ExecutionStatus;
-//   startedAt: string;
-//   finishedAt: string;
-//   workflowId?: string;
-//   workflowName?: string;
-//   workflowDefinition: WorkflowYaml;
-//   stepExecutions: WorkflowStepExecutionDto[];
-//   stepExecutionsTree: StepExecutionTreeItem[];
-//   duration: number | null;
-//   triggeredBy?: string; // 'manual' or 'scheduled'
-//   yaml: string;
-// }
+const result = parseYamlToJSONWithoutValidation(yaml);
+// @ts-expect-error -- it's a storybook story, we don't need to type it
+const definition = result.json as WorkflowYaml;
 
 export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
@@ -122,6 +105,8 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      error: null,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -129,6 +114,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       stepExecutions: [
         {
           stepId: 'analysis',
+          stepType: 'inference.completion',
           topologicalIndex: 0,
           status: ExecutionStatus.PENDING,
           startedAt: '2025-09-02T20:43:57.466Z',
@@ -145,12 +131,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
             input:
               '- Output JSON array with multiple object\n- Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure\n- Generate random count of elements from 3 to 5\n- Generate some famous name and surname (Brad Pitt, etc)\n- Don\'t include anything else except JSON into the response\n- It MUST!!! be just raw JSON string, no formatting, no anything else\n',
           },
-          completedAt: '2025-09-02T20:44:01.245Z',
+          finishedAt: '2025-09-02T20:44:01.245Z',
           executionTimeMs: 3779,
           scopeStack: [],
         },
         {
           stepId: 'debug_ai_response',
+          stepType: 'console',
           topologicalIndex: 1,
           status: ExecutionStatus.RUNNING,
           startedAt: '2025-09-02T20:44:02.142Z',
@@ -167,12 +154,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
             message:
               '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
           },
-          completedAt: '2025-09-02T20:44:02.167Z',
+          finishedAt: '2025-09-02T20:44:02.167Z',
           executionTimeMs: 25,
           scopeStack: [],
         },
         {
           stepId: 'print-enter-dash',
+          stepType: 'slack',
           topologicalIndex: 2,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:03.171Z',
@@ -187,12 +175,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: '-------------------hellow-------',
           },
-          completedAt: '2025-09-02T20:44:03.627Z',
+          finishedAt: '2025-09-02T20:44:03.627Z',
           executionTimeMs: 456,
           scopeStack: [],
         },
         {
           stepId: 'foreachstep',
+          stepType: 'foreach',
           topologicalIndex: 4,
           status: ExecutionStatus.SKIPPED,
           startedAt: '2025-09-02T20:44:05.233Z',
@@ -227,12 +216,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
               },
             ],
           },
-          completedAt: '2025-09-02T20:44:14.522Z',
+          finishedAt: '2025-09-02T20:44:14.522Z',
           executionTimeMs: 9289,
           scopeStack: [],
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.WAITING_FOR_INPUT,
           startedAt: '2025-09-02T20:44:12.598Z',
@@ -247,7 +237,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Scarlett Johansson',
           },
-          completedAt: '2025-09-02T20:44:12.694Z',
+          finishedAt: '2025-09-02T20:44:12.694Z',
           executionTimeMs: 96,
           scopeStack: [
             {
@@ -258,6 +248,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.WAITING,
           startedAt: '2025-09-02T20:44:10.456Z',
@@ -272,7 +263,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Leonardo DiCaprio',
           },
-          completedAt: '2025-09-02T20:44:10.491Z',
+          finishedAt: '2025-09-02T20:44:10.491Z',
           executionTimeMs: 35,
           scopeStack: [
             {
@@ -283,6 +274,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:08.396Z',
@@ -297,7 +289,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Angelina Jolie',
           },
-          completedAt: '2025-09-02T20:44:08.423Z',
+          finishedAt: '2025-09-02T20:44:08.423Z',
           executionTimeMs: 27,
           scopeStack: [
             {
@@ -308,6 +300,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.FAILED,
           startedAt: '2025-09-02T20:44:06.265Z',
@@ -322,7 +315,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Brad Pitt',
           },
-          completedAt: '2025-09-02T20:44:06.293Z',
+          finishedAt: '2025-09-02T20:44:06.293Z',
           executionTimeMs: 28,
           scopeStack: [
             {
@@ -333,6 +326,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:13.480Z',
@@ -347,7 +341,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Scarlett Johansson',
           },
-          completedAt: '2025-09-02T20:44:13.895Z',
+          finishedAt: '2025-09-02T20:44:13.895Z',
           executionTimeMs: 415,
           scopeStack: [
             {
@@ -358,6 +352,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:11.422Z',
@@ -372,7 +367,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Leonardo DiCaprio',
           },
-          completedAt: '2025-09-02T20:44:11.823Z',
+          finishedAt: '2025-09-02T20:44:11.823Z',
           executionTimeMs: 401,
           scopeStack: [
             {
@@ -383,6 +378,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:09.363Z',
@@ -397,7 +393,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Angelina Jolie',
           },
-          completedAt: '2025-09-02T20:44:09.756Z',
+          finishedAt: '2025-09-02T20:44:09.756Z',
           executionTimeMs: 393,
           scopeStack: [
             {
@@ -408,6 +404,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:07.300Z',
@@ -422,7 +419,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Brad Pitt',
           },
-          completedAt: '2025-09-02T20:44:07.692Z',
+          finishedAt: '2025-09-02T20:44:07.692Z',
           executionTimeMs: 392,
           scopeStack: [
             {
@@ -433,6 +430,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'print-exit-dash',
+          stepType: 'slack',
           topologicalIndex: 8,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:15.553Z',
@@ -447,7 +445,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: '--------------------------',
           },
-          completedAt: '2025-09-02T20:44:15.945Z',
+          finishedAt: '2025-09-02T20:44:15.945Z',
           executionTimeMs: 392,
           scopeStack: [],
         },
@@ -489,6 +487,8 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.RUNNING,
+      error: null,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -509,6 +509,8 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      error: null,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -522,5 +524,298 @@ export const ErrorStory: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
     error: new Error('Internal server error'),
     selectedId: null,
+  },
+};
+
+// Large foreach loop with 25 iterations, retry steps, and steps after the foreach.
+// Uses real scopeStack data pattern observed from Kibana's execution engine.
+const largeForeachYaml = `
+name: Large Foreach Workflow
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: prepare_data
+    type: console
+    with:
+      message: preparing
+  - name: loop_items
+    type: foreach
+    foreach: "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]"
+    steps:
+      - name: process_item
+        type: console
+        with:
+          message: "Processing {{ foreach.item }}"
+      - name: http_call
+        type: kibana.request
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 1s
+        with:
+          method: GET
+          path: /api/status
+      - name: log_item
+        type: console
+        with:
+          message: "Logging {{ foreach.item }}"
+  - name: if_new_items
+    type: if
+    condition: steps.loop_items.state.total > 0
+    steps:
+      - name: get_summary
+        type: console
+        with:
+          message: "Got new items"
+  - name: final_summary
+    type: console
+    with:
+      message: "Final summary"
+  - name: send_notification
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/status
+`;
+
+const largeForeachResult = parseYamlToJSONWithoutValidation(largeForeachYaml);
+// @ts-expect-error -- storybook story
+const largeForeachDefinition = largeForeachResult.json as WorkflowYaml;
+
+const ITERATION_COUNT = 25;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const generateLargeForeachStepExecutions = (): any[] => {
+  const stepExecutions: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  let globalIndex = 0;
+  const baseTime = new Date('2025-09-02T20:43:57.441Z').getTime();
+
+  const timeoutScope = {
+    stepId: 'workflow_level_timeout',
+    nestedScopes: [
+      { nodeId: 'enterTimeoutZone_workflow_level_timeout', nodeType: 'enter-timeout-zone' },
+    ],
+  };
+
+  stepExecutions.push({
+    stepId: 'prepare_data',
+    stepType: 'console',
+    topologicalIndex: 0,
+    status: ExecutionStatus.COMPLETED,
+    startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    id: `exec-prepare-data`,
+    globalExecutionIndex: globalIndex++,
+    stepExecutionIndex: 0,
+    workflowRunId: 'run-large-foreach',
+    workflowId: 'wf-large-foreach',
+    output: { message: 'preparing' },
+    input: { message: 'preparing' },
+    finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    executionTimeMs: 54,
+    scopeStack: [timeoutScope],
+  });
+
+  stepExecutions.push({
+    stepId: 'loop_items',
+    stepType: 'foreach',
+    topologicalIndex: 1,
+    status: ExecutionStatus.COMPLETED,
+    startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    id: `exec-loop-items`,
+    globalExecutionIndex: globalIndex++,
+    stepExecutionIndex: 0,
+    workflowRunId: 'run-large-foreach',
+    workflowId: 'wf-large-foreach',
+    output: {},
+    input: {},
+    finishedAt: new Date(baseTime + (globalIndex + ITERATION_COUNT * 4) * 100).toISOString(),
+    executionTimeMs: 2000,
+    scopeStack: [timeoutScope],
+    state: {
+      total: ITERATION_COUNT,
+      index: ITERATION_COUNT - 1,
+    },
+  });
+
+  for (let i = 0; i < ITERATION_COUNT; i++) {
+    const foreachScope = {
+      stepId: 'loop_items',
+      nestedScopes: [
+        {
+          nodeId: 'enterForeach_loop_items',
+          nodeType: 'enter-foreach',
+          scopeId: String(i),
+        },
+      ],
+    };
+
+    stepExecutions.push({
+      stepId: 'process_item',
+      stepType: 'console',
+      topologicalIndex: 2,
+      status: ExecutionStatus.COMPLETED,
+      startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      id: `exec-process-item-${i}`,
+      globalExecutionIndex: globalIndex++,
+      stepExecutionIndex: i,
+      workflowRunId: 'run-large-foreach',
+      workflowId: 'wf-large-foreach',
+      output: { message: `Processing ${i + 1}` },
+      input: { message: `Processing ${i + 1}` },
+      finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      executionTimeMs: 12 + (i % 5),
+      scopeStack: [timeoutScope, foreachScope],
+    });
+
+    stepExecutions.push({
+      stepId: 'http_call',
+      stepType: 'kibana.request',
+      topologicalIndex: 3,
+      status: ExecutionStatus.COMPLETED,
+      startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      id: `exec-http-call-${i}`,
+      globalExecutionIndex: globalIndex++,
+      stepExecutionIndex: i,
+      workflowRunId: 'run-large-foreach',
+      workflowId: 'wf-large-foreach',
+      output: {},
+      input: { method: 'GET', path: '/api/status' },
+      finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      executionTimeMs: 30 + (i % 10),
+      scopeStack: [timeoutScope, foreachScope],
+    });
+
+    stepExecutions.push({
+      stepId: 'http_call',
+      stepType: 'kibana.request',
+      topologicalIndex: 3,
+      status: ExecutionStatus.COMPLETED,
+      startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      id: `exec-http-call-retry-${i}`,
+      globalExecutionIndex: globalIndex++,
+      stepExecutionIndex: i,
+      workflowRunId: 'run-large-foreach',
+      workflowId: 'wf-large-foreach',
+      output: {},
+      input: { method: 'GET', path: '/api/status' },
+      finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      executionTimeMs: 17 + (i % 8),
+      scopeStack: [
+        timeoutScope,
+        foreachScope,
+        {
+          stepId: 'http_call',
+          nestedScopes: [
+            {
+              nodeId: 'enterRetry_http_call',
+              nodeType: 'enter-retry',
+              scopeId: '1-attempt',
+            },
+          ],
+        },
+      ],
+    });
+
+    stepExecutions.push({
+      stepId: 'log_item',
+      stepType: 'console',
+      topologicalIndex: 4,
+      status: ExecutionStatus.COMPLETED,
+      startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      id: `exec-log-item-${i}`,
+      globalExecutionIndex: globalIndex++,
+      stepExecutionIndex: i,
+      workflowRunId: 'run-large-foreach',
+      workflowId: 'wf-large-foreach',
+      output: { message: `Logging ${i + 1}` },
+      input: { message: `Logging ${i + 1}` },
+      finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+      executionTimeMs: 12 + (i % 4),
+      scopeStack: [timeoutScope, foreachScope],
+    });
+  }
+
+  stepExecutions.push({
+    stepId: 'if_new_items',
+    stepType: 'if',
+    topologicalIndex: 5,
+    status: ExecutionStatus.COMPLETED,
+    startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    id: `exec-if-new-items`,
+    globalExecutionIndex: globalIndex++,
+    stepExecutionIndex: 0,
+    workflowRunId: 'run-large-foreach',
+    workflowId: 'wf-large-foreach',
+    output: {},
+    input: {},
+    finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    executionTimeMs: 1,
+    scopeStack: [timeoutScope],
+  });
+
+  stepExecutions.push({
+    stepId: 'final_summary',
+    stepType: 'console',
+    topologicalIndex: 6,
+    status: ExecutionStatus.COMPLETED,
+    startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    id: `exec-final-summary`,
+    globalExecutionIndex: globalIndex++,
+    stepExecutionIndex: 0,
+    workflowRunId: 'run-large-foreach',
+    workflowId: 'wf-large-foreach',
+    output: { message: 'Final summary' },
+    input: { message: 'Final summary' },
+    finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    executionTimeMs: 13,
+    scopeStack: [timeoutScope],
+  });
+
+  stepExecutions.push({
+    stepId: 'send_notification',
+    stepType: 'kibana.request',
+    topologicalIndex: 7,
+    status: ExecutionStatus.COMPLETED,
+    startedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    id: `exec-send-notification`,
+    globalExecutionIndex: globalIndex++,
+    stepExecutionIndex: 0,
+    workflowRunId: 'run-large-foreach',
+    workflowId: 'wf-large-foreach',
+    output: {},
+    input: { method: 'GET', path: '/api/status' },
+    finishedAt: new Date(baseTime + globalIndex * 100).toISOString(),
+    executionTimeMs: 18,
+    scopeStack: [timeoutScope],
+  });
+
+  return stepExecutions;
+};
+
+export const LargeForeachLoop: StoryObj<typeof WorkflowStepExecutionTree> = {
+  decorators: [
+    (story) => <div style={{ width: 280, height: 500, overflow: 'auto' }}>{story()}</div>,
+  ],
+  args: {
+    execution: {
+      id: 'run-large-foreach',
+      spaceId: 'default',
+      workflowId: 'wf-large-foreach',
+      workflowDefinition: largeForeachDefinition,
+      yaml: largeForeachYaml,
+      status: ExecutionStatus.COMPLETED,
+      error: null,
+      isTestRun: false,
+      triggeredBy: 'manual',
+      startedAt: '2025-09-02T20:43:57.441Z',
+      finishedAt: '2025-09-02T20:45:00.000Z',
+      duration: 62559,
+      stepExecutions: generateLargeForeachStepExecutions(),
+    },
+    definition: largeForeachDefinition,
+    selectedId: null,
+    onStepExecutionClick: () => {},
   },
 };

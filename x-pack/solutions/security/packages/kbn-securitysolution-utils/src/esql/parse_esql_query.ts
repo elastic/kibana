@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLCommandOption, EditorError, ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { parse, isColumn, isOptionNode } from '@kbn/esql-ast';
+import type { ESQLCommandOption, EditorError, ESQLAstQueryExpression } from '@elastic/esql/types';
+import { parse, isColumn, isOptionNode } from '@elastic/esql';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 export interface ParseEsqlQueryResult {

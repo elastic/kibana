@@ -9,40 +9,49 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
-import { getCreateRequestBody, getCreateResponseBody } from './schemas';
+import { getRouteConfig } from '../get_route_config';
+import {
+  createRequestParamsSchema,
+  getCreateRequestBodySchema,
+  getCreateResponseBodySchema,
+} from './schemas';
 import { create } from './create';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerCreateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  isDashboardAppRequest: boolean
+) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
-    path: PUBLIC_API_PATH,
-    summary: 'Create a dashboard',
-    ...commonRouteConfig,
+    path: `${basePath}/{id?}`,
+    summary: 'Create a dashboard with an auto-generated ID or a specified ID',
+    ...routeConfig,
   });
 
   createRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
-          body: getCreateRequestBody(),
+          params: createRequestParamsSchema,
+          body: getCreateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
           200: {
-            body: getCreateResponseBody,
+            body: () => getCreateResponseBodySchema(isDashboardAppRequest),
           },
         },
       }),
     },
     async (ctx, req, res) => {
-      let result;
       try {
-        result = await create(ctx, req.body);
+        const result = await create(ctx, req.body, req.params, isDashboardAppRequest);
+        return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
             body: {
-              message: `A dashboard with ID ${req.body.id} already exists.`,
+              message: `A dashboard with ID ${req?.params?.id} already exists.`,
             },
           });
         }
@@ -53,7 +62,6 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
 
         return res.badRequest({ body: e });
       }
-      return res.ok({ body: result });
     }
   );
 }

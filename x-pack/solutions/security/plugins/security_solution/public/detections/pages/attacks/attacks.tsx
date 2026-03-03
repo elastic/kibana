@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type { DocLinks } from '@kbn/doc-links';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { Wrapper } from '../../components/attacks/wrapper';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_key_callout';
@@ -18,7 +19,7 @@ import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_page
 import * as i18n from './translations';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
+import { MissingAttacksPrivilegesCallOut } from '../../components/callouts/missing_attacks_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 
@@ -29,7 +30,8 @@ export const ATTACKS_PAGE_LOADING_TEST_ID = 'attacks-page-loading';
  * the actual content of the attacks page is rendered
  */
 export const AttacksPage = memo(() => {
-  const [{ loading: userInfoLoading, isAuthenticated, canUserREAD, hasIndexRead }] = useUserData();
+  const [{ loading: userInfoLoading, isAuthenticated, hasIndexRead }] = useUserData();
+  const canReadAlerts = useUserPrivileges().rulesPrivileges.rules.read;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { signalIndexNeedsInit } = useSignalHelpers();
@@ -47,8 +49,8 @@ export const AttacksPage = memo(() => {
     [needsListsConfiguration, signalIndexNeedsInit]
   );
   const privilegesRequired: boolean = useMemo(
-    () => !signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false),
-    [canUserREAD, hasIndexRead, signalIndexNeedsInit]
+    () => !signalIndexNeedsInit && (hasIndexRead === false || canReadAlerts === false),
+    [canReadAlerts, hasIndexRead, signalIndexNeedsInit]
   );
 
   if (loading) {
@@ -87,7 +89,7 @@ export const AttacksPage = memo(() => {
     <>
       <NoApiIntegrationKeyCallOut />
       <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+      <MissingAttacksPrivilegesCallOut />
       {privilegesRequired ? (
         <NoPrivileges
           pageName={i18n.PAGE_TITLE.toLowerCase()}

@@ -9,23 +9,43 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
+import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
+import { triggerSchemas } from '../../../../trigger_schemas';
+import type { WorkflowsResponse } from '../../model/types';
+
+export const initialWorkflowsState: WorkflowsResponse = {
+  workflows: {},
+  totalWorkflows: 0,
+};
 
 // Initial state
 const initialState: WorkflowDetailState = {
   yamlString: '',
+  isYamlSynced: true,
   computed: undefined,
   workflow: undefined,
   execution: undefined,
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
-  schema: getWorkflowZodSchema({}),
+  workflows: initialWorkflowsState,
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
+  cursorPosition: undefined,
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
+  replayExecutionId: null,
+  loading: initialLoadingState,
+  hasYamlSchemaValidationErrors: false,
+  connectorFlyout: {
+    isOpen: false,
+    connectorType: undefined,
+    connectorIdToEdit: undefined,
+    insertPosition: undefined,
+  },
 };
 
 // Slice
@@ -44,7 +64,11 @@ const workflowDetailSlice = createSlice({
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
     },
-    setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
+    setIsYamlSynced: (state, action: { payload: boolean }) => {
+      state.isYamlSynced = action.payload;
+    },
+    setCursorPosition: (state, action: { payload: LineColumnPosition }) => {
+      state.cursorPosition = action.payload;
       if (!state.computed?.workflowLookup) {
         state.focusedStepId = undefined;
         return;
@@ -60,8 +84,14 @@ const workflowDetailSlice = createSlice({
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
     },
+    setReplayExecutionId: (state, action: { payload: string | null }) => {
+      state.replayExecutionId = action.payload;
+    },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+    },
+    setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
+      state.workflows = action.payload;
     },
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       state.execution = action.payload;
@@ -74,12 +104,43 @@ const workflowDetailSlice = createSlice({
       state.activeTab = action.payload;
     },
 
+    setHasYamlSchemaValidationErrors: (state, action: { payload: boolean }) => {
+      state.hasYamlSchemaValidationErrors = action.payload;
+    },
+
+    // Connector flyout actions
+    openCreateConnectorFlyout: (
+      state,
+      action: { payload: { connectorType: string; insertPosition?: LineColumnPosition } }
+    ) => {
+      state.connectorFlyout = { isOpen: true, ...action.payload };
+    },
+    openEditConnectorFlyout: (
+      state,
+      action: { payload: { connectorType: string; connectorIdToEdit: string } }
+    ) => {
+      state.connectorFlyout = { isOpen: true, ...action.payload };
+    },
+    closeConnectorFlyout: (state) => {
+      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, and insertPosition are undefined
+    },
+
     // Internal actions - these are not for components usage
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
       state.computed = action.payload;
+      // Recalculate the focused step now that workflowLookup may have changed.
+      // This handles the case where the cursor was positioned before the
+      // debounced YAML computation completed.
+      if (state.cursorPosition && action.payload.workflowLookup) {
+        state.focusedStepId = findStepByLine(
+          state.cursorPosition.lineNumber,
+          action.payload.workflowLookup
+        );
+      }
     },
     _clearComputedData: (state) => {
       state.computed = {};
+      state.focusedStepId = undefined;
     },
     _setGeneratedSchemaInternal: (state, action: { payload: WorkflowDetailState['schema'] }) => {
       state.schema = action.payload;
@@ -87,6 +148,9 @@ const workflowDetailSlice = createSlice({
     _setComputedExecution: (state, action: { payload: ComputedData }) => {
       state.computedExecution = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    addLoadingStateReducers(builder);
   },
 });
 
@@ -98,13 +162,20 @@ export const {
   setWorkflow,
   updateWorkflow,
   setYamlString,
+  setIsYamlSynced,
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,
+  setReplayExecutionId,
   setConnectors,
+  setWorkflows,
   setExecution,
   clearExecution,
   setActiveTab,
+  setHasYamlSchemaValidationErrors,
+  openCreateConnectorFlyout,
+  openEditConnectorFlyout,
+  closeConnectorFlyout,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

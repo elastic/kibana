@@ -15,6 +15,9 @@ import { AbstractFileSystem } from './abstract_file_system';
 
 jest.mock('../utils', () => ({
   cleanTypeCheckArtifacts: jest.fn(),
+  calculateFileHashes: jest.fn().mockResolvedValue({
+    'yarn.lock': 'hash1',
+  }),
 }));
 
 const { cleanTypeCheckArtifacts } = jest.requireMock('../utils') as {
@@ -110,6 +113,23 @@ describe('AbstractFileSystem', () => {
         prNumber: '42',
       });
     });
+
+    it('stores file hashes when cache invalidation files are provided', async () => {
+      const log = createLog();
+      const fs = new TestFileSystem(log);
+
+      await fs.updateArchive({
+        files: ['fileA', 'fileB'],
+        sha: 'sha-with-hashes',
+        cacheInvalidationFiles: ['yarn.lock'],
+      });
+
+      expect(fs.metadata.get('commits/sha-with-hashes/metadata.json')).toEqual({
+        commitSha: 'sha-with-hashes',
+        prNumber: undefined,
+        fileHashes: { 'yarn.lock': 'hash1' },
+      });
+    });
   });
 
   describe('restoreArchive', () => {
@@ -148,6 +168,49 @@ describe('AbstractFileSystem', () => {
       expect((log.info as jest.Mock).mock.calls).toContainEqual([
         'No cached TypeScript build artifacts available to restore.',
       ]);
+    });
+
+    it('logs a warning when cache invalidation files have changed', async () => {
+      const log = createLog();
+      const fs = new TestFileSystem(log);
+      fs.metadata.set('commits/shaX/metadata.json', {
+        commitSha: 'shaX',
+        prNumber: undefined,
+        fileHashes: { 'yarn.lock': 'oldhash' },
+      });
+      fs.availableArchives.add('commits/shaX/archive.tar.gz');
+
+      await fs.restoreArchive({
+        shas: ['shaX'],
+        cacheInvalidationFiles: ['yarn.lock'],
+      });
+
+      expect(fs.extractCalls).toHaveLength(0);
+      expect(cleanTypeCheckArtifacts).not.toHaveBeenCalled();
+      expect((log.warning as jest.Mock).mock.calls).toContainEqual([
+        expect.stringContaining(
+          'Cached TypeScript build artifacts for shaX found, but cache invalidation files have changed:'
+        ),
+      ]);
+    });
+
+    it('proceeds with restore if hashes match', async () => {
+      const log = createLog();
+      const fs = new TestFileSystem(log);
+      fs.metadata.set('commits/shaY/metadata.json', {
+        commitSha: 'shaY',
+        prNumber: undefined,
+        fileHashes: { 'yarn.lock': 'hash1' },
+      });
+      fs.availableArchives.add('commits/shaY/archive.tar.gz');
+
+      await fs.restoreArchive({
+        shas: ['shaY'],
+        cacheInvalidationFiles: ['yarn.lock'],
+      });
+
+      expect(cleanTypeCheckArtifacts).toHaveBeenCalledTimes(1);
+      expect(fs.extractCalls).toEqual(['commits/shaY/archive.tar.gz']);
     });
   });
 });

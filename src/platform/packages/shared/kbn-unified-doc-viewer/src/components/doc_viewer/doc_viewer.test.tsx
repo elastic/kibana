@@ -41,23 +41,30 @@ const WrappedDocViewer = (props: DocViewerProps) => (
   </KibanaErrorBoundaryProvider>
 );
 
+const ThrowingComponent = ({ message }: { message?: string }) => {
+  throw new Error(message ?? 'Invalid');
+};
+
 describe('<DocViewer />', () => {
   test('Render <DocViewer/> with 3 different tabs', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'function', order: 10, title: 'Render function', component: jest.fn() });
     registry.add({
-      id: 'component',
+      id: 'view1',
+      order: 10,
+      title: 'Render 1',
+      render: jest.fn(() => <></>),
+    });
+    registry.add({
+      id: 'view2',
       order: 20,
-      title: 'React component',
-      component: () => <div>test</div>,
+      title: 'Render 2',
+      render: () => <div>test</div>,
     });
     registry.add({
       id: 'invalid',
       order: 30,
       title: 'Invalid doc view',
-      component: () => {
-        throw new Error('Invalid');
-      },
+      render: () => <ThrowingComponent message="Invalid" />,
     });
 
     const renderProps = { hit: {} } as DocViewRenderProps;
@@ -73,12 +80,10 @@ describe('<DocViewer />', () => {
     const errorMsg = 'Catch me if you can!';
     const registry = new DocViewsRegistry();
     registry.add({
-      id: 'component',
+      id: 'throwingView',
       order: 10,
-      title: 'React component',
-      component: () => {
-        throw new Error(errorMsg);
-      },
+      title: 'Failed view',
+      render: () => <ThrowingComponent message={errorMsg} />,
     });
     const renderProps = {
       hit: buildDataTableRecord({ _index: 't', _id: '1' }),
@@ -95,15 +100,13 @@ describe('<DocViewer />', () => {
       id: 'valid',
       order: 10,
       title: 'Valid doc view',
-      component: () => <div>Valid</div>,
+      render: () => <div>Valid</div>,
     });
     registry.add({
       id: 'error',
       order: 20,
       title: 'Error doc view',
-      component: () => {
-        throw new Error('Invalid');
-      },
+      render: () => <ThrowingComponent />,
     });
     const renderProps = {
       hit: buildDataTableRecord({ _index: 't', _id: '1' }),
@@ -118,8 +121,18 @@ describe('<DocViewer />', () => {
 
   test('should save active tab to local storage', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render function', component: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Render function', component: jest.fn() });
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Render function',
+      render: jest.fn(() => <></>),
+    });
+    registry.add({
+      id: 'test2',
+      order: 20,
+      title: 'Render function',
+      render: jest.fn(() => <></>),
+    });
 
     render(
       <WrappedDocViewer docViews={registry.getAll()} hit={records[0]} dataView={dataViewMock} />
@@ -147,8 +160,18 @@ describe('<DocViewer />', () => {
 
   test('should restore active tab from local storage', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render function', component: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Render function', component: jest.fn() });
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Render function',
+      render: jest.fn(() => <></>),
+    });
+    registry.add({
+      id: 'test2',
+      order: 20,
+      title: 'Render function',
+      render: jest.fn(() => <></>),
+    });
 
     mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test2';
 
@@ -162,10 +185,42 @@ describe('<DocViewer />', () => {
     mockTestInitialLocalStorageValue = undefined;
   });
 
+  test('should prioritize the initialTabId prop over local storage value', () => {
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Render function', render: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Render function', render: jest.fn() });
+    registry.add({ id: 'test3', order: 30, title: 'Render function', render: jest.fn() });
+
+    mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test2';
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        initialTabId="test3"
+      />
+    );
+
+    expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('docViewerTab-test3').getAttribute('aria-selected')).toBe('true');
+  });
+
   test('should not restore a tab from local storage if unavailable', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render function', component: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Render function', component: jest.fn() });
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Render function',
+      render: jest.fn(() => <></>),
+    });
+    registry.add({
+      id: 'test2',
+      order: 20,
+      title: 'Render function',
+      render: jest.fn(() => <></>),
+    });
 
     mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test3';
 
@@ -183,9 +238,14 @@ describe('<DocViewer />', () => {
     const initialTabId = 'test2';
 
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render 1st Tab', component: jest.fn() });
-    registry.add({ id: initialTabId, order: 20, title: 'Render 2nd Tab', component: jest.fn() });
-    registry.add({ id: 'test3', order: 30, title: 'Render 3rd Tab', component: jest.fn() });
+    registry.add({ id: 'test1', order: 10, title: 'Render 1st Tab', render: jest.fn(() => <></>) });
+    registry.add({
+      id: initialTabId,
+      order: 20,
+      title: 'Render 2nd Tab',
+      render: jest.fn(() => <></>),
+    });
+    registry.add({ id: 'test3', order: 30, title: 'Render 3rd Tab', render: jest.fn(() => <></>) });
 
     render(
       <WrappedDocViewer
@@ -199,5 +259,141 @@ describe('<DocViewer />', () => {
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test3').getAttribute('aria-selected')).toBe('false');
+  });
+
+  test('should call onUpdateSelectedTabId when tab selection changes', async () => {
+    const onUpdateSelectedTabId = jest.fn();
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn() });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
+      />
+    );
+
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith(undefined);
+    await userEvent.click(screen.getByTestId('docViewerTab-test2'));
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test2');
+  });
+
+  test('should call onInitialDocViewerStateChange when tab state changes', () => {
+    const onInitialDocViewerStateChange = jest.fn();
+    const renderFn = jest.fn(({ onInitialStateChange }) => {
+      onInitialStateChange({ someState: 'value1' });
+      return <div>Tab 1 Content</div>;
+    });
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Tab 1',
+      render: renderFn,
+    });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      />
+    );
+
+    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+      docViewerTabsState: {
+        test1: { someState: 'value1' },
+      },
+    });
+  });
+
+  test('should handle state for multiple tabs independently', async () => {
+    const onInitialDocViewerStateChange = jest.fn();
+
+    const renderTab1 = jest.fn(({ onInitialStateChange }) => {
+      onInitialStateChange({ tab1State: 'value1' });
+      return <div>Tab 1 Content</div>;
+    });
+
+    const renderTab2 = jest.fn(({ onInitialStateChange }) => {
+      onInitialStateChange({ tab2State: 'value2' });
+      return <div>Tab 2 Content</div>;
+    });
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Tab 1',
+      render: renderTab1,
+    });
+    registry.add({
+      id: 'test2',
+      order: 20,
+      title: 'Tab 2',
+      render: renderTab2,
+    });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      />
+    );
+
+    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+      docViewerTabsState: {
+        test1: { tab1State: 'value1' },
+      },
+    });
+
+    await userEvent.click(screen.getByTestId('docViewerTab-test2'));
+
+    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+      docViewerTabsState: {
+        test2: { tab2State: 'value2' },
+      },
+    });
+  });
+
+  test('should set initial state to initialTabState if both initialTabState and initialTabId provided', () => {
+    const initialStateContent = 'Initial state content';
+
+    const renderTab = jest.fn(({ initialState }) => {
+      return <div>{initialState.initialStateContent}</div>;
+    });
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'testTab',
+      order: 10,
+      title: 'Tab 1',
+      render: renderTab,
+    });
+
+    const initialDocViewerState = {
+      docViewerTabsState: {
+        testTab: { initialStateContent },
+      },
+    };
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        initialTabId="testTab"
+        initialDocViewerState={initialDocViewerState}
+      />
+    );
+
+    expect(screen.getByText(initialStateContent)).toBeInTheDocument();
   });
 });

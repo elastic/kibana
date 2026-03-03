@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import type { PanelPackage, PresentationContainer } from '@kbn/presentation-containers';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
@@ -19,6 +18,8 @@ import type {
   HasTypeDisplayName,
   HasUniqueId,
   PublishesTitle,
+  PanelPackage,
+  PresentationContainer,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
@@ -100,10 +101,10 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           );
           try {
             const libraryId = await embeddable.saveToLibrary(newTitle);
-            const { rawState, references } = embeddable.getSerializedStateByReference(libraryId);
+            const byReferenceState = embeddable.getSerializedStateByReference(libraryId);
             resolve({
               byRefPackage: {
-                serializedState: { rawState: { ...rawState, title: newTitle }, references },
+                serializedState: { ...byReferenceState, title: newTitle },
                 panelType: embeddable.type,
               },
               libraryTitle: newTitle,

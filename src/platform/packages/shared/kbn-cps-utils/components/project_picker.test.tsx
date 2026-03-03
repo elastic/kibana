@@ -14,11 +14,12 @@ import type { ProjectRouting } from '@kbn/es-query';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectPicker } from './project_picker';
 
 describe('ProjectPicker', () => {
-  const mockFetchProjects = jest.fn().mockResolvedValue({
-    origin: {
+  const mockProjects = {
+    originProject: {
       _id: 'origin',
       _alias: 'Origin CPSProject',
       _type: 'observability',
@@ -38,12 +39,15 @@ describe('ProjectPicker', () => {
         _organisation: 'test-org',
       },
     ],
-  });
+    isLoading: false,
+    error: null,
+  };
 
   const defaultProps = {
     projectRouting: undefined as ProjectRouting | undefined,
     onProjectRoutingChange: jest.fn(),
-    fetchProjects: mockFetchProjects,
+    projects: mockProjects,
+    totalProjectCount: 2,
   };
 
   const renderProjectPicker = async (props: Partial<typeof defaultProps> = {}) => {
@@ -91,8 +95,8 @@ describe('ProjectPicker', () => {
       expect(allProjectsButton).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('should show "This project" selected when projectRouting is _alias:_origin', async () => {
-      await renderProjectPicker({ projectRouting: '_alias:_origin' });
+    it('should show "This project" selected when projectRouting is ORIGIN', async () => {
+      await renderProjectPicker({ projectRouting: PROJECT_ROUTING.ORIGIN });
 
       await userEvent.click(getButton());
 
@@ -102,10 +106,10 @@ describe('ProjectPicker', () => {
   });
 
   describe('projectRouting change events', () => {
-    it('should call onProjectRoutingChange with undefined when "All projects" is clicked', async () => {
+    it('should call onProjectRoutingChange with PROJECT_ROUTING.ALL when "All projects" is clicked', async () => {
       const onProjectRoutingChange = jest.fn();
       await renderProjectPicker({
-        projectRouting: '_alias:_origin',
+        projectRouting: PROJECT_ROUTING.ORIGIN,
         onProjectRoutingChange,
       });
 
@@ -114,11 +118,11 @@ describe('ProjectPicker', () => {
       const allProjectsButton = screen.getByRole('button', { name: /All projects/i });
       await userEvent.click(allProjectsButton);
 
-      expect(onProjectRoutingChange).toHaveBeenCalledWith(undefined);
+      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
       expect(onProjectRoutingChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onProjectRoutingChange with _alias:_origin when "This project" is clicked', async () => {
+    it('should call onProjectRoutingChange with ORIGIN when "This project" is clicked', async () => {
       const onProjectRoutingChange = jest.fn();
       await renderProjectPicker({
         projectRouting: undefined,
@@ -131,7 +135,7 @@ describe('ProjectPicker', () => {
       const thisProjectButton = screen.getByRole('button', { name: /This project/i });
       await userEvent.click(thisProjectButton);
 
-      expect(onProjectRoutingChange).toHaveBeenCalledWith('_alias:_origin');
+      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ORIGIN);
       expect(onProjectRoutingChange).toHaveBeenCalledTimes(1);
     });
   });
@@ -154,7 +158,7 @@ describe('ProjectPicker', () => {
       const thisProjectButton = screen.getByRole('button', { name: /This project/i });
       await userEvent.click(thisProjectButton);
 
-      expect(onProjectRoutingChange).toHaveBeenCalledWith('_alias:_origin');
+      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ORIGIN);
       expect(onProjectRoutingChange).toHaveBeenCalledTimes(1);
 
       // Simulate parent component updating the prop (after callback is processed)
@@ -163,7 +167,7 @@ describe('ProjectPicker', () => {
           <EuiThemeProvider>
             <ProjectPicker
               {...defaultProps}
-              projectRouting="_alias:_origin"
+              projectRouting={PROJECT_ROUTING.ORIGIN}
               onProjectRoutingChange={onProjectRoutingChange}
             />
           </EuiThemeProvider>
@@ -211,7 +215,7 @@ describe('ProjectPicker', () => {
       // Press Enter to open popover
       await userEvent.keyboard('{Enter}');
 
-      expect(screen.getByText('Cross-project search scope')).toBeInTheDocument();
+      expect(screen.getByText('Cross-project search (CPS) scope')).toBeInTheDocument();
     });
   });
 });

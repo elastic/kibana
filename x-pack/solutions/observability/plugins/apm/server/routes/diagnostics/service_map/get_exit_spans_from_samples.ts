@@ -7,7 +7,7 @@
 
 import { termQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import {
   SERVICE_NAME,
@@ -23,6 +23,7 @@ import {
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { ExitSpanFields } from '../../../../common/service_map_diagnostic_types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { compactMap } from '../../../utils/compact_map';
 
 type DestinationsBySpanId = Map<string, string | undefined>;
 
@@ -83,24 +84,27 @@ export async function getExitSpans({
     },
   });
 
-  const apmExitSpans = (
-    response?.aggregations?.matching_destination_resources?.sample_docs?.hits?.hits.map((doc) => {
-      const fields = unflattenKnownApmEventFields(doc?.fields);
+  const hits =
+    response?.aggregations?.matching_destination_resources?.sample_docs?.hits?.hits ?? [];
 
-      if (!fields?.parent?.id || !parentSpans.get(fields?.parent?.id)) {
-        return;
-      }
+  const apmExitSpans = compactMap(hits, (hit) => {
+    const fields = hit?.fields && accessKnownApmEventFields(hit.fields);
 
-      return {
-        destinationService: fields?.service?.name,
-        spanId: fields?.span?.id ?? '',
-        transactionId: fields?.transaction?.id ?? '',
-        serviceNodeName: fields?.service?.node?.name ?? '',
-        traceId: fields?.trace?.id ?? '',
-        agentName: fields?.agent?.name ?? '',
-      };
-    }) ?? []
-  ).filter((span): span is ExitSpanFields => !!span);
+    const parentId = fields?.[PARENT_ID];
+
+    if (!fields || !parentId || !parentSpans.get(parentId)) {
+      return;
+    }
+
+    return {
+      destinationService: fields[SERVICE_NAME] ?? '',
+      spanId: fields[SPAN_ID] ?? '',
+      transactionId: fields[TRANSACTION_ID] ?? '',
+      serviceNodeName: fields[SERVICE_NODE_NAME] ?? '',
+      traceId: fields[TRACE_ID] ?? '',
+      agentName: fields[AGENT_NAME] ?? '',
+    } satisfies ExitSpanFields;
+  });
 
   return {
     apmExitSpans,
@@ -178,11 +182,10 @@ export async function getSourceSpanIds({
     sourceSpanIdsRawResponse: response,
     destinationsBySpanId:
       response.aggregations?.sample_docs?.buckets?.reduce((acc, bucket) => {
-        const event = unflattenKnownApmEventFields(
-          bucket.top_span_ids.hits.hits[0].fields,
-          requiredFields
-        );
-        acc.set(event.span.id, event.span?.destination?.service?.resource);
+        const event = accessKnownApmEventFields(
+          bucket.top_span_ids.hits.hits[0].fields
+        ).requireFields(requiredFields);
+        acc.set(event[SPAN_ID], event[SPAN_DESTINATION_SERVICE_RESOURCE]);
         return acc;
       }, destinationsBySpanId) ?? destinationsBySpanId,
   };

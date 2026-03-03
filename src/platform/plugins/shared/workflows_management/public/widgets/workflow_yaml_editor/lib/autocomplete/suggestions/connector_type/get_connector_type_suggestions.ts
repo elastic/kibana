@@ -10,12 +10,14 @@
 import { monaco } from '@kbn/monaco';
 import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
+  DataSetStepSchema,
   ForEachStepSchema,
-  HttpStepSchema,
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -112,7 +114,7 @@ export function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
+      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType, {});
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -224,21 +226,31 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Interface,
     },
     {
-      schema: HttpStepSchema,
-      description: 'Make HTTP requests',
-      icon: monaco.languages.CompletionItemKind.Reference,
+      schema: DataSetStepSchema,
+      description: 'Define or compute variables for use in the workflow',
+      icon: monaco.languages.CompletionItemKind.Variable,
     },
     {
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
     },
+    {
+      schema: WorkflowExecuteStepSchema,
+      description: 'Execute another workflow (synchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowExecuteAsyncStepSchema,
+      description: 'Execute another workflow (asynchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
   ];
 
   const stepTypes = stepSchemas.map(({ schema, description, icon }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
-    const stepType = typeField._def.value; // Get the literal value from z.literal()
+    const stepType = typeField.def.values[0]; // Get the literal value from z.literal()
 
     return {
       type: stepType,

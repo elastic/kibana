@@ -7,7 +7,7 @@
 
 import xml2js from 'xml2js';
 
-interface BaseXmlElement {
+export interface BaseXmlElement {
   $?: { [key: string]: string }; // XML attributes
   _?: string; // Text content
 }
@@ -17,9 +17,12 @@ export interface XmlElement extends BaseXmlElement {
 }
 
 export class XmlParser {
-  constructor(private readonly xml: string) {}
+  constructor(private readonly xml?: string) {}
 
   public async parse(): Promise<XmlElement> {
+    if (!this.xml) {
+      throw new Error('No XML content to parse');
+    }
     return xml2js.parseStringPromise(this.xml, {
       explicitArray: true,
     }) as Promise<XmlElement>;
@@ -70,7 +73,7 @@ export class XmlParser {
     elementName: string,
     attrName?: string,
     attrValue?: string
-  ): XmlElement[] | XmlElement | string | undefined {
+  ): Array<XmlElement> | XmlElement | string | undefined {
     if (typeof source !== 'object' || source === null) {
       return undefined;
     }
@@ -135,5 +138,21 @@ export class XmlParser {
     }
 
     return undefined;
+  }
+
+  protected getStrValue(val: BaseXmlElement | Array<string> | string): string {
+    if (this.isBaseXmlElement(val)) {
+      return val._ ? val._.trim() : '';
+    }
+
+    if (Array.isArray(val)) {
+      return val[0].trim();
+    }
+
+    return val.trim();
+  }
+
+  private isBaseXmlElement(obj: unknown): obj is BaseXmlElement {
+    return Boolean(obj && typeof obj === 'object' && ('_' in obj || '$' in obj));
   }
 }

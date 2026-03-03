@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('anomaly detection result views - cases attachments', function () {
-    this.tags(['ml', 'cases', 'dima']);
+    this.tags(['ml', 'cases']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
             swimlaneType: SWIMLANE_TYPE.VIEW_BY,
             viewBy: 'airline',
             jobIds: [JOB_CONFIG.job_id],
-            timeRange: {
+            time_range: {
               from: '2016-02-07T00:00:00.000Z',
               to: '2016-02-11T23:59:54.000Z',
             },

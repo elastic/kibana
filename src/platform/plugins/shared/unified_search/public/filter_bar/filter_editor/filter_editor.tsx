@@ -52,6 +52,7 @@ import type { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -60,17 +61,13 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
-import {
-  MIDDLE_TRUNCATION_PROPS,
-  SINGLE_SELECTION_AS_TEXT_PROPS,
-  flattenFilters,
-} from './lib/helpers';
+import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
+import { flattenFilters } from '../lib/flatten_filters';
 import {
   filterBadgeStyle,
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
-import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 

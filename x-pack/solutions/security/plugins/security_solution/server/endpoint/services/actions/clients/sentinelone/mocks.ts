@@ -9,11 +9,11 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetRemoteScriptsResponse,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge, pick } from 'lodash';

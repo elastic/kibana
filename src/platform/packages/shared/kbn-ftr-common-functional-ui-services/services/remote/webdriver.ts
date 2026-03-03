@@ -124,7 +124,9 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Do not show "Choose your search engine" dialog (> Chrome v127)
     'disable-search-engine-choice-screen',
     // Disable component updater used for Chrome Certificate Verifier
-    'disable-component-update'
+    'disable-component-update',
+    // Enables the SwiftShader software renderer used to render web content when no GPU is available or when GPU acceleration is disabled.
+    'enable-unsafe-swiftshader'
   );
 
   if (process.platform === 'linux') {

@@ -14,7 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/evals",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/tooling-log",
@@ -27,6 +27,11 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/alerting-comparators",
+    "@kbn/test",
+    "@kbn/scout",
     "@kbn/some-dev-log",
+    "@kbn/synthtrace",
+    "@kbn/agent-builder-common",
+    "@kbn/es-snapshot-loader"
   ]
 }

@@ -12,14 +12,15 @@ import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
 
 interface UseWorkflowExecutionsParams {
   workflowId: string | null;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
-  perPage?: number;
+  executedBy?: string[];
+  size?: number;
 }
 
 export function useWorkflowExecutions(
@@ -30,13 +31,13 @@ export function useWorkflowExecutions(
       unknown,
       WorkflowExecutionListDto,
       WorkflowExecutionListDto,
-      (string | number | ExecutionStatus[] | ExecutionType[] | null | undefined)[]
+      (string | number | ExecutionStatus[] | ExecutionType[] | string[] | null | undefined)[]
     >,
     'queryKey' | 'queryFn' | 'getNextPageParam'
   > = {}
 ) {
   const { http } = useKibana().services;
-  const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
+  const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
@@ -45,17 +46,27 @@ export function useWorkflowExecutions(
           workflowId: params.workflowId,
           statuses: params.statuses,
           executionTypes: params.executionTypes,
+          ...(params.executedBy && params.executedBy.length > 0
+            ? { executedBy: params.executedBy }
+            : {}),
           page: pageParam,
-          perPage,
+          size: currentSize,
         },
       });
     },
-    [http, params.workflowId, params.statuses, params.executionTypes, perPage]
+    [
+      http,
+      params.workflowId,
+      params.statuses,
+      params.executionTypes,
+      params.executedBy,
+      currentSize,
+    ]
   );
 
   const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
-    const { page, limit, total } = lastPage._pagination;
-    const totalPages = Math.ceil(total / limit);
+    const { page, size, total } = lastPage;
+    const totalPages = Math.ceil(total / size);
 
     if (page >= totalPages) {
       return undefined;
@@ -81,7 +92,8 @@ export function useWorkflowExecutions(
       'executions',
       params.statuses,
       params.executionTypes,
-      perPage,
+      params.executedBy,
+      currentSize,
     ],
     queryFn,
     getNextPageParam,
@@ -105,11 +117,9 @@ export function useWorkflowExecutions(
 
     return {
       results: allResults,
-      _pagination: {
-        page: data.pages.length, // Number of pages loaded
-        limit: firstPage._pagination.limit, // Keep original page size
-        total: firstPage._pagination.total, // Total available
-      },
+      page: data.pages.length, // Number of pages loaded
+      size: firstPage.size, // Keep original page size
+      total: firstPage.total, // Total available
     };
   }, [data]);
 

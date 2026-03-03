@@ -224,10 +224,24 @@ export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
   }
 );
 
-export const HEADERS_SWITCH_LABEL = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.includeHeadersLabel',
+export const ADD_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.addHeadersLabel',
   {
-    defaultMessage: 'Add HTTP header',
+    defaultMessage: 'Add HTTP headers',
+  }
+);
+
+export const VIEW_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.viewHeadersLabel',
+  {
+    defaultMessage: 'View HTTP headers',
+  }
+);
+
+export const HIDE_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.hideHeadersLabel',
+  {
+    defaultMessage: 'Hide HTTP headers',
   }
 );
 
@@ -253,6 +267,13 @@ export const HEADERS_VALUE_LABEL = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.headersValueLabel',
   {
     defaultMessage: 'Value',
+  }
+);
+
+export const HEADERS_DUPLICATE_KEY_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersDuplicateKeyMessage',
+  {
+    defaultMessage: 'Header keys must be unique.',
   }
 );
 

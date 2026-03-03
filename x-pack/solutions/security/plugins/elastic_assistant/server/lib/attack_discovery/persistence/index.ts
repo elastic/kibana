@@ -110,10 +110,18 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       page = FIRST_PAGE,
       perPage = DEFAULT_PER_PAGE,
       withReplacements = false,
+      scheduled,
     } = findAttackDiscoveryAlertsParams;
     const aggs = getFindAttackDiscoveryAlertsAggregation(includeUniqueAlertIds);
 
-    const index = this.getScheduledAndAdHocIndexPattern();
+    let index;
+    if (scheduled === undefined) {
+      index = this.getScheduledAndAdHocIndexPattern();
+    } else {
+      index = scheduled
+        ? getScheduledIndexPattern(this.spaceId)
+        : this.getAdHocAlertsIndexPattern();
+    }
 
     const filter = combineFindAttackDiscoveryFilters({
       alertIds,

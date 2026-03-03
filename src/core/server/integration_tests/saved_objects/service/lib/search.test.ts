@@ -39,7 +39,7 @@ const registerTypes = (setup: InternalCoreSetup) => {
   setup.savedObjects.registerType({
     name: 'test-type',
     hidden: false,
-    namespaceType: 'single',
+    namespaceType: 'multiple',
     mappings: {
       dynamic: false,
       properties: {
@@ -160,5 +160,46 @@ describe('SOR - search API', () => {
 
     expect(documents.hits.total).toHaveProperty('value', 1);
     expect(documents.hits.hits).toHaveProperty('0._source.test-type.name', 'John Doe');
+  });
+
+  it('should enforce namespace security with runtime field override attempt', async () => {
+    // Baseline: should return 5 documents from default namespace
+    const normalSearch = await savedObjectsRepository.search({
+      type: 'test-type',
+      namespaces: ['default'],
+      query: {
+        match_all: {},
+      },
+    });
+    expect(normalSearch.hits.total).toHaveProperty('value', 5);
+
+    // Baseline: should return 2 documents from namespaceA
+    const namespaceASearch = await savedObjectsRepository.search({
+      type: 'test-type',
+      namespaces: ['namespaceA'],
+      query: {
+        match_all: {},
+      },
+    });
+    expect(namespaceASearch.hits.total).toHaveProperty('value', 2);
+
+    // Attempt to override namespace filter using runtime mappings should throw an error
+    await expect(
+      savedObjectsRepository.search({
+        type: 'test-type',
+        namespaces: ['default'],
+        runtime_mappings: {
+          namespaces: {
+            type: 'keyword',
+            script: {
+              source: 'emit("default")', // Attempt to make all docs appear in 'default' namespace
+            },
+          },
+        },
+        query: {
+          match_all: {},
+        },
+      })
+    ).rejects.toThrow("'runtime_mappings' contains forbidden fields: namespaces");
   });
 });

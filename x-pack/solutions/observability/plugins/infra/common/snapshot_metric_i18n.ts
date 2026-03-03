@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { SnapshotCustomAggregation } from './http_api/snapshot_api';
 
 // Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
@@ -281,4 +282,22 @@ export const toMetricOpt = (
         value: 'sqsOldestMessage',
       };
   }
+};
+
+export const AGGREGATION_LABELS: Record<SnapshotCustomAggregation, string> = {
+  ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLabels.avg', {
+    defaultMessage: 'Average',
+  }),
+  ['max']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLabels.max', {
+    defaultMessage: 'Max',
+  }),
+  ['min']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLabels.min', {
+    defaultMessage: 'Min',
+  }),
+  ['rate']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLabels.rate', {
+    defaultMessage: 'Rate',
+  }),
+  ['last_value']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLabels.lastValue', {
+    defaultMessage: 'Last value',
+  }),
 };

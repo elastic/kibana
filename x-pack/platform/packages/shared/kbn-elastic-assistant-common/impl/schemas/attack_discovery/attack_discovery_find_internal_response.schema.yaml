@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: Attack Discovery Find Internal Response Type
+  version: '1'
+paths: {}
+components:
+  schemas:
+    AttackDiscoveryFindInternalResponse:
+      type: object
+      properties:
+        connector_names:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            $ref: './attack_discovery_alert.schema.yaml#/components/schemas/AttackDiscoveryAlert'
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        unique_alert_ids_count:
+          type: integer
+        unique_alert_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - connector_names
+        - data
+        - page
+        - total
+        - unique_alert_ids_count
+

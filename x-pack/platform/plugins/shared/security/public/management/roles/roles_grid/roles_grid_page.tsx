@@ -258,7 +258,7 @@ export const RolesGridPage: FC<Props> = ({
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
-    if (!args.error) {
+    if (!args.error && args.query) {
       const newState = {
         ...tableState,
         query: args.query,
@@ -513,6 +513,9 @@ export const RolesGridPage: FC<Props> = ({
           data-test-subj={`${!isLoading ? 'rolesTable' : 'rolesTableLoading'}`}
           itemId="name"
           columns={getColumnConfig()}
+          tableCaption={i18n.translate('xpack.security.management.roles.rolesTableCaption', {
+            defaultMessage: 'List of roles',
+          })}
           selection={
             readOnly
               ? undefined

@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { StepContext } from '@kbn/workflows';
+import type { LegacyWorkflowInput, StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
@@ -17,16 +17,30 @@ import {
   parseJsPropertyAccess,
 } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { z } from '@kbn/zod/v4';
 
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
-  schema: z.ZodTypeAny;
+  schema: z.ZodType;
+}
+
+export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {
+  /**
+   * Workflow inputs definition with their default values.
+   * Used to pre-populate input fields in the test step modal.
+   * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
+   */
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
 
-function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
+function buildStepContextSchemaFromObject(obj: any): z.ZodType {
   if (Array.isArray(obj)) {
     return z.array(buildStepContextSchemaFromObject(obj[0]));
   } else if (typeof obj === 'object' && obj !== null) {
@@ -57,9 +71,36 @@ function readPropertyRecursive(
   return object;
 }
 
+/**
+ * Build inputs object from workflow input definitions with their default values.
+ * This allows the test step modal to pre-populate input fields with defined defaults.
+ * Supports both legacy array format and new JSON Schema format.
+ * Uses the same logic as the exec modal to ensure consistency.
+ */
+function buildInputsFromDefinition(
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
+): Record<string, unknown> | undefined {
+  if (!inputsDefinition) {
+    return undefined;
+  }
+
+  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(inputsDefinition);
+
+  if (!normalizedInputs) {
+    return undefined;
+  }
+
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  return defaults;
+}
+
 export function buildContextOverride(
   workflowGraph: WorkflowGraph,
-  staticData: Pick<StepContext, 'consts' | 'workflow'>
+  staticData: StaticContextData
 ): ContextOverrideData {
   const contextOverride = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
@@ -70,6 +111,12 @@ export function buildContextOverride(
     )
   );
   const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
+
+  // Build the static data with inputs defaults for lookup
+  const staticDataWithInputs = {
+    ...staticData,
+    inputs: buildInputsFromDefinition(staticData.inputsDefinition),
+  };
 
   inputsParsed.forEach((pathParts) => {
     let current = contextOverride;
@@ -82,7 +129,7 @@ export function buildContextOverride(
         // Set a default value for the final property
         current[part] =
           current[part] ||
-          readPropertyRecursive(pathParts.slice(0, i + 1), staticData) ||
+          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
           'replace with your data';
       } else {
         // Create nested object if it doesn't exist

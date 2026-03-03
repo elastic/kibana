@@ -8,28 +8,92 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiTextTruncate } from '@elastic/eui';
+import { EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import {
-  SERVICE_NAME_FIELD,
-  SPAN_ID_FIELD,
-  TRACE_ID_FIELD,
-  TRANSACTION_ID_FIELD,
-} from '@kbn/discover-utils';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
-import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
+import { DiscoverEsqlLink } from '../discover_esql_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import {
+  createServiceNameWhereClause,
+  createSpanNameWhereClause,
+  createTraceIdWhereClause,
+} from './create_span_links_where_clauses';
+
+const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
+  const { indexes } = useDataSourcesContext();
+
+  const content = (
+    <EuiTextTruncate
+      data-test-subj={`${type}-spanName-${item.spanId}`}
+      text={item.details?.spanName || NOT_AVAILABLE_LABEL}
+    />
+  );
+
+  return (
+    <DiscoverEsqlLink
+      indexPattern={indexes.apm.traces}
+      dataTestSubj={`${type}-spanNameLink-${item.spanId}`}
+      tabLabel={item.details?.spanName || NOT_AVAILABLE_LABEL}
+      whereClause={createSpanNameWhereClause(item)}
+    >
+      {content}
+    </DiscoverEsqlLink>
+  );
+};
+
+const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
+  const { indexes } = useDataSourcesContext();
+
+  const serviceName = item.details?.serviceName || NOT_AVAILABLE_LABEL;
+  const content = (
+    <EuiTextTruncate data-test-subj={`${type}-serviceName-${serviceName}`} text={serviceName} />
+  );
+
+  return (
+    <ServiceNameWithIcon
+      agentName={item.details?.agentName}
+      serviceName={
+        <DiscoverEsqlLink
+          indexPattern={indexes.apm.traces}
+          dataTestSubj={`${type}-serviceNameLink-${serviceName}`}
+          tabLabel={serviceName}
+          whereClause={createServiceNameWhereClause(item)}
+        >
+          {content}
+        </DiscoverEsqlLink>
+      }
+    />
+  );
+};
+
+const TraceIdLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
+  const { indexes } = useDataSourcesContext();
+
+  const content = (
+    <EuiTextTruncate data-test-subj={`${type}-traceId-${item.traceId}`} text={item.traceId} />
+  );
+
+  return (
+    <DiscoverEsqlLink
+      indexPattern={indexes.apm.traces}
+      dataTestSubj={`${type}-traceIdLink-${item.traceId}`}
+      tabLabel={item.traceId}
+      whereClause={createTraceIdWhereClause(item)}
+    >
+      {content}
+    </DiscoverEsqlLink>
+  );
+};
 
 export const getColumns = ({
-  generateDiscoverLink,
   type,
 }: {
-  generateDiscoverLink: GenerateDiscoverLink;
   type: SpanLinkType;
 }): Array<EuiBasicTableColumn<SpanLinkDetails>> => [
   {
@@ -40,30 +104,13 @@ export const getColumns = ({
     ),
     sortable: (item) => item.details?.spanName || '',
     render: (_, item) => {
-      const content = (
-        <EuiTextTruncate
-          data-test-subj={`${type}-spanName-${item.spanId}`}
-          text={item.details?.spanName || NOT_AVAILABLE_LABEL}
-        />
-      );
-      const href = generateDiscoverLink(
-        item.details?.transactionId
-          ? { [TRANSACTION_ID_FIELD]: item.details.transactionId }
-          : { [SPAN_ID_FIELD]: item.spanId }
-      );
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          {href ? (
-            <EuiLink data-test-subj={`${type}-spanNameLink-${item.spanId}`} href={href}>
-              {content}
-            </EuiLink>
-          ) : (
-            content
-          )}
+          <SpanNameLinkCell type={type} item={item} />
         </span>
       );
     },
@@ -87,31 +134,13 @@ export const getColumns = ({
     ),
     sortable: (item) => item.details?.serviceName || NOT_AVAILABLE_LABEL,
     render: (_, item) => {
-      const serviceName = item.details?.serviceName || NOT_AVAILABLE_LABEL;
-      const content = (
-        <EuiTextTruncate data-test-subj={`${type}-serviceName-${serviceName}`} text={serviceName} />
-      );
-      const href = item.details?.serviceName
-        ? generateDiscoverLink({ [SERVICE_NAME_FIELD]: item.details!.serviceName })
-        : undefined;
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          <ServiceNameWithIcon
-            agentName={item.details?.agentName}
-            serviceName={
-              href ? (
-                <EuiLink data-test-subj={`${type}-serviceNameLink-${serviceName}`} href={href}>
-                  {content}
-                </EuiLink>
-              ) : (
-                content
-              )
-            }
-          />
+          <ServiceNameLinkCell type={type} item={item} />
         </span>
       );
     },
@@ -124,23 +153,13 @@ export const getColumns = ({
     ),
     sortable: (item) => item.traceId,
     render: (_, item) => {
-      const content = (
-        <EuiTextTruncate data-test-subj={`${type}-traceId-${item.traceId}`} text={item.traceId} />
-      );
-      const href = generateDiscoverLink({ [TRACE_ID_FIELD]: item.traceId });
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          {href ? (
-            <EuiLink data-test-subj={`${type}-traceIdLink-${item.traceId}`} href={href}>
-              {content}
-            </EuiLink>
-          ) : (
-            content
-          )}
+          <TraceIdLinkCell type={type} item={item} />
         </span>
       );
     },

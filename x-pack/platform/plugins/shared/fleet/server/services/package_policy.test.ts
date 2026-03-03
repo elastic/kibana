@@ -24,8 +24,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
+import { CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE } from '../../common/constants/cloud_connector';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
 import type {
@@ -71,6 +71,7 @@ import {
   preconfigurePackageInputs,
   updatePackageInputs,
   packagePolicyService,
+  getCompiledVersionsForAgentPolicy,
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
@@ -86,8 +87,16 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
+import * as secretsModule from './secrets';
+import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
+import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
 
-jest.mock('./spaces/helpers');
+jest.mock('./spaces/helpers', () => {
+  return {
+    ...jest.requireActual('./spaces/helpers'),
+    isSpaceAwarenessEnabled: jest.fn(),
+  };
+});
 
 jest.mock('./license');
 
@@ -142,7 +151,15 @@ async function mockedGetInstallation(params: any) {
 
 async function mockedGetPackageInfo(params: any) {
   let pkg;
-  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'apache')
+    pkg = {
+      version: '1.3.2',
+      conditions: {
+        agent: {
+          version: '>=9.3.0',
+        },
+      },
+    };
   if (params.pkgName === 'aws') {
     pkg = {
       name: 'aws',
@@ -189,6 +206,7 @@ async function mockedGetPackageInfo(params: any) {
   if (params.pkgName === 'endpoint') pkg = { name: 'endpoint', version: params.pkgVersion };
   if (params.pkgName === 'test') {
     pkg = {
+      name: 'test',
       version: '1.0.2',
     };
   }
@@ -248,8 +266,26 @@ jest.mock('./epm/packages/get', () => ({
         path: 'test-template.yml',
       });
     }
+    if (params.packageInfo.name === 'test') {
+      assetsMap.set(
+        'data_stream/cel.yml.hbs',
+        Buffer.from(
+          '{{#semverSatisfies _meta.agent.version "^9.3.0"}}mock template content{{/semverSatisfies}}'
+        )
+      );
+    }
     return assetsMap;
   }),
+}));
+
+jest.mock('./utils/version_specific_policies', () => ({
+  ...jest.requireActual('./utils/version_specific_policies'),
+  getAgentVersionsForVersionSpecificPolicies: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock('./agent_policies/package_policies_to_agent_inputs', () => ({
+  ...jest.requireActual('./agent_policies/package_policies_to_agent_inputs'),
+  recompileInputsWithAgentVersion: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('./agent_policy');
@@ -275,7 +311,11 @@ jest.mock('./secrets', () => ({
     id,
     isSecretRef: true,
   })),
+  extractAndWriteSecrets: jest.fn(),
+  deleteSecretsIfNotReferenced: jest.fn(),
 }));
+
+const mockedSecretsModule = secretsModule as jest.Mocked<typeof secretsModule>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
@@ -319,6 +359,9 @@ describe('Package policy service', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
   });
 
   afterEach(() => {
@@ -336,13 +379,17 @@ describe('Package policy service', () => {
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
-
-      soClient.create.mockResolvedValueOnce({
+      const packagePolicySO = {
         id: 'test-package-policy',
-        attributes: {},
+        attributes: {
+          inputs: [],
+        },
         references: [],
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-      });
+      };
+
+      soClient.create.mockResolvedValueOnce(packagePolicySO);
+      soClient.get.mockResolvedValueOnce(packagePolicySO);
 
       mockAgentPolicyGet();
 
@@ -453,7 +500,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+      ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
     });
 
     beforeEach(() => {
@@ -590,8 +637,118 @@ describe('Package policy service', () => {
 
       expect(result.supports_cloud_connector).toBe(false);
     });
+
+    it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'apache',
+            title: 'Apache',
+            version: '1.3.2',
+          },
+        },
+        // Skipping unique name verification just means we have to less mocking/setup
+        { id: 'test-package-policy', skipUniqueNameVerification: true }
+      );
+
+      expect(agentPolicyService.bumpRevision).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test',
+        expect.objectContaining({
+          hasAgentVersionConditions: true,
+        })
+      );
+    });
+
+    it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition in hbs template', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      const packagePolicySO = {
+        id: 'test-package-policy',
+        attributes: {
+          inputs: [],
+        },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      };
+      soClient.create.mockResolvedValueOnce(packagePolicySO);
+      soClient.get.mockResolvedValueOnce(packagePolicySO);
+
+      mockAgentPolicyGet();
+
+      await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        // Skipping unique name verification just means we have to less mocking/setup
+        { id: 'test-package-policy', skipUniqueNameVerification: true }
+      );
+
+      expect(agentPolicyService.bumpRevision).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test',
+        expect.objectContaining({
+          hasAgentVersionConditions: true,
+        })
+      );
+    });
   });
   describe('createCloudConnectorForPackagePolicy', () => {
+    // Mock PackageInfo for input-level storage mode (no package-level vars defined)
+    const mockPackageInfo = {
+      name: 'test-package',
+      title: 'Test Package',
+      version: '1.0.0',
+      description: 'Test package',
+      type: 'integration',
+      categories: [],
+      conditions: {},
+      icons: [],
+      assets: {
+        kibana: undefined,
+        elasticsearch: undefined,
+      },
+      policy_templates: [],
+      data_streams: [],
+      owner: { github: 'elastic' },
+      screenshots: [],
+    } as unknown as PackageInfo;
+
     it('should create cloud connector when all conditions are met', async () => {
       const soClient = createSavedObjectClientMock();
       const enrichedPackagePolicy = {
@@ -666,7 +823,8 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toEqual(mockCloudConnector);
@@ -686,6 +844,7 @@ describe('Package policy service', () => {
             },
           },
           cloudProvider: 'aws',
+          accountType: CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
         });
       } finally {
         // Restore the original method
@@ -714,7 +873,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -775,7 +935,8 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toBeUndefined();
@@ -831,7 +992,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -880,33 +1042,6 @@ describe('Package policy service', () => {
         },
       } as any;
 
-      // Mock existing cloud connector
-      const existingCloudConnector = {
-        id: 'existing-connector-id',
-        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        attributes: {
-          name: 'existing-connector',
-          namespace: '*',
-          cloudProvider: 'aws',
-          vars: {
-            role_arn: {
-              value: 'arn:aws:iam::123456789012:role/OldRole',
-              type: 'text',
-            },
-            external_id: {
-              value: {
-                id: 'OLDEXTERNALID1234567',
-                isSecretRef: true,
-              },
-              type: 'password',
-            },
-          },
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        },
-      };
-
       // Mock updated cloud connector response
       const updatedCloudConnector = {
         id: 'existing-connector-id',
@@ -926,13 +1061,10 @@ describe('Package policy service', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 2, // Incremented
+        packagePolicyCount: 2,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T02:00:00.000Z',
       };
-
-      // Mock soClient.get for the existing connector
-      soClient.get = jest.fn().mockResolvedValue(existingCloudConnector);
 
       // Mock the cloudConnectorService.update method
       const originalUpdate = cloudConnectorService.update;
@@ -942,14 +1074,11 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toEqual(updatedCloudConnector);
-        expect(soClient.get).toHaveBeenCalledWith(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          'existing-connector-id'
-        );
         expect(cloudConnectorService.update).toHaveBeenCalledWith(
           soClient,
           'existing-connector-id',
@@ -967,7 +1096,6 @@ describe('Package policy service', () => {
                 type: 'password',
               },
             },
-            packagePolicyCount: 2, // Original count (1) + 1
           }
         );
       } finally {
@@ -1019,24 +1147,6 @@ describe('Package policy service', () => {
         },
       } as any;
 
-      // Mock existing cloud connector
-      const existingCloudConnector = {
-        id: 'existing-connector-id',
-        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        attributes: {
-          name: 'existing-connector',
-          namespace: '*',
-          cloudProvider: 'aws',
-          vars: {},
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        },
-      };
-
-      // Mock soClient.get for the existing connector
-      soClient.get = jest.fn().mockResolvedValue(existingCloudConnector);
-
       // Mock the cloudConnectorService.update method to throw an error
       const originalUpdate = cloudConnectorService.update;
       cloudConnectorService.update = jest
@@ -1048,16 +1158,19 @@ describe('Package policy service', () => {
           (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
             enrichedPackagePolicy,
-            agentPolicy
+            agentPolicy,
+            mockPackageInfo
           )
         ).rejects.toThrow(CloudConnectorUpdateError);
 
-        // Verify that get was called but create was not
-        expect(soClient.get).toHaveBeenCalledWith(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          'existing-connector-id'
+        // Verify that update was called
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'existing-connector-id',
+          expect.objectContaining({
+            vars: expect.any(Object),
+          })
         );
-        expect(cloudConnectorService.update).toHaveBeenCalled();
       } finally {
         // Restore the original method
         cloudConnectorService.update = originalUpdate;
@@ -1098,7 +1211,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1152,7 +1266,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1194,7 +1309,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1254,11 +1370,119 @@ describe('Package policy service', () => {
           (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
             enrichedPackagePolicy,
-            agentPolicy
+            agentPolicy,
+            mockPackageInfo
           )
         ).rejects.toThrow(
-          'Error creating cloud connector in Fleet, Error: Cloud connector creation failed'
+          'Error creating cloud connector in Fleet, Cloud connector creation failed'
         );
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
+    it('should create cloud connector with generated name when no cloud_connector_name is provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-cspm-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                  // Note: no cloud_connector_name provided
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloud connector service
+      const mockCloudConnector = {
+        id: 'cloud-connector-generated-id',
+        name: 'aws-cloud-connector: test-cspm-policy',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            type: 'password',
+            value: {
+              id: 'ABCDEFGHIJKLMNOPQRST',
+              isSecretRef: true,
+            },
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      // Mock the cloudConnectorService.create method
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        expect(result).toEqual(mockCloudConnector);
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+          name: 'aws-cloud-connector: test-cspm-policy',
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+            external_id: {
+              value: {
+                id: 'ABCDEFGHIJKLMNOPQRST',
+                isSecretRef: true,
+              },
+              type: 'password',
+            },
+          },
+          cloudProvider: 'aws',
+          accountType: CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
+        });
+
+        // Verify the name was auto-generated with the correct format
+        expect(mockCloudConnector.name).toBe('aws-cloud-connector: test-cspm-policy');
       } finally {
         // Restore the original method
         cloudConnectorService.create = originalCreate;
@@ -1324,18 +1548,40 @@ describe('Package policy service', () => {
         saved_objects: [
           {
             id: 'test-package-policy-1',
-            attributes: {},
+            attributes: {
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+              inputs: [],
+            },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-package-policy-2',
-            attributes: {},
+            attributes: {
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+              inputs: [],
+            },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
+      soClient.get.mockImplementation(async (_, id) => ({
+        id,
+        attributes: {
+          inputs: [],
+        },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      }));
 
       mockAgentPolicyGet();
 
@@ -1348,6 +1594,11 @@ describe('Package policy service', () => {
           policy_id: 'test_agent_policy',
           policy_ids: ['test_agent_policy'],
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
         {
           id: 'test-package-policy-2',
@@ -1357,6 +1608,11 @@ describe('Package policy service', () => {
           policy_id: 'test_agent_policy',
           policy_ids: ['test_agent_policy'],
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
       ]);
 
@@ -3054,7 +3310,7 @@ describe('Package policy service', () => {
 
         calls.forEach((call, idx) => {
           expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
-          expect(call[3]).toMatchObject({ removeProtection: false });
+          expect(call[3]).toMatchObject({ removeProtection: undefined });
         });
       });
 
@@ -3104,7 +3360,7 @@ describe('Package policy service', () => {
               },
             }
           )
-        ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+        ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
       });
     });
   });
@@ -3901,6 +4157,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
         {
           id: 'test-package-policy-2',
@@ -3910,6 +4171,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
       ]);
     });
@@ -3956,6 +4222,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
         {
           id: 'test-package-policy-2',
@@ -3965,6 +4236,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
       ]);
 
@@ -4489,6 +4765,196 @@ describe('Package policy service', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
       expect(res).toEqual([]);
+    });
+
+    it('should delete secrets for regular package policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Clear mock calls from previous tests
+      mockedSecretsModule.deleteSecretsIfNotReferenced.mockClear();
+
+      const packagePolicyWithSecrets = {
+        ...createPackagePolicyMock(),
+        id: 'policy-with-secrets',
+        secret_references: [{ id: 'secret-1' }, { id: 'secret-2' }],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-with-secrets',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyWithSecrets,
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        id: 'policy-with-secrets',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        attributes: packagePolicyWithSecrets,
+        references: [],
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'test',
+        version: '1.0.0',
+      } as PackageInfo);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-with-secrets',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, ['policy-with-secrets']);
+
+      // Verify that deleteSecretsIfNotReferenced was called with the correct secret IDs
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledWith({
+        esClient,
+        soClient,
+        ids: ['secret-1', 'secret-2'],
+      });
+    });
+
+    it('should NOT delete secrets for package policies with cloud_connector_id', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Clear mock calls from previous tests
+      mockedSecretsModule.deleteSecretsIfNotReferenced.mockClear();
+
+      const packagePolicyWithCloudConnector = {
+        ...createPackagePolicyMock(),
+        id: 'policy-with-cloud-connector',
+        cloud_connector_id: 'test-cloud-connector-123',
+        secret_references: [{ id: 'cloud-connector-secret-1' }, { id: 'cloud-connector-secret-2' }],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-with-cloud-connector',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyWithCloudConnector,
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        id: 'policy-with-cloud-connector',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        attributes: packagePolicyWithCloudConnector,
+        references: [],
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'test',
+        version: '1.0.0',
+      } as PackageInfo);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'policy-with-cloud-connector',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, ['policy-with-cloud-connector']);
+
+      // Verify that deleteSecretsIfNotReferenced was NOT called for cloud connector secrets
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+    });
+
+    it('should handle mixed package policies - some with cloud connector, some without', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Clear mock calls from previous tests
+      mockedSecretsModule.deleteSecretsIfNotReferenced.mockClear();
+
+      const regularPackagePolicy = {
+        ...createPackagePolicyMock(),
+        id: 'regular-policy',
+        secret_references: [{ id: 'regular-secret-1' }],
+      };
+
+      const cloudConnectorPackagePolicy = {
+        ...createPackagePolicyMock(),
+        id: 'cloud-connector-policy',
+        cloud_connector_id: 'test-cloud-connector-123',
+        secret_references: [{ id: 'cloud-connector-secret-1' }],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'regular-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: regularPackagePolicy,
+          },
+          {
+            id: 'cloud-connector-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: cloudConnectorPackagePolicy,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'test',
+        version: '1.0.0',
+      } as PackageInfo);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          {
+            id: 'regular-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+          {
+            id: 'cloud-connector-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            success: true,
+          },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [
+        'regular-policy',
+        'cloud-connector-policy',
+      ]);
+
+      // Should have been called once for the regular policy secrets only
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledTimes(1);
+      expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledWith({
+        esClient,
+        soClient,
+        ids: ['regular-secret-1'],
+      });
     });
   });
 
@@ -7929,6 +8395,49 @@ describe('Package policy service', () => {
         references: [],
         score: 0,
       },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-2`,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-2',
+          description: '',
+          namespace: 'default',
+          policy_id: '12345',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.2.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-3`,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-3',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.0.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
     ];
     const mockRollbackResult = {
       updatedPolicies: {
@@ -8005,6 +8514,7 @@ describe('Package policy service', () => {
               updated_at: '2025-12-22T21:28:05.380Z',
               updated_by: 'elastic',
             },
+            initialNamespaces: ['default'],
             references: [],
             score: 0,
           },
@@ -8030,6 +8540,7 @@ describe('Package policy service', () => {
               updated_at: '2025-12-22T21:28:05.380Z',
               updated_by: 'elastic',
             },
+            initialNamespaces: ['myspace'],
             references: [],
             score: 0,
           },
@@ -8095,7 +8606,7 @@ describe('Package policy service', () => {
       });
 
       it('should create temporary saved objects to back up package policies before updating them', async () => {
-        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO, '2.2.0');
         expect(mockSoClient.bulkCreate).toHaveBeenNthCalledWith(
           1,
           [
@@ -8120,6 +8631,7 @@ describe('Package policy service', () => {
                 updated_by: 'elastic',
               },
               references: [],
+              initialNamespaces: ['default'],
               score: 0,
             },
           ],
@@ -8155,6 +8667,7 @@ describe('Package policy service', () => {
               },
               references: [],
               score: 0,
+              initialNamespaces: ['myspace'],
             },
           ],
           { namespace: 'myspace' }
@@ -8167,7 +8680,7 @@ describe('Package policy service', () => {
       });
 
       it('should update package policies', async () => {
-        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO, '2.2.0');
         expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
           1,
           [
@@ -8241,7 +8754,8 @@ describe('Package policy service', () => {
       it('should return the updated and backed up package policies, and the old previous revisions', async () => {
         const rollbackResult = await packagePolicyService.rollback(
           mockSoClient,
-          mockPackagePolicySO
+          mockPackagePolicySO,
+          '2.2.0'
         );
         expect(rollbackResult).toStrictEqual(mockRollbackResult);
       });
@@ -8865,5 +9379,246 @@ describe('_getAssetForTemplatePath()', () => {
     };
     const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
     expect(asset).toEqual(expectedFallbackAsset);
+  });
+});
+
+describe('compilePackagePolicyForVersions()', () => {
+  const mockRecompileInputsWithAgentVersion =
+    recompileInputsWithAgentVersion as jest.MockedFunction<typeof recompileInputsWithAgentVersion>;
+  const mockGetAgentVersionsForVersionSpecificPolicies =
+    getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
+      typeof getAgentVersionsForVersionSpecificPolicies
+    >;
+
+  // An assetsMap that triggers hasAgentVersionConditionInInputTemplate to return true
+  const versionConditionAssetsMap = new Map([
+    [
+      'pkg-1.0.0/data_stream/logs/agent/stream/stream.yml.hbs',
+      Buffer.from('{{#semverSatisfies _meta.agent.version "^9.0.0"}}enabled{{/semverSatisfies}}'),
+    ],
+  ]) as PackagePolicyAssetsMap;
+
+  const mockPackageInfo = { name: 'test', version: '1.0.0' } as PackageInfo;
+  const mockPackagePolicy = { id: 'pkg-policy-1' } as PackagePolicy;
+
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    mockRecompileInputsWithAgentVersion.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  const makeSoClient = (existingInputsForVersions: Record<string, any> = {}) => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      id: 'pkg-policy-1',
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: { inputs_for_versions: existingInputsForVersions },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+    return soClient;
+  };
+
+  describe('async task path (agentVersions provided)', () => {
+    it('skips recompilation and SO update when all requested versions already exist in inputs_for_versions', async () => {
+      const soClient = makeSoClient({ '8.18': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18']
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('compiles only versions missing from inputs_for_versions', async () => {
+      const soClient = makeSoClient({ '8.18': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18', '9.3']
+      );
+
+      // 8.18 already compiled - only 9.3 should be recompiled
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(1);
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledWith(
+        mockPackageInfo,
+        mockPackagePolicy,
+        '9.3',
+        soClient
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        mockPackagePolicy.id,
+        expect.objectContaining({
+          inputs_for_versions: expect.objectContaining({ '8.18': expect.anything(), '9.3': [] }),
+        })
+      );
+    });
+
+    it('compiles all requested versions when none exist in inputs_for_versions', async () => {
+      const soClient = makeSoClient({});
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18', '9.3']
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('create/update path (no agentVersions)', () => {
+    it('recompiles default versions plus any previously stored extra versions', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      // 8.18 is an older version previously stored from an agent that enrolled
+      const soClient = makeSoClient({ '8.18': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      // Should compile for 9.3, 9.4 (defaults) and 8.18 (existing stored version)
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(3);
+      const calledVersions = mockRecompileInputsWithAgentVersion.mock.calls.map(
+        ([, , version]) => version
+      );
+      expect(calledVersions).toEqual(expect.arrayContaining(['9.3', '9.4', '8.18']));
+    });
+
+    it('compiles only default versions when no extra versions are stored', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      const soClient = makeSoClient({});
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+      const calledVersions = mockRecompileInputsWithAgentVersion.mock.calls.map(
+        ([, , version]) => version
+      );
+      expect(calledVersions).toEqual(expect.arrayContaining(['9.3', '9.4']));
+    });
+
+    it('deduplicates versions when an existing stored version matches a default version', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      // 9.3 is both a default version and already stored
+      const soClient = makeSoClient({ '9.3': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      // Should compile 9.3 and 9.4 - no duplicates
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+    });
+  });
+});
+
+describe('getCompiledVersionsForAgentPolicy()', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  it('returns empty array when feature flag is disabled', async () => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: false,
+    } as any);
+    const soClient = savedObjectsClientMock.create();
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toEqual([]);
+    expect(soClient.find).not.toHaveBeenCalled();
+  });
+
+  it('returns empty array when no package policies have inputs_for_versions', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: { inputs_for_versions: undefined },
+        },
+      ],
+      total: 1,
+      per_page: 100,
+      page: 1,
+    } as any);
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns the union of all inputs_for_versions keys across package policies', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: { inputs_for_versions: { '9.1': [], '8.18': [] } },
+        },
+        {
+          id: 'pp-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          // 8.18 appears in both — should be deduplicated
+          attributes: { inputs_for_versions: { '8.18': [], '9.3': [] } },
+        },
+      ],
+      total: 2,
+      per_page: 100,
+      page: 1,
+    } as any);
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toHaveLength(3);
+    expect(result).toEqual(expect.arrayContaining(['9.1', '8.18', '9.3']));
   });
 });

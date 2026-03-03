@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { CustomTaskInstance } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
+  DEFAULT_TASK_SCHEDULE,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
+import * as syntheticsSettingsModule from '../saved_objects/synthetics_settings';
 import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -21,6 +22,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 const mockTaskManager = taskManagerMock.createSetup();
@@ -84,20 +86,23 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     jest.clearAllMocks();
     task = new SyncPrivateLocationMonitorsTask(
       mockServerSetup as any,
-      mockTaskManager as unknown as TaskManagerSetupContract,
       mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
     );
     mockSoClient.createInternalRepository.mockReturnValue(mockSoClient as any);
+    jest
+      .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+      .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
   });
 
   describe('constructor', () => {
     it('should register task definitions correctly', () => {
+      task.registerTaskDefinition(mockTaskManager as any);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         'Synthetics:Sync-Private-Location-Monitors': expect.objectContaining({
-          title: 'Synthetics Sync Global Params Task',
+          title: 'Synthetics Sync Private Location Monitors Task',
           description:
-            'This task is executed so that we can sync private location monitors for example when global params are updated',
-          timeout: '5m',
+            'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
+          timeout: '10m',
           maxAttempts: 1,
           createTaskRunner: expect.any(Function),
         }),
@@ -115,7 +120,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         id: 'Synthetics:Sync-Private-Location-Monitors-single-instance',
         state: {},
         schedule: {
-          interval: '60m',
+          interval: DEFAULT_TASK_SCHEDULE,
         },
         taskType: 'Synthetics:Sync-Private-Location-Monitors',
         params: {},
@@ -129,9 +134,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   describe('runTask', () => {
     it('should skip sync if no data has changed', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
-        hasDataChanged: false,
-      });
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
+      } as any);
+      // fetchMonitorMwsIds is used in the implementation now
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
@@ -143,26 +150,28 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const result = await task.runTask({ taskInstance });
 
-      expect(task.hasAnyDataChanged).toHaveBeenCalled();
+      expect(task.hasMWsChanged).toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('No data has changed since last run')
       );
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        disableAutoSync: false,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        lastTotalParams: 1,
-        lastTotalMWs: 1,
         maxCleanUpRetries: 2,
       });
     });
 
     it('should run sync if data has changed', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
-        hasDataChanged: true,
-      });
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: true,
+        updatedMWs: [],
+        missingMWIds: [],
+      } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
@@ -171,54 +180,42 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      jest.spyOn(task, 'syncGlobalParams').mockResolvedValue(undefined);
+      jest
+        .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
+        .mockResolvedValue(undefined);
 
       const result = await task.runTask({ taskInstance });
-      expect(mockLogger.debug).toHaveBeenNthCalledWith(
-        2,
-        '[SyncPrivateLocationMonitorsTask] Starting cleanup of duplicated package policies'
-      );
 
-      expect(mockLogger.debug).toHaveBeenNthCalledWith(
-        3,
-        '[SyncPrivateLocationMonitorsTask] Syncing private location monitors because data has changed'
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Syncing private location monitors because data has changed')
       );
-      expect(mockLogger.debug).toHaveBeenNthCalledWith(
-        4,
-        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded'
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Sync of private location monitors succeeded')
       );
-      expect(task.syncGlobalParams).toHaveBeenCalled();
+      expect(task.deployPackagePolicies.syncPackagePoliciesForMws).toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
-        lastTotalParams: 1,
-        lastTotalMWs: 1,
+        disableAutoSync: false,
         maxCleanUpRetries: 2,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
       });
     });
 
-    it('should not sync if data changed but no private locations exist', async () => {
-      const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
-        hasDataChanged: true,
-      });
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
-      jest.spyOn(task, 'syncGlobalParams');
-
-      await task.runTask({ taskInstance });
-
-      expect(getPrivateLocationsModule.getPrivateLocations).toHaveBeenCalled();
-      expect(task.syncGlobalParams).not.toHaveBeenCalled();
-      expect(mockLogger.debug).toHaveBeenLastCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded'
-      );
-    });
-
     it('should handle errors during the run', async () => {
       const taskInstance = getMockTaskInstance();
       const error = new Error('Sync failed');
-      jest.spyOn(task, 'hasAnyDataChanged').mockRejectedValue(error);
+      // fetchMonitorMwsIds is called before hasMWsChanged in runTask
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(task, 'hasMWsChanged').mockRejectedValue(error);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
 
       const result = await task.runTask({ taskInstance });
 
@@ -227,9 +224,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       expect(result.error).toBe(error);
       expect(result.state).toEqual({
+        disableAutoSync: false,
         lastStartedAt: expect.anything(),
-        lastTotalParams: 1,
-        lastTotalMWs: 1,
         hasAlreadyDoneCleanup: false,
         maxCleanUpRetries: 2,
       });
@@ -242,9 +238,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
         startedAt,
       };
-      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
-        hasDataChanged: false,
-      });
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
+      } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
@@ -258,137 +255,128 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
     });
+
+    it('should sync only for provided privateLocationId and clear it from state', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      // Ensure the server's savedObjects.createInternalRepository returns an object for the call
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const syncSpy = jest
+        .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+        .mockResolvedValue(undefined);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(syncSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allPrivateLocations: expect.any(Array),
+          encryptedSavedObjects: mockEncryptedSoClient,
+          privateLocationId: 'pl-1',
+          soClient: expect.any(Object),
+        })
+      );
+
+      expect(result.state).toEqual({
+        ...taskInstance.state,
+        privateLocationId: undefined,
+      });
+    });
   });
 
   describe('hasAnyDataChanged', () => {
-    it('should return true if params changed', async () => {
-      jest
-        .spyOn(task, 'hasAnyParamChanged')
-        .mockResolvedValue({ hasParamsChanges: true, totalParams: 2 } as any);
-      jest
-        .spyOn(task, 'hasMWsChanged')
-        .mockResolvedValue({ hasMWsChanged: false, totalMWs: 1 } as any);
-      const taskState = { lastTotalParams: 1, lastTotalMWs: 1 };
-
-      const res = await task.hasAnyDataChanged({
-        taskState: taskState as any,
-        soClient: mockSoClient as any,
-        lastStartedAt: new Date().toISOString(),
-      });
-
-      expect(res.hasDataChanged).toBe(true);
-      expect(taskState.lastTotalParams).toBe(2);
-      expect(taskState.lastTotalMWs).toBe(1);
-    });
-
     it('should return true if maintenance windows changed', async () => {
-      jest
-        .spyOn(task, 'hasAnyParamChanged')
-        .mockResolvedValue({ hasParamsChanges: false, totalParams: 1 } as any);
       jest
         .spyOn(task, 'hasMWsChanged')
         .mockResolvedValue({ hasMWsChanged: true, totalMWs: 2 } as any);
 
-      const res = await task.hasAnyDataChanged({
-        taskState: { lastTotalParams: 1, lastTotalMWs: 1 } as any,
+      const res = await task.hasMWsChanged({
+        taskState: { lastTotalMWs: 1 } as any,
         soClient: mockSoClient as any,
         lastStartedAt: new Date().toISOString(),
+        monitorMwsIds: ['mw-1'],
       });
 
-      expect(res.hasDataChanged).toBe(true);
+      expect(res.hasMWsChanged).toBe(true);
     });
 
     it('should return false if nothing changed', async () => {
-      jest
-        .spyOn(task, 'hasAnyParamChanged')
-        .mockResolvedValue({ hasParamsChanges: false, totalParams: 1 } as any);
       jest
         .spyOn(task, 'hasMWsChanged')
         .mockResolvedValue({ hasMWsChanged: false, totalMWs: 1 } as any);
 
       const taskState = { lastTotalParams: 1, lastTotalMWs: 1 };
 
-      const res = await task.hasAnyDataChanged({
+      const res = await task.hasMWsChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
         lastStartedAt: new Date().toISOString(),
+        monitorMwsIds: ['mw-1'],
       });
 
-      expect(res.hasDataChanged).toBe(false);
-    });
-  });
-
-  describe('hasAnyParamChanged', () => {
-    it('returns true if updated params are found', async () => {
-      mockSoClient.find
-        .mockResolvedValueOnce({ total: 1 } as any) // updated
-        .mockResolvedValueOnce({ total: 10 } as any); // total
-      const { hasParamsChanges } = await task.hasAnyParamChanged({
-        soClient: mockSoClient as any,
-        lastStartedAt: '...',
-        lastTotalParams: 10,
-      });
-      expect(hasParamsChanges).toBe(true);
-    });
-
-    it('returns true if total number of params changed', async () => {
-      mockSoClient.find
-        .mockResolvedValueOnce({ total: 0 } as any) // updated
-        .mockResolvedValueOnce({ total: 11 } as any); // total
-      const { hasParamsChanges } = await task.hasAnyParamChanged({
-        soClient: mockSoClient as any,
-        lastStartedAt: '...',
-        lastTotalParams: 10,
-      });
-      expect(hasParamsChanges).toBe(true);
-    });
-
-    it('returns false if no changes are detected', async () => {
-      mockSoClient.find
-        .mockResolvedValueOnce({ total: 0 } as any) // updated
-        .mockResolvedValueOnce({ total: 10 } as any); // total
-      const { hasParamsChanges } = await task.hasAnyParamChanged({
-        soClient: mockSoClient as any,
-        lastStartedAt: '...',
-        lastTotalParams: 10,
-      });
-      expect(hasParamsChanges).toBe(false);
+      expect(res.hasMWsChanged).toBe(false);
     });
   });
 
   describe('hasMWsChanged', () => {
     it('returns true if updated MWs are found', async () => {
-      mockSoClient.find
-        .mockResolvedValueOnce({ total: 1 } as any) // updated
-        .mockResolvedValueOnce({ total: 5 } as any); // total
+      // mock maintenance window client to return an updated MW
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockReturnValue([{ id: 'mw-1', updatedAt: '2024-01-02T00:00:00.000Z' }]);
+
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
-        lastStartedAt: '...',
-        lastTotalMWs: 5,
+        lastStartedAt: '2024-01-01T00:00:00.000Z',
+        taskState: {
+          lastTotalMWs: 5,
+        } as any,
+        monitorMwsIds: ['mw-1'],
       });
       expect(hasMWsChanged).toBe(true);
     });
 
-    it('returns true if total number of MWs changed', async () => {
-      mockSoClient.find
-        .mockResolvedValueOnce({ total: 0 } as any) // updated
-        .mockResolvedValueOnce({ total: 6 } as any); // total
+    it('returns true if total number of MWs changed (missing ids)', async () => {
+      //  returns no maintenance windows -> missing ids detected
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockReturnValue([]);
+
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
         lastStartedAt: '...',
-        lastTotalMWs: 5,
+        taskState: {
+          lastTotalMWs: 5,
+        } as any,
+        monitorMwsIds: ['missing-mw'],
       });
       expect(hasMWsChanged).toBe(true);
     });
 
     it('returns false if no changes are detected', async () => {
-      mockSoClient.find
-        .mockResolvedValueOnce({ total: 0 } as any) // updated
-        .mockResolvedValueOnce({ total: 5 } as any); // total
+      // bulkGet returns MWs updated before lastStartedAt and all ids present
+
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockReturnValue([{ id: 'mw-1', updatedAt: '2023-01-01T00:00:00.000Z' }]);
+
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
-        lastStartedAt: '...',
-        lastTotalMWs: 5,
+        lastStartedAt: '2023-02-01T00:00:00.000Z',
+        taskState: {
+          lastTotalMWs: 5,
+        } as any,
+        monitorMwsIds: ['mw-1'],
       });
       expect(hasMWsChanged).toBe(false);
     });
@@ -399,11 +387,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const mockAllPrivateLocations = [{ id: 'pl-1', name: 'Private Location 1' }];
 
       // Mocking the return of getAllMonitorConfigs
-      jest.spyOn(task, 'getAllMonitorConfigs').mockResolvedValue({
+      jest.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
         configsBySpaces: {
           space1: [{ id: 'm1', locations: [{ name: 'pl-1', isServiceManaged: false }] }],
         },
-        spaceIds: new Set(['space1']),
+        monitorSpaceIds: new Set(['space1']),
         paramsBySpace: { space1: { global: 'param' } },
         maintenanceWindows: [],
       } as any);
@@ -412,13 +400,14 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .spyOn(task, 'parseLocations')
         .mockReturnValue({ privateLocations: ['pl-1'], publicLocations: [] } as any);
 
-      await task.syncGlobalParams({
+      await task.deployPackagePolicies.syncAllPackagePolicies({
         allPrivateLocations: mockAllPrivateLocations as any,
-        encryptedSavedObjects: mockEncryptedSoClient as any,
         soClient: mockSoClient as any,
+        spaceIdToSync: 'space1',
+        encryptedSavedObjects: mockEncryptedSoClient as any,
       });
 
-      expect(task.getAllMonitorConfigs).toHaveBeenCalled();
+      expect(task.deployPackagePolicies.getAllMonitorConfigs).toHaveBeenCalled();
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).toHaveBeenCalledWith(
         expect.any(Array),
         mockAllPrivateLocations,
@@ -428,7 +417,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('should not call editMonitors if no monitors are on private locations', async () => {
-      jest.spyOn(task, 'getAllMonitorConfigs').mockResolvedValue({
+      jest.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
         configsBySpaces: {
           space1: [{ id: 'm1', locations: [] }],
         },
@@ -442,10 +431,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .spyOn(task, 'parseLocations')
         .mockReturnValue({ privateLocations: [], publicLocations: [] } as any);
 
-      await task.syncGlobalParams({
+      await task.deployPackagePolicies.syncAllPackagePolicies({
         allPrivateLocations: [],
         soClient: mockSoClient as any,
         encryptedSavedObjects: mockEncryptedSoClient as any,
+        spaceIdToSync: 'space1',
       });
 
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
@@ -492,6 +482,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
                 attributes: {
                   origin: 'ui',
                   locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
                 },
                 namespaces: ['space1'],
               },
@@ -506,7 +497,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder);
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
-        mockTaskManager as unknown as TaskManagerSetupContract,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
       );
     });
@@ -519,10 +509,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
-      expect(result.performSync).toBe(false);
+      expect(result.performCleanupSync).toBe(false);
     });
 
-    it('should delete unexpected policies and set performSync true', async () => {
+    it('should delete unexpected policies and set performCleanupSync true', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
           yield ['monitor1-loc1-space1', 'unexpected-policy'];
@@ -535,43 +525,43 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ['unexpected-policy'],
         { force: true, spaceIds: ['*'] }
       );
-      expect(result.performSync).toBe(true);
+      expect(result.performCleanupSync).toBe(true);
     });
 
-    it('should set performSync true if expected policies are missing', async () => {
+    it('should set performCleanupSync true if expected policies are missing', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
           yield [];
         })()
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
-      expect(result.performSync).toBe(true);
+      expect(result.performCleanupSync).toBe(true);
     });
 
-    it('should handle errors gracefully and return performSync', async () => {
+    it('should handle errors gracefully and return performCleanupSync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockLogger.error).toHaveBeenCalled();
-      expect(result).toHaveProperty('performSync');
+      expect(result).toHaveProperty('performCleanupSync');
     });
 
     it('should skip cleanup if hasAlreadyDoneCleanup is true', async () => {
       const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(result.performSync).toBe(false);
+      expect(result.performCleanupSync).toBe(false);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as it has already been done once'
+        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as it has already been done once'
       );
     });
 
     it('should skip cleanup if maxCleanUpRetries is 0 or less', async () => {
       const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(result.performSync).toBe(false);
+      expect(result.performCleanupSync).toBe(false);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
       expect(state.maxCleanUpRetries).toBe(3);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached'
+        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
       );
     });
 
@@ -581,14 +571,177 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 2 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(state.maxCleanUpRetries).toBe(1);
-      expect(result).toHaveProperty('performSync');
+      expect(result).toHaveProperty('performCleanupSync');
       // Call again to reach 0
       await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
       expect(state.maxCleanUpRetries).toBe(3);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached'
+        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
       );
+    });
+  });
+
+  describe('resolveSyncInterval', () => {
+    it('should use configured interval from dynamic settings', async () => {
+      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+        privateLocationsSyncInterval: 10,
+      });
+
+      const taskInstance = getMockTaskInstance();
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.schedule).toEqual({ interval: '10m' });
+    });
+
+    it('should fall back to default when dynamic settings read fails', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockRejectedValue(new Error('SO not found'));
+
+      const taskInstance = getMockTaskInstance();
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+    });
+
+    it('should fall back to task schedule interval when settings read fails', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockRejectedValue(new Error('SO not found'));
+
+      const taskInstance = {
+        ...getMockTaskInstance(),
+        schedule: { interval: '15m' },
+      };
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.schedule).toEqual({ interval: '15m' });
+    });
+
+    it('should use default when privateLocationsSyncInterval is not set in dynamic settings', async () => {
+      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+        privateLocationsSyncInterval: undefined,
+      });
+
+      const taskInstance = getMockTaskInstance();
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+    });
+
+    it('should follow full fallback chain: dynamic settings -> task schedule -> default', async () => {
+      const { savedObjects } = mockServerSetup.coreStart;
+
+      // Scenario 1: Dynamic settings has a valid value — uses it regardless of schedule
+      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+        privateLocationsSyncInterval: 7,
+      });
+      const taskWithSchedule = {
+        ...getMockTaskInstance(),
+        schedule: { interval: '15m' },
+      };
+      const result1 = await task.resolveSyncInterval(savedObjects, taskWithSchedule);
+      expect(result1).toBe('7m');
+
+      // Scenario 2: Dynamic settings read fails — falls back to task's current schedule
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockRejectedValue(new Error('SO read error'));
+      const result2 = await task.resolveSyncInterval(savedObjects, taskWithSchedule);
+      expect(result2).toBe('15m');
+
+      // Scenario 3: Dynamic settings read fails and no schedule on task — falls back to default
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockRejectedValue(new Error('SO read error'));
+      const result3 = await task.resolveSyncInterval(savedObjects, getMockTaskInstance());
+      expect(result3).toBe(DEFAULT_TASK_SCHEDULE);
+
+      // Scenario 4: Dynamic settings returns undefined for the interval — falls back to schedule then default
+      jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+        ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+        privateLocationsSyncInterval: undefined,
+      });
+      const result4 = await task.resolveSyncInterval(savedObjects, getMockTaskInstance());
+      expect(result4).toBe(DEFAULT_TASK_SCHEDULE);
+    });
+  });
+
+  // Replace old monitorsHaveMaintenanceWindows tests with fetchMonitorMwsIds tests
+  describe('fetchMonitorMwsIds', () => {
+    it('returns the combined unique ids from monitor and legacy aggregations', async () => {
+      mockSoClient.find.mockResolvedValue({
+        aggregations: {
+          monitorMws: { buckets: [{ key: 'a' }, { key: 'b' }] },
+          legacyMonitorsMws: { buckets: [{ key: 'b' }, { key: 'c' }] },
+        },
+      } as any);
+
+      const res = await task.fetchMonitorMwsIds(mockSoClient as any);
+      expect(res).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.anything(),
+          perPage: 0,
+          namespaces: [expect.any(String)],
+          aggs: expect.any(Object),
+        })
+      );
+    });
+
+    it('returns empty array when aggregations are missing', async () => {
+      mockSoClient.find.mockResolvedValue({} as any);
+
+      const res = await task.fetchMonitorMwsIds(mockSoClient as any);
+      expect(res).toEqual([]);
     });
   });
 });

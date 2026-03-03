@@ -24,9 +24,10 @@ import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
+  ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
-import type { LensApiState } from '../schema';
+import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 import type { LensApiFilterType } from '../schema/filter';
@@ -77,7 +78,7 @@ describe('getDatasetIndex', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "index": "test_index",
-        "timeFieldName": "@timestamp",
+        "timeFieldName": undefined,
       }
     `);
   });
@@ -135,6 +136,98 @@ describe('addLayerColumn', () => {
       }
     `);
   });
+
+  test('adds column with reference column', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'counter_rate',
+      label: 'Counter rate',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'max',
+      sourceField: 'bytes',
+      label: 'Max of bytes',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn]);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric', 'metric_reference']);
+  });
+
+  test('adds reference column to the beginning when first=true', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: ['existing'],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'cumulative_sum',
+      label: 'Cumulative sum',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'sales',
+      label: 'Sum of sales',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], true);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
+  });
+
+  test('adds column with postfix and reference', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'moving_average',
+      label: 'Moving average',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'count',
+      label: 'Sum of count',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+
+    expect(layer.columns.metric_trendline).toBeDefined();
+    expect(layer.columns.metric_trendline_reference).toBeDefined();
+    expect(layer.columns.metric_trendline).toHaveProperty('references', [
+      'metric_trendline_reference',
+    ]);
+    expect(layer.columnOrder).toEqual(['metric_trendline', 'metric_trendline_reference']);
+  });
 });
 
 describe('buildDatasourceStates', () => {
@@ -147,13 +240,16 @@ describe('buildDatasourceStates', () => {
           type: 'esql',
           query: 'from test | limit 10',
         },
-        metric: {
-          operation: 'value',
-          label: 'test',
-          column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
-        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'value',
+            label: 'test',
+            column: 'test',
+            fit: false,
+            alignments: { labels: 'left', value: 'left' },
+          },
+        ],
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -176,7 +272,7 @@ describe('buildDatasourceStates', () => {
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
-                "timeField": "@timestamp",
+                "timeField": undefined,
               },
             },
           },
@@ -184,7 +280,7 @@ describe('buildDatasourceStates', () => {
         "usedDataviews": Object {
           "layer_0": Object {
             "index": "test",
-            "timeFieldName": "@timestamp",
+            "timeFieldName": undefined,
             "type": "adHocDataView",
           },
         },
@@ -272,6 +368,7 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       textBasedLayer,
+      'layer_0',
       {},
       [],
       [
@@ -280,8 +377,7 @@ describe('buildDatasetState', () => {
           id: 'my-index',
           name: 'indexpattern-datasource-layer-layer_0',
         },
-      ],
-      'layer_0'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -298,7 +394,7 @@ describe('buildDatasetState', () => {
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, {}, [], [], 'layer_0');
+    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "id": "my-dataview-id",
@@ -316,13 +412,14 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       formBasedLayer,
+      'layer_1',
       {
         'my-adhoc-dataview-id': {
-          id: 'test-id',
+          index: 'test-id',
           title: 'my-adhoc-dataview-id',
           timeFieldName: '@timestamp',
         },
-      },
+      } as Record<string, unknown>,
       [],
       [
         {
@@ -330,8 +427,7 @@ describe('buildDatasetState', () => {
           id: 'my-adhoc-dataview-id',
           name: 'indexpattern-datasource-layer-layer_1',
         },
-      ],
-      'layer_1'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -370,7 +466,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_1', options);
 
@@ -389,7 +485,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_0', options);
 
@@ -415,13 +511,16 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -435,9 +534,7 @@ describe('filtersAndQueryToLensState', () => {
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
     expect(result.filters).toHaveLength(2);
     for (const [index, filter] of Object.entries(result.filters ?? [])) {
-      expect(filter).toEqual(
-        expect.objectContaining({ query: apiState.filters?.[index as unknown as number] })
-      );
+      expect(filter).toEqual({ meta: {}, ...apiState.filters?.[index as unknown as number] });
     }
   });
 
@@ -449,13 +546,16 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
     };
@@ -463,7 +563,6 @@ describe('filtersAndQueryToLensState', () => {
     const result = filtersAndQueryToLensState(apiState);
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
-    expect(result).not.toHaveProperty('filters');
   });
 });
 
@@ -492,12 +591,10 @@ describe('filtersAndQueryToApiFormat', () => {
         "filters": Array [
           Object {
             "language": "kuery",
-            "meta": Object {},
             "query": "category: \\"electronics\\"",
           },
           Object {
             "language": "lucene",
-            "meta": Object {},
             "query": "price:[100 TO *]",
           },
         ],

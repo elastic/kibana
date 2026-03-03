@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { DEFAULT_TIMEOUT_MS, OPENAI_CONNECTOR_ID } from '../../../common/openai/constants';
+import {
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_MODEL,
+  CONNECTOR_ID,
+  OpenAiProviderType,
+  RunActionResponseSchema,
+} from '@kbn/connector-schemas/openai';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { DEFAULT_OPENAI_MODEL } from '../../../common/openai/constants';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { OpenAIConnector } from './openai';
-import { OpenAiProviderType } from '../../../common/openai/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { RunActionResponseSchema } from '../../../common/openai/schema';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -62,11 +65,11 @@ describe('OpenAI with proxy config', () => {
 
   const connector = new OpenAIConnector({
     configurationUtilities,
-    connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: {
       apiUrl: 'https://api.openai.com/v1/chat/completions',
       apiProvider: OpenAiProviderType.OpenAi,
-      defaultModel: DEFAULT_OPENAI_MODEL,
+      defaultModel: DEFAULT_MODEL,
       organizationId: 'org-id',
       projectId: 'proj-id',
       headers: {
@@ -125,7 +128,7 @@ describe('OpenAI with proxy config', () => {
         data: JSON.stringify({
           ...sampleOpenAiBody,
           stream: false,
-          model: DEFAULT_OPENAI_MODEL,
+          model: DEFAULT_MODEL,
         }),
         headers: {
           Authorization: 'Bearer 123',

@@ -12,7 +12,6 @@ import type { ForwardedRef, ReactNode } from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 
 import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
@@ -30,7 +29,10 @@ export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
   isCurrent?: boolean;
   isHighlighted: boolean;
   isHorizontal?: boolean;
+  isNew: boolean;
   onClick?: () => void;
+  'aria-posinset'?: number;
+  'aria-setsize'?: number;
 }
 
 export const PrimaryMenuItem = forwardRef<
@@ -49,6 +51,7 @@ export const PrimaryMenuItem = forwardRef<
       isCurrent,
       isHighlighted,
       isHorizontal,
+      isNew,
       ...props
     },
     ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
@@ -68,28 +71,17 @@ export const PrimaryMenuItem = forwardRef<
       gap: ${euiTheme.size.xs};
     `;
 
-    const badgeLabel =
-      badgeType === 'beta'
-        ? i18n.translate('core.ui.chrome.sideNavigation.betaTooltipLabel', {
-            defaultMessage: 'Beta',
-          })
-        : badgeType === 'techPreview'
-        ? i18n.translate('core.ui.chrome.sideNavigation.techPreviewTooltipLabel', {
-            defaultMessage: 'Tech preview',
-          })
-        : undefined;
-
-    const getLabelWithBeta = (label: ReactNode) => (
+    const getBadgeContent = (label?: ReactNode) => (
       <div css={betaContentStyles}>
-        <span>{label}</span>
+        {label && <span>{label}</span>}
         {badgeType && <BetaBadge type={badgeType} isInverted />}
       </div>
     );
 
     const getTooltipContent = () => {
       if (hasContent) return null;
-      if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
-      if (!isCollapsed && badgeType) return getLabelWithBeta(badgeLabel ? badgeLabel : children);
+      if (isCollapsed) return badgeType ? getBadgeContent(children) : children;
+      if (!isCollapsed && badgeType) return getBadgeContent();
 
       return null;
     };
@@ -105,6 +97,7 @@ export const PrimaryMenuItem = forwardRef<
         isCurrent={isCurrent}
         isHighlighted={isHighlighted}
         isLabelVisible={!isCollapsed}
+        isNew={isNew}
         ref={ref}
         {...props}
       >

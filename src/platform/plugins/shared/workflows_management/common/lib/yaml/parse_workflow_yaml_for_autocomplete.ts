@@ -8,7 +8,7 @@
  */
 
 import { WorkflowSchemaForAutocomplete } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { InvalidYamlSchemaError } from '../errors';
 import { formatZodError } from '../zod/format_zod_error';
@@ -16,10 +16,7 @@ import { formatZodError } from '../zod/format_zod_error';
 export function parseWorkflowYamlForAutocomplete(
   yamlString: string
 ):
-  | z.SafeParseReturnType<
-      z.input<typeof WorkflowSchemaForAutocomplete>,
-      z.output<typeof WorkflowSchemaForAutocomplete>
-    >
+  | z.ZodSafeParseResult<z.input<typeof WorkflowSchemaForAutocomplete>>
   | { success: false; error: Error } {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
   if (!parseResult.success) {

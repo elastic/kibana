@@ -17,7 +17,8 @@ export const getDetectionsAdmin: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV4: ['all', 'global_artifact_management_all', 'endpoint_exceptions_all'],
+          siemV5: ['all', 'global_artifact_management_all', 'endpoint_exceptions_all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

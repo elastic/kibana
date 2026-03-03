@@ -5,7 +5,7 @@
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -21,7 +21,6 @@
     "@kbn/language-documentation",
     "@kbn/test-jest-helpers",
     "@kbn/data-plugin",
-    "@kbn/index-management-shared-types",
     "@kbn/code-editor",
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-utils",
@@ -31,14 +30,22 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/esql-types",
-    "@kbn/field-types",
     "@kbn/i18n-react",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/restorable-state",
     "@kbn/licensing-types",
     "@kbn/index-editor",
-    "@kbn/react-hooks"
-  ],
+    "@kbn/react-hooks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/kql",
+    "@kbn/ebt-tools",
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types",
+    "@kbn/aiops-utils",
+    "@kbn/esql-resource-browser",
+    "@kbn/projects-solutions-groups",
+    "@kbn/data-views-plugin"  ],
   "exclude": [
     "target/**/*",
   ]

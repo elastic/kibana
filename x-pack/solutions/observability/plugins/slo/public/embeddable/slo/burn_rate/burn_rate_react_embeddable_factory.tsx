@@ -7,7 +7,7 @@
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -43,24 +43,19 @@ export const getBurnRateEmbeddableFactory = ({
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(
-        initialState.rawState,
-        {
-          sloId: '',
-          sloInstanceId: '',
-          duration: '',
-        }
-      );
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(initialState, {
+        sloId: '',
+        sloInstanceId: '',
+        duration: '',
+      });
       const reload$ = new Subject<boolean>();
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloBurnRateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloBurnRateManager.getLatestState(),
         };
       }
 
@@ -76,8 +71,8 @@ export const getBurnRateEmbeddableFactory = ({
           duration: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          sloBurnRateManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          sloBurnRateManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
         },
       });
 

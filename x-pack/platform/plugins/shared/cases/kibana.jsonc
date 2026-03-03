@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/cases-plugin",
-  "owner": [
-    "@elastic/kibana-cases"
-  ],
+  "owner": ["@elastic/kibana-cases"],
   "group": "platform",
   "visibility": "shared",
   "description": "The Case management system in Kibana",
@@ -11,10 +9,7 @@
     "id": "cases",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "cases"
-    ],
+    "configPath": ["xpack", "cases"],
     "requiredPlugins": [
       "alerting",
       "actions",
@@ -31,24 +26,11 @@
       "ruleRegistry",
       "files",
       "contentManagement",
-      "uiActions"
+      "uiActions",
+      "workflowsExtensions"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "home",
-      "taskManager",
-      "usageCollection",
-      "spaces",
-      "serverless"
-    ],
-    "requiredBundles": [
-      "esUiShared",
-      "kibanaReact",
-      "kibanaUtils",
-      "savedObjectsFinder"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless"],
+    "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "savedObjectsFinder"],
+    "extraPublicDirs": ["common"]
   }
 }

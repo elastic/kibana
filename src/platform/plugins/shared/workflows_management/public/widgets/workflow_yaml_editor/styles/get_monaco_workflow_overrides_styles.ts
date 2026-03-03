@@ -26,6 +26,10 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       max-height: 400px;
       font-size: 13px;
       z-index: 999;
+      border-radius: 6px !important;
+      ${euiShadow(euiThemeContext, 'm')}
+      border-width: 0 !important;
+      overflow: hidden !important;
     }
 
     .monaco-editor

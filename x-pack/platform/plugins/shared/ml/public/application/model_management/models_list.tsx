@@ -72,6 +72,7 @@ import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
 import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
+import { SynchronizeSavedObjectsButton } from '../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -609,6 +610,9 @@ export const ModelsList: FC<Props> = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
+            <SynchronizeSavedObjectsButton refreshJobs={fetchModels} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               iconType={'plusInCircle'}
@@ -649,6 +653,9 @@ export const ModelsList: FC<Props> = ({
             onTableChange={onTableChange}
             sorting={sorting}
             data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+            tableCaption={i18n.translate('xpack.ml.trainedModels.modelsList.modelsTableCaption', {
+              defaultMessage: 'Trained models',
+            })}
             childrenBetween={
               isElserCalloutVisible ? (
                 <>

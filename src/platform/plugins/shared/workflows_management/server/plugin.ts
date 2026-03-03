@@ -15,18 +15,18 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import type { WorkflowsManagementConfig } from './config';
-
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
+  WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
   WorkflowsServerPluginStart,
@@ -36,6 +36,7 @@ import { registerUISettings } from './ui_settings';
 import { defineRoutes } from './workflows_management/routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
+import { stepSchemas } from '../common/step_schemas';
 // Import the workflows connector
 
 export class WorkflowsPlugin
@@ -48,7 +49,6 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
@@ -56,7 +56,6 @@ export class WorkflowsPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -65,7 +64,7 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    registerUISettings({ uiSettings: core.uiSettings });
+    registerUISettings(core, plugins);
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
@@ -77,19 +76,9 @@ export class WorkflowsPlugin
             throw new Error('Workflows management API not initialized');
           }
 
-          // Get the workflow first
+          // Get the workflow and validate it is in a runnable state
           const workflow = await this.api.getWorkflow(workflowId, spaceId);
-          if (!workflow) {
-            throw new Error(`Workflow not found: ${workflowId}`);
-          }
-
-          if (!workflow.definition) {
-            throw new Error(`Workflow definition not found: ${workflowId}`);
-          }
-
-          if (!workflow.valid) {
-            throw new Error(`Workflow is not valid: ${workflowId}`);
-          }
+          validateWorkflowForExecution(workflow, workflowId);
 
           const workflowToRun: WorkflowExecutionEngineModel = {
             id: workflow.id,
@@ -104,8 +93,44 @@ export class WorkflowsPlugin
         };
       };
 
+      // Create workflows scheduling service function for per-alert execution
+      const getScheduleWorkflowService = async (request: KibanaRequest) => {
+        return async (
+          workflowId: string,
+          spaceId: string,
+          inputs: Record<string, unknown>,
+          triggeredBy: TriggerType
+        ) => {
+          if (!this.api) {
+            throw new Error('Workflows management API not initialized');
+          }
+
+          // Get the workflow and validate it is in a runnable state
+          const workflow = await this.api.getWorkflow(workflowId, spaceId);
+          validateWorkflowForExecution(workflow, workflowId);
+
+          const workflowToSchedule: WorkflowExecutionEngineModel = {
+            id: workflow.id,
+            name: workflow.name,
+            enabled: workflow.enabled,
+            definition: workflow.definition,
+            yaml: workflow.yaml,
+          };
+
+          return this.api.scheduleWorkflow(
+            workflowToSchedule,
+            spaceId,
+            inputs,
+            triggeredBy,
+            request
+          );
+        };
+      };
+
       // Register the workflows connector
-      plugins.actions.registerType(getWorkflowsConnectorType({ getWorkflowsService }));
+      plugins.actions.registerType(
+        getWorkflowsConnectorType({ getWorkflowsService, getScheduleWorkflowService })
+      );
 
       // Register connector adapter for alerting if available
       if (plugins.alerting) {
@@ -116,35 +141,24 @@ export class WorkflowsPlugin
     // Register the workflows management feature and its privileges
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
-    this.logger.debug('Workflows Management: Creating router');
-    const router = core.http.createRouter();
-
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    // Get ES client from core
-    const esClientPromise = core
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
+    const getPluginsStart = () => core.getStartServices().then(([, pluginsStart]) => pluginsStart);
     const getWorkflowExecutionEngine = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.workflowsExecutionEngine);
+      getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
 
-    // Create function to get actions client (available after start)
-    const getActionsStart = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.actions);
+    this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
 
-    this.workflowsService = new WorkflowsService(
-      esClientPromise,
-      this.logger,
-      this.config.logging.console,
-      getActionsStart
-    );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
     if (!this.spaces) {
       throw new Error('Spaces service not initialized');
     }
+
+    this.logger.debug('Workflows Management: Creating router');
+    const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
     defineRoutes(router, this.api, this.logger, this.spaces);
@@ -155,7 +169,9 @@ export class WorkflowsPlugin
   }
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
-    this.logger.info('Workflows Management: Start');
+    this.logger.debug('Workflows Management: Start');
+
+    stepSchemas.initialize(plugins.workflowsExtensions);
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
@@ -171,7 +187,7 @@ export class WorkflowsPlugin
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
-    this.logger.info('Workflows Management: Started');
+    this.logger.debug('Workflows Management: Started');
 
     return {};
   }

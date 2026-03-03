@@ -7,30 +7,20 @@
 
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { useMemo } from 'react';
-import {
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
-  DEFAULT_AI_CONNECTOR,
-} from '../../../common/constants';
 import { useAIConnectors } from './use_ai_connectors';
 import { useKibana } from '../lib/kibana';
 
 export const useDefaultAIConnectorId = () => {
-  const { settings, uiSettings, featureFlags } = useKibana().services;
+  const { settings } = useKibana().services;
 
   const { aiConnectors: connectors, isLoading: isLoadingConnectors } = useAIConnectors();
-  const legacyDefaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
-  const useNewDefaultConnector = featureFlags.getBooleanValue(
-    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
-  );
-  const newDefaultConnectorId = getDefaultConnector(connectors, settings)?.id;
+  const defaultConnectorId = getDefaultConnector(connectors, settings)?.id;
 
   return useMemo(
     () => ({
-      defaultConnectorId: useNewDefaultConnector ? newDefaultConnectorId : legacyDefaultConnectorId,
+      defaultConnectorId,
       isLoading: isLoadingConnectors,
     }),
-    [useNewDefaultConnector, newDefaultConnectorId, legacyDefaultConnectorId, isLoadingConnectors]
+    [defaultConnectorId, isLoadingConnectors]
   );
 };

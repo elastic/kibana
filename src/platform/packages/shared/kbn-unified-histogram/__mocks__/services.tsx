@@ -22,7 +22,16 @@ dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
 dataPlugin.query.timefilter.timefilter = {
   ...dataPlugin.query.timefilter.timefilter,
   calculateBounds: jest.fn((timeRange) => calculateBounds(timeRange)),
+  getTimeDefaults: jest.fn(() => ({
+    from: 'now-15m',
+    to: 'now',
+  })),
 };
+
+dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({
+  query: '',
+  language: 'kuery',
+}));
 
 export const unifiedHistogramServicesMock = {
   data: dataPlugin,

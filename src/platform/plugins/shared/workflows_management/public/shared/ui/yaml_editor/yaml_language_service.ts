@@ -13,7 +13,7 @@ import { configureMonacoYamlSchema } from '@kbn/monaco';
 // Default options for Monaco YAML
 const defaultMonacoYamlOptions: MonacoYamlOptions = {
   completion: true, // Enable schema-based completions from monaco-yaml until we re-implement 'with' block completions in our own provider
-  hover: false, // hover is handled by the custom providers
+  hover: true, // hover is handled by the custom providers
   validate: true, // Keep validation
 };
 

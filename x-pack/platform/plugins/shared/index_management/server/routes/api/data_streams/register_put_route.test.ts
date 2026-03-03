@@ -15,15 +15,23 @@ describe('registerPutDataStreamFailureStore', () => {
   let router: RouterMock;
   let updateDataStreamOptions: jest.Mock;
 
-  beforeEach(() => {
+  const setupRouter = (configOverrides = {}) => {
     router = new RouterMock();
     const mockDependencies = {
       ...routeDependencies,
       router,
+      config: {
+        ...routeDependencies.config,
+        ...configOverrides,
+      },
     };
 
     registerPutDataStreamFailureStore(mockDependencies);
     updateDataStreamOptions = router.getMockESApiFn('indices.putDataStreamOptions');
+  };
+
+  beforeEach(() => {
+    setupRouter();
   });
 
   afterEach(() => {
@@ -221,5 +229,43 @@ describe('registerPutDataStreamFailureStore', () => {
     updateDataStreamOptions.mockRejectedValue(error);
 
     await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+  });
+
+  it('should disable failure store retention', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: true, retentionDisabled: true },
+    };
+
+    updateDataStreamOptions.mockResolvedValue({ success: true });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      { name: 'test-stream', failure_store: { enabled: true, lifecycle: { enabled: false } } },
+      { meta: true }
+    );
+    expect(res).toEqual({ body: { success: true } });
+  });
+
+  it('should not disable failure store retention if enableFailureStoreRetentionDisabling is false', async () => {
+    setupRouter({ enableFailureStoreRetentionDisabling: false });
+
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: true, retentionDisabled: true },
+    };
+
+    updateDataStreamOptions.mockResolvedValue({ success: true });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      { name: 'test-stream', failure_store: { enabled: true } },
+      { meta: true }
+    );
+    expect(res).toEqual({ body: { success: true } });
   });
 });

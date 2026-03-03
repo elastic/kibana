@@ -23,6 +23,8 @@
         "label": "pluginServiceMock",
         "description": [],
         "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => PluginsServiceMock"
             ],
             "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -90,6 +98,8 @@
               "InternalPluginsServiceSetup"
             ],
             "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -107,6 +117,8 @@
               "InternalPluginsServiceStart"
             ],
             "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -123,6 +135,8 @@
               "() => { browserConfigs: Map<any, any>; internal: Map<any, any>; public: Map<any, any>; }"
             ],
             "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

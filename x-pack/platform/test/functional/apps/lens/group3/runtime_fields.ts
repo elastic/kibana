@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.dragFieldToWorkspace('runtimefield');
       });
       await lens.waitForVisualization();
-      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield');
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 9 values of runtimefield');
       expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
 
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsDatatable_rows > lns-dimensionTrigger'
       );
       await lens.waitForVisualization();
-      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield2');
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 9 values of runtimefield2');
       expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
 

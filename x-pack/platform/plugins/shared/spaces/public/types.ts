@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 
-import type { TourManagerContract } from './nav_control/solution_view_tour';
 import type { SpacesApiUi } from './ui_api';
 import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
 
@@ -66,11 +65,6 @@ export interface SpacesApi {
    * Indicates whether the solution view is enabled.
    */
   isSolutionViewEnabled: boolean;
-
-  /**
-   * Manages the state of the solution view tour.
-   */
-  solutionViewTourManager: TourManagerContract;
 }
 
 /**

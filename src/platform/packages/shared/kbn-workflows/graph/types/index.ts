@@ -10,14 +10,18 @@
 export type {
   AtomicGraphNode,
   AtomicGraphNodeSchema,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
+  DataSetGraphNode,
+  DataSetGraphNodeSchema,
   WaitGraphNode,
   WaitGraphNodeSchema,
   ElasticsearchGraphNode,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
   KibanaGraphNodeSchema,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -66,9 +70,9 @@ export type { WorkflowGraphType } from './graph';
 
 export {
   isAtomic,
+  isDataSet,
   isElasticsearch,
   isKibana,
-  isHttp,
   isWait,
   isEnterForeach,
   isEnterIf,

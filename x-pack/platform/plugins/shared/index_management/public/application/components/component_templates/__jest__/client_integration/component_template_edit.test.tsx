@@ -5,72 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
-import type { ComponentTemplateEditTestBed } from './helpers/component_template_edit.helpers';
-import { setup } from './helpers/component_template_edit.helpers';
+import {
+  completeStep,
+  getEnabledNextButton,
+  getVersionSpinButton,
+  renderComponentTemplateEdit,
+} from './helpers/component_template_edit.helpers';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
-        }}
-      />
-    ),
-  };
-});
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj="mockComboBox"
-        onChange={(syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-  };
-});
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
+jest.mock('@kbn/code-editor');
 
 describe('<ComponentTemplateEdit />', () => {
-  let testBed: ComponentTemplateEditTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let coreStart: ReturnType<(typeof coreMock)['createStart']>;
 
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  beforeAll(() => {
+    jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const env = setupEnvironment();
+    httpSetup = env.httpSetup;
+    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
+    coreStart = coreMock.createStart();
+  });
 
   const COMPONENT_TEMPLATE_NAME = 'comp-1';
   const COMPONENT_TEMPLATE_TO_EDIT = {
@@ -81,93 +46,96 @@ describe('<ComponentTemplateEdit />', () => {
     },
   };
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadComponentTemplateResponse(
-      COMPONENT_TEMPLATE_TO_EDIT.name,
-      COMPONENT_TEMPLATE_TO_EDIT
-    );
-    httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
-      data_streams: [],
+  describe('On component mount', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_TO_EDIT.name,
+        COMPONENT_TEMPLATE_TO_EDIT
+      );
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+        data_streams: [],
+      });
+
+      renderComponentTemplateEdit(httpSetup, coreStart);
+      await screen.findByTestId('pageTitle');
     });
 
-    await act(async () => {
-      testBed = await setup(httpSetup);
+    test('updates the breadcrumbs to component templates', () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.componentTemplateEdit
+      );
     });
 
-    testBed.component.update();
-  });
-
-  test('updates the breadcrumbs to component templates', () => {
-    expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
-      IndexManagementBreadcrumb.componentTemplateEdit
-    );
-  });
-
-  test('should set the correct page title', () => {
-    const { exists, find } = testBed;
-
-    expect(exists('pageTitle')).toBe(true);
-    expect(exists('deprecatedTemplateCallout')).toBe(true);
-    expect(find('pageTitle').text()).toEqual(
-      `Edit component template '${COMPONENT_TEMPLATE_NAME}'`
-    );
-  });
-
-  it('should set the name field to read only', () => {
-    const { find } = testBed;
-
-    const nameInput = find('nameField.input');
-    expect(nameInput.props().disabled).toEqual(true);
-  });
-
-  it('should allow to go directly to a step', async () => {
-    await act(async () => {
-      testBed = await setup(httpSetup, '?step=mappings');
+    test('should set the correct page title', () => {
+      expect(screen.getByTestId('pageTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('deprecatedTemplateCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('pageTitle')).toHaveTextContent(
+        `Edit component template '${COMPONENT_TEMPLATE_NAME}'`
+      );
     });
 
-    testBed.component.update();
+    it('should set the name field to read only', () => {
+      const nameRow = screen.getByTestId('nameField');
+      const nameInput = within(nameRow).getByRole('textbox');
+      expect(nameInput).toBeDisabled();
+    });
 
-    expect(testBed.exists('mappingsEditor')).toBe(true);
+    it('should allow to go directly to a step', async () => {
+      renderComponentTemplateEdit(httpSetup, coreStart, '?step=mappings');
+      await screen.findByTestId('mappingsEditor');
+      expect(screen.getByTestId('mappingsEditor')).toBeInTheDocument();
+    });
   });
 
   describe('form payload', () => {
-    it('should send the correct payload with changed values', async () => {
-      const { actions, component, form, coreStart } = testBed;
-
-      await act(async () => {
-        form.setInputValue('versionField.input', '1');
-      });
-
-      await act(async () => {
-        actions.clickNextButton();
-      });
-
-      component.update();
-
-      await actions.completeStepSettings();
-      await actions.completeStepMappings();
-      await actions.completeStepAliases();
-
-      await act(async () => {
-        actions.clickNextButton();
-      });
-
-      component.update();
-
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
-        expect.objectContaining({
-          body: JSON.stringify({
-            ...COMPONENT_TEMPLATE_TO_EDIT,
-            template: {
-              ...COMPONENT_TEMPLATE_TO_EDIT.template,
-            },
-            version: 1,
-          }),
-        })
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_TO_EDIT.name,
+        COMPONENT_TEMPLATE_TO_EDIT
       );
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+        data_streams: [],
+      });
+
+      renderComponentTemplateEdit(httpSetup, coreStart);
+      await screen.findByTestId('pageTitle');
+    });
+
+    it('should send the correct payload with changed values', async () => {
+      const versionInput = getVersionSpinButton();
+      fireEvent.change(versionInput, { target: { value: '1' } });
+
+      const enabledNextButton = getEnabledNextButton();
+      await waitFor(() => expect(enabledNextButton).toBeEnabled());
+      fireEvent.click(enabledNextButton);
+
+      await screen.findByTestId('stepSettings');
+
+      await completeStep.settings();
+      await completeStep.mappings();
+      await completeStep.aliases();
+
+      const submitButton = getEnabledNextButton();
+      await waitFor(() => expect(submitButton).toBeEnabled());
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              ...COMPONENT_TEMPLATE_TO_EDIT,
+              template: {
+                ...COMPONENT_TEMPLATE_TO_EDIT.template,
+              },
+              version: 1,
+            }),
+          })
+        );
+      });
+
       // Mapping rollout modal should not be opened if the component template is not managed
-      expect(coreStart.overlays.openModal).not.toBeCalled();
+      expect(coreStart.overlays.openModal).not.toHaveBeenCalled();
     });
   });
 
@@ -188,11 +156,8 @@ describe('<ComponentTemplateEdit />', () => {
         data_streams: [DATASTREAM_NAME],
       });
 
-      await act(async () => {
-        testBed = await setup(httpSetup, '@custom');
-      });
-
-      testBed.component.update();
+      renderComponentTemplateEdit(httpSetup, coreStart, '@custom');
+      await screen.findByTestId('pageTitle');
     });
 
     it('should show mappings rollover modal on save if apply mappings call failed', async () => {
@@ -201,76 +166,78 @@ describe('<ComponentTemplateEdit />', () => {
         {},
         { message: 'Bad request', statusCode: 400 }
       );
-      const { actions, component, form, coreStart } = testBed;
 
-      await act(async () => {
-        form.setInputValue('versionField.input', '1');
+      const versionInput = getVersionSpinButton();
+      fireEvent.change(versionInput, { target: { value: '1' } });
+
+      const enabledNextButton = getEnabledNextButton();
+      await waitFor(() => expect(enabledNextButton).toBeEnabled());
+      fireEvent.click(enabledNextButton);
+
+      await screen.findByTestId('stepSettings');
+
+      await completeStep.settings();
+      await completeStep.mappings();
+      await completeStep.aliases();
+
+      const submitButton = getEnabledNextButton();
+      await waitFor(() => expect(submitButton).toBeEnabled());
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
+          expect.anything()
+        );
       });
 
-      await act(async () => {
-        actions.clickNextButton();
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
+          expect.anything()
+        );
       });
 
-      component.update();
-
-      await actions.completeStepSettings();
-      await actions.completeStepMappings();
-      await actions.completeStepAliases();
-
-      await act(async () => {
-        actions.clickNextButton();
-      });
-
-      component.update();
-
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
-        expect.anything()
-      );
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
-        expect.anything()
-      );
-
-      expect(coreStart.overlays.openModal).toBeCalled();
+      expect(coreStart.overlays.openModal).toHaveBeenCalled();
     });
 
     it('should not show mappings rollover modal on save if apply mappings call succeed', async () => {
       httpRequestsMockHelpers.setPostDatastreamMappingsFromTemplate(DATASTREAM_NAME, {
         success: true,
       });
-      const { actions, component, form, coreStart } = testBed;
 
-      await act(async () => {
-        form.setInputValue('versionField.input', '1');
+      const versionInput = getVersionSpinButton();
+      fireEvent.change(versionInput, { target: { value: '1' } });
+
+      const enabledNextButton = getEnabledNextButton();
+      await waitFor(() => expect(enabledNextButton).toBeEnabled());
+      fireEvent.click(enabledNextButton);
+
+      await screen.findByTestId('stepSettings');
+
+      await completeStep.settings();
+      await completeStep.mappings();
+      await completeStep.aliases();
+
+      const submitButton = getEnabledNextButton();
+      await waitFor(() => expect(submitButton).toBeEnabled());
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
+          expect.anything()
+        );
       });
 
-      await act(async () => {
-        actions.clickNextButton();
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
+          expect.anything()
+        );
       });
 
-      component.update();
-
-      await actions.completeStepSettings();
-      await actions.completeStepMappings();
-      await actions.completeStepAliases();
-
-      await act(async () => {
-        actions.clickNextButton();
-      });
-
-      component.update();
-
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
-        expect.anything()
-      );
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
-        expect.anything()
-      );
-
-      expect(coreStart.overlays.openModal).not.toBeCalled();
+      expect(coreStart.overlays.openModal).not.toHaveBeenCalled();
     });
 
     it('should show mappings rollover modal on save if referenced index template is managed and packaged', async () => {
@@ -296,52 +263,50 @@ describe('<ComponentTemplateEdit />', () => {
         }
       );
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-
-      testBed.component.update();
+      renderComponentTemplateEdit(httpSetup, coreStart);
+      await screen.findByTestId('pageTitle');
 
       httpRequestsMockHelpers.setPostDatastreamMappingsFromTemplate(
         DATASTREAM_NAME,
         {},
         { message: 'Bad request', statusCode: 400 }
       );
-      const { exists, actions, component, form, coreStart } = testBed;
 
-      await act(async () => {
-        form.setInputValue('versionField.input', '1');
-      });
+      const versionInput = getVersionSpinButton();
+      fireEvent.change(versionInput, { target: { value: '1' } });
 
-      await act(async () => {
-        actions.clickNextButton();
-      });
+      const enabledNextButton = getEnabledNextButton();
+      await waitFor(() => expect(enabledNextButton).toBeEnabled());
+      fireEvent.click(enabledNextButton);
 
-      component.update();
+      await screen.findByTestId('stepSettings');
 
-      await actions.completeStepSettings();
-      await actions.completeStepMappings();
-      await actions.completeStepAliases();
+      await completeStep.settings();
+      await completeStep.mappings();
+      await completeStep.aliases();
 
+      await screen.findByTestId('stepReview');
       // Make sure the list of affected mappings is shown
-      expect(exists('affectedMappingsList')).toBe(true);
+      await screen.findByTestId('affectedMappingsList');
+      expect(screen.getByTestId('affectedMappingsList')).toBeInTheDocument();
 
-      await act(async () => {
-        actions.clickNextButton();
+      const submitButton = getEnabledNextButton();
+      await waitFor(() => expect(submitButton).toBeEnabled());
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        const lastPut = httpSetup.put.mock.calls[httpSetup.put.mock.calls.length - 1];
+        expect(lastPut?.[0]).toContain(`${API_BASE_PATH}/component_templates/`);
       });
 
-      component.update();
+      await waitFor(() => {
+        const lastPost = httpSetup.post.mock.calls[httpSetup.post.mock.calls.length - 1];
+        expect(lastPost?.[0]).toContain(
+          `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`
+        );
+      });
 
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
-        expect.anything()
-      );
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
-        expect.anything()
-      );
-
-      expect(coreStart.overlays.openModal).toBeCalled();
+      expect(coreStart.overlays.openModal).toHaveBeenCalled();
     });
   });
 });

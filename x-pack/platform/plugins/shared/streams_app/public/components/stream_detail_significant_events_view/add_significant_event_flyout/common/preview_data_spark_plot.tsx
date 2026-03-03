@@ -16,15 +16,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-  type StreamQueryKql,
-  type Streams,
-} from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SparkPlot } from '../../../spark_plot';
@@ -41,35 +37,40 @@ export function PreviewDataSparkPlot({
   hideAxis = false,
   height,
   noOfBuckets,
+  timeRange,
 }: {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
   hideAxis?: boolean;
   height?: number;
   noOfBuckets?: number;
+  timeRange?: AbsoluteTimeRange;
 }) {
   const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
+  const effectiveTimeRange = timeRange ?? timeState.asAbsoluteTimeRange;
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    feature: query.feature,
-    kqlQuery: query.kql.query,
-    timeState,
+    esqlQuery: query.esql.query,
+    timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
   });
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([timeState.start, timeState.end]);
-  }, [timeState.start, timeState.end]);
+    return niceTimeFormatter([
+      new Date(effectiveTimeRange.from).getTime(),
+      new Date(effectiveTimeRange.to).getTime(),
+    ]);
+  }, [effectiveTimeRange.from, effectiveTimeRange.to]);
 
   const sparkPlotData = useSparkplotDataFromSigEvents({
     previewFetch,
-    queryValues: query,
+    query,
     xFormatter,
   });
 
@@ -82,16 +83,18 @@ export function PreviewDataSparkPlot({
   } = useKibana();
   const useUrl = share.url.locators.useUrl;
 
+  const discoverEsqlQuery = query.esql.query;
+
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
         query: {
-          esql: isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : '',
+          esql: discoverEsqlQuery,
         },
       },
     }),
-    [definition, query, isQueryValid]
+    [discoverEsqlQuery]
   );
 
   function renderContent() {
@@ -117,12 +120,12 @@ export function PreviewDataSparkPlot({
 
     if (previewFetch.error) {
       if (compressed) {
-        return <EuiIcon type="cross" color="danger" size="l" />;
+        return <EuiIcon type="cross" color="danger" size="l" aria-hidden={true} />;
       }
 
       return (
         <>
-          <EuiIcon type="cross" color="danger" size="xl" />
+          <EuiIcon type="cross" color="danger" size="xl" aria-hidden={true} />
           <EuiText size="s" textAlign="center">
             {i18n.translate(
               'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartError',
@@ -137,7 +140,9 @@ export function PreviewDataSparkPlot({
 
     if (noOccurrencesFound) {
       if (compressed) {
-        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+        return (
+          <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" aria-hidden={true} />
+        );
       }
 
       return (
@@ -183,6 +188,7 @@ export function PreviewDataSparkPlot({
                 iconType="discoverApp"
                 href={discoverLink}
                 target="_blank"
+                data-test-subj="significant_events_preview_open_in_discover_button"
               >
                 {openInDiscoverLabel}
               </EuiButtonEmpty>

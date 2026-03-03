@@ -8,9 +8,10 @@
  */
 
 import type { TabItem } from '@kbn/unified-tabs';
-import { type TabState } from './types';
+import { TabInitializationStatus, type TabState } from './types';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
+  initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
   globalState: {},
   appState: {},
   previousAppState: {},
@@ -22,8 +23,17 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     searchSessionId: undefined,
     isSearchSessionRestored: false,
   },
+  attributes: {
+    visContext: undefined,
+    controlGroupState: undefined,
+    timeRestore: false,
+  },
   overriddenVisContextAfterInvalidation: undefined,
-  controlGroupState: undefined,
+  cascadedDocumentsState: {
+    availableCascadeGroups: [],
+    selectedCascadeGroups: [],
+    cascadedDocumentsMap: {},
+  },
   esqlVariables: [],
   resetDefaultProfileState: {
     resetId: '',
@@ -32,5 +42,6 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     breakdownField: false,
     hideChart: false,
   },
+  expandedDoc: undefined,
   uiState: {},
 };

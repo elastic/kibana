@@ -6,12 +6,10 @@
  */
 
 import type { SPLUNK_DASHBOARD_COLUMNS } from './constants';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import type { DashboardMigrationStats } from '../../types';
 
 export type OnMigrationCreated = (migrationStats: DashboardMigrationStats) => void;
 export type OnResourcesCreated = () => void;
-export type OnMissingResourcesFetched = (missingResources: SiemMigrationResourceBase[]) => void;
 
 export type SplunkDashboardsResult = Partial<{
   preview: boolean;

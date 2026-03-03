@@ -13,12 +13,15 @@ import type {
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
+import {
+  triggersActionsRoute,
+  createRuleFromTemplateRoute,
+  getRuleDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { ruleTemplateMappings } from './rule_template_mappings';
-import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import type { RawRule, RawRuleTemplate } from '../types';
@@ -26,25 +29,23 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
-import {
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../common';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
   adHocRunParamsModelVersions,
   apiKeyPendingInvalidationModelVersions,
-  maintenanceWindowModelVersions,
   ruleModelVersions,
   ruleTemplateModelVersions,
   rulesSettingsModelVersions,
+  gapAutoFillSchedulerModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
+export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
 
-export const RuleAttributesToEncrypt = ['apiKey'];
+export const RuleAttributesToEncrypt = ['apiKey', 'uiamApiKey'];
 
 // Use caution when removing items from this array! These fields
 // are used to construct decryption AAD and must be remain in
@@ -122,6 +123,12 @@ export function setupSavedObjects(
       getTitle(ruleSavedObject: SavedObject<RawRule>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;
       },
+      getInAppUrl: (savedObject: SavedObject<RawRule>) => {
+        return {
+          path: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(savedObject.id))}`,
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
+        };
+      },
       onImport(ruleSavedObjects) {
         return {
           warnings: getImportWarnings(ruleSavedObjects),
@@ -150,9 +157,34 @@ export function setupSavedObjects(
         createdAt: {
           type: 'date',
         },
+        uiamApiKey: {
+          type: 'binary',
+        },
       },
     },
     modelVersions: apiKeyPendingInvalidationModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'single',
+    mappings: {
+      dynamic: false,
+      properties: {
+        name: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+        // For searching by exact (type, consumer) pair
+        ruleTypeConsumerPairs: { type: 'keyword' },
+        createdAt: { type: 'date' },
+        updatedAt: { type: 'date' },
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: gapAutoFillSchedulerModelVersions,
   });
 
   savedObjects.registerType({
@@ -162,15 +194,6 @@ export function setupSavedObjects(
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
     modelVersions: rulesSettingsModelVersions,
-  });
-
-  savedObjects.registerType({
-    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: maintenanceWindowMappings,
-    modelVersions: maintenanceWindowModelVersions,
   });
 
   savedObjects.registerType({
@@ -260,7 +283,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
     attributesToIncludeInAAD: new Set(['createdAt']),
   });
 

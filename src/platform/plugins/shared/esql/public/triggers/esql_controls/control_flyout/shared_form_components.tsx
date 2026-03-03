@@ -254,6 +254,8 @@ export function ControlLabel({
   label: string;
   onLabelChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const theme = useEuiTheme();
+
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.label.label', {
@@ -269,6 +271,9 @@ export function ControlLabel({
         </EuiText>
       }
       fullWidth
+      css={css`
+        margin-block-start: ${theme.euiTheme.size.base};
+      `}
     >
       <EuiFieldText
         placeholder={i18n.translate('esql.flyout.label.placeholder', {

@@ -345,6 +345,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
   isSubtypeCompatible?: (subtype1?: string, subtype2?: string) => boolean;
 
+  isSubtypeSupported?: (subtype: string) => boolean;
+
   /**
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
@@ -377,6 +379,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   setDimension: (
     props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
+  ) => T;
+
+  reorderDimension?: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; targetColumnId: string }
   ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
@@ -533,6 +539,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
 export interface VisualizationState {
   activeId: string | null;
+  selectedLayerId: string | null;
   state: unknown;
 }
 

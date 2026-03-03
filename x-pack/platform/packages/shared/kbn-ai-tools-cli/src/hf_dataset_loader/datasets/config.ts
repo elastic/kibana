@@ -8,11 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { HuggingFaceDatasetSpec } from '../types';
 import {
-  createOneChatDatasetSpec,
-  isOneChatDataset,
-  isOneChatWildcard,
-  listOneChatDatasets,
-} from './onechat';
+  createAgentBuilderDatasetSpec,
+  isAgentBuilderDataset,
+  isAgentBuilderWildcard,
+  listAgentBuilderDatasets,
+} from './agent_builder';
 
 const BEIR_NAMES = [
   'trec-covid',
@@ -103,9 +103,9 @@ async function expandDatasetNames(
 ): Promise<string[]> {
   const expansions = await Promise.all(
     datasetNames.map(async (datasetName) => {
-      if (isOneChatWildcard(datasetName)) {
+      if (isAgentBuilderWildcard(datasetName)) {
         const directory = datasetName.split('/')[1];
-        const datasetsForDirectory = await listOneChatDatasets(directory, accessToken, logger);
+        const datasetsForDirectory = await listAgentBuilderDatasets(directory, accessToken, logger);
         return datasetsForDirectory;
       }
       return [datasetName];
@@ -116,7 +116,7 @@ async function expandDatasetNames(
 }
 
 /**
- * Gets dataset specifications, including dynamically generated OneChat datasets
+ * Gets dataset specifications, including dynamically generated AgentBuilder datasets
  */
 export async function getDatasetSpecs(
   accessToken: string,
@@ -128,8 +128,8 @@ export async function getDatasetSpecs(
 
   const specs: HuggingFaceDatasetSpec[] = [];
   for (const name of expandedNames) {
-    if (isOneChatDataset(name)) {
-      const spec = await createOneChatDatasetSpec(name, accessToken, logger);
+    if (isAgentBuilderDataset(name)) {
+      const spec = await createAgentBuilderDatasetSpec(name, accessToken, logger);
       specs.push(spec);
     } else {
       // Look for static datasets

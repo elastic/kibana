@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
+import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -41,35 +42,6 @@ const preconfiguredActionSchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
-
-const customHostSettingsSchema = schema.object({
-  url: schema.string({ minLength: 1 }),
-  smtp: schema.maybe(
-    schema.object({
-      ignoreTLS: schema.maybe(schema.boolean()),
-      requireTLS: schema.maybe(schema.boolean()),
-    })
-  ),
-  ssl: schema.maybe(
-    schema.object({
-      verificationMode: schema.maybe(
-        schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        )
-      ),
-      certificateAuthoritiesFiles: schema.maybe(
-        schema.oneOf([
-          schema.string({ minLength: 1 }),
-          schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-        ])
-      ),
-      certificateAuthoritiesData: schema.maybe(schema.string({ minLength: 1 })),
-    })
-  ),
-});
-
-export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 const connectorTypeSchema = schema.object({
   id: schema.string(),
@@ -207,6 +179,7 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usage: schema.maybe(
     schema.object({
       url: schema.maybe(schema.string()),

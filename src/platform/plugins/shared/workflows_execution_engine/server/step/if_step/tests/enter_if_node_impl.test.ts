@@ -11,7 +11,7 @@ import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { EnterIfNodeImpl } from '../enter_if_node_impl';
 
 describe('EnterIfNodeImpl', () => {
@@ -40,6 +40,7 @@ describe('EnterIfNodeImpl', () => {
       contextManager: mockContextManager,
       startStep: jest.fn().mockResolvedValue(undefined),
       setInput: jest.fn(),
+      setCurrentStepState: jest.fn(),
     } as any;
 
     node = {
@@ -100,7 +101,37 @@ describe('EnterIfNodeImpl', () => {
       'event.type: alert'
     );
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+      rawCondition: 'event.type: alert',
       condition: 'event.type: foo',
+      conditionResult: false,
+    });
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+      conditionResult: false,
+    });
+  });
+
+  it('should store true conditionResult in step state when condition matches', async () => {
+    await impl.run();
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+      conditionResult: true,
+    });
+  });
+
+  it('should store false conditionResult in step state when condition does not match', async () => {
+    workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+      {
+        id: 'thenNode',
+        type: 'enter-then-branch',
+        condition: 'event.type:rule',
+      } as EnterConditionBranchNode,
+      {
+        id: 'elseNode',
+        type: 'enter-else-branch',
+      } as EnterConditionBranchNode,
+    ]);
+
+    await impl.run();
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
       conditionResult: false,
     });
   });

@@ -9,10 +9,11 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
-import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { isEnterForeach } from '@kbn/workflows/graph';
+import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
-import { getOutputSchemaForStepType } from '../../../../common/schema';
+import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
@@ -20,16 +21,25 @@ export function getStepsCollectionSchema(
   stepName: string
 ) {
   const stepId = getStepId(stepName);
-  const stepNode =
-    workflowExecutionGraph.getNode(stepId) ||
-    workflowExecutionGraph.getNode(`enterForeach_${stepId}`) ||
-    workflowExecutionGraph.getNode(`enterCondition_${stepId}`);
+  const stepNode = workflowExecutionGraph.getStepNode(stepId);
 
   if (!stepNode) {
     throw new Error(`Step with id ${stepId} not found in the workflow graph.`);
   }
-  // reverse predecessors so the earliest steps are first and will be available when we reach the later ones
-  const predecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
+  // Reverse predecessors so the earliest steps are first and will be available when we reach the later ones.
+  // Deduplicate by stepId: structural nodes (enter-if/exit-if, enter-foreach/exit-foreach, etc.)
+  // share the same stepId, and processing both would cause the later one to overwrite the first.
+  // We keep the first occurrence per stepId since the earliest node (e.g. enter-foreach) carries
+  // the configuration needed for special schema handling (like getForeachStateSchema).
+  const allPredecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
+  const seenStepIds = new Set<string>();
+  const predecessors = allPredecessors.filter((node) => {
+    if (seenStepIds.has(node.stepId)) {
+      return false;
+    }
+    seenStepIds.add(node.stepId);
+    return true;
+  });
 
   if (predecessors.length === 0) {
     return z.object({});
@@ -46,7 +56,7 @@ export function getStepsCollectionSchema(
     if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
-          output: getOutputSchemaForStepType(node.stepType).optional(),
+          output: getOutputSchemaForStepType(node).optional(),
           error: z.any().optional(),
         }),
       });

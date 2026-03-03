@@ -52,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboard.waitForRenderComplete();
+      const panelCountBefore = await dashboard.getPanelCount();
 
       await retry.try(async () => {
         const panelCount = await dashboard.getPanelCount();
@@ -73,16 +74,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const valuesQueryEditorValue = await esql.getEsqlEditorQuery();
-      expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
+      expect(valuesQueryEditorValue).to.contain(
+        'FROM logstash-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY geo.dest'
+      );
 
       // create the control
       await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await testSubjects.click('saveEsqlControlsFlyoutButton');
+      // Wait for the control flyout to close before checking panel count,
+      // otherwise waitForRenderComplete may complete based on the old panel count
+      await testSubjects.waitForDeleted('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
-
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);
       });
 
       // Check Lens editor has been updated accordingly
@@ -95,7 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should update the Lens chart accordingly', async () => {
       // now edit the panel and click on Cancel
-      await dashboardPanelActions.clickInlineEdit();
+      const [, secondPanel] = await dashboard.getDashboardPanels();
+      await dashboardPanelActions.clickInlineEdit(secondPanel);
       // change the table to keep only the column with the control
       await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest | KEEP geo.dest'
@@ -120,8 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should handle properly a query to retrieve the values that return more than one column', async () => {
-      const firstId = (await dashboardControls.getAllControlIds())[0];
-      await dashboardControls.editExistingControl(firstId);
+      const [controlPanel] = await dashboard.getDashboardPanels();
+      await dashboardPanelActions.clickInlineEdit(controlPanel);
 
       await esql.waitESQLEditorLoaded();
       await esql.setEsqlEditorQuery('FROM logstash-*');

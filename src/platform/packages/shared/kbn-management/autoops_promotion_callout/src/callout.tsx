@@ -12,12 +12,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
-export type AutoOpsPromotionCalloutProps = EuiCallOutProps;
+export interface AutoOpsPromotionCalloutProps {
+  learnMoreLink: string;
+  cloudConnectUrl?: string;
+  onConnectClick?: (e: React.MouseEvent) => void;
+  hasCloudConnectPermission?: boolean;
+  overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
+}
 
-const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
+export const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
 
 export const AutoOpsPromotionCallout = ({
-  ...overrideCalloutProps
+  learnMoreLink,
+  cloudConnectUrl = '/app/cloud_connect',
+  onConnectClick,
+  hasCloudConnectPermission,
+  overrideCalloutProps = {},
 }: AutoOpsPromotionCalloutProps) => {
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -37,6 +47,19 @@ export const AutoOpsPromotionCallout = ({
     return null;
   }
 
+  // Determine button behavior based on cloudConnect permission
+  const buttonProps =
+    hasCloudConnectPermission === false
+      ? {
+          href: 'https://cloud.elastic.co/connect-cluster-services-portal',
+          target: '_blank' as const,
+          rel: 'noopener noreferrer',
+        }
+      : {
+          href: cloudConnectUrl,
+          onClick: onConnectClick,
+        };
+
   return (
     <EuiCallOut
       title={
@@ -54,14 +77,10 @@ export const AutoOpsPromotionCallout = ({
       <p>
         <FormattedMessage
           id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Connect this cluster to Elastic Cloud to get real-time issue detection, resolution paths, and enable Elastic Support to use AutoOps to assist you better. {learnMoreLink}"
+          defaultMessage="Connect this cluster to AutoOps on Elastic Cloud for simplified monitoring, real-time issue detection, and performance recommendations. {learnMoreLink}"
           values={{
             learnMoreLink: (
-              <a
-                href="https://www.elastic.co/blog/elasticsearch-autoops-on-prem"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={learnMoreLink} target="_blank" rel="noopener noreferrer">
                 <FormattedMessage
                   id="management.autoOpsPromotionCallout.learnMore"
                   defaultMessage="Learn more"
@@ -75,9 +94,8 @@ export const AutoOpsPromotionCallout = ({
         color="accent"
         fill
         size="s"
-        href="https://cloud.elastic.co/connect-cluster-services-portal"
-        target="_blank"
-        rel="noopener noreferrer"
+        {...buttonProps}
+        data-test-subj="autoOpsPromotionCalloutConnectButton"
       >
         <FormattedMessage
           id="management.autoOpsPromotionCallout.openButton"

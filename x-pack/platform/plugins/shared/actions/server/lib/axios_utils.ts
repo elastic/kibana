@@ -6,6 +6,7 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
+import type { Agent } from 'agent-base';
 import type {
   AxiosInstance,
   Method,
@@ -15,11 +16,13 @@ import type {
 } from 'axios';
 import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import type { SSLSettings } from '@kbn/actions-utils';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorUsageCollector, SSLSettings } from '../types';
+import type { ConnectorUsageCollector } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 import { createAndThrowUserError } from './create_and_throw_user_error';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export const request = async <T = unknown>({
   axios,
@@ -32,6 +35,7 @@ export const request = async <T = unknown>({
   sslOverrides,
   timeout,
   connectorUsageCollector,
+  keepAlive,
   ...config
 }: {
   axios: AxiosInstance;
@@ -44,6 +48,11 @@ export const request = async <T = unknown>({
   timeout?: number;
   sslOverrides?: SSLSettings;
   connectorUsageCollector?: ConnectorUsageCollector;
+  /**
+   *  keep-alive is only supported for https connections or proxied http connections
+   *  It will be ignored for non-proxied http connections, this issue is tracked in https://github.com/elastic/kibana/issues/252991
+   **/
+  keepAlive?: boolean;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -56,6 +65,16 @@ export const request = async <T = unknown>({
     url,
     sslOverrides
   );
+
+  if (keepAlive) {
+    if (httpsAgent) {
+      httpsAgent.options.keepAlive = keepAlive;
+    }
+    if (httpAgent) {
+      (httpAgent as Agent).options.keepAlive = keepAlive;
+    }
+  }
+
   const { maxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 
@@ -79,6 +98,7 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
+      beforeRedirect: getBeforeRedirectFn(configurationUtilities),
     });
 
     if (connectorUsageCollector) {

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ProductDocumentationAttributes } from '@kbn/product-doc-common';
+import type { OpenAPIV3 } from 'openapi-types';
 
 // https://search-labs.elastic.co/search-labs/blog/elser-rag-search-for-relevance
 
@@ -92,6 +93,163 @@ export const performSearch = async ({
           },
         }
       : {}),
+  });
+
+  return results.hits.hits;
+};
+
+interface SecurityLabsAttributes {
+  title: string;
+  slug: string;
+  // semantic_text can be returned as string (normal mode) or object (legacy mode)
+  content?: string | { text: string };
+  description?: string | { text: string };
+  authors?: string;
+  categories?: string[];
+  date?: string;
+  resource_type?: string;
+}
+
+export const performSecurityLabsSearch = async ({
+  searchQuery,
+  size,
+  highlights,
+  index,
+  client,
+}: {
+  searchQuery: string;
+  size: number;
+  highlights: number;
+  index: string;
+  client: ElasticsearchClient;
+}) => {
+  const results = await client.search<SecurityLabsAttributes>({
+    index,
+    size,
+    query: {
+      bool: {
+        should: [
+          {
+            multi_match: {
+              query: searchQuery,
+              minimum_should_match: '1<-1 3<49%',
+              type: 'cross_fields',
+              fields: ['title', 'content.text', 'description.text', 'authors', 'categories'],
+            },
+          },
+          {
+            multi_match: {
+              query: searchQuery,
+              type: 'phrase',
+              boost: 3,
+              slop: 0,
+              fields: ['title.stem', 'content.stem', 'description.stem'],
+            },
+          },
+          {
+            semantic: {
+              field: 'content',
+              query: searchQuery,
+            },
+          },
+          {
+            semantic: {
+              field: 'description',
+              query: searchQuery,
+            },
+          },
+        ],
+      },
+    },
+    ...(highlights > 0
+      ? {
+          highlight: {
+            fields: {
+              content: {
+                type: 'semantic',
+                number_of_fragments: highlights,
+              },
+            },
+          },
+        }
+      : {}),
+  });
+
+  return results.hits.hits;
+};
+
+export interface OpenapiSpecAttributes extends OpenAPIV3.OperationObject {
+  path: string;
+  method: OpenAPIV3.HttpMethods;
+  endpoint: string;
+}
+
+export const performOpenapiSpecSearch = async ({
+  searchQuery,
+  size,
+  highlights,
+  index,
+  client,
+}: {
+  searchQuery: string;
+  size: number;
+  highlights: number;
+  index: string;
+  client: ElasticsearchClient;
+}) => {
+  const results = await client.search<OpenapiSpecAttributes>({
+    index,
+    size,
+    query: {
+      bool: {
+        should: [
+          // Semantic matches (highest boost for understanding intent)
+          { semantic: { field: 'summary', query: searchQuery, boost: 5 } },
+          { semantic: { field: 'description', query: searchQuery, boost: 4 } },
+          { semantic: { field: 'endpoint', query: searchQuery, boost: 3 } },
+
+          {
+            match: {
+              summary: {
+                query: searchQuery,
+                boost: 2,
+                operator: 'and',
+              },
+            },
+          },
+          {
+            match: {
+              description: {
+                query: searchQuery,
+                boost: 1.5,
+                operator: 'and',
+              },
+            },
+          },
+          {
+            match: {
+              operationId: {
+                query: searchQuery,
+                boost: 1.5,
+                fuzziness: 'AUTO',
+              },
+            },
+          },
+          {
+            match: {
+              path: {
+                query: searchQuery,
+                boost: 1.2,
+              },
+            },
+          },
+        ],
+        // Require at least 2 conditions to match for better precision
+        minimum_should_match: 2,
+      },
+    },
+    // Only return documents with a minimum score to filter out weak matches
+    min_score: 5,
   });
 
   return results.hits.hits;

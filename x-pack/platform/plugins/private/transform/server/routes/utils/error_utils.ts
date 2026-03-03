@@ -96,7 +96,7 @@ function extractCausedByChain(
   causedBy: Record<string, any> = {},
   accumulator: string[] = []
 ): string[] {
-  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/naming-convention
+  const { reason, caused_by } = causedBy;
 
   if (reason) {
     accumulator.push(reason);
@@ -121,12 +121,7 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
     meta: { body, statusCode },
   } = err;
 
-  const {
-    error: {
-      root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
-      caused_by = {}, // eslint-disable-line @typescript-eslint/naming-convention
-    } = {},
-  } = body;
+  const { error: { root_cause = [], caused_by = {} } = {} } = body;
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response, include the additional information from ES, and return it

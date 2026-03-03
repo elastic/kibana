@@ -83,6 +83,9 @@ const StreamsAlertRequired = rt.type({
 });
 // prettier-ignore
 const StreamsAlertOptional = rt.partial({
+  'data_stream.dataset': schemaString,
+  'data_stream.namespace': schemaString,
+  'data_stream.type': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
   'event.original': schemaString,
@@ -97,6 +100,8 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.maintenance_window_names': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
   'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,

@@ -115,6 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
+    const getLogger = () => options.logger;
 
     const getEntityStoreApiKeyManager = () =>
       getApiKeyManagerEntityStore({
@@ -204,6 +205,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getLogger,
+
       getDataViewsService: () => dataViewsService,
 
       getEntityStoreApiKeyManager,
@@ -256,6 +259,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
           packageService: startPlugins.fleet?.packageService,
           telemetry: core.analytics,
+          experimentalFeatures: options.config.experimentalFeatures,
         },
       }),
 

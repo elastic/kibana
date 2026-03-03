@@ -9,6 +9,7 @@
 
 import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,10 +22,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
@@ -44,40 +46,88 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
-  const defaultOptions = useMemo(() => getActionOptions(euiTheme), [euiTheme]);
+  const { workflowsExtensions } = useKibana().services;
+  const defaultOptions = useMemo(
+    () => getActionOptions(euiTheme, workflowsExtensions),
+    [euiTheme, workflowsExtensions]
+  );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
+
+  useEffect(() => {
+    if (currentPath.length === 0) {
+      setOptions(defaultOptions);
+    } else {
+      let nextOptions = defaultOptions;
+      for (const id of currentPath) {
+        const next = nextOptions.find((o) => o.id === id);
+        if (next && isActionGroup(next)) {
+          nextOptions = next.options;
+        } else {
+          nextOptions = [];
+        }
+      }
+      setOptions(nextOptions);
+    }
+  }, [defaultOptions, currentPath]);
   const renderActionOption = (option: ActionOptionData, searchValue: string) => {
+    const shouldUseGroupStyle = isActionGroup(option);
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
           grow={false}
           css={[
             styles.iconOuter,
-            isActionGroup(option) ? styles.groupIconOuter : styles.actionIconOuter,
+            shouldUseGroupStyle ? styles.groupIconOuter : styles.actionIconOuter,
           ]}
         >
-          <span css={isActionGroup(option) ? styles.groupIconInner : styles.actionIconInner}>
+          <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
             {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
               <StepIcon
                 stepType={getBaseConnectorType(option.connectorType)}
                 executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
-              <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
+              <EuiIcon
+                type={option.iconType}
+                size="m"
+                color={option.iconColor}
+                aria-hidden={true}
+              />
             ) : null}
           </span>
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-              <EuiTitle size="xxxs" css={styles.actionTitle}>
-                <h6>
-                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-                </h6>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiTitle size="xxxs" css={styles.actionTitle}>
+                  <h6>
+                    <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                  </h6>
+                </EuiTitle>
+                {option.stability === 'tech_preview' && (
+                  <EuiBetaBadge
+                    iconType="flask"
+                    label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
+                      defaultMessage: 'Tech preview',
+                    })}
+                    size="s"
+                    css={styles.techPreviewBadge}
+                  />
+                )}
+                {option.stability === 'beta' && (
+                  <EuiBetaBadge
+                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
+                      defaultMessage: 'Beta',
+                    })}
+                    size="s"
+                    css={styles.techPreviewBadge}
+                  />
+                )}
+              </EuiFlexGroup>
               <EuiText color="subdued" size="xs">
                 {option.instancesLabel}
               </EuiText>
@@ -226,24 +276,19 @@ const componentStyles = {
   actionOption: css({
     gap: '12px',
   }),
-  iconOuter: css({
-    width: '40px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  groupIconOuter: ({ euiTheme }: UseEuiTheme) =>
+  iconOuter: ({ euiTheme }: UseEuiTheme) =>
     css({
+      width: '40px',
+      height: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
       border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       borderRadius: euiTheme.border.radius.medium,
     }),
-  actionIconOuter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      borderRadius: '100%',
-    }),
+  groupIconOuter: ({ euiTheme }: UseEuiTheme) => css({}),
+  actionIconOuter: ({ euiTheme }: UseEuiTheme) => css({}),
   groupIconInner: ({ euiTheme }: UseEuiTheme) => css({}),
   actionIconInner: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -266,4 +311,7 @@ const componentStyles = {
     css({
       lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
     }),
+  techPreviewBadge: css({
+    marginBottom: '-4px', // to align with the action title
+  }),
 };

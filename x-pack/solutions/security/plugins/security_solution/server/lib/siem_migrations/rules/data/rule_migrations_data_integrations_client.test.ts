@@ -49,6 +49,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
   const mockPackageService = packageServiceMock.create();
   const mockGetPackages = mockPackageService.asInternalUser.getPackages;
+  const mockGetFieldMetadata = mockPackageService.asInternalUser.getPackageFieldsMetadata;
   const dependencies = {
     packageService: mockPackageService,
   } as unknown as SiemMigrationsClientDependencies;
@@ -148,6 +149,39 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       );
     });
 
+    it('should return fields metadata if available', async () => {
+      const fieldsMetadata = { 'mock-package': { dataset: { name: 'field1' } } };
+      mockGetPackages.mockResolvedValue([
+        createMockPackage({
+          data_streams: [
+            { type: 'logs', dataset: 'logs.dataset', title: 'Logs' } as RegistryDataStream,
+          ],
+        }),
+      ]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+
+      // Mock getFieldsMetadata to return our test metadata
+      mockGetFieldMetadata.mockResolvedValue(fieldsMetadata);
+
+      await client.populate();
+
+      expect(mockGetFieldMetadata).toHaveBeenCalledWith({ packageName: 'mock-package' });
+      expect(esClientMock.bulk).toHaveBeenCalledWith(
+        {
+          refresh: 'wait_for',
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              doc: expect.objectContaining({
+                fields_metadata: fieldsMetadata,
+              }),
+              doc_as_upsert: true,
+            }),
+          ]),
+        },
+        { requestTimeout: 600000 }
+      );
+    });
+
     it('should call bulk with transformed logs packages', async () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
       esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
@@ -232,7 +266,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
             query: {
               bool: {
                 must: { semantic: { query, field: 'elser_embedding' } },
-                must_not: { ids: { values: ['splunk', 'elastic_security'] } },
+                must_not: { ids: { values: ['splunk', 'elastic_security', 'ibm_qradar'] } },
                 filter: { exists: { field: 'data_streams' } },
               },
             },

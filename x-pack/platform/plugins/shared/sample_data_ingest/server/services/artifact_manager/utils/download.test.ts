@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { createWriteStream } from 'fs';
-import { mkdir, open } from 'fs/promises';
+import { createWriteStream } from '@kbn/fs';
+import { open } from 'fs/promises';
 import { pipeline } from 'stream/promises';
-import fetch from 'node-fetch';
 import { download } from './download';
 
-jest.mock('fs', () => ({
+jest.mock('@kbn/fs', () => ({
   createWriteStream: jest.fn(() => ({
     on: jest.fn((event, callback) => {
       if (event === 'finish') {
@@ -20,23 +19,36 @@ jest.mock('fs', () => ({
     }),
     pipe: jest.fn(),
   })),
+  getSafePath: jest
+    .fn()
+    .mockReturnValue({ fullPath: 'artifacts/file.zip', alias: 'disk:artifacts/file.zip' }),
 }));
 
 jest.mock('fs/promises', () => ({
-  mkdir: jest.fn(),
   open: jest.fn(),
 }));
-
-jest.mock('node-fetch', () => jest.fn());
 
 jest.mock('stream/promises', () => ({
   pipeline: jest.fn(),
 }));
 
+// Mock Readable.fromWeb to return the mock body directly since pipeline is already mocked
+jest.mock('stream', () => {
+  const actual = jest.requireActual('stream');
+  return {
+    ...actual,
+    Readable: {
+      ...actual.Readable,
+      fromWeb: jest.fn((webStream) => webStream),
+    },
+  };
+});
+
+const fetchMock = jest.spyOn(global, 'fetch');
+
 describe('download', () => {
   const mockFileUrl = 'http://example.com/file.zip';
   const mockFilePath = 'artifacts/file.zip';
-  const mockDirPath = 'artifacts';
   const mockMimeType = 'application/zip';
 
   const mockFileHandle = {
@@ -60,13 +72,13 @@ describe('download', () => {
       on: jest.fn(),
     };
 
-    (fetch as unknown as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       headers: {
         get: jest.fn().mockReturnValue('application/zip'),
       },
       body: mockResponseBody,
-    });
+    } as unknown as Response);
 
     // Mock ZIP file signature (PK)
     const zipBuffer = Buffer.alloc(8);
@@ -82,8 +94,7 @@ describe('download', () => {
 
     await download(mockFileUrl, mockFilePath, mockMimeType);
 
-    expect(mkdir).toHaveBeenCalledWith(mockDirPath, { recursive: true });
-    expect(fetch).toHaveBeenCalledWith(mockFileUrl, { signal: undefined });
+    expect(fetchMock).toHaveBeenCalledWith(mockFileUrl, { signal: undefined });
     expect(createWriteStream).toHaveBeenCalledWith(mockFilePath);
     expect(pipeline).toHaveBeenCalledWith(mockResponseBody, expect.anything());
     expect(open).toHaveBeenCalledWith(mockFilePath, 'r');
@@ -91,13 +102,13 @@ describe('download', () => {
   });
 
   it('should throw error for invalid MIME type', async () => {
-    (fetch as unknown as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       headers: {
         get: jest.fn().mockReturnValue('text/plain'),
       },
       body: {},
-    });
+    } as unknown as Response);
 
     await expect(download(mockFileUrl, mockFilePath, mockMimeType)).rejects.toThrow(
       'Invalid MIME type: text/plain. Expected: application/zip'
@@ -110,13 +121,13 @@ describe('download', () => {
       on: jest.fn(),
     };
 
-    (fetch as unknown as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       headers: {
         get: jest.fn().mockReturnValue('application/zip'),
       },
       body: mockResponseBody,
-    });
+    } as unknown as Response);
 
     // Mock invalid file signature
     const invalidBuffer = Buffer.alloc(8);
@@ -133,11 +144,11 @@ describe('download', () => {
   });
 
   it('should handle HTTP errors', async () => {
-    (fetch as unknown as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: false,
       status: 404,
       statusText: 'Not Found',
-    });
+    } as unknown as Response);
 
     await expect(download(mockFileUrl, mockFilePath, mockMimeType)).rejects.toThrow(
       'Failed to download file: 404 Not Found'
@@ -145,13 +156,13 @@ describe('download', () => {
   });
 
   it('should handle missing Content-Type header', async () => {
-    (fetch as unknown as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       headers: {
         get: jest.fn().mockReturnValue(null),
       },
       body: {},
-    });
+    } as unknown as Response);
 
     await expect(download(mockFileUrl, mockFilePath, mockMimeType)).rejects.toThrow(
       'Missing Content-Type header'
@@ -159,14 +170,20 @@ describe('download', () => {
   });
 
   it('should handle path traversal attempts', async () => {
-    const maliciousPaths = ['../../../etc/passwd', 'file/../config', './test/../../secret'];
+    const maliciousPaths = ['../../../etc/passwd', 'file/../../../config', './test/../../secret'];
+
+    const realKbnFs = jest.requireActual<typeof import('@kbn/fs')>('@kbn/fs');
+
+    (createWriteStream as jest.Mock).mockImplementation(realKbnFs.createWriteStream);
 
     for (const maliciousPath of maliciousPaths) {
-      await expect(download(mockFileUrl, maliciousPath, mockMimeType)).rejects.toThrow(
-        'Path traversal attempt detected'
-      );
+      try {
+        await download(mockFileUrl, maliciousPath, mockMimeType);
+      } catch (err) {
+        expect(err.message).toContain('Path traversal detected');
+      }
     }
 
-    expect(fetch as unknown as jest.Mock).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -105,6 +105,55 @@
     {
       "repoOwner": "elastic",
       "repoName": "kibana",
+      "pipelineSlug": "kibana-entity-store-performance-from-pr",
+      "skip_ci_labels": [],
+      "enabled": true,
+      "allow_org_users": true,
+      "allowed_repo_permissions": ["admin", "write"],
+      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
+      "set_commit_status": true,
+      "commit_status_context": "kibana-entity-store-performance-from-pr",
+      "build_on_commit": false,
+      "build_on_comment": true,
+      "build_drafts": false,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:run)\\W+(?:entity-store-performance))$",
+      "enable_trigger_checkbox": true,
+      "kibana_versions_check": true,
+      "kibana_build_reuse": true,
+      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr", "kibana-entity-store-performance-from-pr"],
+      "kibana_build_reuse_regexes": [
+        "^test/",
+        "^x-pack/platform/test/",
+        "^x-pack/solutions/(search|observability|security)/test/",
+        "/__snapshots__/",
+        "\\.test\\.(ts|tsx|js|jsx)"
+      ]
+    },
+    {
+      "repoOwner": "elastic",
+      "repoName": "kibana",
+      "pipelineSlug": "kibana-storybooks-from-pr",
+      "enabled": true,
+      "allow_org_users": true,
+      "allowed_repo_permissions": [
+        "admin",
+        "write"
+      ],
+      "allowed_list": [
+        "elastic-vault-github-plugin-prod[bot]"
+      ],
+      "set_commit_status": true,
+      "commit_status_context": "kibana-storybooks-from-pr",
+      "build_on_commit": false,
+      "build_drafts": false,
+      "enable_trigger_checkbox": true,
+      "kibana_versions_check": true,
+      "build_on_comment": true,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:storybook))$"
+    },
+    {
+      "repoOwner": "elastic",
+      "repoName": "kibana",
       "pipelineSlug": "kibana-renovate-helper",
       "skip_ci_labels": [],
       "enabled": true,

@@ -9,21 +9,37 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { DashboardState } from './content_management';
+import type { create, read, update, deleteDashboard } from './api';
 
+/**
+ * Client interface for dashboard CRUD operations
+ */
+export interface DashboardServerClient {
+  create: typeof create;
+  read: typeof read;
+  update: typeof update;
+  delete: typeof deleteDashboard;
+}
+
+/** The setup contract for the Dashboard plugin on the server. */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
+
+/**
+ * The start contract for the Dashboard plugin on the server.
+ * Provides methods for interacting with dashboards.
+ */
 export interface DashboardPluginStart {
-  getDashboard: (
-    ctx: RequestHandlerContext,
-    id: string
-  ) => Promise<
-    Pick<DashboardState, 'description' | 'tags' | 'title'> & {
-      id: string;
-    }
-  >;
+  /** Client for dashboard CRUD operations. */
+  client: DashboardServerClient;
   /**
-   * @deprecated Contact #kibana-presentation about requirements for a proper panel search interface
+   * Scans dashboards with pagination.
+   *
+   * @deprecated Contact #kibana-presentation about requirements for a proper panel search interface.
+   * @param ctx - The request handler context.
+   * @param page - The page number.
+   * @param perPage - The number of items per page.
+   * @returns A promise that resolves to the {@link ScanDashboardsResult}.
    */
   scanDashboards: (
     ctx: RequestHandlerContext,

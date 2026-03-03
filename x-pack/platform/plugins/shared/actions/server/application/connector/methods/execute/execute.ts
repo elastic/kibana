@@ -58,7 +58,9 @@ export async function execute(
     params,
     source,
     request: context.request,
+    spaceId: context.spaceId,
     relatedSavedObjects,
     actionExecutionId: uuidv4(),
+    connectorTokenClient: context.connectorTokenClient,
   });
 }

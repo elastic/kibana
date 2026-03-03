@@ -27,9 +27,13 @@ import {
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
-import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  AgentManager,
+  configureClient,
+  getRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -208,6 +212,7 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
+    onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
   });
 };
 
@@ -227,7 +232,7 @@ const getMigrator = async ({
   configService: ConfigService;
   client: ElasticsearchClient;
   kibanaIndex: string;
-  typeRegistry: ISavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistryInternal;
   defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;

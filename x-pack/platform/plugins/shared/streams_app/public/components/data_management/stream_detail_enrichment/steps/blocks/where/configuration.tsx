@@ -14,26 +14,28 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Condition, StreamlangWhereBlockWithUIAttributes } from '@kbn/streamlang';
-import { isCondition } from '@kbn/streamlang';
+import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
+import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, forwardRef, useCallback } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useForm, FormProvider, useController, useFormContext } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
-import type { WhereBlockFormState } from '../../../types';
+import type { StepActorRef } from '../../../state_management/steps_state_machine';
+import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import type { ConditionBlockFormState } from '../../../types';
 import {
-  getFormStateFromWhereStep,
-  convertWhereBlockFormStateToConfiguration,
+  getFormStateFromConditionStep,
+  convertConditionBlockFormStateToConfiguration,
 } from '../../../utils';
 import { discardChangesPromptOptions, deleteConditionPromptOptions } from './prompt_options';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
+import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 interface WhereBlockConfigurationProps {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
+  stepRef: StepActorRef;
 }
 
 export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConfigurationProps>(
@@ -46,8 +48,12 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
     const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
     const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
 
+    const streamType = useStreamEnrichmentSelector((snapshot) =>
+      selectStreamType(snapshot.context)
+    );
+
     const [defaultValues] = useState(() =>
-      getFormStateFromWhereStep(step as StreamlangWhereBlockWithUIAttributes)
+      getFormStateFromConditionStep(step as StreamlangConditionBlockWithUIAttributes)
     );
 
     const hasStepChanges = useSelector(
@@ -65,27 +71,28 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
       ...deleteConditionPromptOptions,
     });
 
-    const methods = useForm<WhereBlockFormState>({
-      defaultValues: defaultValues as DeepPartial<WhereBlockFormState>,
+    const methods = useForm<ConditionBlockFormState>({
+      defaultValues: defaultValues as DeepPartial<ConditionBlockFormState>,
       mode: 'onChange',
     });
 
     const isValid = methods.formState.isValid;
+    const hasConditionError = 'condition' in methods.formState.errors;
 
     useEffect(() => {
       const { unsubscribe } = methods.watch((value) => {
-        const { whereDefinition } = convertWhereBlockFormStateToConfiguration(
-          value as WhereBlockFormState
+        const { conditionBlockDefinition } = convertConditionBlockFormStateToConfiguration(
+          value as ConditionBlockFormState
         );
         stepRef.send({
           type: 'step.changeCondition',
-          step: whereDefinition,
+          step: conditionBlockDefinition,
         });
       });
       return () => unsubscribe();
     }, [methods, stepRef]);
 
-    const handleSubmit: SubmitHandler<WhereBlockFormState> = () => {
+    const handleSubmit: SubmitHandler<ConditionBlockFormState> = () => {
       stepRef.send({ type: 'step.save' });
     };
 
@@ -103,6 +110,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
               <div>
                 <EuiButton
                   data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
+                  data-stream-type={streamType}
                   color="danger"
                   onClick={handleDelete}
                   size="s"
@@ -116,10 +124,11 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" wrap={true}>
               <div>
                 <EuiButtonEmpty
                   data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
+                  data-stream-type={streamType}
                   onClick={handleCancel}
                   size="s"
                 >
@@ -132,10 +141,11 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
               <div>
                 <EuiButton
                   data-test-subj="streamsAppConditionConfigurationSaveConditionButton"
+                  data-stream-type={streamType}
                   size="s"
                   fill
                   onClick={methods.handleSubmit(handleSubmit)}
-                  disabled={!canSave || !isValid}
+                  disabled={!canSave || !isValid || hasConditionError}
                 >
                   {isConfigured
                     ? i18n.translate(
@@ -144,7 +154,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
                       )
                     : i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmCreateCondition',
-                        { defaultMessage: 'Create condition' }
+                        { defaultMessage: 'Create' }
                       )}
                 </EuiButton>
               </div>
@@ -157,12 +167,31 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
 );
 
 export const WhereBlockConditionEditor = () => {
-  const { field } = useController<WhereBlockFormState, 'where'>({
-    name: 'where',
+  const { field } = useController<ConditionBlockFormState, 'condition'>({
+    name: 'condition',
     rules: {
-      validate: (value) => isCondition(value),
+      validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
+  const { setError, clearErrors } = useFormContext<ConditionBlockFormState>();
+
+  const handleValidityChange = useCallback(
+    (isValid: boolean) => {
+      if (isValid) {
+        clearErrors('condition');
+        return;
+      }
+
+      setError('condition', {
+        type: 'manual',
+        message: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.invalidConditionJsonError',
+          { defaultMessage: 'Invalid JSON' }
+        ),
+      });
+    },
+    [clearErrors, setError]
+  );
 
   if (field.value === undefined) {
     return null;
@@ -172,6 +201,7 @@ export const WhereBlockConditionEditor = () => {
     <ProcessorConditionEditorWrapper
       condition={field.value as unknown as Condition}
       onConditionChange={field.onChange as (condition: Condition) => void}
+      onValidityChange={handleValidityChange}
     />
   );
 };

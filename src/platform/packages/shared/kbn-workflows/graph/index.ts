@@ -15,6 +15,8 @@ export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
 export type {
   AtomicGraphNode,
+  DataSetGraphNode,
+  DataSetGraphNodeSchema,
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,
   EnterForeachNodeConfiguration,
@@ -31,8 +33,6 @@ export type {
   ExitContinueNode,
   WaitGraphNodeSchema,
   WaitGraphNode,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,
@@ -42,13 +42,17 @@ export type {
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
   GraphNodeUnion,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './types';
 
 export {
   isAtomic,
+  isDataSet,
   isElasticsearch,
   isKibana,
-  isHttp,
   isWait,
   isEnterForeach,
   isEnterIf,

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '../constants';
+import { waitForApmMainContainer } from '../page_helpers';
 
 export class AnomalyDetectionPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/anomaly-detection`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   async getCreateJobButton() {
@@ -41,6 +42,7 @@ export class AnomalyDetectionPage {
   async selectEnvironment(environmentName: string) {
     const environmentComboBox = new EuiComboBoxWrapper(this.page, { locator: '.euiComboBox' });
     await environmentComboBox.setCustomMultiOption(environmentName);
+    await this.page.keyboard.press('Escape');
   }
 
   async clickCreateJobsButton() {
@@ -54,5 +56,16 @@ export class AnomalyDetectionPage {
     await this.clickCreateJobsButton();
 
     this.page.getByText('Anomaly detection jobs created');
+  }
+
+  async deleteMlJob() {
+    const manageJobsButton = this.page.testSubj.locator('apmMLManageJobsTextLink');
+    await manageJobsButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await manageJobsButton.click();
+    const allActionsButton = this.page.getByLabel('All actions, row 1');
+    await allActionsButton.click();
+    await this.page.testSubj.locator('mlActionButtonDeleteJob').click();
+    await this.page.testSubj.locator('mlDeleteJobConfirmModalButton').click();
+    await expect(this.page.getByText('deleted successfully')).toBeVisible();
   }
 }

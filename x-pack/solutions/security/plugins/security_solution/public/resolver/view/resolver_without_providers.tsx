@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,16 +17,16 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { StyledMapContainer, GraphContainer, StyledPanel } from './styles';
+import { GraphContainer, StyledMapContainer } from './styles';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import type { ResolverProps } from '../types';
-import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
+
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
  */
@@ -42,7 +42,6 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
-      isSplitPanel = false,
       showPanelOnClick,
     }: ResolverProps,
     refToForward
@@ -109,7 +108,11 @@ export const ResolverWithoutProviders = React.memo(
     const colorMap = useColors();
 
     return (
-      <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
+      <StyledMapContainer
+        className={className}
+        backgroundColor={colorMap.resolverBackground}
+        windowHeight={window.innerHeight}
+      >
         {isLoading ? (
           <div data-test-subj="resolver:graph:loading" className="loading-container">
             <EuiLoadingSpinner size="xl" />
@@ -160,25 +163,16 @@ export const ResolverWithoutProviders = React.memo(
                     projectionMatrix={projectionMatrix}
                     node={treeNode}
                     timeAtRender={timeAtRender}
-                    onClick={isSplitPanel ? showPanelOnClick : undefined}
+                    onClick={showPanelOnClick}
                   />
                 );
               })}
             </GraphContainer>
-            {!isSplitPanel && (
-              <StyledPanel hasBorder>
-                <PanelRouter id={resolverComponentInstanceID} />
-              </StyledPanel>
-            )}
           </>
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls
-          id={resolverComponentInstanceID}
-          isSplitPanel={isSplitPanel}
-          showPanelOnClick={showPanelOnClick}
-        />
+        <GraphControls id={resolverComponentInstanceID} showPanelOnClick={showPanelOnClick} />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );

@@ -8,21 +8,41 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
+jest.mock('@kbn/elastic-assistant-common', () => {
+  const actual = jest.requireActual('@kbn/elastic-assistant-common');
+  return {
+    ...actual,
+    // `TakeAction` always generates markdown; keep it cheap for unit tests.
+    getAttackDiscoveryMarkdown: jest.fn(() => 'markdown'),
+  };
+});
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
 import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { TakeAction } from '.';
+
+const defaultAgentBuilderAvailability = {
+  isAgentBuilderEnabled: true,
+  hasAgentBuilderPrivilege: true,
+  isAgentChatExperienceEnabled: false,
+  hasValidAgentBuilderLicense: true,
+};
 
 const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
-
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn().mockReturnValue(defaultAgentBuilderAvailability),
+}));
 jest.mock('../../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(),
 }));
 
 const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
+const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -53,13 +73,6 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
     ad?.alertWorkflowStatus !== undefined,
 }));
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 
@@ -71,7 +84,7 @@ const defaultProps = {
 describe('TakeAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    mockUseAgentBuilderAvailability.mockReturnValue(defaultAgentBuilderAvailability);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -145,6 +158,25 @@ describe('TakeAction', () => {
     openPopover();
 
     expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
+  });
+
+  it('renders the Add to chat action disabled when license is invalid', () => {
+    mockUseAgentBuilderAvailability.mockReturnValue({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    });
+
+    render(
+      <TestProviders>
+        <TakeAction {...defaultProps} />
+      </TestProviders>
+    );
+
+    openPopover();
+
+    expect(screen.getByTestId('viewInAgentBuilder')).toBeDisabled();
   });
 
   it('does NOT render View in AI Assistant when multiple discoveries are selected', () => {

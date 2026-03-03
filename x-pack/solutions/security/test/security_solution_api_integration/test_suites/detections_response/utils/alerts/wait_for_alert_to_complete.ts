@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { waitFor } from '../../../../config/services/detections_response';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 
 export const waitForAlertToComplete = async (
   supertest: SuperTest.Agent,

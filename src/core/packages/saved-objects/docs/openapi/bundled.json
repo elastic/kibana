@@ -104,6 +104,7 @@
       "post": {
         "summary": "Create saved objects",
         "operationId": "bulkCreateSavedObjects",
+        "description": "Create multiple Kibana saved objects.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\nNOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -128,7 +129,17 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "coreMigrationVersion": {
+                      "description": "The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                      "type": "string"
+                    },
+                    "typeMigrationVersion": {
+                      "description": "The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -162,7 +173,7 @@
       "post": {
         "summary": "Delete saved objects",
         "operationId": "bulkDeleteSavedObjects",
-        "description": "WARNING: When you delete a saved object, it cannot be recovered.\n",
+        "description": "WARNING: When you delete a saved object, it cannot be recovered.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. There is currently no alternative API for all use cases supported by this API. Once alternative APIs are provided in a future Elastic version, it will be possible to migrate away from this API.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -221,6 +232,7 @@
       "post": {
         "summary": "Get saved objects",
         "operationId": "bulkGetSavedObjects",
+        "description": "Retrieve multiple Kibana saved objects by identifier.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -272,7 +284,7 @@
         "summary": "Resolve saved objects",
         "operationId": "bulkResolveSavedObjects",
         "deprecated": true,
-        "description": "Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.\n",
+        "description": "Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.\n",
         "tags": [
           "saved objects"
         ],
@@ -322,7 +334,7 @@
       "post": {
         "summary": "Update saved objects",
         "operationId": "bulkUpdateSavedObjects",
-        "description": "Update the attributes for multiple Kibana saved objects.",
+        "description": "Update the attributes for multiple Kibana saved objects.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -373,7 +385,7 @@
       "get": {
         "summary": "Search for saved objects",
         "operationId": "findSavedObjects",
-        "description": "Retrieve a paginated set of Kibana saved objects.",
+        "description": "Retrieve a paginated set of Kibana saved objects.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -702,7 +714,7 @@
       "post": {
         "summary": "Create a saved object",
         "operationId": "createSavedObject",
-        "description": "Create a Kibana saved object with a randomly generated identifier.",
+        "description": "Create a Kibana saved object with a randomly generated identifier.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\nNOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -735,6 +747,14 @@
                 "properties": {
                   "attributes": {
                     "$ref": "#/components/schemas/attributes"
+                  },
+                  "coreMigrationVersion": {
+                    "description": "The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
+                  },
+                  "typeMigrationVersion": {
+                    "description": "The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
                   },
                   "initialNamespaces": {
                     "$ref": "#/components/schemas/initial_namespaces"
@@ -775,7 +795,7 @@
       "get": {
         "summary": "Get a saved object",
         "operationId": "getSavedObject",
-        "description": "Retrieve a single Kibana saved object by identifier.",
+        "description": "Retrieve a single Kibana saved object by identifier.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -814,7 +834,7 @@
       "post": {
         "summary": "Create a saved object",
         "operationId": "createSavedObjectId",
-        "description": "Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.",
+        "description": "Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\nNOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -851,11 +871,19 @@
                   "attributes": {
                     "$ref": "#/components/schemas/attributes"
                   },
+                  "coreMigrationVersion": {
+                    "description": "The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
+                  },
+                  "typeMigrationVersion": {
+                    "description": "The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
+                  },
                   "initialNamespaces": {
                     "$ref": "#/components/schemas/initial_namespaces"
                   },
                   "references": {
-                    "$ref": "#/components/schemas/initial_namespaces"
+                    "$ref": "#/components/schemas/references"
                   }
                 }
               }
@@ -888,7 +916,7 @@
       "put": {
         "summary": "Update a saved object",
         "operationId": "updateSavedObject",
-        "description": "Update the attributes for Kibana saved objects.",
+        "description": "Update the attributes for Kibana saved objects.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -952,7 +980,7 @@
       "get": {
         "summary": "Resolve a saved object",
         "operationId": "resolveSavedObject",
-        "description": "Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.\n",
+        "description": "Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -1091,7 +1119,7 @@
       },
       "attributes": {
         "type": "object",
-        "description": "The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.\n"
+        "description": "The data that you want to create. WARNING: Attributes may be validated depending on the saved object type. Supplying malformed data can cause errors or break Kibana. When creating or persisting raw saved objects outside of Kibana, preserve `coreMigrationVersion` and `typeMigrationVersion` (and related migration metadata) to retain forward compatibility across Kibana versions.\n"
       },
       "initial_namespaces": {
         "type": "array",

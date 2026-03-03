@@ -21,27 +21,43 @@ export const SecondaryMenuSectionComponent = ({
   children,
   label,
 }: SecondaryMenuSectionProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme, highContrastMode } = euiThemeContext;
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
-  const wrapperStyles = css`
+  const secondaryMenuWrapperStyles = css`
     padding: ${euiTheme.size.m};
+    position: relative;
 
     &:not(:last-child) {
-      border-bottom: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+      ${highContrastMode
+        ? `
+        border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
+        margin-left: ${euiTheme.size.m};
+        margin-right: ${euiTheme.size.m};
+        padding-left: 0;
+        padding-right: 0;
+      `
+        : `
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: ${euiTheme.size.m};
+          right: ${euiTheme.size.m};
+          height: ${euiTheme.border.width.thin};
+          background-color: ${euiTheme.colors.borderBaseSubdued};
+        }
+      `}
     }
   `;
 
-  /**
-   * To reflect the design perfectly while maintaining a logical structure,
-   * we need to use `6px` which isn't a multiple of 4 and there's no token for it,
-   * hence why we're not using `euiTheme` here.
-   */
   const labelStyles = css`
     font-size: ${euiTheme.size.m};
-    color: ${euiTheme.colors.subduedText};
-    padding: 6px ${euiTheme.size.s};
+    color: ${euiTheme.colors.textSubdued};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    display: block;
   `;
 
   const listStyles = css`
@@ -52,13 +68,15 @@ export const SecondaryMenuSectionComponent = ({
   `;
 
   return (
-    <nav css={wrapperStyles} aria-labelledby={sectionId || undefined}>
+    <div css={secondaryMenuWrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
       {label && (
         <EuiText id={sectionId} css={labelStyles} component="span">
           {label}
         </EuiText>
       )}
-      <ul css={listStyles}>{children}</ul>
-    </nav>
+      <ul css={listStyles} role="none">
+        {children}
+      </ul>
+    </div>
   );
 };

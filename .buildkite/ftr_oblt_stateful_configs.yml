@@ -7,17 +7,8 @@ disabled:
   - x-pack/solutions/observability/plugins/inventory/e2e/ftr_config_run.ts
   - x-pack/solutions/observability/plugins/inventory/e2e/ftr_config.ts
   #FTR configs
-  - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
   - x-pack/solutions/observability/test/api_integration/config.ts
   - x-pack/solutions/observability/test/functional/config.base.ts
-
-  # Elastic Synthetics configs
-  - x-pack/solutions/observability/plugins/uptime/e2e/uptime/synthetics_run.ts
-  - x-pack/solutions/observability/plugins/synthetics/e2e/config.ts
-  - x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/synthetics_run.ts
-  - x-pack/solutions/observability/plugins/exploratory_view/e2e/synthetics_run.ts
-  - x-pack/solutions/observability/plugins/ux/e2e/synthetics_run.ts
-  - x-pack/solutions/observability/plugins/slo/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - x-pack/solutions/observability/test/screenshot_creation/config.ts
@@ -42,8 +33,6 @@ enabled:
   - x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
   - x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
   - x-pack/solutions/observability/test/observability_functional/with_rac_write.config.ts
-  - x-pack/solutions/observability/test/observability_onboarding_api_integration/basic/config.ts
-  - x-pack/solutions/observability/test/observability_onboarding_api_integration/cloud/config.ts
   - x-pack/solutions/observability/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/solutions/observability/test/api_integration/profiling/cloud/config.ts
   - x-pack/solutions/observability/test/functional/apps/apm/config.ts
@@ -59,4 +48,5 @@ enabled:
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts
   - x-pack/solutions/observability/test/functional_solution_sidenav/config.ts

@@ -33,6 +33,7 @@ import {
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -42,14 +43,14 @@ import {
 } from '../../../screens/search_bar';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 
-// Failing: See https://github.com/elastic/kibana/issues/237743
-describe.skip('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
+describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visitWithTimeRange(ALERTS_URL);
+    waitForAlertsToPopulate();
   });
 
   context('KPI viz navigation', () => {

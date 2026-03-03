@@ -28,6 +28,8 @@ export const UpgradePackagePolicyPage = memo(() => {
     from = 'upgrade-from-fleet-policy-list';
   } else if (fromQs && fromQs === 'integrations-policy-list') {
     from = 'upgrade-from-integrations-policy-list';
+  } else if (fromQs && fromQs === 'installed-integrations') {
+    from = 'installed-integrations';
   }
 
   return (

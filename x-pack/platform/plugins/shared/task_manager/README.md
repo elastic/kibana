@@ -53,6 +53,8 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 - `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
 - `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 - `unsafe.exclude_task_types` - A list of task types to exclude from running. Supports wildcard usage, such as `namespace:*`. This configuration is experimental, unsupported, and can only be used for temporary debugging purposes because it causes Kibana to behave in unexpected ways.
+- `invalidate_api_key_task.interval` - Check [API Key Invalidation](#api-key-invalidation) for details.
+- `invalidate_api_key_task.removalDelay` - Check [API Key Invalidation](#api-key-invalidation) for details.
 
 ## Task definitions
 
@@ -348,7 +350,7 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: ScheduleOptions) => {
     // ...
   },
-  runSoon: (taskId: string) =>  {
+  runSoon: (taskId: string, force?: boolean) =>  {
     // ...
   },
   bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
@@ -466,7 +468,7 @@ The only exception to this is if you use `ensureScheduled` to schedule a task wi
 
 #### runSoon
 
-Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`.
+Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`. The default behavior is to throw an error if the task is already in the `Running` or `Claiming` phase. Set the `force` flag to `true` to reset a task in the `Running` phase back to `Idle`. We allow this for manual resets of tasks with long timeouts that may get stuck with a `Running` status during Kibana upgrades and restarts but are not actually running. Please use caution when setting this flag! This does not cancel in-progress task runs if they are still running.
 
 ```js
 export class Plugin {
@@ -848,4 +850,13 @@ createTaskRunner({ taskInstance, fakeRequest}: RunContext) {
 },
 ```
 
-When the task is deleted, Task Manager automatically invalidates the associated API key.
+### API Key Invalidation
+
+When a task with an API key is deleted, we mark the API key for invalidation. Because the API key could be
+re-used between tasks (as in the case of one task queuing up another task), we do not immediately delete the associated API key. Instead, we use the saved object type `api_key_to_invalidate` to store the API key IDs that are marked for invalidation.
+
+We schedule a recurring background task that queries for the existence of any `api_key_to_invalidate` saved objects and then queries to see whether those API key IDs are used by any other tasks. If no other tasks are referencing the API key, we invalidate it. We use a removal delay in the query to avoid race conditions that may happen if a task is scheduled with a re-used API key while the invalidation task is running.
+
+The default schedule for this task is every `5m`. To change this schedule, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.interval`.
+
+The default removal delay for this task is `1h`. To change this delay, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.removalDelay`.

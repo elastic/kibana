@@ -8,6 +8,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
@@ -201,7 +202,13 @@ export const HighlightedFields = memo(
               columns={columns}
               compressed
               loading={isEditLoading}
-              message={
+              tableCaption={i18n.translate(
+                'xpack.securitySolution.flyout.right.investigation.highlightedFields.highlightedFieldsCaption',
+                {
+                  defaultMessage: 'Highlighted fields',
+                }
+              )}
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
                   defaultMessage="There's no highlighted fields for this alert."

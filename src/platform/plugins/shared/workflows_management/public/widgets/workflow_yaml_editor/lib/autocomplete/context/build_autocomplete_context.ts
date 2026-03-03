@@ -10,7 +10,7 @@
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -19,6 +19,8 @@ import {
   isInScheduledTriggerWithBlock,
   isInStepsContext,
   isInTriggersContext,
+  isInWorkflowInputsByPosition,
+  isInWorkflowInputsPath,
 } from './triggers_utils';
 import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
@@ -40,17 +42,18 @@ export function buildAutocompleteContext({
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+  const workflows = editorState?.workflows;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
+  const yamlLineCounter = editorState?.computed?.yamlLineCounter;
   const focusedStepId = editorState?.focusedStepId;
   const workflowDefinition = editorState?.computed?.workflowDefinition;
   // monaco-related
   const absoluteOffset = model.getOffsetAt(position);
   const { lineNumber } = position;
   const line = model.getLineContent(lineNumber);
-  const wordUntil = model.getWordUntilPosition(position);
-  const word = model.getWordAtPosition(position) || wordUntil;
+  const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
   const focusedStepInfo: StepInfo | null = focusedStepId
@@ -92,7 +95,13 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
+    contextSchema = getContextSchemaForPath(
+      workflowDefinition,
+      workflowGraph,
+      path,
+      yamlDocument,
+      absoluteOffset
+    );
   }
 
   if (parseResult?.fullKey) {
@@ -130,12 +139,12 @@ export function buildAutocompleteContext({
     absoluteOffset,
     focusedStepInfo,
     focusedYamlPair,
-    // TODO: add currentTriggerInfo
 
     // context
     contextSchema,
     contextScopedToPath,
     yamlDocument,
+    yamlLineCounter: yamlLineCounter ?? null,
     scalarType,
 
     // kind of ast info
@@ -143,8 +152,16 @@ export function buildAutocompleteContext({
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
     isInTriggersContext: isInTriggersContext(path),
     isInStepsContext: isInStepsContext(path),
+    isInWorkflowInputsContext:
+      isInWorkflowInputsPath(path) || isInWorkflowInputsByPosition(focusedStepInfo, absoluteOffset),
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+    workflows: workflows ?? {
+      workflows: {},
+      totalWorkflows: 0,
+    },
+    currentWorkflowId: editorState?.workflow?.id ?? null,
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

@@ -14,7 +14,7 @@
  * This file causes all of them to be served in a single request.
  */
 
-export { getLensTransforms } from '../common/transforms';
+export { getTransformOut } from '../common/transforms/transform_out';
 
 export * from './visualizations/datatable/datatable_visualization';
 export * from './visualizations/datatable';
@@ -36,11 +36,11 @@ export * from './visualizations/tagcloud';
 export { getEditLensConfiguration } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export * from './datasources/form_based/form_based';
-export { getTextBasedDatasource } from './datasources/form_based/esql_layer/text_based_languages';
+export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
 export { createFormulaPublicApi } from './datasources/form_based/operations/definitions/formula/formula_public_api';
 export * from './lens_suggestions_api';
 
-export * from './datasources/form_based/esql_layer';
+export * from './datasources/text_based';
 export * from './datasources/form_based';
 export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
@@ -52,7 +52,6 @@ export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
 export * from './utils';
 
-export * from './trigger_actions/open_in_discover_helpers';
 export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';
 export { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
 export { getAddLensPanelAction } from './trigger_actions/add_lens_panel_action';
@@ -63,3 +62,5 @@ export { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 
 export { deserializeState } from './react_embeddable/helper';
 export * from './react_embeddable/lens_embeddable';
+export { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+export { getDiscoverDrilldown } from './drilldowns/get_discover_drilldown';

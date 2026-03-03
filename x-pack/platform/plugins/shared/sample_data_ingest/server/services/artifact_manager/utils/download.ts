@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
+
+import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
-import Path from 'path';
-import fetch, { type Response } from 'node-fetch';
-import { validatePath, validateMimeType, validateFileSignature, type MimeType } from './validators';
+import { validateMimeType, validateFileSignature, type MimeType } from './validators';
 
 export const download = async (
   fileUrl: string,
-  filePath: string,
+  filePathAtVolume: string,
   expectedMimeType: MimeType,
   abortController?: AbortController
-) => {
-  validatePath(filePath);
-
-  const dirPath = Path.dirname(filePath);
-
-  await mkdir(dirPath, { recursive: true });
-  const writeStream = createWriteStream(filePath);
+): Promise<string> => {
+  const writeStream = createWriteStream(filePathAtVolume);
 
   let res: Response;
 
@@ -50,7 +45,7 @@ export const download = async (
   }
 
   try {
-    await pipeline(res.body, writeStream);
+    await pipeline(Readable.fromWeb(res.body as WebReadableStream), writeStream);
   } catch (err: any) {
     if (err.name === 'AbortError') {
       writeStream.destroy();
@@ -59,5 +54,9 @@ export const download = async (
     throw err;
   }
 
-  await validateFileSignature(filePath, expectedMimeType);
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+
+  await validateFileSignature(artifactFullPath, expectedMimeType);
+
+  return artifactFullPath;
 };

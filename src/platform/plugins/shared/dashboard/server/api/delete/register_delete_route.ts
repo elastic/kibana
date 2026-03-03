@@ -10,19 +10,20 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
+import { getRouteConfig } from '../get_route_config';
+import { deleteDashboard } from './delete';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
-    path: `${PUBLIC_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   deleteRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: {
         request: {
           params: schema.object({
@@ -37,13 +38,12 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const { core } = await ctx.resolve(['core']);
-        await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, req.params.id);
+        await deleteDashboard(ctx, req.params.id);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.params.id} was not found.`,
+              message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
         }

@@ -23,5 +23,6 @@
     "@kbn/core",
     "@kbn/reporting-mocks-server",
     "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
   ]
 }

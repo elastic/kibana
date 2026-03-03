@@ -13,7 +13,6 @@ export const PLUGIN_NAME = 'Workflows Execution Engine';
 
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
@@ -43,6 +42,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     createdBy: {
       type: 'keyword',
     },
+    executedBy: {
+      type: 'keyword',
+    },
     startedAt: {
       type: 'date',
     },
@@ -53,6 +55,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'long',
     },
     triggeredBy: {
+      type: 'keyword',
+    },
+    concurrencyGroupKey: {
       type: 'keyword',
     },
   },
@@ -88,117 +93,6 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     duration: {
       // milliseconds
       type: 'long',
-    },
-  },
-};
-
-export const WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  properties: {
-    '@timestamp': {
-      type: 'date',
-    },
-    spaceId: {
-      type: 'keyword',
-    },
-    message: {
-      type: 'text',
-      fields: {
-        keyword: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-      },
-    },
-    level: {
-      type: 'keyword',
-    },
-    workflow: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'keyword',
-        },
-        name: {
-          type: 'text',
-          fields: {
-            keyword: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-          },
-        },
-        execution_id: {
-          type: 'keyword',
-        },
-        step_id: {
-          type: 'keyword',
-        },
-        step_name: {
-          type: 'text',
-          fields: {
-            keyword: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-          },
-        },
-        step_type: {
-          type: 'keyword',
-        },
-      },
-    },
-    event: {
-      type: 'object',
-      properties: {
-        action: {
-          type: 'keyword',
-        },
-        category: {
-          type: 'keyword',
-        },
-        type: {
-          type: 'keyword',
-        },
-        provider: {
-          type: 'keyword',
-        },
-        outcome: {
-          type: 'keyword',
-        },
-        duration: {
-          type: 'long',
-        },
-        start: {
-          type: 'date',
-        },
-        end: {
-          type: 'date',
-        },
-      },
-    },
-    error: {
-      type: 'object',
-      properties: {
-        message: {
-          type: 'text',
-          fields: {
-            keyword: {
-              type: 'keyword',
-              ignore_above: 1024,
-            },
-          },
-        },
-        type: {
-          type: 'keyword',
-        },
-        stack_trace: {
-          type: 'text',
-        },
-      },
-    },
-    tags: {
-      type: 'keyword',
     },
   },
 };

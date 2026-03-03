@@ -137,7 +137,16 @@ export const CategoryStoppedPartitions: FC = () => {
               />
             }
           />
-          <EuiBasicTable columns={columns} items={tableRow} />
+          <EuiBasicTable
+            columns={columns}
+            items={tableRow}
+            tableCaption={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitions.tableCaption',
+              {
+                defaultMessage: 'Stopped partitions',
+              }
+            )}
+          />
         </>
       )}
     </>

@@ -5,104 +5,200 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MessageRole, type BoundInferenceClient } from '@kbn/inference-common';
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { fromKueryExpression } from '@kbn/es-query';
-import { GenerateSignificantEventsPrompt } from './prompt';
+import { withSpan } from '@kbn/apm-utils';
+import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
+import { sumTokens } from '../helpers/sum_tokens';
+import { getComputedFeatureInstructions } from '../features/computed';
+import {
+  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+  getFeatureQueryFromToolArgs,
+  resolveFeatureTypeFilters,
+  toFeatureForLlmContext,
+} from './tools/features_tool';
+import {
+  createDefaultSignificantEventsToolUsage,
+  type SignificantEventsToolUsage,
+} from './tools/tool_usage';
 
 interface Query {
-  kql: string;
+  esql: string;
   title: string;
   category: SignificantEventType;
+  severity_score: number;
+  evidence?: string[];
 }
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /**
- * Generate significant event definitions, based on:
- * - the description of the feature (or stream if feature is undefined)
- * - dataset analysis
- * - for the given significant event types
+ * Generate significant event definitions using a reasoning agent that fetches
+ * stream features (including computed dataset analysis) via tool calls.
  */
 export async function generateSignificantEvents({
   stream,
-  feature,
+  esClient,
   start,
   end,
-  esClient,
+  getFeatures,
   inferenceClient,
   signal,
+  systemPrompt,
+  logger,
 }: {
   stream: Streams.all.Definition;
-  feature?: Feature;
+  esClient: ElasticsearchClient;
   start: number;
   end: number;
-  esClient: ElasticsearchClient;
+  getFeatures(params?: {
+    type?: string[];
+    minConfidence?: number;
+    limit?: number;
+  }): Promise<Feature[]>;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  systemPrompt: string;
 }): Promise<{
   queries: Query[];
+  tokensUsed: ChatCompletionTokenCount;
+  toolUsage: SignificantEventsToolUsage;
 }> {
-  const analysis = await describeDataset({
-    start,
-    end,
-    esClient,
-    index: stream.name,
-    filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
-  });
+  logger.debug('Starting significant event generation');
 
-  const response = await executeAsReasoningAgent({
-    input: {
-      name: feature?.name || stream.name,
-      dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
-      description: feature?.description || stream.description,
-    },
-    maxSteps: 4,
-    prompt: GenerateSignificantEventsPrompt,
-    inferenceClient,
-    toolCallbacks: {
-      add_queries: async (toolCall) => {
-        const queries = toolCall.function.arguments.queries;
+  const toolUsage = createDefaultSignificantEventsToolUsage();
 
-        const queryValidationResults = queries.map((query) => {
-          let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
-          try {
-            fromKueryExpression(query.kql);
-          } catch (error) {
-            validation = { valid: false, error };
-          }
-          return {
-            query,
-            valid: validation.valid,
-            status: validation.valid ? 'Added' : 'Failed to add',
-            error: 'error' in validation ? validation.error.message : undefined,
-          };
-        });
+  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
-        return {
-          response: {
-            queries: queryValidationResults,
-          },
-        };
+  logger.trace('Generating significant events via reasoning agent');
+  const response = await withSpan('generate_significant_events', () =>
+    executeAsReasoningAgent({
+      input: {
+        name: stream.name,
+        description: stream.description,
+        available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
+        computed_feature_instructions: getComputedFeatureInstructions(),
       },
-    },
-    abortSignal: signal,
-  });
+      maxSteps: 4,
+      prompt,
+      inferenceClient,
+      toolCallbacks: {
+        get_stream_features: async (toolCall) => {
+          toolUsage.get_stream_features.calls += 1;
+          const startTime = Date.now();
+          try {
+            // Keep this intentionally permissive: ignore unknown tool args instead of failing generation.
+            const { featureTypes, minConfidence, limit } = getFeatureQueryFromToolArgs(
+              toolCall.function.arguments
+            );
+            const typeFilters = resolveFeatureTypeFilters(featureTypes);
+            const features = await withSpan('get_stream_features_for_significant_events', () =>
+              getFeatures({
+                type: typeFilters,
+                minConfidence,
+                limit,
+              })
+            );
+            const llmFeatures = features.map(toFeatureForLlmContext);
+
+            return {
+              response: {
+                features: llmFeatures,
+                count: llmFeatures.length,
+              },
+            };
+          } catch (error) {
+            toolUsage.get_stream_features.failures += 1;
+            const errorMessage = getErrorMessage(error);
+            logger.warn(`Failed to fetch stream features: ${errorMessage}`);
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: errorMessage,
+              },
+            };
+          } finally {
+            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
+          }
+        },
+        add_queries: async (toolCall) => {
+          toolUsage.add_queries.calls += 1;
+          const startTime = Date.now();
+
+          const queries = toolCall.function.arguments.queries;
+          let hasFailures = false;
+
+          const queryValidationResults = await Promise.all(
+            queries.map(async (query) => {
+              try {
+                // The query search validates syntax and field mapping in Elasticsearch.
+                await esClient.esql.query({
+                  query: `${query.esql}\n| LIMIT 0`,
+                  format: 'json',
+                });
+
+                return {
+                  query,
+                  valid: true,
+                  status: 'Added',
+                  error: undefined,
+                };
+              } catch (error) {
+                hasFailures = true;
+                return {
+                  query,
+                  valid: false,
+                  status: 'Failed to add',
+                  error: getErrorMessage(error),
+                };
+              }
+            })
+          );
+          if (hasFailures) {
+            toolUsage.add_queries.failures += 1;
+          }
+          toolUsage.add_queries.latency_ms += Date.now() - startTime;
+
+          return {
+            response: {
+              queries: queryValidationResults,
+            },
+          };
+        },
+      },
+      abortSignal: signal,
+    })
+  );
 
   const queries = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Tool) {
-      return message.response.queries.flatMap((query) => {
-        if (query.valid) {
-          return [query.query];
-        }
-        return [];
-      });
+    if (message.role === MessageRole.Tool && message.name === 'add_queries') {
+      return message.response.queries.flatMap(({ valid, query }) => (valid ? [query] : []));
     }
+
     return [];
   });
 
-  return { queries };
+  logger.debug(`Generated ${queries.length} significant event queries`);
+
+  return {
+    queries,
+    tokensUsed: sumTokens(
+      {
+        prompt: 0,
+        completion: 0,
+        total: 0,
+        cached: 0,
+      },
+      response.tokens
+    ),
+    toolUsage,
+  };
 }

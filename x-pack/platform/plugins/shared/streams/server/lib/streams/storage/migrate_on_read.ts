@@ -8,17 +8,22 @@
 import { get, isObject } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
+import { isRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { set } from '@kbn/safer-lodash-set';
 import type { Condition } from '@kbn/streamlang';
 import { isNeverCondition } from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
+  migrateWhereBlocksToCondition,
 } from './migrate_to_streamlang_on_read';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
   let hasBeenMigrated = false;
+  if ('group' in migratedDefinition) {
+    return migratedDefinition as unknown as Streams.all.Definition;
+  }
   // Add required description
   if (typeof migratedDefinition.description !== 'string') {
     migratedDefinition = {
@@ -51,9 +56,13 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     isObject(migratedDefinition.ingest) &&
     'wired' in migratedDefinition.ingest &&
     (migratedDefinition.ingest as { wired?: unknown }).wired &&
-    typeof (migratedDefinition.ingest as { wired?: any }).wired === 'object' &&
-    Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
-    (migratedDefinition.ingest as { wired?: any }).wired.routing.some((route: any) => 'if' in route)
+    typeof (migratedDefinition.ingest as { wired?: unknown }).wired === 'object' &&
+    Array.isArray(
+      (migratedDefinition.ingest as { wired?: { routing?: unknown[] } }).wired?.routing
+    ) &&
+    (
+      migratedDefinition.ingest as { wired?: { routing?: Array<Record<string, unknown>> } }
+    ).wired!.routing!.some((route) => 'if' in route)
   ) {
     migratedDefinition = migrateRoutingIfConditionToStreamlang(migratedDefinition);
     hasBeenMigrated = true;
@@ -74,10 +83,12 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     isObject(migratedDefinition.ingest) &&
     'wired' in migratedDefinition.ingest &&
     isObject(migratedDefinition.ingest.wired) &&
-    Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
-    (migratedDefinition.ingest as { wired?: any }).wired.routing.some(
-      (route: any) => !('status' in route)
-    )
+    Array.isArray(
+      (migratedDefinition.ingest as { wired?: { routing?: unknown[] } }).wired?.routing
+    ) &&
+    (
+      migratedDefinition.ingest as { wired?: { routing?: Array<Record<string, unknown>> } }
+    ).wired!.routing!.some((route) => !('status' in route))
   ) {
     const routings = get(migratedDefinition, 'ingest.wired.routing', []) as Array<
       Record<string, unknown>
@@ -107,26 +118,76 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
-  // Add metadata to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
+  // Add failure_store to ingest streams if missing
+  if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
+    const streamName = migratedDefinition.name;
+
+    if (
+      'wired' in migratedDefinition.ingest &&
+      typeof streamName === 'string' &&
+      isRoot(streamName)
+    ) {
+      set(migratedDefinition, 'ingest.failure_store', {
+        lifecycle: { enabled: { data_retention: '30d' } },
+      });
+    } else {
+      set(migratedDefinition, 'ingest.failure_store', { inherit: {} });
+    }
+    hasBeenMigrated = true;
+  }
+
+  // Migrate where blocks to use 'condition' property instead of 'where'
+  if (
+    isObject(migratedDefinition.ingest) &&
+    isObject((migratedDefinition.ingest as { processing?: unknown }).processing) &&
+    Array.isArray(
+      (migratedDefinition.ingest as { processing?: { steps?: unknown[] } }).processing?.steps
+    )
+  ) {
+    const steps = (migratedDefinition.ingest as { processing: { steps: unknown[] } }).processing
+      .steps;
+    const migratedSteps = migrateWhereBlocksToCondition(steps);
+
+    if (migratedSteps.migrated) {
+      set(migratedDefinition, 'ingest.processing.steps', migratedSteps.steps);
+      hasBeenMigrated = true;
+    }
+  }
+  // Add required updated_at to all stream types
+  if (typeof migratedDefinition.updated_at !== 'string') {
     migratedDefinition = {
       ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        metadata: {},
+      updated_at: new Date(0).toISOString(),
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add updated_at to processing for ingest streams
+  if (
+    isObject(migratedDefinition.ingest) &&
+    'processing' in migratedDefinition.ingest &&
+    isObject(migratedDefinition.ingest.processing) &&
+    !('updated_at' in migratedDefinition.ingest.processing)
+  ) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      ingest: {
+        ...migratedDefinition.ingest,
+        processing: {
+          ...migratedDefinition.ingest.processing,
+          updated_at: new Date(0).toISOString(),
+        },
       },
     };
     hasBeenMigrated = true;
   }
 
-  // Add tags to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
+  // Initialize query_streams as empty array for ingest streams (WiredStream and ClassicStream)
+  // that don't have this field yet
+  if (isObject(migratedDefinition.ingest) && !('query_streams' in migratedDefinition)) {
     migratedDefinition = {
       ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        tags: [],
-      },
+      query_streams: [],
     };
     hasBeenMigrated = true;
   }

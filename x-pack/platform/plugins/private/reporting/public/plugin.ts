@@ -9,7 +9,7 @@ import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -87,10 +87,12 @@ export class ReportingPublicPlugin
   private config: ClientConfigType;
   private contract?: ReportingSetup;
   private startServices$?: StartServices$;
+  private isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   private getContract(apiClient: ReportingAPIClient, startServices$: StartServices$) {
@@ -128,6 +130,7 @@ export class ReportingPublicPlugin
             rendering: start.rendering,
             uiSettings: start.uiSettings,
             chrome: start.chrome,
+            userProfile: start.userProfile,
           },
           ...rest,
         ];
@@ -205,7 +208,7 @@ export class ReportingPublicPlugin
       visibleIn: [],
     });
 
-    uiActionsSetup.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'generateCsvReport', async () => {
+    uiActionsSetup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'generateCsvReport', async () => {
       const { ReportingCsvPanelAction } = await import('@kbn/reporting-csv-share-panel');
       return new ReportingCsvPanelAction({
         core,
@@ -218,7 +221,12 @@ export class ReportingPublicPlugin
     shareSetup.registerShareIntegration<ExportShare>(
       'search',
       // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-      reportingCsvExportShareIntegration({ apiClient, startServices$ })
+      reportingCsvExportShareIntegration({
+        apiClient,
+        startServices$,
+        isServerless: this.isServerless,
+        csvConfig: this.config.csv,
+      })
     );
 
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {

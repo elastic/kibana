@@ -7,7 +7,7 @@
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import type { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
@@ -79,6 +79,17 @@ export const formatSyntheticsPolicy = (
       }
     }
   });
+
+  // This field is NOT in the monitor config, but needs to be set in the policy
+  // so Heartbeat knows to decode the base64-encoded script
+  const encodingVar = dataStream?.vars?.['source.inline.encoding'];
+  if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
+    encodingVar.value = 'base64';
+    const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
+    if (inlineScript && typeof inlineScript.value === 'string') {
+      inlineScript.value = Buffer.from(inlineScript.value).toString('base64');
+    }
+  }
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {

@@ -7,9 +7,13 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
+  SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+} from '@kbn/management-settings-ids';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
+  AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
@@ -29,6 +33,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const READ_ONLY_SETTINGS: string[] = [
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    AI_CHAT_EXPERIENCE_TYPE,
+    AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   ];
 
   describe('Security advanced settings', function () {

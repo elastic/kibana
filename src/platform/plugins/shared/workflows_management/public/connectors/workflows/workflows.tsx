@@ -48,5 +48,6 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./workflows_connectors')),
     actionParamsFields: lazy(() => import('./workflows_params')),
+    isSystemActionType: true,
   };
 }

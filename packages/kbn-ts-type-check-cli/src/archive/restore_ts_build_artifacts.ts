@@ -8,7 +8,7 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { MAX_COMMITS_TO_CHECK } from './constants';
+import { MAX_COMMITS_TO_CHECK, CACHE_INVALIDATION_FILES } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
@@ -36,10 +36,18 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     if (isCiEnvironment()) {
       await withGcsAuth(log, async () => {
-        await new GcsFileSystem(log).restoreArchive({ shas: candidateShas, prNumber });
+        await new GcsFileSystem(log).restoreArchive({
+          shas: candidateShas,
+          prNumber,
+          cacheInvalidationFiles: CACHE_INVALIDATION_FILES,
+        });
       });
     } else {
-      await new LocalFileSystem(log).restoreArchive({ shas: candidateShas, prNumber });
+      await new LocalFileSystem(log).restoreArchive({
+        shas: candidateShas,
+        prNumber,
+        cacheInvalidationFiles: CACHE_INVALIDATION_FILES,
+      });
     }
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);

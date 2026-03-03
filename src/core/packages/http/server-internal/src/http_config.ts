@@ -190,6 +190,10 @@ const configSchema = schema.object(
         { defaultValue: [] }
       ),
     }),
+    excludeRoutes: schema.arrayOf(
+      schema.string({ validate: match(/^\//, 'must start with a slash') }),
+      { defaultValue: [], maxSize: 100 }
+    ),
     eluMonitor: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       logging: schema.object({
@@ -361,6 +365,7 @@ export class HttpConfig implements IHttpConfig {
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
+  public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
@@ -416,6 +421,7 @@ export class HttpConfig implements IHttpConfig {
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
+    this.excludeRoutes = rawHttpConfig.excludeRoutes;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
     this.rateLimiter = rawHttpConfig.rateLimiter;

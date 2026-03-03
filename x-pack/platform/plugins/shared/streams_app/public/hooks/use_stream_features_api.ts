@@ -5,26 +5,19 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
-import { firstValueFrom } from 'rxjs';
-import type { Streams, Feature } from '@kbn/streams-schema';
-import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
-import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
+import type { Streams } from '@kbn/streams-schema';
+import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
 import { useKibana } from './use_kibana';
+import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
-  upsertQuery: (
-    featureName: string,
-    request: Pick<Feature, 'filter' | 'description'>
-  ) => Promise<void>;
-  identifyFeatures: (
-    connectorId: string,
-    to: string,
-    from: string
-  ) => Promise<IdentifiedFeaturesEvent>;
-  addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
-  removeFeaturesFromStream: (featureNames: string[]) => Promise<StorageClientBulkResponse>;
-  abort: () => void;
+  getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
+  scheduleFeaturesIdentificationTask: (connectorId: string) => Promise<void>;
+  cancelFeaturesIdentificationTask: () => Promise<void>;
+  deleteFeature: (uuid: string) => Promise<void>;
+  deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -36,78 +29,64 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     },
   } = useKibana();
 
-  const { signal, abort, refresh } = useAbortController();
+  const { signal } = useAbortController();
 
-  return {
-    identifyFeatures: async (connectorId: string, to: string, from: string) => {
-      const events$ = streamsRepositoryClient.stream(
-        'POST /internal/streams/{name}/features/_identify',
-        {
+  return useMemo(
+    () => ({
+      getFeaturesIdentificationStatus: async () => {
+        return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features/_status', {
           signal,
           params: {
             path: { name: definition.name },
-            query: {
-              connectorId,
+          },
+        });
+      },
+      scheduleFeaturesIdentificationTask: async (connectorId: string) => {
+        const { from, to } = getLast24HoursTimeRange();
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              action: 'schedule',
               to,
               from,
+              connector_id: connectorId,
             },
           },
-        }
-      );
-
-      return firstValueFrom(events$);
-    },
-    addFeaturesToStream: async (features: Feature[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
+        });
+      },
+      cancelFeaturesIdentificationTask: async () => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              action: 'cancel',
+            },
           },
-          body: {
-            operations: features.map((feature) => ({
-              index: {
-                feature,
-              },
-            })),
+        });
+      },
+      deleteFeature: async (uuid: string) => {
+        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+          signal,
+          params: {
+            path: { name: definition.name, uuid },
           },
-        },
-      });
-    },
-    removeFeaturesFromStream: async (featureNames: string[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
+        });
+      },
+      deleteFeaturesInBulk: async (uuids: string[]) => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              operations: uuids.map((id) => ({ delete: { id } })),
+            },
           },
-          body: {
-            operations: featureNames.map((feature) => ({
-              delete: {
-                feature: {
-                  name: feature,
-                },
-              },
-            })),
-          },
-        },
-      });
-    },
-    upsertQuery: async (featureName, request) => {
-      await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-            featureName,
-          },
-          body: request,
-        },
-      });
-    },
-    abort: () => {
-      abort();
-      refresh();
-    },
-  };
+        });
+      },
+    }),
+    [streamsRepositoryClient, signal, definition.name]
+  );
 }

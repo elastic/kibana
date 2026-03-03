@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import type { AttackDetailsRightPanelKey } from './constants/panel_keys';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import type { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
 
 export interface AttackDetailsProps extends FlyoutPanelProps {
   key: typeof AttackDetailsRightPanelKey;
-  params?: {
-    attackId: string;
-  };
+  path?: PanelPath;
+  params?: { attackId: string; indexName: string };
+}
+
+export interface AttackDetailsLeftPanelProps extends FlyoutPanelProps {
+  key: typeof AttackDetailsLeftPanelKey;
+  path?: PanelPath;
+  params?: { attackId: string; indexName: string };
 }

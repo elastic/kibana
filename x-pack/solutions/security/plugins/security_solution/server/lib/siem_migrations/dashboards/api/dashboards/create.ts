@@ -15,7 +15,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateMigrationItemInput } from '../../../common/data/siem_migrations_data_item_client';
 import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
@@ -87,7 +87,10 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             );
 
             const resourceIdentifier = new DashboardResourceIdentifier(
-              items[0].original_dashboard.vendor
+              items[0].original_dashboard.vendor,
+              {
+                experimentalFeatures: ctx.securitySolution.getConfig().experimentalFeatures,
+              }
             );
 
             const [, extractedResources] = await Promise.all([

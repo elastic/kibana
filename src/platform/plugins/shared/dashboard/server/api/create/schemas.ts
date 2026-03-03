@@ -8,21 +8,31 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { dashboardMetaSchema, getDashboardDataSchema } from '../../content_management/v1/schema';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export function getCreateRequestBody() {
-  return schema.object({
-    id: schema.maybe(schema.string()),
-    data: getDashboardDataSchema(),
-    spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
-  });
+export const createRequestParamsSchema = schema.maybe(
+  schema.object(
+    {
+      id: schema.maybe(
+        schema.string({
+          meta: { description: 'A unique identifier for the dashboard.' },
+        })
+      ),
+    },
+    { unknowns: 'forbid' }
+  )
+);
+
+export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
+  return getDashboardStateSchema(isDashboardAppRequest);
 }
 
-export function getCreateResponseBody() {
+export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardDataSchema(),
-    meta: dashboardMetaSchema,
+    data: getDashboardStateSchema(isDashboardAppRequest),
+    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
     spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

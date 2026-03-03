@@ -23,11 +23,11 @@ import {
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS_ACTIVE,
-  type AlertStatus,
+  type PublicAlertStatus,
 } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
 import type { PropsWithChildren } from 'react';
-import React, { type FC, useCallback, useMemo, useRef } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -71,10 +71,15 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { anomalyDetectionAlertsStateService, anomalyTimelineStateService } =
-    useAnomalyExplorerContext();
+  const { anomalyDetectionAlertsStateService } = useAnomalyExplorerContext();
 
   const selectedAlerts = useObservable(anomalyDetectionAlertsStateService.selectedAlerts$, []);
+
+  const [isPopoverDismissed, setIsPopoverDismissed] = useState(false);
+
+  useEffect(() => {
+    setIsPopoverDismissed(false);
+  }, [selection]);
 
   const leftOffset = useMemo<number>(() => {
     if (!selection || !swimLaneData) return 0;
@@ -86,15 +91,15 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
     return Y_AXIS_LABEL_WIDTH + cellOffset;
   }, [selection, swimlaneContainerWidth, swimLaneData]);
 
-  const popoverOpen = !!selection && !!selectedAlerts?.length;
+  const popoverOpen = !!selection && !!selectedAlerts?.length && !isPopoverDismissed;
 
   const alertFormatter = useMemo(() => getAlertEntryFormatter(fieldFormats), [fieldFormats]);
 
   const viewType = 'table';
 
   const closePopover = useCallback(() => {
-    anomalyTimelineStateService.setSelectedCells();
-  }, [anomalyTimelineStateService]);
+    setIsPopoverDismissed(true);
+  }, []);
 
   return (
     <div
@@ -152,7 +157,7 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
                       ).map(([status, count]) => {
                         return (
                           <EuiText size={'xs'}>
-                            {statusNameMap[status as AlertStatus]}{' '}
+                            {statusNameMap[status as PublicAlertStatus]}{' '}
                             <EuiNotificationBadge
                               size="s"
                               color={status === ALERT_STATUS_ACTIVE ? 'accent' : 'subdued'}
@@ -261,6 +266,9 @@ export const MiniAlertTable: FC<MiniAlertTableProps> = ({ data }) => {
 
   return (
     <EuiInMemoryTable
+      tableCaption={i18n.translate('xpack.ml.explorer.cellSelectionPopover.alertsTableCaption', {
+        defaultMessage: 'Alerts for the selected swim lane cell',
+      })}
       css={{ width: '510px' }}
       compressed
       columns={columns}

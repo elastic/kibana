@@ -19,8 +19,10 @@ import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
 import type { CoreStart } from '@kbn/core/public';
-import type { SearchUsageCollector } from '../..';
-import { createSearchUsageCollectorMock } from '../collectors/mocks';
+import { addInProgressSessionId } from './in_progress_session';
+
+jest.mock('./in_progress_session');
+const mockedAddInProgressSessionId = jest.mocked(addInProgressSessionId);
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
@@ -46,16 +48,9 @@ describe('Session service', () => {
   let currentAppId$: BehaviorSubject<string>;
   let toastService: jest.Mocked<CoreStart['notifications']['toasts']>;
   let sessionsClient: jest.Mocked<ISessionsClient>;
-  let usageCollector: jest.Mocked<SearchUsageCollector>;
 
   beforeEach(() => {
-    const initializerContext = coreMock.createPluginInitializerContext({
-      search: {
-        sessions: {
-          notTouchedTimeout: 5 * 60 * 1000,
-        },
-      },
-    });
+    const initializerContext = coreMock.createPluginInitializerContext();
     const startService = coreMock.createSetup().getStartServices;
     const startServicesMock = coreMock.createStart();
     toastService = startServicesMock.notifications.toasts;
@@ -67,7 +62,6 @@ describe('Session service', () => {
       id,
       attributes: { ...mockSavedObject.attributes, sessionId: id },
     }));
-    usageCollector = createSearchUsageCollectorMock();
     sessionService = new SessionService(
       initializerContext,
       () =>
@@ -92,11 +86,12 @@ describe('Session service', () => {
       getSearchSessionEBTManagerMock(),
       sessionsClient,
       nowProvider,
-      usageCollector,
       { freezeState: false } // needed to use mocks inside state container
     );
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
     sessionService.state$.subscribe(state$);
+
+    jest.resetAllMocks();
   });
 
   describe('Session management', () => {
@@ -180,46 +175,105 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
+  });
 
-    describe('Keeping searches alive', () => {
-      let dateNowSpy: jest.SpyInstance;
-      let now = Date.now();
-      const advanceTimersBy = (by: number) => {
-        now = now + by;
-        jest.advanceTimersByTime(by);
-      };
-      beforeEach(() => {
-        dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
-        now = Date.now();
-        jest.useFakeTimers();
+  describe('Keeping searches alive', () => {
+    let dateNowSpy: jest.SpyInstance;
+    let now = Date.now();
+    const advanceTimersBy = (by: number) => {
+      now = now + by;
+      jest.advanceTimersByTime(by);
+    };
+    beforeEach(() => {
+      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      now = Date.now();
+
+      sessionService.enableStorage({
+        getName: async () => 'Name',
+        getLocatorData: async () => ({
+          id: 'id',
+          initialState: {},
+          restoreState: {},
+        }),
       });
-      afterEach(() => {
-        dateNowSpy.mockRestore();
-        jest.useRealTimers();
-      });
 
-      it('Polls all completed searches to keep them alive', async () => {
-        const abort = jest.fn();
-        const poll = jest.fn(() => Promise.resolve());
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      dateNowSpy.mockRestore();
+      jest.useRealTimers();
+    });
 
-        sessionService.enableStorage({
-          getName: async () => 'Name',
-          getLocatorData: async () => ({
-            id: 'id',
-            initialState: {},
-            restoreState: {},
-          }),
+    describe('when there is only 1 search', () => {
+      describe('when it finishes', () => {
+        it('should NOT poll the search', () => {
+          const abort = jest.fn();
+          const poll = jest.fn(() => Promise.resolve());
+
+          sessionService.start();
+
+          const searchTracker = sessionService.trackSearch({ abort, poll });
+          searchTracker.complete();
+
+          expect(poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(poll).toHaveBeenCalledTimes(0);
         });
-        sessionService.start();
+      });
+    });
 
-        const searchTracker = sessionService.trackSearch({ abort, poll });
-        searchTracker.complete();
+    describe('when there are multiple searches', () => {
+      describe('when not all of them are is finished', () => {
+        it('should poll the finished searches', () => {
+          const search1 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+          const search2 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
 
-        expect(poll).toHaveBeenCalledTimes(0);
+          sessionService.start();
 
-        advanceTimersBy(30000);
+          const searchTracker1 = sessionService.trackSearch(search1);
+          sessionService.trackSearch(search2);
 
-        expect(poll).toHaveBeenCalledTimes(1);
+          searchTracker1.complete();
+
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(search1.poll).toHaveBeenCalledTimes(1);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+        });
+      });
+
+      describe('when all of them are is finished', () => {
+        it('should not poll anything', () => {
+          const search1 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+          const search2 = {
+            poll: jest.fn(() => Promise.resolve()),
+            abort: jest.fn(),
+          };
+
+          sessionService.start();
+
+          const searchTracker1 = sessionService.trackSearch(search1);
+          const searchTracker2 = sessionService.trackSearch(search2);
+
+          searchTracker1.complete();
+          searchTracker2.complete();
+
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+          advanceTimersBy(35_000);
+          expect(search1.poll).toHaveBeenCalledTimes(0);
+          expect(search2.poll).toHaveBeenCalledTimes(0);
+        });
       });
     });
   });
@@ -491,6 +545,27 @@ describe('Session service', () => {
     expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
   });
 
+  test('save() calls addInProgressSessionId()', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    const sessionId = sessionService.start();
+    sessionService.trackSearch({
+      poll: jest.fn().mockResolvedValue(undefined),
+      abort: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(mockedAddInProgressSessionId).toHaveBeenCalledTimes(0);
+    await sessionService.save({ entryPoint: 'test' });
+    expect(mockedAddInProgressSessionId).toHaveBeenNthCalledWith(1, sessionId);
+  });
+
   describe("user doesn't have access to search session", () => {
     beforeAll(() => {
       userHasAccessToSearchSessions = false;
@@ -532,98 +607,6 @@ describe('Session service', () => {
         title: expect.stringContaining('Failed to edit name of the background search'),
       })
     );
-  });
-
-  describe('disableSaveAfterSearchesExpire$', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    test('disables save after session completes on timeout', async () => {
-      const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
-        emitResult.push(result);
-      });
-
-      sessionService.start();
-      const complete = sessionService.trackSearch({
-        abort: () => {},
-        poll: async () => {},
-      }).complete;
-
-      complete();
-
-      expect(emitResult).toEqual([false]);
-
-      jest.advanceTimersByTime(2 * 60 * 1000); // 2 minutes
-
-      expect(emitResult).toEqual([false]);
-
-      jest.advanceTimersByTime(3 * 60 * 1000); // 3 minutes
-
-      expect(emitResult).toEqual([false, true]);
-
-      sessionService.start();
-
-      expect(emitResult).toEqual([false, true, false]);
-    });
-
-    test('disables save for continued from different app sessions', async () => {
-      const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
-        emitResult.push(result);
-      });
-
-      const sessionId = sessionService.start();
-
-      const complete = sessionService.trackSearch({
-        abort: () => {},
-        poll: async () => {},
-      }).complete;
-
-      complete();
-
-      expect(emitResult).toEqual([false]);
-
-      sessionService.clear();
-
-      sessionService.continue(sessionId);
-
-      expect(emitResult).toEqual([false, true]);
-
-      sessionService.start();
-
-      expect(emitResult).toEqual([false, true, false]);
-    });
-
-    test('emits usage once', async () => {
-      const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
-        emitResult.push(result);
-      });
-      sessionService.disableSaveAfterSearchesExpire$.subscribe(); // testing that source is shared
-
-      sessionService.start();
-      const complete = sessionService.trackSearch({
-        abort: () => {},
-        poll: async () => {},
-      }).complete;
-
-      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
-
-      complete();
-
-      jest.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
-
-      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
-
-      sessionService.start();
-
-      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
-    });
   });
 
   it('can continue an old session', () => {

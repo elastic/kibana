@@ -32,6 +32,8 @@ interface GridColumnProps {
   showCardLabels?: boolean;
   scrollElementId?: string;
   emptyStateStyles?: Record<string, string>;
+  columnCount?: 1 | 2 | 3;
+  gutterSize?: 's' | 'm';
 }
 
 export const GridColumn = ({
@@ -41,6 +43,8 @@ export const GridColumn = ({
   isLoading,
   scrollElementId,
   emptyStateStyles,
+  columnCount = 3,
+  gutterSize = 'm',
 }: GridColumnProps) => {
   const windowScrollerRef = useRef<WindowScroller>(null);
   const listRef = useRef<VirtualizedList>(null);
@@ -60,9 +64,9 @@ export const GridColumn = ({
 
   if (isLoading) {
     return (
-      <EuiFlexGrid gutterSize="m" columns={3} alignItems="start">
+      <EuiFlexGrid gutterSize={gutterSize} columns={columnCount} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
-          <EuiFlexItem key={index} grow={3}>
+          <EuiFlexItem key={index} grow={columnCount}>
             <EuiSkeletonRectangle height="160px" width="100%" />
           </EuiFlexItem>
         ))}
@@ -73,13 +77,13 @@ export const GridColumn = ({
   if (!list.length) {
     return (
       <EuiFlexGrid
-        gutterSize="m"
-        columns={3}
+        gutterSize={gutterSize}
+        columns={columnCount}
         data-test-subj="emptyState"
         style={emptyStateStyles}
         alignItems="start"
       >
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={columnCount}>
           <EuiText>
             <p>
               {showMissingIntegrationMessage ? (
@@ -101,7 +105,7 @@ export const GridColumn = ({
   }
 
   const rowRenderer: ListRowRenderer = ({ index, key, parent, style }) => {
-    const items = list.slice(index * 3, index * 3 + 3);
+    const items = list.slice(index * columnCount, index * columnCount + columnCount);
     return (
       <CellMeasurer
         cache={rowMeasurementCache.current}
@@ -112,7 +116,7 @@ export const GridColumn = ({
       >
         {({ registerChild }) => (
           <div ref={registerChild} style={style}>
-            <EuiFlexGrid columns={3} gutterSize="m" alignItems="start">
+            <EuiFlexGrid columns={columnCount} gutterSize={gutterSize} alignItems="start">
               {items.map((item) => (
                 <EuiFlexItem
                   key={item.id}
@@ -131,7 +135,7 @@ export const GridColumn = ({
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
-            <EuiSpacer size="m" />
+            <EuiSpacer size={gutterSize} />
           </div>
         )}
       </CellMeasurer>
@@ -163,7 +167,7 @@ export const GridColumn = ({
               isScrolling={isScrolling}
               onScroll={onChildScroll}
               overscanRowCount={2}
-              rowCount={Math.ceil(list.length / 3)}
+              rowCount={Math.ceil(list.length / columnCount)}
               deferredMeasurementCache={rowMeasurementCache.current}
               rowHeight={rowMeasurementCache.current.rowHeight}
               rowRenderer={rowRenderer}

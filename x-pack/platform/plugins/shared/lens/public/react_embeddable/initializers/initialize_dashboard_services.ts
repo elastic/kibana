@@ -14,7 +14,7 @@ import type {
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { titleComparators } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
@@ -28,7 +28,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import { isTextBasedLanguage, transformToApiConfig } from '../helper';
+import { isTextBasedLanguage, stripInheritedContext, transformToApiConfig } from '../helper';
 
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
@@ -133,17 +133,13 @@ export function initializeDashboardServices(
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         return {
-          rawState: {
-            ...currentState,
-            savedObjectId: newId,
-          },
+          ...currentState,
+          savedObjectId: newId,
         };
       },
       getSerializedStateByValue: () => {
-        const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return {
-          rawState: transformToApiConfig(byValueRuntimeState),
-        };
+        const { savedObjectId, ...byValueRuntimeState } = stripInheritedContext(getLatestState());
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(
@@ -174,8 +170,6 @@ export function initializeDashboardServices(
     },
     reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
-      internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
-      internalApi.updateOverrides(lastSaved?.overrides);
     },
   };
 }

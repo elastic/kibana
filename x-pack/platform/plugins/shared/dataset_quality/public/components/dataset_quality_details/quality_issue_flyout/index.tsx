@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
@@ -35,8 +34,8 @@ import {
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
+  useEsqlRedirectLink,
   useQualityIssues,
-  useRedirectLink,
 } from '../../../hooks';
 import { NavigationSource } from '../../../services/telemetry';
 import DegradedFieldFlyout from './degraded_field';
@@ -53,7 +52,7 @@ export default function QualityIssueFlyout() {
     degradedFieldAnalysisFormattedResult,
     isDegradedFieldsValueLoading,
   } = useQualityIssues();
-  const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
+  const { dataStreamSettings, datasetDetails, timeRange, view } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
   });
@@ -67,25 +66,24 @@ export default function QualityIssueFlyout() {
   const isUserViewingTheIssueOnLatestBackingIndex =
     dataStreamSettings?.lastBackingIndexName === fieldList?.indexFieldWasLastPresentIn;
 
+  const isDegradedType = expandedDegradedField && expandedDegradedField.type === 'degraded';
+
+  const degradedEsqlQuery = isDegradedType
+    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE MV_CONTAINS(${_IGNORED}, "${expandedDegradedField.name}")`
+    : '';
+
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures`;
+
+  const esqlQuery = isDegradedType ? degradedEsqlQuery : failedEsqlQuery;
+
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+    query: { esql: esqlQuery },
     navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
   });
 
-  const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails.rawName,
+  const redirectLinkProps = useEsqlRedirectLink({
+    esqlQuery,
     timeRangeConfig: timeRange,
-    query: {
-      language: 'kuery',
-      query:
-        expandedDegradedField && expandedDegradedField.type === 'degraded'
-          ? `${_IGNORED}: ${expandedDegradedField.name}`
-          : '',
-    },
-    selector:
-      expandedDegradedField && expandedDegradedField.type === 'failed'
-        ? FAILURE_STORE_SELECTOR
-        : undefined,
     sendTelemetry,
   });
 
@@ -135,7 +133,8 @@ export default function QualityIssueFlyout() {
           !isAnalysisInProgress &&
           degradedFieldAnalysisFormattedResult &&
           !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics &&
-          !isDegradedFieldsValueLoading && (
+          !isDegradedFieldsValueLoading &&
+          view !== 'wired' && (
             <>
               <EuiSpacer size="s" />
               <EuiTextColor

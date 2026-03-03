@@ -10,24 +10,20 @@
 import React, { useMemo } from 'react';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import type { Observable } from 'rxjs';
-import { combineLatest, EMPTY } from 'rxjs';
 import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
-  ChromeRecentlyAccessedHistoryItem,
   NavigationTreeDefinitionUI,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
-import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import useObservable from 'react-use/lib/useObservable';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
-import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -37,29 +33,21 @@ export interface ChromeNavigationProps {
   // kibana deps
   basePath: BasePath;
   application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
-  reportEvent: (eventType: string, eventData: object) => void;
 
   // nav state
-  navigationTree$: Observable<NavigationTreeDefinitionUI>;
+  navigation$: Observable<{
+    solutionId: SolutionId;
+    navigationTree: NavigationTreeDefinitionUI;
+    activeNodes: ChromeProjectNavigationNode[][];
+  }>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
-  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
-  // tour
-  navigationTourManager: NavigationTourManager;
-
-  // other state that might be needed later
-  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  isFeedbackBtnVisible$: Observable<boolean>;
-  loadingCount$: Observable<number>;
-  dataTestSubj$?: Observable<string | undefined>;
-
-  feedbackUrlParams$: Observable<URLSearchParams | undefined>;
+  // collapse toggle callback
+  onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
-  const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
-  const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
@@ -69,26 +57,14 @@ export const Navigation = (props: ChromeNavigationProps) => {
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
-      <NavigationTour
-        tourManager={props.navigationTourManager}
-        key={
-          // Force remount (and reset position) the tour when the nav is collapsed/expanded
-          props.isCollapsed ? 'collapsed' : 'expanded'
-        }
-      />
       <NavigationComponent
         items={navItems}
         logo={logoItem}
-        sidePanelFooter={
-          <NavigationFeedbackSnippet
-            solutionId={solutionId}
-            feedbackUrlParams={feedbackUrlParams}
-          />
-        }
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
+        onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
-        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+        data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
   );
@@ -99,21 +75,19 @@ export const Navigation = (props: ChromeNavigationProps) => {
 export default Navigation;
 
 const useNavigationItems = (
-  props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$' | 'basePath'>
-): NavigationItems | null => {
-  const state$ = useMemo(
-    () => combineLatest([props.navigationTree$, props.activeNodes$]),
-    [props.navigationTree$, props.activeNodes$]
-  );
-  const state = useObservable(state$);
+  props: Pick<ChromeNavigationProps, 'navigation$' | 'navLinks$' | 'basePath'>
+): (NavigationItems & { solutionId: SolutionId }) | null => {
+  const state = useObservable(props.navigation$);
 
   const basePath = props.basePath.get();
   const panelStateManager = useMemo(() => new PanelStateManager(basePath), [basePath]);
 
   const memoizedItems = useMemo(() => {
     if (!state) return null;
-    const [navigationTree, activeNodes] = state;
-    return toNavigationItems(navigationTree, activeNodes, panelStateManager);
+    return {
+      ...toNavigationItems(state.navigationTree, state.activeNodes, panelStateManager),
+      solutionId: state.solutionId,
+    };
   }, [state, panelStateManager]);
 
   return memoizedItems;

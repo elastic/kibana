@@ -64,6 +64,18 @@ export class DashboardAddPanelService extends FtrService {
     await this.clickAddNewPanelFromUIActionLink('Lens');
   }
 
+  async clickAddControlPanel() {
+    this.log.debug('DashboardAddPanel.clickAddControlPanel');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('Control');
+  }
+
+  async clickAddEsqlPanel() {
+    this.log.debug('DashboardAddPanel.clickAddEsqlPanel');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('ES|QL');
+  }
+
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();

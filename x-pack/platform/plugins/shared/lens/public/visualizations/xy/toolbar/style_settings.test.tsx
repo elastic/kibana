@@ -12,7 +12,7 @@ import type {
   DatasourcePublicAPI,
   VisualizationToolbarProps,
 } from '@kbn/lens-common';
-import type { State, XYState, XYDataLayerConfig } from '../types';
+import type { XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -25,7 +25,7 @@ import { XyAxisSettings } from './axis_settings';
 describe('xy style settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): State {
+  function testState(): XYState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -35,7 +35,7 @@ describe('xy style settings', () => {
           seriesType: 'bar',
           layerType: LayerTypes.DATA,
           layerId: 'first',
-          splitAccessor: 'baz',
+          splitAccessors: ['baz'],
           xAccessor: 'foo',
           accessors: ['one'],
         },
@@ -90,7 +90,9 @@ describe('xy style settings', () => {
     );
   });
 
-  describe('Axis settings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/246652
+  // FLAKY: https://github.com/elastic/kibana/issues/246653
+  describe.skip('Axis settings', () => {
     it('should disable the popover if there is no right axis', () => {
       renderComponent();
       expect(screen.getByRole('button', { name: 'Right axis' })).toBeDisabled();

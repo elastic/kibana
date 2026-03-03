@@ -73,6 +73,15 @@ export const ERROR_LOADING_PENDING_ACTIONS = i18n.translate(
   }
 );
 
+/** Used by multiple command */
+export const ENDPOINT_EXECUTION_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.executionTimeout',
+  {
+    defaultMessage:
+      'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
+  }
+);
+
 export const getGenericErrorMessage = (errorTitlePrefix: string, code: string) => {
   return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.genericError', {
     defaultMessage: '{prefix}Error {code}',
@@ -232,13 +241,7 @@ export const CONSOLE_COMMANDS = {
     }),
     args: {
       timeout: {
-        about: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
-          {
-            defaultMessage:
-              'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
-          }
-        ),
+        about: ENDPOINT_EXECUTION_TIMEOUT,
       },
     },
   },
@@ -383,8 +386,10 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
       defaultMessage: 'Run Script',
     }),
-    helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: `Command Examples for Running Scripts:
+    helpExample: i18n.translate(
+      'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about',
+      {
+        defaultMessage: `Command Examples for Running Scripts:
 
 1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
 
@@ -403,7 +408,8 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
    runscript --HostPath="C:\\temp\\LocalScript.ps1" --CommandLine="-Verbose true"
 
 `,
-    }),
+      }
+    ),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
       {
@@ -435,7 +441,7 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       },
     },
 
-    helpUsage: i18n.translate(
+    helpExample: i18n.translate(
       'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.about',
       {
         defaultMessage: `Command Examples for Running Scripts:

@@ -100,6 +100,21 @@ export default function (providerContext: FtrProviderContext) {
           }),
         ]);
       });
+      it('should bump policies accross all spaces on update', async () => {
+        const policiesResBefore = await fetchAllPolicies();
+
+        await apiClient.putDownloadSource(
+          { name: `test update ${Date.now()}`, host: 'https://elastic.co' },
+          downloadSourceId
+        );
+
+        const policiesResAfter = await fetchAllPolicies();
+
+        for (const policyRes of policiesResBefore) {
+          const policyAfter = policiesResAfter.find((p) => p.item.id === policyRes.item.id);
+          expect(policyAfter?.item.revision).to.be.greaterThan(policyRes.item.revision);
+        }
+      });
       it('should remove download_source_id accross spaces', async () => {
         const policiesResBefore = await fetchAllPolicies();
 

@@ -106,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const rollUpTransformResponse = await transformHelper.assertExist(getSLOTransformId(id, 1));
       expect(rollUpTransformResponse.transforms[0].source.index).eql(['kbn-data-forge*']);
       expect(rollUpTransformResponse.transforms[0].dest).eql({
-        index: '.slo-observability.sli-v3.5',
+        index: '.slo-observability.sli-v3.6',
         pipeline: `.slo-observability.sli.pipeline-${id}-1`,
       });
       expect(rollUpTransformResponse.transforms[0].pivot.group_by).eql({
@@ -118,10 +118,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         getSLOSummaryTransformId(id, 1)
       );
       expect(summaryTransformResponse.transforms[0].source.index).eql([
-        '.slo-observability.sli-v3.5*',
+        '.slo-observability.sli-v3.6*',
       ]);
       expect(summaryTransformResponse.transforms[0].dest).eql({
-        index: '.slo-observability.summary-v3.5',
+        index: '.slo-observability.summary-v3.6',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
     });

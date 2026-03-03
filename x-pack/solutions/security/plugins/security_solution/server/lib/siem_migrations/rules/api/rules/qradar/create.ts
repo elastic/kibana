@@ -13,14 +13,14 @@ import {
   CreateQRadarRuleMigrationRulesRequestParams,
 } from '../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { QradarRulesXmlParser } from '../../../../../../../common/siem_migrations/parsers/qradar/rules_xml';
+import { RuleResourceIdentifier } from '../../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import type { CreateRuleMigrationRulesInput } from '../../../data/rule_migrations_data_rules_client';
 import { SiemMigrationAuditLogger } from '../../../../common/api/util/audit';
-import { authz } from '../../../../common/api/util/authz';
+import { authz } from '../../util/authz';
 import { withExistingMigration } from '../../../../common/api/util/with_existing_migration_id';
 import { withLicense } from '../../../../common/api/util/with_license';
-import { transformQRadarRuleToOriginalRule } from '../../util/qradar_transform';
 import type { CreateSiemMigrationResourceInput } from '../../../../common/data/siem_migrations_data_resources_client';
+import { getVendorProcessor } from '../../../vendors/get_vendor_processor';
 
 export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -53,6 +53,10 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
           );
 
           try {
+            const ctx = await context.resolve(['securitySolution']);
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const { experimentalFeatures } = ctx.securitySolution.getConfig();
+
             // Parse QRadar XML
             const parser = new QradarRulesXmlParser(xml);
             const qradarRules = await parser.getRules();
@@ -65,27 +69,33 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
               });
             }
 
-            // Transform QRadar rules to OriginalRule format
-            const originalRules = qradarRules
-              .map((qradarRule) => {
-                try {
-                  return transformQRadarRuleToOriginalRule(qradarRule);
-                } catch (error) {
-                  logger.warn(`Failed to transform QRadar rule: ${error.message}`);
-                  return null;
-                }
-              })
-              .filter((rule): rule is NonNullable<typeof rule> => rule !== null);
+            const isEligibleForTranslation = qradarRules.some(
+              (rule) => rule.rule_type !== 'building_block'
+            );
 
-            if (originalRules.length === 0) {
+            if (!isEligibleForTranslation) {
               return res.badRequest({
                 body: { message: 'No valid rules could be extracted from the XML' },
               });
             }
 
-            const rulesCount = originalRules.length;
-            const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const rulesCount = qradarRules.length;
+
+            const VendorProcessor = getVendorProcessor('qradar');
+
+            const rulesProcessor = new VendorProcessor({
+              migrationId,
+              dataClient: ruleMigrationsClient.data.items,
+              logger,
+            }).getProcessor('rules');
+
+            const rulesToBeCreated = rulesProcessor(qradarRules);
+
+            if (rulesCount === 0) {
+              return res.badRequest({
+                body: { message: 'No valid rules could be extracted from the XML' },
+              });
+            }
 
             const resourcesToBeCreated: CreateSiemMigrationResourceInput[] = [];
 
@@ -112,15 +122,26 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
               count: rulesCount,
             });
 
-            // Create rule migrations
-            const ruleMigrations = originalRules.map<CreateRuleMigrationRulesInput>(
-              (originalRule) => ({
-                migration_id: migrationId,
-                original_rule: originalRule,
-              })
-            );
+            await ruleMigrationsClient.data.items.create(rulesToBeCreated);
 
-            await ruleMigrationsClient.data.items.create(ruleMigrations);
+            // Identify reference sets from rule data and create resource records without content
+            // This allows tracking missing resources that need to be uploaded
+            const resourceIdentifier = new RuleResourceIdentifier('qradar', {
+              experimentalFeatures,
+            });
+            const extractedResources = await resourceIdentifier.fromOriginals(
+              rulesToBeCreated.map((r) => r.original_rule)
+            );
+            logger.info(`Identified ${extractedResources.length} QRadar resources from rules`);
+
+            const referenceSetResources = extractedResources.map((resource) => ({
+              ...resource,
+              migration_id: migrationId,
+            }));
+
+            if (referenceSetResources.length > 0) {
+              await ruleMigrationsClient.data.resources.create(referenceSetResources);
+            }
 
             // TODO: Handle and report success and failures
             // For example,  {success: number, failed: number, errors: Array<{ruleId: string, error: string}>}
@@ -129,6 +150,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
                 message: `Successfully imported ${rulesCount} QRadar rule${
                   rulesCount !== 1 ? 's' : ''
                 }`,
+                count: rulesCount,
               },
             });
           } catch (error) {

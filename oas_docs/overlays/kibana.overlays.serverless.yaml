@@ -35,6 +35,20 @@ actions:
         For example, use:
 
         [Data views](../group/endpoint-data-views).
+  - target: '$.tags[?(@.name=="agent builder")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+        
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+      externalDocs:
+        description: Agent Builder docs
+        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+      # externalDocs:
+        # description: 
+        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      x-displayName: 'Agent Builder'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

@@ -6,31 +6,42 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   'POST api/painless_lab/execute',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+    ],
+  },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
-    apiTest('should execute a valid painless script', async ({ apiClient }) => {
-      const response = await apiClient.post('api/painless_lab/execute', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: TEST_INPUT.script,
-      });
-      expect(response.statusCode).toBe(200);
-      expect(response.body).toStrictEqual({
-        result: 'true',
-      });
-    });
+
+    apiTest(
+      'should execute a valid painless script using admin credentials',
+      async ({ apiClient }) => {
+        const response = await apiClient.post('api/painless_lab/execute', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: TEST_INPUT.script,
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({
+          result: 'true',
+        });
+      }
+    );
 
     apiTest('should return error response for invalid painless script', async ({ apiClient }) => {
       const response = await apiClient.post('api/painless_lab/execute', {
@@ -42,7 +53,7 @@ apiTest.describe(
         body: TEST_INPUT.invalid_script,
       });
 
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.error.reason).toBe('compile error');
     });
   }

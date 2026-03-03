@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConfigProperties } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
@@ -23,14 +25,27 @@ export interface ConfigEntryView extends ConfigEntry {
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 
+interface AdaptiveAllocations {
+  max_number_of_allocations?: number;
+  [key: string]: unknown;
+}
+
+interface ProviderConfig {
+  adaptive_allocations?: AdaptiveAllocations;
+  max_number_of_allocations?: number;
+  headers?: Record<string, string>;
+  [key: string]: unknown;
+}
+
 export interface Config {
   taskType: string;
   taskTypeConfig?: Record<string, unknown>;
   inferenceId: string;
   provider: string;
-  providerConfig?: Record<string, unknown>;
+  providerConfig?: ProviderConfig; // Record<string, unknown>;
   contextWindowLength?: number;
   temperature?: number;
+  headers?: Map;
 }
 
 export interface Secrets {
@@ -63,4 +78,9 @@ export function isMapWithStringValues(value: unknown): value is Map {
     value !== null &&
     Object.values(value).every((v) => typeof v === 'string')
   );
+}
+
+export interface InferenceEndpointUiCommonPluginStartDependencies {
+  application: ApplicationStart;
+  cloud?: CloudStart;
 }

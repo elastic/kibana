@@ -9,7 +9,7 @@ import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solu
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
-  attacksAlertsAlignmentEnabled?: boolean
+  enableAlertsAndAttacksAlignment?: boolean
 ): SeparatorLinkCategory[] => {
   return [
     {
@@ -20,15 +20,13 @@ export const getNavCategories = (
       type: LinkCategoryType.separator,
       linkIds: [
         SecurityPageName.rulesLanding,
-        attacksAlertsAlignmentEnabled ? SecurityPageName.alertDetections : SecurityPageName.alerts,
+        enableAlertsAndAttacksAlignment
+          ? SecurityPageName.alertDetections
+          : SecurityPageName.alerts,
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
       ],
-    },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.siemMigrationsLanding],
     },
     {
       type: LinkCategoryType.separator,
@@ -37,15 +35,16 @@ export const getNavCategories = (
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,
+        SecurityPageName.assetInventory,
       ],
     },
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.assetInventory],
-    },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.siemReadiness],
+      linkIds: [
+        SecurityPageName.siemReadiness,
+        SecurityPageName.aiValue,
+        SecurityPageName.siemMigrationsLanding,
+      ],
     },
   ];
 };

@@ -10,9 +10,7 @@ exports[`Header renders 1`] = `
     id="globalHeaderBars"
   >
     <div
-      class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
-      data-fixed-header="true"
-      style="inset-block-start: 0px;"
+      class="euiHeader header__firstBar emotion-euiHeader-static-dark"
     >
       <div
         class="euiHeaderSection emotion-euiHeaderSection"
@@ -39,7 +37,7 @@ exports[`Header renders 1`] = `
               class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate"
+                class="eui-textTruncate css-1ryezsz-s"
               >
                 Skip to main content
               </span>
@@ -118,12 +116,13 @@ exports[`Header renders 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   <span
                     class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                   >
                     <span
+                      aria-hidden="true"
                       data-euiicon-type="question"
                     />
                   </span>
@@ -138,9 +137,7 @@ exports[`Header renders 1`] = `
       </div>
     </div>
     <div
-      class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
-      data-fixed-header="true"
-      style="inset-block-start: 48px;"
+      class="euiHeader header__secondBar emotion-euiHeader-static-default"
     >
       <div
         class="euiHeaderSection emotion-euiHeaderSection"
@@ -161,7 +158,7 @@ exports[`Header renders 1`] = `
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 <span
                   class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"

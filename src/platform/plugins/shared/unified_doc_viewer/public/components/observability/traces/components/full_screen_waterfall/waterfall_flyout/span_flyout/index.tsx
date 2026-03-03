@@ -8,53 +8,27 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
-import { flattenObject } from '@kbn/object-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useEffect, useMemo, useState } from 'react';
-import { WaterfallFlyout } from '..';
+import React, { useEffect, useState } from 'react';
 import type { OverviewApi } from '../../../../doc_viewer_overview/overview';
 import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_overview/overview';
-import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
-import { isSpanHit } from '../../helpers/is_span';
-import { useSpan } from '../../hooks/use_span';
+import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
+import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/use_doc_viewer_extension_actions';
+export { useSpanFlyoutData } from './use_span_flyout_data';
+export type { UseSpanFlyoutDataParams, SpanFlyoutData } from './use_span_flyout_data';
 
 export const spanFlyoutId = 'spanDetailFlyout' as const;
 
-export interface SpanFlyoutProps {
-  spanId: string;
-  traceId: string;
+export interface SpanFlyoutContentProps {
+  hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
-  onCloseFlyout: () => void;
   activeSection?: TraceOverviewSections;
 }
 
-export const SpanFlyout = ({
-  spanId,
-  traceId,
-  dataView,
-  onCloseFlyout,
-  activeSection,
-}: SpanFlyoutProps) => {
-  const { span, docId, loading } = useSpan({ spanId, traceId });
+export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutContentProps) {
   const { indexes } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
-
-  const documentAsHit = useMemo<DataTableRecord | null>(() => {
-    if (!span || !docId) return null;
-
-    return {
-      id: docId,
-      raw: {
-        _index: span._index,
-        _id: docId,
-        _source: span,
-      },
-      flattened: flattenObject(span),
-    };
-  }, [docId, span]);
-
-  const isSpan = isSpanHit(documentAsHit);
+  const actions = useDocViewerExtensionActionsContext();
 
   useEffect(() => {
     if (activeSection && flyoutRef) {
@@ -63,40 +37,14 @@ export const SpanFlyout = ({
   }, [activeSection, flyoutRef]);
 
   return (
-    <WaterfallFlyout
-      flyoutId={spanFlyoutId}
-      onCloseFlyout={onCloseFlyout}
+    <Overview
+      ref={setFlyoutRef}
+      docViewActions={actions}
+      hit={hit}
+      indexes={indexes}
+      showWaterfall={false}
+      showActions={false}
       dataView={dataView}
-      hit={documentAsHit}
-      loading={loading}
-      title={i18n.translate(
-        'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title',
-        {
-          defaultMessage: '{docType} document',
-          values: {
-            docType: isSpan
-              ? i18n.translate(
-                  'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.span',
-                  { defaultMessage: 'Span' }
-                )
-              : i18n.translate(
-                  'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.transction',
-                  { defaultMessage: 'Transaction' }
-                ),
-          },
-        }
-      )}
-    >
-      {documentAsHit ? (
-        <Overview
-          ref={setFlyoutRef}
-          hit={documentAsHit}
-          indexes={indexes}
-          showWaterfall={false}
-          showActions={false}
-          dataView={dataView}
-        />
-      ) : null}
-    </WaterfallFlyout>
+    />
   );
-};
+}

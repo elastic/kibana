@@ -37,7 +37,10 @@ import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
+  selectHasYamlSchemaValidationErrors,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
+  selectIsYamlSynced,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -103,8 +106,10 @@ export const WorkflowDetailHeader = React.memo(
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+    const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
     const hasUnsavedChanges = useSelector(selectHasChanges);
     const isExecutionsTab = useSelector(selectIsExecutionsTab);
+    const isYamlSynced = useSelector(selectIsYamlSynced);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
@@ -116,6 +121,7 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const saveYaml = useSaveYaml();
+    const isSaving = useSelector(selectIsSavingYaml);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
@@ -130,6 +136,11 @@ export const WorkflowDetailHeader = React.memo(
     }, [dispatch]);
 
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
+
+    // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
+    // workflow?.valid !== false covers the initial page load before Monaco validates.
+    const isSchemaValid =
+      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
 
     const runWorkflowTooltipContent = useMemo(() => {
       return getTestRunTooltipContent({
@@ -179,7 +190,7 @@ export const WorkflowDetailHeader = React.memo(
             paddingSize="m"
             alignItems="bottom"
           >
-            <EuiPageHeaderSection css={styles.headerSection}>
+            <EuiPageHeaderSection css={styles.headerSection} data-test-subj="workflowDetailHeader">
               <EuiButtonEmpty
                 iconType="sortLeft"
                 size="xs"
@@ -258,9 +269,9 @@ export const WorkflowDetailHeader = React.memo(
                       ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
                           defaultMessage: 'Save changes to enable/disable workflow',
                         })
-                      : !isSyntaxValid
+                      : !isSchemaValid
                       ? i18n.translate('workflows.workflowDetailHeader.invalid', {
-                          defaultMessage: 'Fix errors to enable workflow',
+                          defaultMessage: 'Fix validation errors to enable workflow',
                         })
                       : undefined
                   }
@@ -270,7 +281,7 @@ export const WorkflowDetailHeader = React.memo(
                       !workflowId ||
                       isLoading ||
                       !canUpdateWorkflow ||
-                      !isSyntaxValid ||
+                      !isSchemaValid ||
                       hasUnsavedChanges
                     }
                     checked={isEnabled}
@@ -299,7 +310,11 @@ export const WorkflowDetailHeader = React.memo(
                     color="primary"
                     size="s"
                     onClick={handleSaveWorkflow}
-                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading}
+                    disabled={
+                      isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced
+                    }
+                    isLoading={isSaving}
+                    data-test-subj="saveWorkflowHeaderButton"
                   >
                     <FormattedMessage
                       id="keepWorkflows.buttonText"
@@ -314,6 +329,7 @@ export const WorkflowDetailHeader = React.memo(
         </EuiPageTemplate>
         {showRunConfirmation && (
           <EuiConfirmModal
+            data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
             title={Translations.runWithUnsavedChangesQuestion}
             onCancel={handleCancelRun}
             onConfirm={handleConfirmRun}

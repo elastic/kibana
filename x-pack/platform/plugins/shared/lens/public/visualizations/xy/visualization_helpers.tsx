@@ -10,6 +10,7 @@ import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import type {
+  AxesSettingsConfig,
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
@@ -18,7 +19,6 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 import type {
-  State,
   XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
@@ -130,6 +130,53 @@ export function checkScaleOperation(
   };
 }
 
+/**
+ * Checks if an operation is a date histogram (date type with interval scale).
+ */
+export function isDateHistogramOperation(operation: OperationMetadata | null | undefined): boolean {
+  return Boolean(operation?.dataType === 'date' && operation?.scale === 'interval');
+}
+
+/**
+ * Returns recommended X-axis title visibility settings based on the operation type.
+ *
+ * - Date histogram: recommends "None" (redundant info - timestamp per bucket shown in chart)
+ * - Non-date histogram: recommends "Auto" (axis label is useful)
+ * - Respects user's manual choice (e.g., if user set Auto on date histogram, keeps it)
+ * - Preserves custom title settings (if xTitle is set, don't change visibility)
+ *
+ * @returns Updated settings if a change is recommended, undefined otherwise
+ */
+export function getRecommendedXAxisTitleVisibility(
+  currentSettings: AxesSettingsConfig | undefined,
+  operation: OperationMetadata | null | undefined,
+  xTitle: string | undefined
+): AxesSettingsConfig | undefined {
+  // Align with toolbar title modes:
+  // - none: hidden title
+  // - auto: visible title with generated text
+  // - custom: visible title with user-defined text
+  const currentTitleMode = xTitle ? 'custom' : currentSettings?.x === false ? 'none' : 'auto';
+
+  // Keep user custom title unchanged.
+  if (currentTitleMode === 'custom') {
+    return undefined;
+  }
+
+  const recommendedTitleMode = isDateHistogramOperation(operation) ? 'none' : 'auto';
+
+  if (currentTitleMode === recommendedTitleMode) {
+    return undefined;
+  }
+
+  return {
+    ...currentSettings,
+    x: recommendedTitleMode !== 'none',
+    yLeft: currentSettings?.yLeft ?? true,
+    yRight: currentSettings?.yRight ?? true,
+  };
+}
+
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
   layer.layerType === layerTypes.DATA || !layer.layerType;
 
@@ -191,7 +238,7 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationSubtypeId(state: State) {
+export function getVisualizationSubtypeId(state: XYState) {
   if (!state.layers.length) {
     return (
       visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
@@ -207,7 +254,10 @@ export function getVisualizationSubtypeId(state: State) {
   return subtype && seriesTypes.length === 1 ? subtype : 'mixed';
 }
 
-export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
+export function getVisualizationType(
+  state: XYState,
+  layerId?: string
+): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
       visualizationTypes.find((t) => t.subtypes?.includes(state.preferredSeriesType)) ??
@@ -232,7 +282,7 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State, layerId?: string) {
+export function getDescription(state?: XYState, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -391,7 +441,7 @@ export function newLayerState({
   return newLayerFn[layerType]({ layerId, seriesType, indexPatternId, extraArg });
 }
 
-export function getLayersByType(state: State, byType?: string) {
+export function getLayersByType(state: XYState, byType?: string) {
   return state.layers.filter(({ layerType = layerTypes.DATA }) =>
     byType ? layerType === byType : true
   );
@@ -416,8 +466,8 @@ export function validateLayersForDimension(
 
   // filter out those layers with no accessors at all
   const filteredLayers = dataLayers.filter(
-    ({ layer: { accessors, xAccessor, splitAccessor } }) =>
-      accessors.length > 0 || xAccessor != null || splitAccessor != null
+    ({ layer: { accessors, xAccessor, splitAccessors = [] } }) =>
+      accessors.length > 0 || xAccessor != null || splitAccessors.length > 0
   );
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them

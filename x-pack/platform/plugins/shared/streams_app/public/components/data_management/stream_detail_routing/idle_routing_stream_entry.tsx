@@ -53,11 +53,13 @@ export function IdleRoutingStreamEntry({
 
   return (
     <EuiPanel
+      color="subdued"
       hasShadow={false}
-      hasBorder
+      hasBorder={false}
       data-test-subj={`routingRule-${routingRule.destination}`}
       className={css`
         overflow: hidden;
+        border: ${euiTheme.border.thin};
         .streamsDragHandle {
           transition: margin-left ${euiTheme.animation.normal};
           padding: ${euiTheme.size.s} 0;
@@ -137,7 +139,11 @@ export function IdleRoutingStreamEntry({
                     }
                   )}
                 >
-                  <EuiBadge color="hollow" tabIndex={0}>{`+${childrenCount}`}</EuiBadge>
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj="streamsAppRoutingRuleChildCountBadge"
+                  >{`+${childrenCount}`}</EuiBadge>
                 </EuiToolTip>
                 <VerticalRule />
               </>
@@ -155,6 +161,7 @@ export function IdleRoutingStreamEntry({
         </EuiFlexGroup>
         <EuiFlexItem
           grow={false}
+          data-test-subj={`streamDetailRoutingItem-${routingRule.destination}`}
           className={css`
             overflow: hidden;
             padding: ${euiTheme.size.xs} 0px;

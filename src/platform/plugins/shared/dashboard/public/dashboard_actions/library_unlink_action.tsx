@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
@@ -16,6 +15,7 @@ import type {
   HasType,
   HasUniqueId,
   PublishesTitle,
+  PresentationContainer,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
@@ -78,10 +78,10 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const title = getTitle(embeddable);
     try {
-      const { references, rawState } = embeddable.getSerializedStateByValue();
+      const byValueState = embeddable.getSerializedStateByValue();
       await embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: embeddable.type,
-        serializedState: { rawState: { ...rawState, title }, references },
+        serializedState: { ...byValueState, title },
       });
       coreServices.notifications.toasts.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -72,7 +74,6 @@ describe('task manager telemetry', () => {
             document__test__: 32,
           },
           unrecognized: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 4,
           },
         },
@@ -213,7 +214,6 @@ describe('task manager telemetry', () => {
             document__test__: 32,
           },
           unrecognized: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 4,
           },
         },
@@ -284,7 +284,7 @@ describe('task manager telemetry', () => {
       const loggerCalls = loggingSystemMock.collect(logger);
       expect(loggerCalls.debug).toHaveLength(2);
       expect(loggerCalls.debug[0][0]).toEqual(
-        `query for getFailedAndUnrecognizedTasksPerDay - {\"index\":\"test\",\"size\":0,\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"term\":{\"task.status\":\"unrecognized\"}},{\"term\":{\"task.status\":\"failed\"}}]}},{\"wildcard\":{\"task.taskType\":{\"value\":\"alerting:*\"}}},{\"range\":{\"task.runAt\":{\"gte\":\"now-1d\"}}}]}},\"aggs\":{\"by_status\":{\"terms\":{\"field\":\"task.status\",\"size\":10},\"aggs\":{\"by_task_type\":{\"terms\":{\"field\":\"task.taskType\",\"size\":33}}}}}}`
+        `query for getFailedAndUnrecognizedTasksPerDay - {\"index\":\"test\",\"size\":0,\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"term\":{\"task.status\":\"unrecognized\"}},{\"term\":{\"task.status\":\"failed\"}}]}},{\"wildcard\":{\"task.taskType\":{\"value\":\"alerting:*\"}}},{\"range\":{\"task.runAt\":{\"gte\":\"now-1d\"}}}]}},\"aggs\":{\"by_status\":{\"terms\":{\"field\":\"task.status\",\"size\":10},\"aggs\":{\"by_task_type\":{\"terms\":{\"field\":\"task.taskType\",\"size\":39}}}}}}`
       );
       expect(loggerCalls.debug[1][0]).toMatchInlineSnapshot(`
         "Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ResponseError: search_phase_execution_exception

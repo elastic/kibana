@@ -62,7 +62,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   timerangeKind,
-  pinnedEventIds,
   eventIdToNoteIds,
 }) => {
   /*
@@ -214,7 +213,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     timelineId,
     refetch,
     events,
-    pinnedEventIds,
     eventIdToNoteIds,
     onToggleShowNotes,
   });
@@ -288,15 +286,8 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const {
-      activeTab,
-      columns,
-      eqlOptions,
-      itemsPerPage,
-      itemsPerPageOptions,
-      pinnedEventIds,
-      eventIdToNoteIds,
-    } = timeline;
+    const { activeTab, columns, eqlOptions, itemsPerPage, itemsPerPageOptions, eventIdToNoteIds } =
+      timeline;
 
     return {
       activeTab,
@@ -307,7 +298,6 @@ const makeMapStateToProps = () => {
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
-      pinnedEventIds,
       eventIdToNoteIds,
       start: input.timerange.from,
       timerangeKind: input.timerange.kind,
@@ -331,7 +321,6 @@ const EqlTabContent = connector(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )

@@ -11,6 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
@@ -32,7 +33,7 @@ export const useWorkflowEditorStyles = () => {
         minHeight: 0,
 
         // Template variables decorations
-        '.template-variable-valid': {
+        '.template-variable-info, .template-variable-valid': {
           backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
           borderRadius: '2px',
         },
@@ -45,14 +46,29 @@ export const useWorkflowEditorStyles = () => {
           backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
           borderRadius: '2px',
         },
-
-        // After text (shadow) decorations
+        '.workflow-name-decoration': {
+          color: euiTheme.colors.textSubdued,
+          fontStyle: 'italic',
+        },
         '.after-text': {
           marginLeft: '10px',
           color: euiTheme.colors.textDisabled,
         },
         '.after-text + .after-text': {
           marginLeft: '0', // Remove padding for consecutive after-text spans
+        },
+
+        // Connector name badge (before decoration)
+        '.connector-name-badge': {
+          display: 'inline-block',
+          backgroundColor: transparentize(euiTheme.colors.success, 0.1),
+          color: euiTheme.colors.successText,
+          padding: '2px 6px',
+          borderRadius: '4px',
+          marginRight: '8px',
+          fontSize: '12px',
+          fontWeight: 500,
+          lineHeight: '1.4',
         },
 
         // Step highlighting decorations
@@ -167,7 +183,9 @@ export const useWorkflowEditorStyles = () => {
     stepActionsContainer: css({
       position: 'absolute',
       zIndex: 1002, // Above the highlighting and pseudo-element
-      transform: 'translateY(4px) translateX(-28px)', // 24px to match width + 4px padding inside decoration
+      transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
+        EDITOR_SCROLLBAR_WIDTH_PX + 2 * FOCUSED_STEP_DECORATION_INSET_PX
+      }px)`, // scrollbar + twice decoration inset (outside and inside)
     }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>

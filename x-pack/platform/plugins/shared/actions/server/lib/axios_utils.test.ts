@@ -83,6 +83,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -189,6 +190,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -220,6 +222,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -342,6 +345,7 @@ describe('request', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
     expect(res).toEqual({
       status: 200,
@@ -410,6 +414,27 @@ describe('request', () => {
     expect(axiosMock.mock.calls[1][1]!.timeout).toBe(360001);
   });
 
+  test('should use keepAlive when provided', async () => {
+    await request({
+      axios,
+      url: '/test',
+      data: { id: '123' },
+      logger,
+      configurationUtilities,
+      keepAlive: true,
+    });
+    expect(axiosMock).toHaveBeenCalledWith(
+      '/test',
+      expect.objectContaining({
+        method: 'get',
+        data: { id: '123' },
+        httpsAgent: expect.objectContaining({
+          options: expect.objectContaining({ keepAlive: true }),
+        }),
+      })
+    );
+  });
+
   test('throw an error if you use baseUrl in your axios instance', async () => {
     await expect(async () => {
       await request({
@@ -447,6 +472,7 @@ describe('request', () => {
       maxContentLength: 1000000,
       timeout: 360000,
       headers: { Authorization: `Basic ${Buffer.from('username:password').toString('base64')}` },
+      beforeRedirect: expect.any(Function),
     });
   });
 
@@ -476,6 +502,7 @@ describe('request', () => {
         'X-Test-Header': 'test',
         Authorization: 'Bearer my_token',
       },
+      beforeRedirect: expect.any(Function),
     });
   });
 
@@ -521,6 +548,7 @@ describe('patch', () => {
       proxy: false,
       maxContentLength: 1000000,
       timeout: 360000,
+      beforeRedirect: expect.any(Function),
     });
   });
 });

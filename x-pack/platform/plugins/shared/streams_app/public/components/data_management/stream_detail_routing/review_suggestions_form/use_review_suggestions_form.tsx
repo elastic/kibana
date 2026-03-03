@@ -8,11 +8,12 @@
 import type { Condition } from '@kbn/streamlang';
 import { useState } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { lastValueFrom } from 'rxjs';
 import { isEmpty } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { showErrorToast } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import {
   useStreamsRoutingActorRef,
   useStreamsRoutingSelector,
@@ -30,23 +31,28 @@ export interface PartitionSuggestion {
   condition: Condition;
 }
 
+export type PartitionSuggestionReason = 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+
 export type UseReviewSuggestionsFormResult = ReturnType<typeof useReviewSuggestionsForm>;
 
 export function useReviewSuggestionsForm() {
   const {
-    core: { notifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
+  const showFetchErrorToast = useFetchErrorToast();
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
   );
   const streamsRoutingActorRef = useStreamsRoutingActorRef();
 
   const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
+  const [suggestionReason, setSuggestionReason] = useState<PartitionSuggestionReason | undefined>(
+    undefined
+  );
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
   const abortController = useAbortController();
@@ -68,9 +74,10 @@ export function useReviewSuggestionsForm() {
         })
       );
       setSuggestions(response.partitions);
+      setSuggestionReason(response.reason);
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        showErrorToast(notifications, error);
+      if (!isRequestAbortedError(error)) {
+        showFetchErrorToast(error);
       }
     } finally {
       setIsLoadingSuggestions(false);
@@ -111,6 +118,7 @@ export function useReviewSuggestionsForm() {
     abortController.abort();
     abortController.refresh();
     setSuggestions(undefined);
+    setSuggestionReason(undefined);
     resetPreview();
   };
 
@@ -121,6 +129,7 @@ export function useReviewSuggestionsForm() {
 
   return {
     suggestions,
+    suggestionReason,
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,

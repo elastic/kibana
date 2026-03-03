@@ -8,9 +8,8 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import type { StepStabilityLevel } from '@kbn/workflows';
 import type {
-  ActionContext,
-  ActionInfo,
   ConnectorExamples,
   HoverContext,
   MonacoConnectorHandler,
@@ -51,11 +50,6 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
   abstract generateHoverContent(context: HoverContext): Promise<monaco.IMarkdownString | null>;
 
   /**
-   * Generate floating action buttons for the connector - must be implemented by subclasses
-   */
-  abstract generateActions(context: ActionContext): Promise<ActionInfo[]>;
-
-  /**
    * Get examples for the connector type - must be implemented by subclasses
    */
   abstract getExamples(connectorType: string): ConnectorExamples | null;
@@ -68,29 +62,6 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
       value: content,
       isTrusted: true,
       supportHtml: true,
-    };
-  }
-
-  /**
-   * Helper method to create action info objects
-   */
-  protected createActionInfo(
-    id: string,
-    label: string,
-    handler: () => void | Promise<void>,
-    options: {
-      icon?: string;
-      tooltip?: string;
-      priority?: number;
-    } = {}
-  ): ActionInfo {
-    return {
-      id,
-      label,
-      handler,
-      icon: options.icon,
-      tooltip: options.tooltip || label,
-      priority: options.priority || 0,
     };
   }
 
@@ -167,6 +138,19 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Returns a markdown blockquote stability note for non-GA steps.
+   */
+  protected getStabilityNote(stability: StepStabilityLevel | undefined): string {
+    if (stability === 'tech_preview') {
+      return `\n\n> ⚠️ **Technical Preview** — This functionality is in technical preview and may be changed or removed in a future release.`;
+    }
+    if (stability === 'beta') {
+      return `\n\n> ⚠️ **Beta** — This functionality is in beta and is subject to change.`;
+    }
+    return '';
   }
 
   /**

@@ -10,25 +10,27 @@
 import type {
   ConnectorContractUnion,
   DynamicConnectorContract,
-  EnhancedInternalConnectorContract,
   EsWorkflowCreate,
+  HttpMethod,
+  InternalConnectorContract,
 } from './v1';
-import { ExecutionStatus } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
+  BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   MergeStep,
   ParallelStep,
   Step,
-  TriggerType,
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
-import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
+import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
+import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
+import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -59,14 +61,7 @@ export function isDangerousStatus(status: ExecutionStatus) {
 }
 
 export function isTerminalStatus(status: ExecutionStatus) {
-  const TerminalStatus: readonly ExecutionStatus[] = [
-    ExecutionStatus.COMPLETED,
-    ExecutionStatus.FAILED,
-    ExecutionStatus.CANCELLED,
-    ExecutionStatus.SKIPPED,
-    ExecutionStatus.TIMED_OUT,
-  ];
-  return TerminalStatus.includes(status);
+  return TerminalExecutionStatuses.includes(status);
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {
@@ -81,7 +76,6 @@ export function isCancelableStatus(status: ExecutionStatus) {
 
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
-export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
@@ -94,10 +88,16 @@ export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
 export const isTriggerType = (type: string): type is TriggerType =>
   TriggerTypes.includes(type as TriggerType);
 
+export const isInternalConnector = (
+  connector: ConnectorContractUnion
+): connector is InternalConnectorContract => 'methods' in connector;
+
 export const isDynamicConnector = (
   connector: ConnectorContractUnion
 ): connector is DynamicConnectorContract => 'actionTypeId' in connector;
 
-export const isEnhancedInternalConnector = (
-  connector: ConnectorContractUnion
-): connector is EnhancedInternalConnectorContract => 'examples' in connector;
+export const isHttpMethod = (method: string): method is HttpMethod =>
+  KNOWN_HTTP_METHODS.includes(method as HttpMethod);
+
+export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
+  BuiltInStepProperties.includes(property as BuiltInStepProperty);

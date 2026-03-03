@@ -98,9 +98,11 @@ function DocumentationContent({
               <section
                 key={helpGroup.label}
                 css={css`
-                  border-top: ${theme.euiTheme.border.thin};
-                  padding-top: ${theme.euiTheme.size.xxl};
-                  margin-top: ${theme.euiTheme.size.xxl};
+                  &:not(:first-of-type) {
+                    border-top: ${theme.euiTheme.border.thin};
+                    padding-top: ${theme.euiTheme.size.xxl};
+                    margin-top: ${theme.euiTheme.size.xxl};
+                  }
                 `}
                 ref={(el) => {
                   if (el) {

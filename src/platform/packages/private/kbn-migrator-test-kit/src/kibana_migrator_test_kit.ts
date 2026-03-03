@@ -26,6 +26,7 @@ import {
   type IKibanaMigrator,
   type MigrationResult,
   type IndexTypesMap,
+  type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -33,10 +34,18 @@ import {
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
-import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  AgentManager,
+  configureClient,
+  getRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  ISavedObjectsEncryptionExtension,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
@@ -79,6 +88,9 @@ export interface KibanaMigratorTestKitParams {
   hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
   clientWrapperFactory?: ElasticsearchClientWrapperFactory;
+  encryptionExtensionFactory?: (
+    typeRegistry: ISavedObjectTypeRegistry
+  ) => ISavedObjectsEncryptionExtension;
 }
 
 export interface KibanaMigratorTestKit {
@@ -143,6 +155,7 @@ export const getKibanaMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
   clientWrapperFactory,
+  encryptionExtensionFactory,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   const loggingSystem = new LoggingSystem();
@@ -188,12 +201,22 @@ export const getKibanaMigratorTestKit = async ({
     }
   };
 
+  const encryptionExtension = encryptionExtensionFactory?.(typeRegistry);
+
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
     migrator,
     typeRegistry,
     kibanaIndex,
     client,
-    loggerFactory.get('saved_objects')
+    loggerFactory.get('saved_objects'),
+    // the toolkit's SavedObjectsRepository must allow testing hidden types
+    typeRegistry
+      .getAllTypes()
+      .filter(({ hidden }) => hidden)
+      .map(({ name }) => name),
+    {
+      encryptionExtension,
+    }
   );
 
   return {
@@ -274,6 +297,7 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
+    onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
   });
 };
 
@@ -281,7 +305,7 @@ interface GetMigratorParams {
   configService: ConfigService;
   client: ElasticsearchClient;
   kibanaIndex: string;
-  typeRegistry: ISavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistryInternal;
   defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;

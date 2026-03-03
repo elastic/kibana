@@ -8,11 +8,11 @@
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
 import { getDefaultFleetServerpolicyId } from '../../common/services/agent_policies_helpers';
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -69,7 +69,7 @@ async function createPackagePolicy(
   options: {
     spaceId: string;
     user: AuthenticatedUser | undefined;
-    authorizationHeader?: HTTPAuthorizationHeader | null;
+    request?: KibanaRequest;
     force?: boolean;
   }
 ) {
@@ -97,13 +97,19 @@ async function createPackagePolicy(
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
 
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    spaceId: options.spaceId,
-    user: options.user,
-    bumpRevision: false,
-    authorizationHeader: options.authorizationHeader,
-    force: options.force,
-  });
+  await packagePolicyService.create(
+    soClient,
+    esClient,
+    newPackagePolicy,
+    {
+      spaceId: options.spaceId,
+      user: options.user,
+      bumpRevision: false,
+      force: options.force,
+    },
+    undefined,
+    options.request
+  );
 }
 
 interface CreateAgentPolicyParams {
@@ -116,11 +122,11 @@ interface CreateAgentPolicyParams {
   monitoringEnabled?: string[];
   spaceId: string;
   user?: AuthenticatedUser;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
   /** Pass force to all following calls: package install, policy creation */
   force?: boolean;
   /** Pass force only to package policy creation */
   forcePackagePolicyCreation?: boolean;
+  request?: KibanaRequest;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -133,7 +139,7 @@ export async function createAgentPolicyWithPackages({
   monitoringEnabled: monitoringEnabledParams,
   spaceId,
   user,
-  authorizationHeader,
+  request,
   force,
   forcePackagePolicyCreation,
 }: CreateAgentPolicyParams) {
@@ -171,6 +177,10 @@ export async function createAgentPolicyWithPackages({
   if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
     logger.info(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
   }
+  if (newPolicy.supports_agentless) {
+    newPolicy.keep_monitoring_alive = true;
+    logger.info(`Enabling keep monitoring alive for agentless policy [${newPolicy.name}]`);
+  }
 
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
@@ -186,7 +196,7 @@ export async function createAgentPolicyWithPackages({
       esClient,
       packagesToInstall,
       spaceId,
-      authorizationHeader,
+      request,
       force,
     });
   }
@@ -200,7 +210,7 @@ export async function createAgentPolicyWithPackages({
     {
       user,
       id: agentPolicyId,
-      authorizationHeader,
+      request,
       hasFleetServer,
       skipDeploy: true, // skip deploying the policy until package policies are added
     }
@@ -223,7 +233,7 @@ export async function createAgentPolicyWithPackages({
       {
         spaceId,
         user,
-        authorizationHeader,
+        request,
         force: force || forcePackagePolicyCreation,
       }
     );
@@ -240,7 +250,7 @@ export async function createAgentPolicyWithPackages({
       {
         spaceId,
         user,
-        authorizationHeader,
+        request,
         force: force || forcePackagePolicyCreation,
       }
     );

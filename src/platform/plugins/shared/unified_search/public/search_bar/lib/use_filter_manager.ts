@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 
 interface UseFilterManagerProps {
+  disabled?: boolean;
   filters?: Filter[];
   filterManager: DataPublicPluginStart['query']['filterManager'];
 }
@@ -20,7 +21,12 @@ interface UseFilterManagerProps {
 export const useFilterManager = (props: UseFilterManagerProps) => {
   // Filters should be either what's passed in the initial state or the current state of the filter manager
   const [filters, setFilters] = useState(props.filters || props.filterManager.getFilters());
+
   useEffect(() => {
+    if (props.disabled) {
+      return;
+    }
+
     const subscriptions = new Subscription();
 
     subscriptions.add(
@@ -35,7 +41,9 @@ export const useFilterManager = (props: UseFilterManagerProps) => {
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [props.filterManager]);
+  }, [props.filterManager, props.disabled]);
 
-  return { filters };
+  const propsFilters = useMemo(() => props.filters || [], [props.filters]);
+
+  return { filters: props.disabled ? propsFilters : filters };
 };

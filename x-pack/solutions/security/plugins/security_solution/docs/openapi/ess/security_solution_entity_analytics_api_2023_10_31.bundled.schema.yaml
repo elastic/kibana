@@ -499,9 +499,10 @@ paths:
                       message: Invalid monitored field
                       username: john.doe
                   stats:
-                    failed: 1
-                    successful: 1
-                    total: 2
+                    failedOperations: 1
+                    successfulOperations: 1
+                    totalOperations: 2
+                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -665,6 +666,190 @@ paths:
         Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/watchlists:
+    post:
+      operationId: CreateWatchlist
+      requestBody:
+        content:
+          application/json:
+            examples:
+              CreateWatchlistRequest:
+                summary: Create watchlist request
+                value:
+                  description: High risk vendor watchlist
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
+            schema:
+              type: object
+              properties:
+                description:
+                  description: Description of the watchlist
+                  type: string
+                managed:
+                  description: Indicates if the watchlist is managed by the system
+                  type: boolean
+                name:
+                  description: Unique name for the watchlist
+                  type: string
+                riskModifier:
+                  description: Risk score modifier associated with the watchlist
+                  type: number
+              required:
+                - name
+                - description
+                - riskModifier
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CreateWatchlistResponse:
+                  summary: Created watchlist
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-01-28T12:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist created successfully
+      summary: Create a new watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+  /api/entity_analytics/watchlists/{id}:
+    get:
+      operationId: GetWatchlist
+      parameters:
+        - description: Unique ID of the watchlist
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                GetWatchlistResponse:
+                  summary: Watchlist details
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-02-18T12:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist details
+      summary: Get a watchlist by ID
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+    put:
+      operationId: UpdateWatchlist
+      parameters:
+        - description: The ID of the watchlist to update
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              UpdateWatchlistRequest:
+                summary: Update watchlist request
+                value:
+                  description: High risk vendor watchlist
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
+            schema:
+              type: object
+              properties:
+                description:
+                  description: Description of the watchlist
+                  type: string
+                managed:
+                  description: Indicates if the watchlist is managed by the system
+                  type: boolean
+                name:
+                  description: Unique name of the watchlist
+                  type: string
+                riskModifier:
+                  description: Risk score modifier associated with the watchlist
+                  type: number
+              required:
+                - name
+                - description
+                - riskModifier
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                UpdateWatchlistResponse:
+                  summary: Updated watchlist
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-02-18T12:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist updated successfully
+      summary: Update an existing watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+  /api/entity_analytics/watchlists/list:
+    get:
+      operationId: ListWatchlists
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ListWatchlistsResponse:
+                  summary: List of watchlists
+                  value:
+                    - createdAt: '2026-01-28T12:00:00.000Z'
+                      description: High risk vendor watchlist
+                      id: watchlist-123
+                      managed: false
+                      name: High Risk Vendors
+                      riskModifier: 1.5
+                      updatedAt: '2026-02-18T12:00:00.000Z'
+                    - createdAt: '2026-01-10T09:30:00.000Z'
+                      description: Privileged user monitoring watchlist
+                      id: watchlist-456
+                      managed: true
+                      name: Privileged Accounts
+                      riskModifier: 2
+                      updatedAt: '2026-02-01T15:45:00.000Z'
+              schema:
+                items:
+                  $ref: '#/components/schemas/WatchlistObject'
+                type: array
+          description: List of watchlists
+      summary: List all watchlists
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -746,6 +931,60 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/engines:
+    delete:
+      operationId: DeleteEntityEngines
+      parameters:
+        - description: >-
+            The entity type of the engine ('user', 'host', 'service',
+            'generic').
+          examples:
+            hostAndService:
+              value: host,service
+          in: query
+          name: entityTypes
+          required: false
+          schema:
+            description: >-
+              Array of engine types to delete. Empty by default, which results
+              in all the engines being deleted.
+            items:
+              $ref: '#/components/schemas/EntityType'
+            type: array
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteEntityEnginesExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted:
+                      - host
+                    still_running:
+                      - generic
+                      - user
+                      - service
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+                  still_running:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+          description: Successful response
+      summary: Delete Entity Engines
+      tags:
+        - Security Entity Analytics API
     get:
       operationId: ListEntityEngines
       responses:
@@ -770,12 +1009,22 @@ paths:
       operationId: DeleteEntityEngine
       parameters:
         - description: The entity type of the engine (either 'user' or 'host').
+          examples:
+            host:
+              value: host
           in: path
           name: entityType
           required: true
           schema:
             $ref: '#/components/schemas/EntityType'
         - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+        - deprecated: true
+          description: Control flag to also delete the entity data.
           in: query
           name: data
           required: false
@@ -785,6 +1034,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEntityEngineExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
@@ -1969,6 +2223,28 @@ components:
           items:
             $ref: '#/components/schemas/RiskScoreInput'
           type: array
+        modifiers:
+          description: A list of modifiers that were applied to the risk score calculation.
+          items:
+            type: object
+            properties:
+              contribution:
+                format: double
+                type: number
+              metadata:
+                additionalProperties: true
+                type: object
+              modifier_value:
+                format: double
+                type: number
+              subtype:
+                type: string
+              type:
+                type: string
+            required:
+              - type
+              - contribution
+          type: array
         notes:
           items:
             type: string
@@ -2110,6 +2386,9 @@ components:
             event:
               type: object
               properties:
+                '@timestamp':
+                  format: date-time
+                  type: string
                 ingested:
                   format: date-time
                   type: string
@@ -2222,16 +2501,19 @@ components:
     PrivmonUserCsvUploadStats:
       type: object
       properties:
-        failed:
+        failedOperations:
           type: integer
-        successful:
+        successfulOperations:
           type: integer
-        total:
+        totalOperations:
+          type: integer
+        uploaded:
           type: integer
       required:
-        - successful
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -2450,12 +2732,75 @@ components:
     UserName:
       type: object
       properties:
+        entity_analytics_monitoring:
+          description: Entity analytics monitoring configuration for the user
+          type: object
+          properties:
+            labels:
+              description: Array of labels associated with the user
+              items:
+                type: object
+                properties:
+                  field:
+                    description: The field name for the label
+                    type: string
+                  source:
+                    description: >-
+                      The source where this label was created (api, csv, or
+                      index_sync)
+                    enum:
+                      - api
+                      - csv
+                      - index_sync
+                    type: string
+                  value:
+                    description: The value of the label
+                    type: string
+              type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
               type: string
+    WatchlistObject:
+      example:
+        createdAt: '2026-01-28T12:00:00.000Z'
+        description: High risk vendor watchlist
+        id: watchlist-123
+        managed: false
+        name: High Risk Vendors
+        riskModifier: 1.5
+        updatedAt: '2026-02-18T12:00:00.000Z'
+      type: object
+      properties:
+        createdAt:
+          description: Timestamp indicating when the watchlist was created
+          format: date-time
+          type: string
+        description:
+          description: Description of the watchlist
+          type: string
+        id:
+          description: The unique ID of the watchlist
+          type: string
+        managed:
+          description: Indicates if the watchlist is managed by the system
+          type: boolean
+        name:
+          description: The name of the watchlist
+          type: string
+        riskModifier:
+          description: Risk score modifier associated with the watchlist
+          type: number
+        updatedAt:
+          description: Timestamp indicating when the watchlist was last updated
+          format: date-time
+          type: string
+      required:
+        - name
+        - riskModifier
+        - managed
   securitySchemes:
     BasicAuth:
       scheme: basic

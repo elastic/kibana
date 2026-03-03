@@ -297,12 +297,15 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               }
               pagination={pagination}
               loading={loadState === 'loadingTable'}
-              message={message}
+              noItemsMessage={message}
               rowProps={() => {
                 return {
                   'data-test-subj': 'roleMappingRow',
                 };
               }}
+              tableCaption={i18n.translate('xpack.security.management.roleMappings.tableCaption', {
+                defaultMessage: 'Role mappings list',
+              })}
             />
           );
         }}

@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { getFormattedError } from '../../../util/errors';
 import { ContentPackObjectsList } from './objects_list';
 import { previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';
@@ -38,7 +39,7 @@ export function ExportContentPackFlyout({
   onExport,
   onClose,
 }: {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.all.GetResponse;
   onClose: () => void;
   onExport: () => void;
 }) {
@@ -84,6 +85,7 @@ export function ExportContentPackFlyout({
       const contentPack = await previewContent({
         http,
         definition,
+        // @ts-expect-error upgrade typescript v5.9.3
         file: new File([contentPackRaw], `${definition.stream.name}-1.0.0.zip`, {
           type: 'application/zip',
         }),
@@ -129,7 +131,7 @@ export function ExportContentPackFlyout({
             <ContentPackObjectsList
               objects={exportResponse.contentPack.entries}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.available ?? false}
+              significantEventsAvailable={significantEvents?.enabled ?? false}
             />
           </>
         ) : null}
@@ -176,6 +178,7 @@ export function ExportContentPackFlyout({
                   );
 
                   saveAs(
+                    // @ts-expect-error upgrade typescript v5.9.3
                     new Blob([contentPack], { type: 'application/zip' }),
                     `${manifest.name}-${manifest.version}.zip`
                   );
@@ -186,7 +189,7 @@ export function ExportContentPackFlyout({
                   );
                   onExport();
                 } catch (err) {
-                  notifications.toasts.addError(err, {
+                  notifications.toasts.addError(getFormattedError(err), {
                     title: i18n.translate('xpack.streams.failedToExportContentError', {
                       defaultMessage: 'Failed to export content pack',
                     }),

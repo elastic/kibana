@@ -42,9 +42,10 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
+import {
+  getIsExperimentalFeatureEnabled,
+  type TriggersAndActionsUIPublicPluginSetup,
+  type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
@@ -69,12 +70,17 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -163,6 +169,7 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
@@ -177,6 +184,8 @@ export interface ObservabilityPublicPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -314,7 +323,6 @@ export class Plugin
         'logs',
         'metrics',
         'apm',
-        'slo',
         'performance',
         'trace',
         'agent',
@@ -332,6 +340,7 @@ export class Plugin
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
+      coreSetup.getStartServices,
       logsLocator
     );
 
@@ -363,7 +372,7 @@ export class Plugin
       from(appUpdater$).pipe(
         mergeMap((value) =>
           from(coreSetup.getStartServices()).pipe(
-            map(([coreStart, pluginsStart]) => {
+            switchMap(([coreStart, pluginsStart]) => {
               const deepLinks = value(app)?.deepLinks ?? [];
 
               const overviewLink = !Boolean(pluginsSetup.serverless)
@@ -381,73 +390,83 @@ export class Plugin
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
-              const aiAssistantLink =
-                isAiAssistantEnabled &&
-                !Boolean(pluginsSetup.serverless) &&
-                Boolean(pluginsSetup.observabilityAIAssistant)
-                  ? [
-                      {
-                        label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
-                          defaultMessage: 'AI Assistant',
-                        }),
-                        app: 'observabilityAIAssistant',
-                        path: '/conversations/new',
-                      },
-                    ]
-                  : [];
+              const chatExperience$ =
+                coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
-              const sloLink = coreStart.application.capabilities.slo?.read
-                ? [
+              return chatExperience$.pipe(
+                map((chatExperience) => {
+                  const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+
+                  const aiAssistantLink =
+                    isAiAssistantEnabled &&
+                    !Boolean(pluginsSetup.serverless) &&
+                    Boolean(pluginsSetup.observabilityAIAssistant) &&
+                    showAiAssistant
+                      ? [
+                          {
+                            label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+                              defaultMessage: 'AI Assistant',
+                            }),
+                            app: 'observabilityAIAssistant',
+                            path: '/conversations/new',
+                          },
+                        ]
+                      : [];
+
+                  const sloLink = coreStart.application.capabilities.slo?.read
+                    ? [
+                        {
+                          label: i18n.translate('xpack.observability.sloLinkTitle', {
+                            defaultMessage: 'SLOs',
+                          }),
+                          app: 'slo',
+                          path: '',
+                        },
+                      ]
+                    : [];
+
+                  // Reformat the visible links to be NavigationEntry objects instead of
+                  // AppDeepLink objects.
+                  //
+                  // In our case the deep links and sections being registered are the
+                  // same, and the logic to hide them based on flags or capabilities is
+                  // the same, so we just want to make a new list with the properties
+                  // needed by `registerSections`, which are different than the
+                  // properties used by the deepLinks.
+                  //
+                  // See https://github.com/elastic/kibana/issues/103325.
+                  const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
+                  const alertsLink: NavigationEntry[] = otherLinks
+                    .filter((link) => link.id === 'alerts')
+                    .map((link) => ({
+                      app: observabilityAppId,
+                      label: link.title,
+                      path: link.path ?? '',
+                    }));
+
+                  const casesLink: NavigationEntry[] = otherLinks
+                    .filter((link) => link.id === 'cases' && pluginsStart.cases)
+                    .map((link) => ({
+                      app: observabilityAppId,
+                      label: link.title,
+                      path: link.path ?? '',
+                    }));
+
+                  return [
                     {
-                      label: i18n.translate('xpack.observability.sloLinkTitle', {
-                        defaultMessage: 'SLOs',
-                      }),
-                      app: 'slo',
-                      path: '',
+                      label: '',
+                      sortKey: 100,
+                      entries: [
+                        ...overviewLink,
+                        ...alertsLink,
+                        ...sloLink,
+                        ...casesLink,
+                        ...aiAssistantLink,
+                      ],
                     },
-                  ]
-                : [];
-
-              // Reformat the visible links to be NavigationEntry objects instead of
-              // AppDeepLink objects.
-              //
-              // In our case the deep links and sections being registered are the
-              // same, and the logic to hide them based on flags or capabilities is
-              // the same, so we just want to make a new list with the properties
-              // needed by `registerSections`, which are different than the
-              // properties used by the deepLinks.
-              //
-              // See https://github.com/elastic/kibana/issues/103325.
-              const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-              const alertsLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'alerts')
-                .map((link) => ({
-                  app: observabilityAppId,
-                  label: link.title,
-                  path: link.path ?? '',
-                }));
-
-              const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases' && pluginsStart.cases)
-                .map((link) => ({
-                  app: observabilityAppId,
-                  label: link.title,
-                  path: link.path ?? '',
-                }));
-
-              return [
-                {
-                  label: '',
-                  sortKey: 100,
-                  entries: [
-                    ...overviewLink,
-                    ...alertsLink,
-                    ...sloLink,
-                    ...casesLink,
-                    ...aiAssistantLink,
-                  ],
-                },
-              ];
+                  ];
+                })
+              );
             })
           )
         )
@@ -487,10 +506,12 @@ export class Plugin
       )
     );
 
+    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -509,13 +530,17 @@ export class Plugin
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {
-      return pluginsStart.navigation.addSolutionNavigation(createDefinition(pluginsStart));
+      return pluginsStart.navigation.addSolutionNavigation(
+        createDefinition(coreStart, pluginsStart)
+      );
     });
+
+    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
     };
   }
 }

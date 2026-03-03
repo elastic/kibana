@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
 import type {
@@ -332,7 +332,7 @@ export const runSaveLensVisualization = async (
     const newDoc = fromDocumentToSerializedState(
       docToSave,
       {
-        timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
+        time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
         savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
       originalInput

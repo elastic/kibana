@@ -71,7 +71,7 @@ export class DataViewsPublicPlugin
 
   public start(
     core: CoreStart,
-    { fieldFormats, contentManagement }: DataViewsPublicStartDependencies
+    { fieldFormats, contentManagement, cps }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, application } = core;
 
@@ -90,10 +90,14 @@ export class DataViewsPublicPlugin
       hasData: this.hasData.start(core, this.callResolveCluster),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http, async () => {
-        const currentUser = await core.security.authc.getCurrentUser();
-        return currentUser?.profile_uid;
-      }),
+      apiClient: new DataViewsApiClient(
+        http,
+        async () => {
+          const currentUser = await core.security.authc.getCurrentUser();
+          return currentUser?.profile_uid;
+        },
+        () => cps?.cpsManager?.getProjectRouting()
+      ),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {
@@ -106,7 +110,12 @@ export class DataViewsPublicPlugin
       getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
       getCanSaveAdvancedSettings: () =>
         Promise.resolve(application.capabilities.advancedSettings.save === true),
-      getIndices: (props) => getIndices({ ...props, http: core.http }),
+      getIndices: (props) =>
+        getIndices({
+          ...props,
+          http: core.http,
+          projectRouting: cps?.cpsManager?.getProjectRouting(props.projectRouting),
+        }),
       getRollupsEnabled: () => this.rollupsEnabled,
       scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value
     });

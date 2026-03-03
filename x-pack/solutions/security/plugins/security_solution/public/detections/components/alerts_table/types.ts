@@ -10,10 +10,8 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type { GroupingBucket } from '@kbn/grouping/src';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -21,6 +19,7 @@ import type { Note } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/model';
 import type { ControlColumnProps, RowRenderer } from '../../../../common/types';
+import type { AlertsGroupingAggregation } from './grouping_settings/types';
 
 export interface SetEventsLoadingProps {
   eventIds: string[];
@@ -77,7 +76,7 @@ export interface SecurityAlertsTableContext {
   isDraggable: boolean;
   leadingControlColumn: ControlColumnProps;
   userProfiles: AlertsUserProfilesData;
-  sourcererScope: PageScope;
+  pageScope: PageScope;
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
@@ -102,7 +101,12 @@ export type GroupTakeActionItems = (props: {
    * Selected group to know which group is extended/visible. This is coming from the getLevel function in the detections alert grouping code.
    */
   selectedGroup: string;
-}) => {
-  items: EuiContextMenuPanelItemDescriptor[];
-  panels: EuiContextMenuPanelDescriptor[];
-};
+  /**
+   * Meta-data about the selected group
+   */
+  groupBucket: GroupingBucket<AlertsGroupingAggregation>;
+  /**
+   * Callback to close the containing popover menu
+   */
+  closePopover: () => void;
+}) => JSX.Element | undefined;

@@ -40,6 +40,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ESQLQueryStats } from '@kbn/esql-types';
+import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -51,10 +53,6 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import type {
-  SuggestionsAbstraction,
-  SuggestionsListSize,
-} from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
@@ -160,6 +158,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * typically bound to UI controls like dropdowns or input fields (Dashboard controls here).
    */
   esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
+  esqlQueryStats?: ESQLQueryStats;
 
   /** Optional configurations for the lookup join index editor */
   onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];
@@ -167,7 +166,12 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
+  hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
+  /**
+   * Enable data source browser suggestion in ES|QL editor.
+   */
+  enableResourceBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -326,8 +330,15 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     return (
       (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
-      this.state.dateRangeTo !== this.props.dateRangeTo
+      this.state.dateRangeTo !== this.props.dateRangeTo ||
+      Boolean(this.props.hasDirtyState)
     );
+  };
+
+  private onDraftChange = (draft: UnifiedSearchDraft | undefined) => {
+    if (this.props.onDraftChange && !isEqual(this.props.draft, draft)) {
+      this.props.onDraftChange(draft);
+    }
   };
 
   componentWillUnmount() {
@@ -548,7 +559,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       text: toMountPoint(
         <FormattedMessage
           id="unifiedSearch.search.searchBar.backgroundSearch.toast.text"
-          defaultMessage="{name} is running now. <link>Check its progress here</link>"
+          defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
             link: (chunks: React.ReactNode) => (
@@ -576,28 +587,36 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     dateRange: TimeRange;
     query?: QT | Query | undefined;
   }) => {
-    if (!this.isDirty()) {
-      const searchSession = await this.services.data.search.session.save({
-        entryPoint: 'main button',
-      });
-      this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      return;
-    }
-
-    const currentSessionId = this.services.data.search.session.getSessionId();
-
-    const subscription = this.services.data.search.session
-      .getSession$()
-      .subscribe(async (newSessionId) => {
-        if (currentSessionId === newSessionId) return;
-        subscription.unsubscribe();
+    try {
+      if (!this.isDirty()) {
         const searchSession = await this.services.data.search.session.save({
           entryPoint: 'main button',
         });
         this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      });
+        return;
+      }
 
-    this.onQueryBarSubmit(payload);
+      const currentSessionId = this.services.data.search.session.getSessionId();
+
+      const subscription = this.services.data.search.session
+        .getSession$()
+        .subscribe(async (newSessionId) => {
+          if (currentSessionId === newSessionId) return;
+          subscription.unsubscribe();
+          const searchSession = await this.services.data.search.session.save({
+            entryPoint: 'main button',
+          });
+          this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
+        });
+
+      this.onQueryBarSubmit(payload);
+    } catch (e) {
+      this.services.notifications.toasts.addError(e as Error, {
+        title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.errorToast.title', {
+          defaultMessage: 'There was a problem sending your search to background',
+        }),
+      });
+    }
   };
 
   private shouldShowDatePickerAsBadge() {
@@ -752,7 +771,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
-          onDraftChange={this.props.onDraftChange}
+          onDraftChange={this.onDraftChange}
           onSendToBackground={this.onBackgroundSearch}
           isDirty={this.isDirty()}
           customSubmitButton={
@@ -789,8 +808,10 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
+          esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>
     );

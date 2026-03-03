@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -15,7 +16,10 @@ import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
-import type { SentinelOneRunScriptActionParameters } from '../command_render_components/run_script_action';
+import type {
+  EndpointRunScriptActionParameters,
+  SentinelOneRunScriptActionParameters,
+} from '../command_render_components/run_script_action';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -24,6 +28,7 @@ import { UploadActionResult } from '../command_render_components/upload_action';
 import {
   ArgumentFileSelector,
   CrowdstrikeScriptInputParams,
+  EndpointScriptInputParams,
   MicrosoftScriptInputParams,
 } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
@@ -51,6 +56,7 @@ import {
 } from '../command_render_components/execute_action';
 import type {
   EndpointPrivileges,
+  EndpointScript,
   ImmutableArray,
   SentinelOneScript,
 } from '../../../../../common/endpoint/types';
@@ -64,6 +70,7 @@ import { validateUnitOfTime } from './utils';
 import {
   CONSOLE_COMMANDS,
   CROWDSTRIKE_CONSOLE_COMMANDS,
+  ENDPOINT_EXECUTION_TIMEOUT,
   MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
 } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
@@ -194,6 +201,7 @@ export const getEndpointConsoleCommands = ({
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
     responseActionsEndpointMemoryDump,
+    responseActionsEndpointRunScript,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -224,7 +232,7 @@ export const getEndpointConsoleCommands = ({
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
-  const consoleCommands: CommandDefinition[] = [
+  let consoleCommands: CommandDefinition[] = [
     {
       name: 'isolate',
       about: getCommandAboutInfo({
@@ -484,11 +492,129 @@ export const getEndpointConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 9,
       helpDisabled: !isActionSupportedByAgentType(agentType, 'runscript', 'manual'),
-      helpHidden:
-        !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }) ||
-        (agentType === 'endpoint' && !doesEndpointSupportCommand('runscript')),
+      helpHidden: !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }),
     },
   ];
+
+  // Adjust `runscript` for use with Endpoint
+  if (agentType === 'endpoint' && !responseActionsEndpointRunScript) {
+    consoleCommands = consoleCommands.filter((command) => command.name !== 'runscript');
+  } else if (agentType === 'endpoint') {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
+
+    runscriptCommand.helpDisabled = false;
+    runscriptCommand.mustHaveArgs = true;
+    runscriptCommand.exampleUsage = (
+      enteredCommand?: Command<
+        CommandDefinition,
+        EndpointRunScriptActionParameters,
+        { script: CustomScriptSelectorState<EndpointScript> }
+      >
+    ) => {
+      let exampleUsageText = `runscript --script="copy.sh" --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+
+      if (enteredCommand) {
+        const scriptArgState = enteredCommand?.argState?.script?.at(0);
+        const selectedScript = scriptArgState?.store?.selectedOption;
+
+        if (selectedScript?.meta?.example) {
+          exampleUsageText = i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptInputExample',
+            {
+              defaultMessage: '{scriptName} script input: {example}',
+              values: {
+                scriptName: scriptArgState?.valueText,
+                example: selectedScript?.meta?.example,
+              },
+            }
+          );
+        }
+      }
+
+      return exampleUsageText;
+    };
+    runscriptCommand.args = {
+      script: {
+        required: true,
+        allowMultiples: false,
+        about: i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg',
+          { defaultMessage: 'The script to run (selected from popup list)' }
+        ),
+        mustHaveValue: 'non-empty-string',
+        SelectorComponent: CustomScriptSelector,
+      },
+      inputParams: {
+        required: false,
+        allowMultiples: false,
+        about: i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg',
+          { defaultMessage: 'Input arguments for the selected script' }
+        ),
+        mustHaveValue: 'non-empty-string',
+        SelectorComponent: EndpointScriptInputParams,
+      },
+      timeout: {
+        required: false,
+        allowMultiples: false,
+        about: ENDPOINT_EXECUTION_TIMEOUT,
+        mustHaveValue: 'non-empty-string',
+        validate: executeTimeoutValidator,
+      },
+      ...commandCommentArgument(),
+    };
+
+    const priorValidateFn = runscriptCommand.validate;
+
+    runscriptCommand.validate = (
+      enteredCommand: Command<CommandDefinition, SentinelOneRunScriptActionParameters>
+    ) => {
+      // First do the base validation - like authz checks
+      const baseValidation = priorValidateFn ? priorValidateFn(enteredCommand) : true;
+
+      if (baseValidation !== true) {
+        return baseValidation;
+      }
+
+      const { argState, args } = enteredCommand;
+
+      // No need to validate display of command help `help`
+      if (args.hasArg('help')) {
+        return true;
+      }
+
+      // Validate the script that was selected
+      const scriptInfo = (argState?.script?.[0]?.store as CustomScriptSelectorState<EndpointScript>)
+        ?.selectedOption;
+      const script = args.args.script[0];
+      const inputParams = args.args?.inputParams?.[0];
+
+      if (!script) {
+        return i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArgValueMissing',
+          { defaultMessage: 'A script selection is required' }
+        );
+      }
+
+      if (scriptInfo?.meta?.requiresInput && !inputParams) {
+        return i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptInputParamsMissing',
+          {
+            defaultMessage:
+              'Script "{name}" requires input parameters to be entered{instructions, select, false {.} other {: {instructions}}}',
+            values: {
+              name: scriptInfo.name,
+              instructions:
+                (scriptInfo.meta.instructions || scriptInfo.meta.example || '').trim() || false,
+            },
+          }
+        );
+      }
+
+      return true;
+    };
+  }
 
   // `upload` command
   consoleCommands.push({
@@ -563,7 +689,6 @@ export const getEndpointConsoleCommands = ({
                   }
                 ),
                 mustHaveValue: 'truthy',
-                selectorShowTextValue: true,
                 SelectorComponent: PendingActionsSelector,
               },
             }
@@ -659,20 +784,6 @@ export const getEndpointConsoleCommands = ({
       },
       mustHaveArgs: true,
       args: {
-        kernel: {
-          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: false,
-          exclusiveOr: true,
-          validate: () => {
-            if (!endpointSupportsKernelDump) {
-              return getMemoryDumpTypeNotSupportedMessage('kernel');
-            }
-
-            return true;
-          },
-        },
         process: {
           about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
           required: false,
@@ -682,6 +793,20 @@ export const getEndpointConsoleCommands = ({
           validate: () => {
             if (!endpointSupportsProcessDump) {
               return getMemoryDumpTypeNotSupportedMessage('process');
+            }
+
+            return true;
+          },
+        },
+        kernel: {
+          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsKernelDump) {
+              return getMemoryDumpTypeNotSupportedMessage('kernel');
             }
 
             return true;
@@ -706,6 +831,7 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
+      helpUsage: getMemoryDumpHelpUsage(),
     });
   }
 
@@ -838,7 +964,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: CustomScriptSelector,
-            selectorShowTextValue: true,
           },
           inputParams: {
             required: false,
@@ -849,7 +974,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: SentinelOneScriptInputParams,
-            selectorShowTextValue: true,
           },
           ...commandCommentArgument(),
         };
@@ -941,7 +1065,7 @@ const adjustCommandsForCrowdstrike = ({
         return {
           ...command,
           exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
-          helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          helpExample: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpExample,
           mustHaveArgs: true,
           args: {
             Raw: {
@@ -957,7 +1081,6 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -965,7 +1088,6 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
-              selectorShowTextValue: true,
               SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
@@ -1031,7 +1153,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             Args: {
@@ -1039,7 +1160,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
-              selectorShowTextValue: true,
               SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),

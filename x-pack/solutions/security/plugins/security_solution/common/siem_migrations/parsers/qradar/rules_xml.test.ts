@@ -6,82 +6,21 @@
  */
 
 import { QradarRulesXmlParser } from './rules_xml';
+import { getMockQRadarXml } from './mock/data';
 
-const mockRuleDataXml = `<rule buildingBlock="true" enabled="true" id="1220" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
-  <name>BB:CategoryDefinition: Authentication Success</name>
-  <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
-  <testDefinitions>
-    <test group="Event Property Tests" id="21" name="com.q1labs.sem.semces.cre.tests.EventCategory_Test" uid="0">
-      <text>when the event category for the event is one of the following &lt;a href='javascript:editParameter("0", "1")' class='dynamic'&gt;Authentication.Admin Login Success Events</text>
-      <parameter id="1">
-        <initialText>categories</initialText>
-        <selectionLabel>Select a category and click 'Add'</selectionLabel>
-        <userOptions format="CustomizerParameter-Categories.jsp" method="com.q1labs.sem.ui.servlets.UISemServices.getCategories" multiscreen="true" source="class"/>
-        <userSelection>1014, 12-2</userSelection>
-        <userSelectionTypes/>
-        <userSelectionId>0</userSelectionId>
-      </parameter>
-    </test>
-  </testDefinitions>
-  <actions flowAnalysisInterval="0" forceOffenseCreation="true" includeAttackerEventsInterval="0" offenseMapping="0"></actions>
-  <responses referenceMap="false" referenceMapOfMaps="false" referenceMapOfMapsRemove="false" referenceMapOfSets="false" referenceMapOfSetsRemove="false" referenceMapRemove="false" referenceTable="false" referenceTableRemove="false">
-    <newevent contributeOffenseName="true" credibility="10" describeOffense="true" description="Create an offense" forceOffenseCreation="true" lowLevelCategory="20013" name="Some Offense" offenseMapping="0" overrideOffenseName="false" qid="67555192" relevance="10" ></newevent>
-  </responses>
-</rule>
-`;
-
-const mockRuleDataBase64 = Buffer.from(mockRuleDataXml).toString('base64');
-
-const userXml = `<content>
-	<qradarversion>2021.6.12.20250509154206</qradarversion>
-	<sensordevice>
-		<deviceenabled>true</deviceenabled>
-		<creationdate>1719987711695</creationdate>
-		<bulk_added_id>0</bulk_added_id>
-		<languageid>1</languageid>
-		<deployed>true</deployed>
-		<timestamp_last_seen>1760692322222</timestamp_last_seen>
-		<devicecredibility>5</devicecredibility>
-		<uuid>cd27f6e0-a926-4476-b0b6-4ddb268189b5</uuid>
-		<hostname>SKDAMBSCXCJTS1</hostname>
-		<timestamp_eps60s>2025-10-17T11:12:10.804+02:00</timestamp_eps60s>
-		<peakeps60s>0</peakeps60s>
-		<eccomponentid>654</eccomponentid>
-		<logonly>false</logonly>
-		<id>25903</id>
-		<devicedescription>WindowsAuthServer device</devicedescription>
-		<store_event_payload>true</store_event_payload>
-		<parsing_order>1</parsing_order>
-		<coalesce_events>true</coalesce_events>
-		<eps60s>0</eps60s>
-		<autodiscovered>true</autodiscovered>
-		<bulk_added>false</bulk_added>
-		<encoding>UTF-8</encoding>
-		<devicetypeid>12</devicetypeid>
-		<sending_ip>172.20.28.21</sending_ip>
-		<eccomponentid_history>654</eccomponentid_history>
-		<devicename>WindowsAuthServer @ SKDAMBSCXCJTS1</devicename>
-		<editdate>1720098231987</editdate>
-		<gateway>false</gateway>
-		<spconfig>0</spconfig>
-	</sensordevice>
-	<custom_rule>
-		<origin>SYSTEM</origin>
-		<mod_date>2025-03-26T16:11:26.275+01:00</mod_date>
-    <rule_data>${mockRuleDataBase64}</rule_data>
-		<uuid>SYSTEM-1220</uuid>
-		<link_uuid>7d9324d4-4c7e-4fb8-99d0-ca8a29377e77</link_uuid>
-		<rule_type>0</rule_type>
-		<id>1220</id>
-		<create_date>2005-12-08T00:36:08.061+01:00</create_date>
-	</custom_rule>
-</content>
-`;
+const RULE_NAME = 'BB:CategoryDefinition: Authentication Success';
+const isBuildingBlockRule = true;
+const {
+  mockQradarXml,
+  mockRuleDataBase64s: _,
+  mockRuleDataXmls,
+  mockRuleDataXmlsSanitized,
+} = getMockQRadarXml([RULE_NAME], isBuildingBlockRule);
 
 describe('QradarRulesXmlParser', () => {
   describe('getRules', () => {
     it('should correctly parse a valid custom rule from the provided XML', async () => {
-      const parser = new QradarRulesXmlParser(userXml);
+      const parser = new QradarRulesXmlParser(mockQradarXml);
       const rules = await parser.getRules();
 
       expect(rules).toHaveLength(1);
@@ -90,7 +29,7 @@ describe('QradarRulesXmlParser', () => {
         'Edit this BB to include all events that indicate successful attempts to access the network.'
       );
       expect(rules[0].rule_type).toBe('building_block');
-      expect(rules[0].rule_data).toBe(mockRuleDataXml);
+      expect(rules[0].rule_data).toBe(mockRuleDataXmlsSanitized[0]);
     });
 
     it('should return an empty array if no custom rules are found', async () => {
@@ -127,11 +66,36 @@ describe('QradarRulesXmlParser', () => {
       const rules = await parser.getRules();
       expect(rules).toHaveLength(0);
     });
+
+    it('should sanitize HTML content within text tags in rule_data', async () => {
+      const ruleDataWithHtml = `<rule buildingBlock="false">
+  <name>Test Rule</name>
+  <notes>Test notes</notes>
+  <testDefinitions>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+      <text>when &lt;a href='javascript:editParameter("1", "1")'&gt;any&lt;/a&gt; of &lt;a&gt;Source IP&lt;/a&gt; are contained in &lt;a&gt;any&lt;/a&gt; of &lt;a&gt;Blocked IPs - IP&lt;/a&gt;</text>
+    </test>
+  </testDefinitions>
+</rule>`;
+      const ruleDataBase64 = Buffer.from(ruleDataWithHtml).toString('base64');
+      const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
+      const parser = new QradarRulesXmlParser(xml);
+      const rules = await parser.getRules();
+
+      expect(rules).toHaveLength(1);
+      // The rule_data should have sanitized text content (HTML entities decoded, tags removed)
+      expect(rules[0].rule_data).toContain(
+        '<text>when any of Source IP are contained in any of Blocked IPs - IP</text>'
+      );
+      // Should NOT contain the original HTML entities
+      expect(rules[0].rule_data).not.toContain('&lt;');
+      expect(rules[0].rule_data).not.toContain('&gt;');
+    });
   });
 
   describe('getResources', () => {
     it('should return an empty array for sensordevicetype when not present', async () => {
-      const parser = new QradarRulesXmlParser(userXml);
+      const parser = new QradarRulesXmlParser(mockQradarXml);
       const resources = await parser.getResources();
       expect(resources.sensordevicetype).toEqual([]);
     });
@@ -176,15 +140,160 @@ describe('QradarRulesXmlParser', () => {
           </responses>
         </rule>
       `;
-      const parser = new QradarRulesXmlParser('');
+      const parser = new QradarRulesXmlParser();
       const severity = await parser.parseSeverityFromRuleData(ruleDataWithSeverity);
       expect(severity).toBe('8');
     });
 
     it('should return undefined if severity is not present', async () => {
       const parser = new QradarRulesXmlParser('');
-      const severity = await parser.parseSeverityFromRuleData(mockRuleDataXml);
+      const severity = await parser.parseSeverityFromRuleData(mockRuleDataXmls[0]);
       expect(severity).toBeUndefined();
+    });
+  });
+
+  describe('extractReferenceSets', () => {
+    it('should extract a single reference set name', async () => {
+      const ruleDataWithRefSet = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Blocked IPs</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithRefSet);
+      expect(refSets).toEqual(['Blocked IPs']);
+    });
+
+    it('should extract multiple reference set names from one test', async () => {
+      const ruleDataWithRefSets = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of IP List 1, IP List 2, Suspicious IPs</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithRefSets);
+      expect(refSets).toEqual(['IP List 1', 'IP List 2', 'Suspicious IPs']);
+    });
+
+    it('should extract reference sets from multiple tests', async () => {
+      const ruleDataWithMultipleTests = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of List A</text>
+            </test>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in all of List B, List C</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithMultipleTests);
+      expect(refSets).toEqual(['List A', 'List B', 'List C']);
+    });
+
+    it('should handle "contained in all of" pattern', async () => {
+      const ruleDataWithAllOf = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in all of Required List 1, Required List 2</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithAllOf);
+      expect(refSets).toEqual(['Required List 1', 'Required List 2']);
+    });
+
+    it('should return unique reference set names only', async () => {
+      const ruleDataWithDuplicates = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Duplicate List, Unique List</text>
+            </test>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Duplicate List, Another List</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithDuplicates);
+      expect(refSets).toEqual(['Duplicate List', 'Unique List', 'Another List']);
+    });
+
+    it('should ignore non-ReferenceSetTest tests', async () => {
+      const ruleDataWithMixedTests = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.sem.semces.cre.tests.EventCategory_Test">
+              <text>when the event category is contained in any of Authentication</text>
+            </test>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Valid List</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithMixedTests);
+      expect(refSets).toEqual(['Valid List']);
+    });
+
+    it('should return empty array when no reference set tests are present', async () => {
+      const ruleDataNoRefSets = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.sem.semces.cre.tests.EventCategory_Test">
+              <text>when the event category is one of Authentication</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataNoRefSets);
+      expect(refSets).toEqual([]);
+    });
+
+    it('should handle reference set names with special characters', async () => {
+      const ruleDataWithSpecialChars = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of IP-List_2024, Blocked.IPs</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithSpecialChars);
+      expect(refSets).toEqual(['IP-List_2024', 'Blocked.IPs']);
+    });
+
+    it('should return empty array if text element is missing', async () => {
+      const ruleDataNoText = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataNoText);
+      expect(refSets).toEqual([]);
     });
   });
 });

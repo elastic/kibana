@@ -128,7 +128,9 @@ export const BorderForm: FunctionComponent<Props> = ({
 };
 
 BorderForm.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
+  // @ts-expect-error upgrade typescript v5.9.3
   radius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func.isRequired,
   colors: PropTypes.array.isRequired,

@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiBetaBadge, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useParams } from 'react-router-dom';
@@ -22,7 +22,6 @@ import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH } from '../../constant
 import ReportExportsTable from './report_exports_table';
 import ReportSchedulesTable from './report_schedules_table';
 import { LicensePrompt } from './license_prompt';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import IlmPolicyWrapper from './ilm_policy_wrapper';
 
 export interface MatchParams {
@@ -130,21 +129,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
           />
         }
         tabs={tabs.map(({ id, name, isBeta = false }) => ({
-          label: !isBeta ? (
-            name
-          ) : (
-            <>
-              {name}{' '}
-              <EuiBetaBadge
-                className="eui-alignMiddle"
-                size="s"
-                iconType="flask"
-                label={TECH_PREVIEW_LABEL}
-                aria-label={TECH_PREVIEW_LABEL}
-                tooltipContent={TECH_PREVIEW_DESCRIPTION}
-              />
-            </>
-          ),
+          label: !isBeta ? name : <>{name}</>,
           onClick: () => onSectionChange(id as Section),
           isSelected: id === section,
           key: id,
@@ -177,11 +162,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
           path={REPORTING_SCHEDULES_PATH}
           render={() => (
             <Suspense fallback={<EuiLoadingSpinner size={'xl'} />}>
-              {enableLinks && showLinks ? (
-                <ReportSchedulesTable apiClient={apiClient} />
-              ) : (
-                <LicensePrompt />
-              )}
+              {enableLinks && showLinks ? <ReportSchedulesTable /> : <LicensePrompt />}
             </Suspense>
           )}
         />

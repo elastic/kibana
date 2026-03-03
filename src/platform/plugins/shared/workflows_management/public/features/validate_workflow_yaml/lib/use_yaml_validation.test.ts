@@ -20,6 +20,8 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
 
+jest.mock('../../../hooks/use_kibana');
+
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
   const lines = value.split('\n');
@@ -51,7 +53,7 @@ jest.mock('../../../../common/schema', () => ({
   getCachedDynamicConnectorTypes: jest.fn(() => ({})),
   getWorkflowZodSchemaLoose: jest.fn(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { z } = require('@kbn/zod');
+    const { z } = require('@kbn/zod/v4');
     // mock actual schema, we only test the name uniqueness validation
     return z
       .object({

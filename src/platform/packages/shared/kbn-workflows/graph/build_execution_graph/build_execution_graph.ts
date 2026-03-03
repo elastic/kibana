@@ -11,9 +11,9 @@ import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import type {
   BaseStep,
+  DataSetStep,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   StepWithForeach,
@@ -21,6 +21,8 @@ import type {
   StepWithOnFailure,
   TimeoutProp,
   WaitStep,
+  WorkflowExecuteAsyncStep,
+  WorkflowExecuteStep,
   WorkflowOnFailure,
   WorkflowRetry,
   WorkflowSettings,
@@ -28,6 +30,7 @@ import type {
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
+  DataSetGraphNode,
   ElasticsearchGraphNode,
   EnterConditionBranchNode,
   EnterContinueNode,
@@ -48,9 +51,10 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   GraphNodeUnion,
-  HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowGraphType,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
@@ -136,8 +140,8 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitWaitStep(currentStep as WaitStep, context);
   }
 
-  if ((currentStep as HttpStep).type === 'http') {
-    return visitHttpStep(currentStep as HttpStep, context);
+  if ((currentStep as DataSetStep).type === 'data.set') {
+    return visitDataSetStep(currentStep as DataSetStep, context);
   }
 
   if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
@@ -146,6 +150,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if ((currentStep as KibanaStep).type?.startsWith('kibana.')) {
     return visitKibanaStep(currentStep as KibanaStep, context);
+  }
+
+  if ((currentStep as WorkflowExecuteStep).type === 'workflow.execute') {
+    return visitWorkflowExecuteStep(currentStep as WorkflowExecuteStep, context);
+  }
+
+  if ((currentStep as WorkflowExecuteAsyncStep).type === 'workflow.executeAsync') {
+    return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
   }
 
   return visitAtomicStep(currentStep, context);
@@ -171,22 +183,22 @@ export function visitWaitStep(
   return graph;
 }
 
-export function visitHttpStep(
-  currentStep: HttpStep,
+export function visitDataSetStep(
+  currentStep: DataSetStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
-  const httpNode: HttpGraphNode = {
+  const dataSetNode: DataSetGraphNode = {
     id: getStepId(currentStep, context),
-    type: 'http',
+    type: 'data.set',
     stepId,
     stepType: currentStep.type,
     configuration: {
       ...currentStep,
     },
   };
-  graph.setNode(httpNode.id, httpNode);
+  graph.setNode(dataSetNode.id, dataSetNode);
 
   return graph;
 }
@@ -226,6 +238,44 @@ export function visitKibanaStep(
   };
   graph.setNode(kibanaNode.id, kibanaNode);
 
+  return graph;
+}
+
+export function visitWorkflowExecuteStep(
+  currentStep: WorkflowExecuteStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowExecuteNode: WorkflowExecuteGraphNode = {
+    id: stepId,
+    type: 'workflow.execute',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(workflowExecuteNode.id, workflowExecuteNode);
+  return graph;
+}
+
+export function visitWorkflowExecuteAsyncStep(
+  currentStep: WorkflowExecuteAsyncStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowExecuteAsyncNode: WorkflowExecuteAsyncGraphNode = {
+    id: stepId,
+    type: 'workflow.executeAsync',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(workflowExecuteAsyncNode.id, workflowExecuteAsyncNode);
   return graph;
 }
 
@@ -378,8 +428,13 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
-  if (onFailureConfiguration.continue) {
-    graph = createContinue(stepId, graph);
+  // Here we can statically determine that 'continue' is needed if "continue" is boolean.
+  // If condition is a string (expression), we need to evaluate it at runtime, so we always create the continue node.
+  if (
+    typeof onFailureConfiguration.continue === 'string' ||
+    onFailureConfiguration.continue === true
+  ) {
+    graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
   context.stack.pop();
@@ -470,7 +525,11 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+function createContinue(
+  stepId: string,
+  condition: string | boolean,
+  innerGraph: WorkflowGraphType
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
@@ -480,6 +539,9 @@ function createContinue(stepId: string, innerGraph: WorkflowGraphType): Workflow
     stepId,
     stepType: 'continue',
     exitNodeId,
+    configuration: {
+      condition,
+    },
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',

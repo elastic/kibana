@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
   LENS_SAMPLING_MIN_VALUE,
@@ -15,6 +16,19 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
 import { filterSchema, unifiedSearchFilterSchema } from './filter';
+
+export const labelSharedProp = {
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+};
 
 export const sharedPanelInfoSchema = {
   /**
@@ -46,12 +60,31 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema)),
+  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema, { maxSize: 100 })),
 };
 
 export const dslOnlyPanelInfoSchema = {
   // ES|QL chart should not have the ability to define a KQL/Lucene query
   query: schema.maybe(filterSchema),
+};
+
+export const ignoringGlobalFiltersSchemaRaw = {
+  /**
+   * Whether to ignore global filters when fetching data for this layer.
+   *
+   * If true, global filters (such as those set in the dashboard or application context) will be ignored for this layer.
+   * If false, global filters will be applied.
+   *
+   * Default: false
+   * Possible values: boolean (true or false)
+   */
+  ignore_global_filters: schema.boolean({
+    defaultValue: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+    meta: {
+      description:
+        'If true, ignore global filters when fetching data for this layer. Default is false.',
+    },
+  }),
 };
 
 export const layerSettingsSchema = {
@@ -74,22 +107,7 @@ export const layerSettingsSchema = {
       description: 'Sampling factor between 0 (no sampling) and 1 (full sampling). Default is 1.',
     },
   }),
-  /**
-   * Whether to ignore global filters when fetching data for this layer.
-   *
-   * If true, global filters (such as those set in the dashboard or application context) will be ignored for this layer.
-   * If false, global filters will be applied.
-   *
-   * Default: false
-   * Possible values: boolean (true or false)
-   */
-  ignore_global_filters: schema.boolean({
-    defaultValue: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
-    meta: {
-      description:
-        'If true, ignore global filters when fetching data for this layer. Default is false.',
-    },
-  }),
+  ...ignoringGlobalFiltersSchemaRaw,
 };
 
 export const collapseBySchema = schema.oneOf(
@@ -111,5 +129,35 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description' } }
+  {
+    meta: {
+      id: 'collapseBy',
+      description: 'Collapse by function description',
+    },
+  }
+);
+
+export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
+
+const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
+
+export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
+
+export const axisTitleSchemaProps = {
+  value: schema.maybe(
+    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
+  ),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
+};
+
+export const legendTruncateAfterLinesSchema = schema.maybe(
+  schema.number({
+    defaultValue: 1,
+    min: 1,
+    max: 10,
+    meta: {
+      description: 'Maximum lines before truncating legend items (1-10)',
+      id: 'legendTruncateAfterLines',
+    },
+  })
 );

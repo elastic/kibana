@@ -12,13 +12,14 @@ import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
-import { coreMock } from '@kbn/core/server/mocks';
-import type { ESQLControlState } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -61,6 +62,10 @@ describe('ValueControlForm', () => {
     data: dataMock,
   };
 
+  services.core.http.get = jest
+    .fn()
+    .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
+
   const defaultProps = {
     initialVariableType: ESQLVariableType.TIME_LITERAL,
     queryString: 'FROM foo | STATS BY BUCKET(@timestamp,)',
@@ -70,13 +75,17 @@ describe('ValueControlForm', () => {
     search: searchMock,
     esqlVariables: [],
     ariaLabelledBy: 'esqlControlsFlyoutTitle',
+    telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
+    telemetryService: new ESQLEditorTelemetryService(services.core.analytics),
   };
 
   describe('Interval type', () => {
     it('should default correctly if no initial state is given for an interval variable type', async () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout {...defaultProps} />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
@@ -99,13 +108,6 @@ describe('ValueControlForm', () => {
       // variable label input should be rendered and with the default value (empty)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('');
 
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Medium'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
       // control type radio should be rendered and default to 'single'
       const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
       expect(selectionTypeContainer).toBeInTheDocument();
@@ -113,22 +115,19 @@ describe('ValueControlForm', () => {
         'Only allow a single selection'
       );
       expect(singleRadioButton).toBeChecked();
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).not.toBeChecked();
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
       const onCreateControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            {...defaultProps}
-            onSaveControl={onCreateControlSpy}
-            cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              onSaveControl={onCreateControlSpy}
+              cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
 
@@ -147,7 +146,9 @@ describe('ValueControlForm', () => {
       const onCancelControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout {...defaultProps} onCancelControl={onCancelControlSpy} />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} onCancelControl={onCancelControlSpy} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // click on the cancel button
@@ -160,16 +161,18 @@ describe('ValueControlForm', () => {
         grow: true,
         width: 'small',
         title: 'my control',
-        availableOptions: ['5 minutes'],
-        selectedOptions: ['5 minutes'],
-        variableName: 'myInterval',
-        variableType: ESQLVariableType.TIME_LITERAL,
-        esqlQuery: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['5 minutes'],
+        selected_options: ['5 minutes'],
+        variable_name: 'myInterval',
+        variable_type: ESQLVariableType.TIME_LITERAL,
+        esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout {...defaultProps} initialState={initialState} />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} initialState={initialState} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
 
@@ -183,18 +186,6 @@ describe('ValueControlForm', () => {
 
       // variable label input should be rendered and with the default value (my control)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('my control');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Small'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).toBeChecked();
     });
 
     it('should call the onEditControl callback, if initialState is given', async () => {
@@ -202,22 +193,24 @@ describe('ValueControlForm', () => {
         grow: true,
         width: 'small',
         title: 'my control',
-        availableOptions: ['5 minutes'],
-        selectedOptions: ['5 minutes'],
-        variableName: 'myInterval',
-        variableType: ESQLVariableType.TIME_LITERAL,
-        esqlQuery: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['5 minutes'],
+        selected_options: ['5 minutes'],
+        variable_name: 'myInterval',
+        variable_type: ESQLVariableType.TIME_LITERAL,
+        esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const onEditControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            {...defaultProps}
-            onSaveControl={onEditControlSpy}
-            initialState={initialState}
-            cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              onSaveControl={onEditControlSpy}
+              initialState={initialState}
+              cursorPosition={{ lineNumber: 1, column: 1 } as monaco.Position}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // click on the create button
@@ -253,11 +246,13 @@ describe('ValueControlForm', () => {
       it('should be able to change in fields type', async () => {
         const { findByTestId } = render(
           <IntlProvider locale="en">
-            <ESQLControlsFlyout
-              {...defaultProps}
-              initialVariableType={ESQLVariableType.VALUES}
-              queryString="FROM foo | WHERE field =="
-            />
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+              />
+            </KibanaContextProvider>
           </IntlProvider>
         );
         // variable name input should be rendered and with the default value
@@ -279,12 +274,14 @@ describe('ValueControlForm', () => {
 
         render(
           <IntlProvider locale="en">
-            <ESQLControlsFlyout
-              {...defaultProps}
-              initialVariableType={ESQLVariableType.VALUES}
-              queryString="FROM foo | WHERE field =="
-              timeRange={mockTimeRange}
-            />
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+                timeRange={mockTimeRange}
+              />
+            </KibanaContextProvider>
           </IntlProvider>
         );
 
@@ -292,6 +289,7 @@ describe('ValueControlForm', () => {
           expect(getESQLResults).toHaveBeenCalledWith(
             expect.objectContaining({
               timeRange: mockTimeRange,
+              signal: expect.any(AbortSignal),
             })
           );
         });
@@ -303,13 +301,13 @@ describe('ValueControlForm', () => {
           grow: false,
           width: 'medium',
           title: 'Custom Query Control',
-          availableOptions: [],
-          selectedOptions: [], // Start with empty to trigger the useEffect
-          variableName: 'customVar',
-          variableType: ESQLVariableType.VALUES,
-          esqlQuery: customQuery,
-          controlType: EsqlControlType.VALUES_FROM_QUERY,
-        } as ESQLControlState;
+          available_options: [],
+          selected_options: [], // Start with empty to trigger the useEffect
+          variable_name: 'customVar',
+          variable_type: ESQLVariableType.VALUES,
+          esql_query: customQuery,
+          control_type: EsqlControlType.VALUES_FROM_QUERY,
+        } as OptionsListESQLControlState;
 
         const getESQLResultsMock = getESQLResults as jest.Mock;
         getESQLResultsMock.mockClear();
@@ -343,6 +341,28 @@ describe('ValueControlForm', () => {
         if (queryEditor) {
           expect(queryEditor.textContent).toContain('custom-logs');
         }
+      });
+
+      it("should show the 'no results' callout", async () => {
+        (getESQLResults as jest.Mock).mockResolvedValueOnce({
+          response: {
+            columns: [],
+          },
+        });
+
+        const { findByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field.id  == 'lala' | STATS BY field.name"
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
       });
     });
   });

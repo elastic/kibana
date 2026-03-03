@@ -18,7 +18,7 @@ import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 import { withLicense } from '../../../common/api/util/with_license';
 
@@ -59,6 +59,7 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
               }
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+              const { experimentalFeatures } = ctx.securitySolution.getConfig();
               await siemMigrationAuditLogger.logAddRules({
                 migrationId,
                 count: rulesCount,
@@ -75,7 +76,10 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
 
               // Create identified resource documents without content to keep track of them
               const resourceIdentifier = new RuleResourceIdentifier(
-                firstOriginalRule.vendor as ResourceSupportedVendor
+                firstOriginalRule.vendor as ResourceSupportedVendor,
+                {
+                  experimentalFeatures,
+                }
               );
               const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
 

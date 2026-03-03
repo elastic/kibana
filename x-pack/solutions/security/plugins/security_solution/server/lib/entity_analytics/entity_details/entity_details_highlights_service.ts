@@ -28,6 +28,7 @@ import type {
   QueryDslQueryContainer,
   QueryDslFieldAndFormat,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { MlSummaryJob } from '@kbn/ml-plugin/server';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -41,13 +42,14 @@ import type { AssetCriticalityDataClient, IdentifierValuesByField } from '../ass
 import { buildCriticalitiesQuery } from '../asset_criticality';
 import type { AggregationBucket } from '../../asset_inventory/telemetry/type';
 
-const EMPTY_VULNERABILITIES_TOTAL: Record<string, number> = {
+// Always return a new object to prevent mutation
+const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
   [VULNERABILITIES_RESULT_EVALUATION.NONE]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.HIGH]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
-};
+});
 
 interface EntityDetailsHighlightsServiceFactoryOptions {
   riskEngineClient: RiskEngineDataClient;
@@ -108,12 +110,14 @@ export const entityDetailsHighlightsServiceFactory = ({
             {
               score: [latestRiskScore.calculated_score_norm],
               id_field: [latestRiskScore.id_field],
-              inputs: latestRiskScore.inputs.map((input) => ({
+              alert_inputs: latestRiskScore.inputs.map((input) => ({
                 risk_score: [input.risk_score?.toString() ?? ''],
                 contribution_score: [input.contribution_score?.toString() ?? ''],
                 description: [input.description ?? ''],
                 timestamp: [input.timestamp ?? ''],
               })),
+              asset_criticality_contribution_score:
+                latestRiskScore.category_2_score?.toString() ?? '0',
             },
           ]
         : [];
@@ -151,7 +155,7 @@ export const entityDetailsHighlightsServiceFactory = ({
     ) {
       let anomaliesAnonymized: Record<string, string[]>[] = [];
       if (ml) {
-        const jobs = await ml.jobServiceProvider(request, soClient).jobsSummary();
+        const jobs: MlSummaryJob[] = await ml.jobServiceProvider(request, soClient).jobsSummary();
         const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
         const { getAnomaliesTableData } = ml.resultsServiceProvider(request, soClient);
         const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
@@ -173,7 +177,7 @@ export const entityDetailsHighlightsServiceFactory = ({
         const jobNameById = jobs.reduce<Record<string, { name: string; description: string }>>(
           (acc, job) => {
             acc[job.id] = {
-              name: job.customSettings.security_app_display_name,
+              name: job.customSettings?.security_app_display_name ?? job.id,
               description: job.description,
             };
             return acc;
@@ -235,9 +239,9 @@ export const entityDetailsHighlightsServiceFactory = ({
               acc[key] = value.doc_count;
               return acc;
             },
-            EMPTY_VULNERABILITIES_TOTAL
+            getEmptyVulnerabilitiesTotal()
           )
-        : EMPTY_VULNERABILITIES_TOTAL;
+        : getEmptyVulnerabilitiesTotal();
 
       const vulnerabilitiesAnonymized = vulnerabilities?.hits.hits.map((hit) =>
         transformRawDataToRecord({

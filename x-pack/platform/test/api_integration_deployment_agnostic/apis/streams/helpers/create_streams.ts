@@ -15,7 +15,7 @@ type StreamPutItem = Streams.WiredStream.UpsertRequest & {
 
 const streams: StreamPutItem[] = [
   {
-    name: 'logs',
+    name: 'logs.otel',
     stream: {
       description: '',
       ingest: {
@@ -29,18 +29,23 @@ const streams: StreamPutItem[] = [
             },
             'scope.name': {
               type: 'keyword',
+              ignore_above: 1024,
             },
             trace_id: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             span_id: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             event_name: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             severity_text: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             'body.text': {
               type: 'match_only_text',
@@ -50,9 +55,11 @@ const streams: StreamPutItem[] = [
             },
             'resource.attributes.host.name': {
               type: 'keyword',
+              ignore_above: 1024,
             },
             'resource.attributes.service.name': {
               type: 'keyword',
+              ignore_above: 1024,
             },
             'stream.name': {
               type: 'system',
@@ -60,7 +67,7 @@ const streams: StreamPutItem[] = [
           },
           routing: [
             {
-              destination: 'logs.test',
+              destination: 'logs.otel.test',
               where: {
                 and: [
                   {
@@ -72,7 +79,7 @@ const streams: StreamPutItem[] = [
               status: 'enabled',
             },
             {
-              destination: 'logs.test2',
+              destination: 'logs.otel.test2',
               where: {
                 and: [
                   {
@@ -85,12 +92,15 @@ const streams: StreamPutItem[] = [
             },
           ],
         },
+        failure_store: {
+          lifecycle: { enabled: { data_retention: '30d' } },
+        },
       },
     },
     ...emptyAssets,
   },
   {
-    name: 'logs.test',
+    name: 'logs.otel.test',
     stream: {
       description: '',
       ingest: {
@@ -105,12 +115,13 @@ const streams: StreamPutItem[] = [
             },
           },
         },
+        failure_store: { inherit: {} },
       },
     },
     ...emptyAssets,
   },
   {
-    name: 'logs.test2',
+    name: 'logs.otel.test2',
     stream: {
       description: '',
       ingest: {
@@ -134,12 +145,13 @@ const streams: StreamPutItem[] = [
           },
           routing: [],
         },
+        failure_store: { inherit: {} },
       },
     },
     ...emptyAssets,
   },
   {
-    name: 'logs.deeply.nested.streamname',
+    name: 'logs.otel.deeply.nested.streamname',
     stream: {
       description: '',
       ingest: {
@@ -154,6 +166,7 @@ const streams: StreamPutItem[] = [
           },
           routing: [],
         },
+        failure_store: { inherit: {} },
       },
     },
     ...emptyAssets,

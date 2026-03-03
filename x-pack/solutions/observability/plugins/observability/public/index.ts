@@ -40,16 +40,15 @@ export {
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
+export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
 export {
-  alertsLocatorID,
   ruleDetailsLocatorID,
   rulesLocatorID,
   sloDetailsLocatorID,
   sloEditLocatorID,
-  uptimeOverviewLocatorID,
-} from '../common';
+} from '@kbn/deeplinks-observability';
 
-export type { RulesParams } from './locators/rules';
+export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';

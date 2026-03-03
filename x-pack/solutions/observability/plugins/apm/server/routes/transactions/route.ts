@@ -71,8 +71,10 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MergedServiceTransactionGroupsResponse> => {
     const { params } = resources;
-    const apmEventClient = await getApmEventClient(resources);
-    const apmAlertsClient = await getApmAlertsClient(resources);
+    const [apmEventClient, apmAlertsClient] = await Promise.all([
+      getApmEventClient(resources),
+      getApmAlertsClient(resources),
+    ]);
 
     const {
       path: { serviceName },

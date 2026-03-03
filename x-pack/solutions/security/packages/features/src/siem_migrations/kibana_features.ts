@@ -16,7 +16,7 @@ export const getSiemMigrationsBaseKibanaFeature = (): BaseKibanaFeatureConfig =>
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSiemMigrationsTitle',
     {
-      defaultMessage: 'SIEM migrations',
+      defaultMessage: 'Automatic Migration',
     }
   ),
   order: 1500,

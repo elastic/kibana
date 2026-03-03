@@ -103,7 +103,7 @@ export const IndexActionsContextMenu = ({
     plugins: { reindexService },
     core: { getUrlForApp, application, http },
     history,
-    config: { enableIndexActions },
+    config: { enableIndexActions, isServerless },
   } = useAppContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -126,23 +126,29 @@ export const IndexActionsContextMenu = ({
   const isConvertableToLookupIndex = (indexName: string) => {
     const selectedIndex = indices.find((index) => index.name === indexName);
 
-    if (
-      !selectedIndex ||
-      selectedIndex.documents === undefined ||
-      selectedIndex.primary === undefined
-    ) {
+    if (!selectedIndex || selectedIndex.documents === undefined) {
       return false;
     }
 
-    if (
-      selectedIndex.documents >= 0 &&
-      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
-      Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
-    ) {
-      return true;
+    // In non-serverless mode, we also need to check primary shards
+    if (!isServerless && selectedIndex.primary === undefined) {
+      return false;
     }
 
-    return false;
+    const isWithinDocumentLimit =
+      selectedIndex.documents >= 0 &&
+      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX;
+
+    const hasSinglePrimaryShard =
+      Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX;
+
+    // In serverless mode, only check document limit
+    // In non-serverless mode, require both document limit and single primary shard
+    if (isServerless) {
+      return isWithinDocumentLimit;
+    }
+
+    return isWithinDocumentLimit && hasSinglePrimaryShard;
   };
 
   const getPanels = () => {
@@ -348,10 +354,17 @@ export const IndexActionsContextMenu = ({
                 <>
                   <EuiSpacer size="xs" />
                   <EuiText size="xs">
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
-                      defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
-                    />
+                    {isServerless ? (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.serverlessError"
+                        defaultMessage="The index must have less than 2 billion documents to be converted."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
+                        defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
+                      />
+                    )}
                   </EuiText>
                 </>
               )}
@@ -385,7 +398,8 @@ export const IndexActionsContextMenu = ({
       data-test-subj="indexActionsContextMenuButton"
       iconSide={iconSide}
       aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
-        defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
+        defaultMessage:
+          'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
         values: { selectedIndexCount },
       })}
       onClick={onButtonClick}

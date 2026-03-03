@@ -36,6 +36,7 @@ import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/sie
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import { getMissingCapabilitiesChecker } from '../../common/service';
 import { raiseSuccessToast } from './notification/success_notification';
+import { MigrationSource } from '../../common/types';
 
 // --- Mocks for external modules ---
 
@@ -52,6 +53,7 @@ jest.mock('../api', () => ({
 }));
 
 jest.mock('../../common/service/capabilities', () => ({
+  ...jest.requireActual('../../common/service/capabilities'),
   getMissingCapabilitiesChecker: jest.fn(() => []),
 }));
 
@@ -89,8 +91,10 @@ const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.
 
 const defaultMigrationStats = {
   id: 'mig-1',
+  name: 'test-migration',
+  vendor: MigrationSource.SPLUNK,
   status: SiemMigrationTaskStatus.READY,
-  rules: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+  items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-01-01T00:00:00Z',
   last_updated_at: '2025-01-01T01:00:00Z',
 };
@@ -146,7 +150,13 @@ describe('SiemRulesMigrationsService', () => {
 
   describe('createRuleMigration', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.createRuleMigration([], 'test')).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
+      await expect(
+        service.createRuleMigration({
+          rules: [],
+          migrationName: 'test',
+          vendor: MigrationSource.SPLUNK,
+        })
+      ).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
     });
 
     it('should create migration with a single batch', async () => {
@@ -155,7 +165,11 @@ describe('SiemRulesMigrationsService', () => {
       (createRuleMigration as jest.Mock).mockResolvedValue({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body, name);
+      const migrationId = await service.createRuleMigration({
+        rules: body,
+        migrationName: name,
+        vendor: MigrationSource.SPLUNK,
+      });
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(createRuleMigration).toHaveBeenCalledWith({ name });
@@ -170,7 +184,11 @@ describe('SiemRulesMigrationsService', () => {
       (createRuleMigration as jest.Mock).mockResolvedValueOnce({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body, name);
+      const migrationId = await service.createRuleMigration({
+        rules: body,
+        migrationName: name,
+        vendor: MigrationSource.SPLUNK,
+      });
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(addRulesToMigration).toHaveBeenCalledTimes(2);
@@ -193,15 +211,23 @@ describe('SiemRulesMigrationsService', () => {
 
   describe('upsertMigrationResources', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.upsertMigrationResources('mig-1', [])).rejects.toThrow(
-        i18n.EMPTY_RULES_ERROR
-      );
+      await expect(
+        service.upsertMigrationResources({
+          migrationId: defaultMigrationStats.id,
+          vendor: defaultMigrationStats.vendor,
+          body: [],
+        })
+      ).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
     });
 
     it('should upsert resources in batches', async () => {
       const body = new Array(51).fill({ resource: 'res' });
       (upsertMigrationResources as jest.Mock).mockResolvedValue({});
-      await service.upsertMigrationResources('mig-1', body);
+      await service.upsertMigrationResources({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+        body,
+      });
 
       expect(upsertMigrationResources).toHaveBeenCalledTimes(2);
       expect((upsertMigrationResources as jest.Mock).mock.calls[0][0]).toEqual({
@@ -219,7 +245,10 @@ describe('SiemRulesMigrationsService', () => {
     it('should notify and not start migration if missing capabilities exist', async () => {
       mockGetMissingCapabilitiesChecker.mockReturnValue(() => [{ capability: 'cap' }]);
 
-      const result = await service.startRuleMigration('mig-1');
+      const result = await service.startRuleMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ started: false });
     });
@@ -229,7 +258,10 @@ describe('SiemRulesMigrationsService', () => {
       // Force connectorId to be missing
       jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
 
-      const result = await service.startRuleMigration('mig-1');
+      const result = await service.startRuleMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ started: false });
     });
@@ -259,10 +291,11 @@ describe('SiemRulesMigrationsService', () => {
       // @ts-ignore (spying on a private method)
       const stopMigrationPollingSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
 
-      const result = await service.startRuleMigration(
-        'mig-1',
-        SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED
-      );
+      const result = await service.startRuleMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+        retry: SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED,
+      });
 
       expect(mockStartRuleMigrationAPI).toHaveBeenCalledWith({
         migrationId: 'mig-1',
@@ -284,7 +317,10 @@ describe('SiemRulesMigrationsService', () => {
     it('should notify and not stop migration if missing capabilities exist', async () => {
       mockGetMissingCapabilitiesChecker.mockReturnValue(() => [{ capability: 'cap' }]);
 
-      const result = await service.stopRuleMigration('mig-1');
+      const result = await service.stopRuleMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ stopped: false });
     });
@@ -305,7 +341,10 @@ describe('SiemRulesMigrationsService', () => {
       // @ts-ignore (spying on a private method)
       const stopMigrationPollingSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
 
-      const result = await service.stopRuleMigration('mig-1');
+      const result = await service.stopRuleMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
 
       expect(mockStopRuleMigrationAPI).toHaveBeenCalledWith({ migrationId: 'mig-1' });
       expect(stopMigrationPollingSpy).toHaveBeenCalled();

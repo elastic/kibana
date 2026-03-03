@@ -6,14 +6,13 @@
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiPanel, EuiSkeletonText, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { OverviewTrend } from '../../../../../../../../common/types';
 import { MetricItemExtra } from './metric_item_extra';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
@@ -34,6 +33,7 @@ import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
 import { MetricItemIcon } from './metric_item_icon';
 import type { FlyoutParamProps } from '../types';
+import { getTrendDuration } from '../../../../../utils/formatting/trend_duration';
 
 export const METRIC_ITEM_HEIGHT = 180;
 
@@ -72,48 +72,42 @@ const truncateText = (text: string) => {
  * the type expectations of the Metric component.
  */
 export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null | undefined) => {
-  if (trendData === 'loading')
-    return {
+  return getTrendDuration<
+    | {
+        value: string;
+        extra: React.JSX.Element;
+        valueFormatter?: undefined;
+      }
+    | {
+        value: number;
+        valueFormatter: (d: number) => string;
+        extra: React.JSX.Element;
+      }
+  >({
+    onLoading: (onLoadingComponent) => ({
       value: '',
+      extra: onLoadingComponent,
+    }),
+    onNoData: (onNoDataComponent) => ({
+      value: '',
+      extra: onNoDataComponent,
+    }),
+    onData: ({ max, median, min, avg }) => ({
+      value: median,
+      valueFormatter: (d: number) => formatDuration(d),
       extra: (
-        <EuiSkeletonText
-          lines={1}
-          ariaWrapperProps={{
-            style: {
-              height: '16px',
-              width: '50px',
-            },
+        <MetricItemExtra
+          stats={{
+            medianDuration: median,
+            minDuration: min,
+            maxDuration: max,
+            avgDuration: avg,
           }}
         />
       ),
-    };
-
-  if (!trendData || trendData.median === null) {
-    return {
-      value: '',
-      extra: (
-        <FormattedMessage
-          id="xpack.synthetics.overview.metricItem.noDataAvailableMessage"
-          defaultMessage="--"
-        />
-      ),
-    };
-  }
-
-  return {
-    value: trendData.median,
-    valueFormatter: (d: number) => formatDuration(d),
-    extra: (
-      <MetricItemExtra
-        stats={{
-          medianDuration: trendData.median,
-          minDuration: trendData.min,
-          maxDuration: trendData.max,
-          avgDuration: trendData.avg,
-        }}
-      />
-    ),
-  };
+    }),
+    trendData,
+  });
 };
 
 export const MetricItem = ({

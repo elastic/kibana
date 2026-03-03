@@ -41,6 +41,12 @@ export type {
 } from './types';
 
 export type {
+  AlertFormatter,
+  AlertFormatterFormatters,
+  FormattedAlertInfo,
+} from '@kbn/alerts-ui-shared/src/common/types';
+
+export type {
   ActionConnectorFieldsProps,
   ActionParamsProps,
   ActionTypeModel,
@@ -76,7 +82,12 @@ export {
   SectionLoading,
 } from './application/components';
 
-export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
+export { AddMessageVariablesOptional } from './application/components/add_message_variables_optional';
+
+export {
+  AlertProvidedActionVariables,
+  defaultAlertFormatterFormatters,
+} from '@kbn/alerts-ui-shared';
 export { templateActionVariable, updateActionConnector, executeAction } from './application/lib';
 
 export function plugin(context: PluginInitializerContext) {
@@ -124,3 +135,5 @@ export { transformRule } from './application/lib/rule_api/common_transformations
 export { validateActionFilterQuery } from './application/lib/value_validators';
 
 export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';
+
+export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';

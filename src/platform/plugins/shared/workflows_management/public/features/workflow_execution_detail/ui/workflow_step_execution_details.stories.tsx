@@ -43,11 +43,26 @@ export const Default: StoryObj<typeof WorkflowStepExecutionDetails> = {
         url: 'https://api.abuseipdb.com/api/v2/check?ipAddress=',
         timeout: 30000,
       },
-      completedAt: '2025-09-01T17:34:54.965Z',
+      finishedAt: '2025-09-01T17:34:54.965Z',
       executionTimeMs: 423,
-      error: 'HTTP Error: 422 Unprocessable Entity',
+      error: {
+        type: 'Error',
+        message: 'HTTP Error: 422 Unprocessable Entity',
+        details: {
+          statusCode: 422,
+          statusText: 'Unprocessable Entity',
+          body: {
+            errors: [
+              {
+                detail: 'ipAddress is required',
+                status: '422',
+                title: 'Unprocessable Entity',
+              },
+            ],
+          },
+        },
+      },
     },
-    isLoading: false,
     workflowExecutionId: 'e2387d33-d626-42f0-a402-c379d4d30d42',
   },
 };

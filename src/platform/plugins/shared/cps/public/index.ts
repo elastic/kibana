@@ -15,4 +15,3 @@ export function plugin(initContext: PluginInitializerContext) {
 }
 
 export type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
-export type { CPSManager } from './services/cps_manager';

@@ -19,6 +19,9 @@ import type {
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
+  SearchSessionStatus,
+  SearchSessionRequestInfo,
 } from '../../../common/search';
 import type { SearchSessionsConfigSchema } from '../../config';
 
@@ -45,9 +48,15 @@ export interface IScopedSearchSessionsClient {
     expires: Date
   ) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>;
   status: (sessionId: string) => Promise<SearchSessionStatusResponse>;
+  updateStatuses: (sessionIds: string[]) => Promise<SearchSessionStatusesResponse>;
   getConfig: () => SearchSessionsConfigSchema;
 }
 
 export interface ISearchSessionService {
   asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient;
+}
+
+export interface SessionStatus {
+  status: SearchSessionStatus;
+  searchStatuses?: SearchSessionRequestInfo[];
 }

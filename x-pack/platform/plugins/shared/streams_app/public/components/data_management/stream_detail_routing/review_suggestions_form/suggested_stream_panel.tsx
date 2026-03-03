@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type Streams } from '@kbn/streams-schema';
-import { isCondition } from '@kbn/streamlang';
+import { type Condition, isCondition } from '@kbn/streamlang';
 import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useMatchRate } from './use_match_rate';
 import {
@@ -30,7 +30,7 @@ import {
 } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel, VerticalRule } from '../../shared';
-import { StreamNameFormRow } from '../stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from '../../../stream_name_form_row';
 import { RoutingConditionEditor } from '../routing_condition_editor';
 import { processCondition } from '../utils';
 import { EditSuggestedRuleControls } from '../control_bars';
@@ -50,18 +50,29 @@ export function SuggestedStreamPanel({
   onPreview(toggle: boolean): void;
   index: number;
   onEdit(index: number, suggestion: PartitionSuggestion): void;
-  onSave?: () => void;
+  onSave?: (suggestion: PartitionSuggestion) => void;
 }) {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
-    useStreamRoutingEvents();
+  const {
+    changeSuggestionNameDebounced,
+    changeSuggestionCondition,
+    reviewSuggestedRule,
+    setConditionEditorValidity,
+  } = useStreamRoutingEvents();
 
-  const editedSuggestion = routingSnapshot.context.editedSuggestion;
-  const isEditing =
-    routingSnapshot.matches({ ready: 'editingSuggestedRule' }) &&
-    routingSnapshot.context.editingSuggestionIndex === index;
+  const isEditing = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+      snapshot.context.editingSuggestionIndex === index
+  );
+  const editedSuggestionForPanel = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+    snapshot.context.editingSuggestionIndex === index
+      ? snapshot.context.editedSuggestion
+      : null
+  );
 
-  const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
+  const currentSuggestion =
+    isEditing && editedSuggestionForPanel ? editedSuggestionForPanel : partition;
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
@@ -70,22 +81,6 @@ export function SuggestedStreamPanel({
       selectedPreview.type === 'suggestion' &&
       selectedPreview.name === currentSuggestion.name
   );
-
-  const nameError = React.useMemo(() => {
-    if (!isEditing) return undefined;
-
-    const isDuplicateName = routingSnapshot.context.routing.some(
-      (r) => r.destination === currentSuggestion.name
-    );
-
-    if (isDuplicateName) {
-      return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
-        defaultMessage: 'A stream with this name already exists',
-      });
-    }
-
-    return undefined;
-  }, [isEditing, currentSuggestion.name, routingSnapshot.context.routing]);
 
   const conditionError = React.useMemo(() => {
     if (!isEditing) return undefined;
@@ -104,37 +99,44 @@ export function SuggestedStreamPanel({
 
   const handleNameChange = (name: string) => {
     if (!isEditing) return;
-    changeSuggestionName(name);
+    changeSuggestionNameDebounced(name);
   };
 
-  const handleConditionChange = (condition: any) => {
+  const handleConditionChange = (condition: Condition) => {
     if (!isEditing) return;
     changeSuggestionCondition(condition);
   };
+
+  const { isStreamNameValid, setLocalStreamName, partitionName, prefix, helpText, errorMessage } =
+    useChildStreamInput(currentSuggestion.name, false);
 
   if (isEditing) {
     return (
       <SelectablePanel paddingSize="m" isSelected={isSelected}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <StreamNameFormRow
-            value={currentSuggestion.name}
             onChange={handleNameChange}
+            setLocalStreamName={setLocalStreamName}
+            partitionName={partitionName}
+            prefix={prefix}
+            helpText={helpText}
+            errorMessage={errorMessage}
             autoFocus
-            error={nameError}
-            isInvalid={!!nameError}
+            isStreamNameValid={isStreamNameValid}
           />
           <RoutingConditionEditor
             status="enabled"
             condition={currentSuggestion.condition}
             onConditionChange={handleConditionChange}
+            onValidityChange={setConditionEditorValidity}
             onStatusChange={() => {}}
             isSuggestionRouting={true}
           />
           <EditSuggestedRuleControls
-            onSave={onSave}
+            onSave={onSave ? () => onSave(currentSuggestion) : undefined}
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
-            nameError={nameError}
             conditionError={conditionError}
+            isStreamNameValid={isStreamNameValid}
           />
         </EuiFlexGroup>
       </SelectablePanel>
@@ -146,7 +148,9 @@ export function SuggestedStreamPanel({
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h4>{currentSuggestion.name}</h4>
+            <h4 data-test-subj={`suggestionName-${currentSuggestion.name}`}>
+              {currentSuggestion.name}
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         {matchRate.loading ? (
@@ -174,7 +178,9 @@ export function SuggestedStreamPanel({
         />
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <ConditionPanel condition={currentSuggestion.condition} />
+      <div data-test-subj={`suggestionConditionPanel-${currentSuggestion.name}`}>
+        <ConditionPanel condition={currentSuggestion.condition} />
+      </div>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={false}>
@@ -189,6 +195,7 @@ export function SuggestedStreamPanel({
                 defaultMessage: 'Preview',
               }
             )}
+            data-test-subj={`suggestionPreviewButton-${currentSuggestion.name}`}
           >
             {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.preview', {
               defaultMessage: 'Preview',
@@ -207,6 +214,7 @@ export function SuggestedStreamPanel({
                     defaultMessage: 'Reject',
                   }
                 )}
+                data-test-subj={`suggestionRejectButton-${currentSuggestion.name}`}
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.dismiss', {
                   defaultMessage: 'Reject',
@@ -219,6 +227,7 @@ export function SuggestedStreamPanel({
                 size="s"
                 onClick={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
                 fill
+                data-test-subj={`suggestionAcceptButton-${currentSuggestion.name}`}
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
                   defaultMessage: 'Accept',

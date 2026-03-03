@@ -1,0 +1,25 @@
+# SCALB
+
+The SCALB function returns the result of multiplying a number by 2 raised to the power of a scale factor, following the behavior of Java's `scalb` function. The result is rounded as if performed by a single correctly rounded floating-point multiply to a member of the double value set.
+
+## Syntax
+
+`SCALB(d, scaleFactor)`
+
+### Parameters
+
+#### d
+
+Numeric expression for the multiplier. If `null`, the function returns `null`.
+
+#### scaleFactor
+
+Numeric expression for the scale factor. If `null`, the function returns `null`.
+
+## Examples
+
+Calculates the value of 3.0 multiplied by 2 to the power of 10 and stores the result in a new column.
+
+```esql
+row x = 3.0, y = 10 | eval z = scalb(x, y)
+```

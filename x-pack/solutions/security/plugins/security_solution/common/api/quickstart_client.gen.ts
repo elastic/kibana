@@ -109,6 +109,22 @@ import type {
   SetAlertsStatusRequestBodyInput,
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import type {
+  SearchUnifiedAlertsRequestBodyInput,
+  SearchUnifiedAlertsResponse,
+} from './detection_engine/unified_alerts/search/search_route.gen';
+import type {
+  SetUnifiedAlertsAssigneesRequestBodyInput,
+  SetUnifiedAlertsAssigneesResponse,
+} from './detection_engine/unified_alerts/set_alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetUnifiedAlertsTagsRequestBodyInput,
+  SetUnifiedAlertsTagsResponse,
+} from './detection_engine/unified_alerts/set_alert_tags/set_alert_tags_route.gen';
+import type {
+  SetUnifiedAlertsWorkflowStatusRequestBodyInput,
+  SetUnifiedAlertsWorkflowStatusResponse,
+} from './detection_engine/unified_alerts/set_workflow_status/set_workflow_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
@@ -231,6 +247,8 @@ import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
+  DeleteEntityEnginesRequestQueryInput,
+  DeleteEntityEnginesResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
 import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
@@ -346,6 +364,20 @@ import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
+import type {
+  CreateWatchlistRequestBodyInput,
+  CreateWatchlistResponse,
+} from './entity_analytics/watchlists/management/create.gen';
+import type {
+  GetWatchlistRequestParamsInput,
+  GetWatchlistResponse,
+} from './entity_analytics/watchlists/management/get.gen';
+import type { ListWatchlistsResponse } from './entity_analytics/watchlists/management/list.gen';
+import type {
+  UpdateWatchlistRequestParamsInput,
+  UpdateWatchlistRequestBodyInput,
+  UpdateWatchlistResponse,
+} from './entity_analytics/watchlists/management/update.gen';
 import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
@@ -474,6 +506,9 @@ import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
+  RuleMigrationEnhanceRuleRequestParamsInput,
+  RuleMigrationEnhanceRuleRequestBodyInput,
+  RuleMigrationEnhanceRuleResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -669,6 +704,12 @@ If asset criticality records already exist for the specified entities, those rec
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Creates an index for Elastic Security alerts. Calling this API is not
+required for the detection engine to function properly. You can create
+rules and alerts without calling this API.
+
+    */
   async createAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateAlertsIndex`);
     return this.kbnClient
@@ -945,6 +986,19 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async createWatchlist(props: CreateWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWatchlist`);
+    return this.kbnClient
+      .request<CreateWatchlistResponse>({
+        path: '/api/entity_analytics/watchlists',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async deleteAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAlertsIndex`);
     return this.kbnClient
@@ -994,6 +1048,20 @@ For detailed information on Kibana actions and alerting, and additional API call
     return this.kbnClient
       .request<DeleteEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteEntityEngines(props: DeleteEntityEnginesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
+    return this.kbnClient
+      .request<DeleteEntityEnginesResponse>({
+        path: '/api/entity_store/engines',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2095,6 +2163,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getWatchlist(props: GetWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetWatchlist`);
+    return this.kbnClient
+      .request<GetWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getWorkflowInsights(props: GetWorkflowInsightsProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
     return this.kbnClient
@@ -2369,6 +2449,18 @@ providing you with the most current and effective threat detection capabilities.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listWatchlists() {
+    this.log.info(`${new Date().toISOString()} Calling API ListWatchlists`);
+    return this.kbnClient
+      .request<ListWatchlistsResponse>({
+        path: '/api/entity_analytics/watchlists/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2684,6 +2776,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
+   */
+  async ruleMigrationEnhanceRule(props: RuleMigrationEnhanceRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleMigrationEnhanceRule`);
+    return this.kbnClient
+      .request<RuleMigrationEnhanceRuleResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/rules/enhance',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -2784,6 +2895,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Find and/or aggregate detection and attack alerts that match the given query.
+   */
+  async searchUnifiedAlerts(props: SearchUnifiedAlertsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchUnifiedAlerts`);
+    return this.kbnClient
+      .request<SearchUnifiedAlertsResponse>({
+        path: '/internal/detection_engine/unified_alerts/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Assign users to detection alerts, and unassign them from alerts.
 > info
 > You cannot add and remove the same assignee in the same request.
@@ -2831,6 +2958,60 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         path: '/api/detection_engine/signals/tags',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Assign users to detection and attack alerts, and unassign them from alerts.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+    */
+  async setUnifiedAlertsAssignees(props: SetUnifiedAlertsAssigneesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsAssignees`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsAssigneesResponse>({
+        path: '/internal/detection_engine/unified_alerts/assignees',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Add tags to detection and attack alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+    */
+  async setUnifiedAlertsTags(props: SetUnifiedAlertsTagsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsTags`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsTagsResponse>({
+        path: '/internal/detection_engine/unified_alerts/tags',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Set the workflow status of one or more detection and attack alerts by IDs.
+   */
+  async setUnifiedAlertsWorkflowStatus(props: SetUnifiedAlertsWorkflowStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsWorkflowStatus`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsWorkflowStatusResponse>({
+        path: '/internal/detection_engine/unified_alerts/workflow_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -3078,6 +3259,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateWatchlist(props: UpdateWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlist`);
+    return this.kbnClient
+      .request<UpdateWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
     return this.kbnClient
@@ -3246,6 +3440,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
 }
+export interface CreateWatchlistProps {
+  body: CreateWatchlistRequestBodyInput;
+}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -3255,6 +3452,9 @@ export interface DeleteDashboardMigrationProps {
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
+}
+export interface DeleteEntityEnginesProps {
+  query: DeleteEntityEnginesRequestQueryInput;
 }
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;
@@ -3431,6 +3631,9 @@ export interface GetTimelineProps {
 export interface GetTimelinesProps {
   query: GetTimelinesRequestQueryInput;
 }
+export interface GetWatchlistProps {
+  params: GetWatchlistRequestParamsInput;
+}
 export interface GetWorkflowInsightsProps {
   query: GetWorkflowInsightsRequestQueryInput;
 }
@@ -3505,6 +3708,10 @@ export interface ReadRuleProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
+export interface RuleMigrationEnhanceRuleProps {
+  params: RuleMigrationEnhanceRuleRequestParamsInput;
+  body: RuleMigrationEnhanceRuleRequestBodyInput;
+}
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
@@ -3518,6 +3725,9 @@ export interface SearchAlertsProps {
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
 }
+export interface SearchUnifiedAlertsProps {
+  body: SearchUnifiedAlertsRequestBodyInput;
+}
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;
 }
@@ -3526,6 +3736,15 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface SetUnifiedAlertsAssigneesProps {
+  body: SetUnifiedAlertsAssigneesRequestBodyInput;
+}
+export interface SetUnifiedAlertsTagsProps {
+  body: SetUnifiedAlertsTagsRequestBodyInput;
+}
+export interface SetUnifiedAlertsWorkflowStatusProps {
+  body: SetUnifiedAlertsWorkflowStatusRequestBodyInput;
 }
 export interface StartDashboardsMigrationProps {
   params: StartDashboardsMigrationRequestParamsInput;
@@ -3579,6 +3798,10 @@ export interface UpdateRuleMigrationIndexPatternProps {
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
   body: UpdateRuleMigrationRulesRequestBodyInput;
+}
+export interface UpdateWatchlistProps {
+  params: UpdateWatchlistRequestParamsInput;
+  body: UpdateWatchlistRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

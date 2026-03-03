@@ -9,27 +9,28 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { searchRequestBody, searchResponseBody } from './schemas';
+import { getRouteConfig } from '../get_route_config';
+import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const searchRoute = router.post({
-    path: '/api/dashboards/search',
+    path: `${basePath}/search`,
     summary: `Search dashboards`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   searchRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: {
         request: {
-          body: searchRequestBody,
+          body: searchRequestBodySchema,
         },
         response: {
           200: {
-            body: () => searchResponseBody,
+            body: () => searchResponseBodySchema,
           },
         },
       },

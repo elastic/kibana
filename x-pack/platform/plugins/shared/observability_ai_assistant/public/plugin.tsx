@@ -10,7 +10,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { type ComponentType, lazy, type Ref } from 'react';
-import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { AIChatExperience, type AssistantScope } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
@@ -61,13 +62,18 @@ export class ObservabilityAIAssistantPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPublicStart {
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,
       enabled:
         coreStart.application.capabilities.observabilityAIAssistant[
           aiAssistantCapabilities.show
-        ] === true,
+        ] === true && chatExperience !== AIChatExperience.Agent,
       scopes: this.scopeFromConfig ? [this.scopeFromConfig] : ['all'],
       scopeIsMutable: !!this.scopeFromConfig,
     }));

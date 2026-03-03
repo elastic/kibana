@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy, orderBy, pick, uniqBy } from 'lodash';
+import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -19,7 +19,7 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
-import type { DiscoverAppState } from './discover_app_state_container';
+import type { DiscoverAppState } from './redux';
 import { fromSavedObjectTabToTabState } from './redux';
 import type { TabsUrlState } from '../../../../common/types';
 
@@ -28,6 +28,7 @@ export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
+  attributes: TabState['attributes'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
 };
@@ -70,7 +71,10 @@ export interface TabsStorageManager {
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
+    tabState: Pick<
+      TabStateInLocalStorage,
+      'internalState' | 'attributes' | 'appState' | 'globalState'
+    >
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -179,6 +183,7 @@ export const createTabsStorageManager = ({
       id: tabState.id,
       label: tabState.label,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
+      attributes: tabState.attributes,
       appState: tabState.appState,
       globalState: tabState.globalState,
     };
@@ -206,25 +211,51 @@ export const createTabsStorageManager = ({
     defaultTabState: Omit<TabState, keyof TabItem>
   ): TabState => {
     const internalState = getDefinedStateOnly(tabStateInStorage.internalState);
+    const attributes = getDefinedStateOnly(tabStateInStorage.attributes);
     const appState = getDefinedStateOnly(tabStateInStorage.appState);
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
-    const controlGroupState = internalState?.controlGroupJson
-      ? parseControlGroupJson(internalState.controlGroupJson)
-      : undefined;
+
+    let controlGroupState = attributes?.controlGroupState;
+
+    // migration from the older format where controlGroupJson was stored in internalState
+    if (internalState && 'controlGroupJson' in internalState && !attributes?.controlGroupState) {
+      controlGroupState =
+        internalState.controlGroupJson && typeof internalState.controlGroupJson === 'string'
+          ? parseControlGroupJson(internalState.controlGroupJson)
+          : undefined;
+    }
+
     const esqlVariables = controlGroupState
       ? extractEsqlVariables(controlGroupState)
       : defaultTabState.esqlVariables;
 
-    return {
+    const tabState: TabState = {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
-      initialInternalState: internalState,
+      initialInternalState: internalState
+        ? omit(internalState, 'visContext', 'controlGroupJson')
+        : undefined,
+      attributes: {
+        ...defaultTabState.attributes,
+        ...attributes,
+        controlGroupState,
+      },
       appState: appState || {},
       globalState: globalState || {},
       esqlVariables,
     };
+
+    // migration from the older format where visContext was stored in internalState
+    if (internalState && 'visContext' in internalState && !tabState.attributes.visContext) {
+      tabState.attributes.visContext =
+        internalState.visContext && typeof internalState.visContext === 'object'
+          ? internalState.visContext
+          : undefined;
+    }
+
+    return tabState;
   };
 
   const toRecentlyClosedTabState = (
@@ -334,6 +365,7 @@ export const createTabsStorageManager = ({
           return {
             ...tab,
             internalState: tabStatePartial.internalState,
+            attributes: tabStatePartial.attributes,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
           };

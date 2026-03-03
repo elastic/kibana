@@ -34,6 +34,10 @@ import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
+import {
+  WiredStreamsIngestionSelector,
+  type IngestionMode,
+} from '../shared/wired_streams_ingestion_selector';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { buildInstallStackCommand } from './build_install_stack_command';
@@ -45,6 +49,9 @@ import {
 import { buildValuesFileUrl } from './build_values_file_url';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
+import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
+import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 export const OtelKubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
@@ -55,7 +62,7 @@ export const OtelKubernetesPanel: React.FC = () => {
   const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
-    services: { share },
+    services: { share, docLinks },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const apmLocator = share.url.locators.get('APM_LOCATOR');
@@ -67,6 +74,16 @@ export const OtelKubernetesPanel: React.FC = () => {
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+
+  const {
+    isEnabled: isWiredStreamsEnabled,
+    isLoading: isWiredStreamsLoading,
+    isEnabling,
+    enableWiredStreams,
+  } = useWiredStreamsStatus();
+  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
+  const useWiredStreams = ingestionMode === 'wired';
+  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {};
 
   useEffect(() => {
     if (data) {
@@ -100,11 +117,13 @@ export const OtelKubernetesPanel: React.FC = () => {
         elasticsearchUrl: data.elasticsearchUrl,
         apiKeyEncoded: data.apiKeyEncoded,
         agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+        useWiredStreams,
       })
     : undefined;
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
+      <ManagedOtlpCallout />
       <EuiSteps
         steps={[
           {
@@ -116,6 +135,28 @@ export const OtelKubernetesPanel: React.FC = () => {
             ),
             children: (
               <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.observability_onboarding.otelKubernetesPanel.addRepositoryDescription"
+                    defaultMessage="Run this command to add the Helm chart. Refer to the {docsLink} for information on supported Helm versions."
+                    values={{
+                      docsLink: (
+                        <EuiLink
+                          data-test-subj="observabilityOnboardingOtelKubernetesPanelQuickstartDocsLink"
+                          href="https://www.elastic.co/docs/solutions/observability/get-started/quickstart-unified-kubernetes-observability-with-elastic-distributions-of-opentelemetry-edot"
+                          external
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelKubernetesPanel.quickstartDocsLinkLabel',
+                            { defaultMessage: 'quickstart guide' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+                <EuiSpacer />
                 <EuiCodeBlock paddingSize="m" language="bash">
                   {addRepoCommand}
                 </EuiCodeBlock>
@@ -136,6 +177,20 @@ export const OtelKubernetesPanel: React.FC = () => {
             ),
             children: installStackCommand ? (
               <>
+                {!isWiredStreamsLoading && (
+                  <>
+                    <WiredStreamsIngestionSelector
+                      ingestionMode={ingestionMode}
+                      onChange={setIngestionMode}
+                      streamsDocLink={docLinks?.links.observability.logsStreams}
+                      isWiredStreamsEnabled={isWiredStreamsEnabled}
+                      isEnabling={isEnabling}
+                      flowType="otel_kubernetes"
+                      onEnableWiredStreams={enableWiredStreams}
+                    />
+                    <EuiSpacer size="xl" />
+                  </>
+                )}
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
@@ -412,8 +467,8 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                   integration="kubernetes_otel"
                   newTab={false}
                   isLoading={false}
-                  actionLinks={
-                    isMetricsOnboardingEnabled
+                  actionLinks={[
+                    ...(isMetricsOnboardingEnabled
                       ? [
                           {
                             id: CLUSTER_OVERVIEW_DASHBOARD_ID,
@@ -451,25 +506,26 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                             href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
                           },
                         ]
-                      : [
-                          {
-                            id: 'logs',
-                            title: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
-                              {
-                                defaultMessage: 'View and analyze your logs:',
-                              }
-                            ),
-                            label: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
-                              {
-                                defaultMessage: 'Explore logs',
-                              }
-                            ),
-                            href: logsLocator?.getRedirectUrl({}) ?? '',
-                          },
-                        ]
-                  }
+                      : []),
+                    // Always show Explore logs link - in wired mode it uses logs.otel,logs.otel.* data view,
+                    // in classic mode it uses default logs data view
+                    {
+                      id: 'logs',
+                      title: i18n.translate(
+                        'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
+                        {
+                          defaultMessage: 'View and analyze your logs:',
+                        }
+                      ),
+                      label: i18n.translate(
+                        'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
+                        {
+                          defaultMessage: 'Explore logs',
+                        }
+                      ),
+                      href: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
+                    },
+                  ]}
                 />
               </>
             ) : (

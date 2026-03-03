@@ -10,6 +10,8 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 
+import type { KibanaRequest } from '@kbn/core/server';
+
 import { appContextService } from '../../services';
 
 import { type BulkUpgradeTaskParams, _runBulkUpgradeTask } from './run_bulk_upgrade';
@@ -33,9 +35,11 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
       createTaskRunner: ({
         taskInstance,
         abortController,
+        fakeRequest,
       }: {
         taskInstance: ConcreteTaskInstance;
         abortController: AbortController;
+        fakeRequest?: KibanaRequest;
       }) => {
         const logger = appContextService.getLogger();
 
@@ -45,7 +49,6 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
             if (taskInstance.state.isDone) {
               return;
             }
-
             const taskParams = taskInstance.params as BulkPackageOperationsTaskParams;
             try {
               let results: BulkPackageOperationsTaskState['results'];
@@ -60,6 +63,7 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
                   abortController,
                   logger,
                   taskParams: taskParams as BulkUpgradeTaskParams,
+                  request: fakeRequest!,
                 });
               } else if (taskParams.type === 'bulk_rollback') {
                 results = await _runBulkRollbackTask({

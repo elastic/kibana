@@ -47,7 +47,7 @@ export interface SearchAlertsParams {
   /**
    * ES query to perform on the affected alert indices
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   /**
    * The alert document fields to include in the response
    */
@@ -145,6 +145,7 @@ export const searchAlerts = ({
             total,
             querySnapshot: {
               request: response?.inspect?.dsl ?? [],
+              // @ts-expect-error upgrade typescript v5.9.3
               response: [JSON.stringify(rawResponse)] ?? [],
             },
             error: alertsError,

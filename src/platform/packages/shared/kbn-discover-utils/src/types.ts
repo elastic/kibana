@@ -18,7 +18,7 @@ export type {
   RowControlRowProps,
 } from './components/custom_control_columns/types';
 export type * from './components/app_menu/types';
-export { AppMenuActionId, AppMenuActionType } from './components/app_menu/types';
+export { AppMenuActionId } from './components/app_menu/types';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 
@@ -82,6 +82,7 @@ export interface LogDocumentOverview
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'body.text'?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
@@ -96,11 +97,15 @@ export interface LogDocumentOverview
 export interface ApmErrorLogFields {
   'processor.event': string;
   'error.log.level'?: string;
+  'error.exception.type'?: string;
   'error.exception.message'?: string;
+  'error.culprit'?: string;
+  'error.grouping_name'?: string;
 }
 
 export interface OtelExceptionLogFields {
   event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {

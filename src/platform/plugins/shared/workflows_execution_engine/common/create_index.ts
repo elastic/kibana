@@ -42,7 +42,7 @@ export const createIndexWithMappings = async ({
       mappings,
     });
 
-    logger?.info(`Successfully created index ${indexName}`);
+    logger?.debug(`Successfully created index ${indexName}`);
   } catch (error) {
     // If the index already exists, we can ignore the error
     if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {

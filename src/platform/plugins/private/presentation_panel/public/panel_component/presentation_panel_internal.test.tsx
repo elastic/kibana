@@ -9,7 +9,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,6 +24,8 @@ import type {
   PanelCompatibleComponent,
   PresentationPanelInternalProps,
 } from './types';
+import { EuiThemeProvider } from '@elastic/eui';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 describe('Presentation panel', () => {
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
@@ -53,10 +55,15 @@ describe('Presentation panel', () => {
   it('renders a blocking error when one is present', async () => {
     const api: DefaultPresentationPanelApi = {
       uuid: 'test',
+
       blockingError$: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
     };
-    render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
-    await waitFor(() => expect(screen.getByTestId('embeddableStackError')).toBeInTheDocument());
+    render(
+      <EuiThemeProvider>
+        <PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />
+      </EuiThemeProvider>
+    );
+    await waitFor(() => expect(screen.getByTestId('embeddableError')).toBeInTheDocument());
   });
 
   it('renders error boundary when internal component throws during rendering', async () => {
@@ -96,7 +103,7 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('superTest'),
       };
       await renderPresentationPanel({ api });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, {
         embeddable: api,
       });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {
@@ -244,6 +251,7 @@ describe('Presentation panel', () => {
 
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
+        isCustomizable: true,
         title$: new BehaviorSubject<string | undefined>('TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
@@ -260,11 +268,34 @@ describe('Presentation panel', () => {
       expect(editPanelSpy).toHaveBeenCalled();
     });
 
+    it('does not open customize panel flyout on title click when panel is not customizable', async () => {
+      editPanelSpy.mockClear();
+
+      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
+        uuid: 'test',
+        isCustomizable: false,
+        title$: new BehaviorSubject<string | undefined>('TITLE'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      const titleElement = screen.getByTestId('embeddablePanelTitle');
+      expect(titleElement).toHaveTextContent('TITLE');
+      expect(titleElement.nodeName).toBe('SPAN');
+
+      await userEvent.click(titleElement);
+      expect(editPanelSpy).not.toHaveBeenCalled();
+    });
+
     it('does not show title customize link in view mode', async () => {
       editPanelSpy.mockClear();
 
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
+        isCustomizable: true,
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('view'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
@@ -329,6 +360,28 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+
+    it('passes titleHighlight prop through to PresentationPanelHeader', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
     });
   });
 });

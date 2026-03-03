@@ -465,7 +465,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               loading={isRelatedUsersLoading}
               data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
               pagination={pagination}
-              message={
+              tableCaption={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.entities.relatedUsersTableCaption',
+                {
+                  defaultMessage: 'Related users list',
+                }
+              )}
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersNoDataDescription"
                   defaultMessage="No users identified"

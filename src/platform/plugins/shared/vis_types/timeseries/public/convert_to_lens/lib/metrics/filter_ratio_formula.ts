@@ -31,7 +31,6 @@ const constructFilterRationFormula = (
 };
 
 export const getFilterRatioFormula = (currentMetric: Metric, additionalArgs: AdditionalArgs) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;
   let aggregation: SupportedMetric | null | undefined = SUPPORTED_METRICS.count;
   if (metric_agg) {

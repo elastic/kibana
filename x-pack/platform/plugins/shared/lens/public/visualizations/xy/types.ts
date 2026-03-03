@@ -22,7 +22,6 @@ import {
 export type {
   XYLayerConfig,
   XYState,
-  XYState as State,
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYAnnotationLayerConfig,

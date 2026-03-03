@@ -29,6 +29,9 @@ import {
   InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
   useKibana,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
+  EisKnowledgeBaseCallout,
+  useEisKnowledgeBaseCalloutDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 export function ChangeKbModel({
@@ -42,6 +45,8 @@ export function ChangeKbModel({
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
+  const [eisKnowledgeBaseCalloutDismissed, setEisKnowledgeBaseCalloutDismissed] =
+    useEisKnowledgeBaseCalloutDismissed();
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
@@ -60,6 +65,10 @@ export function ChangeKbModel({
       InferenceModelState.MODEL_PENDING_DEPLOYMENT;
 
   const isSelectedModelCurrentModel = selectedInferenceId === currentlyDeployedInferenceId;
+
+  const isSelectedModelFromEis = EIS_PRECONFIGURED_INFERENCE_IDS.includes(selectedInferenceId);
+
+  const showEisKnowledgeBaseCallout = isSelectedModelFromEis && !eisKnowledgeBaseCalloutDismissed;
 
   const isKnowledgeBaseInLoadingState =
     knowledgeBase.isInstalling ||
@@ -214,19 +223,35 @@ export function ChangeKbModel({
       );
     }
 
+    const handleDismissEisKnowledgeBaseCallout = () => {
+      setEisKnowledgeBaseCalloutDismissed(true);
+    };
+
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false} css={{ width: 354 }}>
-          <EuiSuperSelect
-            fullWidth
-            hasDividers
-            isLoading={isLoadingEndpoints}
-            options={superSelectOptions}
-            valueOfSelected={selectedInferenceId}
-            onChange={(value) => setSelectedInferenceId(value)}
-            disabled={isKnowledgeBaseInLoadingState}
-            data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
-          />
+          <EisKnowledgeBaseCallout
+            isOpen={showEisKnowledgeBaseCallout}
+            dismissCallout={handleDismissEisKnowledgeBaseCallout}
+            zIndex={0}
+          >
+            <EuiSuperSelect
+              fullWidth
+              hasDividers
+              isLoading={isLoadingEndpoints}
+              options={superSelectOptions}
+              valueOfSelected={selectedInferenceId}
+              onChange={(value) => setSelectedInferenceId(value)}
+              disabled={isKnowledgeBaseInLoadingState}
+              data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
+              aria-label={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBase.modelSelectAriaLabel',
+                {
+                  defaultMessage: 'Semantic search model',
+                }
+              )}
+            />
+          </EisKnowledgeBaseCallout>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -261,6 +286,8 @@ export function ChangeKbModel({
     knowledgeBase.status?.value?.inferenceModelState,
     knowledgeBase.status?.value?.endpoint?.inference_id,
     handleInstall,
+    showEisKnowledgeBaseCallout,
+    setEisKnowledgeBaseCalloutDismissed,
   ]);
 
   return (

@@ -8,15 +8,15 @@ exports[`Both modes should render the side navigation 1`] = `
     id="kbnChromeNav-root"
   >
     <div
-      class="kbnChromeNav-root css-1rb2acp-getWrapperStyles"
+      class="kbnChromeNav-root css-vka7tb-getNavWrapperStyles"
     >
       <div
-        class="css-1aomi1g-wrapperStyles"
+        class="css-1ja8ujo-wrapperStyles"
         data-test-subj="kbnChromeNav-logoWrapper"
       >
         <a
           aria-label="Solution homepage"
-          class="css-12vu9wt-buttonStyles"
+          class="css-r2tafp-buttonStyles"
           data-highlighted="false"
           data-menu-item="true"
           data-test-subj="kbnChromeNav-logo"
@@ -33,15 +33,22 @@ exports[`Both modes should render the side navigation 1`] = `
             />
           </div>
           <div
-            class="euiText emotion-euiText-xs-euiTextAlign-center-textStyles-labelStyles"
+            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
           >
             Solution
           </div>
         </a>
       </div>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="main-navigation-instructions_generated-id"
+      >
+        You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu.
+      </p>
       <nav
         aria-label="Main"
         class="css-175v8l8-getPrimaryMenuStyles"
+        data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
         <div
@@ -51,8 +58,11 @@ exports[`Both modes should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <a
+              aria-describedby="main-navigation-instructions_generated-id"
               aria-haspopup="false"
-              class="css-12vu9wt-buttonStyles"
+              aria-posinset="1"
+              aria-setsize="3"
+              class="css-r2tafp-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-dashboards"
@@ -71,7 +81,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Dashboards
               </div>
@@ -86,7 +96,9 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <a
               aria-haspopup="false"
-              class="css-12vu9wt-buttonStyles"
+              aria-posinset="2"
+              aria-setsize="3"
+              class="css-r2tafp-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-discover"
@@ -105,7 +117,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Discover
               </div>
@@ -115,13 +127,22 @@ exports[`Both modes should render the side navigation 1`] = `
         <div
           class="css-1y7bpvk-wrapperStyles"
         >
+          <p
+            class="emotion-euiScreenReaderOnly"
+            id="popover-enter-exit-instructions_generated-id"
+          >
+            Press Enter to go to the submenu.
+          </p>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
             <a
+              aria-describedby="popover-enter-exit-instructions_generated-id"
               aria-expanded="false"
               aria-haspopup="true"
-              class="css-12vu9wt-buttonStyles"
+              aria-posinset="3"
+              aria-setsize="3"
+              class="css-r2tafp-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-apps_overview"
@@ -140,7 +161,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>
@@ -148,9 +169,16 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
       </nav>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="footer-navigation-instructions_generated-id"
+      >
+        You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.
+      </p>
       <footer
         aria-label="Side navigation"
-        class="css-1cpms11-getWrapperStyles"
+        class="css-18gcnxt-root"
+        data-test-subj="kbnChromeNav-footer"
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
@@ -160,25 +188,31 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Getting started"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-getting_started"
-                href="/getting-started"
-                rel="noreferrer"
-                tabindex="0"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="launch"
-                />
-              </a>
+                <a
+                  aria-describedby="footer-navigation-instructions_generated-id"
+                  aria-haspopup="false"
+                  aria-label="Getting started"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-getting_started"
+                  href="/getting-started"
+                  rel="noreferrer"
+                  tabindex="0"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="launch"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
@@ -190,56 +224,72 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Developer tools"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-developer_tools"
-                href="/developer-tools"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="code"
-                />
-              </a>
+                <a
+                  aria-haspopup="false"
+                  aria-label="Developer tools"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-developer_tools"
+                  href="/developer-tools"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="code"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
         >
+          <p
+            class="emotion-euiScreenReaderOnly"
+            id="popover-enter-exit-instructions_generated-id"
+          >
+            Press Enter to go to the submenu.
+          </p>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
             <div
               class="css-1g7fa48-wrapperStyles"
             >
-              <a
-                aria-expanded="false"
-                aria-haspopup="true"
-                aria-label="Settings"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-integrations"
-                href="/integrations"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="gear"
-                />
-              </a>
+                <a
+                  aria-describedby="popover-enter-exit-instructions_generated-id"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-label="Settings"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-integrations"
+                  href="/integrations"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="gear"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -251,25 +301,30 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Fourth item"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-fourth_item"
-                href="/fourth-item"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="launch"
-                />
-              </a>
+                <a
+                  aria-haspopup="false"
+                  aria-label="Fourth item"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-fourth_item"
+                  href="/fourth-item"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="launch"
+                  />
+                </a>
+              </div>
             </span>
           </div>
         </div>
@@ -281,27 +336,56 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
-              <a
-                aria-haspopup="false"
-                aria-label="Fifth item"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
-                data-highlighted="false"
-                data-menu-item="true"
-                data-test-subj="kbnChromeNav-footerItem-fifth_item"
-                href="/fourth-item"
-                rel="noreferrer"
-                tabindex="-1"
+              <div
+                class="css-1v0cj6t-buttonWrapperStyles"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="code"
-                />
-              </a>
+                <a
+                  aria-haspopup="false"
+                  aria-label="Fifth item"
+                  class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
+                  data-highlighted="false"
+                  data-menu-item="true"
+                  data-test-subj="kbnChromeNav-footerItem-fifth_item"
+                  href="/fourth-item"
+                  rel="noreferrer"
+                  tabindex="-1"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="code"
+                  />
+                </a>
+              </div>
             </span>
           </div>
+        </div>
+        <hr
+          class="euiHorizontalRule emotion-euiHorizontalRule-full-xs-collapseDivider"
+        />
+        <div
+          class="sideNavCollapseButtonWrapper css-1y5smli-sideNavCollapseButtonWrapper"
+        >
+          <button
+            aria-controls="kbnChromeNav-primaryNavigation"
+            aria-expanded="true"
+            aria-label="Collapse navigation menu"
+            aria-pressed="true"
+            class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-sideNavCollapseButton"
+            data-test-subj="sideNavCollapseButton"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="transitionLeftOut"
+            />
+          </button>
         </div>
       </footer>
     </div>

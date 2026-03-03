@@ -29,12 +29,15 @@ export interface RuleMigrationAgentRunOptions {
   skipPrebuiltRulesMatching: boolean;
 }
 
+export type ModelWithTools = Runnable<
+  BaseLanguageModelInput,
+  AIMessageChunk,
+  InferenceChatModelCallOptions
+>;
+
 export interface MigrateRuleGraphParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
-  model:
-    | ChatModel
-    // when model is passed with tools, its type changes to Runnable
-    | Runnable<BaseLanguageModelInput, AIMessageChunk, InferenceChatModelCallOptions>;
+  model: ChatModel;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
   telemetryClient: RuleMigrationTelemetryClient;

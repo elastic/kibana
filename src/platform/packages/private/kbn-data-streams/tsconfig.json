@@ -16,7 +16,10 @@
   "kbn_references": [
     "@kbn/logging",
     "@kbn/test",
+    "@kbn/es-mappings",
     "@kbn/core-logging-server-mocks",
     "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ]
 }

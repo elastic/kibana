@@ -43,7 +43,7 @@ export function ImportContentPackFlyout({
   onImport,
   onClose,
 }: {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.all.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {
@@ -127,11 +127,12 @@ export function ImportContentPackFlyout({
                 } catch (err) {
                   setFile(undefined);
 
-                  notifications.toasts.addError(err, {
+                  const formattedErr = getFormattedError(err);
+                  notifications.toasts.addError(formattedErr, {
                     title: i18n.translate('xpack.streams.failedToPreviewContentError', {
                       defaultMessage: 'Failed to preview content pack',
                     }),
-                    toastMessage: getFormattedError(err).message,
+                    toastMessage: formattedErr.message,
                   });
                 }
               } else {
@@ -158,6 +159,9 @@ export function ImportContentPackFlyout({
 
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label={i18n.translate('xpack.streams.importContentPackFlyout.closeIcon', {
+                      defaultMessage: 'Close',
+                    })}
                     iconType="cross"
                     color="danger"
                     onClick={() => {
@@ -176,7 +180,7 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.available ?? false}
+              significantEventsAvailable={significantEvents?.enabled ?? false}
             />
           </>
         ) : null}
@@ -227,11 +231,12 @@ export function ImportContentPackFlyout({
                 } catch (err) {
                   setIsLoading(false);
 
-                  notifications.toasts.addError(err, {
+                  const formattedErr = getFormattedError(err);
+                  notifications.toasts.addError(formattedErr, {
                     title: i18n.translate('xpack.streams.failedToImportContentError', {
                       defaultMessage: 'Failed to import content pack',
                     }),
-                    toastMessage: getFormattedError(err).message,
+                    toastMessage: formattedErr.message,
                   });
                 }
               }}

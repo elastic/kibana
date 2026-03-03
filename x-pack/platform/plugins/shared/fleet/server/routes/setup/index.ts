@@ -24,7 +24,8 @@ export const FleetSetupResponseSchema = schema.object(
       schema.object({
         name: schema.string(),
         message: schema.string(),
-      })
+      }),
+      { maxSize: 10000 }
     ),
   },
   {
@@ -93,14 +94,17 @@ export const GetAgentsSetupResponseSchema = schema.object(
         schema.literal('api_keys'),
         schema.literal('fleet_admin_user'),
         schema.literal('fleet_server'),
-      ])
+      ]),
+      { maxSize: 5 }
     ),
     missing_optional_features: schema.arrayOf(
-      schema.oneOf([schema.literal('encrypted_saved_object_encryption_key_required')])
+      schema.oneOf([schema.literal('encrypted_saved_object_encryption_key_required')]),
+      { maxSize: 1 }
     ),
     package_verification_key_id: schema.maybe(schema.string()),
     is_space_awareness_enabled: schema.maybe(schema.boolean()),
     is_secrets_storage_enabled: schema.maybe(schema.boolean()),
+    is_ssl_secrets_storage_enabled: schema.maybe(schema.boolean()),
     is_action_secrets_storage_enabled: schema.maybe(schema.boolean()),
   },
   {

@@ -19,7 +19,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
 import type { ReportingCore } from '../..';
-import type { ScheduledReportType } from '../../types';
+import type { ReportingUser, ScheduledReportType } from '../../types';
 import {
   Frequency,
   TaskStatus,
@@ -288,9 +288,10 @@ describe('ScheduledReportsService', () => {
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
+        search: 'cool dashboard',
       });
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
@@ -298,6 +299,8 @@ describe('ScheduledReportsService', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
+        search: 'cool dashboard',
+        searchFields: ['title', 'created_by'],
       });
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({
@@ -427,7 +430,7 @@ describe('ScheduledReportsService', () => {
         request: fakeRawRequest,
       });
       await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -438,6 +441,7 @@ describe('ScheduledReportsService', () => {
         page: 1,
         perPage: 10,
         filter: 'scheduled_report.attributes.createdBy: "somebody"',
+        searchFields: ['title', 'created_by'],
       });
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({
@@ -471,7 +475,7 @@ describe('ScheduledReportsService', () => {
         saved_objects: [],
       }));
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -480,6 +484,7 @@ describe('ScheduledReportsService', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
+        searchFields: ['title', 'created_by'],
       });
       expect(client.search).not.toHaveBeenCalled();
       expect(taskManager.bulkGet).not.toHaveBeenCalled();
@@ -493,7 +498,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.list({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           page: 1,
           size: 10,
         })
@@ -514,7 +519,7 @@ describe('ScheduledReportsService', () => {
       });
 
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -586,7 +591,7 @@ describe('ScheduledReportsService', () => {
         throw new Error('task manager error');
       });
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -656,7 +661,7 @@ describe('ScheduledReportsService', () => {
         return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
       });
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -725,7 +730,7 @@ describe('ScheduledReportsService', () => {
   describe('bulkDisable', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -748,10 +753,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -822,7 +828,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -840,9 +846,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
@@ -930,7 +938,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -948,9 +956,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1006,7 +1016,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1058,7 +1068,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1080,10 +1090,11 @@ describe('ScheduledReportsService', () => {
       );
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       // TM still called with both in case the task was not disabled
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1134,7 +1145,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1157,9 +1168,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
       expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
@@ -1212,7 +1225,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1235,10 +1248,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
@@ -1261,7 +1275,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDisable({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -1273,10 +1287,601 @@ describe('ScheduledReportsService', () => {
     });
   });
 
+  describe('bulkEnable', () => {
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      soClient.bulkGet = jest.fn().mockImplementation(async () => ({
+        saved_objects: savedObjects.map((so) => ({
+          ...so,
+          attributes: { ...so.attributes, enabled: false },
+        })),
+      }));
+
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: savedObjects.map((so) => ({
+          id: so.id,
+          type: so.type,
+          attributes: { enabled: true },
+        })),
+      }));
+
+      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+        tasks: savedObjects.map((so) => ({ id: so.id })),
+        errors: [],
+      }));
+
+      taskManager.bulkGet = jest
+        .fn()
+        .mockResolvedValue(
+          nextRunResponse.map((task) =>
+            task.tag === 'ok' ? { ...task, value: { ...task.value, enabled: false } } : task
+          )
+        );
+    });
+
+    it('should pass parameters in the request body', async () => {
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+      ]);
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is enabling scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: 'Another cool dashboard',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is enabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [
+          'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        ],
+        errors: [],
+        total: 2,
+      });
+    });
+
+    it('should not enable scheduled report when user does not have permissions', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+            attributes: { enabled: true },
+          },
+        ],
+      }));
+      taskManager.bulkEnable = jest.fn().mockImplementationOnce(async () => ({
+        tasks: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca' }],
+        errors: [],
+      }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+      ]);
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        errors: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message: `Not found.`,
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "elastic" attempted to enable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4" created by "not-elastic" without sufficient privileges.`
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is enabling scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        error: {
+          code: 'Error',
+          message: 'Not found.',
+        },
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            name: 'Another cool dashboard',
+          },
+        },
+        message:
+          'Failed attempt to enable scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+    });
+
+    it('should handle errors in bulk get', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            error: {
+              error: 'Not Found',
+              message:
+                'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+              statusCode: 404,
+            },
+          },
+          { ...savedObjects[1], attributes: { ...savedObjects[1].attributes, enabled: false } },
+        ],
+      }));
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            attributes: { enabled: true },
+          },
+        ],
+      }));
+      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+        tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
+        errors: [],
+      }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+      ]);
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: 'Another cool dashboard',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is enabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should short-circuit if no saved objects to update', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            error: {
+              error: 'Not found',
+              message:
+                'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+              statusCode: 404,
+            },
+          },
+          {
+            id: savedObjects[1].id,
+            type: savedObjects[1].type,
+            error: { error: 'Bad Request', message: 'Some unspecified error', statusCode: 404 },
+          },
+        ],
+      }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+            status: 404,
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message: 'Some unspecified error',
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should not update saved object if already enabled', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            attributes: { ...savedObjects[0].attributes, enabled: true },
+          },
+          { ...savedObjects[1], attributes: { ...savedObjects[1].attributes, enabled: false } },
+        ],
+      }));
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            attributes: { enabled: true },
+          },
+        ],
+      }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+      ]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        `Scheduled report aa8b6fb3-cf61-4903-bce3-eec9ddc823ca is already enabled`
+      );
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      // TM still called with both in case the task was not disabled
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: 'Another cool dashboard',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is enabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [
+          'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        ],
+        errors: [],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk update', async () => {
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+            error: { error: 'Conflict', message: 'Error updating saved object', statusCode: 409 },
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            attributes: { enabled: true },
+          },
+        ],
+      }));
+      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+        tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
+        errors: [],
+      }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+      ]);
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(3);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
+        error: {
+          code: 'Error',
+          message: 'Error updating saved object',
+        },
+        event: {
+          action: 'scheduled_report_enable',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'Failed attempt to enable scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message: 'Error updating saved object',
+            status: 409,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk enable', async () => {
+      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+        tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
+        errors: [
+          {
+            type: 'task',
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            error: {
+              statusCode: 400,
+              error: 'Fail',
+              message: 'Error enabling task',
+            },
+          },
+        ],
+      }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: { username: 'elastic' } as ReportingUser,
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: true },
+        },
+      ]);
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Scheduled report enabled but task enabling failed due to: Error enabling task',
+            status: 400,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should reject if the soClient throws an error', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('Some error');
+      });
+
+      await expect(
+        scheduledReportsService.bulkEnable({
+          user: { username: 'somebody' } as ReportingUser,
+          ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        })
+      ).rejects.toMatchInlineSnapshot(`
+        Object {
+          "body": "Error enabling scheduled reports: Some error",
+          "statusCode": 500,
+        }
+      `);
+    });
+  });
+
   describe('bulkDelete', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1369,7 +1974,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1473,7 +2078,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1546,7 +2151,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1597,7 +2202,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1672,7 +2277,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1719,7 +2324,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDelete({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -1744,12 +2349,19 @@ describe('ScheduledReportsService', () => {
       },
     };
 
+    const mockNotification = {
+      email: {
+        to: ['test@email.com'],
+      },
+    };
+
     const defaultUpdateParams = {
-      user: { username: 'somebody' },
+      user: { username: 'somebody' } as ReportingUser,
       id: savedObjects[0].id,
       updateParams: {
         title: 'foobar',
         schedule: mockSchedule,
+        notification: mockNotification,
       } as UpdateScheduledReportParams,
     };
 
@@ -1760,12 +2372,14 @@ describe('ScheduledReportsService', () => {
       expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
         schedule: mockSchedule,
         title: 'foobar',
+        notification: mockNotification,
       });
 
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
-        mockSchedule
+        mockSchedule,
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1834,19 +2448,25 @@ describe('ScheduledReportsService', () => {
 
       await scheduledReportsService.update({
         ...defaultUpdateParams,
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(1);
       expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
         schedule: mockSchedule,
         title: 'foobar',
+        notification: {
+          email: {
+            to: ['test@email.com'],
+          },
+        },
       });
 
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
-        mockSchedule
+        mockSchedule,
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);

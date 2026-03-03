@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/emotion.d.ts"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
@@ -30,7 +35,9 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/es-query",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

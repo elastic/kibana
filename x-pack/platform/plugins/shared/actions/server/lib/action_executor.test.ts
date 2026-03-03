@@ -128,6 +128,22 @@ const connectorType: jest.Mocked<ConnectorType> = {
   executor: jest.fn(),
 };
 
+const connectorTypeWithGlobalHeaders: jest.Mocked<ConnectorType> = {
+  id: 'test-with-global-headers',
+  name: 'Test with Global Headers',
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
+  validate: {
+    config: { schema: z.object({ bar: z.boolean() }) },
+    secrets: { schema: z.object({ baz: z.boolean() }) },
+    params: { schema: z.object({ foo: z.boolean() }) },
+  },
+  executor: jest.fn(),
+  globalAuthHeaders: {
+    'x-custom-header': 'custom-header-value',
+  },
+};
+
 const systemConnectorType: jest.Mocked<ConnectorType> = {
   id: '.cases',
   name: 'Cases',
@@ -352,6 +368,38 @@ describe('Action Executor', () => {
 
       expect(mockRateLimiterLog).toHaveBeenCalledTimes(1);
       expect(mockRateLimiterLog).toBeCalledWith('test');
+    });
+
+    test(`successfully  ${label} with any defined auth headers`, async () => {
+      mockGetRequestBodyByte.mockReturnValue(300);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorTypeWithGlobalHeaders);
+
+      if (executeUnsecure) {
+        await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        await actionExecutor.execute(executeParams);
+      }
+
+      expect(connectorTypeWithGlobalHeaders.executor).toHaveBeenCalledWith({
+        actionId: CONNECTOR_ID,
+        services: expect.anything(),
+        config: {
+          bar: true,
+        },
+        secrets: {
+          baz: true,
+        },
+        params: { foo: true },
+        logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        globalAuthHeaders: {
+          'x-custom-header': 'custom-header-value',
+        },
+        ...(executeUnsecure ? {} : { source: SOURCE }),
+      });
     });
 
     for (const executionSource of [
@@ -839,7 +887,9 @@ describe('Action Executor', () => {
       }
 
       expect(connectorType.executor).toHaveBeenCalledTimes(1);
-      const executorCall = connectorType.executor.mock.calls[0][0];
+      const executorCall = (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mock.calls[0][0];
       expect(executorCall.config).toMatchInlineSnapshot(`Object {}`);
     });
 
@@ -1312,7 +1362,9 @@ describe('Action Executor', () => {
     });
 
     test(`${label} does not log warning when executor succeeds`, async () => {
-      connectorType.executor.mockResolvedValueOnce({
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockResolvedValueOnce({
         actionId: '1',
         status: 'ok',
       });
@@ -1330,7 +1382,9 @@ describe('Action Executor', () => {
     });
 
     test(`${label} logs warning when executor returns error gracefully`, async () => {
-      connectorType.executor.mockResolvedValueOnce({
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockResolvedValueOnce({
         actionId: '1',
         status: 'error',
         message: 'message for action execution error',
@@ -1354,7 +1408,9 @@ describe('Action Executor', () => {
     test(`${label} logs warning and error when executor throws error`, async () => {
       const err = new Error('this action execution is intended to fail');
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
-      connectorType.executor.mockRejectedValueOnce(err);
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
@@ -1383,7 +1439,9 @@ describe('Action Executor', () => {
         TaskErrorSource.USER
       );
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
-      connectorType.executor.mockRejectedValueOnce(err);
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
@@ -1407,7 +1465,9 @@ describe('Action Executor', () => {
     });
 
     test(`${label} logs warning when executor returns invalid status`, async () => {
-      connectorType.executor.mockResolvedValueOnce({
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockResolvedValueOnce({
         actionId: '1',
         // @ts-expect-error
         status: 'invalid-status',
@@ -1488,6 +1548,36 @@ describe('Action Executor', () => {
         await expect(() => actionExecutor.execute(executeParams)).rejects.toThrow('nope');
         expect(connectorType.executor).not.toHaveBeenCalled();
       }
+    });
+
+    test(`${label} classifies error as user-error when execution fails with "socket disconnected"`, async () => {
+      const err = createTaskRunError(
+        new Error('Client network socket disconnected before secure TLS connection was established')
+      );
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed', 'user-error'],
+      });
     });
   }
 });
@@ -1840,6 +1930,7 @@ describe('Event log', () => {
       },
     ],
   };
+
   test('writes usage data to event log for OpenAI events', async () => {
     const executorMock = setupActionExecutorMock('.gen-ai');
 
@@ -1996,6 +2087,7 @@ describe('Event log', () => {
       user: { name: 'coolguy', id: '123' },
     });
   });
+
   test('reports telemetry for token count events', async () => {
     const executorMock = setupActionExecutorMock('.gen-ai');
     executorMock.mockResolvedValue({
@@ -2010,17 +2102,20 @@ describe('Event log', () => {
       { actionTypeId: '.gen-ai', completion_tokens: 9, prompt_tokens: 10, total_tokens: 19 }
     );
   });
+
   test('reports telemetry for token count events with additional properties', async () => {
-    const executorMock = setupActionExecutorMock('.gen-ai', {} as ConnectorType['validate'], {
+    const executorMock = setupActionExecutorMock('.gen-ai', undefined, {
       defaultModel: 'gpt-4',
       apiProvider: 'OpenAI',
     });
+
     executorMock.mockResolvedValue({
       actionId: '1',
       status: 'ok',
       // @ts-ignore
       data: mockGenAi,
     });
+
     await actionExecutor.execute(executeParams);
     expect(actionExecutorInitializationParams.analyticsService.reportEvent).toHaveBeenCalledWith(
       GEN_AI_TOKEN_COUNT_EVENT.eventType,
@@ -2035,14 +2130,17 @@ describe('Event log', () => {
     );
   });
 });
+
 function setupActionExecutorMock(
   actionTypeId = 'test',
   validationOverride?: ConnectorType['validate'],
   additionalConfig?: Record<string, unknown>
-) {
-  const thisConnectorType: jest.Mocked<ConnectorType> = {
+): jest.MockedFunction<NonNullable<ConnectorType['executor']>> {
+  const executor = jest.fn();
+  const thisConnectorType = {
     ...connectorType,
     ...(validationOverride ? { validate: validationOverride } : {}),
+    executor,
   };
   const actionSavedObject = {
     id: '1',
@@ -2063,5 +2161,116 @@ function setupActionExecutorMock(
   };
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   connectorTypeRegistry.get.mockReturnValueOnce(thisConnectorType);
-  return thisConnectorType.executor;
+  return executor;
 }
+
+describe('execute() - optional params validator', () => {
+  test('handles action types without params validator', async () => {
+    const connectorTypeWithoutParams: ConnectorType = {
+      id: 'test-without-params',
+      name: 'Test Without Params',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['workflows'],
+      validate: {
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        // params validator is missing
+      },
+      executor: jest.fn().mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID }),
+    };
+
+    connectorTypeRegistry.get.mockReturnValue(connectorTypeWithoutParams);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: CONNECTOR_ID,
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test-without-params',
+        name: 'test',
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+
+    await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
+      'Connector type "test-without-params" does not have a params validator and cannot be executed.'
+    );
+  });
+
+  test('throws error when action type does not have executor', async () => {
+    const connectorTypeWithoutExecutor: ConnectorType = {
+      id: 'test-without-executor',
+      name: 'Test Without Executor',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['workflows'],
+      validate: {
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        params: { schema: z.object({}) },
+      },
+      // executor is missing
+    };
+
+    connectorTypeRegistry.get.mockReturnValue(connectorTypeWithoutExecutor);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: CONNECTOR_ID,
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test-without-executor',
+        name: 'test',
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+
+    await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
+      'Connector type "test-without-executor" does not have an execute function and cannot be executed.'
+    );
+  });
+});
+
+describe('execute() - spaceId override', () => {
+  test('uses the provided spaceId instead of deriving from request', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute({
+      ...executeParams,
+      spaceId: 'override-space',
+    });
+
+    // spacesMock.getSpaceId should not be called when spaceId is provided
+    expect(spacesMock.getSpaceId).not.toHaveBeenCalled();
+
+    // The action should be fetched from the override space namespace
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'override-space' }
+    );
+  });
+
+  test('falls back to deriving spaceId from request when spaceId is not provided', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    // spacesMock.getSpaceId should be called when no spaceId override is provided
+    expect(spacesMock.getSpaceId).toHaveBeenCalled();
+
+    // The action should be fetched from the namespace derived from request
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'some-namespace' }
+    );
+  });
+});

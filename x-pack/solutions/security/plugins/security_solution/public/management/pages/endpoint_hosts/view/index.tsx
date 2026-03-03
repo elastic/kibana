@@ -448,10 +448,13 @@ export const EndpointList = () => {
   }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
+    if (autoRefreshInterval <= 0) {
+      return;
+    }
     dispatch({
       type: 'appRequestedEndpointList',
     });
-  }, [dispatch]);
+  }, [autoRefreshInterval, dispatch]);
 
   const onRefreshChange = useCallback<NonNullable<EuiSuperDatePickerProps['onRefreshChange']>>(
     (evt) => {
@@ -614,6 +617,12 @@ export const EndpointList = () => {
         return (
           <EuiBasicTable
             data-test-subj="endpointListTable"
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.endpoint.list.endpointTableCaption',
+              {
+                defaultMessage: 'Endpoint',
+              }
+            )}
             items={mutableListData}
             columns={columns}
             pagination={paginationSetup}

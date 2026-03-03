@@ -54,15 +54,20 @@ export function ReviewSuggestionsForm({
   onRegenerate,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
-  );
-  const editingSuggestion = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: 'editingSuggestedRule' }) ? snapshot.context.editedSuggestion : null
+    snapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } })
+      ? snapshot.context.suggestedRuleId
+      : null
   );
 
-  // For the confirmation modal, use edited suggestion if available, otherwise find by name
-  const partitionForModal =
-    editingSuggestion || suggestions.find(({ name }) => name === ruleUnderReview)!;
+  const isEditingOrReorderingStreams = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
+  );
+
+  const partitionForModal = ruleUnderReview
+    ? suggestions.find(({ name }) => name === ruleUnderReview)
+    : undefined;
 
   const selectedPreviewName = useStreamSamplesSelector(
     ({ context }) =>
@@ -72,16 +77,6 @@ export function ReviewSuggestionsForm({
   );
 
   const { editSuggestion } = useStreamRoutingEvents();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-
-  const handleSave = () => {
-    const currentEditingIndex = routingSnapshot.context.editingSuggestionIndex;
-    const currentEditedSuggestion = routingSnapshot.context.editedSuggestion;
-
-    if (currentEditingIndex !== null && currentEditedSuggestion) {
-      updateSuggestion(currentEditingIndex, currentEditedSuggestion);
-    }
-  };
 
   return (
     <>
@@ -89,11 +84,7 @@ export function ReviewSuggestionsForm({
         <CreateStreamConfirmationModal
           partition={partitionForModal}
           onSuccess={() => {
-            acceptSuggestion(
-              editingSuggestion
-                ? routingSnapshot.context.editingSuggestionIndex!
-                : suggestions.findIndex(({ name }) => name === ruleUnderReview)!
-            );
+            acceptSuggestion(suggestions.findIndex(({ name }) => name === ruleUnderReview)!);
           }}
         />
       )}
@@ -107,46 +98,63 @@ export function ReviewSuggestionsForm({
         className={css`
           min-block-size: auto; /* Prevent background clipping */
         `}
+        data-test-subj="streamsAppReviewPartitioningSuggestionsCallout"
       >
         <EuiText size="s">
           {i18n.translate(
             'xpack.streams.streamDetailRouting.childStreamList.suggestPartitionsDescription',
             {
               defaultMessage:
-                'Preview each suggestion before accepting - They will change how your data is ingested. All suggestions are based on the same sample: each proposal uses 1,000 documents from the original stream.',
+                'Preview each suggestion before accepting - they will change how your data is ingested. All suggestions are based on the same sample: each proposal uses up to 1,000 documents from the stream that are not already matched by enabled child stream routing rules.',
             }
           )}
         </EuiText>
         <EuiSpacer size="m" />
-        {suggestions.map((partition, index) => (
-          <NestedView key={partition.name} last={index === suggestions.length - 1}>
-            <SuggestedStreamPanel
-              definition={definition}
-              partition={partition}
-              index={index}
-              onPreview={(toggle) => previewSuggestion(index, toggle)}
-              onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
-              onEdit={editSuggestion}
-              onSave={handleSave}
+        {isEditingOrReorderingStreams ? (
+          <>
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="info"
+              title={i18n.translate('xpack.streams.reviewSuggestionsForm.actionsDisabled', {
+                defaultMessage: 'Finish editing or reordering streams to interact with suggestions',
+              })}
             />
-            <EuiSpacer size="s" />
-          </NestedView>
-        ))}
-        <EuiSpacer size="m" />
-        <GenerateSuggestionButton
-          iconType="refresh"
-          size="s"
-          onClick={onRegenerate}
-          isLoading={isLoadingSuggestions}
-          aiFeatures={aiFeatures}
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-            {
-              defaultMessage: 'Regenerate',
-            }
-          )}
-        </GenerateSuggestionButton>
+            <EuiSpacer size="m" />
+          </>
+        ) : (
+          <>
+            {suggestions.map((partition, index) => (
+              <NestedView key={partition.name} last={index === suggestions.length - 1}>
+                <SuggestedStreamPanel
+                  definition={definition}
+                  partition={partition}
+                  index={index}
+                  onPreview={(toggle) => previewSuggestion(index, toggle)}
+                  onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
+                  onEdit={editSuggestion}
+                  onSave={(updatedSuggestion) => updateSuggestion(index, updatedSuggestion)}
+                />
+                <EuiSpacer size="s" />
+              </NestedView>
+            ))}
+            <EuiSpacer size="m" />
+            <GenerateSuggestionButton
+              iconType="refresh"
+              size="s"
+              onClick={onRegenerate}
+              isLoading={isLoadingSuggestions}
+              aiFeatures={aiFeatures}
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                {
+                  defaultMessage: 'Regenerate',
+                }
+              )}
+            </GenerateSuggestionButton>
+          </>
+        )}
       </EuiCallOut>
     </>
   );

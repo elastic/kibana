@@ -8,10 +8,12 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import type { DashboardLocatorParams } from '../../../../common/types';
+import type { DashboardLocatorParams, DashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
+import type { AccessControlClient } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -56,7 +58,7 @@ describe('showPublicUrlSwitch', () => {
 
 describe('ShowShareModal', () => {
   const dashboardBackupService = getDashboardBackupService();
-  const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
+  const unsavedStateKeys = ['query', 'options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
@@ -68,6 +70,14 @@ describe('ShowShareModal', () => {
   const defaultShareModalProps = {
     isDirty: true,
     anchorElement: document.createElement('div'),
+    canSave: true,
+    saveDashboard: jest.fn(),
+    changeAccessMode: jest.fn(),
+    accessControlClient: {} as AccessControlClient,
+    accessControl: {} as SavedObjectAccessControl,
+    isManaged: false,
+    getCurrentUser: jest.fn().mockResolvedValue({} as { uid: string }),
+    getActiveSpace: jest.fn().mockResolvedValue({ name: 'default' }),
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {
@@ -85,30 +95,25 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState = {
-      panels: {
-        panel_1: {
+    const unsavedDashboardState: DashboardState = {
+      title: 'My Dashboard',
+      panels: [
+        {
           type: 'panel_type',
-          grid: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          panelRefName: 'superPanel',
-          explicitInput: {
+          grid: { w: 0, h: 0, x: 0, y: 0 },
+          config: {
             id: 'superPanel',
           },
         },
-      },
-      hidePanelTitles: true,
-      useMargins: true,
-      syncColors: true,
-      syncCursor: true,
-      syncTooltips: true,
+      ],
       filters: [
         {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
+          type: 'condition',
+          condition: {
+            field: 'status',
+            operator: 'is',
+            value: 'active',
           },
-          query: { query: 'hi' },
         },
       ],
       query: { query: 'bye', language: 'kuery' },
@@ -123,8 +128,28 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (unsavedDashboardState as unknown as Partial<DashboardLocatorParams>)[key]
+        (unsavedDashboardState as Partial<DashboardLocatorParams>)[key]
       );
     });
+    // Filters in the locator params are in the storedFilter format
+    expect(shareLocatorParams.filters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "meta": Object {
+            "field": "status",
+            "key": "status",
+            "params": Object {
+              "query": "active",
+            },
+            "type": "phrase",
+          },
+          "query": Object {
+            "match_phrase": Object {
+              "status": "active",
+            },
+          },
+        },
+      ]
+    `);
   });
 });

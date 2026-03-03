@@ -40,7 +40,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
@@ -49,6 +50,7 @@ import {
   PROCESS_DESCENDANT_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { ProcessDescendantsIconTip } from '../../../../components/process_descendant_icontip';
 import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
@@ -71,15 +73,17 @@ import {
   RULE_NAME,
 } from '../event_filters_list';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
+import { EVENT_FILTER_LIST_TYPE } from '../../constants';
+
+const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
-import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -152,11 +156,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
-    // compute this for initial render only
-    const existingComments = useMemo<ExceptionListItemSchema['comments']>(
-      () => (exception as ExceptionListItemSchema)?.comments,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+
+    const [existingComments, _] = useState<ExceptionListItemSchema['comments']>(
+      (exception as ExceptionListItemSchema)?.comments
     );
 
     const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
@@ -425,8 +427,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Process Descendants"
                 />
               </EuiText>
-              <ProcessDescendantsTooltip
+              <ProcessDescendantsIconTip
                 data-test-subj={getTestId('filterProcessDescendantsTooltip')}
+                tooltipText={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
               />
             </EuiFlexGroup>
           ),

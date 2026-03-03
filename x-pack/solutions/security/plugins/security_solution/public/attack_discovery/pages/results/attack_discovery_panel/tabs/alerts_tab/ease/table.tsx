@@ -46,7 +46,7 @@ export interface TableProps {
   /**
    * Query that contains the id of the alerts to display in the table
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
 }
 
 /**
@@ -101,6 +101,7 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
         consumers={ALERT_TABLE_CONSUMERS}
         gridStyle={GRID_STYLE}
         id={id}
+        isMutedAlertsEnabled={false}
         query={query}
         ref={refetchRef}
         renderActionsCell={ActionsCell}

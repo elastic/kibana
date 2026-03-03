@@ -24,6 +24,16 @@ const mockMenuItemHeight = 32;
 // Security mock reusable IDs - Machine Learning > Anomaly explorer (item that's in "More" menu)
 const mlAnomalyExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[1].items[0].id;
 
+// Test ID helpers
+const logoId = `kbnChromeNav-logo`;
+const primaryItemId = (id: string) => `kbnChromeNav-primaryItem-${id}`;
+const secondaryItemId = (id: string) => `kbnChromeNav-secondaryItem-${id}`;
+const moreMenuId = 'kbnChromeNav-moreMenuTrigger';
+const popoverId = (label: string) => `side-nav-popover-${label}`;
+const popoverItemId = (id: string) => `kbnChromeNav-popoverItem-${id}`;
+const nestedMenuItemId = (id: string) => `kbnChromeNav-nestedMenuItem-${id}`;
+const sidePanelId = 'kbnChromeNav-sidePanel';
+
 describe('Collapsed mode', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
@@ -61,9 +71,7 @@ describe('Collapsed mode', () => {
     it('should NOT display the solution label next to the logo', () => {
       render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-      const solutionLogo = screen.getByRole('link', {
-        name: 'Solution homepage',
-      });
+      const solutionLogo = screen.getByTestId(logoId);
 
       // The label is wrapped with `<EuiScreenReaderOnly />` in collapsed mode
       // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
@@ -81,9 +89,7 @@ describe('Collapsed mode', () => {
     it('should display a tooltip with the solution label on hover, and hide on hover out', async () => {
       render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-      const solutionLogo = screen.getByRole('link', {
-        name: 'Solution homepage',
-      });
+      const solutionLogo = screen.getByTestId(logoId);
 
       await user.hover(solutionLogo);
       flushPopoverTimers();
@@ -116,16 +122,12 @@ describe('Collapsed mode', () => {
       it('(with submenu) should show a popover with the submenu on hover', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
         await user.hover(appsLink);
         flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'Apps',
-        });
+        const popover = await screen.findByTestId(popoverId('Apps'));
 
         expect(popover).toBeInTheDocument();
       });
@@ -138,17 +140,13 @@ describe('Collapsed mode', () => {
       it('(with submenu) should show a popover when item with submenu receives keyboard focus', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
         act(() => {
           appsLink.focus();
         });
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'Apps',
-        });
+        const popover = await screen.findByTestId(popoverId('Apps'));
 
         expect(popover).toBeInTheDocument();
       });
@@ -163,18 +161,14 @@ describe('Collapsed mode', () => {
       it('(with submenu) should redirect and NOT open side panel when clicking item', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
         const expectedHref = basicMock.navItems.primaryItems[2].href; // Apps
 
         await user.click(appsLink);
 
         expect(appsLink).toHaveAttribute('href', expectedHref);
 
-        const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel for Apps',
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });
@@ -188,25 +182,19 @@ describe('Collapsed mode', () => {
       it('(with submenu) should move focus to first popover item on Enter', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
         act(() => {
           appsLink.focus();
         });
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'Apps',
-        });
+        const popover = await screen.findByTestId(popoverId('Apps'));
 
         expect(popover).toBeInTheDocument();
 
         await user.keyboard('{Enter}');
 
-        const overviewLink = within(popover).getByRole('link', {
-          name: 'Overview',
-        });
+        const overviewLink = within(popover).getByTestId(popoverItemId('apps_overview'));
 
         expect(overviewLink).toHaveFocus();
       });
@@ -220,14 +208,12 @@ describe('Collapsed mode', () => {
       it('(without submenu) should NOT show a popover on hover', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
         await user.hover(dashboardsLink);
         flushPopoverTimers();
 
-        const popover = screen.queryByRole('dialog');
+        const popover = screen.queryByTestId(popoverId('Apps'));
 
         expect(popover).not.toBeInTheDocument();
       });
@@ -242,9 +228,7 @@ describe('Collapsed mode', () => {
       it('(without submenu) should redirect without side panel when clicking item without submenu', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
         const expectedHref = basicMock.navItems.primaryItems[0].href;
 
@@ -252,9 +236,7 @@ describe('Collapsed mode', () => {
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
-        const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });
@@ -268,9 +250,7 @@ describe('Collapsed mode', () => {
       it('(without submenu) should redirect on Enter when focused item has no submenu', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const expectedHref = basicMock.navItems.primaryItems[0].href;
 
         act(() => {
@@ -293,9 +273,7 @@ describe('Collapsed mode', () => {
       it('should display a tooltip with the item label on hover, and hide on hover out', async () => {
         render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
         await user.hover(dashboardsLink);
         flushPopoverTimers();
@@ -332,9 +310,7 @@ describe('Collapsed mode', () => {
           />
         );
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
         await user.hover(dashboardsLink);
         flushPopoverTimers();
@@ -363,9 +339,7 @@ describe('Collapsed mode', () => {
           />
         );
 
-        const casesLink = screen.getByRole('link', {
-          name: 'Cases',
-        });
+        const casesLink = screen.getByTestId(primaryItemId('cases'));
 
         await user.hover(casesLink);
         flushPopoverTimers();
@@ -376,6 +350,37 @@ describe('Collapsed mode', () => {
         expect(tooltip).toBeInTheDocument();
         expect(tooltip).toHaveTextContent('Cases');
         expect(flaskIcon).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN the side navigation is in collapsed mode
+       * AND a primary menu item is new
+       * WHEN I hover over that item
+       * THEN a tooltip shows up with the item label
+       * AND a badge reading "New"
+       */
+      it('should show tooltip with label and new badge on hover', async () => {
+        render(
+          <TestComponent
+            isCollapsed
+            items={observabilityMock.navItems}
+            logo={observabilityMock.logo}
+          />
+        );
+
+        const alertsLink = screen.getByTestId(primaryItemId('alerts'));
+
+        await user.hover(alertsLink);
+        flushPopoverTimers();
+
+        const tooltip = await screen.findByRole('tooltip');
+
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Alerts');
+
+        const badge = tooltip.querySelector('.euiBadge');
+        expect(badge).toBeInTheDocument();
+        expect(badge).toHaveTextContent('New');
       });
     });
 
@@ -392,9 +397,7 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = await screen.findByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toBeInTheDocument();
       });
@@ -410,16 +413,12 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = await screen.findByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         await user.hover(moreButton);
         flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
         expect(popover).toBeInTheDocument();
       });
@@ -440,27 +439,21 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = await screen.findByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         await user.click(moreButton);
         flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
-        const mlButton = within(popover).getByRole('button', {
-          name: 'Machine learning',
-        });
+        const mlButton = within(popover).getByTestId(secondaryItemId('ml-overview'));
 
         await user.click(mlButton);
         flushPopoverTimers();
 
-        const anomalyExplorerLink = await within(popover).findByRole('link', {
-          name: 'Anomaly explorer',
-        });
+        const anomalyExplorerLink = await within(popover).findByTestId(
+          nestedMenuItemId('anomaly-explorer')
+        );
 
         await user.click(anomalyExplorerLink);
 
@@ -468,9 +461,7 @@ describe('Collapsed mode', () => {
           expect(popover).not.toBeInTheDocument();
         });
 
-        const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel for Machine learning',
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         await waitFor(() => {
           expect(sidePanel).not.toBeInTheDocument();
@@ -491,20 +482,14 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = await screen.findByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         await user.hover(moreButton);
         flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
-        const coverageLink = within(popover).getByRole('link', {
-          name: 'Coverage',
-        });
+        const coverageLink = within(popover).getByTestId(secondaryItemId('coverage'));
 
         await user.click(coverageLink);
 
@@ -512,9 +497,7 @@ describe('Collapsed mode', () => {
           expect(popover).not.toBeInTheDocument();
         });
 
-        const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });
@@ -539,37 +522,29 @@ describe('Collapsed mode', () => {
           />
         );
 
-        const moreButton = await screen.findByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toHaveAttribute('data-highlighted', 'true');
 
         await user.hover(moreButton);
         flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
-        const mlButton = within(popover).getByRole('button', {
-          name: 'Machine learning',
-        });
+        const mlButton = within(popover).getByTestId(secondaryItemId('ml-overview'));
 
         expect(mlButton).toHaveAttribute('data-highlighted', 'true');
 
         await user.click(mlButton);
 
-        const mlAnomalyExplorerLink = within(popover).getByRole('link', {
-          name: 'Anomaly explorer',
-        });
+        const mlAnomalyExplorerLink = within(popover).getByTestId(
+          nestedMenuItemId('anomaly-explorer')
+        );
 
         expect(mlAnomalyExplorerLink).toHaveAttribute('aria-current', 'page');
         expect(mlAnomalyExplorerLink).toHaveAttribute('data-highlighted', 'true');
 
-        const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });

@@ -10,6 +10,7 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+export const UNSAVED_CHANGES_NOTIFICATION = 'split-button-notification-indicator';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
@@ -98,6 +99,9 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickFullScreenMode() {
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+    }
     this.log.debug(`clickFullScreenMode`);
     await this.testSubjects.click('dashboardFullScreenMode');
     await this.testSubjects.exists('exitFullScreenModeButton');
@@ -327,12 +331,24 @@ export class DashboardPageObject extends FtrService {
 
   public async getIsInEditMode() {
     this.log.debug('getIsInEditMode');
-    return await this.testSubjects.exists('dashboardViewOnlyMode');
+    // Check if the "switch to view mode" button exists (indicates we're in edit mode)
+    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
+      return true;
+    }
+    // In edit mode, either quick save button (saved dashboard) or interactive save button (new dashboard) is present
+    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem');
+    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem');
+    return hasQuickSave || hasInteractiveSave;
   }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
-    return await this.testSubjects.exists('dashboardEditMode');
+    // Check if the "edit" button exists (indicates we're in view mode)
+    if (await this.testSubjects.exists('dashboardEditMode')) {
+      return true;
+    }
+    // If we're not in edit mode, we're in view mode
+    return !(await this.getIsInEditMode());
   }
 
   public async ensureDashboardIsInEditMode() {
@@ -345,12 +361,22 @@ export class DashboardPageObject extends FtrService {
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
+
     await this.retry.waitFor('leave edit mode button enabled', async () => {
+      // Open overflow menu if the button is not visible and overflow menu exists
+      if (
+        !(await this.testSubjects.exists('dashboardViewOnlyMode')) &&
+        (await this.testSubjects.exists('app-menu-overflow-button'))
+      ) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
       const leaveEditModeButton = await this.testSubjects.find('dashboardViewOnlyMode');
       const isDisabled = await leaveEditModeButton.getAttribute('disabled');
       return !isDisabled;
     });
+
     await this.testSubjects.click('dashboardViewOnlyMode');
+
     if (accept) {
       const confirmation = await this.testSubjects.exists('confirmModalTitleText');
       if (confirmation) {
@@ -391,9 +417,9 @@ export class DashboardPageObject extends FtrService {
     }
     await this.retry.try(async () => {
       // avoid flaky test by surrounding in retry
-      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.ensureHasUnsavedChangesNotification();
       await this.clickQuickSave();
-      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await this.ensureMissingUnsavedChangesNotification();
       await this.testSubjects.click('toastCloseButton');
     });
     if (switchMode) {
@@ -401,18 +427,32 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async expectUnsavedChangesBadge() {
-    this.log.debug('Expect unsaved changes badge to be present');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-    });
+  public async ensureHasUnsavedChangesNotification({ retry = false } = {}) {
+    this.log.debug('Expect unsaved changes notification indicator to be present');
+    if (retry) {
+      await this.retry.try(async () => {
+        await this.testSubjects.existOrFail(UNSAVED_CHANGES_NOTIFICATION);
+      });
+      return;
+    } else {
+      await this.testSubjects.existOrFail(UNSAVED_CHANGES_NOTIFICATION);
+    }
   }
 
-  public async expectMissingUnsavedChangesBadge() {
-    this.log.debug('Expect there to be no unsaved changes badge');
-    await this.retry.try(async () => {
-      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-    });
+  public async ensureMissingUnsavedChangesNotification({ retry = false } = {}) {
+    this.log.debug('Expect there to be no unsaved changes notification indicator');
+    if (retry) {
+      await this.retry.try(async () => {
+        await this.testSubjects.missingOrFail(UNSAVED_CHANGES_NOTIFICATION);
+      });
+      return;
+    } else {
+      await this.testSubjects.missingOrFail(UNSAVED_CHANGES_NOTIFICATION);
+    }
+  }
+
+  public async expectUnsavedChangesNotificationExists(timeout: number | undefined = undefined) {
+    await this.testSubjects.exists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
   }
 
   public async clickNewDashboard(
@@ -460,6 +500,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('openSettingsFlyout');
     const isOpen = await this.isSettingsOpen();
     if (!isOpen) {
+      await this.testSubjects.click('app-menu-overflow-button');
       return await this.testSubjects.click('dashboardSettingsButton');
     }
   }
@@ -538,7 +579,7 @@ export class DashboardPageObject extends FtrService {
       }
 
       this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
-      return await this.testSubjects.exists('dashboardUnsavedChangesBadge', { timeout: 1500 });
+      return await this.expectUnsavedChangesNotificationExists(1500);
     });
   }
 
@@ -712,6 +753,13 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  public async getPanelIdByTitle(title: string) {
+    const panelHoverActionsWrapper = await this.testSubjects.find(
+      `embeddablePanelHoverActions-${title}`
+    );
+    return await panelHoverActionsWrapper.getAttribute('data-test-embeddable-id');
+  }
+
   /**
    * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
    */
@@ -834,7 +882,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async verifyNoRenderErrors() {
-    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
     }

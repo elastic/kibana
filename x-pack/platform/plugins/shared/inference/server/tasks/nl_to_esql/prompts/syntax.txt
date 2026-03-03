@@ -15,9 +15,10 @@
     <source-commands>
         Source commands select a data source.
 
-        - FROM: Selects one or multiple indices, data streams or aliases to use as source.
-        - ROW: Produces a row with one or more columns with values that you specify.
+        - FROM: selects one or multiple indices, data streams or aliases to use as source.
+        - ROW: produces a row with one or more columns with values that you specify.
         - SHOW: returns information about the deployment.
+        - TS: selects one or multiple data streams with support for time series semantics and time series aggregation functions
     </source-commands>
 
     <processing-commands>
@@ -39,100 +40,135 @@
         - [preview] SAMPLE: samples a fraction of the table rows
         - [preview] COMPLETION: send prompts and context to an LLM
         - [preview] CHANGE_POINT: detects spikes, dips, and change points in a metric.
+        - [preview] FORK creates multiple execution branches to operate
+on the same input data and combines the results in a single output table. A discriminator column (`_fork`) is added to identify which branch each row came from.
+        - [preview] FUSE merges rows from multiple result sets and assigns
+new relevance scores. `FUSE` enables hybrid search to combine and score results from multiple queries, together with the `FORK` command.
+
     </processing-commands>
 
     <grouping-functions>
-        BUCKET: Create groups of values out of a datetime or numeric input
-        CATEGORIZE: Organize textual data into groups of similar format
+        BUCKET: Creates groups of values - buckets - out of a datetime or numeric input
+        TBUCKET: Creates groups of values - buckets - out of a @timestamp attribute
+        CATEGORIZE: Groups text messages into categories of similarly formatted text values
     </grouping-functions>
 
     <aggregation-functions>
-        AVG: calculate the average of a numeric field
-        COUNT: return the total number of input values
-        COUNT_DISTINCT: return the number of distinct values in a field
-        MAX: calculate the maximum value of a field
-        MEDIAN: calculate the median value of a numeric field
-        MEDIAN_ABSOLUTE_DEVIATION: calculate the median absolute deviation of a numeric field
-        MIN: calculate the minimum value of a field
-        PERCENTILE: calculate a specified percentile of a numeric field
-        STD_DEV: calculate the standard deviation of a numeric field
-        SUM: calculate the total sum of a numeric expression
-        TOP: collect the top values for a specified field
-        VALUES: return all values in a group as a multivalued field
-        WEIGHTED_AVG: calculate the weighted average of a numeric expression
+        ABSENT: Returns true if the input expression yields no non-null values within the current aggregation context
+        AVG: The average of a numeric field.
+        COUNT: Returns the total number (count) of input values.
+        COUNT_DISTINCT: Returns the approximate number of distinct values
+        MAX: The maximum value of a field.
+        MEDIAN: The value that is greater than half of all values and less than half of all values, also known as the 50% PERCENTILE
+        MEDIAN_ABSOLUTE_DEVIATION: Returns the median absolute deviation, a measure of variability
+        MIN: The minimum value of a field.
+        PERCENTILE: Returns the value at which a certain percentage of observed values occur
+        PRESENT: Returns true if the input expression yields any non-null values within the current aggregation context
+        SAMPLE: Collects sample values for a field.
+        ST_CENTROID_AGG: Calculate the spatial centroid over a field with spatial point geometry type.
+        ST_EXTENT_AGG: Calculate the spatial extent over a field with geometry type
+        STD_DEV: The population standard deviation of a numeric field.
+        SUM: The sum of a numeric expression.
+        TOP: Collects the top values for a field
+        VALUES: Returns unique values as a multivalued field
+        VARIANCE: The population variance of a numeric field.
+        WEIGHTED_AVG: The weighted average of a numeric expression.
     </aggregation-functions>
 
     <conditional-functions>
-        CASE: accept pairs of conditions and values and return the value for the first true condition
-        COALESCE: return the first non-null argument from the list of provided arguments
-        GREATEST: return the maximum value from multiple columns
-        LEAST: return the smallest value from multiple columns
+        CASE: Accepts pairs of conditions and values
+        COALESCE: Returns the first of its arguments that is not null
+        GREATEST: Returns the maximum value from multiple columns
+        LEAST: Returns the minimum value from multiple columns
+        CLAMP: Limits (or clamps) the values of all samples to have a lower limit of min and an upper limit of max.
+        CLAMP_MIN: Limits (or clamps) all input sample values to a lower bound of min
+        CLAMP_MAX: Limits (or clamps) all input sample values to an upper bound of max
     </conditional-functions>
 
     <search-functions>
+        DECAY: Calculates a relevance score that decays based on the distance of a numeric, spatial or date type value from a target origin, using configurable decay functions
+        KQL: perform a KQL query. KQL is a simple text-based query language for filtering data. It can also be used to search for patterns in complete Event        MATCH: Use MATCH to perform a match query on the specified field
+        MATCH_PHRASE: Use MATCH_PHRASE to perform a match_phrase on the specified field
         MATCH: execute a match query on a specified field - equivalent to match query for Elasticsearch Query DSL
-        QSTR: perform a Lucene query string query
-        KQL: perform a KQL query
+        QSTR: perform a Lucene query string query. It can also be used to search for patterns in complete Event.        SCORE: Scores an expression
+        TOP_SNIPPETS: Use TOP_SNIPPETS to extract the best snippets for a given query string from a text field
     </search-functions>
 
     <date-time-functions>
-        DATE_DIFF: calculate the difference between two timestamps in a given unit
-        DATE_EXTRACT: extract a specific part of a date
-        DATE_FORMAT: return a string representation of a date using the provided format
-        DATE_PARSE: convert a date string into a date
-        DATE_TRUNC: round down a date to the nearest specified interval
-        NOW: return the current date and time
+        DATE_DIFF: Subtracts the startTimestamp from the endTimestamp and returns the difference in multiples of unit
+        DATE_EXTRACT: Extracts parts of a date, like year, month, day, hour.
+        DATE_FORMAT: Returns a string representation of a date, in the provided format.
+        DATE_PARSE: Returns a date by parsing the second argument using the format specified in the first argument.
+        DATE_TRUNC: Rounds down a date to the closest interval since epoch, which starts at 0001-01-01T00:00:00Z.
+        DAY_NAME: Returns the name of the weekday for date based on the configured Locale.
+        MONTH_NAME: Returns the month name for the provided date based on the configured Locale.
+        NOW: Returns current date and time.
+        TRANGE: Filters data for the given time range using the @timestamp attribute.
     </date-time-functions>
 
     <string-functions>
-        BIT_LENGTH: calculate the bit length of a string
-        BYTE_LENGTH: calculate the byte length of a string
-        CONCAT: combine two or more strings
-        ENDS_WITH: check if a given string ends with a specified suffix
-        FROM_BASE64: decode a base64 string
-        HASH: compute the hash of a given input using a specified algorithm
-        LEFT: extract a specified number of characters from the start of a string
-        LENGTH: calculate the character length of a given string
-        LOCATE: return the position of a specified substring within a string
-        LTRIM: remove leading whitespaces from a string
-        REPEAT: generate a string by repeating a specified string a certain number of times
-        REPLACE: substitute any match of a regular expression within a string with a replacement string
-        REVERSE: reverse a string
-        RIGHT: extract a specified number of characters from the end of a string
-        RTRIM: remove trailing whitespaces from a string
-        SPACE: create a string composed of a specific number of spaces
-        SPLIT: split a single valued string into multiple strings based on a delimiter
-        STARTS_WITH: check if a given string begins with another specified string
-        SUBSTRING: extract a portion of a string
-        TO_BASE64: encode a string to b64
-        TO_LOWER: convert a string to lowercase
-        TO_UPPER: convert a string to uppercase
-        TRIM: remove leading and trailing whitespaces from a string
+        BIT_LENGTH: Returns the bit length of a string
+        BYTE_LENGTH: Returns the byte length of a string
+        CHUNK: Use CHUNK to split a text field into smaller chunks
+        CONCAT: Concatenates two or more strings.
+        CONTAINS: Returns a boolean that indicates whether a keyword substring is within another string
+        ENDS_WITH: Returns a boolean that indicates whether a keyword string ends with another string.
+        FROM_BASE64: Decode a base64 string.
+        HASH: Computes the hash of the input using various algorithms such as MD5, SHA, SHA-224, SHA-256, SHA-384, SHA-512.
+        LEFT: Returns the substring that extracts *length* chars from *string* starting from the left.
+        LENGTH: Returns the character length of a string
+        LOCATE: Returns an integer that indicates the position of a keyword substring within another string
+        LTRIM: Removes leading whitespaces from a string.
+        MD5: Computes the MD5 hash of the input (if the MD5 hash is available on the JVM).
+        REPEAT: Returns a string constructed by concatenating string with itself the specified number of times.
+        REPLACE: The function substitutes in the string str any match of the regular expression regex with the replacement string newStr.
+        REVERSE: Returns a new string representing the input string in reverse order.
+        RIGHT: Return the substring that extracts *length* chars from *str* starting from the right.
+        RTRIM: Removes trailing whitespaces from a string.
+        SHA1: Computes the SHA1 hash of the input.
+        SHA256: Computes the SHA256 hash of the input.
+        SPACE: Returns a string made of number spaces.
+        SPLIT: Split a single valued string into multiple strings.
+        STARTS_WITH: Returns a boolean that indicates whether a keyword string starts with another string.
+        SUBSTRING: Returns a substring of a string, specified by a start position and an optional length.
+        TO_BASE64: Encode a string to a base64 string.
+        TO_LOWER: Returns a new string representing the input string converted to lower case.
+        TO_UPPER: Returns a new string representing the input string converted to upper case.
+        TRIM: Removes leading and trailing whitespaces from a string.
+        URL_ENCODE: URL-encodes the input
+        URL_ENCODE_COMPONENT: URL-encodes the input
+        URL_DECODE: URL-decodes the input, or returns null and adds a warning header to the response if the input cannot be decoded.
     </string-functions>
 
     <ip-functions>
-        CIDR_MATCH: checks if an IP address falls within specified network blocks
-        IP_PREFIX: truncates an IP address to a specified prefix length
+        CIDR_MATCH: Returns true if the provided IP is contained in one of the provided CIDR blocks.
+        IP_PREFIX: Truncates an IP to a given prefix length.
     </ip-functions>
 
     <type-conversion-functions>
-        TO_BOOLEAN
-        TO_CARTESIANPOINT
-        TO_CARTESIANSHAPE
-        TO_DATETIME (prefer DATE_PARSE to convert strings to datetime)
-        TO_DATEPERIOD
-        TO_DEGREES
-        TO_DOUBLE
-        TO_GEOPOINT
-        TO_GEOSHAPE
-        TO_INTEGER
-        TO_IP
-        TO_LONG
-        TO_RADIANS
-        TO_STRING
-        TO_TIMEDURATION
-        TO_UNSIGNED_LONG
-        TO_VERSION
+        TO_AGGREGATE_METRIC_DOUBLE: Encode a numeric to an aggregate_metric_double.
+        TO_BOOLEAN: Converts an input value to a boolean value
+        TO_CARTESIANPOINT: Converts an input value to a cartesian_point value
+        TO_CARTESIANSHAPE: Converts an input value to a cartesian_shape value
+        TO_DATEPERIOD: Converts an input value into a date_period value.
+        TO_DATETIME: Converts an input value to a date value
+        TO_DATE_NANOS: Converts an input to a nanosecond-resolution date value (aka date_nanos)
+        TO_DEGREES: Converts a number in radians to degrees).
+        TO_DENSE_VECTOR: Converts a multi-valued input of numbers, or a hexadecimal string, to a dense_vector.
+        TO_DOUBLE: Converts an input value to a double value
+        TO_GEOHASH: Converts an input value to a geohash value
+        TO_GEOHEX: Converts an input value to a geohex value
+        TO_GEOPOINT: Converts an input value to a geo_point value
+        TO_GEOSHAPE: Converts an input value to a geo_shape value
+        TO_GEOTILE: Converts an input value to a geotile value
+        TO_INTEGER: Converts an input value to an integer value
+        TO_IP: Converts an input string to an IP value.
+        TO_LONG: Converts the input value to a long
+        TO_RADIANS: Converts a number in degrees) to radians.
+        TO_STRING: Converts an input value into a string.
+        TO_TIMEDURATION: Converts an input value into a time_duration value.
+        TO_UNSIGNED_LONG: Converts an input value to an unsigned long value
+        TO_VERSION: Converts an input string to a version value.
     </type-conversion-functions>
 
     <mathematical-functions>

@@ -7,8 +7,6 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -49,10 +47,6 @@ export const RESPONSE_HEADERS = i18n.translate(
   }
 );
 
-const FlyoutContainer = euiStyled(EuiFlyout)`
-  z-index: ${(props) => props.theme.eui.euiZLevel5};
-`;
-
 export interface WaterfallFlyoutProps {
   flyoutData?: WaterfallMetadataEntry;
   onFlyoutClose: OnFlyoutClose;
@@ -88,7 +82,7 @@ export const WaterfallFlyout = ({
       data-test-subj="waterfallFlyout"
       aria-labelledby="flyoutTitle"
     >
-      <FlyoutContainer size="s" onClose={onFlyoutClose}>
+      <EuiFlyout size="s" onClose={onFlyoutClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
@@ -119,7 +113,7 @@ export const WaterfallFlyout = ({
             </>
           )}
         </EuiFlyoutBody>
-      </FlyoutContainer>
+      </EuiFlyout>
     </div>
   );
 };

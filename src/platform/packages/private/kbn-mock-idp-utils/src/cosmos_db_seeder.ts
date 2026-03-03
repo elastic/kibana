@@ -7,34 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHmac } from 'crypto';
-import { Agent, fetch } from 'undici';
+import { Agent } from 'undici';
 
-/**
- * Cosmos DB emulator uses a fixed key
- * For production, this should be retrieved from configuration
- */
-const COSMOS_KEY =
-  'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==';
-
-/**
- * Default Cosmos DB configuration
- */
-export const DEFAULT_COSMOS_CONFIG = {
-  endpoint: 'https://127.0.0.1:8081',
-  databaseName: 'uiam-db',
-  usersCollection: 'users',
-} as const;
+import {
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
+  MOCK_IDP_UIAM_COSMOS_DB_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_URL,
+} from './constants';
+import { generateCosmosDBApiRequestHeaders } from '..';
 
 /**
  * Create an HTTPS agent that accepts self-signed certificates
  * for local Cosmos DB emulator development
  */
-const httpsAgent = new Agent({
-  connect: {
-    rejectUnauthorized: false,
-  },
-});
+const httpsAgent = new Agent({ connect: { rejectUnauthorized: false } });
 
 /**
  * User data structure for seeding
@@ -48,16 +35,6 @@ export interface TestUserData {
   roleId: string;
   projectType: string;
   applicationRoles: string[];
-}
-
-/**
- * Cosmos DB configuration options
- */
-export interface CosmosDbConfig {
-  endpoint?: string;
-  databaseName?: string;
-  usersCollection?: string;
-  cosmosKey?: string;
 }
 
 /**
@@ -90,6 +67,7 @@ interface PersistableUser {
     cloudConnected: any[];
   };
   enabled: boolean;
+  mfa_enforced: boolean;
   metadata: {
     created: string;
     last_modified: string;
@@ -97,34 +75,39 @@ interface PersistableUser {
 }
 
 /**
- * Generate authorization token for Cosmos DB REST API
+ * Api key data structure for seeding.
  */
-function generateAuthToken(
-  verb: string,
-  resourceType: string,
-  resourceLink: string,
-  date: string,
-  cosmosKey: string
-): string {
-  // Build the string to sign
-  const stringToSign = `${verb}\n${resourceType}\n${resourceLink}\n${date.toLowerCase()}\n\n`;
+export interface TestApiKeyData {
+  creator: string;
+  organizationId: string;
+}
 
-  // Decode the Cosmos key from base64
-  const keyBuffer = Buffer.from(cosmosKey, 'base64');
-
-  // Generate HMAC-SHA256 signature
-  const signature = createHmac('sha256', keyBuffer).update(stringToSign).digest('base64');
-
-  // URL encode the signature
-  const encodedSig = encodeURIComponent(signature);
-
-  return `type%3Dmaster%26ver%3D1.0%26sig%3D${encodedSig}`;
+/**
+ * PersistableApiKey structure matching the Cosmos DB schema
+ */
+interface PersistableApiKey {
+  id: string;
+  hash: string;
+  creator: string;
+  organization_id: string;
+  expiration: string;
+  role_assignments: {
+    organization: Array<{ organization_id: string; application_roles: string[]; role_id: string }>;
+    deployment: unknown[];
+    project: unknown[];
+    cloud_connected_resource: unknown[];
+  };
+  internal: boolean;
+  revoked: boolean;
+  description?: string;
+  metadata: { created: string; last_modified: string };
 }
 
 /**
  * Create a user document matching PersistableUser structure
  */
-function createUserDocument(userData: TestUserData, currentTime: string): PersistableUser {
+function createUserDocument(userData: TestUserData): PersistableUser {
+  const currentTime = new Date().toISOString();
   return {
     id: userData.userId,
     email: userData.email,
@@ -155,6 +138,7 @@ function createUserDocument(userData: TestUserData, currentTime: string): Persis
       cloudConnected: [],
     },
     enabled: true,
+    mfa_enforced: true,
     metadata: {
       created: currentTime,
       last_modified: currentTime,
@@ -166,7 +150,6 @@ function createUserDocument(userData: TestUserData, currentTime: string): Persis
  * Seed a test user in Cosmos DB
  *
  * @param userData - User data to seed
- * @param config - Cosmos DB configuration (optional)
  * @returns Promise that resolves when user is created or already exists
  *
  * @example
@@ -184,58 +167,46 @@ function createUserDocument(userData: TestUserData, currentTime: string): Persis
  * ```
  */
 export async function seedTestUser(
-  userData: TestUserData,
-  config: CosmosDbConfig = {}
+  userData: TestUserData
 ): Promise<{ success: boolean; message: string; response?: any }> {
-  const {
-    endpoint = DEFAULT_COSMOS_CONFIG.endpoint,
-    databaseName = DEFAULT_COSMOS_CONFIG.databaseName,
-    usersCollection = DEFAULT_COSMOS_CONFIG.usersCollection,
-    cosmosKey = COSMOS_KEY,
-  } = config;
-
-  const currentTime = new Date().toISOString();
-  const userDoc = createUserDocument(userData, currentTime);
-
-  // Generate date in RFC 1123 format
-  const date = new Date().toUTCString();
-  const resourceLink = `dbs/${databaseName}/colls/${usersCollection}`;
-  const authToken = generateAuthToken('POST', 'docs', resourceLink, date, cosmosKey);
-
-  const url = `${endpoint}/dbs/${databaseName}/colls/${usersCollection}/docs`;
-
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: authToken,
-        'x-ms-date': date,
-        'x-ms-version': '2018-12-31',
-        'x-ms-documentdb-partitionkey': JSON.stringify([userData.userId]),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userDoc),
-      dispatcher: httpsAgent,
-    });
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}/docs`,
+      {
+        method: 'POST',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'POST',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([userData.userId]),
+        },
+        body: JSON.stringify(createUserDocument(userData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
 
     const responseData = await response.json();
-
     if (response.status === 201) {
       return {
         success: true,
         message: `✓ Test user created successfully: ${userData.userId}`,
         response: responseData,
       };
-    } else if (response.status === 409) {
-      // User already exists, update it instead
-      return await updateTestUser(userData, config);
-    } else {
-      return {
-        success: false,
-        message: `✗ Failed to create test user (HTTP ${response.status})`,
-        response: responseData,
-      };
     }
+
+    if (response.status === 409) {
+      // User already exists, update it instead.
+      return await updateTestUser(userData);
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to create test user (HTTP ${response.status})`,
+      response: responseData,
+    };
   } catch (error) {
     return {
       success: false,
@@ -250,7 +221,6 @@ export async function seedTestUser(
  * Update an existing test user in Cosmos DB
  *
  * @param userData - User data to update
- * @param config - Cosmos DB configuration (optional)
  * @returns Promise that resolves when user is updated
  *
  * @example
@@ -268,59 +238,206 @@ export async function seedTestUser(
  * ```
  */
 export async function updateTestUser(
-  userData: TestUserData,
-  config: CosmosDbConfig = {}
+  userData: TestUserData
 ): Promise<{ success: boolean; message: string; response?: any }> {
-  const {
-    endpoint = DEFAULT_COSMOS_CONFIG.endpoint,
-    databaseName = DEFAULT_COSMOS_CONFIG.databaseName,
-    usersCollection = DEFAULT_COSMOS_CONFIG.usersCollection,
-    cosmosKey = COSMOS_KEY,
-  } = config;
-
-  const currentTime = new Date().toISOString();
-  const userDoc = createUserDocument(userData, currentTime);
-
-  // Generate date in RFC 1123 format
-  const date = new Date().toUTCString();
-  const resourceLink = `dbs/${databaseName}/colls/${usersCollection}/docs/${userData.userId}`;
-  const authToken = generateAuthToken('PUT', 'docs', resourceLink, date, cosmosKey);
-
-  const url = `${endpoint}/dbs/${databaseName}/colls/${usersCollection}/docs/${userData.userId}`;
-
   try {
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        Authorization: authToken,
-        'x-ms-date': date,
-        'x-ms-version': '2018-12-31',
-        'x-ms-documentdb-partitionkey': JSON.stringify([userData.userId]),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userDoc),
-      dispatcher: httpsAgent,
-    });
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}/docs/${userData.userId}`,
+      {
+        method: 'PUT',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'PUT',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}/docs/${userData.userId}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([userData.userId]),
+        },
+        body: JSON.stringify(createUserDocument(userData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
 
     const responseData = await response.json();
-
     if (response.status === 200) {
       return {
         success: true,
         message: `✓ Test user updated successfully: ${userData.userId}`,
         response: responseData,
       };
-    } else {
-      return {
-        success: false,
-        message: `✗ Failed to update test user (HTTP ${response.status})`,
-        response: responseData,
-      };
     }
+
+    return {
+      success: false,
+      message: `✗ Failed to update test user (HTTP ${response.status})`,
+      response: responseData,
+    };
   } catch (error) {
     return {
       success: false,
       message: `✗ Error updating test user: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+const API_KEY_ID = '72kse5wBzbyj5dh9Iz13';
+
+/**
+ * Create an api key document matching PersistableApiKey structure.
+ */
+function createApiKeyDocument(apiKeyData: TestApiKeyData): PersistableApiKey {
+  const currentTime = new Date().toISOString();
+  return {
+    // Hash for API key value "n2-RiRLS2gNSwXSR0pc2tg" is generated with the following snippet:
+    // python3 -c 'import os, hashlib, base64; pwd=b"n2-RiRLS2gNSwXSR0pc2tg"; salt=os.urandom(32); h=hashlib.sha256(salt + pwd).digest(); print(f"{{SSHA-256}}${base64.b64encode(salt).decode()}${base64.b64encode(h).decode()}")'
+    // Corresponds to: essu_dev_TnpKcmMyVTFkMEo2WW5scU5XUm9PVWw2TVRNNmJqSXRVbWxTVEZNeVowNVRkMWhUVWpCd1l6SjBadz09AAAAAN10T0s=
+    id: API_KEY_ID,
+    hash: '{SSHA-256}$yY06GoiBnlS/V2kNqWOTlh7OplBxIayo9C5wa5J5FxM=$OdktViokHd1IPPxULCSW4WEuxsY1ploVNbDsISwrLyk=',
+    creator: apiKeyData.creator,
+    organization_id: apiKeyData.organizationId,
+    // Set expiration to 1 year in the future for testing purposes.
+    expiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    role_assignments: {
+      organization: [
+        {
+          role_id: 'organization-admin',
+          organization_id: apiKeyData.organizationId,
+          application_roles: ['admin'],
+        },
+      ],
+      deployment: [],
+      project: [],
+      cloud_connected_resource: [],
+    },
+    internal: false,
+    revoked: false,
+    description: 'test UIAM API key',
+    metadata: { created: currentTime, last_modified: currentTime },
+  };
+}
+
+/**
+ * Seed a test Api Key in Cosmos DB
+ *
+ * @param apiKeyData - Api key data to seed.
+ * @returns Promise that resolves when api key is created or already exists
+ *
+ * @example
+ * ```ts
+ * await seedTestApiKey({
+ *   creator: '12345',
+ *   organizationId: '1234567890'
+ * });
+ * ```
+ */
+export async function seedTestApiKey(
+  apiKeyData: TestApiKeyData
+): Promise<{ success: boolean; message: string; response?: any }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}/docs`,
+      {
+        method: 'POST',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'POST',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([API_KEY_ID]),
+        },
+        body: JSON.stringify(createApiKeyDocument(apiKeyData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    const responseData = await response.json();
+    if (response.status === 201) {
+      return {
+        success: true,
+        message: `✓ Test API key created successfully: ${apiKeyData.creator}`,
+        response: responseData,
+      };
+    }
+
+    if (response.status === 409) {
+      // API key already exists, update it instead.
+      return await updateTestApiKey(apiKeyData);
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to create test API key (HTTP ${response.status})`,
+      response: responseData,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error creating test API key: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+/**
+ * Update an existing API key in Cosmos DB.
+ *
+ * @param apiKeyData - API key data to update
+ * @returns Promise that resolves when API key is updated
+ *
+ * @example
+ * ```ts
+ * await updateTestApiKey({
+ *   creator: '12345',
+ *   organizationId: '1234567890'
+ * });
+ * ```
+ */
+export async function updateTestApiKey(
+  apiKeyData: TestApiKeyData
+): Promise<{ success: boolean; message: string; response?: any }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}/docs/${API_KEY_ID}`,
+      {
+        method: 'PUT',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'PUT',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}/docs/${API_KEY_ID}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([API_KEY_ID]),
+        },
+        body: JSON.stringify(createApiKeyDocument(apiKeyData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    const responseData = await response.json();
+    if (response.status === 200) {
+      return {
+        success: true,
+        message: `✓ Test API key updated successfully: ${apiKeyData.creator}`,
+        response: responseData,
+      };
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to update test API key (HTTP ${response.status})`,
+      response: responseData,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error updating test API key: ${
         error instanceof Error ? error.message : String(error)
       }`,
     };

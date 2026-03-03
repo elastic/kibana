@@ -112,7 +112,11 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(query, dataViews, { skipFetchFields: true });
+    return getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query,
+      options: { skipFetchFields: true },
+    });
   }, [query, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
@@ -314,7 +318,10 @@ export function VisualizeESQL({
                     onClick={() => {
                       chatFlyoutSecondSlotHandler?.setVisibility?.(true);
                       if (triggerOptions) {
-                        uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
+                        uiActions.executeTriggerActions(
+                          'IN_APP_EMBEDDABLE_EDIT_TRIGGER',
+                          triggerOptions
+                        );
                       }
                     }}
                     data-test-subj="observabilityAiAssistantLensESQLEditButton"

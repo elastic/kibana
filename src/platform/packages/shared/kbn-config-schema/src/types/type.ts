@@ -26,6 +26,16 @@ import { Reference } from '../references';
  */
 export interface TypeMeta {
   /**
+   * A unique identifier for this type, reduces duplication.
+   */
+  id?: string;
+  /**
+   * A human-friendly title for this type to be used in documentation.
+   *
+   * Defaults to the `id`, if provided.
+   */
+  title?: string;
+  /**
    * A human-friendly description of this type to be used in documentation.
    */
   description?: string;
@@ -132,6 +142,11 @@ export abstract class Type<V> {
     }
 
     if (options.meta) {
+      const title = options.meta.title ?? options.meta.id;
+      if (title) {
+        schema = schema.meta({ title });
+      }
+
       if (options.meta.description) {
         schema = schema.description(options.meta.description);
       }

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type {
+  StreamlangProcessorDefinitionWithUIAttributes,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
-import { uniq } from 'lodash';
-import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import type { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
-import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import { uniq } from 'lodash';
 import type {
   MappedSchemaField,
   SchemaField,
@@ -19,6 +21,14 @@ import type {
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
+import { collectDescendantStepIds } from '../utils';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type {
+  DetectedField,
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+} from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
@@ -47,6 +57,67 @@ export function getSourceField(
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
+}
+
+/**
+ * Recursively collects all descendant processor IDs
+ * for a given condition step ID.
+ */
+export function collectDescendantProcessorIdsForCondition(
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) {
+  const descendantStepIds = collectDescendantStepIds(steps, conditionId);
+
+  if (descendantStepIds.size === 0) {
+    return [];
+  }
+
+  return steps
+    .filter((step) => descendantStepIds.has(step.customIdentifier))
+    .filter((step) => isActionBlock(step))
+    .map((step) => step.customIdentifier);
+}
+
+/**
+ * Collects the documents affected by the processors
+ * directly included in the currently selected condition.
+ */
+export function collectActiveDocumentsForSelectedCondition(
+  documents: Simulation['documents'] | undefined,
+  selectedConditionId: string | undefined
+): Simulation['documents'] {
+  if (!documents) {
+    return [];
+  }
+
+  if (!selectedConditionId) {
+    return documents;
+  }
+
+  // Condition filtering is based on the simulation-only noop processor that is tagged
+  // with the condition customIdentifier. This allows tracking match rates even when
+  // the subtree is empty or descendants are faulty.
+  const processorIds = [selectedConditionId];
+
+  return collectDocumentsAffectedByProcessors(documents, processorIds);
+}
+
+/**
+ * Filters documents based on the processors
+ * that affected them during simulation.
+ */
+export function collectDocumentsAffectedByProcessors(
+  documents: Simulation['documents'] | undefined,
+  processorIds: string[]
+): Simulation['documents'] {
+  if (!documents || processorIds.length === 0) {
+    return [];
+  }
+
+  return documents.filter((doc) => {
+    return doc.processed_by?.some((processorId) => processorIds.includes(processorId)) ?? false;
+  });
 }
 
 export function getAllFieldsInOrder(
@@ -100,6 +171,8 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
       return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
       return (doc: SimulationDocReport) => doc.status === 'failed';
+    case 'outcome_filter_dropped':
+      return (doc: SimulationDocReport) => doc.status === 'dropped';
     case 'outcome_filter_all':
     default:
       return (_doc: SimulationDocReport) => true;
@@ -178,8 +251,9 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
       // └─────────────────────────────────────────────────────────────────────────────────┘
       // Detected field already inherited
       if ('from' in field) {
+        const { from, alias_for: _, ...rest } = field;
         fieldSchema = {
-          ...field,
+          ...rest,
           status: 'inherited',
           parent: field.from,
         };
@@ -349,4 +423,28 @@ export function convertToFieldDefinition(fields: MappedSchemaField[]): FieldDefi
       Object.assign(mappedFields, { [field.name]: convertToFieldDefinitionConfig(field) }),
     {}
   );
+}
+
+/**
+ * Safely retrieves the original sample document for a given document index.
+ *
+ * This function handles the edge case where the samples array might have been
+ * re-filtered (e.g., when switching preview tabs from "Processed" to "Dropped")
+ * while a document is still selected in the flyout. In such cases, the
+ * currentDocIndex might be out of bounds for the new samples array.
+ *
+ * @param originalSamples - Array of sample documents with UI attributes, or undefined
+ * @param currentDocIndex - The index of the currently selected document, or undefined
+ * @returns The document at the given index, or undefined if samples is empty,
+ *          index is undefined, or index is out of bounds
+ */
+export function getOriginalSampleDocument(
+  originalSamples: SampleDocumentWithUIAttributes[] | undefined,
+  currentDocIndex: number | undefined
+): SampleDocumentWithUIAttributes['document'] | undefined {
+  if (!originalSamples || currentDocIndex === undefined) {
+    return undefined;
+  }
+  // Safe array access - returns undefined if index is out of bounds
+  return originalSamples[currentDocIndex]?.document;
 }

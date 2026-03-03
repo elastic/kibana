@@ -7,10 +7,10 @@
 
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ApmAlertFields } from './helpers/alerting_helper';
@@ -27,6 +27,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
+  const retry = getService('retry');
 
   describe('transaction error rate alert', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -320,27 +321,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('shows alert count=1 for opbeans-node on service inventory', async () => {
-        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
-        expect(serviceInventoryAlertCounts).to.eql({
-          'opbeans-node': 1,
-          'opbeans-java': 0,
+        await retry.tryForTime(5000, async () => {
+          const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
+          expect(serviceInventoryAlertCounts).to.eql({
+            'opbeans-node': 1,
+            'opbeans-java': 0,
+          });
         });
       });
 
       it('shows alert count=0 in opbeans-java service', async () => {
-        const serviceTabAlertCount = await fetchServiceTabAlertCount({
-          apmApiClient,
-          serviceName: 'opbeans-java',
+        await retry.tryForTime(5000, async () => {
+          const serviceTabAlertCount = await fetchServiceTabAlertCount({
+            apmApiClient,
+            serviceName: 'opbeans-java',
+          });
+          expect(serviceTabAlertCount).to.be(0);
         });
-        expect(serviceTabAlertCount).to.be(0);
       });
 
       it('shows alert count=1 in opbeans-node service', async () => {
-        const serviceTabAlertCount = await fetchServiceTabAlertCount({
-          apmApiClient,
-          serviceName: 'opbeans-node',
+        await retry.tryForTime(5000, async () => {
+          const serviceTabAlertCount = await fetchServiceTabAlertCount({
+            apmApiClient,
+            serviceName: 'opbeans-node',
+          });
+          expect(serviceTabAlertCount).to.be(1);
         });
-        expect(serviceTabAlertCount).to.be(1);
       });
     });
   });

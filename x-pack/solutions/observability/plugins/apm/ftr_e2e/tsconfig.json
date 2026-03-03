@@ -9,10 +9,10 @@
   },
   "kbn_references": [
     "@kbn/test",
-    "@kbn/apm-synthtrace",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace",
+    "@kbn/synthtrace-client",
     "@kbn/axe-config",
     "@kbn/cypress-config",
-    "@kbn/apm-plugin",
+    "@kbn/apm-plugin"
   ]
 }
