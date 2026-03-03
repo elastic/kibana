@@ -9,7 +9,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 
 import { encode } from '../../common/lib/embeddable_dataurl';
 import { transformWorkpadIn } from './transform_workpad_in';
-import { embeddableService } from '../kibana_services';
+import { embeddableService, logger } from '../kibana_services';
 import { getDecodedConfig, makeWorkpad } from './fixtures';
 
 jest.mock('../kibana_services', () => ({
