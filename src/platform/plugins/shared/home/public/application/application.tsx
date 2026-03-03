@@ -25,9 +25,9 @@ export const renderApp = async (
   // FIXME: use featureCatalogue.getFeatures$()
   const directories = featureCatalogue.get();
 
-  // Filters solutions by available nav links
   const root = createRoot(element);
 
+  // Filters solutions by available nav links
   const navLinksSubscription = chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = featureCatalogue
       .getSolutions()
