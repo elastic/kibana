@@ -256,7 +256,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       })}
     >
       <FlyoutHeader
-        icon={icon ?? actionTypeModel?.iconClass}
+        icon={actionTypeModel?.iconClass}
         actionTypeName={flyoutHeaderName}
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
