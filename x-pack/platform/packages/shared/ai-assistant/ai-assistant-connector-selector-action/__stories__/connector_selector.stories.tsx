@@ -56,7 +56,7 @@ export default {
       return (
         <EuiPopover
           button={
-            <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+            <EuiButton iconType="chevronSingleDown" iconSide="right" onClick={onButtonClick}>
               Click me to load a context menu
             </EuiButton>
           }

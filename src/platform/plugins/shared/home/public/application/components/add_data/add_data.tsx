@@ -108,7 +108,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   data-test-subj="homeAddData"
                   fill={false}
                   href={addBasePath('/app/integrations/browse')}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={(event: MouseEvent) => {
                     trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
                     createAppNavigationHandler('/app/integrations/browse')(event);
@@ -139,7 +139,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 <EuiButtonEmpty
                   data-test-subj="uploadFile"
                   href={addBasePath('#/tutorial_directory/fileDataViz')}
-                  iconType="importAction"
+                  iconType="download"
                 >
                   <FormattedMessage
                     id="home.addData.uploadFileButtonLabel"

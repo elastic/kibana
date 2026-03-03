@@ -353,7 +353,7 @@ export function CollapsibleNav({
               })}
               fill
               fullWidth
-              iconType="plusInCircleFilled"
+              iconType="plusCircle"
             >
               {i18n.translate('core.ui.primaryNav.addData', {
                 defaultMessage: 'Add integrations',

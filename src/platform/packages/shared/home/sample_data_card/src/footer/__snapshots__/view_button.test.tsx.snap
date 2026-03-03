@@ -21,7 +21,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
       </span>
       <span
         color="inherit"
-        data-euiicon-type="arrowDown"
+        data-euiicon-type="chevronSingleDown"
       />
     </span>
   </button>
@@ -49,7 +49,7 @@ exports[`should render popover with ordered appLinks 1`] = `
       </span>
       <span
         color="inherit"
-        data-euiicon-type="arrowDown"
+        data-euiicon-type="chevronSingleDown"
       />
     </span>
   </button>
