@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunctionExpression, within } from '@elastic/esql';
 import { getExpressionType, getFunctionDefinition } from '../..';
-import { isFunctionExpression } from '../../../../../ast/is';
-import { within } from '../../../../../ast/location';
 import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
