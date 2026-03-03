@@ -28,11 +28,10 @@ export function generateRandomIndexName(
   const charsLength = suffixCharacters.length;
   let result = prefix;
 
-  let counter = 0;
-  do {
-    result += suffixCharacters.charAt(Math.random() * charsLength);
-    counter++;
-  } while (counter < randomSuffixLength);
+  for (let i = 0; i < randomSuffixLength; i++) {
+    const idx = Math.floor(Math.random() * charsLength);
+    result += suffixCharacters.charAt(idx);
+  }
 
   return result;
 }

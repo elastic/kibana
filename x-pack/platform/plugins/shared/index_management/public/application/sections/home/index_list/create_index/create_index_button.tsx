@@ -23,13 +23,14 @@ export interface CreateIndexButtonProps {
 }
 
 export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
+  const {
+    core: { chrome },
+  } = useAppContext();
   const isPlatformIndexManagementV2Enabled = useIsPlatformIndexManagementV2Enabled();
   const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
   const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
 
-  const {
-    core: { chrome },
-  } = useAppContext();
+  const IndexModal = isPlatformIndexManagementV2Enabled ? CreateIndexModalV2 : CreateIndexModal;
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
 
@@ -53,18 +54,9 @@ export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIn
           defaultMessage="Create index"
         />
       </EuiButton>
-      {createIndexModalOpen &&
-        (isPlatformIndexManagementV2Enabled ? (
-          <CreateIndexModalV2
-            closeModal={() => setCreateIndexModalOpen(false)}
-            loadIndices={loadIndices}
-          />
-        ) : (
-          <CreateIndexModal
-            closeModal={() => setCreateIndexModalOpen(false)}
-            loadIndices={loadIndices}
-          />
-        ))}
+      {createIndexModalOpen && (
+        <IndexModal closeModal={() => setCreateIndexModalOpen(false)} loadIndices={loadIndices} />
+      )}
     </>
   );
 };

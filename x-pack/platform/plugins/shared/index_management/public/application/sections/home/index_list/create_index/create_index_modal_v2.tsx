@@ -289,7 +289,7 @@ export const CreateIndexModalV2 = ({ closeModal, loadIndices }: CreateIndexModal
             </EuiFlexGroup>
           </EuiFlexGroup>
           {showApi && (
-            <EuiCodeBlock language="bash" isCopyable>
+            <EuiCodeBlock language="json" isCopyable>
               {apiCode}
             </EuiCodeBlock>
           )}
