@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_ai4dsoc.sh
-    cancel_on_build_failing: true
     label: 'Serverless AI4DSOC - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4

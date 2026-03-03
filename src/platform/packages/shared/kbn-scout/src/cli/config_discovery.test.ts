@@ -11,8 +11,11 @@ import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
 import { getServerRunFlagsFromTags } from '../tests_discovery/tag_utils';
+import {
+  filterModulesByScoutCiConfig,
+  getScoutCiExcludedConfigs,
+} from '../tests_discovery/search_configs';
 import type { ModuleDiscoveryInfo } from './config_discovery';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 
@@ -51,6 +54,7 @@ jest.mock('@kbn/scout-info', () => ({
 
 jest.mock('../tests_discovery/search_configs', () => ({
   filterModulesByScoutCiConfig: jest.fn(),
+  getScoutCiExcludedConfigs: jest.fn(),
 }));
 
 jest.mock('@kbn/scout-reporting/src/registry', () => {
@@ -132,6 +136,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.arrayOfStrings.mockReturnValue([]);
 
     (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
+    (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([]);
 
     // Default mock modules
     mockTestableModules.modules = [
@@ -149,7 +154,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginA/config1.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'abc123',
               tests: [
                 {
@@ -176,7 +180,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginA/parallel.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'def456',
               tests: [
                 {
@@ -205,7 +208,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginB/config3.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'ghi789',
               tests: [
                 {
@@ -234,7 +236,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'packageA/config4.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'jkl012',
               tests: [
                 {
@@ -326,6 +327,145 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
   });
 
+  it('includes custom-server configs alongside defaults when "include-custom-servers" is true', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => flag === 'include-custom-servers');
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginCustom',
+        group: 'groupCustom',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/platform/plugins/private/pluginCustom',
+        configs: [
+          {
+            path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
+              exists: true,
+              sha1: 'custom123',
+              tests: [
+                {
+                  id: 'customTest1',
+                  title: 'Custom Test 1',
+                  expectedStatus: 'passed',
+                  location: { file: 'custom.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+          },
+          {
+            path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
+              exists: true,
+              sha1: 'normal456',
+              tests: [
+                {
+                  id: 'normalTest1',
+                  title: 'Normal Test 1',
+                  expectedStatus: 'passed',
+                  location: { file: 'normal.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
+    expect(configLogs.length).toBeGreaterThan(0);
+    expect(configLogs.some((call) => call[0].includes('/test/scout_custom/'))).toBe(true);
+    expect(
+      configLogs.some((call) => call[0].includes('/pluginCustom/config.playwright.config.ts'))
+    ).toBe(true);
+  });
+
+  it('excludes configs listed in scout_ci_config.yml when running in CI', () => {
+    const originalCi = process.env.CI;
+    process.env.CI = 'true';
+
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => flag === 'include-custom-servers');
+
+    const excludedConfigPath =
+      'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts';
+
+    (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([excludedConfigPath]);
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginCspm',
+        group: 'security',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/solutions/security/plugins/cloud_security_posture',
+        configs: [
+          {
+            path: excludedConfigPath,
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: excludedConfigPath,
+              exists: true,
+              sha1: 'exclude123',
+              tests: [
+                {
+                  id: 'excludedTest',
+                  title: 'Excluded Test',
+                  expectedStatus: 'passed',
+                  location: { file: 'excluded.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+          },
+          {
+            path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/config.playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/config.playwright.config.ts',
+              exists: true,
+              sha1: 'include456',
+              tests: [
+                {
+                  id: 'includedTest',
+                  title: 'Included Test',
+                  expectedStatus: 'passed',
+                  location: { file: 'included.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
+    expect(configLogs.some((call) => call[0].includes(excludedConfigPath))).toBe(false);
+    expect(
+      configLogs.some((call) => call[0].includes('/test/scout/ui/config.playwright.config.ts'))
+    ).toBe(true);
+
+    process.env.CI = originalCi;
+  });
+
   it('filters config tags to only include cross tags', () => {
     flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@local-stateful-classic']
     flagsReader.boolean.mockReturnValue(false);
@@ -383,7 +523,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginNoMatch/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'mno345',
               tests: [
                 {
@@ -466,7 +605,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginNoTests/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'pqr678',
               tests: [
                 {
@@ -519,7 +657,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginMixedTests/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'stu901',
               tests: [
                 {
@@ -620,7 +757,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginTestModes/config1.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'vwx234',
               tests: [
                 {
@@ -644,7 +780,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginTestModes/config2.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'yza567',
               tests: [
                 {
@@ -694,7 +829,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginSearch/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'bcd234',
                 tests: [
                   {
@@ -714,7 +848,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginSearch/config2.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'cde345',
                 tests: [
                   {
@@ -743,7 +876,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginPlatform/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'def456',
                 tests: [
                   {
@@ -772,7 +904,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginOblt/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'efg567',
                 tests: [
                   {
@@ -985,7 +1116,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginMultiMode/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'fgh678',
                 tests: [
                   {
