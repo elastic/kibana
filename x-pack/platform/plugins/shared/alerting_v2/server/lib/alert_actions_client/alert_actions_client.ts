@@ -14,7 +14,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import type {
   BulkCreateAlertActionItemBody,
   CreateAlertActionBody,
-} from '../../routes/schemas/alert_action_schema';
+} from '@kbn/alerting-v2-schemas';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
