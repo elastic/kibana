@@ -12,9 +12,7 @@ import {
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
 } from '../../tools';
-import {
-  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
-} from '../../tools/get_log_change_points/tool';
+import { OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID } from '../../tools/get_log_change_points/tool';
 
 export const logAnalysisSkill = defineSkillType({
   id: 'log-analysis',

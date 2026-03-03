@@ -12,12 +12,8 @@ import {
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
 } from '../../tools';
-import {
-  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
-} from '../../tools/get_metric_change_points/tool';
-import {
-  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
-} from '../../tools/get_trace_change_points/tool';
+import { OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID } from '../../tools/get_metric_change_points/tool';
+import { OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID } from '../../tools/get_trace_change_points/tool';
 
 export const infrastructureAlertingSkill = defineSkillType({
   id: 'infrastructure-alerting',
