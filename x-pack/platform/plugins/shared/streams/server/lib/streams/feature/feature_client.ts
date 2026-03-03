@@ -195,9 +195,9 @@ export class FeatureClient {
       expires_at: undefined,
     };
     const document = toStorage(stream, softDeleted);
-    return this.clients.storageClient.bulk({
-      operations: [{ index: { document, _id: document[FEATURE_UUID] } }],
-      throwOnFail: true,
+    return this.clients.storageClient.index({
+      id: document[FEATURE_UUID],
+      document,
     });
   }
 
