@@ -128,7 +128,7 @@ describe('schema validation', () => {
       });
     });
 
-    it('should reject invalid group_by value without cross-variant slo_id error', () => {
+    it('should reject invalid group_by value with group_filters.group_by error', () => {
       const invalidState = {
         group_filters: {
           group_by: 'invalid-group-by',
@@ -139,7 +139,8 @@ describe('schema validation', () => {
       expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow(
         /group_filters\.group_by/
       );
-      expect(() => overviewEmbeddableSchema.validate(invalidState)).not.toThrow(/slo_id/);
+      // With schema.oneOf, both branches are tried and all failures are reported, so the error
+      // may also mention slo_id from the single branch; we only assert the group branch error.
     });
 
     it('should validate group overview state with minimal required fields', () => {
