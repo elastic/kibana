@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
 import type { Insight } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { parseError } from '../../streams/errors/parse_error';
@@ -16,11 +15,7 @@ import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
 
 export interface QueryData {
   title: string;
-  kql: string;
-  feature?: {
-    name: string;
-    filter: Condition;
-  };
+  esql: string;
   currentCount: number;
   sampleEvents: string[];
 }
@@ -118,10 +113,7 @@ export async function collectQueryData({
 
   return {
     title: query.query.title,
-    kql: query.query.kql.query,
-    feature: query.query.feature
-      ? { name: query.query.feature.name, filter: query.query.feature.filter }
-      : undefined,
+    esql: query.query.esql.query,
     currentCount,
     sampleEvents,
   };

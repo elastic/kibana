@@ -41,7 +41,8 @@ export function* getCodeOwnersLines(): Generator<string> {
     if (line.startsWith('#')) continue;
 
     // Assignment override on backport branches to avoid review requests
-    if (line.includes('@kibanamachine')) continue;
+    // The line is * @kibanamachine, let's skip that
+    if (line.match(/^\*\s+@kibanamachine$/)) continue;
 
     yield line.trim();
   }
