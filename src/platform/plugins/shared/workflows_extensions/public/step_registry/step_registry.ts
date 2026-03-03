@@ -18,7 +18,7 @@ import type { PublicStepDefinitionOrLoader } from '../types';
  */
 export class PublicStepRegistry {
   private readonly registry = new Map<string, PublicStepDefinition>();
-  private readonly pending = new Set<Promise<void>>(); // Stores promises that in progress or rejected
+  private readonly pending = new Set<Promise<void>>(); // Stores promises that are either in progress or have been rejected
 
   /**
    * Register step definition.
@@ -67,13 +67,12 @@ export class PublicStepRegistry {
    */
   public async whenReady(): Promise<void> {
     if (this.pending.size > 0) {
-      return Promise.allSettled(this.pending).then((results) => {
-        results.forEach((result) => {
-          if (result.status === 'rejected') {
-            throw result.reason;
-          }
-        });
-      });
+      const results = await Promise.allSettled(this.pending);
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          throw result.reason;
+        }
+      }
     }
   }
 
