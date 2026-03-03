@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh
-    cancel_on_build_failing: true
     label: 'Entity Store Performance Tests'
     agents:
       provider: gcp

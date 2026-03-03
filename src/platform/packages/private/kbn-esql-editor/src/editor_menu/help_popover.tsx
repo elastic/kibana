@@ -180,6 +180,14 @@ export const HelpPopover: React.FC<{
     if (solutionsRecommendedQueries.length) {
       recommendedQueries.push(
         ...solutionsRecommendedQueries.map((recommendedQuery) => {
+          // If the query is standalone, return the query string directly
+          if (recommendedQuery.isStandalone) {
+            return {
+              label: recommendedQuery.name,
+              queryString: recommendedQuery.query,
+            };
+          }
+
           const template = prettifyQueryTemplate(recommendedQuery.query);
           // Check if query starts with FROM or TS
           const startsWithTs = recommendedQuery.query.startsWith('TS');

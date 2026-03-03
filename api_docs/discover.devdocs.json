@@ -525,10 +525,10 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/unified-data-table",
-                "scope": "public",
-                "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-public.DataGridDensity",
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataGridDensity",
                 "text": "DataGridDensity"
               },
               " | undefined"
@@ -2363,18 +2363,74 @@
           "DiscoverStateContainer"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-        "lineNumber": 18,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.createAppStateObservable",
+            "type": "Function",
+            "tags": [],
+            "label": "createAppStateObservable",
+            "description": [
+              "\nCreates an observable of the current tab's app state"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverAppState",
+                "text": "DiscoverAppState"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.createTabPersistableStateObservable",
+            "type": "Function",
+            "tags": [],
+            "label": "createTabPersistableStateObservable",
+            "description": [
+              "\nCreates an observable of the current tab's main state (query, filters, time range, refresh interval, persistable attributes)"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<Pick<",
+              "TabState",
+              ", \"attributes\" | \"appState\" | \"globalState\">>"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.ExtendedDiscoverStateContainer.getAppStateFromSavedSearch",
             "type": "Function",
             "tags": [],
             "label": "getAppStateFromSavedSearch",
-            "description": [],
+            "description": [
+              "\nGet updated AppState when given a saved search"
+            ],
             "signature": [
               "(newSavedSearch: ",
               {
@@ -2394,7 +2450,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 22,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2416,13 +2472,41 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-                "lineNumber": 22,
+                "lineNumber": 36,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.getSavedSearchFromCurrentTab",
+            "type": "Function",
+            "tags": [],
+            "label": "getSavedSearchFromCurrentTab",
+            "description": [
+              "\nBuilds a SavedSearch object from the current tab's state"
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -2464,7 +2548,7 @@
               "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3085,7 +3169,7 @@
           ") => void | (() => void) | Promise<void | (() => void)>"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-        "lineNumber": 38,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3102,7 +3186,7 @@
               "CustomizationCallbackContext"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3444,7 +3528,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; } & {}>> & ",
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -4844,7 +4928,7 @@
           "\"_a\""
         ],
         "path": "src/platform/plugins/shared/discover/common/constants.ts",
-        "lineNumber": 42,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

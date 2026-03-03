@@ -33,6 +33,7 @@ import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
+import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -176,6 +177,18 @@ export interface AgentBuilderPluginSetup {
 }
 
 /**
+ * AgentBuilder runtime service's start contract.
+ */
+export interface RuntimeStart {
+  /**
+   * Creates a model provider for the given request context.
+   * The model provider can be used to obtain a {@link ScopedModel} for use
+   * with utilities like `generateEsql` from `@kbn/agent-builder-genai-utils`.
+   */
+  createModelProvider: ModelProviderFactoryFn;
+}
+
+/**
  * Start contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -195,4 +208,9 @@ export interface AgentBuilderPluginStart {
    * Execution service, to execute agents and retrieve execution status.
    */
   execution: ExecutionStart;
+  /**
+   * Runtime utilities for consumers that need to interact with LLM models
+   * outside of the agent builder's built-in tool/agent execution flow.
+   */
+  runtime: RuntimeStart;
 }
