@@ -127,54 +127,6 @@ export interface AgentBuilderTelemetry {
   };
 }
 
-function conversationMetricsSchema(scope: string) {
-  return {
-    total: {
-      type: 'long' as const,
-      _meta: { description: `Total number of conversations (${scope})` },
-    },
-    total_rounds: {
-      type: 'long' as const,
-      _meta: { description: `Total conversation rounds across all conversations (${scope})` },
-    },
-    avg_rounds_per_conversation: {
-      type: 'float' as const,
-      _meta: { description: `Average rounds per conversation (${scope})` },
-    },
-    rounds_distribution: {
-      type: 'array' as const,
-      items: {
-        bucket: {
-          type: 'keyword' as const,
-          _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
-        },
-        count: {
-          type: 'long' as const,
-          _meta: { description: 'Number of conversations in this bucket' },
-        },
-      },
-    },
-    tokens_used: {
-      type: 'long' as const,
-      _meta: {
-        description: `Total tokens used across all conversations (input + output) (${scope})`,
-      },
-    },
-    tokens_input: {
-      type: 'long' as const,
-      _meta: { description: `Total input tokens across all conversations (${scope})` },
-    },
-    tokens_output: {
-      type: 'long' as const,
-      _meta: { description: `Total output tokens across all conversations (${scope})` },
-    },
-    average_tokens_per_conversation: {
-      type: 'float' as const,
-      _meta: { description: `Average tokens per conversation (${scope})` },
-    },
-  };
-}
-
 /**
  * Register telemetry collector for Agent Builder
  * @param usageCollection - Usage collection setup contract
@@ -227,8 +179,92 @@ export function registerTelemetryCollector(
             },
           },
         },
-        conversations: conversationMetricsSchema('all-time'),
-        daily: conversationMetricsSchema('daily (last 24h)'),
+        conversations: {
+          total: {
+            type: 'long',
+            _meta: { description: 'Total number of conversations (all-time)' },
+          },
+          total_rounds: {
+            type: 'long',
+            _meta: { description: 'Total conversation rounds across all conversations (all-time)' },
+          },
+          avg_rounds_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average rounds per conversation (all-time)' },
+          },
+          rounds_distribution: {
+            type: 'array',
+            items: {
+              bucket: {
+                type: 'keyword',
+                _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
+              },
+              count: {
+                type: 'long',
+                _meta: { description: 'Number of conversations in this bucket' },
+              },
+            },
+          },
+          tokens_used: {
+            type: 'long',
+            _meta: { description: 'Total tokens used (input + output) (all-time)' },
+          },
+          tokens_input: {
+            type: 'long',
+            _meta: { description: 'Total input tokens across all conversations (all-time)' },
+          },
+          tokens_output: {
+            type: 'long',
+            _meta: { description: 'Total output tokens across all conversations (all-time)' },
+          },
+          average_tokens_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average tokens per conversation (all-time)' },
+          },
+        },
+        daily: {
+          total: {
+            type: 'long',
+            _meta: { description: 'Total number of conversations (daily, last 24h)' },
+          },
+          total_rounds: {
+            type: 'long',
+            _meta: { description: 'Total conversation rounds (daily, last 24h)' },
+          },
+          avg_rounds_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average rounds per conversation (daily, last 24h)' },
+          },
+          rounds_distribution: {
+            type: 'array',
+            items: {
+              bucket: {
+                type: 'keyword',
+                _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
+              },
+              count: {
+                type: 'long',
+                _meta: { description: 'Number of conversations in this bucket' },
+              },
+            },
+          },
+          tokens_used: {
+            type: 'long',
+            _meta: { description: 'Total tokens used (input + output) (daily, last 24h)' },
+          },
+          tokens_input: {
+            type: 'long',
+            _meta: { description: 'Total input tokens (daily, last 24h)' },
+          },
+          tokens_output: {
+            type: 'long',
+            _meta: { description: 'Total output tokens (daily, last 24h)' },
+          },
+          average_tokens_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average tokens per conversation (daily, last 24h)' },
+          },
+        },
         query_to_result_time: {
           p50: {
             type: 'long',
