@@ -6,6 +6,7 @@
  */
 
 import { createClient } from './create_client';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -56,6 +57,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise,
         regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
@@ -68,6 +70,7 @@ describe('createClient', () => {
           esClient: mockEsClient,
           anonymizationRulesPromise,
           regexWorker,
+          endpointIdCache: expect.any(InferenceEndpointIdCache),
         })
       );
 
@@ -88,6 +91,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise: Promise.resolve([]),
         regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
       });
 
       // type check on client.chatComplete
@@ -117,6 +121,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise,
         regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
@@ -129,6 +134,7 @@ describe('createClient', () => {
           esClient: mockEsClient,
           anonymizationRulesPromise,
           regexWorker,
+          endpointIdCache: expect.any(InferenceEndpointIdCache),
         })
       );
 
@@ -155,6 +161,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise: Promise.resolve([]),
         regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
       });
 
       // type check on client.chatComplete

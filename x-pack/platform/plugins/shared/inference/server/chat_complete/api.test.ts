@@ -32,6 +32,7 @@ import {
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -41,6 +42,7 @@ describe('createChatCompleteApi', () => {
   let inferenceConnector: ReturnType<typeof createInferenceConnectorMock>;
   let inferenceExecutor: ReturnType<typeof createInferenceExecutorMock>;
   let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
+  let endpointIdCache: InferenceEndpointIdCache;
 
   let chatComplete: ChatCompleteAPI;
   const mockEsClient = {
@@ -63,12 +65,16 @@ describe('createChatCompleteApi', () => {
     ml: {
       inferTrainedModel: jest.fn(),
     },
+    transport: {
+      request: jest.fn().mockResolvedValue({ endpoints: [] }),
+    },
   } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     regexWorker = createRegexWorkerServiceMock();
+    endpointIdCache = new InferenceEndpointIdCache();
     const callbackApi = createChatCompleteCallbackApi({
       request,
       namespace: 'default',
@@ -77,6 +83,7 @@ describe('createChatCompleteApi', () => {
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+      endpointIdCache,
     });
     chatComplete = createChatCompleteApi({
       callbackApi,
@@ -438,10 +445,14 @@ describe('createChatCompleteApi', () => {
     });
   });
 
-  describe('inference endpoint path (inferenceId)', () => {
+  describe('inference endpoint path (via connectorId resolution)', () => {
     const mockEndpointExecutor = { invoke: jest.fn() };
 
     beforeEach(() => {
+      mockEsClient.transport.request.mockResolvedValue({
+        endpoints: [{ inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' }],
+      });
+
       resolveInferenceEndpointMock.mockResolvedValue({
         inferenceId: 'my-endpoint',
         provider: 'openai',
@@ -452,9 +463,9 @@ describe('createChatCompleteApi', () => {
       inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
     });
 
-    it('does NOT call actionsClient or getInferenceExecutor when inferenceId is provided', async () => {
+    it('does NOT call actionsClient or getInferenceExecutor when connectorId resolves to inference endpoint', async () => {
       await chatComplete({
-        inferenceId: 'my-endpoint',
+        connectorId: 'my-endpoint',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
       });
@@ -465,7 +476,7 @@ describe('createChatCompleteApi', () => {
 
     it('calls resolveInferenceEndpoint with the correct parameters', async () => {
       await chatComplete({
-        inferenceId: 'my-endpoint',
+        connectorId: 'my-endpoint',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
       });
@@ -479,7 +490,7 @@ describe('createChatCompleteApi', () => {
 
     it('calls createInferenceEndpointExecutor with the correct parameters', async () => {
       await chatComplete({
-        inferenceId: 'my-endpoint',
+        connectorId: 'my-endpoint',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
       });
@@ -492,7 +503,7 @@ describe('createChatCompleteApi', () => {
 
     it('calls the inference endpoint adapter with the correct parameters', async () => {
       await chatComplete({
-        inferenceId: 'my-endpoint',
+        connectorId: 'my-endpoint',
         messages: [{ role: MessageRole.User, content: 'question' }],
         temperature: 0.5,
         modelName: 'gpt-4o-mini',
@@ -513,7 +524,7 @@ describe('createChatCompleteApi', () => {
 
     it('returns a promise with the response in non-stream mode', async () => {
       const response = await chatComplete({
-        inferenceId: 'my-endpoint',
+        connectorId: 'my-endpoint',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
       });
@@ -531,7 +542,7 @@ describe('createChatCompleteApi', () => {
 
       const events$ = chatComplete({
         stream: true,
-        inferenceId: 'my-endpoint',
+        connectorId: 'my-endpoint',
         messages: [{ role: MessageRole.User, content: 'question' }],
         maxRetries: 0,
       });
@@ -544,15 +555,6 @@ describe('createChatCompleteApi', () => {
       expect(events).toHaveLength(2);
       expect(events[0].content).toBe('chunk-1');
       expect(events[1].content).toBe('chunk-2');
-    });
-
-    it('throws when neither connectorId nor inferenceId is provided', () => {
-      expect(() =>
-        chatComplete({
-          messages: [{ role: MessageRole.User, content: 'question' }],
-          maxRetries: 0,
-        } as any)
-      ).toThrow('Either connectorId or inferenceId must be provided');
     });
   });
 });

@@ -41,14 +41,20 @@ The following concepts are commonly used throughout the plugin:
 - **tools**: a set of tools that the LLM can choose to use when generating the next message. In essence, it allows the consumer of the API to define a schema for structured output instead of plain text, and having the LLM select the most appropriate one.
 - **tool call**: when the LLM has chosen a tool (schema) to use for its output, and returns a document that matches the schema, this is referred to as a tool call.
 
-## Inference connectors
+## Inference connectors and endpoints
 
-Performing inference, or more globally communicating with the LLM, is done using stack connectors.
+The `connectorId` parameter accepted by `chatComplete`, `output`, and `prompt` APIs accepts both
+Kibana stack connector IDs and Elasticsearch inference endpoint IDs. The system automatically
+resolves which pipeline to use based on the provided identifier:
 
-The subset of connectors that can be used for inference are called `genAI`, or `inference` connectors. 
-Calling any inference APIs with the ID of a connector that is not inference-compatible will result in the API throwing an error.
+- If the ID matches a known inference endpoint, the request is routed through the Elasticsearch Inference API.
+- Otherwise, it is routed through the Kibana stack connector pipeline.
+- If the connector pipeline returns a "not found" error, the system falls back to the inference endpoint pipeline.
 
-The list of inference connector types:
+The `getConnectorList` API returns both stack connectors and inference endpoints in a unified list.
+Inference endpoints have `isInferenceEndpoint: true` set on the returned `InferenceConnector` object.
+
+The list of supported stack connector types:
 - `.gen-ai`: OpenAI connector
 - `.bedrock`: Bedrock Claude connector
 - `.gemini`: Vertex Gemini connector

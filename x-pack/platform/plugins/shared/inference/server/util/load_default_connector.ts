@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getDefaultConnector } from '../../common/utils/get_default_connector';
@@ -14,10 +14,12 @@ import { getConnectorList } from './get_connector_list';
 export const loadDefaultConnector = async ({
   actions,
   request,
+  esClient,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
+  esClient: ElasticsearchClient;
 }): Promise<InferenceConnector> => {
-  const connectors = await getConnectorList({ actions, request });
+  const connectors = await getConnectorList({ actions, request, esClient });
   return getDefaultConnector({ connectors });
 };

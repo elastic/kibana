@@ -12,13 +12,7 @@ import type {
   RequestHandlerContext,
   KibanaRequest,
 } from '@kbn/core/server';
-import {
-  createInferenceRequestError,
-  InferenceTaskEventType,
-  isConnectorApiCall,
-  isInferenceError,
-  isInferenceIdApiCall,
-} from '@kbn/inference-common';
+import { InferenceTaskEventType, isInferenceError } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
@@ -50,6 +44,7 @@ export function registerChatCompleteRoute({
     const client = inferenceStart.getClient({ request, actions, logger });
 
     const {
+      connectorId,
       messages,
       system,
       toolChoice,
@@ -62,7 +57,8 @@ export function registerChatCompleteRoute({
       metadata,
     } = request.body;
 
-    const commonOptions = {
+    return client.chatComplete({
+      connectorId,
       messages,
       system,
       toolChoice,
@@ -75,20 +71,7 @@ export function registerChatCompleteRoute({
       retryConfiguration,
       temperature,
       metadata,
-    };
-
-    if (isConnectorApiCall(request.body)) {
-      return client.chatComplete({ ...commonOptions, connectorId: request.body.connectorId });
-    }
-
-    if (isInferenceIdApiCall(request.body)) {
-      return client.chatComplete({ ...commonOptions, inferenceId: request.body.inferenceId });
-    }
-
-    throw createInferenceRequestError(
-      'Either connectorId or inferenceId must be provided',
-      400
-    );
+    });
   }
 
   router.post(

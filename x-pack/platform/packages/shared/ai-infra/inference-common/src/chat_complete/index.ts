@@ -10,13 +10,11 @@ export type {
   ChatCompleteAPI,
   ChatCompleteAPIResponse,
   ChatCompleteOptions,
-  ChatCompleteOptionsBase,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
 } from './api';
-export { isConnectorApiCall, isInferenceIdApiCall } from './api';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,

@@ -59,14 +59,6 @@ import type { AnonymizationResponseMetadata } from './anonymization';
  * ```
  */
 
-export function isConnectorApiCall<T>(params: T): params is T & { connectorId: string; inferenceId?: never } {
-  return typeof params === 'object' && params !== null && 'connectorId' in params;
-}
-
-export function isInferenceIdApiCall<T>(params: T): params is T & { inferenceId: string; connectorId?: never } {
-  return typeof params === 'object' && params !== null && 'inferenceId' in params;
-}
-
 export interface DefaultChatCompleteOptions {
   stream: false;
   tools: {};
@@ -88,9 +80,18 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
- * Common options shared by both connector-based and inference-endpoint-based chat completion.
+ * Options used to call the {@link ChatCompleteAPI}.
+ *
+ * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
+ * and Elasticsearch inference endpoint IDs. The system automatically resolves which
+ * pipeline to use based on the provided identifier.
  */
-export type ChatCompleteOptionsBase = {
+export type ChatCompleteOptions = {
+  /**
+   * The ID of the connector or inference endpoint to use.
+   * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
+   */
+  connectorId: string;
   /**
    * Optional system message for the LLM.
    */
@@ -148,30 +149,6 @@ export type ChatCompleteOptionsBase = {
    */
   timeout?: number;
 } & ToolOptions;
-
-/**
- * Options used to call the {@link ChatCompleteAPI}.
- *
- * Exactly one of `connectorId` or `inferenceId` must be provided.
- * - `connectorId`: routes through Kibana stack connectors (OpenAI, Bedrock, Gemini, etc.)
- * - `inferenceId`: routes through the Elasticsearch Inference API directly
- *
- * Use {@link isConnectorApiCall} or {@link isInferenceIdApiCall} to narrow.
- */
-export type ChatCompleteOptions = ChatCompleteOptionsBase & {
-  /**
-   * The ID of the connector to use.
-   * Must be an inference connector, or an error will be thrown.
-   * Mutually exclusive with `inferenceId`.
-   */
-  connectorId?: string;
-  /**
-   * The ID of the Elasticsearch inference endpoint to use.
-   * Must be a `chat_completion` type endpoint.
-   * Mutually exclusive with `connectorId`.
-   */
-  inferenceId?: string;
-};
 
 export interface ChatCompleteRetryConfiguration {
   /**

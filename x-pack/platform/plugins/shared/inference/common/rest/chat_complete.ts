@@ -6,12 +6,11 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import {
-  isConnectorApiCall,
-  type ChatCompleteAPI,
-  type ChatCompleteCompositeResponse,
-  type ChatCompleteOptions,
-  type ChatCompleteResponse,
+import type {
+  ChatCompleteAPI,
+  ChatCompleteCompositeResponse,
+  ChatCompleteOptions,
+  ChatCompleteResponse,
 } from '@kbn/inference-common';
 import { defer, from, lastValueFrom } from 'rxjs';
 import type { ChatCompleteRequestBody } from '../http_apis';
@@ -36,6 +35,7 @@ export function createChatCompleteRestApi({
 export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCompleteOptions) {
   return (options: ChatCompleteOptions): ChatCompleteCompositeResponse => {
     const {
+      connectorId,
       messages,
       system,
       toolChoice,
@@ -50,7 +50,8 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       retryConfiguration,
     } = options;
 
-    const commonBody = {
+    const body: ChatCompleteRequestBody = {
+      connectorId,
       system,
       messages,
       toolChoice,
@@ -62,10 +63,6 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       maxRetries,
       metadata,
     };
-
-    const body: ChatCompleteRequestBody = isConnectorApiCall(options)
-      ? { ...commonBody, connectorId: options.connectorId }
-      : { ...commonBody, inferenceId: options.inferenceId };
 
     function retry<T>() {
       return retryWithExponentialBackoff<T>({

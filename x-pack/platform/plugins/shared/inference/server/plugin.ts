@@ -34,6 +34,7 @@ import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
+import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -89,10 +90,12 @@ export class InferencePlugin
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
+  private endpointIdCache: InferenceEndpointIdCache;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get<InferenceConfig>();
+    this.endpointIdCache = new InferenceEndpointIdCache();
   }
   setup(
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
@@ -213,6 +216,8 @@ export class InferencePlugin
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
+          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          endpointIdCache: this.endpointIdCache,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -224,15 +229,21 @@ export class InferencePlugin
           callbacks: options.callbacks,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
+          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
+          regexWorker: this.regexWorker!,
+          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          endpointIdCache: this.endpointIdCache,
           logger: this.logger,
         });
       },
 
       getConnectorList: async (request: KibanaRequest) => {
-        return getConnectorList({ actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        return getConnectorList({ actions: pluginsStart.actions, request, esClient });
       },
       getDefaultConnector: async (request: KibanaRequest) => {
-        return loadDefaultConnector({ actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        return loadDefaultConnector({ actions: pluginsStart.actions, request, esClient });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
         return getConnectorById({ connectorId: id, actions: pluginsStart.actions, request });

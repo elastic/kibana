@@ -28,10 +28,10 @@ export function registerConnectorsRoute({
       validate: {},
     },
     async (_context, request, response) => {
-      const actions = await coreSetup
-        .getStartServices()
-        .then(([_coreStart, pluginsStart]) => pluginsStart.actions);
-      const connectors = await getConnectorList({ actions, request });
+      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const actions = pluginsStart.actions;
+      const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      const connectors = await getConnectorList({ actions, request, esClient });
       return response.ok({ body: { connectors } });
     }
   );

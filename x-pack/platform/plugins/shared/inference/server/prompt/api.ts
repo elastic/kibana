@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import {
-  createInferenceRequestError,
-  isConnectorApiCall,
-  isInferenceIdApiCall,
-  type PromptOptions,
-  type PromptAPI,
-} from '@kbn/inference-common';
-import type { ChatCompleteApiWithCallbackCallback, ChatCompleteApiWithCallback } from '../chat_complete/callback_api';
+import type { PromptOptions, PromptAPI } from '@kbn/inference-common';
+import type {
+  ChatCompleteApiWithCallbackCallback,
+  ChatCompleteApiWithCallback,
+} from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 
 export function createPromptApi(opts: { callbackApi: ChatCompleteApiWithCallback }): PromptAPI;
 export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiWithCallback }) {
   return (options: PromptOptions) => {
     const {
+      connectorId,
       stream,
       abortSignal,
       prompt,
@@ -28,8 +26,6 @@ export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiW
       maxRetries,
       ...rest
     } = options;
-
-    const initBase = { stream, abortSignal, retryConfiguration, maxRetries };
 
     const callback: ChatCompleteApiWithCallbackCallback = ({ model }) => {
       const { match, options: nextOptions } = promptToMessageOptions(prompt, input, model ?? {});
@@ -53,17 +49,9 @@ export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiW
       };
     };
 
-    if (isConnectorApiCall(options)) {
-      return callbackApi({ ...initBase, connectorId: options.connectorId }, callback);
-    }
-
-    if (isInferenceIdApiCall(options)) {
-      return callbackApi({ ...initBase, inferenceId: options.inferenceId }, callback);
-    }
-
-    throw createInferenceRequestError(
-      'Either connectorId or inferenceId must be provided',
-      400
+    return callbackApi(
+      { connectorId, stream, abortSignal, retryConfiguration, maxRetries },
+      callback
     );
   };
 }

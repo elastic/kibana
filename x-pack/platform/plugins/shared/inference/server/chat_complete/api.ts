@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  createInferenceRequestError,
-  isConnectorApiCall,
-  isInferenceIdApiCall,
-  type ChatCompleteOptions,
-  type ChatCompleteAPI,
-} from '@kbn/inference-common';
+import type { ChatCompleteOptions, ChatCompleteAPI } from '@kbn/inference-common';
 import type { ChatCompleteApiWithCallback } from './callback_api';
 
 export function createChatCompleteApi(opts: {
@@ -23,22 +17,13 @@ export function createChatCompleteApi({
   callbackApi: ChatCompleteApiWithCallback;
 }) {
   return (options: ChatCompleteOptions) => {
-    const { stream, abortSignal, retryConfiguration, maxRetries, ...rest } = options;
-    const initBase = { stream, abortSignal, retryConfiguration, maxRetries };
+    const { connectorId, stream, abortSignal, retryConfiguration, maxRetries, ...rest } = options;
 
     const callback = (_context: unknown) => rest;
 
-    if (isConnectorApiCall(options)) {
-      return callbackApi({ ...initBase, connectorId: options.connectorId }, callback);
-    }
-
-    if (isInferenceIdApiCall(options)) {
-      return callbackApi({ ...initBase, inferenceId: options.inferenceId }, callback);
-    }
-
-    throw createInferenceRequestError(
-      'Either connectorId or inferenceId must be provided',
-      400
+    return callbackApi(
+      { connectorId, stream, abortSignal, retryConfiguration, maxRetries },
+      callback
     );
   };
 }

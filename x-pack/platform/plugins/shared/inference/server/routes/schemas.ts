@@ -54,60 +54,47 @@ export const messageOptionsSchema = schema.object({
   toolChoice: toolChoiceSchema,
 });
 
-export const chatCompleteBaseSchema = schema.object(
-  {
-    connectorId: schema.maybe(schema.string({ minLength: 1 })),
-    inferenceId: schema.maybe(schema.string({ minLength: 1 })),
-    maxRetries: schema.maybe(schema.number()),
-    retryConfiguration: schema.maybe(
-      schema.object({
-        retryOn: schema.maybe(schema.oneOf([schema.literal('all'), schema.literal('auto')])),
-      })
-    ),
-    temperature: schema.maybe(schema.number()),
-    modelName: schema.maybe(schema.string()),
-    metadata: schema.maybe(
-      schema.object({
-        connectorTelemetry: schema.maybe(
-          schema.object({
-            pluginId: schema.maybe(schema.string()),
-            aggregateBy: schema.maybe(schema.string()),
-          })
-        ),
-        anonymization: schema.maybe(
-          schema.object({
-            profileId: schema.maybe(schema.string()),
-            replacementsId: schema.maybe(schema.string()),
-            target: schema.maybe(
-              schema.object({
-                targetType: schema.oneOf([
-                  schema.literal('data_view'),
-                  schema.literal('index_pattern'),
-                  schema.literal('index'),
-                ]),
-                targetId: schema.string(),
-              })
-            ),
-          })
-        ),
-        attributes: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-      })
-    ),
-    functionCalling: schema.maybe(
-      schema.oneOf([schema.literal('auto'), schema.literal('native'), schema.literal('simulated')])
-    ),
-  },
-  {
-    validate: (value) => {
-      if (!value.connectorId && !value.inferenceId) {
-        return 'Either [connectorId] or [inferenceId] must be provided';
-      }
-      if (value.connectorId && value.inferenceId) {
-        return 'Only one of [connectorId] or [inferenceId] may be provided, not both';
-      }
-    },
-  }
-);
+export const chatCompleteBaseSchema = schema.object({
+  connectorId: schema.string({ minLength: 1 }),
+  maxRetries: schema.maybe(schema.number()),
+  retryConfiguration: schema.maybe(
+    schema.object({
+      retryOn: schema.maybe(schema.oneOf([schema.literal('all'), schema.literal('auto')])),
+    })
+  ),
+  temperature: schema.maybe(schema.number()),
+  modelName: schema.maybe(schema.string()),
+  metadata: schema.maybe(
+    schema.object({
+      connectorTelemetry: schema.maybe(
+        schema.object({
+          pluginId: schema.maybe(schema.string()),
+          aggregateBy: schema.maybe(schema.string()),
+        })
+      ),
+      anonymization: schema.maybe(
+        schema.object({
+          profileId: schema.maybe(schema.string()),
+          replacementsId: schema.maybe(schema.string()),
+          target: schema.maybe(
+            schema.object({
+              targetType: schema.oneOf([
+                schema.literal('data_view'),
+                schema.literal('index_pattern'),
+                schema.literal('index'),
+              ]),
+              targetId: schema.string(),
+            })
+          ),
+        })
+      ),
+      attributes: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    })
+  ),
+  functionCalling: schema.maybe(
+    schema.oneOf([schema.literal('auto'), schema.literal('native'), schema.literal('simulated')])
+  ),
+});
 
 const messageSchema = schema.oneOf([
   schema.object({

@@ -15,7 +15,8 @@ import type {
   ToolChoice,
 } from '@kbn/inference-common';
 
-interface ChatCompleteRequestBodyCommon {
+export interface ChatCompleteRequestBodyBase {
+  connectorId: string;
   temperature?: number;
   modelName?: string;
   functionCalling?: FunctionCallingMode;
@@ -26,10 +27,6 @@ interface ChatCompleteRequestBodyCommon {
   metadata?: ChatCompleteMetadata;
   toolChoice?: ToolChoice;
 }
-
-export type ChatCompleteRequestBodyBase =
-  | (ChatCompleteRequestBodyCommon & { connectorId?: string })
-  | (ChatCompleteRequestBodyCommon & { inferenceId?: string });
 
 export type ChatCompleteRequestBody = ChatCompleteRequestBodyBase & {
   system?: string;

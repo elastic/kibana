@@ -24,6 +24,7 @@ import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { createCallbackManager } from './callback_manager';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 export function createInferenceClient({
   request,
@@ -33,7 +34,9 @@ export function createInferenceClient({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+<<<<<<< HEAD
   replacementsEsClient,
+  endpointIdCache,
   callbacks,
   anonymization,
 }: {
@@ -45,6 +48,7 @@ export function createInferenceClient({
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
 }): InferenceClient {
@@ -58,6 +62,7 @@ export function createInferenceClient({
     anonymizationRulesPromise,
     regexWorker,
     esClient,
+    endpointIdCache,
     callbackManager,
     anonymization: {
       ...anonymization,

@@ -29,6 +29,7 @@ import type {
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 import { createPromptApi } from './api';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 jest.mock('../chat_complete/callback_api');
 jest.mock('../../common/prompt/prompt_to_message_options', () => {
@@ -44,6 +45,9 @@ jest.mock('../../common/prompt/prompt_to_message_options', () => {
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
+  },
+  transport: {
+    request: jest.fn().mockResolvedValue({ endpoints: [] }),
   },
 } as any;
 
@@ -87,6 +91,7 @@ describe('createPromptApi', () => {
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+      endpointIdCache: new InferenceEndpointIdCache(),
     });
     promptApi = createPromptApi({
       callbackApi,
@@ -106,6 +111,7 @@ describe('createPromptApi', () => {
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+      endpointIdCache: expect.any(InferenceEndpointIdCache),
     });
   });
 
@@ -146,18 +152,18 @@ describe('createPromptApi', () => {
     expect(mockPromptToMessageOptions).toHaveBeenCalledWith(mockPrompt, mockInput, modelInfo);
   });
 
-  it('forwards inferenceId to the callback API init options', async () => {
+  it('forwards connectorId (which may be an inference endpoint ID) to the callback API init options', async () => {
     const promptOptions: PromptOptions = {
       prompt: mockPrompt,
       input: mockInput,
-      inferenceId: 'my-inference-endpoint',
+      connectorId: 'my-inference-endpoint',
       stream: false,
     };
     await promptApi(promptOptions);
 
     expect(mockCallbackApi).toHaveBeenCalledWith(
       expect.objectContaining({
-        inferenceId: 'my-inference-endpoint',
+        connectorId: 'my-inference-endpoint',
       }),
       expect.any(Function)
     );

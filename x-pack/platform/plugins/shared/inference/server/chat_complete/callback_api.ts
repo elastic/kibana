@@ -15,11 +15,9 @@ import {
   getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
   MessageRole,
-  isInferenceIdApiCall,
-  isConnectorApiCall,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
+import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -42,6 +40,7 @@ import { addAnonymizationInstruction } from './anonymization/add_anonymization_i
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import { prepareAnonymization } from './prepare_anonymization';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -52,6 +51,7 @@ interface CreateChatCompleteApiOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   anonymization?: InferenceAnonymizationOptions;
+  endpointIdCache: InferenceEndpointIdCache;
   callbackManager?: InferenceCallbackManager;
 }
 
@@ -64,7 +64,7 @@ type CreateChatCompleteApiOptionsKey =
 type ChatCompleteApiWithCallbackInitOptions = Pick<
   ChatCompleteOptions,
   CreateChatCompleteApiOptionsKey
-> & ({ connectorId: string } | { inferenceId: string });
+> & { connectorId: string };
 
 export interface ChatCompleteCallbackContext {
   model?: Partial<Model>;
@@ -72,7 +72,7 @@ export interface ChatCompleteCallbackContext {
 
 export type ChatCompleteApiWithCallbackCallback = (
   context: ChatCompleteCallbackContext
-) => Omit<ChatCompleteOptions, CreateChatCompleteApiOptionsKey | 'connectorId' | 'inferenceId'>;
+) => Omit<ChatCompleteOptions, CreateChatCompleteApiOptionsKey | 'connectorId'>;
 
 export type ChatCompleteApiWithCallback = (
   options: ChatCompleteApiWithCallbackInitOptions,
@@ -92,50 +92,68 @@ export function createChatCompleteCallbackApi({
   regexWorker,
   esClient,
   anonymization,
+  endpointIdCache,
   callbackManager,
 }: CreateChatCompleteApiOptions) {
   return (
     {
+      connectorId,
       abortSignal,
       stream,
       maxRetries = 3,
       retryConfiguration = {},
-      ...params
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
     const inference$ = defer(() => {
-      if (isInferenceIdApiCall(params)) {
-        return createInferenceEndpointPipeline({
-          inferenceId: params.inferenceId,
-          esClient,
-          logger,
-          anonymizationRulesPromise,
-          regexWorker,
-          callback,
-          abortSignal,
-          stream,
-        });
-      }
+      return from(endpointIdCache.has(connectorId, esClient)).pipe(
+        switchMap((isInferenceEndpoint) => {
+          if (isInferenceEndpoint) {
+            return createInferenceEndpointPipeline({
+              inferenceId: connectorId,
+              esClient,
+              logger,
+              anonymizationRulesPromise,
+              regexWorker,
+              callback,
+              abortSignal,
+              stream,
+            }).pipe(
+              catchError((endpointError) => {
+                if (endpointError?.meta?.status === 404 || endpointError?.statusCode === 404) {
+                  endpointIdCache.invalidate();
+                }
+                return throwError(() => endpointError);
+              })
+            );
+          }
 
-      if (!isConnectorApiCall(params)) {
-        return throwError(() =>
-          createInferenceRequestError('Either connectorId or inferenceId must be provided', 400)
-        );
-      }
-
-      return createConnectorPipeline({
-        connectorId: params.connectorId,
-        request,
-        actions,
-        esClient,
-        logger,
-        anonymizationRulesPromise,
-        regexWorker,
-        callback,
-        abortSignal,
-        stream,
-      });
+          return createConnectorPipeline({
+            connectorId,
+            request,
+            actions,
+            esClient,
+            logger,
+            anonymizationRulesPromise,
+            regexWorker,
+            callback,
+            abortSignal,
+            stream,
+          }).pipe(
+            catchError((connectorError) => {
+              if (connectorError?.meta?.status === 404 || connectorError?.statusCode === 404) {
+                return throwError(() =>
+                  createInferenceRequestError(
+                    `No connector or inference endpoint found for ID '${connectorId}'`,
+                    404
+                  )
+                );
+              }
+              return throwError(() => connectorError);
+            })
+          );
+        })
+      );
     }).pipe(
       retryWithExponentialBackoff({
         maxRetry: maxRetries,
