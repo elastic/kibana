@@ -127,9 +127,7 @@ describe('deprecation_helpers', () => {
             release: 'ga',
             package: 'test-pkg',
             path: 'logs',
-            streams: [
-              { input: 'logfile', title: 'Log stream', template_path: 'stream.yml.hbs' },
-            ],
+            streams: [{ input: 'logfile', title: 'Log stream', template_path: 'stream.yml.hbs' }],
           },
         ],
       });
