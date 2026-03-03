@@ -2761,8 +2761,8 @@
         "description": [],
         "signature": [
           "({\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n}: { definition: ",
-          "IngestStream",
-          ".all.Definition; inferenceClient: ",
+          "WiredStream",
+          ".Definition; inferenceClient: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -2780,18 +2780,12 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<({ id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; stream_name: string; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; } & { status: \"active\" | \"stale\" | \"expired\"; uuid: string; last_seen: string; expires_at?: string | undefined; })[]>; }) => Promise<{ name: string; condition: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]>"
+          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<({ id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; stream_name: string; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; } & { status: \"active\" | \"stale\" | \"expired\"; uuid: string; last_seen: string; expires_at?: string | undefined; })[]>; }) => Promise<",
+          "PartitionStreamResponse",
+          ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-        "lineNumber": 26,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2804,7 +2798,7 @@
             "label": "{\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 48,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2812,18 +2806,16 @@
               {
                 "parentPluginId": "@kbn/streams-ai",
                 "id": "def-server.partitionStream.$1.definition",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "definition",
                 "description": [],
                 "signature": [
                   "WiredStream",
-                  ".Definition | ",
-                  "ClassicStream",
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 37,
+                "lineNumber": 49,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2845,7 +2837,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 38,
+                "lineNumber": 50,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3849,7 +3841,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 39,
+                "lineNumber": 51,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3871,7 +3863,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 40,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3884,7 +3876,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 41,
+                "lineNumber": 53,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3897,7 +3889,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 42,
+                "lineNumber": 54,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3913,7 +3905,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 43,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3929,7 +3921,7 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 44,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3945,7 +3937,7 @@
                   "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<({ id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; stream_name: string; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; } & { status: \"active\" | \"stale\" | \"expired\"; uuid: string; last_seen: string; expires_at?: string | undefined; })[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 45,
+                "lineNumber": 57,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3958,7 +3950,7 @@
                     "label": "params",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                    "lineNumber": 45,
+                    "lineNumber": 57,
                     "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -3974,7 +3966,7 @@
                           "string[] | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                        "lineNumber": 46,
+                        "lineNumber": 58,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -3990,7 +3982,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                        "lineNumber": 47,
+                        "lineNumber": 59,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -4006,7 +3998,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                        "lineNumber": 48,
+                        "lineNumber": 60,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false

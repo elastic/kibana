@@ -20,6 +20,7 @@ import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
+import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -27,6 +28,7 @@ import {
   selectEditorWorkflowLookup,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
+  selectWorkflows,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -57,6 +59,7 @@ export function useYamlValidation(
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
+  const workflows = useSelector(selectWorkflows);
   const { application } = useKibana().services;
 
   useEffect(() => {
@@ -83,19 +86,9 @@ export function useYamlValidation(
         return;
       }
 
-      if (!yamlDocument || !workflowGraph || !workflowDefinition) {
-        let errorMessage = 'Error validating variables';
-        if (!yamlDocument) {
-          errorMessage += '. Yaml document is not loaded';
-        }
-        if (!workflowGraph) {
-          errorMessage += '. Workflow graph is not loaded';
-        }
-        if (!workflowDefinition) {
-          errorMessage += '. Workflow definition is not loaded';
-        }
+      if (!yamlDocument) {
         setIsLoading(false);
-        setError(new Error(errorMessage));
+        setError(new Error('Error validating: Yaml document is not loaded'));
         return;
       }
 
@@ -117,16 +110,26 @@ export function useYamlValidation(
         absolute: true,
       });
 
-      // Build validation results - only include validations that don't require workflowDefinition
-      // Monaco YAML's schema validation will show errors independently
+      // These validations only need the parsed YAML document, not the full workflow graph.
+      // They must run even when workflowGraph/workflowDefinition are unavailable
+      // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
+      // so that connector-id, step-name, liquid-template, custom-property, and
+      // workflow-inputs validation still provide feedback.
       const validationResults: YamlValidationResult[] = [
         ...validateStepNameUniqueness(yamlDocument),
         ...validateLiquidTemplate(model.getValue()),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
+        ...(workflowLookup && lineCounter
+          ? validateWorkflowInputs(workflowLookup, workflows, lineCounter)
+          : []),
       ];
 
-      // Only run validations that require workflowDefinition if it's available
+      // Variable and JSON-schema-default validations require a fully parsed
+      // workflowGraph and workflowDefinition. When those are unavailable
+      // (e.g. YAML has structural issues that prevent graph construction),
+      // these validations are skipped gracefully; the remaining validators
+      // above still provide feedback.
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(
@@ -172,6 +175,7 @@ export function useYamlValidation(
     isWorkflowTab,
     connectors?.connectorTypes,
     workflowLookup,
+    workflows,
   ]);
 
   return {
