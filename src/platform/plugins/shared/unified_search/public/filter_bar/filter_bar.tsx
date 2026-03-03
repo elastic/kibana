@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IntlShape } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
@@ -71,6 +72,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const isExpandable = filterCount > 1;
   const expandTooltipRef = useRef<EuiToolTip>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const expandablePillsId = useGeneratedHtmlId();
 
   const filterPills = (
     <EuiFlexGroup
@@ -135,20 +137,39 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             aria-label={isExpanded ? collapseLabel : expandLabel}
             onClick={onToggleExpand}
             aria-expanded={isExpanded}
+            aria-controls={expandablePillsId}
           />
         </EuiToolTip>
       </EuiFlexItem>
-      {isExpanded ? (
-        <EuiFlexItem grow={true} css={[css({ minWidth: 0 }), styles.pillsScrollContainer]}>
-          {filterPills}
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="left" type="button" onClick={onToggleExpand} color="text">
-            {filtersAppliedLabel}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+      {/* For a11y compliance, show and hide filtersAppliedLabel and filterPills using CSS instead of re-renders */}
+      <EuiFlexItem
+        css={isExpanded ? css({ display: 'none' }) : null}
+        aria-hidden={isExpanded}
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          type="button"
+          onClick={onToggleExpand}
+          color="text"
+          aria-expanded={isExpanded}
+        >
+          {filtersAppliedLabel}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+
+      <EuiFlexItem
+        id={expandablePillsId}
+        aria-hidden={!isExpanded}
+        grow={true}
+        css={[
+          css({ minWidth: 0 }),
+          styles.pillsScrollContainer,
+          !isExpanded ? css({ blockSize: 0 }) : null,
+        ]}
+      >
+        {filterPills}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
