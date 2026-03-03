@@ -8558,6 +8558,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
               },
               {

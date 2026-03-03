@@ -6,8 +6,9 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { Parser, validateQuery } from '@kbn/esql-language';
-import type { ESQLSource, ESQLCommand } from '@kbn/esql-language';
+import { validateQuery } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
+import type { ESQLSource, ESQLCommand } from '@elastic/esql/types';
 import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
 import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
