@@ -131,7 +131,7 @@ describe('transformWorkpadOut', () => {
         title: 'My Map',
         savedObjectId: 'map-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('maps');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('map');
     });
   });
 
