@@ -79,13 +79,18 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
         const isV1Installed = isEntityStoreInstalled(statusResponseV1.status);
 
+        const installTasks: Array<Promise<unknown>> = [];
         if (isV1Installed) {
-          await stopAndUninstallV1Engines({ http: services.http, logger: services.logger });
+          installTasks.push(
+            stopAndUninstallV1Engines({ http: services.http, logger: services.logger })
+          );
         }
 
         if (space.id === 'default' || isV1Installed) {
-          await services.http.post(installAllEntitiesRequest);
+          installTasks.push(services.http.post(installAllEntitiesRequest));
         }
+
+        await Promise.all(installTasks);
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);
@@ -102,13 +107,15 @@ const stopAndUninstallV1Engines = async ({ http, logger }: Pick<Services, 'http'
   const resp = await http.get<{ engines?: Array<{ type: string }> }>(getV1ListEnginesRequest);
   const v1Engines = resp.engines ?? [];
 
-  for (const { type } of v1Engines) {
-    try {
-      await http.post(postv1StopEngineRequest(type));
-      await http.delete(deleteV1UninstallEngineRequest(type));
-    } catch (e) {
-      logger.error(`Failed to uninstall Entity Store v1 engine ${type}`);
-      logger.error(e);
-    }
-  }
+  await Promise.all(
+    v1Engines.map(async ({ type }) => {
+      try {
+        await http.post(postv1StopEngineRequest(type));
+        await http.delete(deleteV1UninstallEngineRequest(type));
+      } catch (e) {
+        logger.error(`Failed to uninstall Entity Store v1 engine ${type}`);
+        logger.error(e);
+      }
+    })
+  );
 };
