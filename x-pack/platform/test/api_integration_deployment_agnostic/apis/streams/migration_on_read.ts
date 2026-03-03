@@ -213,6 +213,7 @@ const expectedQueriesResponse = {
         query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* | WHERE KQL("atest")`,
       },
       type: 'match',
+      category: 'operational',
       tags: [],
     },
   ],
