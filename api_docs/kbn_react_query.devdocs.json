@@ -14309,11 +14309,11 @@
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
               },
               {
                 "plugin": "maintenanceWindows",
