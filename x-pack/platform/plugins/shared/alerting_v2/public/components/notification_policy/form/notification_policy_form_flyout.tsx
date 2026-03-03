@@ -25,46 +25,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
+import { toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
 const FLYOUT_TITLE_ID = 'notificationPolicyFlyoutTitle';
-
-function toFormState(response: NotificationPolicyResponse): NotificationPolicyFormState {
-  return {
-    name: response.name,
-    description: response.description,
-    matcher: response.matcher ?? '',
-    groupBy: response.group_by ?? [],
-    frequency: response.throttle
-      ? { type: 'throttle', interval: response.throttle.interval }
-      : { type: 'immediate' },
-    destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
-  };
-}
-
-function toCreatePayload(state: NotificationPolicyFormState): CreateNotificationPolicyData {
-  return {
-    name: state.name,
-    description: state.description,
-    ...(state.matcher ? { matcher: state.matcher } : {}),
-    ...(state.groupBy.length > 0 ? { group_by: state.groupBy } : {}),
-    ...(state.frequency.type === 'throttle'
-      ? { throttle: { interval: state.frequency.interval } }
-      : {}),
-    destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
-  };
-}
-
-function toUpdatePayload(
-  state: NotificationPolicyFormState,
-  version: string
-): UpdateNotificationPolicyBody {
-  return {
-    ...toCreatePayload(state),
-    version,
-  };
-}
 
 interface NotificationPolicyFormFlyoutProps {
   onClose: () => void;
@@ -98,8 +63,6 @@ export const NotificationPolicyFormFlyout = ({
       onUpdate(initialValues.id, toUpdatePayload(values, initialValues.version));
     } else if (!isEditMode && onSave) {
       onSave(toCreatePayload(values));
-    } else {
-      throw new Error('Invalid form state: neither edit mode nor create mode');
     }
   };
 
@@ -110,12 +73,12 @@ export const NotificationPolicyFormFlyout = ({
           <h2 data-test-subj="title">
             {isEditMode ? (
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.flyout.editTitle"
+                id="xpack.alertingV2.notificationPolicy.formFlyout.editTitle"
                 defaultMessage="Edit notification policy"
               />
             ) : (
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.flyout.title"
+                id="xpack.alertingV2.notificationPolicy.formFlyout.title"
                 defaultMessage="Create notification policy"
               />
             )}
@@ -132,7 +95,7 @@ export const NotificationPolicyFormFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} isLoading={isLoading} data-test-subj="cancelButton">
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.flyout.cancel"
+                id="xpack.alertingV2.notificationPolicy.formFlyout.cancel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -147,12 +110,12 @@ export const NotificationPolicyFormFlyout = ({
             >
               {isEditMode ? (
                 <FormattedMessage
-                  id="xpack.alertingV2.notificationPolicy.flyout.update"
+                  id="xpack.alertingV2.notificationPolicy.formFlyout.update"
                   defaultMessage="Update"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.alertingV2.notificationPolicy.flyout.save"
+                  id="xpack.alertingV2.notificationPolicy.formFlyout.save"
                   defaultMessage="Save"
                 />
               )}

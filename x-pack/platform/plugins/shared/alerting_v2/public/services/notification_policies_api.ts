@@ -26,6 +26,12 @@ export interface FindNotificationPoliciesResponse {
 export class NotificationPoliciesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
+  public async getNotificationPolicy(id: string) {
+    return this.http.get<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`
+    );
+  }
+
   public async listNotificationPolicies(params: { page?: number; perPage?: number }) {
     return this.http.get<FindNotificationPoliciesResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,

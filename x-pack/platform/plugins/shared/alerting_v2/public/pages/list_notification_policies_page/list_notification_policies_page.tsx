@@ -17,46 +17,35 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type {
-  CreateNotificationPolicyData,
-  NotificationPolicyResponse,
-  UpdateNotificationPolicyBody,
-} from '@kbn/alerting-v2-schemas';
+import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { DeleteNotificationPolicyConfirmModal } from '../../components/notification_policy/delete_confirmation_modal';
-import { NotificationPolicyFormFlyout } from '../../components/notification_policy/form';
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
-import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
+import { paths } from '../../constants';
 import { useDeleteNotificationPolicy } from '../../hooks/use_delete_notification_policy';
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
-import { useUpdateNotificationPolicy } from '../../hooks/use_update_notification_policy';
-
-type FlyoutState = { mode: 'create' } | { mode: 'edit'; policy: NotificationPolicyResponse } | null;
 
 const DEFAULT_PER_PAGE = 20;
 
 export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [flyoutState, setFlyoutState] = useState<FlyoutState>(null);
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
 
-  const { mutate: createNotificationPolicy, isLoading: isCreating } = useCreateNotificationPolicy();
-  const { mutate: updateNotificationPolicy, isLoading: isUpdating } = useUpdateNotificationPolicy();
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const { basePath } = useService(CoreStart('http'));
+
   const { mutate: deleteNotificationPolicy, isLoading: isDeleting } = useDeleteNotificationPolicy();
 
-  const closeFlyout = () => setFlyoutState(null);
-
-  const handleSave = (data: CreateNotificationPolicyData) => {
-    createNotificationPolicy(data, {
-      onSuccess: closeFlyout,
-    });
+  const navigateToCreate = () => {
+    navigateToUrl(basePath.prepend(paths.notificationPolicyCreate));
   };
 
-  const handleUpdate = (id: string, data: UpdateNotificationPolicyBody) => {
-    updateNotificationPolicy({ id, data }, { onSuccess: closeFlyout });
+  const navigateToEdit = (id: string) => {
+    navigateToUrl(basePath.prepend(paths.notificationPolicyEdit(id)));
   };
 
   const { data, isLoading, isError, error } = useFetchNotificationPolicies({
@@ -162,8 +151,7 @@ export const ListNotificationPoliciesPage = () => {
           ),
           icon: 'pencil',
           type: 'icon',
-          onClick: (item: NotificationPolicyResponse) =>
-            setFlyoutState({ mode: 'edit', policy: item }),
+          onClick: (item: NotificationPolicyResponse) => navigateToEdit(item.id),
         },
         {
           name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.delete', {
@@ -194,7 +182,7 @@ export const ListNotificationPoliciesPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton key="create-policy" onClick={() => setFlyoutState({ mode: 'create' })}>
+          <EuiButton key="create-policy" onClick={navigateToCreate}>
             <FormattedMessage
               id="xpack.alertingV2.notificationPoliciesList.createPolicyButton"
               defaultMessage="Create policy"
@@ -232,21 +220,6 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage: 'Notification Policies',
         })}
       />
-      {flyoutState?.mode === 'create' && (
-        <NotificationPolicyFormFlyout
-          onClose={closeFlyout}
-          onSave={handleSave}
-          isLoading={isCreating}
-        />
-      )}
-      {flyoutState?.mode === 'edit' && (
-        <NotificationPolicyFormFlyout
-          onClose={closeFlyout}
-          onUpdate={handleUpdate}
-          initialValues={flyoutState.policy}
-          isLoading={isUpdating}
-        />
-      )}
       {policyToDelete && (
         <DeleteNotificationPolicyConfirmModal
           policyName={policyToDelete.name}
