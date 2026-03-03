@@ -345,7 +345,13 @@ describe('WorkflowExecutionPanel', () => {
         status: ExecutionStatus.COMPLETED,
         stepId: 'my-step',
         stepExecutions: [
-          { id: 'step-exec-1', stepId: 'my-step', workflowRunId: 'exec-123', status: 'completed', startedAt: '' },
+          {
+            id: 'step-exec-1',
+            stepId: 'my-step',
+            workflowRunId: 'exec-123',
+            status: 'completed',
+            startedAt: '',
+          },
         ],
       };
 
