@@ -10,6 +10,7 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
@@ -139,4 +140,5 @@ export interface WorkflowsExtensionsServerPluginSetupDeps {}
 export interface WorkflowsExtensionsServerPluginStartDeps {
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  spaces?: SpacesPluginStart;
 }

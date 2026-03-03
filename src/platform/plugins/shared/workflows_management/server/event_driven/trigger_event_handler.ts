@@ -33,7 +33,8 @@ export function createTriggerEventHandler({
   getTriggerEventsClient,
 }: CreateTriggerEventHandlerParams): (params: TriggerEventHandlerParams) => Promise<void> {
   return async (params: TriggerEventHandlerParams): Promise<void> => {
-    const { timestamp, triggerId, spaceId, payload, request } = params;
+    const { timestamp, triggerId, payload, request } = params;
+    const spaceId = params.spaceId ?? 'default';
 
     const allWorkflows = await api.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
     const eventContext = { ...payload, timestamp, spaceId };

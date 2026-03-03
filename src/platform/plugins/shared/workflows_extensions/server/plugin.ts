@@ -14,7 +14,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import { emitEvent } from './emit_event';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
@@ -69,11 +68,8 @@ export class WorkflowsExtensionsServerPlugin
     core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
       'workflows',
       async (_context, request) => {
-        const [coreStart] = await core.getStartServices();
-        const { spaceId } = getSpaceIdFromPath(
-          request.url.pathname,
-          coreStart.http.basePath.serverBasePath
-        );
+        const [, plugins] = await core.getStartServices();
+        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? 'default';
         const emitEventFn = this.emitEventFn;
         if (!emitEventFn) {
           throw new Error('Workflows extensions plugin not started: emitEvent is not available.');
