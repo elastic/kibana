@@ -34,4 +34,15 @@ export class DiscoverValidationPage {
         'This indicates that no log data was successfully ingested or the Discover app failed to load properly.'
     ).toBe(true);
   }
+
+  async assertHitCountGreaterThanZero() {
+    const hitsContainer = this.page.getByTestId('discoverQueryTotalHits');
+    await hitsContainer.waitFor({ state: 'visible', timeout: 60000 });
+
+    const hitsText = (await hitsContainer.textContent()) ?? '';
+    const match = hitsText.match(/[\d,]+/);
+    const hits = parseInt((match?.[0] ?? '0').replace(/,/g, ''), 10);
+
+    expect(hits, `Expected hit count > 0, got "${hitsText}"`).toBeGreaterThan(0);
+  }
 }

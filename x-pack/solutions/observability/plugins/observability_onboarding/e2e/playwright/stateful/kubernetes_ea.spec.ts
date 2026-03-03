@@ -19,15 +19,21 @@ test('Kubernetes EA', async ({
   onboardingHomePage,
   kubernetesEAFlowPage,
   kubernetesOverviewDashboardPage,
+  wiredStreamsSelector,
 }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
+  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
   await onboardingHomePage.selectKubernetesUseCase();
   await onboardingHomePage.selectKubernetesQuickstart();
+
+  if (useWiredStreams) {
+    await wiredStreamsSelector.selectWiredStreamsMode();
+  }
 
   await kubernetesEAFlowPage.assertVisibilityCodeBlock();
   await kubernetesEAFlowPage.copyToClipboard();
@@ -45,7 +51,23 @@ test('Kubernetes EA', async ({
    */
   fs.writeFileSync(outputPath, clipboardData);
 
-  if (!isLogsEssentialsMode) {
+  if (useWiredStreams) {
+    await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
+
+    await page.waitForTimeout(2 * 60000);
+
+    const discoverValidation =
+      await kubernetesEAFlowPage.clickExploreLogsAndGetDiscoverValidation();
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+    await discoverValidation.assertHitCountGreaterThanZero();
+
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
+    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
+    const streamsValidation = new StreamsValidationPage(page);
+    await streamsValidation.waitForStreamsToLoad();
+    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
+  } else if (!isLogsEssentialsMode) {
     await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
 
     /**

@@ -6,6 +6,7 @@
  */
 
 import { expect, type Page, type Locator } from '@playwright/test';
+import { DiscoverValidationPage } from './discover_validation.page';
 
 export class AutoDetectFlowPage {
   page: Page;
@@ -15,6 +16,7 @@ export class AutoDetectFlowPage {
   private readonly autoDetectSystemIntegrationActionLink: Locator;
   private readonly codeBlock: Locator;
   private readonly logsDataReceivedIndicator: Locator;
+  private readonly customLogsExploreButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -31,6 +33,9 @@ export class AutoDetectFlowPage {
     this.logsDataReceivedIndicator = this.page
       .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
       .getByText(/logs.*ready|data.*ready|ready.*explore/i);
+    this.customLogsExploreButton = this.page.getByTestId(
+      'observabilityOnboardingAutoDetectPanelButton'
+    );
   }
 
   public async copyToClipboard() {
@@ -57,5 +62,18 @@ export class AutoDetectFlowPage {
 
   public async clickAutoDetectSystemIntegrationCTA() {
     await this.autoDetectSystemIntegrationActionLink.click();
+  }
+
+  public async hasCustomLogsExploreButtons(): Promise<boolean> {
+    return (await this.customLogsExploreButton.count()) > 0;
+  }
+
+  public async clickCustomLogsExploreAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
+    const [newPage] = await Promise.all([
+      this.page.waitForEvent('popup'),
+      this.customLogsExploreButton.first().click(),
+    ]);
+
+    return new DiscoverValidationPage(newPage);
   }
 }

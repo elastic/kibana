@@ -15,15 +15,25 @@ test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
 });
 
-test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDetectFlowPage }) => {
+test('Auto-detect logs and metrics', async ({
+  page,
+  onboardingHomePage,
+  autoDetectFlowPage,
+  wiredStreamsSelector,
+}) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
+  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_logs_auto_detect.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
   await onboardingHomePage.selectHostUseCase();
   await onboardingHomePage.selectAutoDetectWithElasticAgent();
+
+  if (useWiredStreams) {
+    await wiredStreamsSelector.selectWiredStreamsMode();
+  }
 
   await autoDetectFlowPage.assertVisibilityCodeBlock();
   await autoDetectFlowPage.copyToClipboard();
@@ -50,24 +60,40 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
    */
   await page.waitForTimeout(2 * 60000);
 
-  await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
+  if (useWiredStreams) {
+    if (await autoDetectFlowPage.hasCustomLogsExploreButtons()) {
+      const discoverValidation =
+        await autoDetectFlowPage.clickCustomLogsExploreAndGetDiscoverValidation();
+      await discoverValidation.waitForDiscoverToLoad();
+      await discoverValidation.assertHasAnyLogData();
+      await discoverValidation.assertHitCountGreaterThanZero();
+    }
 
-  /**
-   * Host Details pages open in a new tab, so it
-   * needs to be captured using the `popup` event.
-   */
-  const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
-
-  if (!isLogsEssentialsMode) {
-    await hostDetailsPage.assertCpuPercentageNotEmpty();
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
+    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
+    const streamsValidation = new StreamsValidationPage(page);
+    await streamsValidation.waitForStreamsToLoad();
+    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
   } else {
-    await autoDetectFlowPage.assertReceivedDataIndicator();
+    await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
 
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+    /**
+     * Host Details pages open in a new tab, so it
+     * needs to be captured using the `popup` event.
+     */
+    const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
 
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    if (!isLogsEssentialsMode) {
+      await hostDetailsPage.assertCpuPercentageNotEmpty();
+    } else {
+      await autoDetectFlowPage.assertReceivedDataIndicator();
+
+      await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+
+      const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+      const discoverValidation = new DiscoverValidationPage(page);
+      await discoverValidation.waitForDiscoverToLoad();
+      await discoverValidation.assertHasAnyLogData();
+    }
   }
 });

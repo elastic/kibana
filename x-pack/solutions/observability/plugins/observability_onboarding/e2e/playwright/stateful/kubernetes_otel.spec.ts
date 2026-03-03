@@ -29,10 +29,16 @@ test.beforeEach(async ({ page }) => {
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
-test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
+test('Otel Kubernetes', async ({
+  page,
+  onboardingHomePage,
+  otelKubernetesFlowPage,
+  wiredStreamsSelector,
+}) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
+  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_otel_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -42,12 +48,16 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   await otelKubernetesFlowPage.copyHelmRepositorySnippetToClipboard();
   const helmRepoSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
+  if (useWiredStreams) {
+    await wiredStreamsSelector.selectWiredStreamsMode();
+  }
+
   await otelKubernetesFlowPage.copyInstallStackSnippetToClipboard();
   const installStackSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
   let codeSnippet: string;
 
-  if (!isLogsEssentialsMode) {
+  if (!isLogsEssentialsMode && !useWiredStreams) {
     /**
      * Getting the snippets and replacing placeholder
      * with the values used by Ensemble
@@ -85,7 +95,19 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    */
   await page.waitForTimeout(5 * 60000);
 
-  if (!isLogsEssentialsMode) {
+  if (useWiredStreams) {
+    const discoverValidation =
+      await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+    await discoverValidation.assertHitCountGreaterThanZero();
+
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
+    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
+    const streamsValidation = new StreamsValidationPage(page);
+    await streamsValidation.waitForStreamsToLoad();
+    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.otel');
+  } else if (!isLogsEssentialsMode) {
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
     );

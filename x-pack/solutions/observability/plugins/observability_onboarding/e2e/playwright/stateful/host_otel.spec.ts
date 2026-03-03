@@ -15,10 +15,17 @@ test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
 });
 
-test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOverviewPage }) => {
+test('Otel Host', async ({
+  page,
+  onboardingHomePage,
+  otelHostFlowPage,
+  hostsOverviewPage,
+  wiredStreamsSelector,
+}) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
+  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_otel_host.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -27,6 +34,10 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
 
   const osName = process.env.OS_NAME || os.platform();
   await otelHostFlowPage.selectPlatform(osName);
+
+  if (useWiredStreams) {
+    await wiredStreamsSelector.selectWiredStreamsMode();
+  }
 
   await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();
   const collectorDownloadSnippet = (await page.evaluate(
@@ -52,7 +63,21 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
    */
   await page.waitForTimeout(3 * 60000);
 
-  if (!isLogsEssentialsMode) {
+  if (useWiredStreams) {
+    await otelHostFlowPage.clickLogsExplorationCTA();
+
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+    await discoverValidation.assertHitCountGreaterThanZero();
+
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
+    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
+    const streamsValidation = new StreamsValidationPage(page);
+    await streamsValidation.waitForStreamsToLoad();
+    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.otel');
+  } else if (!isLogsEssentialsMode) {
     await otelHostFlowPage.clickHostsOverviewCTA();
     const hostname = os.hostname();
     await hostsOverviewPage.assertHostCpuNotEmpty(hostname);
