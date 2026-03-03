@@ -533,12 +533,15 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
+        const bulkGetResult = await savedObjectsClient.bulkGet<DataSourceAttributes>(
+          ids.map((id) => ({ type: DATA_SOURCE_SAVED_OBJECT_TYPE, id }))
+        );
+
         const deleteResults = await Promise.allSettled(
-          ids.map(async (id) => {
-            const dataSource = await savedObjectsClient.get<DataSourceAttributes>(
-              DATA_SOURCE_SAVED_OBJECT_TYPE,
-              id
-            );
+          bulkGetResult.saved_objects.map(async (dataSource) => {
+            if (dataSource.error) {
+              throw new Error(dataSource.error.message);
+            }
             return deleteDataSourceAndRelatedResources({
               dataSource,
               savedObjectsClient,

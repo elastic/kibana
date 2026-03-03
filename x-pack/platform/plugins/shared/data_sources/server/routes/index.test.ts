@@ -1035,9 +1035,9 @@ describe('registerRoutes', () => {
     });
 
     it('should return results for all successfully deleted data sources', async () => {
-      mockSavedObjectsClient.get.mockImplementation(async (_type, id) =>
-        createBulkMockDataSource(id as string)
-      );
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [createBulkMockDataSource('ds-1'), createBulkMockDataSource('ds-2')],
+      });
       mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
         success: true,
         fullyDeleted: true,
@@ -1062,9 +1062,9 @@ describe('registerRoutes', () => {
     });
 
     it('should handle mixed results with partial deletions', async () => {
-      mockSavedObjectsClient.get.mockImplementation(async (_type, id) =>
-        createBulkMockDataSource(id as string)
-      );
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [createBulkMockDataSource('ds-1'), createBulkMockDataSource('ds-2')],
+      });
       mockDeleteDataSourceAndRelatedResources
         .mockResolvedValueOnce({ success: true, fullyDeleted: true })
         .mockResolvedValueOnce({
@@ -1096,9 +1096,18 @@ describe('registerRoutes', () => {
     });
 
     it('should log errors and return failure results when some deletions fail', async () => {
-      mockSavedObjectsClient.get
-        .mockResolvedValueOnce(createBulkMockDataSource('ds-1'))
-        .mockRejectedValueOnce(new Error('Data source not found'));
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          createBulkMockDataSource('ds-1'),
+          {
+            id: 'ds-2',
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 404, message: 'Data source not found', error: 'Not Found' },
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
 
       mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
         success: true,
