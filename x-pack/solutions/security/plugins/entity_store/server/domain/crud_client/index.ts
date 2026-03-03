@@ -28,12 +28,12 @@ interface CRUDClientDependencies {
   namespace: string;
 }
 
-interface BulkObject {
+export interface BulkObject {
   type: EntityType;
   doc: Entity;
 }
 
-interface BulkObjectResponse {
+export interface BulkObjectResponse {
   _id: string;
   status: number;
   type: string;

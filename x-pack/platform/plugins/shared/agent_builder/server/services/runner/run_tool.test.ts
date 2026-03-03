@@ -292,6 +292,7 @@ describe('runTool', () => {
         toolReturn: expect.objectContaining({
           results: expect.arrayContaining([expect.objectContaining({ data: { original: true } })]),
         }),
+        toolHandlerContext: expect.any(Object),
       })
     );
   });

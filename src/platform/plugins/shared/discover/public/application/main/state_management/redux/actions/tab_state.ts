@@ -235,7 +235,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const queryString = getInitialESQLQuery(dataView, filterQuery);
     const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     dispatch(

@@ -152,7 +152,7 @@ export function TransactionsTable({
 
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const tableSearchBar: TableSearchBar<ApiResponse['transactionGroups'][0]> = useMemo(() => {
     return {

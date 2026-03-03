@@ -19,6 +19,7 @@ import {
   QUERY_FEATURE_NAME,
   STREAM_NAME,
   RULE_ID,
+  RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
@@ -93,6 +94,11 @@ export class QueryService {
             const uuid = migrated[ASSET_UUID] as string;
             const kqlQuery = migrated[QUERY_KQL_BODY] as string;
             migrated = { ...migrated, [RULE_ID]: computeRuleId(uuid, kqlQuery) };
+          }
+
+          // Pre-existing queries were all rule-backed; back-fill the flag so it is persisted.
+          if (!(RULE_BACKED in migrated)) {
+            migrated = { ...migrated, [RULE_BACKED]: true };
           }
 
           return migrated as StoredQueryLink;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { errors } from '@elastic/elasticsearch';
+
 import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
@@ -279,8 +281,8 @@ export class AuthenticationService {
         return toolkit.notHandled();
       }
 
-      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
-      if (getErrorStatusCode(error) !== 401) {
+      // We can only re-authenticate if the original request failed because of the expired access token.
+      if (!isTokenExpiredError(error)) {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
             error
@@ -472,4 +474,25 @@ export class AuthenticationService {
       getCurrentUser,
     };
   }
+}
+
+/**
+ * Checks if the provided error is caused by expired access token. The logic is based on the error
+ * reason set by the Elasticsearch and error code set by the UIAM service and is covered by the FTR
+ * and Scout API integration tests.
+ * @param error Error returned by the Elasticsearch client when authentication fails.
+ */
+function isTokenExpiredError(error: errors.ResponseError) {
+  // If the request failed because of expired access token it should always have 401 status code.
+  if (getErrorStatusCode(error) !== 401) {
+    return false;
+  }
+
+  // If expired the Elasticsearch native access token, it should properly set `reason` property.
+  if (error.body?.error?.reason === 'token expired') {
+    return true;
+  }
+
+  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
+  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
 }

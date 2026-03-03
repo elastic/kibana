@@ -58,12 +58,12 @@ describe('SearchAndFiltersBar', () => {
         status: ['deprecated'],
       });
 
-      const { getByTestId, container } = renderSearchAndFiltersBar();
+      const { getByTestId } = renderSearchAndFiltersBar();
       const button = getByTestId('browseIntegrations.searchBar.statusBtn');
 
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-      const badge = container.querySelector('.euiNotificationBadge');
+      const badge = button.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
     });
@@ -153,7 +153,7 @@ describe('SearchAndFiltersBar', () => {
         status: ['deprecated'],
       });
 
-      const { getByTestId, container } = renderSearchAndFiltersBar();
+      const { getByTestId } = renderSearchAndFiltersBar();
 
       // Search should show query
       const searchInput = getByTestId('browseIntegrations.searchBar.input') as HTMLInputElement;
@@ -162,7 +162,7 @@ describe('SearchAndFiltersBar', () => {
       // Status filter should show count
       const statusButton = getByTestId('browseIntegrations.searchBar.statusBtn');
       expect(statusButton).toHaveClass('euiFilterButton-hasActiveFilters');
-      const badge = container.querySelector('.euiNotificationBadge');
+      const badge = statusButton.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
 

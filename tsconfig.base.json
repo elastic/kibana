@@ -1122,6 +1122,8 @@
       "@kbn/evals-plugin/*": ["x-pack/platform/plugins/shared/evals/*"],
       "@kbn/evals-suite-agent-builder": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder"],
       "@kbn/evals-suite-agent-builder/*": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/*"],
+      "@kbn/evals-suite-endpoint": ["x-pack/solutions/security/packages/kbn-evals-suite-endpoint"],
+      "@kbn/evals-suite-endpoint/*": ["x-pack/solutions/security/packages/kbn-evals-suite-endpoint/*"],
       "@kbn/evals-suite-llm-tasks": ["x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks"],
       "@kbn/evals-suite-llm-tasks/*": ["x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/*"],
       "@kbn/evals-suite-obs-ai-assistant": ["x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant"],

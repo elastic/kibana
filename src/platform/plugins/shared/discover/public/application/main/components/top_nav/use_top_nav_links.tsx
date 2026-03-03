@@ -147,7 +147,7 @@ export const useTopNavLinks = ({
     if (!services.embeddableEditor.isEmbeddedEditor()) {
       const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
         isEsqlMode && currentDataView.type === ESQL_TYPE
-          ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
+          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
           : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState

@@ -180,7 +180,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const getActiveAlertsForSlo = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
       const key = `${sloItem.id}|${sloItem.instanceId ?? ALL_VALUE}`;
-      return activeAlerts.get(key) ?? 0;
+      return activeAlerts?.get(key) ?? 0;
     },
     [activeAlerts]
   );
@@ -210,8 +210,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     if (!sloData.length) return [];
 
     return [...sloData].sort((a, b) => {
-      const alertsA = activeAlerts.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
-      const alertsB = activeAlerts.get(`${b.id}|${b.instanceId ?? ALL_VALUE}`) ?? 0;
+      const alertsA = activeAlerts?.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
+      const alertsB = activeAlerts?.get(`${b.id}|${b.instanceId ?? ALL_VALUE}`) ?? 0;
 
       if (alertsA !== alertsB) {
         return alertsB - alertsA;

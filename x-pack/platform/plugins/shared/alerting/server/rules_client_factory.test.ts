@@ -16,6 +16,7 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
   securityServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -107,6 +108,8 @@ describe('RulesClientFactory', () => {
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,
       shouldGrantUiam: false,
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     };
 
     rulesClientFactoryParams.actions = actionsMock.createStart();
@@ -155,39 +158,41 @@ describe('RulesClientFactory', () => {
       rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest
     ).toHaveBeenCalledWith(request);
 
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
-      auditLogger: {
-        enabled: true,
-        includeSavedObjectNames: false,
-        log: expect.any(Function),
-      },
-      unsecuredSavedObjectsClient: savedObjectsClient,
-      authorization: alertingAuthorization,
-      actionsAuthorization,
-      logger: rulesClientFactoryParams.logger,
-      taskManager: rulesClientFactoryParams.taskManager,
-      ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
-      spaceId: 'default',
-      namespace: 'default',
-      getUserName: expect.any(Function),
-      getActionsClient: expect.any(Function),
-      getEventLogClient: expect.any(Function),
-      createAPIKey: expect.any(Function),
-      internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
-      encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
-      kibanaVersion: '7.10.0',
-      maxScheduledPerMinute: 10000,
-      minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: expect.any(Function),
-      getAuthenticationAPIKey: expect.any(Function),
-      connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
-      isSystemAction: expect.any(Function),
-      getAlertIndicesAlias: expect.any(Function),
-      alertsService: null,
-      backfillClient,
-      uiSettings: rulesClientFactoryParams.uiSettings,
-      shouldGrantUiam: false,
-    });
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auditLogger: {
+          enabled: true,
+          includeSavedObjectNames: false,
+          log: expect.any(Function),
+        },
+        unsecuredSavedObjectsClient: savedObjectsClient,
+        authorization: alertingAuthorization,
+        actionsAuthorization,
+        logger: rulesClientFactoryParams.logger,
+        taskManager: rulesClientFactoryParams.taskManager,
+        ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
+        spaceId: 'default',
+        namespace: 'default',
+        getUserName: expect.any(Function),
+        getActionsClient: expect.any(Function),
+        getEventLogClient: expect.any(Function),
+        createAPIKey: expect.any(Function),
+        internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
+        encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
+        kibanaVersion: '7.10.0',
+        maxScheduledPerMinute: 10000,
+        minimumScheduleInterval: { value: '1m', enforce: false },
+        isAuthenticationTypeAPIKey: expect.any(Function),
+        getAuthenticationAPIKey: expect.any(Function),
+        connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+        isSystemAction: expect.any(Function),
+        getAlertIndicesAlias: expect.any(Function),
+        alertsService: null,
+        backfillClient,
+        uiSettings: rulesClientFactoryParams.uiSettings,
+        shouldGrantUiam: false,
+      })
+    );
   });
 
   test('creates a rules client with proper constructor arguments', async () => {
@@ -218,34 +223,36 @@ describe('RulesClientFactory', () => {
       'default'
     );
 
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
-      unsecuredSavedObjectsClient: savedObjectsClient,
-      authorization: alertingAuthorization,
-      actionsAuthorization,
-      logger: rulesClientFactoryParams.logger,
-      taskManager: rulesClientFactoryParams.taskManager,
-      ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
-      spaceId: 'default',
-      namespace: 'default',
-      getUserName: expect.any(Function),
-      createAPIKey: expect.any(Function),
-      internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
-      encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
-      getActionsClient: expect.any(Function),
-      getEventLogClient: expect.any(Function),
-      kibanaVersion: '7.10.0',
-      maxScheduledPerMinute: 10000,
-      minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: expect.any(Function),
-      getAuthenticationAPIKey: expect.any(Function),
-      connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
-      isSystemAction: expect.any(Function),
-      getAlertIndicesAlias: expect.any(Function),
-      alertsService: null,
-      backfillClient,
-      uiSettings: rulesClientFactoryParams.uiSettings,
-      shouldGrantUiam: false,
-    });
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unsecuredSavedObjectsClient: savedObjectsClient,
+        authorization: alertingAuthorization,
+        actionsAuthorization,
+        logger: rulesClientFactoryParams.logger,
+        taskManager: rulesClientFactoryParams.taskManager,
+        ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
+        spaceId: 'default',
+        namespace: 'default',
+        getUserName: expect.any(Function),
+        createAPIKey: expect.any(Function),
+        internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
+        encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
+        getActionsClient: expect.any(Function),
+        getEventLogClient: expect.any(Function),
+        kibanaVersion: '7.10.0',
+        maxScheduledPerMinute: 10000,
+        minimumScheduleInterval: { value: '1m', enforce: false },
+        isAuthenticationTypeAPIKey: expect.any(Function),
+        getAuthenticationAPIKey: expect.any(Function),
+        connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+        isSystemAction: expect.any(Function),
+        getAlertIndicesAlias: expect.any(Function),
+        alertsService: null,
+        backfillClient,
+        uiSettings: rulesClientFactoryParams.uiSettings,
+        shouldGrantUiam: false,
+      })
+    );
   });
 
   test('getUserName() returns null when security is disabled', async () => {

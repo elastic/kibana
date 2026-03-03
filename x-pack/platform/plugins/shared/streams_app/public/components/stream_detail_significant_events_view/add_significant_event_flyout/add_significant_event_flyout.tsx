@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
+import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -30,7 +30,7 @@ import { v4 } from 'uuid';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
@@ -42,7 +42,7 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 
-const defaultTask: SignificantEventsQueriesGenerationTaskResult = {
+const defaultTask: TaskResult<OnboardingResult> = {
   status: TaskStatus.NotStarted,
 };
 interface Props {
@@ -77,8 +77,13 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const { cancelGenerationTask, getGenerationTask, scheduleGenerationTask } =
-    useSignificantEventsApi({ name: definition.stream.name });
+  const { scheduleOnboardingTask, getOnboardingTaskStatus, cancelOnboardingTask } =
+    useOnboardingApi({
+      connectorId: aiFeatures?.genAiConnectors.selectedConnector,
+      saveQueries: false,
+    });
+
+  const streamName = definition.stream.name;
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
@@ -91,23 +96,24 @@ export function AddSignificantEventFlyout({
 
   const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
 
-  const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>(defaultTask);
+  const [task, setTask] = useState<TaskResult<OnboardingResult>>(defaultTask);
   const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
     useBoolean(false);
 
-  const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
-    useAsyncFn(scheduleGenerationTask);
+  const [{ loading: isSchedulingGenerationTask }, doScheduleOnboardingTask] = useAsyncFn(
+    scheduleOnboardingTask,
+    [scheduleOnboardingTask]
+  );
 
-  const scheduleTask = (connectorId: string) => {
+  const scheduleTask = () => {
     setTask(defaultTask);
-    doScheduleGenerationTask(connectorId).then(setTask);
+    doScheduleOnboardingTask(streamName).then(setTask);
   };
 
   const getTaskStatus = useCallback(() => {
     gettingTaskStatus();
-    getGenerationTask().then(setTask).finally(stoppedGettingTaskStatus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stoppedGettingTaskStatus, gettingTaskStatus]);
+    getOnboardingTaskStatus(streamName).then(setTask).finally(stoppedGettingTaskStatus);
+  }, [stoppedGettingTaskStatus, gettingTaskStatus, streamName, getOnboardingTaskStatus]);
 
   useEffect(() => {
     // Skip initial status fetch when we are about to schedule a new generation on mount,
@@ -120,11 +126,21 @@ export function AddSignificantEventFlyout({
     getTaskStatus();
   }, [generateOnMount, getTaskStatus, initialFlow]);
 
+  const pollTask = useCallback(
+    () => getOnboardingTaskStatus(streamName),
+    [getOnboardingTaskStatus, streamName]
+  );
+
+  const cancelOnboarding = useCallback(
+    () => cancelOnboardingTask(streamName),
+    [cancelOnboardingTask, streamName]
+  );
+
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
-    onPoll: getGenerationTask,
+    onPoll: pollTask,
     onRefresh: getTaskStatus,
-    onCancel: cancelGenerationTask,
+    onCancel: cancelOnboarding,
   });
 
   const isGenerating =
@@ -143,8 +159,12 @@ export function AddSignificantEventFlyout({
     const isNewlyCompleted =
       task?.status === TaskStatus.Completed && prevStatus !== TaskStatus.Completed;
     if (isNewlyCompleted) {
+      const queriesResult = task.queriesTaskResult;
+      const completedQueries =
+        queriesResult?.status === TaskStatus.Completed ? queriesResult.queries : [];
+
       setGeneratedQueries(
-        task.queries
+        completedQueries
           .filter((nextQuery) => {
             const validation = validateQuery({
               title: nextQuery.title,
@@ -181,15 +201,14 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = () => {
-    const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connectorId) {
+    if (!aiFeatures?.genAiConnectors.selectedConnector) {
       return;
     }
 
     setSelectedFlow('ai');
     setGeneratedQueries([]);
 
-    scheduleTask(connectorId);
+    scheduleTask();
   };
 
   useEffect(() => {

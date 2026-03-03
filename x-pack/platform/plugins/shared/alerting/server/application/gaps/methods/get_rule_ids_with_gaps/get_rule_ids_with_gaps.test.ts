@@ -27,6 +27,7 @@ import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { gapFillStatus, gapStatus } from '../../../../../common';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 describe('getRuleIdsWithGaps', () => {
   let rulesClient: RulesClient;
@@ -86,6 +87,8 @@ describe('getRuleIdsWithGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();
