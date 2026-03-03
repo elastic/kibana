@@ -141,22 +141,16 @@ export const ConsoleLang: LangModuleType = {
             context,
             esqlCallbacks
           );
-          const word = model.getWordUntilPosition(position);
-          const range = new monaco.Range(
-            position.lineNumber,
-            word.startColumn,
-            position.lineNumber,
-            word.endColumn
-          );
-
-          return {
+          const completionList: monaco.languages.CompletionList = {
+            // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
             suggestions: wrapAsMonacoSuggestions(
               esqlSuggestions,
               queryText,
               false,
               !insideTripleQuotes
-            ).map((suggestion) => ({ ...suggestion, range })),
+            ),
           };
+          return completionList;
         }
         return delegateToActionsProvider();
       },

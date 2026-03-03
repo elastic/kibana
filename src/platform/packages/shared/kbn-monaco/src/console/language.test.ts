@@ -340,7 +340,13 @@ describe('console language', () => {
     const provider = createProvider(esqlCallbacks, actionsProvider);
     const { token, dispose } = createToken();
 
-    const wrapped = [] as ReturnType<typeof wrapFn>;
+    const wrapped = [
+      {
+        label: 'FROM',
+        insertText: 'FROM',
+        kind: monaco.languages.CompletionItemKind.Keyword,
+      },
+    ] as unknown as ReturnType<typeof wrapFn>;
     mockWrapAsMonacoSuggestions.mockReturnValue(wrapped);
 
     mockCheckForTripleQuotesAndEsqlQuery.mockReturnValue({
@@ -371,6 +377,8 @@ describe('console language', () => {
     expect(mockWrapAsMonacoSuggestions).toHaveBeenCalledTimes(1);
     expect(provideCompletionItems).not.toHaveBeenCalled();
     expect(result).toEqual({ suggestions: wrapped });
+    expect(result?.suggestions).toBe(wrapped);
+    expect(result?.suggestions?.[0]?.range).toBeUndefined();
     dispose();
   });
 
