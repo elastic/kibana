@@ -11,23 +11,29 @@ import React from 'react';
 import type { Observable } from 'rxjs';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type {
+  ChromeBadge,
   ChromeBreadcrumb,
+  ChromeBreadcrumbsAppendExtension,
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
   ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
   ChromeProjectNavigationNode,
+  ChromeUserBanner,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
-import { Header, LoadingIndicator, ProjectHeader, Sidebar } from '.';
+import { Header, LoadingIndicator, ProjectHeader, Sidebar } from './';
 import { HeaderTopBanner } from './header/header_top_banner';
 import { AppMenuBar } from './project/app_menu';
 import { GridLayoutProjectSideNav } from './project/sidenav/grid_layout_sidenav';
 import type { NavigationProps } from './project/sidenav/types';
-import type { ChromeState } from '../state/chrome_state';
 
 interface ChromeComponentsConfig {
   isServerless: boolean;
@@ -53,9 +59,8 @@ interface ProjectNavigationObservables {
 
 export interface ChromeComponentsDeps {
   config: ChromeComponentsConfig;
-  state: ChromeState;
   application: InternalApplicationStart;
-  basePath: InternalHttpStart['basePath'];
+  basePath: HttpStart['basePath'];
   docLinks: DocLinksStart;
   navControls: NavControlsObservables;
   projectNavigation: ProjectNavigationObservables;
@@ -63,9 +68,23 @@ export interface ChromeComponentsDeps {
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
-  customBranding$: CustomBrandingStart['customBranding$'];
-  appMenuActions$: InternalApplicationStart['currentActionMenu$'];
-  prependBasePath: InternalHttpStart['basePath']['prepend'];
+  customBranding$: Observable<CustomBranding>;
+  appMenuActions$: Observable<MountPoint<HTMLElement> | undefined>;
+  prependBasePath: HttpStart['basePath']['prepend'];
+
+  // State observables (replacing state: ChromeState)
+  badge$: Observable<ChromeBadge | undefined>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
+  customNavLink$: Observable<ChromeNavLink | undefined>;
+  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
+  helpExtension$: Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Observable<string>;
+  appMenu$: Observable<AppMenuConfig | undefined>;
+  headerBanner$: Observable<ChromeUserBanner | undefined>;
+  sideNavCollapsed$: Observable<boolean>;
+  initialSideNavCollapsed: boolean;
+  onToggleSideNavCollapsed: (collapsed: boolean) => void;
 }
 
 export const createChromeComponents = ({
@@ -73,7 +92,6 @@ export const createChromeComponents = ({
   application,
   basePath,
   docLinks,
-  state,
   loadingCount$,
   helpMenuLinks$,
   navLinks$,
@@ -83,22 +101,34 @@ export const createChromeComponents = ({
   appMenuActions$,
   projectNavigation,
   prependBasePath,
+  badge$,
+  breadcrumbs$,
+  breadcrumbsAppendExtensions$,
+  customNavLink$,
+  globalHelpExtensionMenuLinks$,
+  helpExtension$,
+  helpSupportUrl$,
+  appMenu$,
+  headerBanner$,
+  sideNavCollapsed$,
+  initialSideNavCollapsed,
+  onToggleSideNavCollapsed,
 }: ChromeComponentsDeps) => {
   const getClassicHeader = () => (
     <Header
       isServerless={config.isServerless}
       loadingCount$={loadingCount$}
       application={application}
-      badge$={state.badge.$}
+      badge$={badge$}
       basePath={basePath}
-      breadcrumbs$={state.breadcrumbs.classic.$}
-      breadcrumbsAppendExtensions$={state.breadcrumbs.appendExtensionsWithBadges$}
-      customNavLink$={state.customNavLink.$}
+      breadcrumbs$={breadcrumbs$}
+      breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+      customNavLink$={customNavLink$}
       kibanaDocLink={config.kibanaDocLink}
       docLinks={docLinks}
-      globalHelpExtensionMenuLinks$={state.help.globalMenuLinks.$}
-      helpExtension$={state.help.extension.$}
-      helpSupportUrl$={state.help.supportUrl.$}
+      globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+      helpExtension$={helpExtension$}
+      helpSupportUrl$={helpSupportUrl$}
       helpMenuLinks$={helpMenuLinks$}
       homeHref={config.homeHref}
       kibanaVersion={config.kibanaVersion}
@@ -109,7 +139,7 @@ export const createChromeComponents = ({
       navControlsRight$={navControls.right$}
       navControlsExtension$={navControls.extension$}
       customBranding$={customBranding$}
-      appMenu$={state.appMenu.$}
+      appMenu$={appMenu$}
     />
   );
 
@@ -117,12 +147,12 @@ export const createChromeComponents = ({
     <ProjectHeader
       isServerless={config.isServerless}
       application={application}
-      globalHelpExtensionMenuLinks$={state.help.globalMenuLinks.$}
+      globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
       breadcrumbs$={projectNavigation.breadcrumbs$}
-      breadcrumbsAppendExtensions$={state.breadcrumbs.appendExtensionsWithBadges$}
+      breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
       customBranding$={customBranding$}
-      helpExtension$={state.help.extension.$}
-      helpSupportUrl$={state.help.supportUrl.$}
+      helpExtension$={helpExtension$}
+      helpSupportUrl$={helpSupportUrl$}
       helpMenuLinks$={helpMenuLinks$}
       navControlsLeft$={navControls.left$}
       navControlsCenter$={navControls.center$}
@@ -143,20 +173,20 @@ export const createChromeComponents = ({
       activeNodes$: projectNavigation.activeNodes$,
       navLinks$,
       dataTestSubj$: projectNavigation.activeDataTestSubj$,
-      onToggleCollapsed: state.sideNav.collapsed.set,
+      onToggleCollapsed: onToggleSideNavCollapsed,
     };
 
     return (
       <GridLayoutProjectSideNav
-        isCollapsed$={state.sideNav.collapsed.$}
-        initialIsCollapsed={state.sideNav.collapsed.get()}
+        isCollapsed$={sideNavCollapsed$}
+        initialIsCollapsed={initialSideNavCollapsed}
         navProps={navProps}
       />
     );
   };
 
   const getHeaderBanner = () => {
-    return <HeaderTopBanner headerBanner$={state.headerBanner.$} position={'static'} />;
+    return <HeaderTopBanner headerBanner$={headerBanner$} position={'static'} />;
   };
 
   const getChromelessHeader = () => {
@@ -168,7 +198,7 @@ export const createChromeComponents = ({
   };
 
   const getProjectAppMenu = () => {
-    return <AppMenuBar appMenuActions$={appMenuActions$} appMenu$={state.appMenu.$} />;
+    return <AppMenuBar appMenuActions$={appMenuActions$} appMenu$={appMenu$} />;
   };
 
   const getSidebar = () => {

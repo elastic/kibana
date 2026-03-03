@@ -388,6 +388,8 @@
       "@kbn/core-chrome-app-menu-components/*": ["src/core/packages/chrome/app-menu/core-chrome-app-menu-components/*"],
       "@kbn/core-chrome-browser": ["src/core/packages/chrome/browser"],
       "@kbn/core-chrome-browser/*": ["src/core/packages/chrome/browser/*"],
+      "@kbn/core-chrome-browser-components": ["src/core/packages/chrome/browser-components"],
+      "@kbn/core-chrome-browser-components/*": ["src/core/packages/chrome/browser-components/*"],
       "@kbn/core-chrome-browser-internal": ["src/core/packages/chrome/browser-internal"],
       "@kbn/core-chrome-browser-internal/*": ["src/core/packages/chrome/browser-internal/*"],
       "@kbn/core-chrome-browser-mocks": ["src/core/packages/chrome/browser-mocks"],
