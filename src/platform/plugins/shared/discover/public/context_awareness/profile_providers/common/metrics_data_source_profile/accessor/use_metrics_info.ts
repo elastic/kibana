@@ -9,11 +9,11 @@
 
 import { useEffect } from 'react';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
-import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
+import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { fetchMetricsInfo } from '../utils/fetch_metrics_info';
 
 /**
