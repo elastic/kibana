@@ -101,7 +101,7 @@ describe('buildTimelineEventsAllQuery', () => {
       sort: [
         {
           direction: Direction.asc,
-          field: 'timestamp',
+          field: 'event.ingested',
           type: 'datetime',
           esTypes: ['date'],
         },
