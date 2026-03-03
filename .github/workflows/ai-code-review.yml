@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       github.event.pull_request.user.type != 'Bot' &&
-      contains(fromJSON('["MEMBER","COLLABORATOR","CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
+      contains(fromJSON('["MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) &&
       !contains(github.event.pull_request.labels.*.name, 'ai:skip-review')
     outputs:
       run_claude: ${{ steps.labels.outputs.run_claude }}
