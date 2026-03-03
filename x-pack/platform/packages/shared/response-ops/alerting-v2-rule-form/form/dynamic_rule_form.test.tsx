@@ -9,11 +9,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createQueryClientWrapper } from '../test_utils';
 import { DynamicRuleForm } from './dynamic_rule_form';
-import { RULE_FORM_ID } from './rule_form';
+import { RULE_FORM_ID } from './constants';
 
 // Mock the yaml-rule-editor to avoid monaco editor setup
 jest.mock('@kbn/yaml-rule-editor', () => ({
@@ -39,6 +40,7 @@ const createMockApplication = () => ({
 
 const createMockServices = () => ({
   http: httpServiceMock.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   application: createMockApplication() as any,

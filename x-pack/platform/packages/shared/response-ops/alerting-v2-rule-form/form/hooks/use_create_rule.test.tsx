@@ -32,6 +32,7 @@ describe('useCreateRule', () => {
 
   // Expected API payload after mapping FormValues to CreateRuleData
   // Note: timeField in form is mapped to time_field in API
+  // Note: empty condition field is omitted from the payload
   const expectedApiPayload = {
     kind: 'signal',
     time_field: '@timestamp',
@@ -43,7 +44,6 @@ describe('useCreateRule', () => {
     evaluation: {
       query: {
         base: 'FROM logs | LIMIT 10',
-        condition: '',
       },
     },
     grouping: { fields: ['host.name'] },
@@ -200,6 +200,7 @@ describe('useCreateRule', () => {
     };
 
     // Note: timeField in form is mapped to time_field in API
+    // Note: empty condition field is omitted from the payload
     const expectedPayload = {
       kind: 'signal',
       time_field: 'event.timestamp',
@@ -211,7 +212,6 @@ describe('useCreateRule', () => {
       evaluation: {
         query: {
           base: 'FROM metrics | WHERE cpu > 90',
-          condition: '',
         },
       },
       grouping: { fields: ['host.name', 'service.name'] },

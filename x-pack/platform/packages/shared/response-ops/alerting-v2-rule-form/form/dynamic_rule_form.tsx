@@ -10,30 +10,25 @@ import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from './types';
-import { RuleForm, type RuleFormServices } from './rule_form';
+import { RuleForm } from './rule_form';
+import type { RuleFormServices } from './contexts';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface DynamicRuleFormProps {
-  /* The query that drives form values - changes will sync to form state */
+  /** The query that drives form values - changes will sync to form state */
   query: string;
   services: RuleFormServices;
-  /* Called with form values when form is submitted.
-   * Only used when includeSubmission is false. */
-  onSubmit?: (values: FormValues) => void;
-  /* Called after successful rule creation (only used when includeSubmission is true) */
-  onSuccess?: () => void;
-  /* Callback when cancel button is clicked */
+  onSubmit: (values: FormValues) => void;
   onCancel?: () => void;
-  /* Whether to include YAML editor toggle (default: false) */
+  /** Whether to include YAML editor toggle (default: false) */
   includeYaml?: boolean;
-  /* Whether the form is in a loading/disabled state */
+  /** Whether the form is in a loading/disabled state */
   isDisabled?: boolean;
-  /* Whether to include submit/cancel buttons (default: false).
-   * When true, the form handles the API call internally. */
+  /** Whether the form is currently submitting (controls button loading state) */
+  isSubmitting?: boolean;
+  /** Whether to show submit/cancel buttons (default: false) */
   includeSubmission?: boolean;
-  /* Custom label for the submit button */
   submitLabel?: React.ReactNode;
-  /* Custom label for the cancel button */
   cancelLabel?: React.ReactNode;
 }
 
@@ -55,8 +50,8 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   onSubmit,
   includeYaml = false,
   isDisabled = false,
+  isSubmitting = false,
   includeSubmission = false,
-  onSuccess,
   onCancel,
   submitLabel,
   cancelLabel,
@@ -92,8 +87,8 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
         includeQueryEditor={false}
         includeYaml={includeYaml}
         isDisabled={isDisabled}
+        isSubmitting={isSubmitting}
         includeSubmission={includeSubmission}
-        onSuccess={onSuccess}
         onCancel={onCancel}
         submitLabel={submitLabel}
         cancelLabel={cancelLabel}

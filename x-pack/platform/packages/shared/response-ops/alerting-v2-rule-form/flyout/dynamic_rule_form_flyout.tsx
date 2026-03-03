@@ -38,11 +38,9 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   query,
   services,
 }) => {
-  const { http, notifications, data, dataViews, application } = services;
-
   const { createRule, isLoading } = useCreateRule({
-    http,
-    notifications,
+    http: services.http,
+    notifications: services.notifications,
     onSuccess: onClose,
   });
 
@@ -54,8 +52,9 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <DynamicRuleForm
         onSubmit={handleSubmit}
+        isSubmitting={isLoading}
         query={query}
-        services={{ http, data, dataViews, application }}
+        services={services}
       />
     </RuleFormFlyout>
   );

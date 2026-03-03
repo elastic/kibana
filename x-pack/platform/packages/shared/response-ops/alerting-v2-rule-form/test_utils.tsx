@@ -8,6 +8,7 @@
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -92,11 +93,13 @@ export const createFormWrapper = (
     });
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <FormProvider {...form}>
-          <RuleFormServicesProvider services={services}>{children}</RuleFormServicesProvider>
-        </FormProvider>
-      </QueryClientProvider>
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormServicesProvider services={services}>{children}</RuleFormServicesProvider>
+          </FormProvider>
+        </QueryClientProvider>
+      </IntlProvider>
     );
   };
 

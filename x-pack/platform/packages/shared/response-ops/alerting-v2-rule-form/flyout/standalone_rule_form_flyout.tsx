@@ -38,11 +38,9 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
   query,
   services,
 }) => {
-  const { application, http, notifications, data, dataViews } = services;
-
   const { createRule, isLoading } = useCreateRule({
-    http,
-    notifications,
+    http: services.http,
+    notifications: services.notifications,
     onSuccess: onClose ?? (() => {}),
   });
 
@@ -54,8 +52,9 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <StandaloneRuleForm
         onSubmit={handleSubmit}
+        isSubmitting={isLoading}
         query={query}
-        services={{ http, data, dataViews, application }}
+        services={services}
       />
     </RuleFormFlyout>
   );
