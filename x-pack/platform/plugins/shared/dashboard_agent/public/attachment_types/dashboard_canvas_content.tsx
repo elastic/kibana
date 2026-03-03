@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachmentData, AttachmentPanel } from '@kbn/dashboard-agent-common';
 import { isGenericAttachmentPanel, isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardRendererProps,
+} from '@kbn/dashboard-plugin/public';
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/public';
 import { i18n } from '@kbn/i18n';
@@ -313,9 +318,6 @@ const getDashboardCanvasContentStyles = ({
       display: 'none !important',
     },
   }),
-  actions: css({
-    padding: euiTheme.size.m,
-  }),
   renderer: css({
     flex: 1,
     minHeight: 0,
@@ -325,11 +327,15 @@ const getDashboardCanvasContentStyles = ({
 
 export const DashboardCanvasContent = ({
   attachment,
-}: AttachmentRenderProps<DashboardAttachment>) => {
+  registerActionButtons,
+  dashboardLocator,
+}: AttachmentRenderProps<DashboardAttachment> & {
+  registerActionButtons: (buttons: ActionButton[]) => void;
+  dashboardLocator?: DashboardRendererProps['locator'];
+}) => {
   const { euiTheme } = useEuiTheme();
   const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-  const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const styles = useMemo(() => getDashboardCanvasContentStyles({ euiTheme }), [euiTheme]);
 
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
@@ -343,44 +349,59 @@ export const DashboardCanvasContent = ({
     [data.savedObjectId, initialDashboardInput]
   );
 
-  const handleSave = useCallback(async () => {
-    if (!dashboardApi || isSaveInProgress) {
+  useEffect(() => {
+    if (!dashboardApi) {
       return;
     }
-
-    setIsSaveInProgress(true);
-    try {
-      await saveDashboardFromApi(dashboardApi);
-    } finally {
-      setIsSaveInProgress(false);
+    const buttons: ActionButton[] = [];
+    if (dashboardApi.locator) {
+      const { locator } = dashboardApi;
+      buttons.push({
+        label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel', {
+          defaultMessage: 'Edit',
+        }),
+        icon: 'pencil',
+        type: ActionButtonType.PRIMARY,
+        handler: async () => {
+          await locator.navigate({
+            dashboardId: data.savedObjectId,
+            title: initialDashboardInput.title,
+            description: initialDashboardInput.description,
+            panels: initialDashboardInput.panels,
+            time_range: initialDashboardInput.timeRange,
+            viewMode: 'edit',
+          });
+        },
+      });
     }
-  }, [dashboardApi, isSaveInProgress]);
+
+    buttons.push({
+      label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
+        defaultMessage: 'Save',
+      }),
+      icon: 'save',
+      type: ActionButtonType.SECONDARY,
+      handler: () => saveDashboardFromApi(dashboardApi),
+    });
+
+    registerActionButtons(buttons);
+  }, [
+    dashboardApi,
+    data.savedObjectId,
+    initialDashboardInput.description,
+    initialDashboardInput.panels,
+    initialDashboardInput.timeRange,
+    initialDashboardInput.title,
+    registerActionButtons,
+  ]);
 
   return (
     <div css={styles.root}>
-      <div css={styles.actions}>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              size="s"
-              iconType="save"
-              onClick={handleSave}
-              isLoading={isSaveInProgress}
-              disabled={!dashboardApi || isSaveInProgress}
-              data-test-subj="dashboardCanvasSaveButton"
-            >
-              {i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
-                defaultMessage: 'Save dashboard',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
           showPlainSpinner
+          locator={dashboardLocator}
           savedObjectId={data.savedObjectId}
           onApiAvailable={(api) => {
             api.setViewMode('view');

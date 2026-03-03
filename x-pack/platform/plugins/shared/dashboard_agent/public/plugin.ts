@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -38,8 +39,10 @@ export class DashboardAgentPlugin
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
+      const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         attachments: plugins.agentBuilder.attachments,
+        dashboardLocator,
       });
     });
 

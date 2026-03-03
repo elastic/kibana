@@ -11,22 +11,15 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
-
-// TODO: Remove this once we have a real action for the canvas - required to show the canvas header
-const canvasNoopAction = {
-  label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasNoopActionLabel', {
-    defaultMessage: 'Placeholder',
-  }),
-  icon: 'eye',
-  type: ActionButtonType.PRIMARY,
-  handler: () => undefined,
-} as const;
 
 export const registerDashboardAttachmentUiDefinition = ({
   attachments,
+  dashboardLocator,
 }: {
   attachments: AttachmentServiceStartContract;
+  dashboardLocator?: DashboardRendererProps['locator'];
 }): (() => void) => {
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
@@ -38,12 +31,14 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    renderCanvasContent: (props) => <DashboardCanvasContent {...props} />,
-    getActionButtons: ({ isCanvas, openCanvas }) => {
-      if (isCanvas) {
-        return [canvasNoopAction];
-      }
-
+    renderCanvasContent: (props, registerActionButtons) => (
+      <DashboardCanvasContent
+        {...props}
+        registerActionButtons={registerActionButtons}
+        dashboardLocator={dashboardLocator}
+      />
+    ),
+    getActionButtons: ({ openCanvas }) => {
       if (!openCanvas) {
         return [];
       }
