@@ -42,7 +42,7 @@ export const RulesPageApp = ({ deps }: { deps: TriggersAndActionsUiServices }) =
   const { dataViews } = deps;
   setDataViewsService(dataViews);
   return deps.rendering.addContext(
-    <KibanaContextProvider services={{ ...deps }}>
+    <KibanaContextProvider services={{ ...deps, security: deps.securityPlugin ?? deps.security }}>
       <Router history={deps.history}>
         <QueryClientProvider client={queryClient}>
           <AppWithoutRouter />

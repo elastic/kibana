@@ -34,7 +34,8 @@
     "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils", "actions"],
     "extraPublicDirs": ["public/common", "public/common/constants"],
     "runtimePluginDependencies": [
-      "cases"
+      "cases",
+      "security"
     ]
   }
 }

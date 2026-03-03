@@ -12,13 +12,13 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, type ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
-import { CaseAlertActions } from './case_alert_actions';
+import { useCaseAlertActionItems } from './case_alert_actions';
 
 const VIEW_DETAILS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.viewDetailsLabel',
@@ -58,14 +58,15 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
 
   const { onExpandedAlertIndexChange, renderCellValue, ...defaultActionProps } = props;
 
-  const actionsMenuItems = [
-    <CaseAlertActions
-      key="caseActions"
-      alert={props.alert}
-      cases={props.services.cases}
-      refresh={props.refresh}
-      onActionExecuted={closeActionsPopover}
-    />,
+  const caseActionItems = useCaseAlertActionItems({
+    alert: props.alert,
+    cases: props.services.cases,
+    refresh: props.refresh,
+    onActionExecuted: closeActionsPopover,
+  });
+
+  const actionsMenuItems: ReactElement[] = [
+    ...caseActionItems,
     <DefaultAlertActions
       key="defaultRowActions"
       onActionExecuted={closeActionsPopover}

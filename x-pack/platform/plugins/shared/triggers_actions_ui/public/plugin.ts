@@ -25,6 +25,7 @@ import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -293,6 +294,11 @@ export class Plugin
           category: DEFAULT_APP_CATEGORIES.management,
           visibleIn: ['sideNav'],
           async mount(params: AppMountParameters) {
+            const { cases: casesResponse, security: securityResponse } =
+              await core.plugins.onStart<{
+                cases: CasesPublicStart;
+                security: SecurityPluginStart;
+              }>('cases', 'security');
             const [coreStart, pluginsStart] = (await core.getStartServices()) as [
               CoreStart,
               PluginsStart,
@@ -314,6 +320,8 @@ export class Plugin
             return renderRulesPageApp({
               ...coreStart,
               actions: plugins.actions,
+              cases: casesResponse.found ? casesResponse.contract : undefined,
+              securityPlugin: securityResponse.found ? securityResponse.contract : undefined,
               cloud: plugins.cloud,
               data: pluginsStart.data,
               dataViews: pluginsStart.dataViews,
@@ -352,9 +360,6 @@ export class Plugin
         title: featureTitle,
         order: 1,
         async mount(params: ManagementAppMountParams) {
-          const { cases: casesResponse } = await core.plugins.onStart<{ cases: CasesPublicStart }>(
-            'cases'
-          );
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,
@@ -399,7 +404,6 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            cases: casesResponse.found ? casesResponse.contract : undefined, // TODO: Cases in used by other plugins. Plugins pass the service to their KibanaContext. ML does not pass the licensing service thus it is optional.
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
