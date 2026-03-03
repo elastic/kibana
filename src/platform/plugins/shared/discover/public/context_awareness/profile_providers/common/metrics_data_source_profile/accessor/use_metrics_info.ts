@@ -8,7 +8,6 @@
  */
 
 import { useEffect } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import type {
@@ -26,7 +25,7 @@ export function useMetricsInfo(
   isComponentVisible: boolean
 ): void {
   const esql =
-    fetchParams.query && isOfAggregateQueryType(fetchParams.query)
+    fetchParams.query && 'esql' in fetchParams.query
       ? (fetchParams.query as { esql: string }).esql
       : undefined;
   const shouldFetch =
