@@ -120,18 +120,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins/,
-        /^package.json/,
-        /^yarn.lock/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites') ||
-      ALL_UI_TEST_SUITES
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-    }
-
     const aiInfraPaths = [
       /^x-pack\/platform\/packages\/shared\/ai-infra/,
       /^x-pack\/platform\/plugins\/shared\/ai_infra/,
