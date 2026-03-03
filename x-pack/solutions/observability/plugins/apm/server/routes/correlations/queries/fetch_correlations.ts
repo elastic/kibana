@@ -36,6 +36,7 @@ interface FetchCorrelationsParams extends CommonCorrelationsQueryParams {
   percentileThreshold?: number;
   durationMin?: number;
   durationMax?: number;
+  includeHistogram?: boolean;
   config?: {
     apm: {
       searchAggregatedTransactions?: boolean;
@@ -55,6 +56,7 @@ export async function fetchCorrelations({
   percentileThreshold = DEFAULT_PERCENTILE_THRESHOLD,
   durationMin: providedDurationMin,
   durationMax: providedDurationMax,
+  includeHistogram = false,
   config,
 }: FetchCorrelationsParams): Promise<CorrelationsResponse> {
   const chartType =
@@ -88,7 +90,7 @@ export async function fetchCorrelations({
 
   // For error_rate, also get error histogram
   let errorHistogram: CorrelationsResponse['errorHistogram'];
-  if (correlationType === CorrelationType.ERROR_RATE) {
+  if (includeHistogram && correlationType === CorrelationType.ERROR_RATE) {
     const errorDistribution = await getOverallLatencyDistribution({
       chartType,
       apmEventClient,
@@ -295,11 +297,8 @@ export async function fetchCorrelations({
     fallbackResult = bestFallback;
   }
 
-  return {
-    overallHistogram: overallDistribution.overallHistogram,
-    errorHistogram,
+  const response: CorrelationsResponse = {
     totalDocCount,
-    percentileThresholdValue: overallDistribution.percentileThresholdValue,
     durationMin,
     durationMax,
     fieldCandidates,
@@ -307,4 +306,15 @@ export async function fetchCorrelations({
     ccsWarning,
     fallbackResult,
   };
+
+  if (includeHistogram) {
+    response.overallHistogram = overallDistribution.overallHistogram;
+    response.percentileThresholdValue = overallDistribution.percentileThresholdValue;
+
+    if (correlationType === CorrelationType.ERROR_RATE) {
+      response.errorHistogram = errorHistogram;
+    }
+  }
+
+  return response;
 }

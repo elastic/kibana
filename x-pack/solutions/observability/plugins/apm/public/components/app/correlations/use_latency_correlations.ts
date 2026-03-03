@@ -66,9 +66,10 @@ export function useLatencyCorrelations() {
             correlationType: CorrelationType.TRANSACTION_DURATION,
             ...fetchParams,
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            includeHistogram: true,
           },
         },
-      })) as CorrelationsResponse;
+      })) as CorrelationsResponse & { includeHistogram: boolean };
 
       if (abortCtrl.current.signal.aborted) {
         return;

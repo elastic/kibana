@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -367,6 +367,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
         durationMin: toNumberRt,
         durationMax: toNumberRt,
         percentileThreshold: toNumberRt,
+        includeHistogram: toBooleanRt,
       }),
       environmentRt,
       kueryRt,
@@ -397,6 +398,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
         durationMin,
         durationMax,
         percentileThreshold,
+        includeHistogram,
         // metricField is reserved for future infrastructure metrics support
         metricField: _metricField,
       },
@@ -431,6 +433,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
       percentileThreshold,
       durationMin,
       durationMax,
+      includeHistogram,
       config: {
         apm: {
           searchAggregatedTransactions,

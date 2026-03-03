@@ -67,6 +67,7 @@ export function useFailedTransactionsCorrelations() {
             correlationType: CorrelationType.ERROR_RATE,
             ...fetchParams,
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            includeHistogram: true,
           },
         },
       })) as CorrelationsResponse;
