@@ -332,8 +332,37 @@ describe('WorkflowExecutionPanel', () => {
       fireEvent.click(screen.getByTestId('replayExecutionButton'));
 
       const state = store.getState();
-      expect(state.detail.replayExecutionId).toBe('exec-123');
+      expect(state.detail.replay?.executionId).toBe('exec-123');
       expect(state.detail.isTestModalOpen).toBe(true);
+    });
+
+    it('should dispatch setTestStepModalOpenStepId and setReplayStepExecutionId when step run replay', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString(mockExecution.yaml));
+
+      const stepRunExecution = {
+        ...mockExecution,
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'my-step',
+        stepExecutions: [
+          { id: 'step-exec-1', stepId: 'my-step', workflowRunId: 'exec-123', status: 'completed', startedAt: '' },
+        ],
+      };
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: stepRunExecution,
+        },
+        store
+      );
+
+      fireEvent.click(screen.getByTestId('replayExecutionButton'));
+
+      const state = store.getState();
+      expect(state.detail.testStepModalOpenStepId).toBe('my-step');
+      expect(state.detail.replay?.stepExecutionId).toBe('step-exec-1');
+      expect(state.detail.isTestModalOpen).toBe(false);
     });
 
     it('should disable replay button when user lacks execute capability', () => {

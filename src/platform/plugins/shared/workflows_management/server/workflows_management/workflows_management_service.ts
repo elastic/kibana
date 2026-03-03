@@ -53,7 +53,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { z } from '@kbn/zod/v4';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
-import { searchStepExecutions } from './lib/search_step_executions';
+import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
@@ -61,6 +61,7 @@ import type {
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
+  SearchStepExecutionsParams,
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
@@ -1255,13 +1256,35 @@ export class WorkflowsService {
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
-    return searchStepExecutions({
+    const searchResult = await searchStepExecutions({
       esClient: this.esClient,
       logger: this.logger,
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
+    });
+    return searchResult.results;
+  }
+
+  public async searchStepExecutions(
+    params: SearchStepExecutionsParams,
+    spaceId: string
+  ): Promise<StepExecutionListResult> {
+    const sourceExcludes: string[] = [];
+    if (!params.includeInput) sourceExcludes.push('input');
+    if (!params.includeOutput) sourceExcludes.push('output');
+
+    return searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowId: params.workflowId,
+      stepId: params.stepId,
+      spaceId,
+      sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
+      page: params.page,
+      size: params.size,
     });
   }
 

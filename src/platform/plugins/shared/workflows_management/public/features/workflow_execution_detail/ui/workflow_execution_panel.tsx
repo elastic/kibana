@@ -33,6 +33,8 @@ import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workf
 import {
   setIsTestModalOpen,
   setReplayExecutionId,
+  setReplayStepExecutionId,
+  setTestStepModalOpenStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
@@ -46,6 +48,9 @@ const i18nTexts = {
   }),
   replay: i18n.translate('workflows.workflowStepExecutionList.replay', {
     defaultMessage: 'Run again',
+  }),
+  replayStep: i18n.translate('workflows.workflowStepExecutionList.replayStep', {
+    defaultMessage: 'Run step again',
   }),
 };
 
@@ -139,7 +144,16 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                   {showDoneButton && (
                     <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                       <EuiFlexItem grow={!showDoneButton}>
-                        <ReplayExecutionButton executionId={execution.id} />
+                        <ReplayExecutionButton
+                          executionId={execution.id}
+                          stepExecutionId={
+                            execution.stepId != null && execution.stepExecutions?.length
+                              ? execution.stepExecutions.find((s) => s.stepId === execution.stepId)
+                                  ?.id
+                              : undefined
+                          }
+                          stepId={execution.stepId ?? undefined}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiButton
@@ -174,12 +188,23 @@ const componentStyles = {
     }),
 };
 
-const ReplayExecutionButton = React.memo<{ executionId: string }>(({ executionId }) => {
+const ReplayExecutionButton = React.memo<{
+  executionId: string;
+  stepExecutionId?: string;
+  stepId?: string;
+}>(({ executionId, stepExecutionId, stepId }) => {
   const dispatch = useDispatch();
+  const isStepRun = stepExecutionId != null && stepId != null;
+
   const replayExecution = useCallback(() => {
-    dispatch(setReplayExecutionId(executionId));
-    dispatch(setIsTestModalOpen(true));
-  }, [executionId, dispatch]);
+    if (isStepRun && stepId && stepExecutionId) {
+      dispatch(setTestStepModalOpenStepId(stepId));
+      dispatch(setReplayStepExecutionId(stepExecutionId));
+    } else {
+      dispatch(setReplayExecutionId(executionId));
+      dispatch(setIsTestModalOpen(true));
+    }
+  }, [executionId, stepExecutionId, stepId, isStepRun, dispatch]);
 
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
   const { canExecuteWorkflow } = useCapabilities();
@@ -198,7 +223,10 @@ const ReplayExecutionButton = React.memo<{ executionId: string }>(({ executionId
   }, [canExecuteWorkflow, isSyntaxValid]);
 
   return (
-    <EuiToolTip content={runDisabledTooltipContent ?? i18nTexts.replay} disableScreenReaderOutput>
+    <EuiToolTip
+      content={runDisabledTooltipContent ?? isStepRun ? i18nTexts.replayStep : i18nTexts.replay}
+      disableScreenReaderOutput
+    >
       <EuiButtonIcon
         onClick={replayExecution}
         iconType="refresh"

@@ -217,7 +217,7 @@ export class WorkflowEditorPage {
    */
   async setTestStepInputs(inputs: Record<string, unknown>) {
     await this.waitForTestStepModal();
-    const stepInputsEditor = this.page.testSubj.locator('workflow-event-json-editor');
+    const stepInputsEditor = this.page.testSubj.locator('workflow-event-manual-json-editor');
     await stepInputsEditor.waitFor({ state: 'visible' });
     await this.setEditorValue(stepInputsEditor, JSON.stringify(inputs, null, 2));
   }

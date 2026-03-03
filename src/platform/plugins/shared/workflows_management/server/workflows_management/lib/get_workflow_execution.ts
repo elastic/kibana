@@ -111,7 +111,7 @@ export const getWorkflowExecution = async ({
       );
     } else {
       // Fallback to search for backward compatibility (old workflows without stepExecutionIds)
-      stepExecutions = await searchStepExecutions({
+      const searchResult = await searchStepExecutions({
         esClient,
         logger,
         stepsExecutionIndex,
@@ -119,6 +119,7 @@ export const getWorkflowExecution = async ({
         spaceId,
         sourceExcludes,
       });
+      stepExecutions = searchResult.results;
     }
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);

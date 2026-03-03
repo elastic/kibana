@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { getWorkflowExecution } from './get_workflow_execution';
 
 jest.mock('./search_step_executions', () => ({
-  searchStepExecutions: jest.fn().mockResolvedValue([]),
+  searchStepExecutions: jest.fn().mockResolvedValue({ results: [] }),
 }));
 
 const { searchStepExecutions } = jest.requireMock('./search_step_executions');
@@ -142,7 +142,7 @@ describe('getWorkflowExecution', () => {
       mockEsClient.get.mockResolvedValue({
         _source: { ...baseExecutionDoc, stepExecutionIds: undefined },
       } as any);
-      searchStepExecutions.mockResolvedValue([]);
+      searchStepExecutions.mockResolvedValue({ results: [] });
     });
 
     it('should pass sourceExcludes to searchStepExecutions when includeInput/includeOutput are false', async () => {

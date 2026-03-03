@@ -47,7 +47,9 @@ const WorkflowYAMLEditorMock = ({ highlightDiff, onStepRun }: any) => (
     <button
       type="button"
       data-test-subj="test-step-run"
-      onClick={() => onStepRun?.({ stepId: 'test-step', actionType: 'run' })}
+      onClick={() =>
+        onStepRun?.({ stepId: 'test-step', actionType: 'run' })
+      }
     >
       {'Run Step'}
     </button>
@@ -99,8 +101,13 @@ jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
 jest.mock('./use_context_override_data', () => ({
   useContextOverrideData: jest.fn(() => (stepId: string) => ({
     stepContext: { mockKey: 'mockValue' },
+    schema: {},
   })),
 }));
+
+const mockUseContextOverrideData = jest.mocked(
+  require('./use_context_override_data').useContextOverrideData
+);
 
 describe('WorkflowDetailEditor', () => {
   const mockYaml =
@@ -134,7 +141,8 @@ describe('WorkflowDetailEditor', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return <TestWrapper store={store}>{children}</TestWrapper>;
     };
-    return render(<WorkflowDetailEditor {...props} />, { wrapper });
+    const result = render(<WorkflowDetailEditor {...props} />, { wrapper });
+    return { ...result, store };
   };
 
   beforeEach(() => {
@@ -169,6 +177,10 @@ describe('WorkflowDetailEditor', () => {
       // Mock selectYamlString
       if (selector.toString().includes('selectYamlString')) {
         return mockYaml;
+      }
+      // Mock selectWorkflowId
+      if (selector.toString().includes('selectWorkflowId')) {
+        return 'workflow-1';
       }
       // Mock selectWorkflowDefinition
       if (selector.toString().includes('selectWorkflowDefinition')) {
@@ -217,52 +229,41 @@ describe('WorkflowDetailEditor', () => {
   });
 
   describe('step run functionality', () => {
-    it('should handle step run action', async () => {
-      const { getByTestId, queryByTestId } = renderEditor();
+    it('should dispatch setTestStepModalOpenStepId when step run needs modal', async () => {
+      const { getByTestId, store } = renderEditor();
       const runButton = getByTestId('test-step-run');
 
       await act(async () => {
         runButton.click();
       });
 
-      // Wait for the modal to appear (if context override data is returned)
-      await waitFor(() => {
-        expect(queryByTestId('test-step-modal')).toBeInTheDocument();
-      });
-
-      // The component should handle the step run internally
-      expect(mockUseWorkflowActions).toHaveBeenCalled();
+      expect(store?.getState().detail.testStepModalOpenStepId).toBe('test-step');
     });
 
-    it('should show toast error when step run fails', async () => {
-      const { getByTestId, queryByTestId } = renderEditor();
-      const runButton = getByTestId('test-step-run');
+    it('should show toast error when immediate step run (no modal) fails', async () => {
+      mockUseContextOverrideData.mockReturnValue(
+        () => ({ stepContext: {}, schema: {} }) as any
+      );
 
+      const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Failed to run step'));
       mockUseWorkflowActions.mockReturnValue({
-        runIndividualStep: {
-          mutateAsync: jest.fn().mockRejectedValue(new Error('Failed to run step')),
-        },
+        runIndividualStep: { mutateAsync: mockMutateAsync },
       });
+
+      const { getByTestId } = renderEditor();
+      const runButton = getByTestId('test-step-run');
 
       await act(async () => {
         runButton.click();
       });
 
-      // Wait for the modal to appear
       await waitFor(() => {
-        expect(queryByTestId('test-step-modal')).toBeInTheDocument();
-      });
-
-      const submitButton = getByTestId('workflowSubmitStepRun');
-      await act(async () => {
-        submitButton.click();
+        expect(mockMutateAsync).toHaveBeenCalled();
       });
 
       expect(mockUseKibana().services.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('Failed to run step'),
-        {
-          title: 'Failed to run step',
-        }
+        { title: 'Failed to run step' }
       );
     });
   });

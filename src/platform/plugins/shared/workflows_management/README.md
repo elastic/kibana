@@ -348,6 +348,7 @@ POST /api/workflows/testStep
 ```json
 {
   "stepId": "step-1",
+  "workflowId": "workflow-0d8d376e-07f9-47a2-b8a2-852081d75ddc",
   "contextOverride": {
     "spaceId": "default",
     "inputs": {...}

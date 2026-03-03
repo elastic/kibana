@@ -43,8 +43,13 @@ export interface WorkflowDetailState {
   highlightedStepId?: string;
   /** The modal to test the workflow is open */
   isTestModalOpen: boolean;
-  /** When set, open test modal in "From historical" mode with this execution pre-selected */
-  replayExecutionId: string | null;
+  /** When set, Test Step modal is open for this step id (undefined = closed) */
+  testStepModalOpenStepId?: string;
+  /** Replay context: workflow-level (executionId) or step-level (stepExecutionId) for pre-selection in modals */
+  replay?: {
+    executionId?: string;
+    stepExecutionId?: string;
+  };
   /** The connectors data */
   connectors?: ConnectorsResponse;
   /** The schema for the workflow, depends on the connectors available */

@@ -2220,13 +2220,17 @@ steps:
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],
+            must: [
+              { term: { spaceId: 'default' } },
+              { term: { workflowRunId: 'execution-1' } },
+            ],
           },
         },
         _source: { excludes: ['input', 'output'] },
-        sort: 'startedAt:desc',
+        sort: 'globalExecutionIndex:asc',
         from: 0,
         size: 1000,
+        track_total_hits: false,
       });
     });
 

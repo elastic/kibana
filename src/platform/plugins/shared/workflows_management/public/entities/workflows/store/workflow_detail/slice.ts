@@ -30,7 +30,8 @@ const initialState: WorkflowDetailState = {
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
-  replayExecutionId: null,
+  testStepModalOpenStepId: undefined,
+  replay: undefined,
   loading: initialLoadingState,
   hasYamlSchemaValidationErrors: false,
   connectorFlyout: {
@@ -78,7 +79,24 @@ const workflowDetailSlice = createSlice({
       state.isTestModalOpen = action.payload;
     },
     setReplayExecutionId: (state, action: { payload: string | null }) => {
-      state.replayExecutionId = action.payload;
+      if (state.replay === undefined) {
+        state.replay = {};
+      }
+      state.replay.executionId = action.payload ?? undefined;
+      state.replay.stepExecutionId = undefined; // only one replay type at a time
+    },
+    setReplayStepExecutionId: (state, action: { payload: string | null }) => {
+      if (state.replay === undefined) {
+        state.replay = {};
+      }
+      state.replay.stepExecutionId = action.payload ?? undefined;
+      state.replay.executionId = undefined; // only one replay type at a time
+    },
+    setTestStepModalOpenStepId: (state, action: { payload: string | undefined }) => {
+      state.testStepModalOpenStepId = action.payload;
+    },
+    clearReplay: (state) => {
+      state.replay = undefined;
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
@@ -157,6 +175,9 @@ export const {
   setHighlightedStepId,
   setIsTestModalOpen,
   setReplayExecutionId,
+  setReplayStepExecutionId,
+  setTestStepModalOpenStepId,
+  clearReplay,
   setConnectors,
   setExecution,
   clearExecution,

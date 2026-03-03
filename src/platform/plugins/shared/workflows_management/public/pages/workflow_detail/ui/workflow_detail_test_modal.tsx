@@ -18,8 +18,8 @@ import {
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  clearReplay,
   setIsTestModalOpen,
-  setReplayExecutionId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
@@ -57,7 +57,7 @@ export const WorkflowDetailTestModal = () => {
 
   const closeModal = useCallback(() => {
     dispatch(setIsTestModalOpen(false));
-    dispatch(setReplayExecutionId(null));
+    dispatch(clearReplay());
   }, [dispatch]);
 
   useEffect(() => {

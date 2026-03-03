@@ -23,6 +23,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
       validate: {
         body: schema.object({
           stepId: schema.string(),
+          workflowId: schema.maybe(schema.string()),
           contextOverride: schema.recordOf(schema.string(), schema.any()),
           workflowYaml: schema.string(),
         }),
@@ -35,6 +36,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
         const workflowExecutionId = await api.testStep(
           request.body.workflowYaml,
           request.body.stepId,
+          request.body.workflowId,
           request.body.contextOverride,
           spaceId,
           request
