@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/inference-plugin",
-  "owner": "@elastic/appex-ai-infra",
+  "owner": "@elastic/search-kibana",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
