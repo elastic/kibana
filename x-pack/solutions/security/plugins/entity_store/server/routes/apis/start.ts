@@ -8,6 +8,7 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
@@ -21,7 +22,7 @@ const bodySchema = z.object({
 export function registerStart(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: '/internal/security/entity-store/start',
+      path: ENTITY_STORE_ROUTES.START,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

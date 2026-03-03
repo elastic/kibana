@@ -166,7 +166,6 @@ describe('AutomaticImportSetupService', () => {
       const [updateData, expectedVersion] = mockUpdateIntegration.mock.calls[0];
       expect(expectedVersion).toBe('1.2.3');
       expect(updateData.integration_id).toBe('integration-123');
-      expect(updateData.status).toBe('approved');
       expect(updateData.last_updated_by).toBe('approver-user');
       expect(updateData.last_updated_at).toEqual(expect.any(String));
       expect(updateData.metadata).toEqual(expect.objectContaining({ version: '0.0.1' }));

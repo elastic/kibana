@@ -13,6 +13,7 @@ import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
+  selectReplayExecutionId,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store';
@@ -44,6 +45,7 @@ jest.mock('../../../hooks/use_async_thunk', () => ({
 
 jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
   selectIsTestModalOpen: jest.fn(),
+  selectReplayExecutionId: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
   selectWorkflow: jest.fn(),
@@ -59,7 +61,7 @@ jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
   }: {
     definition: any;
     onClose: () => void;
-    onSubmit: (inputs: any) => void;
+    onSubmit: (inputs: any, triggerTab: string) => void;
   }) => (
     <div data-test-subj="workflow-execute-modal">
       <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
@@ -69,7 +71,7 @@ jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
       <button
         type="button"
         data-test-subj="submit-modal"
-        onClick={() => onSubmit({ test: 'input' })}
+        onClick={() => onSubmit({ test: 'input' }, 'manual')}
       >
         {'Run'}
       </button>
@@ -103,6 +105,7 @@ describe('WorkflowDetailTestModal', () => {
     mockTestWorkflow = jest.fn();
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
+    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue(null);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
     (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
     (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
@@ -199,7 +202,10 @@ describe('WorkflowDetailTestModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(expectedCalledFunction).toHaveBeenCalledWith({ inputs: { test: 'input' } });
+      expect(expectedCalledFunction).toHaveBeenCalledWith({
+        inputs: { test: 'input' },
+        triggerTab: 'manual',
+      });
     });
   });
 

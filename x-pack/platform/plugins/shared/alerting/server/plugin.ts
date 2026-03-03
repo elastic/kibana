@@ -53,8 +53,6 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
-
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -205,7 +203,6 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
-  cps?: CPSServerSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -253,7 +250,6 @@ export class AlertingPlugin {
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
-  private cpsSetup?: CPSServerSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -281,7 +277,6 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
-    this.cpsSetup = plugins.cps;
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -669,6 +664,8 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      isServerless: this.isServerless,
+      featureFlags: core.featureFlags,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -799,17 +796,7 @@ export class AlertingPlugin {
   }
 
   private getShouldGrantUiam(core: CoreStart): boolean {
-    const cpsEnabled = this.cpsSetup?.getCpsEnabled() ?? false;
-    if (!cpsEnabled) {
-      return false;
-    }
-    if (!core.security.authc.apiKeys.uiam) {
-      this.logger.error(
-        'CPS is enabled but UIAM API key service is not available. UIAM API keys will not be granted.'
-      );
-      return false;
-    }
-    return true;
+    return !!core.security.authc.apiKeys.uiam;
   }
 
   private createRouteHandlerContext = (

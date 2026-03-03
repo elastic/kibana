@@ -6,24 +6,29 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { GroupedInferenceEndpointsData } from '../../../types';
+import type { GroupByOptions, GroupedInferenceEndpointsData } from '../../../types';
+import { GroupByIcon } from './group_by_icon';
 
 export interface GroupByHeaderButtonProps {
   data: GroupedInferenceEndpointsData;
+  groupBy: GroupByOptions;
 }
-export const GroupByHeaderButton = ({ data }: GroupByHeaderButtonProps) => {
+export const GroupByHeaderButton = ({ data, groupBy }: GroupByHeaderButtonProps) => {
   return (
     <EuiFlexGroup
-      gutterSize="m"
+      gutterSize="xs"
       alignItems="center"
+      justifyContent="spaceBetween"
       data-test-subj={`${data.groupId}-accordion-header`}
     >
+      <GroupByIcon groupBy={groupBy} data={data} />
       <EuiText>
         <strong>{data.groupLabel}</strong>
       </EuiText>
+      <EuiSpacer />
       <EuiBadge>
         {i18n.translate(
           'xpack.searchInferenceEndpoints.groupedEndpoints.headers.endpointsCountBadge',

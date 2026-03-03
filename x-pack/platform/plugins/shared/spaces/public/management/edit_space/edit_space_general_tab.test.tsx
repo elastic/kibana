@@ -22,6 +22,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
 import { EditSpaceProviderRoot } from './provider/edit_space_provider';
@@ -540,5 +541,223 @@ describe('EditSpaceSettings', () => {
     });
 
     expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides CustomizeCps component when project_routing capability is not present', async () => {
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={space}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('shows CustomizeCps component when project_routing.read_space_default capability is true', async () => {
+    const TestComponentWithCapability: React.FC<React.PropsWithChildren> = ({ children }) => {
+      return (
+        <IntlProvider locale="en">
+          <KibanaContextProvider
+            services={{
+              application: {
+                capabilities: {
+                  navLinks: {},
+                  management: {},
+                  catalogue: {},
+                  spaces: { manage: true },
+                  project_routing: { read_space_default: true, manage_space_default: true },
+                },
+              },
+            }}
+          >
+            <EditSpaceProviderRoot
+              capabilities={{
+                navLinks: {},
+                management: {},
+                catalogue: {},
+                spaces: { manage: true },
+                project_routing: { read_space_default: true, manage_space_default: true },
+              }}
+              getUrlForApp={getUrlForApp}
+              navigateToUrl={navigateToUrl}
+              serverBasePath=""
+              spacesManager={spacesManager}
+              getRolesAPIClient={getRolesAPIClient}
+              http={http}
+              notifications={notifications}
+              overlays={overlays}
+              getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
+              getPrivilegesAPIClient={getPrivilegeAPIClient}
+              getSecurityLicense={getSecurityLicenseMock}
+              userProfile={userProfile}
+              theme={theme}
+              i18n={i18n}
+              logger={logger}
+              enableSecurityLink=""
+            >
+              {children}
+            </EditSpaceProviderRoot>
+          </KibanaContextProvider>
+        </IntlProvider>
+      );
+    };
+
+    render(
+      <TestComponentWithCapability>
+        <EditSpaceSettingsTab
+          space={space}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponentWithCapability>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+    });
+  });
+
+  it('hides CustomizeCps component when project_routing.read_space_default capability is false', async () => {
+    const TestComponentWithCapability: React.FC<React.PropsWithChildren> = ({ children }) => {
+      return (
+        <IntlProvider locale="en">
+          <KibanaContextProvider
+            services={{
+              application: {
+                capabilities: {
+                  navLinks: {},
+                  management: {},
+                  catalogue: {},
+                  spaces: { manage: true },
+                  project_routing: { read_space_default: false, manage_space_default: true },
+                },
+              },
+            }}
+          >
+            <EditSpaceProviderRoot
+              capabilities={{
+                navLinks: {},
+                management: {},
+                catalogue: {},
+                spaces: { manage: true },
+                project_routing: { read_space_default: false, manage_space_default: true },
+              }}
+              getUrlForApp={getUrlForApp}
+              navigateToUrl={navigateToUrl}
+              serverBasePath=""
+              spacesManager={spacesManager}
+              getRolesAPIClient={getRolesAPIClient}
+              http={http}
+              notifications={notifications}
+              overlays={overlays}
+              getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
+              getPrivilegesAPIClient={getPrivilegeAPIClient}
+              getSecurityLicense={getSecurityLicenseMock}
+              userProfile={userProfile}
+              theme={theme}
+              i18n={i18n}
+              logger={logger}
+              enableSecurityLink=""
+            >
+              {children}
+            </EditSpaceProviderRoot>
+          </KibanaContextProvider>
+        </IntlProvider>
+      );
+    };
+
+    render(
+      <TestComponentWithCapability>
+        <EditSpaceSettingsTab
+          space={space}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponentWithCapability>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('includes projectRouting in updateSpace request when space has projectRouting', async () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      projectRouting: '_alias:_origin',
+    };
+
+    // Mock getActiveSpace to return the space being edited
+    const getActiveSpaceSpy = jest
+      .spyOn(spacesManager, 'getActiveSpace')
+      .mockResolvedValue(spaceToUpdate);
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    // Update the space name to make the form dirty
+    const nameInput = screen.getByTestId('addSpaceName');
+    fireEvent.change(nameInput, { target: { value: 'Updated Space Name' } });
+
+    // Click save
+    const updateButton = await screen.findByTestId('save-space-button');
+    await userEvent.click(updateButton);
+
+    // Verify updateSpace was called with projectRouting included
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalled();
+      const callArgs = updateSpaceSpy.mock.calls[0][0];
+      expect(callArgs).toMatchObject({
+        id: 'existing-space',
+        name: 'Updated Space Name',
+        projectRouting: '_alias:_origin',
+      });
+    });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+
+    // Clean up
+    getActiveSpaceSpy.mockRestore();
   });
 });

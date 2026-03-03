@@ -10,7 +10,11 @@
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
-import { useContentListItems, type ContentListItem } from '@kbn/content-list-provider';
+import {
+  useContentListItems,
+  useDeleteConfirmation,
+  type ContentListItem,
+} from '@kbn/content-list-provider';
 import { Column as BaseColumn, NameColumn, UpdatedAtColumn, ActionsColumn } from './column';
 import { Action as BaseAction, EditAction, DeleteAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
@@ -116,7 +120,9 @@ const ContentListTableComponent = ({
   const { items: rawItems, isLoading: loading, error } = useContentListItems();
   const items = useMemo(() => (filter ? rawItems.filter(filter) : rawItems), [rawItems, filter]);
 
-  const columns = useColumns(children);
+  const { requestDelete, deleteModal } = useDeleteConfirmation();
+
+  const columns = useColumns(children, requestDelete);
   const { sorting, onChange } = useSorting();
   const { selection } = useSelection();
 
@@ -128,20 +134,23 @@ const ContentListTableComponent = ({
   }
 
   return (
-    <EuiBasicTable
-      tableCaption={title}
-      columns={columns}
-      compressed={compressed}
-      error={error?.message}
-      itemId={(item) => getRowId(item.id)}
-      items={items}
-      loading={loading}
-      onChange={onChange}
-      sorting={sorting}
-      selection={selection}
-      tableLayout={tableLayout}
-      data-test-subj={dataTestSubj}
-    />
+    <>
+      <EuiBasicTable
+        tableCaption={title}
+        columns={columns}
+        compressed={compressed}
+        error={error?.message}
+        itemId={(item) => getRowId(item.id)}
+        items={items}
+        loading={loading}
+        onChange={onChange}
+        sorting={sorting}
+        selection={selection}
+        tableLayout={tableLayout}
+        data-test-subj={dataTestSubj}
+      />
+      {deleteModal}
+    </>
   );
 };
 

@@ -24,8 +24,8 @@ import {
   type DslStepMetaFields,
   type DslStepsFlyoutFormInternal,
   type PreservedTimeUnit,
-  toMilliseconds,
 } from '../form';
+import { downsamplingHelpText, getDoubledDurationFromPrevious, toMilliseconds } from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
 import { useStyles } from '../use_styles';
 import { StepPanel } from './step_panel';
@@ -47,6 +47,9 @@ export interface DslStepsFlyoutArrayViewProps {
   setSelectedStepIndex: (index: number | undefined) => void;
   tabHasErrors: (stepPath: string) => boolean;
   pruneToStepPaths: (stepPaths: string[]) => void;
+  reindexErrorsAfterRemoval: (removedIndex: number) => void;
+  dataRetentionMs?: number;
+  dataRetentionEsFormat?: string;
 }
 
 export const DslStepsFlyoutArrayView = ({
@@ -57,6 +60,9 @@ export const DslStepsFlyoutArrayView = ({
   setSelectedStepIndex,
   tabHasErrors,
   pruneToStepPaths,
+  reindexErrorsAfterRemoval,
+  dataRetentionMs,
+  dataRetentionEsFormat,
 }: DslStepsFlyoutArrayViewProps) => {
   const { items, form } = arrayField;
   const { sectionStyles, headerStyles, headerNoStepsStyles } = useStyles();
@@ -102,31 +108,34 @@ export const DslStepsFlyoutArrayView = ({
     (previousStep?: DslStepMetaFields): DslStepMetaFields => {
       if (previousStep === undefined) {
         return {
-          afterValue: '',
+          afterValue: '1',
           afterUnit: 'd',
-          afterToMilliSeconds: -1,
+          afterToMilliSeconds: toMilliseconds('1', 'd'),
           fixedIntervalValue: '1',
           fixedIntervalUnit: 'd',
         };
       }
 
       const previousAfterUnit = previousStep.afterUnit ?? 'd';
-      const previousAfterNum = Number(previousStep.afterValue);
-      const safePreviousAfterNum =
-        Number.isFinite(previousAfterNum) && previousAfterNum >= 0 ? previousAfterNum : 0;
-      const nextAfterValue = String(safePreviousAfterNum * 2);
-      const nextAfterMs = toMilliseconds(nextAfterValue, previousAfterUnit);
+      const { value: nextAfterValue, ms: nextAfterMs } = getDoubledDurationFromPrevious({
+        previousValue: previousStep.afterValue,
+        previousUnit: previousAfterUnit,
+        previousValueFallback: 0,
+        previousValueMinInclusive: 0,
+      });
 
       const previousFixedUnit = previousStep.fixedIntervalUnit ?? 'd';
-      const previousFixedNum = Number(previousStep.fixedIntervalValue);
-      const safePreviousFixedNum =
-        Number.isFinite(previousFixedNum) && previousFixedNum > 0 ? previousFixedNum : 1;
-      const nextFixedIntervalValue = String(safePreviousFixedNum * 2);
+      const { value: nextFixedIntervalValue } = getDoubledDurationFromPrevious({
+        previousValue: previousStep.fixedIntervalValue,
+        previousUnit: previousFixedUnit,
+        previousValueFallback: 1,
+        previousValueMinExclusive: 0,
+      });
 
       return {
         afterValue: nextAfterValue,
         afterUnit: previousAfterUnit,
-        afterToMilliSeconds: Number.isFinite(nextAfterMs) ? nextAfterMs : -1,
+        afterToMilliSeconds: nextAfterMs,
         fixedIntervalValue: nextFixedIntervalValue,
         fixedIntervalUnit: previousFixedUnit,
       };
@@ -156,6 +165,7 @@ export const DslStepsFlyoutArrayView = ({
         _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
       };
       form.updateFieldValues(payload, { runDeserializer: false });
+      void form.validate();
     },
     [
       clampStepIndex,
@@ -256,6 +266,7 @@ export const DslStepsFlyoutArrayView = ({
       _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
     };
     form.updateFieldValues(payload, { runDeserializer: false });
+    void form.validate();
     setSelectedStepIndex(nextIndex);
   }, [createNextStepFromPrevious, form, getCurrentSteps, items.length, setSelectedStepIndex]);
 
@@ -263,11 +274,14 @@ export const DslStepsFlyoutArrayView = ({
     (stepIndex: number) => {
       const oldLength = items.length;
 
+      reindexErrorsAfterRemoval(stepIndex);
+
       const nextSteps = getCurrentSteps().filter((_, index) => index !== stepIndex);
       const payload: DslStepsFlyoutFormFieldUpdate = {
         _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
       };
       form.updateFieldValues(payload, { runDeserializer: false });
+      void form.validate();
 
       if (selectedStepIndex === undefined) return;
       const newLength = oldLength - 1;
@@ -285,7 +299,14 @@ export const DslStepsFlyoutArrayView = ({
         setSelectedStepIndex(Math.min(selectedStepIndex, newLength - 1));
       }
     },
-    [form, getCurrentSteps, items.length, selectedStepIndex, setSelectedStepIndex]
+    [
+      form,
+      getCurrentSteps,
+      items.length,
+      reindexErrorsAfterRemoval,
+      selectedStepIndex,
+      setSelectedStepIndex,
+    ]
   );
 
   return (
@@ -305,6 +326,11 @@ export const DslStepsFlyoutArrayView = ({
                 })}
               </h2>
             </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {downsamplingHelpText}
+            </EuiText>
           </EuiFlexItem>
 
           {items.length > 0 && (
@@ -369,6 +395,8 @@ export const DslStepsFlyoutArrayView = ({
               onRemoveStep={removeStep}
               dataTestSubj={dataTestSubj}
               timeUnitOptions={TIME_UNIT_OPTIONS}
+              dataRetentionMs={dataRetentionMs}
+              dataRetentionEsFormat={dataRetentionEsFormat}
             />
           ))
         )}

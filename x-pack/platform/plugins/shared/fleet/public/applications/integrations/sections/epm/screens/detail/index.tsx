@@ -76,6 +76,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
+import { AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -93,6 +94,7 @@ export type DetailViewPanelName =
   | 'overview'
   | 'policies'
   | 'assets'
+  | 'alerting'
   | 'settings'
   | 'custom'
   | 'api-reference'
@@ -134,7 +136,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -421,6 +423,11 @@ export function Detail() {
         hash,
       });
 
+      const agentlessStatus = getAgentlessStatusForPackage(
+        packageInfo ?? undefined,
+        integration ?? undefined
+      );
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
@@ -429,8 +436,8 @@ export function Detail() {
         isFirstTimeAgentUser,
         pkgkey,
         prerelease,
-        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
-        isAgentlessDefault,
+        isAgentlessIntegration: agentlessStatus.isAgentless,
+        isAgentlessDefault: agentlessStatus.isDefaultDeploymentMode,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -465,9 +472,8 @@ export function Detail() {
       isFirstTimeAgentUser,
       pkgkey,
       prerelease,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       packageInfo,
-      isAgentlessDefault,
       returnAppId,
       returnPath,
       services.application,
@@ -699,6 +705,21 @@ export function Detail() {
       });
     }
 
+    if (isInstalled && packageInfo.type === 'integration') {
+      tabs.push({
+        id: 'alerting',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAlertingLinkText"
+            defaultMessage="Alerting"
+          />
+        ),
+        isSelected: panel === 'alerting',
+        'data-test-subj': `tab-alerting`,
+        href: getHref('integration_details_alerting', pathValues),
+      });
+    }
+
     if (canReadPackageSettings) {
       tabs.push({
         id: 'settings',
@@ -857,10 +878,14 @@ export function Detail() {
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
               isCustomPackage={isCustomPackage}
+              integrationInfo={integrationInfo}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_alerting}>
+            <AlertingPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />

@@ -118,11 +118,11 @@ describe('ProcessorFieldSelector', () => {
   });
 
   describe('Default Configuration', () => {
-    it('renders with default labels', () => {
+    it('renders with default label and no default help text', () => {
       renderComponent();
 
-      expect(screen.getByLabelText('Source Field')).toBeInTheDocument();
-      expect(screen.getByText('Select or enter a field name')).toBeInTheDocument();
+      expect(screen.getByLabelText('Field')).toBeInTheDocument();
+      expect(screen.queryByText('Select or enter a field name')).not.toBeInTheDocument();
     });
 
     it('uses default fieldKey', () => {

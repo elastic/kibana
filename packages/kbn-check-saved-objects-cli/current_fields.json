@@ -866,6 +866,7 @@
   ],
   "integration-config": [
     "created_by",
+    "created_by_profile_uid",
     "data_stream_count",
     "integration_id",
     "metadata",
@@ -921,6 +922,11 @@
     "title",
     "uiStateJSON",
     "version"
+  ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
@@ -1376,6 +1382,12 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "watchlist-config": [
+    "description",
+    "managed",
+    "name",
+    "riskModifier"
   ],
   "workplace_search_telemetry": []
 }

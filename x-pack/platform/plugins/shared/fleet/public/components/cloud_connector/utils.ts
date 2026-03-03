@@ -8,13 +8,7 @@
 import gte from 'semver/functions/gte';
 import { i18n } from '@kbn/i18n';
 
-import type {
-  NewPackagePolicy,
-  NewPackagePolicyInput,
-  NewPackagePolicyInputStream,
-  PackageInfo,
-  PackagePolicyConfigRecord,
-} from '../../../common';
+import type { PackageInfo, PackagePolicyConfigRecord } from '../../../common';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
@@ -25,32 +19,21 @@ import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
   CloudConnectorCredentials,
-  CloudProviders,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
-  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
   CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
-  SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
-  AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
-  AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
 } from './constants';
-
-export type AzureCloudConnectorFieldNames =
-  (typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES];
-
-export type AwsCloudConnectorFieldNames =
-  (typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES];
 
 // Cloud connector name validation constants
 export const CLOUD_CONNECTOR_NAME_MAX_LENGTH = 255;
@@ -120,22 +103,6 @@ export function isAzureCredentials(
   return 'tenantId' in credentials;
 }
 
-export function hasValidNewConnectionCredentials(
-  credentials: CloudConnectorCredentials,
-  provider?: string
-): boolean {
-  if (!provider) return false;
-
-  switch (provider) {
-    case AWS_PROVIDER:
-      return isAwsCredentials(credentials) && !!credentials.roleArn;
-    case AZURE_PROVIDER:
-      return isAzureCredentials(credentials) && !!credentials.tenantId;
-    default:
-      return false;
-  }
-}
-
 export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   const match = url.match(/\/deployments\/([^/?#]+)/);
@@ -179,44 +146,14 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
-const getAccountTypeFromInput = (
-  input: NewPackagePolicyInput,
-  provider: CloudProviders
-): string | undefined => {
-  switch (provider) {
-    case AWS_PROVIDER:
-      return input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT;
-    case AZURE_PROVIDER:
-      return (
-        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT
-      );
-  }
-  return undefined;
-};
-
-const getTemplateFieldNameByProvider = (provider: CloudProviders): string | undefined => {
-  switch (provider) {
-    case AWS_PROVIDER:
-      return CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS;
-    case AZURE_PROVIDER:
-      return ARM_TEMPLATE_URL_CLOUD_CONNECTORS;
-    default:
-      return undefined;
-  }
-};
-
 export const getCloudConnectorRemoteRoleTemplate = ({
-  input,
   cloud,
-  packageInfo,
-  templateName,
-  provider,
+  accountType,
+  iacTemplateUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
-  const accountType = getAccountTypeFromInput(input, provider);
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-  const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
 
   if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
     elasticResourceId = cloud.serverless.projectId;
@@ -226,144 +163,11 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     elasticResourceId = kibanaComponentId;
   }
 
-  if (!elasticResourceId || !templateUrlFieldName || !accountType) return undefined;
+  if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
 
-  return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
-};
-
-/**
- * Helper function to update policy inputs with new variables
- * @param policy - The package policy to update
- * @param updatedVars - The updated variables to apply
- * @returns Updated policy with new input variables
- */
-const updatePolicyInputsWithVars = (
-  policy: NewPackagePolicy,
-  updatedVars: PackagePolicyConfigRecord
-): NewPackagePolicy => {
-  // Create a deep copy to avoid circular references
-  const updatedPolicy: NewPackagePolicy = {
-    ...policy,
-    inputs: policy.inputs
-      .map((input: NewPackagePolicyInput) => {
-        if (input.enabled && input.streams[0]?.enabled) {
-          return {
-            ...input,
-            streams: input.streams.map((stream: NewPackagePolicyInputStream) => {
-              if (stream.enabled) {
-                return {
-                  ...stream,
-                  vars: { ...updatedVars }, // Create a shallow copy instead of referencing directly
-                };
-              }
-              return { ...stream }; // Return a copy of the original stream if not enabled
-            }),
-          };
-        }
-        return { ...input }; // Return a copy of the original input if not enabled
-      })
-      .filter(Boolean), // Filter out undefined values
-  };
-
-  return updatedPolicy;
-};
-
-/**
- * Update AWS cloud connector credentials in package policy
- */
-export const updatePolicyWithAwsCloudConnectorCredentials = (
-  packagePolicy: NewPackagePolicy,
-  input: NewPackagePolicyInput,
-  inputCredentials: Partial<Record<AwsCloudConnectorFieldNames, string | undefined>>
-): NewPackagePolicy => {
-  if (!inputCredentials) return packagePolicy;
-
-  const updatedPolicy = { ...packagePolicy };
-
-  if (!updatedPolicy.inputs) {
-    updatedPolicy.inputs = [];
-  }
-
-  if (!input.streams[0].vars) return updatedPolicy;
-
-  const updatedVars = { ...input.streams[0].vars };
-
-  // Update role_arn if it exists in inputCredentials
-  if (inputCredentials.role_arn) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value = inputCredentials.role_arn;
-  }
-  // Update external_id if it exists in inputCredentials
-  if (inputCredentials.external_id) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value = inputCredentials.external_id;
-  }
-  // Update aws.role_arn if it exists in inputCredentials
-  if (inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
-      inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
-  }
-  // Update aws.credentials.external_id if it exists in inputCredentials
-  if (inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
-      inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
-  }
-
-  return updatePolicyInputsWithVars(updatedPolicy, updatedVars);
-};
-
-/**
- * Updates input variables with Aazure credentials
- * @param inputVars - The original input variables
- * @param inputCredentials - The Azure credentials to apply
- * @returns Updated input variables with Azure credentials applied
- */
-export const updatePolicyWithAzureCloudConnectorCredentials = (
-  packagePolicy: NewPackagePolicy,
-  input: NewPackagePolicyInput,
-  inputCredentials: Partial<Record<AzureCloudConnectorFieldNames, string | undefined>>
-): NewPackagePolicy => {
-  if (!inputCredentials) return packagePolicy;
-
-  const updatedPolicy = { ...packagePolicy };
-
-  if (!updatedPolicy.inputs || !updatedPolicy.inputs[0]) {
-    return updatedPolicy;
-  }
-
-  if (!input.streams || !input.streams[0].vars) return updatedPolicy;
-
-  const updatedVars = { ...input.streams[0].vars };
-
-  // Update tenant_id if it exists in inputCredentials
-  if (inputCredentials.tenant_id) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value = inputCredentials.tenant_id;
-  }
-
-  // Update client_id if it exists in inputCredentials
-  if (inputCredentials.client_id) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value = inputCredentials.client_id;
-  }
-
-  // Update azure.credentials.tenant_id if exists in inputCredentials
-  if (inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID].value =
-      inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID];
-  }
-
-  // Update azure.credentials.client_id if exists in inputCredentials
-  if (inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID].value =
-      inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID];
-  }
-
-  // Update azure_credentials_cloud_connector_id if exists in inputCredentials
-  if (inputCredentials.azure_credentials_cloud_connector_id) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID].value =
-      inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID];
-  }
-
-  return updatePolicyInputsWithVars(updatedPolicy, updatedVars);
+  return iacTemplateUrl
+    .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+    .replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 /**
@@ -529,22 +333,35 @@ export const updateInputVarsWithCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
+  let updatedVars: PackagePolicyConfigRecord | undefined;
+
   // If credentials is undefined, clear all credential fields (both AWS and Azure)
   if (!credentials) {
-    let clearedVars = updateInputVarsWithAwsCredentials(inputVars, undefined);
-    clearedVars = updateInputVarsWithAzureCredentials(clearedVars, undefined);
-    return clearedVars;
+    updatedVars = updateInputVarsWithAwsCredentials(inputVars, undefined);
+    updatedVars = updateInputVarsWithAzureCredentials(updatedVars, undefined);
+  } else if (isAwsCredentials(credentials)) {
+    updatedVars = updateInputVarsWithAwsCredentials(inputVars, credentials);
+  } else if (isAzureCredentials(credentials)) {
+    updatedVars = updateInputVarsWithAzureCredentials(inputVars, credentials);
+  } else {
+    updatedVars = inputVars;
   }
 
-  if (isAwsCredentials(credentials)) {
-    return updateInputVarsWithAwsCredentials(inputVars, credentials);
+  // Set supports_cloud_connectors flag if the var exists in the record.
+  // This flag is required for the agent's auth provider to use cloud connector
+  // credential exchange and must be set alongside other cloud connector vars.
+  // Always explicitly false when not using cloud connectors (never undefined).
+  if (updatedVars && SUPPORTS_CLOUD_CONNECTORS_VAR_NAME in updatedVars) {
+    updatedVars = {
+      ...updatedVars,
+      [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]: {
+        ...updatedVars[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME],
+        value: !!credentials,
+      },
+    };
   }
 
-  if (isAzureCredentials(credentials)) {
-    return updateInputVarsWithAzureCredentials(inputVars, credentials);
-  }
-
-  return inputVars;
+  return updatedVars;
 };
 
 export const isCloudConnectorReusableEnabled = (
@@ -559,6 +376,10 @@ export const isCloudConnectorReusableEnabled = (
     if (templateName === 'asset_inventory') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
+
+    if (templateName === 'aws') {
+      return true;
+    }
   } else if (provider === AZURE_PROVIDER) {
     if (templateName === 'cspm') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION);
@@ -567,6 +388,7 @@ export const isCloudConnectorReusableEnabled = (
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
   }
+
   return false;
 };
 
@@ -576,6 +398,13 @@ export const isCloudConnectorReusableEnabled = (
  * If found, it returns the variable definition object; otherwise, it returns undefined.
  */
 export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
+  // First check package-level vars (for scope-aware credential storage)
+  const packageLevelVar = packageInfo?.vars?.find((v) => v?.name === key);
+  if (packageLevelVar) {
+    return packageLevelVar;
+  }
+
+  // Then check data stream vars
   return packageInfo?.data_streams
     ?.filter((datastreams) => datastreams !== undefined)
     .map((ds) => ds.streams)
