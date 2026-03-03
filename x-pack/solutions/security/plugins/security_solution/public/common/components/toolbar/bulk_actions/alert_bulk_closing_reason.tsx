@@ -83,7 +83,6 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
         options={options}
         onChange={(updatedOptions) => setOptions(updatedOptions)}
         singleSelection="always"
-        height={options.length * 32}
       >
         {(list) => list}
       </EuiSelectable>
