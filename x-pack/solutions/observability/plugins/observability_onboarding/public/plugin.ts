@@ -95,6 +95,44 @@ export class ObservabilityOnboardingPlugin
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: ['add data'],
+      deepLinks: [
+        {
+          id: 'ingest-hub',
+          title: 'Get started',
+          path: '/ingest-hub',
+          visibleIn: [],
+        },
+        {
+          id: 'ingest-hub-integrations',
+          title: 'Integrations',
+          path: '/ingest-hub/integrations',
+          visibleIn: [],
+        },
+        {
+          id: 'ingest-hub-api-endpoint',
+          title: 'API Endpoint',
+          path: '/ingest-hub/api-endpoint',
+          visibleIn: [],
+        },
+        {
+          id: 'ingest-hub-platform-migration',
+          title: 'Platform Migration',
+          path: '/ingest-hub/platform-migration',
+          visibleIn: [],
+        },
+        {
+          id: 'ingest-hub-dashboards',
+          title: 'Dashboards',
+          path: '/ingest-hub/dashboards',
+          visibleIn: [],
+        },
+        {
+          id: 'ingest-hub-rules',
+          title: 'Rules & Monitors',
+          path: '/ingest-hub/rules',
+          visibleIn: [],
+        },
+      ],
       async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([

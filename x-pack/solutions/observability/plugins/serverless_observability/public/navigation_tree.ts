@@ -390,6 +390,70 @@ export const createNavigationTree = ({
         icon: 'plusInCircle',
       },
       {
+        id: 'ingestHub',
+        title: i18n.translate('xpack.serverlessObservability.nav.ingestHub', {
+          defaultMessage: 'Ingest Hub',
+        }),
+        link: 'observabilityOnboarding:ingest-hub',
+        renderAs: 'panelOpener',
+        icon: 'logstashInput',
+        children: [
+          {
+            id: 'ingestHub_main',
+            title: '',
+            children: [
+              {
+                link: 'observabilityOnboarding:ingest-hub',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.getStarted', {
+                  defaultMessage: 'Get started',
+                }),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-integrations',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.integrations', {
+                  defaultMessage: 'Integrations',
+                }),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-api-endpoint',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.apiEndpoint', {
+                  defaultMessage: 'API Endpoint',
+                }),
+              },
+            ],
+          },
+          {
+            id: 'ingestHub_migration',
+            title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.migration', {
+              defaultMessage: 'Migration',
+            }),
+            children: [
+              {
+                link: 'observabilityOnboarding:ingest-hub-platform-migration',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.ingestHub.platformMigration',
+                  {
+                    defaultMessage: 'Platform Migration',
+                  }
+                ),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-dashboards',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.dashboards', {
+                  defaultMessage: 'Dashboards',
+                }),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-rules',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.rules', {
+                  defaultMessage: 'Rules & Monitors',
+                }),
+              },
+            ],
+          },
+        ],
+      },
+      {
         id: 'devTools',
         title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
           defaultMessage: 'Developer tools',

@@ -29,12 +29,13 @@ export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, t
   const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
   const isRootPage = normalizedPathname === '';
+  const isIngestHub = normalizedPathname.startsWith('/ingest-hub');
 
   const feedbackButtonLabel = i18n.translate('xpack.observability_onboarding.header.feedback', {
     defaultMessage: 'Give feedback',
   });
 
-  if (!context.isServerless && !isRootPage && isFeedbackEnabled) {
+  if (!context.isServerless && !isRootPage && !isIngestHub && isFeedbackEnabled) {
     return (
       <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
         <EuiButtonEmpty

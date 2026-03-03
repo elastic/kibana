@@ -34,6 +34,13 @@ type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
 type UptimeApp = typeof UPTIME_APP_ID;
 type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
+export type ObservabilityOnboardingLinkId =
+  | 'ingest-hub'
+  | 'ingest-hub-integrations'
+  | 'ingest-hub-api-endpoint'
+  | 'ingest-hub-platform-migration'
+  | 'ingest-hub-dashboards'
+  | 'ingest-hub-rules';
 type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
@@ -96,6 +103,7 @@ export type StreamsLinkId = 'overview';
 export type LinkId =
   | LogsLinkId
   | ObservabilityOverviewLinkId
+  | ObservabilityOnboardingLinkId
   | MetricsLinkId
   | ApmLinkId
   | SyntheticsLinkId
@@ -111,6 +119,7 @@ export type DeepLinkId =
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
   | `${UptimeApp}:${UptimeLinkId}`
+  | `${ObservabilityOnboardingApp}:${ObservabilityOnboardingLinkId}`
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`;
