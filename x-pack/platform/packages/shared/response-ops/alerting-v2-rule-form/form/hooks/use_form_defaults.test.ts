@@ -26,6 +26,7 @@ describe('useFormDefaults', () => {
           base: '',
         },
       },
+      noData: { timeframe: '5m' },
       grouping: undefined,
     });
   });

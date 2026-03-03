@@ -12,6 +12,7 @@ import { ScheduleField } from '../fields/schedule_field';
 import { TimeFieldSelect } from '../fields/time_field_select';
 import { LookbackWindowField } from '../fields/lookback_window_field';
 import { GroupFieldSelect } from '../fields/group_field_select';
+import { NoDataHandlingField } from '../fields/no_data_handling_field';
 
 export const RuleExecutionFieldGroup: React.FC = () => {
   return (
@@ -24,6 +25,7 @@ export const RuleExecutionFieldGroup: React.FC = () => {
       <TimeFieldSelect />
       <LookbackWindowField />
       <GroupFieldSelect />
+      <NoDataHandlingField />
     </FieldGroup>
   );
 };
