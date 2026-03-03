@@ -8,13 +8,13 @@
  */
 
 import type { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ICommandContext,
   ISuggestionItem,
   Location,
 } from '../../../../registry/types';
-import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../../../types';
 import type {
   FunctionDefinition,
   FunctionDefinitionTypes,

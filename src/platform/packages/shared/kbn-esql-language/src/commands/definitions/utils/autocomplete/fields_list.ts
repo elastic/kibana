@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isFunctionExpression, within, isAssignment, isColumn } from '../../../../ast';
-import type { ESQLAstAllCommands, ESQLAstField } from '../../../../types';
+import { isFunctionExpression, within, isAssignment, isColumn } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import {
   getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,

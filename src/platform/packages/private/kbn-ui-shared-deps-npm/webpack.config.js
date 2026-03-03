@@ -60,6 +60,8 @@ module.exports = (_, argv) => {
         // modules from npm
         '@elastic/apm-rum-core',
         '@elastic/charts',
+        '@elastic/esql',
+        '@elastic/esql/types',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',
         '@elastic/eui/optimize/es/services/theme/warning',
