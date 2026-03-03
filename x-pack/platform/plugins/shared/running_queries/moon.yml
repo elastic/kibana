@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/discover-plugin'
   - '@kbn/share-plugin'
   - '@kbn/config-schema'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
