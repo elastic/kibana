@@ -5,41 +5,46 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
-test.describe('User with basic license should hit License Paywall', { tag: ['@ess'] }, () => {
-  test('Create Integration is not accessible when user is basic', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    // Mock the licensing API to return a basic license
-    await page.route('**/api/licensing/info', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          license: {
-            uid: 'someId',
-            type: 'basic',
-            mode: 'basic',
-            expiryDateInMillis: 4884310543000,
-            status: 'active',
-          },
-          signature: 'someIdAgain',
-        }),
-      })
-    );
+test.describe(
+  'User with basic license should hit License Paywall',
+  { tag: [...tags.stateful.classic] },
+  () => {
+    test('Create Integration is not accessible when user is basic', async ({
+      browserAuth,
+      pageObjects,
+      page,
+    }) => {
+      // Mock the licensing API to return a basic license
+      await page.route('**/api/licensing/info', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            license: {
+              uid: 'someId',
+              type: 'basic',
+              mode: 'basic',
+              expiryDateInMillis: 4884310543000,
+              status: 'active',
+            },
+            signature: 'someIdAgain',
+          }),
+        })
+      );
 
-    await browserAuth.loginAsPrivilegedUser();
-    const { createIntegrationLanding } = pageObjects;
+      await browserAuth.loginAsPrivilegedUser();
+      const { createIntegrationLanding } = pageObjects;
 
-    await createIntegrationLanding.navigateTo();
-    await createIntegrationLanding.waitForPageToLoad();
+      await createIntegrationLanding.navigateTo();
+      await createIntegrationLanding.waitForPageToLoad();
 
-    // Verify License Paywall Card is visible
-    await expect(createIntegrationLanding.getLicensePaywallCard()).toBeVisible();
-  });
-});
+      // Verify License Paywall Card is visible
+      await expect(createIntegrationLanding.getLicensePaywallCard()).toBeVisible();
+    });
+  }
+);

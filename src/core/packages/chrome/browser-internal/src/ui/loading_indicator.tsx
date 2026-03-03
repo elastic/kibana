@@ -10,10 +10,11 @@
 import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import classNames from 'classnames';
-import type { Subscription } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
+
+const DEBOUNCE_DELAY_MS = 250;
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -23,114 +24,100 @@ export interface LoadingIndicatorProps {
   valueAmount?: string | number;
 }
 
-export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
-  public static defaultProps = { showAsBar: false };
+export const LoadingIndicator = ({
+  loadingCount$,
+  showAsBar = false,
+  customLogo,
+  maxAmount,
+  valueAmount,
+}: LoadingIndicatorProps) => {
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  private loadingCountSubscription?: Subscription;
-
-  state = {
-    visible: false,
-  };
-
-  private timer: any;
-  private increment = 1;
-
-  componentDidMount() {
-    this.loadingCountSubscription = this.props.loadingCount$.subscribe((count) => {
-      if (this.increment > 1) {
-        clearTimeout(this.timer);
-      }
-      this.increment += this.increment;
-      this.timer = setTimeout(() => {
-        this.setState({
-          visible: count > 0,
-        });
-      }, 250);
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.loadingCountSubscription) {
-      clearTimeout(this.timer);
-      this.loadingCountSubscription.unsubscribe();
-      this.loadingCountSubscription = undefined;
-    }
-  }
-
-  render() {
-    const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
-    const indicatorHiddenCss = !this.state.visible
-      ? css({
-          visibility: 'hidden',
-          animationPlayState: 'paused',
-        })
-      : undefined;
-
-    const testSubj = this.state.visible
-      ? 'globalLoadingIndicator'
-      : 'globalLoadingIndicator-hidden';
-
-    const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
-      defaultMessage: 'Loading content',
+  useEffect(() => {
+    const subscription = loadingCount$.subscribe((count) => {
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setVisible(count > 0);
+      }, DEBOUNCE_DELAY_MS);
     });
 
-    const logoImage = this.props.customLogo ? (
-      <EuiImage
-        src={this.props.customLogo}
-        data-test-subj={testSubj}
-        size={24}
-        alt="logo"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
-          defaultMessage: 'User logo',
-        })}
-      />
-    ) : (
-      <EuiIcon
-        type={'logoElastic'}
-        size="l"
-        data-test-subj={testSubj}
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-          defaultMessage: 'Elastic Logo',
-        })}
-      />
-    );
+    return () => {
+      clearTimeout(timerRef.current);
+      subscription.unsubscribe();
+    };
+  }, [loadingCount$]);
 
-    const logo = this.state.visible ? (
-      <EuiLoadingSpinner
-        size="l"
-        data-test-subj={testSubj}
-        aria-hidden={false}
-        aria-label={ariaLabel}
-      />
-    ) : (
-      logoImage
-    );
+  const className = classNames(!visible && 'kbnLoadingIndicator-hidden');
+  const indicatorHiddenCss = !visible
+    ? css({
+        visibility: 'hidden',
+        animationPlayState: 'paused',
+      })
+    : undefined;
 
-    return (
-      <>
-        <Global
-          styles={{
-            '.euiHeaderSectionItem .euiButtonEmpty__text': {
-              // stop global header buttons from jumping during loading state
-              display: 'flex',
-            },
-          }}
+  const testSubj = visible ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
+
+  const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
+    defaultMessage: 'Loading content',
+  });
+
+  const logoImage = customLogo ? (
+    <EuiImage
+      src={customLogo}
+      data-test-subj={testSubj}
+      size={24}
+      alt="logo"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
+        defaultMessage: 'User logo',
+      })}
+    />
+  ) : (
+    <EuiIcon
+      type={'logoElastic'}
+      size="l"
+      data-test-subj={testSubj}
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+        defaultMessage: 'Elastic Logo',
+      })}
+    />
+  );
+
+  const logo = visible ? (
+    <EuiLoadingSpinner
+      size="l"
+      data-test-subj={testSubj}
+      aria-hidden={false}
+      aria-label={ariaLabel}
+    />
+  ) : (
+    logoImage
+  );
+
+  return (
+    <>
+      <Global
+        styles={{
+          '.euiHeaderSectionItem .euiButtonEmpty__text': {
+            // stop global header buttons from jumping during loading state
+            display: 'flex',
+          },
+        }}
+      />
+      {!showAsBar ? (
+        logo
+      ) : (
+        <EuiProgress
+          className={className}
+          css={indicatorHiddenCss}
+          data-test-subj={testSubj}
+          max={maxAmount}
+          value={valueAmount}
+          position="fixed"
+          color="accent"
+          size="xs"
         />
-        {!this.props.showAsBar ? (
-          logo
-        ) : (
-          <EuiProgress
-            className={className}
-            css={indicatorHiddenCss}
-            data-test-subj={testSubj}
-            max={this.props.maxAmount}
-            value={this.props.valueAmount}
-            position="fixed"
-            color="accent"
-            size="xs"
-          />
-        )}
-      </>
-    );
-  }
-}
+      )}
+    </>
+  );
+};

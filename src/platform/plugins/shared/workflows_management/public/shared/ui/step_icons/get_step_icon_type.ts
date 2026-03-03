@@ -9,27 +9,25 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-// eslint-disable-next-line complexity
+export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
+  switch (triggerType) {
+    case 'trigger_manual':
+      return 'play';
+    case 'trigger_alert':
+      return 'warning';
+    case 'trigger_document':
+      return 'document';
+    case 'trigger_scheduled':
+      return 'clock';
+    default:
+      return 'info';
+  }
+};
+
 export const getStepIconType = (nodeType: string): EuiIconType => {
   let iconType: EuiIconType = 'info';
 
-  let typeToMatch = nodeType;
-  if (nodeType.startsWith('trigger_')) {
-    typeToMatch = nodeType.replace('trigger_', '');
-  }
-
-  switch (typeToMatch) {
-    // triggers
-    case 'manual':
-      iconType = 'play';
-      break;
-    case 'alert':
-      iconType = 'warning';
-      break;
-    case 'scheduled':
-      iconType = 'clock';
-      break;
-
+  switch (nodeType) {
     // built-in node types
     case 'http':
       iconType = 'globe';
@@ -39,6 +37,10 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
       break;
     case 'data.set':
       iconType = 'tableOfContents';
+      break;
+    case 'workflow.execute':
+    case 'workflow.executeAsync':
+      iconType = 'link';
       break;
 
     // flow control nodes
@@ -79,9 +81,9 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     // will be handled by in getStackConnectorIcon
 
     default:
-      if (typeToMatch.startsWith('elasticsearch')) {
+      if (nodeType.startsWith('elasticsearch')) {
         iconType = 'logoElasticsearch';
-      } else if (typeToMatch.startsWith('kibana')) {
+      } else if (nodeType.startsWith('kibana')) {
         iconType = 'logoKibana';
       } else {
         iconType = 'plugs';

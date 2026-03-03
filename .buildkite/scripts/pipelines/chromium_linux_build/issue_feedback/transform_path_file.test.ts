@@ -16,7 +16,7 @@ import pathFileTransform from './transform_path_file';
 
 // read contents of the path file our transform is built to update
 const pathFileContents = readFileSync(
-  resolve(process.cwd(), '../src/platform/packages/private/kbn-screenshotting-server/src/paths.ts'),
+  resolve(process.cwd(), 'src/platform/packages/private/kbn-screenshotting-server/src/paths.ts'),
   'utf8'
 );
 

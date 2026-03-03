@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/// <reference path="./emotion.d.ts" />
+
 declare module '*.html' {
   const template: string;
   // eslint-disable-next-line import/no-default-export

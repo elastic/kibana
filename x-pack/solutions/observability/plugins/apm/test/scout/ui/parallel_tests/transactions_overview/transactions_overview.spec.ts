@@ -5,52 +5,57 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
-test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
+test.describe(
+  'Transactions Overview',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsViewer();
+    });
 
-  test('Viewer: Page has no detectable a11y violations on load', async ({
-    page,
-    pageObjects: { transactionsOverviewPage },
-  }) => {
-    await transactionsOverviewPage.goto('service-go', testData.START_DATE, testData.END_DATE);
+    test('Viewer: Page has no detectable a11y violations on load', async ({
+      page,
+      pageObjects: { transactionsOverviewPage },
+    }) => {
+      await transactionsOverviewPage.goto('service-go', testData.START_DATE, testData.END_DATE);
 
-    // Verify Transactions tab is selected (same as original Cypress check)
-    await expect(page.getByTestId('transactionsTab')).toHaveAttribute('aria-selected', 'true');
+      // Verify Transactions tab is selected (same as original Cypress check)
+      await expect(page.getByTestId('transactionsTab')).toHaveAttribute('aria-selected', 'true');
 
-    // Run accessibility check scoped to the Kibana app wrapper (same as Cypress checkA11y)
-    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-    expect(violations).toStrictEqual([]);
-  });
+      // Run accessibility check scoped to the Kibana app wrapper (same as Cypress checkA11y)
+      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      expect(violations).toStrictEqual([]);
+    });
 
-  test('Viewer: Persists transaction type selected when navigating to Overview tab', async ({
-    page,
-    pageObjects: { transactionsOverviewPage },
-  }) => {
-    await transactionsOverviewPage.goto('service-node', testData.START_DATE, testData.END_DATE);
+    test('Viewer: Persists transaction type selected when navigating to Overview tab', async ({
+      page,
+      pageObjects: { transactionsOverviewPage },
+    }) => {
+      await transactionsOverviewPage.goto('service-node', testData.START_DATE, testData.END_DATE);
 
-    // Verify default transaction type is 'request'
-    const transactionTypeFilter = transactionsOverviewPage.getTransactionTypeFilter();
-    await expect(transactionTypeFilter).toHaveValue('request');
+      // Verify default transaction type is 'request'
+      const transactionTypeFilter = transactionsOverviewPage.getTransactionTypeFilter();
+      await expect(transactionTypeFilter).toHaveValue('request');
 
-    expect(page.url()).toContain('transactionType=request');
+      expect(page.url()).toContain('transactionType=request');
 
-    // Change to 'Worker' type
-    await transactionsOverviewPage.selectTransactionType('Worker');
-    await expect(transactionTypeFilter).toHaveValue('Worker');
+      // Change to 'Worker' type
+      await transactionsOverviewPage.selectTransactionType('Worker');
+      await expect(transactionTypeFilter).toHaveValue('Worker');
 
-    // Navigate to Overview tab
-    await page.getByTestId('overviewTab').click();
-    await waitForApmSettingsHeaderLink(page);
+      // Navigate to Overview tab
+      await page.getByTestId('overviewTab').click();
+      await waitForApmSettingsHeaderLink(page);
 
-    expect(page.url()).toContain('transactionType=Worker');
+      expect(page.url()).toContain('transactionType=Worker');
 
-    // Verify transaction type is still 'Worker'
-    await expect(transactionTypeFilter).toHaveValue('Worker');
-  });
-});
+      // Verify transaction type is still 'Worker'
+      await expect(transactionTypeFilter).toHaveValue('Worker');
+    });
+  }
+);

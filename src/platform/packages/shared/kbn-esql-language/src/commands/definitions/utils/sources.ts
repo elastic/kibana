@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
+import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
+import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
@@ -17,8 +18,6 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
-import { isAsExpression, Walker } from '../../../ast';
-import { LeafPrinter } from '../../../pretty_print';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -59,15 +58,17 @@ export const buildSourcesDefinitions = (
     let text = getSafeInsertSourceText(name);
     const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
     let rangeToReplace: { start: number; end: number } | undefined;
+    let filterText: string | undefined;
 
-    // If this is a timeseries source we should replace FROM with TS
-    // With TS users can benefit from the timeseries optimizations
+    // If this is a timeseries source we should replace FROM with TS.
     if (isTimeseries && queryString) {
       text = `TS ${text}`;
       rangeToReplace = {
         start: 0,
         end: queryString.length + 1,
       };
+      // Keep filterText source-aware so Monaco can rank/filter by the typed source fragment.
+      filterText = `FROM ${name}`;
     }
 
     return withAutoSuggest({
@@ -86,12 +87,32 @@ export const buildSourcesDefinitions = (
             },
           }),
       sortText: 'A',
-      // with filterText we are explicitly telling the Monaco editor's filtering engine
-      //  to display the item when the text FROM  is present in the editor at the specified range,
-      // even though the label is different.
-      ...(rangeToReplace && { rangeToReplace, filterText: queryString }),
+      ...(rangeToReplace && { rangeToReplace }),
+      ...(filterText && { filterText }),
     });
   });
+
+/**
+ * Builds suggestion items for ES|QL views (GET _query/view).
+ */
+export const buildViewsDefinitions = (
+  views: EsqlView[],
+  alreadyUsed: string[] = []
+): ISuggestionItem[] =>
+  views
+    .filter(({ name }) => !alreadyUsed.includes(name))
+    .map(({ name }) => {
+      const text = getSafeInsertSourceText(name);
+      return withAutoSuggest({
+        label: name,
+        text,
+        kind: 'Issue',
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
+          defaultMessage: 'View',
+        }),
+        sortText: 'A-view',
+      });
+    });
 
 /**
  * Checks if the source exists in the provided sources set.
@@ -155,17 +176,26 @@ export async function additionalSourcesSuggestions(
   queryText: string,
   sources: ESQLSourceResult[],
   ignored: string[],
-  recommendedQuerySuggestions: ISuggestionItem[]
+  recommendedQuerySuggestions: ISuggestionItem[],
+  views: EsqlView[] = []
 ) {
+  const sourceNames = new Set([
+    ...sources.map(({ name }) => name),
+    ...views.map(({ name }) => name),
+  ]);
   const suggestionsToAdd = await handleFragment(
     queryText,
-    (fragment) =>
-      sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+    (fragment) => sourceExists(fragment, sourceNames),
     (_fragment, rangeToReplace) => {
-      return getSourceSuggestions(sources, ignored).map((suggestion) => ({
+      const sourceSuggestions = getSourceSuggestions(sources, ignored).map((suggestion) => ({
         ...suggestion,
         rangeToReplace,
       }));
+      const viewSuggestions = buildViewsDefinitions(views, ignored).map((suggestion) => ({
+        ...suggestion,
+        rangeToReplace,
+      }));
+      return [...sourceSuggestions, ...viewSuggestions];
     },
     (fragment, rangeToReplace) => {
       const exactMatch = sources.find(({ name: _name }) => _name === fragment);
@@ -197,12 +227,16 @@ export async function additionalSourcesSuggestions(
             text: fragment + ' METADATA ',
             rangeToReplace,
           },
-          ...recommendedQuerySuggestions.map((suggestion) => ({
-            ...suggestion,
-            rangeToReplace,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-          })),
+          ...recommendedQuerySuggestions.map((suggestion) =>
+            suggestion.text
+              ? {
+                  ...suggestion,
+                  rangeToReplace,
+                  filterText: fragment,
+                  text: fragment + suggestion.text,
+                }
+              : suggestion
+          ),
         ];
         return _suggestions;
       }
@@ -224,12 +258,12 @@ export const specialIndicesToSuggestions = (
         label: index.name,
         text: index.name + ' ',
         kind: 'Issue',
-        detail: i18n.translate(
-          'kbn-esql-language.esql.autocomplete.specialIndexes.indexType.index',
-          {
-            defaultMessage: 'Index',
-          }
-        ),
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+          defaultMessage: '{type}',
+          values: {
+            type: index.mode ?? SOURCES_TYPES.INDEX,
+          },
+        }),
         sortText: '0-INDEX-' + index.name,
       })
     );

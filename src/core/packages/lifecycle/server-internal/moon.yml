@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/core-pricing-server'
   - '@kbn/core-di-internal'
   - '@kbn/core-data-streams-server'
+  - '@kbn/core-user-activity-server-internal'
 tags:
   - shared-server
   - package

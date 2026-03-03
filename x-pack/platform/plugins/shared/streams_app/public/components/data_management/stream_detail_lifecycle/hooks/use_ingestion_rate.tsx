@@ -52,6 +52,7 @@ const getSamplingProbability = (totalDocs?: number): number => {
 // if the interval should be a calendar_interval or a fixed_interval
 const getIntervalAndType = (
   timeState: TimeState,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   core: { uiSettings: { get: (key: string) => any } }
 ): { interval: string; intervalType: string } | undefined => {
   const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(

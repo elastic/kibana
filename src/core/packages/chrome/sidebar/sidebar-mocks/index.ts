@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type {
   SidebarApp,
-  SidebarAppDefinition,
+  SidebarAppConfig,
   SidebarSetup,
   SidebarStart,
 } from '@kbn/core-chrome-sidebar';
@@ -18,8 +18,9 @@ import type {
 const DEFAULT_WIDTH = 400;
 
 const createSetupContractMock = (): jest.Mocked<SidebarSetup> => {
-  const registerApp = jest.fn(<TParams = {}>(_app: SidebarAppDefinition<TParams>) =>
-    jest.fn()
+  const registerApp = jest.fn(
+    <TState = undefined, TActions = undefined>(_app: SidebarAppConfig<TState, TActions>) =>
+      jest.fn()
   ) as jest.MockedFunction<SidebarSetup['registerApp']>;
 
   return {
@@ -27,13 +28,18 @@ const createSetupContractMock = (): jest.Mocked<SidebarSetup> => {
   };
 };
 
-const createAppMock = <TParams = {}>(): jest.Mocked<SidebarApp<TParams>> => {
+/** Create a mock for SidebarApp with all properties */
+const createAppMock = <TState = undefined, TActions = undefined>(): jest.Mocked<
+  SidebarApp<TState, TActions>
+> => {
   return {
     open: jest.fn(),
     close: jest.fn(),
-    setParams: jest.fn(),
-    getParams: jest.fn().mockReturnValue({} as TParams),
-    getParams$: jest.fn().mockReturnValue(new BehaviorSubject<TParams>({} as TParams)),
+    actions: {} as unknown as jest.Mocked<SidebarApp<TState, TActions>>['actions'],
+    getState: jest.fn().mockReturnValue({} as TState),
+    getState$: jest.fn().mockReturnValue(new BehaviorSubject<TState>({} as TState)),
+    getStatus: jest.fn().mockReturnValue('available'),
+    getStatus$: jest.fn().mockReturnValue(new BehaviorSubject('available')),
   };
 };
 

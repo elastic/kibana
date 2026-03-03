@@ -8,10 +8,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLColumn, ESQLIdentifier } from '../../../types';
+import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
-import type { ESQLAstItem } from '../../../types';
 import type { SupportedDataType } from '../types';
 
 export const techPreviewLabel = i18n.translate(
@@ -108,6 +108,41 @@ export function pipePrecedesCurrentWord(text: string) {
   return characterPrecedesCurrentWord(text, '|');
 }
 
+export function findPipeOutsideQuotes(text: string, start: number = 0): number {
+  let inString = false;
+  let stringChar = '';
+
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+
+    if (inString) {
+      if (char === '\\' && i + 1 < text.length) {
+        i++;
+        continue;
+      }
+
+      if (char === stringChar) {
+        inString = false;
+        stringChar = '';
+      }
+
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = true;
+      stringChar = char;
+      continue;
+    }
+
+    if (char === '|') {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 /**
  * Are we after a comma? i.e. STATS fieldA, <here>
  */
@@ -125,6 +160,13 @@ export function unescapeColumnName(columnName: string) {
     return columnName.slice(1, -1).replace(/``/g, '`');
   }
   return columnName;
+}
+
+/** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
+export function getTrailingIdentifier(text: string): string | undefined {
+  const match = text.match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
+
+  return match ? match[1] : undefined;
 }
 
 /**
@@ -200,6 +242,72 @@ function getWildcardPosition(name: string) {
  * Type guard to check if the type is 'param'
  */
 export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
+/** Counts commas at the top nesting level, respecting parens/brackets/braces/strings. */
+export function countTopLevelCommas(text: string, start: number, end: number): number {
+  let commas = 0;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  let braceDepth = 0;
+  let quote: '"' | "'" | undefined;
+
+  for (let i = start; i < end && i < text.length; i++) {
+    const char = text[i];
+
+    if (quote) {
+      if (char === '\\' && i + 1 < end) {
+        i++;
+        continue;
+      }
+
+      if (char === quote) {
+        quote = undefined;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char === '(') {
+      parenDepth++;
+      continue;
+    }
+
+    if (char === ')') {
+      parenDepth = Math.max(0, parenDepth - 1);
+      continue;
+    }
+
+    if (char === '[') {
+      bracketDepth++;
+      continue;
+    }
+
+    if (char === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+      continue;
+    }
+
+    if (char === '{') {
+      braceDepth++;
+      continue;
+    }
+
+    if (char === '}') {
+      braceDepth = Math.max(0, braceDepth - 1);
+      continue;
+    }
+
+    if (char === ',' && parenDepth === 0 && bracketDepth === 0 && braceDepth === 0) {
+      commas++;
+    }
+  }
+
+  return commas;
+}
 
 export function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
   const wildCardPosition = getWildcardPosition(fuzzyName);

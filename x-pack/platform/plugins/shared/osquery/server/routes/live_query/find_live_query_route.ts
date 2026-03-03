@@ -18,6 +18,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 
 import type {
+  ActionDetails,
   ActionsRequestOptions,
   ActionsStrategyResponse,
   Direction,
@@ -25,6 +26,7 @@ import type {
 import { OsqueryQueries } from '../../../common/search_strategy';
 import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 
 export const findLiveQueryRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -81,11 +83,101 @@ export const findLiveQueryRoute = (
             )
           );
 
+          let items = res.edges;
+
+          if (request.query.withResultCounts && items.length > 0) {
+            try {
+              const [coreStartServices] = await osqueryContext.getStartServices();
+              const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+
+              const allActionIds: string[] = [];
+              for (const item of items) {
+                const action = item._source as ActionDetails | undefined;
+                if (action?.queries) {
+                  for (const query of action.queries) {
+                    if (query.action_id) {
+                      allActionIds.push(query.action_id);
+                    }
+                  }
+                }
+              }
+
+              const resultCountsMap = await getResultCountsForActions(
+                esClient,
+                allActionIds,
+                spaceId
+              );
+
+              items = items.map((item) => {
+                const action = item._source as ActionDetails | undefined;
+                if (!action?.queries) return item;
+
+                if (action.pack_id) {
+                  let totalRows = 0;
+                  let queriesWithResults = 0;
+                  let successfulAgents = 0;
+                  let errorAgents = 0;
+                  let maxRespondedAgents = 0;
+
+                  for (const query of action.queries) {
+                    if (query.action_id) {
+                      const counts = resultCountsMap.get(query.action_id);
+                      if (counts) {
+                        totalRows += counts.totalRows;
+                        if (counts.totalRows > 0) {
+                          queriesWithResults++;
+                        }
+
+                        if (counts.respondedAgents > maxRespondedAgents) {
+                          maxRespondedAgents = counts.respondedAgents;
+                          successfulAgents = counts.successfulAgents;
+                          errorAgents = counts.errorAgents;
+                        }
+                      }
+                    }
+                  }
+
+                  return {
+                    ...item,
+                    _source: {
+                      ...action,
+                      result_counts: {
+                        total_rows: totalRows,
+                        queries_with_results: queriesWithResults,
+                        queries_total: action.queries.length,
+                        successful_agents: successfulAgents,
+                        error_agents: errorAgents,
+                      },
+                    },
+                  };
+                }
+
+                const queryActionId = action.queries[0]?.action_id;
+                const counts = queryActionId ? resultCountsMap.get(queryActionId) : undefined;
+
+                return {
+                  ...item,
+                  _source: {
+                    ...action,
+                    result_counts: {
+                      total_rows: counts?.totalRows ?? 0,
+                      responded_agents: counts?.respondedAgents ?? 0,
+                      successful_agents: counts?.successfulAgents ?? 0,
+                      error_agents: counts?.errorAgents ?? 0,
+                    },
+                  },
+                };
+              });
+            } catch {
+              // Result counts are supplementary — don't fail the listing if aggregation errors
+            }
+          }
+
           return response.ok({
             body: {
               data: {
                 ...omit(res, 'edges'),
-                items: res.edges,
+                items,
               },
             },
           });

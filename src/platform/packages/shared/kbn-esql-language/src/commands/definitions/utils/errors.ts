@@ -17,7 +17,7 @@ import type {
   ESQLLocation,
   ESQLMessage,
   ESQLSource,
-} from '../../../types';
+} from '@elastic/esql/types';
 import type {
   ErrorTypes,
   ErrorValues,
@@ -265,35 +265,19 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlMissingParam':
+    case 'promqlInvalidParam':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParam', {
-          defaultMessage: '[PROMQL] Missing required param "{param}"',
-          values: { param: out.param },
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidParam', {
+          defaultMessage: '[PROMQL] {reason}',
+          values: { reason: out.reason },
         }),
         type: 'error',
       };
-    case 'promqlMissingParamValue':
+    case 'promqlMutuallyExclusiveParams':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParamValue', {
-          defaultMessage: '[PROMQL] Missing value for "{param}"',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidDateParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDateParam', {
-          defaultMessage:
-            '[PROMQL] Invalid {param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidStepParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {
-          defaultMessage: '[PROMQL] Invalid step value',
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
+          defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
+          values: { param1: out.param1, param2: out.param2 },
         }),
         type: 'error',
       };
@@ -301,6 +285,38 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
           defaultMessage: '[PROMQL] Missing query',
+        }),
+        type: 'error',
+      };
+    case 'promqlUnknownFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlUnknownFunction', {
+          defaultMessage: '[PROMQL] Unknown function "{fn}"',
+          values: { fn: out.fn },
+        }),
+        type: 'error',
+      };
+    case 'promqlWrongNumberArgs':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlWrongNumberArgs', {
+          defaultMessage:
+            '[PROMQL] Wrong number of arguments for "{fn}". Expected {expected}, got {actual}',
+          values: { fn: out.fn, expected: out.expected, actual: out.actual },
+        }),
+        type: 'error',
+      };
+    case 'promqlGroupingNotAllowed':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlGroupingNotAllowed', {
+          defaultMessage: '[PROMQL] Grouping is only allowed on aggregation',
+        }),
+        type: 'error',
+      };
+    case 'promqlNoMatchingSignature':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlNoMatchingSignature', {
+          defaultMessage: '[PROMQL] Argument types require ({required}) for function "{fn}"',
+          values: { fn: out.fn, required: out.required },
         }),
         type: 'error',
       };
@@ -460,6 +476,22 @@ Expected one of:
             expectedType: out.expectedType,
             actualType: out.actualType,
           },
+        }),
+        type: 'error',
+      };
+    case 'mmrQueryVectorWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrQueryVectorWrongType', {
+          defaultMessage: '[MMR] Query vector must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
+    case 'mmrOnFieldWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrOnFieldWrongType', {
+          defaultMessage: '[MMR] ON field must be of type dense_vector. Found {type}',
+          values: { type: out.type },
         }),
         type: 'error',
       };

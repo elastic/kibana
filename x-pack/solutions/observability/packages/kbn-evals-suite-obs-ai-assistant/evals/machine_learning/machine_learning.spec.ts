@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { MlGetJobsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   cleanupAnomalyDetectionJobs,
@@ -17,7 +18,7 @@ import {
 import { createMLJobsWithSampleData } from '../../src/data_generators/load_sample_data';
 import { evaluate } from '../../src/evaluate';
 
-evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
+evaluate.describe('Machine learning', { tag: tags.serverless.observability.complete }, () => {
   let jobs: MlGetJobsResponse = { count: 0, jobs: [] };
   let jobIds: string[] = [];
 

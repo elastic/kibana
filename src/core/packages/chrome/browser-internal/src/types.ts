@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -18,14 +18,12 @@ import type {
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
-  SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface InternalChromeSetup extends ChromeSetup {}
+export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -98,13 +96,6 @@ export interface InternalChromeStart extends ChromeStart {
   getSidebarComponent(): JSX.Element;
 
   /**
-   * Used only by the rendering service to retrieve the set of classNames
-   * that will be set on the body element.
-   * @internal
-   */
-  getBodyClasses$(): Observable<string[]>;
-
-  /**
    * Used only by the rendering service to render the global footer UI (devbar)
    * @internal
    */
@@ -116,24 +107,10 @@ export interface InternalChromeStart extends ChromeStart {
    */
   project: {
     /**
-     * Sets the project home href string.
-     * @param homeHref
-     *
-     * Use {@link ServerlessPluginStart.setProjectHome} to set project home.
-     */
-    setHome(homeHref: string): void;
-
-    /**
      * Sets the cloud's URLs.
      * @param cloudUrls
      */
     setCloudUrls(cloudUrls: CloudURLs): void;
-
-    /**
-     * Sets the feedback URL parameters.
-     * @param feedbackUrlParams
-     */
-    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
 
     /**
      * Sets the Kibana name - project name for serverless, deployment name for ECH.
@@ -147,16 +124,14 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      config?: { dataTestSubj?: string }
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
-    getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
-
-    /**
-     * Returns an observable of the active nodes in the project navigation.
-     */
-    getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
+    getNavigation$(): Observable<{
+      solutionId: SolutionId;
+      navigationTree: NavigationTreeDefinitionUI;
+      activeNodes: ChromeProjectNavigationNode[][];
+    }>;
 
     /** Get an Observable of the current project breadcrumbs */
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
@@ -172,22 +147,5 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
-
-    /**
-     * Update the solution navigation definitions.
-     *
-     * @param solutionNavs The solution navigation definitions to update.
-     * @param replace Flag to indicate if the previous solution navigation definitions should be replaced.
-     * If `false`, the new solution navigation definitions will be merged with the existing ones.
-     */
-    updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
-
-    /**
-     * Change the active solution navigation.
-     *
-     * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
-     * will be replaced with the legacy Kibana navigation.
-     */
-    changeActiveSolutionNavigation(id: SolutionId | null): void;
   };
 }

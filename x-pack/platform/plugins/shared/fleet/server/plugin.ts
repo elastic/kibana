@@ -50,6 +50,7 @@ import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { ReportingStart } from '@kbn/reporting-plugin/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -190,6 +191,7 @@ export interface FleetStartDeps {
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
   alerting: AlertingServerStart;
+  reporting: ReportingStart;
 }
 
 export interface FleetAppContext {
@@ -229,6 +231,7 @@ export interface FleetAppContext {
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
+  reportingStart?: ReportingStart;
 }
 
 export type FleetSetupContract = void;
@@ -514,6 +517,28 @@ export class FleetPlugin
               },
             ],
           },
+          {
+            name: 'Generate reports',
+            requireAllSpaces,
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    id: `generate_report`,
+                    api: [`${PLUGIN_ID}-generate-report`],
+                    name: 'All',
+                    ui: ['generate_report'],
+                    savedObject: {
+                      all: allSavedObjectTypes,
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'all',
+                  },
+                ],
+              },
+            ],
+          },
         ],
         privileges: {
           all: {
@@ -686,6 +711,9 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.unenrollInactiveAgents?.taskInterval,
+      },
     });
     this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
       core,
@@ -809,6 +837,7 @@ export class FleetPlugin
       agentStatusChangeTask: this.agentStatusChangeTask,
       fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
+      reportingStart: plugins.reporting,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

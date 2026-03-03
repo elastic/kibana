@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { Redirect } from 'react-router-dom';
 import { useCloneMonitor } from './hooks/use_clone_monitor';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
@@ -23,6 +24,7 @@ import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
+import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
@@ -40,14 +42,23 @@ export const MonitorAddPage = () => {
   useEffect(() => {
     dispatch(getServiceLocations());
   }, [dispatch]);
-  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
+  const {
+    locations,
+    locationsLoaded,
+    loading: locationsLoading,
+    error: locationsError,
+  } = useSelector(selectServiceLocationsState);
 
   if (locationsError) {
     return <LocationsLoadingError />;
   }
 
-  if (!locationsLoaded || cloneMonitorLoading) {
+  if (!locationsLoaded || locationsLoading || cloneMonitorLoading) {
     return <LoadingState />;
+  }
+
+  if (locationsLoaded && locations.length === 0) {
+    return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
   return (

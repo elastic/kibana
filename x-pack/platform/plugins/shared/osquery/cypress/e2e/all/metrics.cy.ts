@@ -39,7 +39,6 @@ describe('ALL - Inventory', { tags: ['@ess'] }, () => {
       triggerLoadData();
       cy.contains('Osquery').click();
       inputQuery('select * from uptime;');
-
       submitQuery();
       checkResults();
     });

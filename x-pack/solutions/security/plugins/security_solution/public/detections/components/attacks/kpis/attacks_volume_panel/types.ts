@@ -11,7 +11,7 @@ export interface AttacksVolumeBucket {
 }
 
 export interface AttacksVolumeAgg {
-  attacks_volume: {
+  attacks: {
     buckets: AttacksVolumeBucket[];
   };
 }

@@ -19,6 +19,7 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   entityTypeFallback: 'Service',
   fields: [
+    newestValue({ destination: 'entity.name', source: 'service.name' }),
     oldestValue({ source: 'service.entity.id' }),
 
     collect({ source: 'service.name' }),
@@ -34,24 +35,5 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
-
-    collect({
-      source: `service.entity.relationships.Communicates_with`,
-      destination: 'entity.relationships.Communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.Depends_on`,
-      destination: 'entity.relationships.Depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.Dependent_of`,
-      destination: 'entity.relationships.Dependent_of',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

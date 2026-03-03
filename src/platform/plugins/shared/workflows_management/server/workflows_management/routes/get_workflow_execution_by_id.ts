@@ -29,13 +29,21 @@ export function registerGetWorkflowExecutionByIdRoute({
         params: schema.object({
           workflowExecutionId: schema.string(),
         }),
+        query: schema.object({
+          includeInput: schema.boolean({ defaultValue: false }),
+          includeOutput: schema.boolean({ defaultValue: false }),
+        }),
       },
     },
     withLicenseCheck(async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
+        const { includeInput, includeOutput } = request.query;
         const spaceId = spaces.getSpaceId(request);
-        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId);
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId, {
+          includeInput,
+          includeOutput,
+        });
         if (!workflowExecution) {
           return response.notFound();
         }

@@ -10,41 +10,25 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import type { Transaction } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import {
+  TRACE_ID,
   AGENT_NAME,
   PROCESSOR_EVENT,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
+  AT_TIMESTAMP,
   TIMESTAMP_US,
-  TRACE_ID,
-  TRANSACTION_DURATION,
+  SERVICE_NAME,
   TRANSACTION_ID,
+  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
-  AT_TIMESTAMP,
-  PROCESSOR_NAME,
   SPAN_LINKS,
   TRANSACTION_MARKS_AGENT,
-  SERVICE_LANGUAGE_NAME,
-  URL_FULL,
-  HTTP_REQUEST_METHOD,
-  HTTP_RESPONSE_STATUS_CODE,
-  TRANSACTION_PAGE_URL,
-  USER_AGENT_NAME,
-  URL_PATH,
-  URL_SCHEME,
-  SERVER_ADDRESS,
-  SERVER_PORT,
-  USER_AGENT_VERSION,
-  KUBERNETES_POD_UID,
-  CONTAINER_ID,
-  HOST_HOSTNAME,
-  HOST_NAME,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+
 const requiredFields = asMutableArray([
   TRACE_ID,
   AGENT_NAME,
@@ -57,26 +41,6 @@ const requiredFields = asMutableArray([
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
-] as const);
-
-const optionalFields = asMutableArray([
-  PROCESSOR_NAME,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_ENVIRONMENT,
-  URL_FULL,
-  TRANSACTION_PAGE_URL,
-  HTTP_RESPONSE_STATUS_CODE,
-  HTTP_REQUEST_METHOD,
-  USER_AGENT_NAME,
-  URL_PATH,
-  URL_SCHEME,
-  SERVER_ADDRESS,
-  SERVER_PORT,
-  USER_AGENT_VERSION,
-  KUBERNETES_POD_UID,
-  HOST_HOSTNAME,
-  HOST_NAME,
-  CONTAINER_ID,
 ] as const);
 
 export async function getTransaction({
@@ -113,7 +77,8 @@ export async function getTransaction({
         ]),
       },
     },
-    fields: [...requiredFields, ...optionalFields],
+    // Custom links should allow users to use any transaction field as a placeholder.
+    fields: [{ field: '*', include_unmapped: true }],
     _source: [SPAN_LINKS, TRANSACTION_MARKS_AGENT],
   });
 
@@ -135,11 +100,13 @@ export async function getTransaction({
         })
       : undefined;
 
+  const serverTransaction = server as Transaction['server'];
+
   return {
     ...event,
     server: {
-      ...server,
-      port: server?.port ? Number(server?.port) : undefined,
+      ...serverTransaction,
+      port: serverTransaction?.port ? Number(serverTransaction.port) : undefined,
     },
     transaction: {
       ...transaction,
@@ -150,5 +117,5 @@ export async function getTransaction({
       event: 'transaction',
     },
     span: source?.span,
-  };
+  } as Transaction;
 }

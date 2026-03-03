@@ -17,6 +17,12 @@ describe('getEuidFromObject', () => {
     it('returns generic: + entity.id when present', () => {
       expect(getEuidFromObject('generic', { entity: { id: 'e-123' } })).toBe('generic:e-123');
     });
+
+    it('unwraps _source when doc is an Elasticsearch hit', () => {
+      expect(getEuidFromObject('generic', { _source: { entity: { id: 'e-123' } } })).toBe(
+        'generic:e-123'
+      );
+    });
   });
 
   describe('host', () => {

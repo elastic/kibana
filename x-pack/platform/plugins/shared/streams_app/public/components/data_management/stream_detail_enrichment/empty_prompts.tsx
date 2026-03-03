@@ -154,7 +154,7 @@ export const NoStepsEmptyPrompt = ({
       body={
         <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="s">
           <EuiFlexItem>
-            <ProcessingPanel message={message}>
+            <ProcessingPanel message={message} showTechPreviewBadge={canUsePipelineSuggestions}>
               {canUsePipelineSuggestions ? children : <ProcessingButtonsManual />}
             </ProcessingPanel>
           </EuiFlexItem>

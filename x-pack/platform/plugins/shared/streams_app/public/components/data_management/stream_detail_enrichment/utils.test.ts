@@ -42,10 +42,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns).toEqual([{ value: '' }]);
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -71,10 +71,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns).toEqual([{ value: '' }]);
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -103,10 +103,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns).toEqual([{ value: '' }]);
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -135,10 +135,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns).toEqual([{ value: '' }]);
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
   });
@@ -218,6 +218,7 @@ describe('utils', () => {
       text_structure: true,
       read_failure_store: true,
       manage_failure_store: true,
+      create_snapshot_repository: true,
     });
 
     const createWiredDefinition = (): Streams.WiredStream.GetResponse => ({

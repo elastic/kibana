@@ -10,23 +10,25 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
-import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
 import { stripUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
 
-export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerReadRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  isDashboardAppRequest: boolean
+) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const readRoute = router.get({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   readRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
           params: schema.object({
@@ -36,15 +38,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
               },
             }),
           }),
-          query: schema.maybe(
-            schema.object({
-              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
-            })
-          ),
         },
         response: {
           200: {
-            body: getReadResponseBodySchema,
+            body: () => getReadResponseBodySchema(isDashboardAppRequest),
           },
         },
       }),
@@ -52,8 +49,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     async (ctx, req, res) => {
       try {
         const result = await read(ctx, req.params.id);
-        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
-        const { data, warnings } = !allowUnmappedKeys
+        const { data, warnings } = !isDashboardAppRequest
           ? stripUnmappedKeys(result.data)
           : { data: result.data, warnings: [] };
         return res.ok({
@@ -67,7 +63,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.params.id}] was not found.`,
+              message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
         }
