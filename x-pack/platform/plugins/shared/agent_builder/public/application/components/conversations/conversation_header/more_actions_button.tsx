@@ -234,7 +234,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       ? [
           <EuiContextMenuItem
             key="skills"
-            icon="sparkles"
+            icon="bullseye"
             onClick={closePopover}
             href={createAgentBuilderUrl(appPaths.skills.list)}
             data-test-subj="agentBuilderActionsSkills"

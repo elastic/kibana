@@ -25,7 +25,7 @@ export const useSkillsService = () => {
   return { skills: data ?? [], isLoading, error, isError };
 };
 
-export const useSkillService = (skillId?: string) => {
+const useSkillService = (skillId?: string) => {
   const { skillsService } = useAgentBuilderServices();
 
   const {

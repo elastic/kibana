@@ -46,6 +46,10 @@ const validationMessages = {
     required: i18n.translate('xpack.agentBuilder.skills.validation.description.required', {
       defaultMessage: 'Description is required.',
     }),
+    tooLong: i18n.translate('xpack.agentBuilder.skills.validation.description.tooLong', {
+      defaultMessage: 'Description must be at most {maxLength} characters.',
+      values: { maxLength: 1024 },
+    }),
   },
   content: {
     required: i18n.translate('xpack.agentBuilder.skills.validation.content.required', {
@@ -71,7 +75,10 @@ export const skillFormValidationSchema = z.object({
     .min(1, { message: validationMessages.name.required })
     .max(skillNameMaxLength, { message: validationMessages.name.tooLong })
     .regex(skillNameRegexp, { message: validationMessages.name.format }),
-  description: z.string().min(1, { message: validationMessages.description.required }),
+  description: z
+    .string()
+    .min(1, { message: validationMessages.description.required })
+    .max(1024, { message: validationMessages.description.tooLong }),
   content: z.string().min(1, { message: validationMessages.content.required }),
   tool_ids: z.array(z.string()).max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),
 });

@@ -9,7 +9,6 @@ import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -20,7 +19,6 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiMarkdownEditor,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -33,7 +31,7 @@ import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Controller, FormProvider } from 'react-hook-form';
 import type { CreateSkillPayload, UpdateSkillPayload } from '../../../../common/http_api/skills';
 import { useSkillForm } from '../../hooks/skills/use_skill_form';
@@ -133,18 +131,17 @@ export const SkillForm: React.FC<SkillFormProps> = ({
     formState: { errors, isDirty, isSubmitSuccessful },
     handleSubmit,
   } = form;
-  const [isCancelling, setIsCancelling] = useState(false);
-
   const isViewMode = mode === SkillFormMode.View;
   const isCreateMode = mode === SkillFormMode.Create;
   const hasErrors = Object.keys(errors).length > 0;
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: !isViewMode && isDirty && !isSubmitSuccessful && !isCancelling,
+    hasUnsavedChanges: !isViewMode && isDirty && !isSubmitSuccessful,
     history,
     http,
     navigateToUrl,
     openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   useEffect(() => {
@@ -201,11 +198,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
     [onSave, mode, reset, deferNavigateToAgentBuilderUrl]
   );
 
-  const handleCancel = useCallback(() => {
-    setIsCancelling(true);
-    deferNavigateToAgentBuilderUrl(appPaths.skills.list);
-  }, [deferNavigateToAgentBuilderUrl]);
-
   const pageTitle = useMemo(() => {
     if (mode === SkillFormMode.Create) return labels.skills.newSkillTitle;
     if (mode === SkillFormMode.Edit) return skill?.id ?? labels.skills.editSkillTitle;
@@ -232,6 +224,25 @@ export const SkillForm: React.FC<SkillFormProps> = ({
               )}
             </EuiFlexGroup>
           }
+          rightSideItems={
+            !isViewMode
+              ? [
+                  <EuiButton
+                    key="save"
+                    size="m"
+                    fill
+                    iconType="save"
+                    onClick={handleSubmit(onSubmit)}
+                    disabled={hasErrors || isSubmitting}
+                    isLoading={isSubmitting}
+                    data-test-subj="agentBuilderSkillFormSaveButton"
+                  >
+                    {labels.skills.saveButtonLabel}
+                  </EuiButton>,
+                ]
+              : []
+          }
+          rightSideGroupProps={{ gutterSize: 's' }}
           css={css`
             background-color: ${euiTheme.colors.backgroundBasePlain};
             border-block-end: none;
@@ -263,29 +274,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
               >
                 <EuiSpacer size="s" />
                 {isCreateMode && (
-                  <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="subdued">
-                    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-                      <EuiTitle size="xxs">
-                        <span>
-                          {i18n.translate('xpack.agentBuilder.skills.form.skillIdHint', {
-                            defaultMessage: 'Skill ID',
-                          })}
-                        </span>
-                      </EuiTitle>
-                      <EuiText size="s" color="subdued">
-                        {i18n.translate(
-                          'xpack.agentBuilder.skills.form.skillIdHintDescription',
-                          {
-                            defaultMessage:
-                              'A unique identifier for the skill, used in code and configurations. Cannot be changed after creation.',
-                          }
-                        )}
-                      </EuiText>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                )}
-
-                {isCreateMode && (
                   <Controller
                     name="id"
                     control={control}
@@ -294,9 +282,11 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                         label={labels.skills.skillIdLabel}
                         isInvalid={!!error}
                         error={error?.message}
+                        fullWidth
                       >
                         <EuiFieldText
                           {...field}
+                          fullWidth
                           isInvalid={!!error}
                           disabled={isViewMode}
                           data-test-subj="agentBuilderSkillFormIdInput"
@@ -318,9 +308,11 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       label={labels.skills.nameLabel}
                       isInvalid={!!error}
                       error={error?.message}
+                      fullWidth
                     >
                       <EuiFieldText
                         {...field}
+                        fullWidth
                         isInvalid={!!error}
                         disabled={isViewMode}
                         data-test-subj="agentBuilderSkillFormNameInput"
@@ -341,9 +333,11 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       label={labels.skills.descriptionLabel}
                       isInvalid={!!error}
                       error={error?.message}
+                      fullWidth
                     >
                       <EuiTextArea
                         {...field}
+                        fullWidth
                         isInvalid={!!error}
                         disabled={isViewMode}
                         rows={3}
@@ -383,6 +377,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       label={labels.skills.contentLabel}
                       isInvalid={!!error}
                       error={error?.message}
+                      fullWidth
                     >
                       <EuiMarkdownEditor
                         value={value}
@@ -422,8 +417,10 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       label={labels.skills.toolIdsLabel}
                       isInvalid={!!error}
                       error={error?.message}
+                      fullWidth
                     >
                       <EuiComboBox
+                        fullWidth
                         options={toolOptions}
                         selectedOptions={value.map((toolId) => ({
                           label: toolId,
@@ -446,46 +443,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
             </EuiForm>
           )}
         </KibanaPageTemplate.Section>
-        {!isViewMode && (
-          <KibanaPageTemplate.BottomBar
-            css={css`
-              z-index: ${euiTheme.levels.header};
-            `}
-            paddingSize="m"
-            restrictWidth={false}
-            position="fixed"
-            usePortal
-          >
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  aria-label={labels.skills.cancelButtonLabel}
-                  size="s"
-                  iconType="cross"
-                  color="text"
-                  onClick={handleCancel}
-                  data-test-subj="agentBuilderSkillFormCancelButton"
-                >
-                  {labels.skills.cancelButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  type="submit"
-                  fill
-                  iconType="save"
-                  onClick={handleSubmit(onSubmit)}
-                  disabled={hasErrors || isSubmitting}
-                  isLoading={isSubmitting}
-                  data-test-subj="agentBuilderSkillFormSaveButton"
-                >
-                  {labels.skills.saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </KibanaPageTemplate.BottomBar>
-        )}
       </KibanaPageTemplate>
     </FormProvider>
   );
