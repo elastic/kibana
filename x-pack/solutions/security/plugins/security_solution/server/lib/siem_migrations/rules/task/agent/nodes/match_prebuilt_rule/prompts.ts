@@ -65,7 +65,6 @@ ${EXAMPLE_RULE_RESPONSE}
 </example_response>
 `,
   ],
-  ['ai', 'Please find the resulting JSON response below:'],
 ]);
 
 export const MATCH_PREBUILT_RULE_PROMPT_GENERIC = ChatPromptTemplate.fromMessages([
@@ -105,5 +104,4 @@ ${EXAMPLE_RULE_RESPONSE}
 </example_response>
 `,
   ],
-  ['ai', `Please find the resulting JSON response below:`],
 ]);

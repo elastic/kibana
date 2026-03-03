@@ -63,5 +63,4 @@ A: Please find the match JSON object below:
 </example_response>
 `,
   ],
-  ['ai', 'Please find the match JSON object below:'],
 ]);
