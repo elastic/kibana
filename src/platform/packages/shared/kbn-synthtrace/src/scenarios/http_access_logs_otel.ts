@@ -57,8 +57,8 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
 
   // Deterministic seed from run parameters so every run with the same
   // --from / --scale / --mode produces identical data.
-  const seed =
-    Math.floor(runOptions.from / 1000) + scale * 7919 + finalOpts.mode.charCodeAt(0) * 31;
+  const modeHash = finalOpts.mode.split('').reduce((hash, ch) => hash * 31 + ch.charCodeAt(0), 0);
+  const seed = Math.abs(Math.floor(runOptions.from / 1000) + scale * 7919 + modeHash);
   initRandom(seed);
   logger.info(`Seeded PRNG with seed=${seed} for deterministic generation`);
 

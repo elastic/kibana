@@ -264,25 +264,23 @@ export function applySpecialChars(logData: Partial<LogDocument>): Partial<LogDoc
  */
 export function applyTimestampAnomaly(logData: Partial<LogDocument>): Partial<LogDocument> {
   const corrupted = { ...logData };
+  const baseTimestamp =
+    typeof corrupted['@timestamp'] === 'number' ? corrupted['@timestamp'] : 1700000000000;
 
   const anomalyType = Math.floor(random() * 4);
 
   switch (anomalyType) {
     case 0:
-      // Very old timestamp (10 years ago)
-      corrupted['@timestamp'] = Date.now() - 10 * 365 * 24 * 60 * 60 * 1000;
+      corrupted['@timestamp'] = baseTimestamp - 10 * 365 * 24 * 60 * 60 * 1000;
       break;
     case 1:
-      // Future timestamp (1 year ahead)
-      corrupted['@timestamp'] = Date.now() + 365 * 24 * 60 * 60 * 1000;
+      corrupted['@timestamp'] = baseTimestamp + 365 * 24 * 60 * 60 * 1000;
       break;
     case 2:
-      // Unix epoch (1970-01-01)
       corrupted['@timestamp'] = 0;
       break;
     case 3:
-      // Millisecond precision issues (microseconds added)
-      corrupted['@timestamp'] = Date.now() + random();
+      corrupted['@timestamp'] = baseTimestamp + random();
       break;
   }
 

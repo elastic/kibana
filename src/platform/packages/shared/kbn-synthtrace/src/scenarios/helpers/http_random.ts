@@ -18,6 +18,8 @@
  * for reproducible test data, not for cryptographic or security-sensitive use.
  */
 
+export const DETERMINISTIC_TIMESTAMP = '2026-01-01T00:00:00.000Z';
+
 let seededRng: (() => number) | null = null;
 
 /**

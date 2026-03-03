@@ -13,7 +13,7 @@
  */
 
 import { getRandomItem } from './http_field_generators';
-import { random, randomId } from './http_random';
+import { random, randomId, DETERMINISTIC_TIMESTAMP } from './http_random';
 
 /**
  * User registration request template.
@@ -123,7 +123,7 @@ export function generateProductUpdateBody() {
       },
       tags: ['featured', 'bestseller', 'new-arrival'].filter(() => random() > 0.5),
     },
-    timestamp: new Date().toISOString(),
+    timestamp: DETERMINISTIC_TIMESTAMP,
   };
 }
 
@@ -156,7 +156,7 @@ export function generateOrderSubmissionBody() {
 
   return {
     order: {
-      orderId: `ORD-${Date.now()}-${Math.floor(random() * 1000)}`,
+      orderId: `ORD-${randomId('', 10)}-${Math.floor(random() * 1000)}`,
       customerId: randomId('cust_', 13),
       items: orderItems,
       pricing: {
@@ -226,7 +226,7 @@ export function generateReviewSubmissionBody() {
       pros: ['Good quality', 'Fast shipping'],
       cons: ['Price could be better'],
     },
-    timestamp: new Date().toISOString(),
+    timestamp: DETERMINISTIC_TIMESTAMP,
   };
 }
 
@@ -267,7 +267,7 @@ export function generateAnalyticsEventBody() {
       browser: getRandomItem(['Chrome', 'Safari', 'Firefox', 'Edge']),
       screenResolution: getRandomItem(['1920x1080', '1366x768', '375x667', '414x896']),
     },
-    timestamp: new Date().toISOString(),
+    timestamp: DETERMINISTIC_TIMESTAMP,
     customDimensions: {
       dimension1: 'value1',
       dimension2: 'value2',
@@ -340,7 +340,7 @@ export function generateSearchQueryBody() {
 export function generateWebhookPayloadBody() {
   return {
     event: getRandomItem(['order.created', 'user.registered', 'payment.completed', 'item.shipped']),
-    timestamp: new Date().toISOString(),
+    timestamp: DETERMINISTIC_TIMESTAMP,
     data: {
       id: randomId('', 13),
       status: getRandomItem(['pending', 'processing', 'completed', 'failed']),
@@ -385,7 +385,7 @@ export function generateConfigUpdateBody() {
       },
     },
     updatedBy: randomId('user_', 13),
-    timestamp: new Date().toISOString(),
+    timestamp: DETERMINISTIC_TIMESTAMP,
   };
 }
 
