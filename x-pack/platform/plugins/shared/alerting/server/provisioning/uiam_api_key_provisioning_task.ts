@@ -75,9 +75,6 @@ export class UiamApiKeyProvisioningTask {
     core: CoreSetup<AlertingPluginsStart>;
     taskManager: TaskManagerSetupContract;
   }) {
-    if (!this.isServerless) {
-      return;
-    }
     if (!taskManager) {
       this.logger.error(
         `Missing required task manager service during registration of ${API_KEY_PROVISIONING_TASK_TYPE}`,
