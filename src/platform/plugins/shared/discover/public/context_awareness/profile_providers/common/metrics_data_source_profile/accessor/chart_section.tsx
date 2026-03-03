@@ -22,6 +22,7 @@ import type { DiscoverAppState } from '../../../../../application/main/state_man
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { fetchMetricsInfo } from '../utils/fetch_metrics_info';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 
 /**
  * Triggers a METRICS_INFO fetch when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -33,7 +34,9 @@ function useMetricsInfoFetch(
   isComponentVisible: boolean
 ): void {
   const esql =
-    fetchParams.query && 'esql' in fetchParams.query ? fetchParams.query.esql : undefined;
+    fetchParams.query && isOfAggregateQueryType(fetchParams.query)
+      ? fetchParams.query.esql
+      : undefined;
   const shouldFetch =
     isComponentVisible && !!esql && !!fetchParams.isESQLQuery && !hasTransformationalCommand(esql);
 
