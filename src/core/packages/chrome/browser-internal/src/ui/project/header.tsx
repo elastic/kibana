@@ -172,6 +172,21 @@ const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppAction
     />
   );
 
+  const hasPrimaryActions = config.primaryActions && config.primaryActions.length > 0;
+  const showPrimaryActionsSeparator = showToolbar && hasPrimaryActions;
+
+  const primaryActionsSeparatorCss = css({
+    borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    paddingInlineStart: euiTheme.size.s,
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.s,
+  });
+
+  const primaryActionsContent = config.primaryActions?.map((action, index) => (
+    <React.Fragment key={index}>{action}</React.Fragment>
+  ));
+
   return (
     <EuiHeaderLinks gutterSize="xs" popoverBreakpoints="none">
       {showToolbar && (
@@ -212,9 +227,13 @@ const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppAction
           )}
         </div>
       )}
-      {config.primaryActions?.map((action, index) => (
-        <React.Fragment key={index}>{action}</React.Fragment>
-      ))}
+      {showPrimaryActionsSeparator ? (
+        <div css={primaryActionsSeparatorCss} data-test-subj="headerGlobalNav-appActionsPrimary">
+          {primaryActionsContent}
+        </div>
+      ) : (
+        primaryActionsContent
+      )}
     </EuiHeaderLinks>
   );
 };
