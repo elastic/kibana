@@ -23,9 +23,9 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     const createPromises = Array.from({ length: TOTAL_MARKDOWNS }, (_, i) =>
       kbnClient.savedObjects.create({
         type: 'markdown',
-        id: `test-search-markdown-${String(i)}`,
+        id: `test-search-markdown-${String(i).padStart(2, '0')}`,
         attributes: {
-          title: `Search Markdown ${String(i)}`,
+          title: `Search Markdown ${String(i).padStart(2, '0')}`,
           description: `Description for markdown ${i}`,
           content: `# Content ${i}`,
         },
