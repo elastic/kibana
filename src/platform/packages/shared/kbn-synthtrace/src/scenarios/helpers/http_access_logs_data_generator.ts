@@ -14,30 +14,24 @@
  */
 
 import type { LogDocument } from '@kbn/synthtrace-client';
-import { generateIPWithGeo } from './geo_ip_mappings';
 import {
   getRandomItem,
   getWeightedRandomItem,
   HTTP_METHODS,
   HTTP_STATUS_CODES,
-  USER_AGENTS,
   BOT_USER_AGENTS,
   MALICIOUS_BOT_USER_AGENTS,
   URL_PATHS,
-  SERVICE_VERSIONS,
-  SERVICE_ENVIRONMENTS,
-  DEPLOYMENT_NAMES,
-  generateCloudMetadata,
-  generateK8sMetadata,
-  generateContainerMetadata,
   generateNetworkMetadata,
   generateCorrelationIds,
   generateErrorMetadata,
   generateResponseSize,
-  generateSessionId,
+  generateReferrer,
 } from './http_field_generators';
 import { getRandomRequestBody } from './http_request_body_templates';
 import { applyMalformation } from './http_malformed_data_generator';
+import { getInfraPool, getRandomHost, hostToLogFields } from './http_infra_pool';
+import { getActiveSession } from './http_session_pool';
 
 /**
  * Traffic pattern types.
@@ -58,48 +52,32 @@ export enum TrafficPattern {
 
 /**
  * Base HTTP access log data generator.
- * Creates common fields shared across all traffic patterns.
+ * Draws infrastructure identity from a stable pool so that hosts, cloud
+ * provider, pods, and containers remain consistent across the scenario run.
+ * Client IP and geo-location are still randomized per request (representing
+ * different end-users hitting the servers).
  */
 export function generateBaseLogData(): Partial<LogDocument> {
-  const { ip, geo, isIPv6 } = generateIPWithGeo();
-  const serviceName = getRandomItem(['web-frontend', 'api-gateway', 'mobile-api', 'cdn']);
-  const hasK8s = Math.random() < 0.4; // 40% K8s
-  const hasCloud = Math.random() < 0.6; // 60% cloud
-  const hasContainer = Math.random() < 0.5; // 50% containerized
+  const pool = getInfraPool();
+  const host = getRandomHost(pool);
+  const infraFields = hostToLogFields(host);
+
+  const session = getActiveSession(host.cloud.region);
 
   const baseData: Partial<LogDocument> = {
-    'client.ip': ip,
-    'host.geo.location': [geo.location.lon, geo.location.lat],
-    'host.geo.city_name': geo.city,
-    'host.geo.country_name': geo.country,
-    'host.geo.country_iso_code': geo.countryCode,
-    'host.geo.continent_name': geo.continent,
-    'host.geo.timezone': geo.timezone,
-    'cloud.region': geo.countryCode.toLowerCase(),
-    hostname: `${serviceName}-${Math.floor(Math.random() * 100)}`,
-    'service.name': serviceName,
-    'service.version': getRandomItem(SERVICE_VERSIONS),
-    'service.environment': getRandomItem(SERVICE_ENVIRONMENTS),
-    'deployment.name': getRandomItem(DEPLOYMENT_NAMES),
-    'network.type': isIPv6 ? 'ipv6' : 'ipv4',
+    'client.ip': session.clientIp,
+    'host.geo.location': [session.geo.location.lon, session.geo.location.lat],
+    'host.geo.city_name': session.geo.city,
+    'host.geo.country_name': session.geo.country,
+    'host.geo.country_iso_code': session.geo.countryCode,
+    'host.geo.continent_name': session.geo.continent,
+    'host.geo.timezone': session.geo.timezone,
+    'network.type': session.isIPv6 ? 'ipv6' : 'ipv4',
+    'session.id': session.sessionId,
+    'user_agent.name': session.userAgent,
+    ...infraFields,
   };
 
-  // Add cloud metadata (60%)
-  if (hasCloud) {
-    Object.assign(baseData, generateCloudMetadata());
-  }
-
-  // Add K8s metadata (40%)
-  if (hasK8s) {
-    Object.assign(baseData, generateK8sMetadata());
-  }
-
-  // Add container metadata (50%)
-  if (hasContainer) {
-    Object.assign(baseData, generateContainerMetadata());
-  }
-
-  // Add correlation IDs (60%)
   const correlationIds = generateCorrelationIds();
   if (Object.keys(correlationIds).length > 0) {
     Object.assign(baseData, correlationIds);
@@ -125,14 +103,12 @@ export function generateNormalTraffic(): Partial<LogDocument> {
     'url.path': path,
     'http.response.status_code': statusCode,
     'http.version': getRandomItem(['1.1', '2.0']),
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': Math.random() < 0.6 ? 'https://www.google.com' : '-',
+    'http.request.referrer': generateReferrer(),
     'http.response.bytes': generateResponseSize(statusCode, false),
     ...generateNetworkMetadata(isHttps),
     ...generateErrorMetadata(statusCode),
   };
 
-  // Add request body for POST/PUT/PATCH
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
     const requestBody = getRandomRequestBody(method, path);
     if (requestBody) {
@@ -140,12 +116,6 @@ export function generateNormalTraffic(): Partial<LogDocument> {
     }
   }
 
-  // Add session ID (60%)
-  if (Math.random() < 0.6) {
-    logData['session.id'] = generateSessionId();
-  }
-
-  // Apply malformation (5%)
   return applyMalformation(logData);
 }
 
@@ -209,8 +179,7 @@ export function generateErrorTraffic(): Partial<LogDocument> {
     'url.path': path,
     'http.response.status_code': statusCode,
     'http.version': getRandomItem(['1.1', '2.0']),
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': 'https://www.google.com',
+    'http.request.referrer': generateReferrer(),
     'http.response.bytes': generateResponseSize(statusCode, false),
     'log.level': 'error',
     'event.category': 'application',
@@ -250,8 +219,7 @@ export function generateHeavyTraffic(): Partial<LogDocument> {
     'url.path': path,
     'http.response.status_code': statusCode,
     'http.version': '2.0', // HTTP/2 for large transfers
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': 'https://app.example.com',
+    'http.request.referrer': generateReferrer(),
     'http.response.bytes': generateResponseSize(statusCode, true), // Large response
     ...generateNetworkMetadata(true),
     ...generateErrorMetadata(statusCode),
@@ -367,8 +335,11 @@ export function generateOAuthTraffic(): Partial<LogDocument> {
     'url.path': path,
     'http.response.status_code': statusCode,
     'http.version': '1.1',
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': 'https://app.example.com',
+    'http.request.referrer': getRandomItem([
+      'https://app.example.com/login',
+      'https://app.example.com/dashboard',
+      'https://accounts.example.com/signin',
+    ]),
     'http.response.bytes': generateResponseSize(statusCode, false),
     ...generateNetworkMetadata(true), // OAuth always HTTPS
     ...generateErrorMetadata(statusCode),
@@ -401,8 +372,12 @@ export function generateRedirectTraffic(): Partial<LogDocument> {
     'url.path': path,
     'http.response.status_code': statusCode,
     'http.version': getRandomItem(['1.1', '2.0']),
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': 'https://old-domain.com',
+    'http.request.referrer': getRandomItem([
+      'https://old-domain.com',
+      'https://legacy.example.com',
+      'https://www.example.com/old-page',
+      '-',
+    ]),
     'http.response.bytes': 0, // Redirects have no body
     ...generateNetworkMetadata(true),
     tags: ['redirect'],
@@ -428,8 +403,11 @@ export function generateCORSTraffic(): Partial<LogDocument> {
     'url.path': path,
     'http.response.status_code': 204, // No content for OPTIONS
     'http.version': '1.1',
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': 'https://app.example.com',
+    'http.request.referrer': getRandomItem([
+      'https://app.example.com',
+      'https://app.example.com/dashboard',
+      'https://staging.example.com',
+    ]),
     'http.response.bytes': 0,
     ...generateNetworkMetadata(true),
     tags: ['cors', 'preflight'],
@@ -454,8 +432,11 @@ export function generateWebSocketTraffic(): Partial<LogDocument> {
     'url.path': getRandomItem(['/ws', '/websocket', '/api/stream', '/realtime']),
     'http.response.status_code': 101, // Switching Protocols
     'http.version': '1.1',
-    'user_agent.name': getRandomItem(USER_AGENTS),
-    'http.request.referrer': 'https://app.example.com',
+    'http.request.referrer': getRandomItem([
+      'https://app.example.com/dashboard',
+      'https://app.example.com/realtime',
+      'https://app.example.com/notifications',
+    ]),
     'http.response.bytes': 0,
     ...generateNetworkMetadata(true),
     tags: ['websocket', 'upgrade'],
