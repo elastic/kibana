@@ -32,7 +32,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
+import {
+  type RuntimeStateManager,
+  selectTabRuntimeInternalState,
+  selectTabRuntimeState,
+} from './runtime_state';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -489,9 +493,9 @@ const createMiddleware = (options: InternalStateDependencies) => {
       (action, listenerApi) => {
         const discoverSession =
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId);
+          selectTabRuntimeInternalState(runtimeStateManager, tabId, services);
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -507,10 +511,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: syncLocallyPersistedTabState,
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id, services),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
@@ -548,6 +552,19 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { services } = listenerApi.extra;
       services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
+    },
+  });
+
+  startListening({
+    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
+    effect: (action, listenerApi) => {
+      const { runtimeStateManager } = listenerApi.extra;
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
+      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+
+      if (tabStateContainer?.dataState.cleanupEsql) {
+        tabStateContainer.dataState.cleanupEsql();
+      }
     },
   });
 

@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { TimeRange } from '@kbn/es-query';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
@@ -39,7 +40,7 @@ function parseLayerListJSON(layerListJSON?: string) {
 
 function parseMapStateJSON(mapStateJSON?: string) {
   const parsedMapState = parseJSON<{ [key: string]: unknown }>({}, mapStateJSON);
-  const { refreshConfig, ...rest } = dropUnknownKeys(
+  const { refreshConfig, timeFilters, ...rest } = dropUnknownKeys(
     parsedMapState,
     mapStateKeys
   ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
@@ -47,6 +48,11 @@ function parseMapStateJSON(mapStateJSON?: string) {
     ...rest,
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
+      : {}),
+    // BWC drop mode - no longer needed.
+    // mode stored in timeRange with values not supported in timeRangeSchema
+    ...(timeFilters
+      ? { timeFilters: dropUnknownKeys(timeFilters, ['from', 'to']) as TimeRange }
       : {}),
   };
 }

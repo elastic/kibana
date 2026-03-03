@@ -24,6 +24,8 @@ export const ENTITY_STORE_ROUTES = {
   UNINSTALL: 'internal/security/entity_store/uninstall',
   FORCE_LOG_EXTRACTION: (entityType: string) =>
     `internal/security/entity_store/${entityType}/force_log_extraction`,
+  FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
+    `internal/security/entity_store/${entityType}/force_ccs_extract_to_updates`,
   CRUD_UPSERT: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
   CRUD_UPSERT_BULK: 'internal/security/entity_store/entities/bulk',
   CRUD_DELETE: 'internal/security/entity_store/entities/',

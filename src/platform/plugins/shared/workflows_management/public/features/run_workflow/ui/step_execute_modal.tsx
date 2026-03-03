@@ -152,12 +152,10 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           <EuiModalHeaderTitle id={modalTitleId}>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
-                <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
-              </EuiFlexItem>
-              <EuiFlexItem css={styles.description}>
                 <FormattedMessage
-                  id="workflows.testStepModal.description"
-                  defaultMessage="Test run with current changes and provided payload. Will not be saved in history."
+                  id="workflows.testStepModal.title"
+                  defaultMessage='Test "{stepName}" step'
+                  values={{ stepName: stepId }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
