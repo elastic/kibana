@@ -62,11 +62,11 @@ export class ConnectorExecutor {
       signal: abortController.signal,
     });
 
-    const abortPromise = new Promise<void>((_resolve, reject) => {
-      abortController.signal.addEventListener('abort', () =>
-        reject(
-          new Error(`Action type "${actionTypeId}" with ID "${actionId}" execution was aborted`)
-        )
+    const abortPromise = new Promise<ActionTypeExecutorResult<unknown>>((_resolve, reject) => {
+      abortController.signal.addEventListener(
+        'abort',
+        () => reject(this.createAbortError(actionTypeId, actionId)),
+        { once: true }
       );
     });
 
@@ -74,8 +74,11 @@ export class ConnectorExecutor {
     // Otherwise, the executeActionPromise will resolve first
     // This ensures that we handle cancellation properly.
     // In the future, if all connectors support cancellation, we can remove this logic.
-    await Promise.race([abortPromise, executeActionPromise]);
-    return executeActionPromise;
+    return Promise.race([abortPromise, executeActionPromise]);
+  }
+
+  private createAbortError(actionTypeId: string, actionId: string): Error {
+    return new Error(`Action type "${actionTypeId}" with ID "${actionId}" execution was aborted`);
   }
 
   private async resolveConnectorId(connectorName: string): Promise<string> {
