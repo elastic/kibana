@@ -28,7 +28,7 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The Firecrawl connector has the following actions:
 
 scrape
-:   Scrape a single URL and extract content (e.g. markdown, HTML).
+:   Scrape a single URL and extract content (for example, markdown or HTML).
     - **url** (required): The URL to scrape.
     - **formats** (optional): Output formats: `markdown`, `html`, `links`, `screenshot`, `extract`. Defaults to markdown.
     - **onlyMainContent** (optional): Return only main content, excluding nav/footer. Defaults to true.
