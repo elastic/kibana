@@ -12,7 +12,7 @@ import type {
   PromQLBinaryExpression,
   PromQLFunction,
   PromQLSelector,
-} from '../../../../../embedded_languages/promql/types';
+} from '@elastic/esql';
 import type { PromQLFunctionParamType } from '../../../types';
 
 // ============================================================================

@@ -10,11 +10,8 @@
 import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
-import { isDynamicConnector } from '@kbn/workflows';
-import type {
-  ActionsMenuGroup,
-  WorkflowsExtensionsPublicPluginStart,
-} from '@kbn/workflows-extensions/public';
+import { isDynamicConnector, StepCategory } from '@kbn/workflows';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -209,12 +206,13 @@ export function getActionOptions(
     options: [],
   };
 
-  const stepGroups: Record<ActionsMenuGroup, ActionGroup> = {
-    elasticsearch: elasticSearchGroup,
-    external: externalGroup,
-    ai: aiGroup,
-    kibana: kibanaGroup,
-    data: dataTransformationGroup,
+  const stepGroups: Record<StepCategory, ActionGroup> = {
+    [StepCategory.Elasticsearch]: elasticSearchGroup,
+    [StepCategory.External]: externalGroup,
+    [StepCategory.Ai]: aiGroup,
+    [StepCategory.Kibana]: kibanaGroup,
+    [StepCategory.Data]: dataTransformationGroup,
+    [StepCategory.FlowControl]: flowControlGroup,
   };
 
   const baseTypeInstancesCount: Record<string, number> = {};
@@ -222,7 +220,7 @@ export function getActionOptions(
   for (const connector of connectors) {
     const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
     if (customStepDefinition) {
-      const group = stepGroups[customStepDefinition.actionsMenuGroup ?? 'kibana'];
+      const group = stepGroups[customStepDefinition.category];
       group.options.push({
         id: customStepDefinition.id,
         label: customStepDefinition.label,
