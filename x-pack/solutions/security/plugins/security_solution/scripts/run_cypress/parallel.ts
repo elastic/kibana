@@ -41,6 +41,35 @@ import {
 import { getFTRConfig } from './get_ftr_config';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 
+const filterCompletedSpecs = async (
+  specFiles: string[],
+  logger: { info: (...args: unknown[]) => void }
+): Promise<{ remaining: string[]; skippedCount: number }> => {
+  const completionStatus = await Promise.all(
+    specFiles.map(async (filePath) => {
+      const completed = await isSpecCompleted(filePath);
+      logger.info(`[cypress-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${filePath}`);
+      return { filePath, completed };
+    })
+  );
+
+  const skipped = completionStatus.filter((s) => s.completed);
+  const remaining = completionStatus.filter((s) => !s.completed).map((s) => s.filePath);
+
+  if (skipped.length > 0) {
+    logger.info(
+      `[cypress-checkpoint] Resumed: skipped ${skipped.length} already-completed, ` +
+        `${remaining.length} remaining`
+    );
+  } else {
+    logger.info(
+      `[cypress-checkpoint] No prior checkpoints found, running all ${remaining.length} specs`
+    );
+  }
+
+  return { remaining, skippedCount: skipped.length };
+};
+
 export const cli = () => {
   run(
     async ({ log: _cliLogger }) => {
@@ -170,30 +199,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             `retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`
         );
 
-        const specsToCheck = files;
-        const completionStatus = await Promise.all(
-          specsToCheck.map(async (filePath) => {
-            const completed = await isSpecCompleted(filePath);
-            log.info(`[cypress-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${filePath}`);
-            return { filePath, completed };
-          })
-        );
-
-        const skipped = completionStatus.filter((s) => s.completed);
-        files = completionStatus.filter((s) => !s.completed).map((s) => s.filePath);
-
-        if (skipped.length > 0) {
-          log.info(
-            `[cypress-checkpoint] Resumed: skipped ${skipped.length} already-completed, ` +
-              `${files.length} remaining`
-          );
-        } else {
-          log.info(
-            `[cypress-checkpoint] No prior checkpoints found, running all ${files.length} specs`
-          );
-        }
-
-        checkpointSkippedCount = skipped.length;
+        const checkpoint = await filterCompletedSpecs(files, log);
+        files = checkpoint.remaining;
+        checkpointSkippedCount = checkpoint.skippedCount;
       }
 
       if (!files?.length) {
