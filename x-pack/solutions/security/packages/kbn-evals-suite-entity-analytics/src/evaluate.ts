@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { evaluate as base } from '@kbn/evals';
@@ -28,30 +29,17 @@ export const evaluate = base.extend<
       const chatClient = new EvaluationChatClient(fetch, log, connector.id);
       await use(chatClient);
     },
-    {
-      scope: 'worker',
-    },
+    { scope: 'worker' },
   ],
   evaluateDataset: [
     ({ chatClient, evaluators, executorClient }, use) => {
-      use(
-        createEvaluateDataset({
-          chatClient,
-          evaluators,
-          executorClient,
-        })
-      );
+      use(createEvaluateDataset({ chatClient, evaluators, executorClient }));
     },
     { scope: 'test' },
   ],
   esArchiverLoad: [
     async ({ log, esClient, kbnClient }, use) => {
-      const esArchiver = new EsArchiver({
-        log,
-        client: esClient,
-        kbnClient,
-      });
-
+      const esArchiver = new EsArchiver({ log, client: esClient, kbnClient });
       const loadedArchivers: Set<string> = new Set();
 
       await use(async (archive: string) => {
@@ -83,10 +71,7 @@ export const evaluate = base.extend<
   ],
   quickApiClient: [
     async ({ kbnClient, log }, use) => {
-      const quickstartClient = new QuickstartClient({
-        kbnClient,
-        log,
-      });
+      const quickstartClient = new QuickstartClient({ kbnClient, log });
       await use(quickstartClient);
     },
     { scope: 'worker' },

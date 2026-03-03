@@ -6735,6 +6735,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-entity-analytics@link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-llm-tasks@link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks":
   version "0.0.0"
   uid ""
@@ -9196,10 +9200,6 @@
   uid ""
 
 "@kbn/test-suites-security-solution-apis@link:x-pack/solutions/security/test/security_solution_api_integration":
-  version "0.0.0"
-  uid ""
-
-"@kbn/test-suites-security-solution-evals@link:x-pack/solutions/security/test/security-solution-evals":
   version "0.0.0"
   uid ""
 
