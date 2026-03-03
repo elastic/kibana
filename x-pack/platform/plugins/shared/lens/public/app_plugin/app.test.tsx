@@ -247,14 +247,7 @@ describe('Lens App', () => {
       services.getOriginatingAppName = jest.fn(() => undefined);
       const { lensStore } = await renderApp();
 
-      const expectedCreateBreadcrumbs = [
-        {
-          text: 'Dashboards',
-          href: '/testbasepath/app/dashboards#/',
-          onClick: expect.anything(),
-        },
-        { text: 'Create' },
-      ];
+      const expectedCreateBreadcrumbs = [{ text: 'Create' }];
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
         project: { value: expectedCreateBreadcrumbs, absolute: true },
       });
@@ -267,14 +260,7 @@ describe('Lens App', () => {
         );
       });
 
-      const expectedSavedBreadcrumbs = [
-        {
-          text: 'Dashboards',
-          href: '/testbasepath/app/dashboards#/',
-          onClick: expect.anything(),
-        },
-        { text: 'Daaaaaaadaumching!' },
-      ];
+      const expectedSavedBreadcrumbs = [{ text: 'Daaaaaaadaumching!' }];
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
         project: { value: expectedSavedBreadcrumbs, absolute: true },
       });
