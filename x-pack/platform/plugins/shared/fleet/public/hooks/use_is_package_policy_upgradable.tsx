@@ -9,6 +9,7 @@ import { useCallback, useMemo } from 'react';
 import semverLt from 'semver/functions/lt';
 
 import { installationStatuses } from '../../common/constants';
+import type { Installation } from '../../common/types';
 import type { PackagePolicy } from '../types';
 
 import { useGetPackages } from './use_request/epm';
@@ -48,8 +49,17 @@ export const useIsPackagePolicyUpgradable = () => {
     [findInstalledPackage]
   );
 
+  const getPackagePolicyUpgradeReview = useCallback(
+    (pkgPolicy: PackagePolicy): Installation['pending_upgrade_review'] | undefined => {
+      const installedPackage = findInstalledPackage(pkgPolicy);
+      return installedPackage?.installationInfo?.pending_upgrade_review;
+    },
+    [findInstalledPackage]
+  );
+
   return {
     isPackagePolicyUpgradable,
+    getPackagePolicyUpgradeReview,
     isLoadingPackages,
   };
 };

@@ -161,6 +161,7 @@ export const AgentBasedPackagePoliciesTable = ({
                           <EuiFlexItem grow={false}>
                             <PendingUpgradeReviewStatus
                               pkgName={packagePolicy.package?.name ?? ''}
+                              pkgTitle={packagePolicy.package?.title ?? ''}
                               pendingUpgradeReview={review}
                             />
                           </EuiFlexItem>
@@ -170,6 +171,7 @@ export const AgentBasedPackagePoliciesTable = ({
                         return (
                           <EuiFlexItem grow={false}>
                             <DeclinedUpgradeStatus
+                              pkgTitle={packagePolicy.package?.title ?? ''}
                               pkgName={packagePolicy.package?.name ?? ''}
                               pendingUpgradeReview={review}
                             />
@@ -226,7 +228,17 @@ export const AgentBasedPackagePoliciesTable = ({
                 </EuiText>
               ) : (
                 <EuiText color="subdued" size="xs">
-                  <EuiIcon size="m" type="warning" color="warning" />
+                  <EuiIcon
+                    size="m"
+                    type="warning"
+                    color="warning"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning',
+                      {
+                        defaultMessage: 'Policy not found',
+                      }
+                    )}
+                  />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"

@@ -40,6 +40,7 @@ import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { PendingUpgradeReviewStatus, DeclinedUpgradeStatus } from './pending_upgrade_review_status';
 import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
@@ -230,16 +231,21 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 defaultMessage: 'Attached policies',
               }
             ),
-            width: '206px',
+            width: '270px',
             render: (item: InstalledPackageUIPackageListItem) => {
               const policyCount = item.packagePoliciesInfo?.count ?? 0;
-              if (!policyCount) {
+              const status = item.ui.installation_status;
+              const review = item.installationInfo?.pending_upgrade_review;
+              const showPendingReview = status === 'pending_upgrade_review' && review;
+              const showDeclinedReview = status === 'declined_review' && review;
+
+              if (!policyCount && !showPendingReview && !showDeclinedReview) {
                 return null;
               }
 
               const isDisabled = !authz.fleet.readAgentPolicies;
 
-              return (
+              const policiesLink = policyCount ? (
                 <DisabledWrapperTooltip
                   tooltipContent={
                     <FormattedMessage
@@ -255,7 +261,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     <FormattedMessage
                       id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
                       defaultMessage={
-                        'View {policyCount, plural, one {# policies} other {# policies}}'
+                        'View {policyCount, plural, one {# policy} other {# policies}}'
                       }
                       values={{
                         policyCount,
@@ -263,7 +269,39 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     />
                   </EuiLink>
                 </DisabledWrapperTooltip>
-              );
+              ) : null;
+
+              if (showPendingReview) {
+                return (
+                  <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
+                    {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
+                    <EuiFlexItem grow={false}>
+                      <PendingUpgradeReviewStatus
+                        pkgTitle={item.title ?? ''}
+                        pkgName={item.name}
+                        pendingUpgradeReview={review}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+
+              if (showDeclinedReview) {
+                return (
+                  <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
+                    {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
+                    <EuiFlexItem grow={false}>
+                      <DeclinedUpgradeStatus
+                        pkgName={item.name}
+                        pendingUpgradeReview={review}
+                        pkgTitle={item.title ?? ''}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+
+              return policiesLink;
             },
           },
           {

@@ -25,7 +25,6 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
-import { PendingUpgradeReviewStatus, DeclinedUpgradeStatus } from './pending_upgrade_review_status';
 
 const InstalledVersionStatus: React.FunctionComponent<{
   item: InstalledPackageUIPackageListItem;
@@ -33,7 +32,7 @@ const InstalledVersionStatus: React.FunctionComponent<{
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="m" type="checkInCircleFilled" color="success" aria-hidden={true} />
+        <EuiIcon size="m" type="checkInCircleFilled" color="success"/>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{item.installationInfo?.version ?? item.version}</EuiFlexItem>
     </EuiFlexGroup>
@@ -237,24 +236,14 @@ export const InstallationVersionStatus: React.FunctionComponent<{
 }> = React.memo(({ item }) => {
   const status = item.ui.installation_status;
 
-  if (status === 'installed') {
+  if (
+    status === 'installed' ||
+    status === 'pending_upgrade_review' ||
+    status === 'declined_review'
+  ) {
     return <InstalledVersionStatus item={item} />;
   } else if (status === 'upgrade_available') {
     return <UpgradeAvailableVersionStatus item={item} />;
-  } else if (status === 'pending_upgrade_review') {
-    return (
-      <PendingUpgradeReviewStatus
-        pkgName={item.name}
-        pendingUpgradeReview={item.installationInfo!.pending_upgrade_review!}
-      />
-    );
-  } else if (status === 'declined_review') {
-    return (
-      <DeclinedUpgradeStatus
-        pkgName={item.name}
-        pendingUpgradeReview={item.installationInfo!.pending_upgrade_review!}
-      />
-    );
   } else if (status === 'upgrading') {
     return <UpgradingVersionStatus item={item} />;
   } else if (status === 'uninstalling') {

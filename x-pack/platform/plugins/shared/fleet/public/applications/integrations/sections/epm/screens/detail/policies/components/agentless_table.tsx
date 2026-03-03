@@ -205,6 +205,7 @@ export const AgentlessPackagePoliciesTable = ({
                           <EuiFlexItem grow={false}>
                             <PendingUpgradeReviewStatus
                               pkgName={packagePolicy.package?.name ?? ''}
+                              pkgTitle={packagePolicy.package?.title ?? ''}
                               pendingUpgradeReview={review}
                             />
                           </EuiFlexItem>
@@ -215,6 +216,7 @@ export const AgentlessPackagePoliciesTable = ({
                           <EuiFlexItem grow={false}>
                             <DeclinedUpgradeStatus
                               pkgName={packagePolicy.package?.name ?? ''}
+                              pkgTitle={packagePolicy.package?.title ?? ''}
                               pendingUpgradeReview={review}
                             />
                           </EuiFlexItem>
