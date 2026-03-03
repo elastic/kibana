@@ -18,7 +18,8 @@ export const RetentionWarningPrompt: React.FC = () => {
     <EuiCallOut
       announceOnMount
       title={i18n.translate('xpack.securitySolution.siemReadiness.retention.warningPrompt.title', {
-        defaultMessage: 'Some indices have shorter retention periods than recommended.',
+        defaultMessage:
+          'Some data streams or indices have shorter retention periods than recommended.',
       })}
       color="warning"
       iconType="warning"

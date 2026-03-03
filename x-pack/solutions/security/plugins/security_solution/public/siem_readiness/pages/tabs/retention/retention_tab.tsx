@@ -207,7 +207,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.dataStream',
           {
-            defaultMessage: 'Data stream',
+            defaultMessage: 'Data streams/indices',
           }
         ),
         sortable: true,
@@ -500,7 +500,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         renderExtraAction={renderExtraAction}
         defaultSortField="retentionDays"
         defaultSortDirection="asc"
-        itemName="indices"
+        itemName="data streams / indices"
       />
     </>
   );
