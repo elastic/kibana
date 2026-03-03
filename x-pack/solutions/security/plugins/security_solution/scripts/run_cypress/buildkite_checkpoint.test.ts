@@ -13,6 +13,7 @@ import { execFile } from 'child_process';
 import {
   isInBuildkite,
   getCheckpointKey,
+  normalizeSpecPath,
   markSpecCompleted,
   isSpecCompleted,
 } from './buildkite_checkpoint';
@@ -45,6 +46,35 @@ describe('buildkite_checkpoint', () => {
     it('returns false when BUILDKITE is empty string', () => {
       process.env.BUILDKITE = '';
       expect(isInBuildkite()).toBe(false);
+    });
+  });
+
+  describe('normalizeSpecPath', () => {
+    it('strips the agent workspace prefix from an absolute Buildkite path', () => {
+      const absolute =
+        '/opt/buildkite-agent/builds/bk-agent-prod-gcp-123456/elastic/kibana-pull-request/kibana/x-pack/solutions/security/test/spec.cy.ts';
+      expect(normalizeSpecPath(absolute)).toBe(
+        'x-pack/solutions/security/test/spec.cy.ts'
+      );
+    });
+
+    it('returns the same value for the same spec on different agents', () => {
+      const agent1 =
+        '/opt/buildkite-agent/builds/bk-agent-prod-gcp-111/elastic/kibana-pull-request/kibana/x-pack/test/spec.cy.ts';
+      const agent2 =
+        '/opt/buildkite-agent/builds/bk-agent-prod-gcp-999/elastic/kibana-pull-request/kibana/x-pack/test/spec.cy.ts';
+      expect(normalizeSpecPath(agent1)).toBe(normalizeSpecPath(agent2));
+    });
+
+    it('returns the path unchanged when already relative', () => {
+      expect(normalizeSpecPath('cypress/e2e/alerts.cy.ts')).toBe(
+        'cypress/e2e/alerts.cy.ts'
+      );
+    });
+
+    it('handles paths without the /kibana/ marker', () => {
+      const odd = '/some/other/path/spec.cy.ts';
+      expect(normalizeSpecPath(odd)).toBe(odd);
     });
   });
 
@@ -93,6 +123,19 @@ describe('buildkite_checkpoint', () => {
       const key1 = getCheckpointKey('spec.cy.ts');
 
       expect(key0).not.toBe(key1);
+    });
+
+    it('produces the same key for the same spec on different Buildkite agents', () => {
+      process.env.BUILDKITE_STEP_ID = 'step-123';
+      process.env.BUILDKITE_PARALLEL_JOB = '0';
+
+      const keyAgent1 = getCheckpointKey(
+        '/opt/buildkite-agent/builds/bk-agent-prod-gcp-111/elastic/kibana-pull-request/kibana/x-pack/test/spec.cy.ts'
+      );
+      const keyAgent2 = getCheckpointKey(
+        '/opt/buildkite-agent/builds/bk-agent-prod-gcp-999/elastic/kibana-pull-request/kibana/x-pack/test/spec.cy.ts'
+      );
+      expect(keyAgent1).toBe(keyAgent2);
     });
   });
 
