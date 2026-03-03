@@ -16,9 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const browser = getService('browser');
-  const dataViews = getService('dataViews');
-  const filterBar = getService('filterBar');
-  const retry = getService('retry');
+  
   const { common, discover, header, timePicker } = getPageObjects([
     'common',
     'discover',
@@ -30,30 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  const defaultTimespan =
-    'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000 (interval: Auto - 3 hours)';
   const defaultTimespanESQL = 'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000';
-  const defaultTotalCount = '14,004';
-
-  async function checkNoVis(totalCount: string) {
-    await header.waitUntilLoadingHasFinished();
-    await discover.waitUntilSearchingHasFinished();
-
-    expect(await discover.isChartVisible()).to.be(false);
-    expect(await discover.getHitCount()).to.be(totalCount);
-  }
-
-  async function checkHistogramVis(timespan: string, totalCount: string) {
-    await header.waitUntilLoadingHasFinished();
-    await discover.waitUntilSearchingHasFinished();
-
-    await testSubjects.existOrFail('xyVisChart');
-    await testSubjects.existOrFail('unifiedHistogramEditVisualization');
-    await testSubjects.existOrFail('unifiedHistogramBreakdownSelectorButton');
-    await testSubjects.existOrFail('unifiedHistogramTimeIntervalSelectorButton');
-    expect(await discover.getChartTimespan()).to.be(timespan);
-    expect(await discover.getHitCount()).to.be(totalCount);
-  }
 
   async function checkESQLHistogramVis(
     timespan: string,
