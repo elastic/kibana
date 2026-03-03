@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const SYNTHETICS_MONITORS_EMBEDDABLE = 'SYNTHETICS_MONITORS_EMBEDDABLE';
+//
+// Do not change constant values - part of public REST APIs
+//
+export const SYNTHETICS_MONITORS_EMBEDDABLE = 'synthetics_monitors';

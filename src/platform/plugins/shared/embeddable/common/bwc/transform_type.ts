@@ -8,7 +8,6 @@
  */
 
 export function transformType(type: string) {
-  // Pre 9.4 typed markdown embeddable as DASHBOARD_MARKDOWN
   if (type === 'DASHBOARD_MARKDOWN') {
     return 'markdown';
   }
@@ -27,6 +26,14 @@ export function transformType(type: string) {
 
   if (type === 'esqlControl') {
     return 'esql_control';
+  }
+
+  if (type === 'SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE') {
+    return 'synthetics_stats_overview';
+  }
+
+  if (type === 'SYNTHETICS_MONITORS_EMBEDDABLE') {
+    return 'synthetics_monitors';
   }
 
   return type;

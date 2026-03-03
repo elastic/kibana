@@ -9,7 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+//
 // Do not change constant value - part of public REST APIs
+//
 export const MARKDOWN_EMBEDDABLE_TYPE = 'markdown';
 
 export const MARKDOWN_SAVED_OBJECT_TYPE = 'markdown';
