@@ -30,11 +30,10 @@ describe('Dashboard services API', () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({ attributes });
       const serializedState = api.serializeState();
-      // make sure of 3 things:
       // * attributes are sent back
       expect(serializedState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
-      // * savedObjectId is cleaned up
-      expect(serializedState).not.toHaveProperty('savedObjectId');
+      // * savedObjectId is undefined for by-value panels
+      expect(serializedState).toHaveProperty('savedObjectId', undefined);
     });
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
