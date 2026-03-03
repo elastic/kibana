@@ -26,11 +26,11 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
+import { createChromeComponents } from '@kbn/core-chrome-browser-components';
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
-import { createChromeComponents } from '@kbn/core-chrome-browser-components';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
