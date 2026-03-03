@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const playgroundAttributesSchema = schema.object({
   name: schema.string({ minLength: 1, maxLength: 50 }),
@@ -33,3 +33,5 @@ export const playgroundAttributesSchema = schema.object({
     })
   ),
 });
+
+export type SavedPlaygroundV1 = TypeOf<typeof playgroundAttributesSchema>;

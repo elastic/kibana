@@ -18,7 +18,7 @@ import type {
 import { APIRoutes } from '../types';
 import { errorHandler } from '../utils/error_handler';
 import { parsePlaygroundSO, parsePlaygroundSOList, validatePlayground } from '../utils/playgrounds';
-import { playgroundAttributesSchema } from '../playground_saved_object/schema/v1/v1';
+import { playgroundAttributesSchemaV2 } from '../playground_saved_object/schema/v2/v2';
 
 export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOptions) => {
   router.versioned
@@ -158,7 +158,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
         version: ROUTE_VERSIONS.v1,
         validate: {
           request: {
-            body: playgroundAttributesSchema,
+            body: playgroundAttributesSchemaV2,
           },
         },
       },
@@ -228,7 +228,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
             params: schema.object({
               id: schema.string(),
             }),
-            body: playgroundAttributesSchema,
+            body: playgroundAttributesSchemaV2,
           },
         },
       },
