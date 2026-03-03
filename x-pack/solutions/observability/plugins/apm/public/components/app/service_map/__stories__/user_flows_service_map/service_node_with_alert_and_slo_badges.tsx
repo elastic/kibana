@@ -6,9 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { Node, NodeProps } from '@xyflow/react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ServiceNodeData } from '../../../../../../common/service_map';
 import { ServiceNode } from '../../service_node';
@@ -28,19 +27,19 @@ type ServiceNodeWithAlertAndSloType = Node<
   'serviceWithAlertAndSlo'
 >;
 
-const badgesContainerStyles = (
-  euiTheme: { size: { xs: string; s: string }; levels: { header: number } },
-  twoBadges: boolean
-) => css`
-  position: absolute;
-  top: ${twoBadges ? `calc(-${euiTheme.size.m} - ${euiTheme.size.m})` : `-${euiTheme.size.xs}`};
-  right: -${euiTheme.size.xs};
-  z-index: ${euiTheme.levels.header};
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: ${euiTheme.size.xs};
-`;
+const badgesContainerStyles = (euiTheme: { size: { xs: string }; levels: { header: number } }) =>
+  css`
+    position: absolute;
+    top: -${euiTheme.size.xs};
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: ${euiTheme.levels.header};
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: ${euiTheme.size.xs};
+  `;
 
 export const ServiceNodeWithAlertAndSloBadges = memo(
   (props: NodeProps<ServiceNodeWithAlertAndSloType>) => {
@@ -53,34 +52,34 @@ export const ServiceNodeWithAlertAndSloBadges = memo(
     const showAlert = showAlertsBadge && alertCount > 0;
     const showSlo = showSloBadge && sloCount > 0;
     const showBadges = showAlert || showSlo;
-    const twoBadges = showAlert && showSlo;
+    const theme = {
+      size: euiTheme.size,
+      levels: { header: Number(euiTheme.levels?.header ?? 2000) },
+    };
 
     return (
       <div style={{ position: 'relative', display: 'inline-block' }}>
-        <ServiceNode {...props} />
+        <ServiceNode {...(props as unknown as React.ComponentProps<typeof ServiceNode>)} />
         {showBadges && (
-          <div css={badgesContainerStyles(euiTheme, twoBadges)}>
-            {showSlo && (
-              <EuiBadge color="warning" data-test-subj="serviceNodeSloBadge">
-                <EuiFlexGroup alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="visGauge" aria-hidden />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {sloCount}{' '}
-                    {i18n.translate('xpack.apm.serviceNodeWithAlertAndSloBadges.sloBadgeLabel', {
-                      defaultMessage: 'SLOs',
-                    })}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+          <div css={badgesContainerStyles(theme)}>
+            {showAlert && (
+              <EuiBadge
+                color="danger"
+                data-test-subj="serviceNodeAlertBadge"
+                title={`${alertCount} alert${alertCount === 1 ? '' : 's'}`}
+              >
+                <EuiIcon type="warning" size="s" aria-hidden />
+                {alertCount}
               </EuiBadge>
             )}
-            {showAlert && (
-              <EuiBadge color="danger" data-test-subj="serviceNodeAlertBadge">
-                {alertCount}{' '}
-                {i18n.translate('xpack.apm.serviceNodeWithAlertAndSloBadges.alertsBadgeLabel', {
-                  defaultMessage: 'alerts',
-                })}
+            {showSlo && (
+              <EuiBadge
+                color="warning"
+                data-test-subj="serviceNodeSloBadge"
+                title={`${sloCount} SLO${sloCount === 1 ? '' : 's'}`}
+              >
+                <EuiIcon type="visGauge" size="s" aria-hidden />
+                {sloCount}
               </EuiBadge>
             )}
           </div>
