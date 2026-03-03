@@ -148,6 +148,15 @@ node scripts/es_snapshot_loader replay \
   --snapshot-url file:///path/to/snapshot \
   --kibana-url http://localhost:5601 \
   --patterns "logs-*,metrics-*,traces-*"
+
+# Replay into a custom destination index
+node scripts/es_snapshot_loader replay \
+  --repo-type gcs \
+  --gcs-bucket obs-ai-datasets \
+  --gcs-base-path "sigevents/my-dataset" \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --patterns "logs" \
+  --dest-index "my-custom-index"
 ```
 
 ### Common Options
@@ -182,6 +191,7 @@ Notes:
 | --------------- | ------------------------------------------------------------------------------------- |
 | `--patterns`    | Comma-separated data stream patterns to replay (required)                              |
 | `--concurrency` | Number of indices to reindex in parallel (default: all at once)                       |
+| `--dest-index`  | Reindex all matched indices into this single destination instead of deriving it from the original index name |
 
 ## Programmatic API
 
@@ -261,6 +271,27 @@ const result = await replaySnapshot({
 });
 ```
 
+### Replay into a Custom Destination Index
+
+```typescript
+import { createGcsRepository, replaySnapshot } from '@kbn/es-snapshot-loader';
+
+const result = await replaySnapshot({
+  esClient,
+  log,
+  repository: createGcsRepository({
+    bucket: 'obs-ai-datasets',
+    basePath: 'sigevents/my-dataset',
+  }),
+  patterns: ['logs'],
+  destIndex: 'my-custom-index',
+});
+
+if (result.success) {
+  console.log(`All matched indices reindexed into my-custom-index`);
+}
+```
+
 ### Using in Test Hooks
 
 ```typescript
@@ -315,5 +346,5 @@ describe('my test suite', () => {
 5. Create an ingest pipeline that transforms `@timestamp` fields:
    - The latest timestamp from the data becomes "now"
    - All other timestamps are adjusted by the same offset, preserving relative timing
-6. Reindex through the pipeline to the target data streams
+6. Reindex through the pipeline to the target data streams (or to `--dest-index` if provided)
 7. Clean up temporary indices, pipeline, and repository

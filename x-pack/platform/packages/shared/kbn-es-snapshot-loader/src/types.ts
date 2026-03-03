@@ -49,6 +49,12 @@ export interface RestoreConfig extends BaseConfig {
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
   concurrency?: number;
+  /**
+   * When provided, all matched indices are reindexed into this single
+   * destination index (or data stream) instead of deriving the destination
+   * from the original index name.
+   */
+  destIndex?: string;
 }
 
 // Unified result type (ReplayResult is superset of RestoreResult)

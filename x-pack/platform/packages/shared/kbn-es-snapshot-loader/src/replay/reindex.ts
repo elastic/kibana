@@ -109,6 +109,7 @@ export async function reindexAllIndices({
   originalIndices,
   concurrency,
   pipelineName,
+  destIndexOverride,
 }: {
   esClient: Client;
   log: ToolingLog;
@@ -116,10 +117,14 @@ export async function reindexAllIndices({
   originalIndices: string[];
   concurrency?: number;
   pipelineName: string;
+  destIndexOverride?: string;
 }): Promise<string[]> {
   const successfullyReindexed: string[] = [];
 
   const jobs: ReindexJob[] = restoredIndices.map((sourceIndex, i) => {
+    if (destIndexOverride) {
+      return { sourceIndex, destIndex: destIndexOverride, isDataStream: true };
+    }
     const { destIndex, isDataStream } = getDestinationInfo(originalIndices[i]);
     return { sourceIndex, destIndex, isDataStream };
   });

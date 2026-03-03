@@ -260,9 +260,11 @@ function runReplayCli(): void {
         'snapshot-name': snapshotName,
         patterns: patternsFlag,
         concurrency: concurrencyFlag,
+        'dest-index': destIndex,
       } = flags as CommonFlags & {
         patterns?: string;
         concurrency?: string;
+        'dest-index'?: string;
       };
 
       const repository = resolveRepositoryFromFlags(flags as CommonFlags);
@@ -282,6 +284,7 @@ function runReplayCli(): void {
       log.info(`Repository type: ${repository.type}`);
       if (snapshotName) log.info(`Snapshot name: ${snapshotName}`);
       log.info(`Index patterns: ${patterns.join(', ')}`);
+      if (destIndex) log.info(`Destination index: ${destIndex}`);
       if (concurrency) log.info(`Concurrency: ${concurrency}`);
 
       const result = await replaySnapshot({
@@ -291,6 +294,7 @@ function runReplayCli(): void {
         snapshotName,
         patterns,
         concurrency,
+        destIndex,
       });
 
       if (result.success) {
@@ -319,6 +323,7 @@ function runReplayCli(): void {
           'gcs-client',
           'patterns',
           'concurrency',
+          'dest-index',
         ],
         help: `
       Usage: node scripts/es_snapshot_loader replay [options]
@@ -327,6 +332,10 @@ function runReplayCli(): void {
 
       --concurrency       Number of indices to reindex in parallel
                           Default: all indices at once (no limit)
+
+      --dest-index        Reindex all matched indices into this single destination
+                          index instead of deriving it from the original index name.
+                          The index must already exist or have a matching template.
         `,
         allowUnexpected: false,
       },
