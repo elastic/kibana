@@ -28,7 +28,6 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/esql",
-    "@kbn/esql-language",
     "@kbn/lens-embeddable-utils",
     "@kbn/utility-types",
     "@kbn/workflows-management-plugin",
