@@ -438,11 +438,9 @@ export class TaskManagerRunner implements TaskRunner {
       return processedResult;
     } catch (err) {
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
-      const taskRunError = getTaskRunErrorInfo(err);
-      this.logger.error(`Task ${this} failed: ${taskRunError.message}`, {
+      this.logger.error(`Task ${this} failed: ${err}`, {
         tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
-        error: { stack_trace: taskRunError.stackTrace },
-        ...(taskRunError.details ? { task_run_error: taskRunError.details } : {}),
+        error: { stack_trace: err.stack },
       });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
@@ -1063,65 +1061,4 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
 export function getTaskDelayInSeconds(scheduledAt: Date) {
   const now = new Date();
   return (now.valueOf() - scheduledAt.valueOf()) / 1000;
-}
-
-function getTaskRunErrorInfo(err: unknown): {
-  message: string;
-  stackTrace?: string;
-  details?: string;
-} {
-  const stackTrace =
-    err && typeof err === 'object' && 'stack' in err && typeof err.stack === 'string'
-      ? err.stack
-      : undefined;
-
-  const rawString = String(err);
-  if (rawString !== '[object Object]') {
-    return { message: rawString, stackTrace };
-  }
-
-  const extractedMessage = extractObjectErrorMessage(err) ?? rawString;
-  return {
-    message: extractedMessage,
-    stackTrace,
-    details: safeStringifyError(err),
-  };
-}
-
-function extractObjectErrorMessage(err: unknown): string | undefined {
-  if (!err || typeof err !== 'object') {
-    return;
-  }
-
-  if ('message' in err && typeof err.message === 'string') {
-    return err.message;
-  }
-
-  if ('reason' in err && typeof err.reason === 'string') {
-    return err.reason;
-  }
-
-  if ('error' in err && err.error && typeof err.error === 'object') {
-    if ('message' in err.error && typeof err.error.message === 'string') {
-      return err.error.message;
-    }
-    if ('reason' in err.error && typeof err.error.reason === 'string') {
-      return err.error.reason;
-    }
-    if ('type' in err.error && typeof err.error.type === 'string') {
-      return err.error.type;
-    }
-  }
-
-  if ('type' in err && typeof err.type === 'string') {
-    return err.type;
-  }
-}
-
-function safeStringifyError(err: unknown): string | undefined {
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return undefined;
-  }
 }
