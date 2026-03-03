@@ -21,6 +21,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AttacksPageContent } from './content';
+import { UninitializedDataViewEmptyState } from './uninitialized_empty_state/uninitialized_data_view_empty_state';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 
 export const DATA_VIEW_LOADING_PROMPT_TEST_ID = 'attacks-page-data-view-loading-prompt';
@@ -41,13 +42,34 @@ export const Wrapper = React.memo(() => {
     [status, newDataViewPickerEnabled]
   );
 
-  const isDataViewInvalid: boolean = useMemo(
-    () =>
-      !newDataViewPickerEnabled ||
-      status === 'error' ||
-      (status === 'ready' && !dataView.hasMatchedIndices()),
+  const isDataViewError: boolean = useMemo(
+    () => !newDataViewPickerEnabled || status === 'error',
+    [status, newDataViewPickerEnabled]
+  );
+
+  const isDataViewUninitialized: boolean = useMemo(
+    () => newDataViewPickerEnabled && status === 'ready' && !dataView.hasMatchedIndices(),
     [dataView, status, newDataViewPickerEnabled]
   );
+
+  const loadedContent = useMemo(() => {
+    if (isDataViewError) {
+      return (
+        <EuiEmptyPrompt
+          color="danger"
+          data-test-subj={DATA_VIEW_ERROR_TEST_ID}
+          iconType="error"
+          title={<h2>{DATAVIEW_ERROR}</h2>}
+        />
+      );
+    }
+
+    if (isDataViewUninitialized) {
+      return <UninitializedDataViewEmptyState dataView={dataView} />;
+    }
+
+    return <AttacksPageContent dataView={dataView} />;
+  }, [isDataViewError, isDataViewUninitialized, dataView]);
 
   return (
     <EuiSkeletonLoading
@@ -76,20 +98,7 @@ export const Wrapper = React.memo(() => {
           <EuiSkeletonRectangle height={600} width="100%" />
         </div>
       }
-      loadedContent={
-        <>
-          {isDataViewInvalid ? (
-            <EuiEmptyPrompt
-              color="danger"
-              data-test-subj={DATA_VIEW_ERROR_TEST_ID}
-              iconType="error"
-              title={<h2>{DATAVIEW_ERROR}</h2>}
-            />
-          ) : (
-            <AttacksPageContent dataView={dataView} />
-          )}
-        </>
-      }
+      loadedContent={loadedContent}
     />
   );
 });

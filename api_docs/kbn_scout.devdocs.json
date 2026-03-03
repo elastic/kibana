@@ -8901,7 +8901,16 @@
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
-                    "references": []
+                    "references": [
+                      {
+                        "plugin": "synthetics",
+                        "path": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/fixtures/page_objects/synthetics_app.ts"
+                      },
+                      {
+                        "plugin": "synthetics",
+                        "path": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/fixtures/page_objects/synthetics_app.ts"
+                      }
+                    ]
                   }
                 ]
               }
@@ -10140,12 +10149,7 @@
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
-              }
-            ],
+            "references": [],
             "children": [
               {
                 "parentPluginId": "@kbn/scout",

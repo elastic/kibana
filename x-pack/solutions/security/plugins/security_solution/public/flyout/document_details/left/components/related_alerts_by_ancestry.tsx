@@ -37,7 +37,6 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
     indices,
-    scopeId,
   });
 
   if (error) {
