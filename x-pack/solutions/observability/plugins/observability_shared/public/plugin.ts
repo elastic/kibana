@@ -149,7 +149,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     application: CoreStart['application'],
     agentBuilder: AgentBuilderPluginStart | undefined
   ) {
-    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
+    if (!agentBuilder) {
       return;
     }
 

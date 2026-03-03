@@ -112,16 +112,6 @@ describe('ObservabilitySharedPlugin', () => {
       }).not.toThrow();
     });
 
-    it('does not throw when setConversationFlyoutActiveConfig is undefined', () => {
-      expect(() => {
-        plugin.start(coreStart, {
-          embeddable: {} as any,
-          share: sharePluginMock.createStartContract(),
-          agentBuilder: {} as AgentBuilderPluginStart,
-        });
-      }).not.toThrow();
-    });
-
     it('unsubscribes from app changes on stop', () => {
       const apps = new Map<string, PublicAppInfo>();
       apps.set('apm', createMockApp('apm', DEFAULT_APP_CATEGORIES.observability.id));
