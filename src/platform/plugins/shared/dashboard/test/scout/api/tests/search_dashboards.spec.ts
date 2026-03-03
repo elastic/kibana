@@ -12,7 +12,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
-apiTest.describe('dashboards - list', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('dashboards - list', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {

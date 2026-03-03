@@ -60,26 +60,31 @@ function getScoutServerRunFlags(configPath: string): string[] {
   }
 
   if (groupType === 'platform') {
-    return ['--stateful', '--serverless=es', '--serverless=oblt', '--serverless=security'];
+    return [
+      '--arch stateful --domain classic',
+      '--arch serverless --domain search',
+      '--arch serverless --domain observability_complete',
+      '--arch serverless --domain security_complete',
+    ];
   }
 
   if (groupType === 'workplaceai') {
-    return ['--serverless=workplace-ai'];
+    return ['--arch serverless --domain workplaceai'];
   }
-
-  const flags = ['--stateful'];
-
   if (groupType === 'observability') {
-    flags.push('--serverless=oblt');
-  } else if (groupType === 'security') {
-    flags.push('--serverless=security');
-  } else if (groupType === 'search') {
-    flags.push('--serverless=search');
-  } else {
-    throw new Error(`Unknown solution type: ${groupType}.`);
+    return [
+      '--arch stateful --domain classic',
+      '--arch serverless --domain observability_complete',
+    ];
+  }
+  if (groupType === 'security') {
+    return ['--arch stateful --domain classic', '--arch serverless --domain security_complete'];
+  }
+  if (groupType === 'search') {
+    return ['--arch stateful --domain classic', '--arch serverless --domain search'];
   }
 
-  return flags;
+  throw new Error(`Unknown solution type: ${groupType}.`);
 }
 
 function getTestSuitesFromJson(json: string) {
@@ -215,7 +220,6 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
-      cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -228,7 +232,7 @@ for (const testSuite of testSuites) {
     const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
         SCOUT_REPORTER_ENABLED: 'true',
@@ -243,7 +247,6 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 60,
-      cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -272,7 +275,6 @@ for (const testSuite of testSuites) {
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        cancel_on_build_failing: true,
         retry: {
           automatic: [{ exit_status: '-1', limit: 3 }],
         },
@@ -284,30 +286,6 @@ for (const testSuite of testSuites) {
           // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
           // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
           RUN_ALL_TESTS: 'true',
-        },
-      });
-      break;
-    case 'elastic_synthetics':
-      const synthGroup = groups.find((g) => g.key === testSuite.key);
-      if (!synthGroup) {
-        throw new Error(
-          `Group configuration was not found in groups.json for the following synthetics suite: {${suiteName}}.`
-        );
-      }
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
-        label: synthGroup.name,
-        agents: expandAgentQueue('n2-4-spot'),
-        key: `${TestSuiteType.SYNTHETICS}-${suiteIndex++}`,
-        depends_on: 'build',
-        timeout_in_minutes: 30,
-        parallelism: testSuite.count,
-        concurrency,
-        concurrency_group: process.env.UUID,
-        concurrency_method: 'eager',
-        cancel_on_build_failing: true,
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
         },
       });
       break;

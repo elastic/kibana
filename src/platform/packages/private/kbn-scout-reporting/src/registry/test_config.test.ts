@@ -18,7 +18,6 @@ jest.mock('fast-glob');
 
 const dummyManifestProps = {
   exists: false,
-  lastModified: new Date(0).toISOString(),
   sha1: '000000000000000-000000000000000',
   tests: [],
 };
@@ -64,14 +63,18 @@ describe('test_config module', () => {
       );
       const scoutRoot = path.join(moduleRoot, 'test/scout');
       const validManifestContent = {
-        lastModified: '2025-12-03T19:04:17.097Z',
         sha1: 'b72df4fa5abc546e5f21e6c2f6eaaaa523755720',
         tests: [
           {
             id: 'f44f18cc703276d-178a4921f7b18d0',
             title: 'Module modularity should be the off the charts',
             expectedStatus: 'passed',
-            tags: ['@svlSecurity', '@ess'],
+            tags: [
+              '@local-serverless-security_complete',
+              '@cloud-serverless-security_complete',
+              '@local-stateful-classic',
+              '@cloud-stateful-classic',
+            ],
             location: {
               file: path.join(
                 scoutRoot,

@@ -53,7 +53,7 @@ export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector"
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 ### Load OneChat Datasets

@@ -47,18 +47,6 @@ const useGetCommandText = (
         description: CONSOLE_COMMANDS.isolate.about,
         tooltip: CONSOLE_COMMANDS.isolate.privileges,
       };
-    case 'kill-process':
-      return {
-        title: CONSOLE_COMMANDS.killProcess.title,
-        description: CONSOLE_COMMANDS.killProcess.about,
-        tooltip: CONSOLE_COMMANDS.killProcess.privileges,
-      };
-    case 'suspend-process':
-      return {
-        title: CONSOLE_COMMANDS.suspendProcess.title,
-        description: CONSOLE_COMMANDS.suspendProcess.about,
-        tooltip: CONSOLE_COMMANDS.suspendProcess.privileges,
-      };
     default:
       return {
         title: '',

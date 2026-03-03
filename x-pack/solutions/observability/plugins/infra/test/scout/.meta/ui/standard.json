@@ -1,0 +1,22 @@
+{
+  "lastModified": "2026-02-20T05:09:05.927Z",
+  "sha1": "ee39e1764c83099a4d15bd0af5ddf47db2a6e191",
+  "tests": [
+    {
+      "id": "2255affe2a24223-6edec65fe06717b",
+      "title": "Infrastructure Inventory - Onboarding Renders no data page and redirects to onboarding page when no data is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    }
+  ]
+}

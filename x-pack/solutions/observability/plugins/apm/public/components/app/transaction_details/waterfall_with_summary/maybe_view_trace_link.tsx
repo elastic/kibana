@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getNextEnvironmentUrlParam,
+} from '../../../../../common/environment_filter_values';
 import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
@@ -91,7 +94,7 @@ export function MaybeViewTraceLink({
   const rootTransaction = rootWaterfallTransaction.doc;
   const isRoot = transaction.transaction.id === rootWaterfallTransaction.id;
   const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: rootTransaction.service.environment,
+    requestedEnvironment: rootTransaction.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
     currentEnvironmentUrlParam: environment,
   });
 

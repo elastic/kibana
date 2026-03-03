@@ -9,6 +9,7 @@
     "scripts/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -81,7 +82,6 @@
     "@kbn/securitysolution-io-ts-types",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/serverless",
-    "@kbn/repo-info",
     "@kbn/index-management-plugin",
     "@kbn/license-management-plugin",
     "@kbn/react-kibana-mount",
@@ -121,7 +121,8 @@
     "@kbn/content-management-plugin",
     "@kbn/licensing-types",
     "@kbn/observability-synthetics-test-data",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/scout-oblt"
   ],
   "exclude": ["target/**/*"]
 }

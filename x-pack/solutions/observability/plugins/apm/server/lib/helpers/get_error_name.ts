@@ -12,7 +12,9 @@ import type { APMError } from '../../../typings/es_schemas/ui/apm_error';
 export function getErrorName({
   error,
 }: {
-  error: Maybe<Pick<APMError['error'], 'exception'>> & { log?: { message?: string } };
+  error: Maybe<Pick<APMError['error'], 'exception' | 'message'>> & { log?: { message?: string } };
 }): string {
-  return error?.log?.message || error?.exception?.[0]?.message || NOT_AVAILABLE_LABEL;
+  return (
+    error?.log?.message || error?.exception?.[0]?.message || error?.message || NOT_AVAILABLE_LABEL
+  );
 }

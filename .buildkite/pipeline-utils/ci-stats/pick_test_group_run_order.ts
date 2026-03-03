@@ -302,7 +302,7 @@ export async function pickTestGroupRunOrder() {
       ? process.env.JEST_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build'];
+      : [];
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
@@ -362,6 +362,7 @@ export async function pickTestGroupRunOrder() {
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    durationPercentile: 75,
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
@@ -416,6 +417,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 4,
         names: jestUnitConfigs,
       },
       {
@@ -423,6 +425,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 2,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
@@ -432,6 +435,7 @@ export async function pickTestGroupRunOrder() {
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
+        warmupMin: 3,
         names,
       })),
     ],
@@ -513,9 +517,6 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest',
             agents: expandAgentQueue('n2-4-spot', 110),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
@@ -532,12 +533,10 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 120,
+            // TODO: Reduce once we have identified the cause of random long-running tests
+            timeout_in_minutes: 75,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot', 105),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
@@ -574,7 +573,6 @@ export async function pickTestGroupRunOrder() {
                   timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue, 105),
                   env: {
-                    SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
                     ...envFromlabels,

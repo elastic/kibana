@@ -142,6 +142,7 @@ export const StdErrorLogs = ({
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );

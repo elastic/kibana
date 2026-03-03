@@ -345,6 +345,11 @@ export const config: PluginConfigDescriptor = {
           maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
         })
       ),
+      unenrollInactiveAgents: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),

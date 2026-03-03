@@ -96,7 +96,7 @@ export default createPlaywrightEvalsConfig({ testDir: __dirname });
 Start scout:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
@@ -239,7 +239,7 @@ To do this, you need to create (or override) a configuration file at `.scout/ser
 
 Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
 
-> **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
+> **Note:** Running the Scout server with `node scripts/scout.js start-server --arch stateful --domain classic` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
 
 ## Regenerating Phoenix GraphQL types
 

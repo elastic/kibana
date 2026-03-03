@@ -15,19 +15,33 @@ describe('getErrorName', () => {
         error: {
           log: { message: 'bar' },
           exception: [{ message: 'foo' }],
+          message: 'baz',
         },
       } as APMError)
     ).toEqual('bar');
   });
+
   it('returns exception message', () => {
     expect(
       getErrorName({
         error: {
           exception: [{ message: 'foo' }],
+          message: 'baz',
         },
       } as APMError)
     ).toEqual('foo');
   });
+
+  it('returns error message', () => {
+    expect(
+      getErrorName({
+        error: {
+          message: 'baz',
+        },
+      } as APMError)
+    ).toEqual('baz');
+  });
+
   it('returns default message', () => {
     expect(getErrorName({} as APMError)).toEqual(NOT_AVAILABLE_LABEL);
   });
