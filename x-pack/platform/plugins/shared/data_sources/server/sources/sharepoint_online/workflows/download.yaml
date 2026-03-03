@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint.download'
-description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id) for markdown/plain-text files; downloadItemFromURL + ingest extract (download_url) for PDFs, .docx, and other files that require preprocessing (extracted text available in simulate response under docs[0].doc._source.attachment.content); getSitePageContents (site_id, page_id) for SharePoint site page content.'
+description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id) for markdown/plain-text files; downloadItemFromURL + extract (download_url) for PDFs, .docx, and other files that require preprocessing (extracted text available under output.content); getSitePageContents (site_id, page_id) for SharePoint site page content.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -45,22 +45,13 @@ steps:
         with:
           downloadUrl: "${{ inputs.download_url }}"
       - name: extract-content
-        type: elasticsearch.request
+        type: workflow.execute
         with:
-          method: POST
-          path: /_ingest/pipeline/_simulate
-          body:
-            pipeline:
-              processors:
-                - attachment:
-                    field: data
-                    indexed_chars: -1
-                    remove_binary: true
-            docs:
-              - _id: "${{ inputs.download_url }}"
-                _source:
-                  filename: "${{ inputs.download_url }}"
-                  data: "${{ steps.download-item-from-url.output.base64 }}"
+          workflow-id: "workflow-00000000-0000-0000-0000-000000000001"
+          inputs:
+            content: "${{ steps.download-item-from-url.output.base64 }}"
+            filename: "${{ inputs.download_url }}"
+            docId: "${{ inputs.download_url }}"
   - name: get-site-page-contents
     type: sharepoint-online.getSitePageContents
     if: "${{ inputs.download_action == 'getSitePageContents' }}"

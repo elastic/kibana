@@ -38,30 +38,21 @@ steps:
         with:
           fileId: "${{foreach.item}}"
       - name: extract_content
-        type: elasticsearch.request
+        type: workflow.execute
         with:
-          method: POST
-          path: /_ingest/pipeline/_simulate
-          body:
-            pipeline:
-              processors:
-                - attachment:
-                    field: data
-                    indexed_chars: -1
-                    remove_binary: true
-            docs:
-              - _id: "${{foreach.item}}"
-                _source:
-                  filename: "${{steps.download_file.output.name}}"
-                  data: "${{steps.download_file.output.content}}"
+          workflow-id: "workflow-00000000-0000-0000-0000-000000000001"
+          inputs:
+            content: "${{steps.download_file.output.content}}"
+            filename: "${{steps.download_file.output.name}}"
+            docId: "${{foreach.item}}"
       - name: normalize_result
         type: data.set
         with:
           normalized:
             fileId: "${{foreach.item}}"
             filename: "${{steps.download_file.output.name}}"
-            content: "${{steps.extract_content.output.docs[0].doc._source.attachment.content}}"
-            content_type: "${{steps.extract_content.output.docs[0].doc._source.attachment.content_type}}"
+            content: "${{steps.extract_content.output.content}}"
+            content_type: "${{steps.extract_content.output.content_type}}"
       - name: accumulate_result
         type: data.set
         with:

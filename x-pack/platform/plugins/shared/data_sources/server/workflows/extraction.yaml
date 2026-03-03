@@ -1,0 +1,40 @@
+version: '1'
+name: 'sources.shared.extract_content'
+description: 'Shared extraction workflow: extracts text from base64-encoded file data using the ingest attachment processor (Tika). Used by data source download workflows via workflow.execute.'
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: content
+    type: string
+    description: Base64-encoded file content
+  - name: filename
+    type: string
+    description: Filename with extension, used for content type detection
+  - name: docId
+    type: string
+    required: false
+    description: Optional document identifier, passed as _id in the simulated doc
+steps:
+  - name: simulate_extraction
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /_ingest/pipeline/_simulate
+      body:
+        pipeline:
+          processors:
+            - attachment:
+                field: data
+                indexed_chars: -1
+                remove_binary: true
+        docs:
+          - _id: "${{inputs.docId}}"
+            _source:
+              filename: "${{inputs.filename}}"
+              data: "${{inputs.content}}"
+  - name: normalize_output
+    type: data.set
+    with:
+      content: "${{steps.simulate_extraction.output.docs[0].doc._source.attachment.content}}"
+      content_type: "${{steps.simulate_extraction.output.docs[0].doc._source.attachment.content_type}}"

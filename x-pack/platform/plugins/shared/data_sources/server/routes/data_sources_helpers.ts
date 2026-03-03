@@ -25,6 +25,8 @@ import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
 import type { ImportedTool } from '@kbn/data-catalog-plugin/common/data_source_spec';
 import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 import { createStackConnector } from '../utils/create_stack_connector';
 
 import type {
@@ -32,6 +34,8 @@ import type {
   DataSourcesServerStartDependencies,
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
+
+const EXTRACTION_WORKFLOW_ID = 'workflow-00000000-0000-0000-0000-000000000001';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -54,6 +58,35 @@ function slugify(input: string): string {
     .replace(/[\u0300-\u036f]/g, '') // remove accents
     .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
     .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
+/**
+ * Ensures the shared extraction workflow exists, creating it if necessary.
+ * Uses a well-known ID so all data source download workflows can reference it via workflow.execute.
+ */
+async function ensureExtractionWorkflowExists(
+  workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'],
+  spaceId: string,
+  request: KibanaRequest,
+  logger: Logger
+): Promise<void> {
+  const existing = await workflowManagement.management.getWorkflow(
+    EXTRACTION_WORKFLOW_ID,
+    spaceId
+  );
+  if (existing) {
+    return;
+  }
+
+  const yamlPath = join(__dirname, '..', 'workflows', 'extraction.yaml');
+  const yaml = await fs.readFile(yamlPath, 'utf-8');
+
+  await workflowManagement.management.createWorkflow(
+    { yaml, id: EXTRACTION_WORKFLOW_ID },
+    spaceId,
+    request
+  );
+  logger.info(`Created shared extraction workflow with id '${EXTRACTION_WORKFLOW_ID}'`);
 }
 
 /**
@@ -180,6 +213,8 @@ export async function createDataSourceAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
+
+  await ensureExtractionWorkflowExists(workflowManagement, spaceId, request, logger);
 
   logger.info(`data source workflows: ${JSON.stringify(dataSource.workflows)}`);
 
