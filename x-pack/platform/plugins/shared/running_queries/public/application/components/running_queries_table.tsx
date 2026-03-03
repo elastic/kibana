@@ -114,7 +114,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
           sourceAvailable: source.length > 0,
         };
       }),
-    [notAvailableLabel, queries]
+    [queries]
   );
 
   const filteredQueries = useMemo(() => {

@@ -26,9 +26,9 @@ import { css } from '@emotion/react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { formatRuntime } from '../../lib/format_runtime';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { formatRuntime } from '../../lib/format_runtime';
 import { useRunningQueriesAppContext } from '../app_context';
 import { notAvailableLabel } from './running_queries_table';
 import type { RunningQuery } from '../../../common/types';
@@ -108,9 +108,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             <EuiText size="s">{query.taskId}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {query.queryType}
-            </EuiBadge>
+            <EuiBadge color="hollow">{query.queryType}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
 

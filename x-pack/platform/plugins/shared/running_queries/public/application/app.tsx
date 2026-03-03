@@ -156,9 +156,7 @@ export const RunningQueriesApp: React.FC = () => {
   if (capabilities.isLoading) {
     return (
       <EuiPageTemplate restrictWidth={false}>
-        <EuiPageTemplate.Header
-          pageTitle={PLUGIN_NAME}
-        />
+        <EuiPageTemplate.Header pageTitle={PLUGIN_NAME} />
         <EuiPageTemplate.Section>
           <EuiLoadingSpinner size="l" />
         </EuiPageTemplate.Section>
