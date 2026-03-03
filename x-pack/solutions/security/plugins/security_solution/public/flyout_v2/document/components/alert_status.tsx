@@ -47,7 +47,7 @@ export const AlertStatus = memo(({ hit }: AlertStatusProps) => {
     [statusUpdatedAt, user]
   );
 
-  if (!statusUpdatedBy || !statusUpdatedAt || !user) {
+  if (statusUpdatedBy?.length === 0 || !statusUpdatedAt || user == null) {
     return null;
   }
 
