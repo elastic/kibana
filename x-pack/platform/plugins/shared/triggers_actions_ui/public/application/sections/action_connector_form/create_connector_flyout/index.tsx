@@ -219,6 +219,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
+  const handleErrorFocus = useCallback((node: HTMLDivElement) => {
+    node?.focus();
+  }, []);
 
   return (
     <EuiFlyout
@@ -269,6 +272,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  tabIndex={-1}
+                  announceOnMount
+                  ref={handleErrorFocus}
                   size="s"
                   color="danger"
                   iconType="warning"
