@@ -89,7 +89,7 @@ export const TabsView = (props: SingleTabViewProps) => {
        */}
       <EuiResizeObserver onResize={onResize}>
         {(resizeRef) => (
-          <div ref={resizeRef}>
+          <div ref={resizeRef} id="tabs-view-container">
             <UnifiedTabs
               services={services}
               items={items}
