@@ -17,5 +17,5 @@ steps:
     type: firecrawl.search
     connector-id: <%= firecrawl-stack-connector-id %>
     with:
-      query: "${{inputs.query}}"
-      limit: ${{inputs.limit}}
+      query: "${{ inputs.query }}"
+      limit: ${{ inputs.limit }}

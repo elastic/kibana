@@ -24,7 +24,7 @@ steps:
     type: firecrawl.map
     connector-id: <%= firecrawl-stack-connector-id %>
     with:
-      url: "${{inputs.url}}"
-      search: "${{inputs.search}}"
-      limit: ${{inputs.limit}}
-      includeSubdomains: ${{inputs.includeSubdomains}}
+      url: "${{ inputs.url }}"
+      search: "${{ inputs.search }}"
+      limit: ${{ inputs.limit }}
+      includeSubdomains: ${{ inputs.includeSubdomains }}

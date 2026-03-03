@@ -21,6 +21,6 @@ steps:
     type: firecrawl.scrape
     connector-id: <%= firecrawl-stack-connector-id %>
     with:
-      url: "${{inputs.url}}"
-      onlyMainContent: ${{inputs.onlyMainContent}}
-      waitFor: ${{inputs.waitFor}}
+      url: "${{ inputs.url }}"
+      onlyMainContent: ${{ inputs.onlyMainContent }}
+      waitFor: ${{ inputs.waitFor }}
