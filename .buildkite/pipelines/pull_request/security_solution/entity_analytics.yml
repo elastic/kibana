@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
-    cancel_on_build_failing: true
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -16,7 +15,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
-    cancel_on_build_failing: true
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
