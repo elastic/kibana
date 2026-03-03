@@ -27,7 +27,7 @@ import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   PostAttackDiscoveryGenerateRequestBody,
   DefendInsightsPostRequestBody,
@@ -49,6 +49,7 @@ import type {
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
+import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type {
   AlertingServerSetup,
@@ -57,9 +58,10 @@ import type {
   PublicFrameworkAlertsService,
 } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -75,6 +77,7 @@ import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
+import { AIAssistantService } from './ai_assistant_service';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -94,6 +97,16 @@ export interface ElasticAssistantPluginStart {
    * Inference plugin start contract.
    */
   inference: InferenceServerStart;
+  /**
+   * Assistant service for creating data clients and managing AI Assistant functionality.
+   * @internal
+   */
+  assistantService?: AIAssistantService;
+  /**
+   * Adhoc attack discovery data client for attack discovery operations.
+   * @internal
+   */
+  adhocAttackDiscoveryDataClient?: IRuleDataClient;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -135,22 +148,26 @@ export interface ElasticAssistantPluginStart {
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   alerting: AlertingServerSetup;
+  cases?: CasesServerSetup;
   cloud?: CloudSetup;
   eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   alerting: AlertingServerStart;
+  cases?: CasesServerStart;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -190,6 +207,16 @@ export interface ElasticAssistantApiRequestHandlerContext {
    */
   updateAnonymizationFields: () => Promise<void>;
   userProfile: UserProfileServiceStart;
+  /**
+   * Get the Cases plugin start contract, if available.
+   * Returns undefined if Cases plugin is not installed.
+   */
+  getCases: () => CasesServerStart | undefined;
+  /**
+   * Get the Alert Grouping Task for scheduling/unscheduling workflows.
+   * Returns undefined if not initialized.
+   */
+  getAlertGroupingTask: () => import('./lib/alert_grouping').AlertGroupingTask | undefined;
 }
 /**
  * @internal

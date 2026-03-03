@@ -29,6 +29,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
   #replacements?: Replacements;
   #size?: number;
   #start?: DateMath | null;
+  #allowAllWorkflowStatuses?: boolean;
 
   constructor({
     alertsIndexPattern,
@@ -41,6 +42,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
     replacements,
     size,
     start,
+    allowAllWorkflowStatuses,
   }: {
     alertsIndexPattern?: string;
     anonymizationFields?: AnonymizationFieldResponse[];
@@ -52,6 +54,8 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
     replacements?: Replacements;
     size?: number;
     start?: DateMath | null;
+    /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+    allowAllWorkflowStatuses?: boolean;
   }) {
     super(fields);
 
@@ -64,6 +68,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
     this.#replacements = replacements;
     this.#size = size;
     this.#start = start;
+    this.#allowAllWorkflowStatuses = allowAllWorkflowStatuses;
   }
 
   async _getRelevantDocuments(
@@ -80,6 +85,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
       replacements: this.#replacements,
       size: this.#size,
       start: this.#start,
+      allowAllWorkflowStatuses: this.#allowAllWorkflowStatuses,
     });
 
     return anonymizedAlerts.map((alert) => ({

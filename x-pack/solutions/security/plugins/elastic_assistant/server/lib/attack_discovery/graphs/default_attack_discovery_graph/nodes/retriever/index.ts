@@ -20,6 +20,7 @@ export const getRetrieveAnonymizedAlertsNode = ({
   onNewReplacements,
   replacements,
   size,
+  allowAllWorkflowStatuses,
 }: {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
@@ -28,6 +29,8 @@ export const getRetrieveAnonymizedAlertsNode = ({
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;
+  /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+  allowAllWorkflowStatuses?: boolean;
 }): ((state: AttackDiscoveryGraphState) => Promise<AttackDiscoveryGraphState>) => {
   let localReplacements = { ...(replacements ?? {}) };
   const localOnNewReplacements = (newReplacements: Replacements) => {
@@ -53,6 +56,7 @@ export const getRetrieveAnonymizedAlertsNode = ({
       replacements,
       size,
       start,
+      allowAllWorkflowStatuses,
     });
 
     const documents = await retriever

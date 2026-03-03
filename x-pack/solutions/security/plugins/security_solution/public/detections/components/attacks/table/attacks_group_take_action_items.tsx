@@ -7,11 +7,7 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
-import {
-  getAttackDiscoveryMarkdown,
-  getOriginalAlertIds,
-  type AttackDiscoveryAlert,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { inputsModel } from '../../../../common/store';
@@ -22,8 +18,6 @@ import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/
 import type { AttackWithWorkflowStatus } from '../../../hooks/attacks/bulk_actions/types';
 import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
-import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
-import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -42,14 +36,9 @@ export function AttacksGroupTakeActionItems({
     globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   }, [globalQueries]);
 
-  const originalAlertIds = useMemo(
-    () => getOriginalAlertIds({ alertIds: attack.alertIds, replacements: attack.replacements }),
-    [attack.alertIds, attack.replacements]
-  );
-
   const baseAttackProps = useMemo(() => {
-    return { attackId: attack.id, relatedAlertIds: originalAlertIds };
-  }, [attack.id, originalAlertIds]);
+    return { attackId: attack.id, relatedAlertIds: attack.alertIds };
+  }, [attack.alertIds, attack.id]);
 
   const attacksWithAssignees = useMemo(() => {
     return [{ ...baseAttackProps, assignees: attack.assignees }];
@@ -88,32 +77,7 @@ export function AttacksGroupTakeActionItems({
     closePopover,
   });
 
-  const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
-
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
-    attacksWithTimelineAlerts,
-    closePopover,
-  });
-
-  const attacksWithCase = useMemo(
-    () => [
-      {
-        ...baseAttackProps,
-        markdownComment: getAttackDiscoveryMarkdown({
-          attackDiscovery: attack,
-          replacements: attack.replacements,
-        }),
-      },
-    ],
-    [attack, baseAttackProps]
-  );
-
-  const { items: casesItems } = useAttackCaseContextMenuItems({
-    closePopover,
-    title: attack.title,
-    attacksWithCase,
-  });
-  const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,
     closePopover,
   });
@@ -121,23 +85,9 @@ export function AttacksGroupTakeActionItems({
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
       id: 0,
-      items: [
-        ...workflowItems,
-        ...assignItems,
-        ...tagsItems,
-        ...investigateInTimelineItems,
-        ...casesItems,
-        ...viewInAiAssistantItems,
-      ],
+      items: [...workflowItems, ...assignItems, ...tagsItems, ...investigateInTimelineItems],
     }),
-    [
-      workflowItems,
-      assignItems,
-      tagsItems,
-      investigateInTimelineItems,
-      casesItems,
-      viewInAiAssistantItems,
-    ]
+    [workflowItems, assignItems, tagsItems, investigateInTimelineItems]
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(

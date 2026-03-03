@@ -35,9 +35,34 @@ interface GetOpenAndAcknowledgedAlertsQuery {
 }
 
 /**
+ * The workflow status filter for open and acknowledged alerts
+ */
+const WORKFLOW_STATUS_FILTER = {
+  bool: {
+    should: [
+      {
+        match_phrase: {
+          'kibana.alert.workflow_status': 'open',
+        },
+      },
+      {
+        match_phrase: {
+          'kibana.alert.workflow_status': 'acknowledged',
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
+/**
  * This query returns open and acknowledged (non-building block) alerts in the last 24 hours.
  *
  * The alerts are ordered by risk score, and then from the most recent to the oldest.
+ *
+ * @param allowAllWorkflowStatuses - If true, the workflow status filter (open/acknowledged) is not applied,
+ *   allowing alerts of any status to be returned. This is useful for case-based Attack Discovery
+ *   where you want to analyze all alerts attached to a case regardless of their current status.
  */
 export const getOpenAndAcknowledgedAlertsQuery = ({
   alertsIndexPattern,
@@ -46,6 +71,7 @@ export const getOpenAndAcknowledgedAlertsQuery = ({
   filter,
   size,
   start,
+  allowAllWorkflowStatuses,
 }: {
   alertsIndexPattern: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -53,6 +79,8 @@ export const getOpenAndAcknowledgedAlertsQuery = ({
   filter?: Record<string, unknown> | null;
   size: number;
   start?: DateMath | null;
+  /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+  allowAllWorkflowStatuses?: boolean;
 }): GetOpenAndAcknowledgedAlertsQuery => ({
   allow_no_indices: true,
   fields: anonymizationFields
@@ -68,23 +96,8 @@ export const getOpenAndAcknowledgedAlertsQuery = ({
           bool: {
             must: [],
             filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        'kibana.alert.workflow_status': 'open',
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        'kibana.alert.workflow_status': 'acknowledged',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
+              // Only include workflow status filter if not bypassed
+              ...(allowAllWorkflowStatuses ? [] : [WORKFLOW_STATUS_FILTER]),
               ...(filter != null ? [filter] : []),
               {
                 range: {

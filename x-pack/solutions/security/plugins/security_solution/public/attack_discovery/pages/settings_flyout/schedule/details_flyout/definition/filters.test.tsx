@@ -37,9 +37,7 @@ const renderComponent = async () => {
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/238898
-// FLAKY: https://github.com/elastic/kibana/issues/238897
-describe.skip('Filters', () => {
+describe('Filters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 

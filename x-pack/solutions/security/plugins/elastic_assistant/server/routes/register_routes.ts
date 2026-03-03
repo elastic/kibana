@@ -59,6 +59,7 @@ import { suggestUsersRoute } from './users/suggest';
 import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymization_fields_route';
 import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
+import { registerAlertGroupingRoutes } from './alert_grouping';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -164,4 +165,7 @@ export const registerRoutes = (
   if (enableDataGeneratorRoutes) {
     createAttackDiscoveryAlertsRoute(router);
   }
+
+  // Alert Grouping
+  registerAlertGroupingRoutes(router, logger);
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-/**
- * Field name for attack IDs that reference related alerts.
- * This field contains an array of alert IDs that are associated with the attack.
- */
-export const ALERT_ATTACK_DISCOVERY_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
+export const ATTACK_DISCOVERY_ATTACHMENT_TYPE = '.attack-discovery' as const;
+
+
+
+

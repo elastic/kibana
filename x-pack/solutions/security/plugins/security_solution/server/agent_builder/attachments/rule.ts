@@ -15,7 +15,38 @@ import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  text: z.string(),
+  /**
+   * Rule text representation (legacy format).
+   */
+  text: z.string().optional(),
+  /**
+   * Rule ID.
+   */
+  ruleId: z.string().optional(),
+  /**
+   * Rule name.
+   */
+  ruleName: z.string().optional(),
+  /**
+   * Rule description.
+   */
+  ruleDescription: z.string().optional(),
+  /**
+   * Whether the rule is enabled.
+   */
+  enabled: z.boolean().optional(),
+  /**
+   * Rule severity.
+   */
+  severity: z.string().optional(),
+  /**
+   * Rule query (KQL or EQL).
+   */
+  query: z.string().optional(),
+  /**
+   * Rule type.
+   */
+  ruleType: z.string().optional(),
 });
 
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
@@ -26,6 +57,15 @@ type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;
 };
+
+/**
+ * Creates the definition for the `rule` (detection_rule) attachment type.
+ *
+ * This attachment type is used for security detection rules with capabilities to:
+ * - Enable/disable the rule
+ * - Preview and add exceptions
+ * - View rule details and query
+ */
 export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.rule,
@@ -61,15 +101,109 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
 
       If this is a migration rule, it includes both the old rule and the new rule.
 
-{ruleData}
+**How to access the rule data:**
+The rule JSON is in the attachment content above. Parse it to extract:
+- Rule ID and name
+- Rule query (KQL/EQL)
+- Severity and risk score
+- MITRE ATT&CK mappings
 
-1. Extract the query or topic from the rule attachment.
-2. Use the appropriate tools to provide a response`;
-      return description;
+**Investigation steps:**
+1. Review the rule query and detection logic
+2. Check if the rule is currently enabled
+3. Review any existing exceptions
+4. Analyze the rule's detection capabilities`;
+    },
+
+    // Skills to reference when this attachment is present
+    skills: ['security.detection_rules', 'security.exception_lists'],
+
+    // LLM guidance for detection rule operations
+    skillContent: `# Detection Rule Operations
+
+A security detection rule is attached to this conversation.
+
+## Available Actions
+- **Review**: Understand what the rule detects and how
+- **Enable/Disable**: Change the rule's active status
+- **Exceptions**: Preview or add exceptions to reduce false positives
+- **Analyze Query**: Understand the rule's KQL/EQL query
+
+## Rule Analysis
+When analyzing a rule:
+1. Understand the detection logic (query syntax)
+2. Review severity and risk score
+3. Check for MITRE ATT&CK mappings
+4. Identify potential false positive sources
+5. Suggest exception patterns if needed
+
+## Exception Management
+Before adding exceptions:
+1. Confirm the pattern matches legitimate activity
+2. Use preview to verify exception impact
+3. Make exceptions specific to avoid over-suppression
+4. Document the reason for the exception
+
+## Rule Tuning Tips
+- Consider time-based patterns
+- Look for specific user/host patterns
+- Check for process/command line variations
+- Review network indicators`,
+
+    // Entity recognition patterns for auto-attachment
+    entityRecognition: {
+      patterns: [
+        /rule\s+["']?([a-zA-Z0-9_-]+)["']?/i,
+        /detection\s+rule\s+["']?([a-zA-Z0-9_-]+)["']?/i,
+        /security\s+rule\s+["']?([a-zA-Z0-9_-]+)["']?/i,
+      ],
+      extractId: (match) => match[1],
+      resolve: async (entityId, context) => {
+        // TODO: Implement resolution from detection rules API
+        return null;
+      },
     },
   };
 };
 
 const formatRuleData = (data: RuleAttachmentData): string => {
-  return data.text;
+  // Support both legacy text format and new structured format
+  if (data.text) {
+    return data.text;
+  }
+
+  const parts: string[] = [];
+
+  if (data.ruleName) {
+    parts.push(`## Detection Rule: ${data.ruleName}`);
+  }
+
+  if (data.ruleId) {
+    parts.push(`**Rule ID**: ${data.ruleId}`);
+  }
+
+  if (data.enabled !== undefined) {
+    parts.push(`**Status**: ${data.enabled ? 'Enabled' : 'Disabled'}`);
+  }
+
+  if (data.severity) {
+    parts.push(`**Severity**: ${data.severity}`);
+  }
+
+  if (data.ruleType) {
+    parts.push(`**Type**: ${data.ruleType}`);
+  }
+
+  if (data.ruleDescription) {
+    parts.push(`\n**Description**: ${data.ruleDescription}`);
+  }
+
+  if (data.query) {
+    parts.push('\n**Query**:');
+    parts.push('```');
+    parts.push(data.query);
+    parts.push('```');
+  }
+
+  return parts.join('\n');
 };

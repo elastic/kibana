@@ -118,11 +118,11 @@ describe('PageFilters', () => {
     const controlsConfig = [
       {
         title: 'Status',
-        field_name: 'kibana.alert.workflow_status',
-        selected_options: ['open'],
-        hide_action_bar: true,
+        fieldName: 'kibana.alert.workflow_status',
+        selectedOptions: ['open'],
+        hideActionBar: true,
         persist: true,
-        hide_exists: true,
+        hideExists: true,
       },
     ];
     jest

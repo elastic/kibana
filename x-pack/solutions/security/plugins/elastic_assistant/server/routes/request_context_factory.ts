@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
+import type { AlertGroupingTask } from '../lib/alert_grouping';
 
 let hasLoggedProfileUidError = false;
 
@@ -38,17 +39,20 @@ interface ConstructorOptions {
   kibanaVersion: string;
   assistantService: AIAssistantService;
   adhocAttackDiscoveryDataClient: IRuleDataClient;
+  alertGroupingTask?: AlertGroupingTask;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
   private adhocAttackDiscoveryDataClient: IRuleDataClient;
+  private alertGroupingTask?: AlertGroupingTask;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
     this.adhocAttackDiscoveryDataClient = options.adhocAttackDiscoveryDataClient;
+    this.alertGroupingTask = options.alertGroupingTask;
   }
 
   public async create(
@@ -255,6 +259,10 @@ export class RequestContextFactory implements IRequestContextFactory {
           currentUser,
         });
       }),
+
+      getCases: () => startPlugins.cases,
+
+      getAlertGroupingTask: () => this.alertGroupingTask,
     };
   }
 }

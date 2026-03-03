@@ -40,6 +40,8 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   replacements?: Replacements;
   size: number;
   start?: string;
+  /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+  allowAllWorkflowStatuses?: boolean;
 }
 
 export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDiscoveryGraph>;
@@ -64,6 +66,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   replacements,
   size,
   start,
+  allowAllWorkflowStatuses,
 }: GetDefaultAttackDiscoveryGraphParams) => {
   try {
     const graphState = getDefaultGraphAnnotation({ end, filter, prompts, start });
@@ -77,7 +80,15 @@ export const getDefaultAttackDiscoveryGraph = ({
       onNewReplacements,
       replacements,
       size,
+      allowAllWorkflowStatuses,
     });
+
+    logger?.error('index pattern: ' + JSON.stringify(alertsIndexPattern));
+
+    logger?.error('anonymizationFields: ' + JSON.stringify(anonymizationFields));
+
+    logger?.error('filter: ' + JSON.stringify(filter));
+
 
     const generationSchema = getAttackDiscoveriesGenerationSchema(prompts);
 
