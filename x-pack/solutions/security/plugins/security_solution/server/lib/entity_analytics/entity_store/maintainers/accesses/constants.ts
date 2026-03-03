@@ -8,12 +8,8 @@
 export const MAINTAINER_ID = 'accesses_frequently_and_infrequently';
 export const LOOKBACK_WINDOW = 'now-4w';
 export const COMPOSITE_PAGE_SIZE = 3500;
-export const INDEX_PATTERN = 'logs-test';
 export const MAX_ITERATIONS = 1000;
 
-export const USER_IDENTITY_FIELDS = [
-  'user.entity.id',
-  'user.id',
-  'user.name',
-  'user.email',
-] as const;
+export function getIndexPattern(namespace: string): string {
+  return `logs-endpoint.events.security-${namespace}`;
+}

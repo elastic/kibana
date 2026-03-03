@@ -14,14 +14,14 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
   description:
     'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
-  interval: '1m',
+  interval: '1h',
   initialState: {},
   run: async ({ esClient, logger, status }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting accesses_frequently maintainer run');
     const result = await runMaintainer({ esClient, logger, namespace });
     logger.info(
-      `Completed run: ${result.totalBuckets} user buckets, ${result.totalAccessRecords} access records, ${result.totalUpserted} entities upserted, ${result.visitedCount} events marked visited`
+      `Completed run: ${result.totalBuckets} user buckets, ${result.totalAccessRecords} access records, ${result.totalUpserted} entities upserted`
     );
     return result;
   },

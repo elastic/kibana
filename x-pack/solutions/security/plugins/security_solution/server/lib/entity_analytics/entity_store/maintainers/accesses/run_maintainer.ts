@@ -9,14 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityMaintainerState } from '@kbn/entity-store/server';
 
-import { INDEX_PATTERN, LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
+import { getIndexPattern, LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { CompositeAfterKey, CompositeBucket, ProcessedEntityRecord } from './types';
 import { buildCompositeAggQuery, buildBucketUserFilter } from './build_composite_agg';
 import { buildEsqlQuery } from './build_esql_query';
 import { postprocessEsqlResults } from './postprocess_records';
 import { upsertEntityRelationships } from './upsert_entities';
-import { fetchDocumentIds } from './fetch_document_ids';
-import { markEventsAsVisited } from './mark_events_visited';
 
 export async function runMaintainer({
   esClient,
@@ -32,7 +30,7 @@ export async function runMaintainer({
   let totalAccessRecords = 0;
   let totalUpserted = 0;
   let iterations = 0;
-  const processedDocIds: string[] = [];
+  let skipEntityFields = false;
   const allRecords: ProcessedEntityRecord[] = [];
 
   do {
@@ -45,7 +43,7 @@ export async function runMaintainer({
 
     const aggResult = await esClient
       .search({
-        index: INDEX_PATTERN,
+        index: getIndexPattern(namespace),
         ...buildCompositeAggQuery(afterKey),
       })
       .catch((err) => {
@@ -63,27 +61,39 @@ export async function runMaintainer({
 
     if (buckets.length === 0) break;
 
-    const esqlQuery = buildEsqlQuery();
     const bucketFilter = buildBucketUserFilter(buckets);
-    logger.info(`Running ES|QL query:\n${esqlQuery}`);
+    const esqlFilter = {
+      bool: {
+        filter: [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }, bucketFilter],
+      },
+    };
+
+    let esqlQuery = buildEsqlQuery(namespace, skipEntityFields);
+    logger.info(`Running ES|QL query (skipEntityFields=${skipEntityFields}):\n${esqlQuery}`);
     logger.info(`Bucket user filter: ${JSON.stringify(bucketFilter)}`);
 
-    const esqlResult = await esClient.esql
-      .query({
-        query: esqlQuery,
-        filter: {
-          bool: {
-            filter: [
-              { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-              bucketFilter,
-            ],
-          },
-        },
-      })
-      .catch((err) => {
+    let esqlResult;
+    try {
+      esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
+    } catch (err) {
+      const isVerificationException =
+        err?.meta?.body?.error?.type === 'verification_exception' ||
+        err?.message?.includes('verification_exception');
+
+      if (isVerificationException && !skipEntityFields) {
+        logger.warn(
+          'ES|QL query failed with verification_exception (likely missing *.entity.id fields). ' +
+            'Retrying without entity fields.'
+        );
+        skipEntityFields = true;
+        esqlQuery = buildEsqlQuery(namespace, skipEntityFields);
+        logger.info(`Retry ES|QL query (skipEntityFields=${skipEntityFields}):\n${esqlQuery}`);
+        esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
+      } else {
         logger.error(`ES|QL query failed: ${err?.message ?? JSON.stringify(err)}`);
         throw err;
-      });
+      }
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const columns = (esqlResult as any).columns as Array<{ name: string; type: string }>;
@@ -106,21 +116,15 @@ export async function runMaintainer({
       }
     }
 
-    const batchDocIds = await fetchDocumentIds(esClient, bucketFilter);
-    processedDocIds.push(...batchDocIds);
-    logger.info(`Collected ${batchDocIds.length} document IDs from this batch`);
-
     afterKey = buckets.length < COMPOSITE_PAGE_SIZE ? undefined : newAfterKey;
   } while (afterKey);
 
   totalUpserted = await upsertEntityRelationships(esClient, logger, namespace, allRecords);
-  const visitedCount = await markEventsAsVisited(esClient, logger, processedDocIds);
 
   return {
     totalBuckets,
     totalAccessRecords,
     totalUpserted,
-    visitedCount,
     lastRunTimestamp: new Date().toISOString(),
   };
 }

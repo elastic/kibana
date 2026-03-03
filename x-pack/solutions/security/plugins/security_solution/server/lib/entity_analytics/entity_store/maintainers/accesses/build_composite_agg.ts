@@ -8,8 +8,10 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { euid } from '@kbn/entity-store/common';
 
-import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, USER_IDENTITY_FIELDS } from './constants';
+import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 import type { CompositeAfterKey, CompositeBucket } from './types';
+
+const USER_IDENTITY_FIELDS = euid.getEuidSourceFields('user').requiresOneOf;
 
 export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) => ({
   size: 0,
@@ -17,19 +19,11 @@ export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) => ({
     bool: {
       filter: [
         { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-        { term: { 'event.code': '4624' } },
-        { term: { 'event.provider': 'Microsoft-Windows-Security-Auditing' } },
-        { term: { 'event.category': 'authentication' } },
-        { term: { 'event.action': 'logged-in' } },
+        { term: { 'event.action': 'log_on' } },
+        { terms: { 'process.Ext.session_info.logon_type': ['RemoteInteractive', 'Interactive'] } },
         { term: { 'event.outcome': 'success' } },
         euid.getEuidDslDocumentsContainsIdFilter('user'),
-      ],
-      must_not: [
-        { wildcard: { 'user.name': '*$' } },
-        { terms: { 'user.name': ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE'] } },
-        { wildcard: { 'user.name': 'UMFD-*' } },
-        { wildcard: { 'user.name': 'DWM-*' } },
-        { term: { 'winlog.event_data.VirtualAccount': 'Yes' } },
+        euid.getEuidDslDocumentsContainsIdFilter('host'),
       ],
     },
   },
@@ -38,12 +32,9 @@ export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) => ({
       composite: {
         size: COMPOSITE_PAGE_SIZE,
         ...(afterKey ? { after: afterKey } : {}),
-        sources: [
-          { 'user.entity.id': { terms: { field: 'user.entity.id', missing_bucket: true } } },
-          { 'user.id': { terms: { field: 'user.id', missing_bucket: true } } },
-          { 'user.name': { terms: { field: 'user.name', missing_bucket: true } } },
-          { 'user.email': { terms: { field: 'user.email', missing_bucket: true } } },
-        ],
+        sources: USER_IDENTITY_FIELDS.map((field) => ({
+          [field]: { terms: { field, missing_bucket: true } },
+        })),
       },
     },
   },
