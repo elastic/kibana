@@ -36,6 +36,7 @@ export const getTransformOut = (
       transformTimeRangeOut<LensSerializedState>,
       (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
     );
+
     const state = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
