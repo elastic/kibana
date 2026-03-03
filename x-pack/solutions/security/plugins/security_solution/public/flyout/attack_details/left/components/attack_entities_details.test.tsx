@@ -12,9 +12,31 @@ import { AttackDetailsContext } from '../../context';
 import { AttackEntitiesDetails } from './attack_entities_details';
 
 jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-    <span>{defaultMessage}</span>
-  ),
+  FormattedMessage: ({
+    defaultMessage,
+    values,
+  }: {
+    defaultMessage: string;
+    values?: { userCount?: number; hostCount?: number };
+  }) => {
+    if (values?.userCount !== undefined) {
+      return (
+        <span>
+          {values.userCount === 1 ? 'User' : 'Users'}
+          {':'}
+        </span>
+      );
+    }
+    if (values?.hostCount !== undefined) {
+      return (
+        <span>
+          {values.hostCount === 1 ? 'Host' : 'Hosts'}
+          {':'}
+        </span>
+      );
+    }
+    return <span>{defaultMessage}</span>;
+  },
 }));
 
 jest.mock('../../hooks/use_header_data', () => ({
@@ -166,8 +188,8 @@ describe('AttackEntitiesDetails', () => {
     renderWithProvider(<AttackEntitiesDetails />);
 
     expect(screen.getByTestId('attack-entities-details')).toBeInTheDocument();
-    expect(screen.getByText('Users')).toBeInTheDocument();
-    expect(screen.getByText('Host')).toBeInTheDocument();
+    expect(screen.getByText(/Users:/)).toBeInTheDocument();
+    expect(screen.getByText(/Host:/)).toBeInTheDocument();
 
     expect(screen.getByText('UserDetails: user1')).toBeInTheDocument();
     expect(screen.getByText('UserDetails: user2')).toBeInTheDocument();
@@ -184,8 +206,8 @@ describe('AttackEntitiesDetails', () => {
 
     renderWithProvider(<AttackEntitiesDetails />);
 
-    expect(screen.getByText('User')).toBeInTheDocument();
-    expect(screen.getByText('Host')).toBeInTheDocument();
+    expect(screen.getByText(/User:/)).toBeInTheDocument();
+    expect(screen.getByText(/Host:/)).toBeInTheDocument();
   });
 
   it('renders plural Users and Hosts titles when each list has more than one item', () => {
@@ -198,8 +220,8 @@ describe('AttackEntitiesDetails', () => {
 
     renderWithProvider(<AttackEntitiesDetails />);
 
-    expect(screen.getByText('Users')).toBeInTheDocument();
-    expect(screen.getByText('Hosts')).toBeInTheDocument();
+    expect(screen.getByText(/Users:/)).toBeInTheDocument();
+    expect(screen.getByText(/Hosts:/)).toBeInTheDocument();
   });
 
   it('passes scopeId and timestamp to UserDetails and HostDetails', () => {

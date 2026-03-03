@@ -52,6 +52,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
+}));
+
 describe('AttackDetailsLeftPanel', () => {
   it('renders when provided with context via AttackDetailsProvider', () => {
     render(

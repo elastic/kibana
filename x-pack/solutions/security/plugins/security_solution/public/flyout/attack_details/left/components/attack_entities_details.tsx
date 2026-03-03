@@ -72,16 +72,15 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
         </EuiTitle>
         <EuiSpacer size="s" />
         {userNames.map((userName, index) => (
-          <>
+          <React.Fragment key={`user-${index}-${userName}`}>
             <UserDetails
-              key={`user-${index}-${userName}`}
               userName={userName}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
             />
             <EuiSpacer size="s" />
-          </>
+          </React.Fragment>
         ))}
       </EuiFlexItem>
       <EuiFlexItem>
@@ -96,16 +95,15 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
         </EuiTitle>
         <EuiSpacer size="s" />
         {hostNames.map((hostName, index) => (
-          <>
+          <React.Fragment key={`host-${index}-${hostName}`}>
             <HostDetails
-              key={`hostName-${index}-${hostName}`}
               hostName={hostName}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
             />
             <EuiSpacer size="s" />
-          </>
+          </React.Fragment>
         ))}
       </EuiFlexItem>
     </EuiFlexGroup>
