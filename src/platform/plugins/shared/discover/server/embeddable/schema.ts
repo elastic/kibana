@@ -168,6 +168,21 @@ export const dataViewSpecSchema = schema.object(
 
 export const dataViewSchema = schema.oneOf([dataViewReferenceSchema, dataViewSpecSchema]);
 
+export const viewModeSchema = schema.oneOf(
+  [
+    schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+    schema.literal(VIEW_MODE.PATTERN_LEVEL),
+    schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+  ],
+  {
+    defaultValue: VIEW_MODE.DOCUMENT_LEVEL,
+    meta: {
+      description:
+        'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
+    },
+  }
+);
+
 const dataTableLimitsSchema = schema.object(
   {
     rows_per_page: schema.maybe(
@@ -223,20 +238,6 @@ const dataTableSchema = schema.object(
         description: 'Sort configuration for the data table (field and direction).',
       },
     }),
-    view_mode: schema.oneOf(
-      [
-        schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
-        schema.literal(VIEW_MODE.PATTERN_LEVEL),
-        schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
-      ],
-      {
-        defaultValue: VIEW_MODE.DOCUMENT_LEVEL,
-        meta: {
-          description:
-            'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
-        },
-      }
-    ),
     density: schema.oneOf(
       [
         schema.literal(DataGridDensity.COMPACT),
@@ -301,6 +302,7 @@ const classicTabSchema = schema.allOf([
       },
     }),
     dataset: dataViewSchema,
+    view_mode: viewModeSchema,
   }),
 ]);
 

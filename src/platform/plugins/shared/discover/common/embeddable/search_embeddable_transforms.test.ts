@@ -117,10 +117,16 @@ describe('searchEmbeddableTransforms', () => {
         { name: 'message' },
         { name: '@timestamp', width: 200 },
       ]);
-      expect(result.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
-      expect(result.tabs[0].view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-      expect(result.tabs[0].density).toBe(DataGridDensity.COMPACT);
-      expect((result.tabs[0] as DiscoverSessionClassicTab).dataset).toEqual({
+      const {
+        sort,
+        view_mode: viewMode,
+        density,
+        dataset,
+      } = result.tabs[0] as DiscoverSessionClassicTab;
+      expect(sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+      expect(viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect(density).toBe(DataGridDensity.COMPACT);
+      expect(dataset).toEqual({
         type: 'dataView',
         id: 'data-view-1',
       });

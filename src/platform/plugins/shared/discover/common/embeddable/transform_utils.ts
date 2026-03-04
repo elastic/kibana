@@ -184,7 +184,7 @@ export function byValueDiscoverSessionToSavedSearchEmbeddableState(
     grid: toStoredGrid(tab.columns),
     hideChart: false,
     isTextBasedQuery: !('dataset' in tab),
-    viewMode: tab.view_mode,
+    ...('view_mode' in tab && { view_mode: tab.view_mode }),
     rowHeight: tab.row_height === 'auto' || tab.row_height === undefined ? -1 : tab.row_height,
     headerRowHeight:
       tab.header_row_height === 'auto' || tab.header_row_height === undefined
