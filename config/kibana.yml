@@ -1,4 +1,11 @@
-xpack.actions.ears.url: "https://elastic-auth-redirect-service.eu-west-1.aws.svc.qa.elastic.cloud"
+xpack.actions.ears.url: https://elastic-auth-redirect-service.eu-west-1.aws.svc.qa.elastic.cloud
+
+logging:
+  loggers:
+    - name: plugins.actions
+      level: debug
+      appenders: [default]
+
 # For more configuration options see the configuration guide for Kibana in
 # https://www.elastic.co/guide/index.html
 

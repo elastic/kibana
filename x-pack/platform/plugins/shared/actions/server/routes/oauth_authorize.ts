@@ -110,6 +110,7 @@ export const oauthAuthorizeRoute = (
 
           const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
           const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
+          logger.debug(`Kibana public URL: ${kibanaUrl}`);
           if (!kibanaUrl) {
             return res.badRequest({
               body: {
@@ -173,6 +174,9 @@ export const oauthAuthorizeRoute = (
 
           let authorizationUrl: string;
           if (oauthConfig.authTypeId === 'ears') {
+            const earsBaseUrl = actionsConfigUtils.getEarsUrl();
+            logger.info(`EARS Base URL ${earsBaseUrl}`);
+            logger.info(`EARS Stored Authorization URL ${oauthConfig.authorizationUrl}`);
             authorizationUrl = oauthService.buildEarsAuthorizationUrl({
               baseAuthorizationUrl: resolveEarsUrl(
                 oauthConfig.authorizationUrl,
