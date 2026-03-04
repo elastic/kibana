@@ -36,11 +36,7 @@ interface HostPanelHeaderProps {
 const linkTitleCSS = { width: 'fit-content' };
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({
-  entityIdentifiers,
-  lastSeen,
-  entity,
-}: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ entityIdentifiers, lastSeen, entity }: HostPanelHeaderProps) => {
   const hostName = useMemo(
     () =>
       entityIdentifiers[EntityIdentifierFields.hostName] ||
