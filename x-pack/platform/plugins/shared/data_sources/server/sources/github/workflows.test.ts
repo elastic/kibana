@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { loadDataSourceWorkflow } from '../helpers/data_source_workflow_helper';
+import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { renderWorkflowTemplate } from '../workflow_test_helpers';
 
 const MCP_CONNECTOR_NAME = 'fake-mcp-connector';
 const MCP_CONNECTOR_ID = 'fake-mcp-connector-uuid';
@@ -16,7 +18,7 @@ const GITHUB_CONNECTOR_NAME = 'fake-github-connector';
 const GITHUB_CONNECTOR_ID = 'fake-github-connector-uuid';
 
 const loadWorkflow = (file: string): string =>
-  loadDataSourceWorkflow('github', file, {
+  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
     'mcp-stack-connector-id': MCP_CONNECTOR_NAME,
     'github-stack-connector-id': GITHUB_CONNECTOR_NAME,
   });
@@ -48,26 +50,14 @@ describe('github workflows', () => {
             status: 'ok',
             actionId,
             data: {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify({
-                    total_count: 1,
-                    items: [{ name: 'result.ts', path: 'src/result.ts', repository: { full_name: 'org/repo' } }],
-                  }),
-                },
-              ],
+              content: [{ type: 'text', text: JSON.stringify({ total_count: 1, items: [{ name: 'result.ts' }] }) }],
             },
           };
         case 'getDoc':
           return {
             status: 'ok',
             actionId,
-            data: {
-              name: subActionParams.path,
-              content: Buffer.from('file content here').toString('base64'),
-              encoding: 'base64',
-            },
+            data: { name: subActionParams.path, content: Buffer.from('file content').toString('base64'), encoding: 'base64' },
           };
         default:
           throw new Error(`Unexpected GitHub subAction: ${subAction}`);
@@ -99,10 +89,7 @@ describe('github workflows', () => {
             subAction: 'callTool',
             subActionParams: expect.objectContaining({
               name: 'search_code',
-              arguments: expect.objectContaining({
-                query: 'handleError language:typescript',
-                perPage: 5,
-              }),
+              arguments: expect.objectContaining({ query: 'handleError language:typescript', perPage: 5 }),
             }),
           }),
         })
@@ -124,12 +111,7 @@ describe('github workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getDoc',
-            subActionParams: expect.objectContaining({
-              owner: 'elastic',
-              repo: 'kibana',
-              path: 'README.md',
-              ref: 'main',
-            }),
+            subActionParams: expect.objectContaining({ owner: 'elastic', repo: 'kibana', path: 'README.md', ref: 'main' }),
           }),
         })
       );

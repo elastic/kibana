@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { loadDataSourceWorkflow } from '../helpers/data_source_workflow_helper';
+import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { renderWorkflowTemplate } from '../workflow_test_helpers';
 
 const CONNECTOR_NAME = 'fake-jira-connector';
 const CONNECTOR_ID = 'fake-jira-connector-uuid';
 
 const loadWorkflow = (file: string): string =>
-  loadDataSourceWorkflow('jira-cloud', file, {
+  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
     'jira-cloud-stack-connector-id': CONNECTOR_NAME,
   });
 
@@ -44,49 +46,27 @@ describe('jira cloud workflows', () => {
             status: 'ok',
             actionId,
             data: {
-              issues: [
-                { id: '10001', key: 'PROJ-1', fields: { summary: 'Fix bug' } },
-                { id: '10002', key: 'PROJ-2', fields: { summary: 'Add feature' } },
-              ],
-              total: 2,
+              issues: [{ id: '10001', key: 'PROJ-1', fields: { summary: 'Fix bug' } }],
+              total: 1,
             },
-          };
-        case 'searchUsers':
-          return {
-            status: 'ok',
-            actionId,
-            data: [
-              { accountId: 'abc123', displayName: 'Test User', emailAddress: 'test@example.com' },
-            ],
           };
         case 'getIssue':
           return {
             status: 'ok',
             actionId,
-            data: {
-              id: '10001',
-              key: `PROJ-${subActionParams.issueId}`,
-              fields: { summary: 'Test Issue', status: { name: 'Open' } },
-            },
+            data: { id: '10001', key: `PROJ-${subActionParams.issueId}`, fields: { summary: 'Test Issue' } },
           };
         case 'getProject':
           return {
             status: 'ok',
             actionId,
-            data: {
-              id: subActionParams.projectId,
-              key: 'PROJ',
-              name: 'Test Project',
-            },
+            data: { id: subActionParams.projectId, key: 'PROJ', name: 'Test Project' },
           };
         case 'getProjects':
           return {
             status: 'ok',
             actionId,
-            data: {
-              values: [{ id: '1', key: 'PROJ', name: 'Test Project' }],
-              total: 1,
-            },
+            data: { values: [{ id: '1', key: 'PROJ', name: 'Test Project' }], total: 1 },
           };
         default:
           throw new Error(`Unexpected Jira subAction: ${subAction}`);
@@ -182,10 +162,7 @@ describe('jira cloud workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getProjects',
-            subActionParams: expect.objectContaining({
-              query: 'backend',
-              maxResults: 10,
-            }),
+            subActionParams: expect.objectContaining({ query: 'backend', maxResults: 10 }),
           }),
         })
       );

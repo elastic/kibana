@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { loadDataSourceWorkflow } from '../helpers/data_source_workflow_helper';
+import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { renderWorkflowTemplate } from '../workflow_test_helpers';
 
 const CONNECTOR_NAME = 'fake-slack-connector';
 const CONNECTOR_ID = 'fake-slack-connector-uuid';
 
 const loadWorkflow = (file: string): string =>
-  loadDataSourceWorkflow('slack', file, {
+  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
     'slack2-stack-connector-id': CONNECTOR_NAME,
   });
 
@@ -39,23 +41,13 @@ describe('slack workflows', () => {
 
       switch (subAction) {
         case 'sendMessage':
-          return {
-            status: 'ok',
-            actionId,
-            data: { ok: true, ts: '1234567890.123456', channel: 'C123' },
-          };
+          return { status: 'ok', actionId, data: { ok: true, ts: '1234567890.123456' } };
         case 'searchMessages':
           return {
             status: 'ok',
             actionId,
             data: {
-              matches: [
-                {
-                  text: 'Found message',
-                  channel: { id: 'C123', name: 'general' },
-                  permalink: 'https://slack.com/archives/C123/p123',
-                },
-              ],
+              matches: [{ text: 'Found message', channel: { id: 'C123', name: 'general' } }],
             },
           };
         default:

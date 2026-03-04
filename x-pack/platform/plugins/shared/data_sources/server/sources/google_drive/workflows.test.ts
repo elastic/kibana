@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { loadDataSourceWorkflow } from '../helpers/data_source_workflow_helper';
+import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { renderWorkflowTemplate } from '../workflow_test_helpers';
 
 const CONNECTOR_NAME = 'fake-google-drive-connector';
 const CONNECTOR_ID = 'fake-gd-connector-uuid';
 
-const loadGoogleDriveWorkflow = (workflowFile: string): string =>
-  loadDataSourceWorkflow('google_drive', workflowFile, {
+const loadWorkflow = (file: string): string =>
+  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
     'google_drive-stack-connector-id': CONNECTOR_NAME,
   });
 
@@ -81,18 +83,6 @@ describe('google drive workflows', () => {
               nextPageToken: null,
             },
           };
-        case 'listFiles':
-          return {
-            status: 'ok',
-            actionId,
-            data: {
-              files: [
-                { id: 'file-a', name: 'notes.docx', mimeType: 'application/vnd.google-apps.document' },
-                { id: 'folder-b', name: 'Archive', mimeType: 'application/vnd.google-apps.folder' },
-              ],
-              nextPageToken: null,
-            },
-          };
         case 'getFileMetadata':
           return {
             status: 'ok',
@@ -136,7 +126,7 @@ describe('google drive workflows', () => {
     it('N file IDs produce N download actions and N text extractions', async () => {
       const fileIds = ['f1', 'f2', 'f3', 'f4', 'f5'];
       await fixture.runWorkflow({
-        workflowYaml: loadGoogleDriveWorkflow('download.yaml'),
+        workflowYaml: loadWorkflow('download.yaml'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -150,7 +140,7 @@ describe('google drive workflows', () => {
     it('download output feeds into extraction input for each file', async () => {
       const fileIds = ['alpha', 'beta'];
       await fixture.runWorkflow({
-        workflowYaml: loadGoogleDriveWorkflow('download.yaml'),
+        workflowYaml: loadWorkflow('download.yaml'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -189,7 +179,7 @@ describe('google drive workflows', () => {
 
       const fileIds = ['r1', 'r2', 'r3'];
       await fixture.runWorkflow({
-        workflowYaml: loadGoogleDriveWorkflow('download.yaml'),
+        workflowYaml: loadWorkflow('download.yaml'),
         inputs: { fileIds, rerank: true, rerankQuery: 'quarterly report', topK: 2 },
       });
 
@@ -203,7 +193,7 @@ describe('google drive workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadGoogleDriveWorkflow('search.yaml'),
+        workflowYaml: loadWorkflow('search.yaml'),
         inputs: { query: "name contains 'budget'", pageSize: 10 },
       });
 
@@ -228,7 +218,7 @@ describe('google drive workflows', () => {
     it('forwards file IDs to the connector', async () => {
       const fileIds = ['meta-1', 'meta-2', 'meta-3'];
       await fixture.runWorkflow({
-        workflowYaml: loadGoogleDriveWorkflow('metadata.yaml'),
+        workflowYaml: loadWorkflow('metadata.yaml'),
         inputs: { fileIds },
       });
 

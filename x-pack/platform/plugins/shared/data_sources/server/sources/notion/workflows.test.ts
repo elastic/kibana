@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { loadDataSourceWorkflow } from '../helpers/data_source_workflow_helper';
+import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { renderWorkflowTemplate } from '../workflow_test_helpers';
 
 const CONNECTOR_NAME = 'fake-notion-connector';
 const CONNECTOR_ID = 'fake-notion-connector-uuid';
 
 const loadWorkflow = (file: string): string =>
-  loadDataSourceWorkflow('notion', file, {
+  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
     'notion-stack-connector-id': CONNECTOR_NAME,
   });
 
@@ -43,42 +45,19 @@ describe('notion workflows', () => {
           return {
             status: 'ok',
             actionId,
-            data: {
-              results: [{ id: 'page-1', object: 'page', properties: { title: 'Test Page' } }],
-            },
+            data: { results: [{ id: 'page-1', object: 'page' }] },
           };
         case 'getPage':
           return {
             status: 'ok',
             actionId,
-            data: {
-              id: subActionParams.pageId,
-              object: 'page',
-              properties: { title: { title: [{ plain_text: 'My Page' }] } },
-            },
-          };
-        case 'getDataSource':
-          return {
-            status: 'ok',
-            actionId,
-            data: {
-              id: subActionParams.dataSourceId,
-              object: 'database',
-              title: [{ plain_text: 'My Database' }],
-              properties: { Name: { type: 'title' }, Status: { type: 'select' } },
-            },
+            data: { id: subActionParams.pageId, object: 'page' },
           };
         case 'queryDataSource':
           return {
             status: 'ok',
             actionId,
-            data: {
-              results: [
-                { id: 'row-1', properties: { Name: { title: [{ plain_text: 'Item 1' }] } } },
-                { id: 'row-2', properties: { Name: { title: [{ plain_text: 'Item 2' }] } } },
-              ],
-              has_more: false,
-            },
+            data: { results: [{ id: 'row-1' }, { id: 'row-2' }], has_more: false },
           };
         default:
           throw new Error(`Unexpected Notion subAction: ${subAction}`);
@@ -153,10 +132,7 @@ describe('notion workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'queryDataSource',
-            subActionParams: expect.objectContaining({
-              dataSourceId: 'db-456',
-              pageSize: 5,
-            }),
+            subActionParams: expect.objectContaining({ dataSourceId: 'db-456', pageSize: 5 }),
           }),
         })
       );

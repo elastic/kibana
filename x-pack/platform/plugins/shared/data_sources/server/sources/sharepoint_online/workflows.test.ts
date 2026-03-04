@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { loadDataSourceWorkflow } from '../helpers/data_source_workflow_helper';
+import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { renderWorkflowTemplate } from '../workflow_test_helpers';
 
 const CONNECTOR_NAME = 'fake-sharepoint-connector';
 const CONNECTOR_ID = 'fake-sp-connector-uuid';
 
 const loadWorkflow = (file: string): string =>
-  loadDataSourceWorkflow('sharepoint_online', file, {
+  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
     'sharepoint-online-stack-connector-id': CONNECTOR_NAME,
   });
 
@@ -37,26 +39,19 @@ describe('sharepoint online workflows', () => {
       params: Record<string, unknown>;
     }): Promise<ActionTypeExecutorResult<unknown>> => {
       const subAction = params.subAction as string;
-      const subActionParams = params.subActionParams as Record<string, unknown>;
 
       switch (subAction) {
         case 'downloadDriveItem':
           return {
             status: 'ok',
             actionId,
-            data: {
-              content: `markdown content of item ${subActionParams.itemId}`,
-              mimeType: 'text/markdown',
-            },
+            data: { content: 'markdown content', mimeType: 'text/markdown' },
           };
         case 'downloadItemFromURL':
           return {
             status: 'ok',
             actionId,
-            data: {
-              base64: Buffer.from('pdf binary content').toString('base64'),
-              mimeType: 'application/pdf',
-            },
+            data: { base64: Buffer.from('pdf binary').toString('base64'), mimeType: 'application/pdf' },
           };
         case 'getSitePageContents':
           return {
@@ -68,24 +63,14 @@ describe('sharepoint online workflows', () => {
           return {
             status: 'ok',
             actionId,
-            data: {
-              value: [
-                { resource: { id: 'r1', name: 'doc.docx', webUrl: 'https://sp/doc.docx' } },
-              ],
-            },
+            data: { value: [{ resource: { id: 'r1', name: 'doc.docx' } }] },
           };
         case 'getDriveItems':
           return {
             status: 'ok',
             actionId,
-            data: {
-              value: [
-                { id: 'item1', name: 'file.txt', webUrl: 'https://sp/file.txt' },
-              ],
-            },
+            data: { value: [{ id: 'item1', name: 'file.txt' }] },
           };
-        case 'getAllSites':
-          return { status: 'ok', actionId, data: { value: [{ id: 's1', name: 'Site A' }] } };
         default:
           throw new Error(`Unexpected SharePoint subAction: ${subAction}`);
       }
@@ -142,10 +127,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'downloadDriveItem',
-            subActionParams: expect.objectContaining({
-              driveId: 'drv-1',
-              itemId: 'itm-1',
-            }),
+            subActionParams: expect.objectContaining({ driveId: 'drv-1', itemId: 'itm-1' }),
           }),
         })
       );
@@ -208,10 +190,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getDriveItems',
-            subActionParams: expect.objectContaining({
-              driveId: 'drv-abc',
-              path: '/Documents',
-            }),
+            subActionParams: expect.objectContaining({ driveId: 'drv-abc', path: '/Documents' }),
           }),
         })
       );
