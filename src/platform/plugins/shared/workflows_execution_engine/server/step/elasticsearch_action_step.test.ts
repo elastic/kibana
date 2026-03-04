@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';

@@ -13,9 +13,9 @@
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
+import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { ResponseSizeLimitError, formatBytes } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -141,8 +141,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
 
         // Detect maxContentLength exceeded from HTTP connectors and enrich the error
         if (errorMsg.includes('maxContentLength')) {
-          const stepName =
-            step.name || (step as any).configuration?.name || (step as any).stepId;
+          const stepName = step.name || (step as any).configuration?.name || (step as any).stepId;
           const limitBytes = this.getMaxResponseSize();
           const sizeLimitError = new ResponseSizeLimitError(-1, limitBytes, stepName);
 
@@ -165,8 +164,12 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
                     compressedSizeFormatted: formatBytes(rawSize),
                     contentEncoding,
                     suggestion:
-                      `The remote resource is ${formatBytes(rawSize)} compressed (${contentEncoding}). ` +
-                      `The decompressed size is larger and exceeded the ${formatBytes(limitBytes)} limit. ` +
+                      `The remote resource is ${formatBytes(
+                        rawSize
+                      )} compressed (${contentEncoding}). ` +
+                      `The decompressed size is larger and exceeded the ${formatBytes(
+                        limitBytes
+                      )} limit. ` +
                       `Increase max-step-size until the request succeeds.`,
                   };
                 } else {
@@ -177,7 +180,9 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
                     suggestedLimit: formatBytes(Math.ceil(rawSize * 1.1)),
                     suggestion:
                       `The remote resource is ${formatBytes(rawSize)}. ` +
-                      `Set max-step-size to at least ${formatBytes(Math.ceil(rawSize * 1.1))} to allow this request.`,
+                      `Set max-step-size to at least ${formatBytes(
+                        Math.ceil(rawSize * 1.1)
+                      )} to allow this request.`,
                   };
                 }
               }

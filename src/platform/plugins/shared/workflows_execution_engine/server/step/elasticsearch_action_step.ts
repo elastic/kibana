@@ -13,9 +13,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { buildElasticsearchRequest } from '@kbn/workflows';
+import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { ResponseSizeLimitError, formatBytes } from './errors';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -95,7 +95,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         // Run a lightweight query to help the user estimate the needed limit
         try {
           const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
-          const index = stepWith?.index || stepWith?.request?.path?.replace(/^\//, '').split('/')[0];
+          const index =
+            stepWith?.index || stepWith?.request?.path?.replace(/^\//, '').split('/')[0];
           const query = stepWith?.query || stepWith?.body?.query || stepWith?.request?.body?.query;
           const requestedSize = Number(stepWith?.size ?? stepWith?.body?.size ?? 0);
 
@@ -116,9 +117,10 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
               ? Buffer.byteLength(JSON.stringify(sampleDoc), 'utf8')
               : 0;
             const docsToFetch = requestedSize > 0 ? Math.min(totalHits, requestedSize) : totalHits;
-            const estimatedFullResponseBytes = sampleDocBytes > 0
-              ? sampleDocBytes * docsToFetch + 500 // 500 bytes for response envelope
-              : undefined;
+            const estimatedFullResponseBytes =
+              sampleDocBytes > 0
+                ? sampleDocBytes * docsToFetch + 500 // 500 bytes for response envelope
+                : undefined;
 
             if (sizeLimitError.details) {
               sizeLimitError.details._debug = {
@@ -134,17 +136,20 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
                   : undefined,
                 suggestion:
                   `Query matches ${totalHits} docs (avg ~${formatBytes(sampleDocBytes)} each), ` +
-                  `step requests ${requestedSize || 'all'}. ` +
-                  (estimatedFullResponseBytes
-                    ? `Estimated full response: ~${formatBytes(estimatedFullResponseBytes)}. `
-                    : '') +
-                  `To fit within the limit, try: ` +
+                  `step requests ${requestedSize || 'all'}. ${
+                    estimatedFullResponseBytes
+                      ? `Estimated full response: ~${formatBytes(estimatedFullResponseBytes)}. `
+                      : ''
+                  }To fit within the limit, try: ` +
                   `(1) reduce 'size', ` +
                   `(2) use '_source' to return only needed fields, ` +
-                  `(3) add filters to narrow results, or ` +
-                  (estimatedFullResponseBytes
-                    ? `(4) set max-step-size to at least ${formatBytes(Math.ceil(estimatedFullResponseBytes * 1.1))}.`
-                    : `(4) increase max-step-size.`),
+                  `(3) add filters to narrow results, or ${
+                    estimatedFullResponseBytes
+                      ? `(4) set max-step-size to at least ${formatBytes(
+                          Math.ceil(estimatedFullResponseBytes * 1.1)
+                        )}.`
+                      : `(4) increase max-step-size.`
+                  }`,
               };
             }
           }

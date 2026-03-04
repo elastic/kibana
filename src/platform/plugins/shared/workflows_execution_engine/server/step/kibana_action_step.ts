@@ -13,9 +13,9 @@
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
+import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { ResponseSizeLimitError } from './errors';
 import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -346,7 +346,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         totalBytes += value.byteLength;
         if (totalBytes > maxBytes) {
           reader.cancel();
-          return Buffer.concat(chunks).toString('utf-8') + '... [truncated]';
+          return `${Buffer.concat(chunks).toString('utf-8')}... [truncated]`;
         }
         chunks.push(value);
       }

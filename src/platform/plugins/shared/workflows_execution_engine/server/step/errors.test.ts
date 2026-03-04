@@ -8,12 +8,7 @@
  */
 
 import { Readable } from 'stream';
-import {
-  formatBytes,
-  parseByteSize,
-  safeOutputSize,
-  ResponseSizeLimitError,
-} from './errors';
+import { formatBytes, parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
 
 describe('formatBytes', () => {
   it('should format 0 bytes', () => {

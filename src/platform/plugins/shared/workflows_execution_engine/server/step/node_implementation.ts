@@ -15,10 +15,10 @@
 import apm from 'elastic-apm-node';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
+import { parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { ResponseSizeLimitError, parseByteSize, safeOutputSize } from './errors';
 
 export interface RunStepResult {
   input: any;
@@ -240,8 +240,8 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     }
 
     // 2. Workflow-level override (from YAML settings)
-    const workflowSettings = this.stepExecutionRuntime.contextManager.getContext().workflow
-      .settings;
+    const workflowSettings =
+      this.stepExecutionRuntime.contextManager.getContext().workflow.settings;
     const workflowLimit = workflowSettings?.['max-step-size'];
     if (workflowLimit) {
       return parseByteSize(workflowLimit);
@@ -252,9 +252,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     if (pluginConfig?.maxResponseSize) {
       const configValue = pluginConfig.maxResponseSize;
       // schema.byteSize() returns a ByteSizeValue object with getValueInBytes()
-      return typeof configValue === 'number'
-        ? configValue
-        : (configValue as any).getValueInBytes();
+      return typeof configValue === 'number' ? configValue : (configValue as any).getValueInBytes();
     }
 
     // 4. Hardcoded fallback

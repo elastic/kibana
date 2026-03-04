@@ -12,8 +12,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { WorkflowLogEvent } from '../repositories/logs_repository';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { WorkflowLogEvent } from '../repositories/logs_repository';
 
 export interface ContextDependencies {
   cloudSetup: CloudSetup | undefined;
