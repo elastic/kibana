@@ -546,8 +546,14 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const styles = useMemo(
     () =>
-      esqlEditorStyles(theme.euiTheme, editorHeight, Boolean(editorIsInline), Boolean(hasOutline)),
-    [theme.euiTheme, editorHeight, editorIsInline, hasOutline]
+      esqlEditorStyles(
+        theme.euiTheme,
+        editorHeight,
+        Boolean(editorIsInline),
+        Boolean(hasOutline),
+        isVisorOpen
+      ),
+    [theme.euiTheme, editorHeight, editorIsInline, hasOutline, isVisorOpen]
   );
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
@@ -1264,6 +1270,10 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   editor.onDidFocusEditorText(() => {
+                    if (isVisorOpenRef.current) {
+                      setIsVisorOpen(false);
+                    }
+
                     // Skip triggering suggestions on initial focus to avoid interfering
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
@@ -1316,18 +1326,18 @@ const ESQLEditorInternal = function ESQLEditor({
             </div>
           </EuiFlexItem>
         </div>
+        {!hideQuickSearch && (
+          <QuickSearchVisor
+            query={code}
+            isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
+            isVisible={isVisorOpen}
+            onUpdateAndSubmitQuery={(newQuery) =>
+              onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+            }
+            onToggleVisor={onToggleVisor}
+          />
+        )}
       </EuiFlexGroup>
-      {!hideQuickSearch && (
-        <QuickSearchVisor
-          query={code}
-          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
-          isVisible={isVisorOpen}
-          onUpdateAndSubmitQuery={(newQuery) =>
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
-          }
-          onToggleVisor={onToggleVisor}
-        />
-      )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
         <ResizableButton
           onMouseDownResizeHandler={(mouseDownEvent) => {

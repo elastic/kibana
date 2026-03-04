@@ -22,7 +22,8 @@ export const esqlEditorStyles = (
   euiTheme: EuiThemeComputed,
   editorHeight: number,
   editorIsInline: boolean,
-  hasOutline: boolean
+  hasOutline: boolean,
+  isVisorOpen: boolean = false
 ) => {
   return {
     editorContainer: {
@@ -32,6 +33,8 @@ export const esqlEditorStyles = (
       zIndex: 4,
       height: `${editorHeight}px`,
       border: hasOutline ? euiTheme.border.thin : 'none',
+      filter: isVisorOpen ? 'blur(0.8px)' : 'none',
+      transition: 'filter 0.3s ease',
     },
     resizableContainer: {
       display: 'flex',
