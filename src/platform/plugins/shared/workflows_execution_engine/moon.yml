@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/licensing-plugin'
   - '@kbn/logging-mocks'
+  - '@kbn/es-errors'
 tags:
   - plugin
   - prod
