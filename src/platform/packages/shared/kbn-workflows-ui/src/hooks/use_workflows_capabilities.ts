@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows/common/constants';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
-import { useKibana } from './use_kibana';
 
 const CapabilitiesMap = {
   canCreateWorkflow: WorkflowsManagementUiActions.create,
@@ -24,8 +25,10 @@ const CapabilitiesMap = {
 export type CapabilitiesKey = keyof typeof CapabilitiesMap;
 export type WorkflowsManagementCapabilities = Record<CapabilitiesKey, boolean>;
 
-export const useCapabilities = (): WorkflowsManagementCapabilities => {
-  const { application } = useKibana().services;
+export const useWorkflowsCapabilities = (): WorkflowsManagementCapabilities => {
+  const {
+    services: { application },
+  } = useKibana<{ application: ApplicationStart }>();
   const workflowsCapabilities = application?.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
 
   return Object.fromEntries(

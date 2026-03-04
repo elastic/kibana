@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsManagementCapabilities } from '../use_capabilities';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
-export const mockCapabilities: WorkflowsManagementCapabilities = {
-  canCreateWorkflow: true,
-  canReadWorkflow: true,
-  canUpdateWorkflow: true,
-  canDeleteWorkflow: true,
-  canExecuteWorkflow: true,
-  canReadWorkflowExecution: true,
-  canCancelWorkflowExecution: true,
+export const useWorkflowsUIEnabledSetting = (): boolean => {
+  const {
+    services: { uiSettings },
+  } = useKibana<{ uiSettings: IUiSettingsClient }>();
+
+  return uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
 };
-export const useCapabilities = jest.fn((): WorkflowsManagementCapabilities => mockCapabilities);
