@@ -367,7 +367,7 @@ export async function ensureOtelDemo({
  *
  * @param log - Tooling logger for output
  * @param demoType - Type of demo to patch (default: 'otel-demo')
- * @param scenarioIds - List of scenario IDs to apply (empty = no changes unless reset)
+ * @param scenarioIds - List of failure scenario IDs to apply (empty = no changes unless reset)
  * @param reset - If true, resets all services to defaults
  */
 export async function patchScenarios({
@@ -399,7 +399,6 @@ export async function patchScenarios({
   if (reset) {
     log.info(`Resetting all scenarios to defaults for ${demoConfig.displayName}...`);
 
-    // Reset all services to their default values
     for (const [service, defaults] of Object.entries(serviceDefaults)) {
       const envArgs = Object.entries(defaults)
         .map(([key, value]) => `${key}=${value}`)
@@ -447,7 +446,7 @@ export async function patchScenarios({
     }
   }
 
-  // Apply changes using kubectl set env
+  // Apply env changes using kubectl set env
   for (const [service, envs] of Object.entries(envChanges)) {
     const envArgs = Object.entries(envs)
       .map(([key, value]) => `${key}=${value}`)
@@ -465,7 +464,7 @@ export async function patchScenarios({
   }
 
   log.write('');
-  log.success(`Applied ${scenarioIds.length} scenario(s). Pods will restart with new config.`);
+  log.success(`Applied ${scenarioIds.length} scenario(s).`);
   log.write('');
   log.write(chalk.dim('  To watch pod restarts:'));
   log.write(chalk.dim(`    kubectl get pods -n ${namespace} -w`));

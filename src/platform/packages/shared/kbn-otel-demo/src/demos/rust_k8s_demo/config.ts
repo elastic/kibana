@@ -56,7 +56,6 @@ The first deployment may take several minutes while Rust compiles the services.`
       env: {
         POSTGRES_PASSWORD: 'postgres',
         POSTGRES_USER: 'postgres',
-        POSTGRES_DB: 'quotations',
       },
       resources: {
         requests: { memory: '128Mi', cpu: '100m' },
@@ -100,6 +99,20 @@ The first deployment may take several minutes while Rust compiles the services.`
       resources: {
         requests: { memory: '64Mi', cpu: '100m' },
         limits: { memory: '128Mi', cpu: '200m' },
+      },
+    },
+
+    // Load generator - fetches quotations periodically
+    {
+      name: 'load-generator',
+      image: 'curlimages/curl:8.5.0',
+      command: ['/bin/sh', '-c'],
+      args: [
+        `while true; do for i in 1 2 3 4 5; do curl -s -o /dev/null http://frontendservice:8080/ || true; sleep 0.3; done; sleep 0.5; done`,
+      ],
+      resources: {
+        requests: { memory: '32Mi', cpu: '50m' },
+        limits: { memory: '64Mi', cpu: '100m' },
       },
     },
   ],

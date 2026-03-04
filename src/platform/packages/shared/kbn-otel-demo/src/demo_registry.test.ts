@@ -30,7 +30,6 @@ describe('demo_registry', () => {
     'bank-of-anthos',
     'quarkus-super-heroes',
     'aws-retail-store',
-    'kubepay',
     'rust-k8s-demo',
   ];
 
@@ -110,7 +109,7 @@ describe('demo_registry', () => {
 
   describe('getDemoServiceDefaults', () => {
     it('should return service defaults for valid demo type', () => {
-      const defaults = getDemoServiceDefaults('kubepay');
+      const defaults = getDemoServiceDefaults('rust-k8s-demo');
       expect(typeof defaults).toBe('object');
     });
 

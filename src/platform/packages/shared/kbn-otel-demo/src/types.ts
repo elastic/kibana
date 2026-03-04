@@ -16,7 +16,6 @@ export type DemoType =
   | 'bank-of-anthos'
   | 'quarkus-super-heroes'
   | 'aws-retail-store'
-  | 'kubepay'
   | 'rust-k8s-demo';
 
 /**

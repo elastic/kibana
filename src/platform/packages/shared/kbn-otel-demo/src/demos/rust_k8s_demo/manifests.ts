@@ -282,6 +282,8 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
+  command?: string[];
+  args?: string[];
   resources?: {
     requests?: { memory?: string; cpu?: string };
     limits?: { memory?: string; cpu?: string };
@@ -296,6 +298,14 @@ function createDeployment(opts: {
     image: opts.image,
     imagePullPolicy: 'IfNotPresent',
   };
+
+  if (opts.command) {
+    container.command = opts.command;
+  }
+
+  if (opts.args) {
+    container.args = opts.args;
+  }
 
   if (opts.ports && opts.ports.length > 0) {
     container.ports = opts.ports.map((p) => ({ containerPort: p }));
@@ -417,6 +427,8 @@ export const rustK8sDemoManifests: DemoManifestGenerator = {
           image: svc.image,
           ports: svc.port ? [svc.port] : [],
           env: finalEnv,
+          command: svc.command,
+          args: svc.args,
           resources: svc.resources,
         })
       );

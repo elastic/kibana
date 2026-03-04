@@ -9,6 +9,7 @@
 
 import yaml from 'js-yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
+
 import { HTTP_OTLP_SERVICES, getFlagdConfig } from './config';
 
 /**

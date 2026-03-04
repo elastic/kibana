@@ -39,12 +39,6 @@ import {
 import { awsRetailStoreManifests } from './demos/aws_retail_store/manifests';
 import { AWS_RETAIL_STORE_SCENARIOS } from './demos/aws_retail_store/scenarios';
 import {
-  kubepayConfig,
-  SERVICE_DEFAULTS as KUBEPAY_SERVICE_DEFAULTS,
-} from './demos/kubepay/config';
-import { kubepayManifests } from './demos/kubepay/manifests';
-import { KUBEPAY_SCENARIOS } from './demos/kubepay/scenarios';
-import {
   rustK8sDemoConfig,
   SERVICE_DEFAULTS as RUST_K8S_DEMO_SERVICE_DEFAULTS,
 } from './demos/rust_k8s_demo/config';
@@ -60,7 +54,6 @@ export const DEMO_CONFIGS: Record<DemoType, DemoConfig> = {
   'bank-of-anthos': bankOfAnthosConfig,
   'quarkus-super-heroes': quarkusSuperHeroesConfig,
   'aws-retail-store': awsRetailStoreConfig,
-  kubepay: kubepayConfig,
   'rust-k8s-demo': rustK8sDemoConfig,
 };
 
@@ -73,7 +66,6 @@ export const DEMO_MANIFESTS: Record<DemoType, DemoManifestGenerator> = {
   'bank-of-anthos': bankOfAnthosManifests,
   'quarkus-super-heroes': quarkusSuperHeroesManifests,
   'aws-retail-store': awsRetailStoreManifests,
-  kubepay: kubepayManifests,
   'rust-k8s-demo': rustK8sDemoManifests,
 };
 
@@ -86,7 +78,6 @@ export const DEMO_SCENARIOS: Record<DemoType, FailureScenario[]> = {
   'bank-of-anthos': BANK_OF_ANTHOS_SCENARIOS,
   'quarkus-super-heroes': QUARKUS_SUPER_HEROES_SCENARIOS,
   'aws-retail-store': AWS_RETAIL_STORE_SCENARIOS,
-  kubepay: KUBEPAY_SCENARIOS,
   'rust-k8s-demo': RUST_K8S_DEMO_SCENARIOS,
 };
 
@@ -99,7 +90,6 @@ export const DEMO_SERVICE_DEFAULTS: Record<DemoType, Record<string, Record<strin
   'bank-of-anthos': BANK_OF_ANTHOS_SERVICE_DEFAULTS,
   'quarkus-super-heroes': QUARKUS_SUPER_HEROES_SERVICE_DEFAULTS,
   'aws-retail-store': AWS_RETAIL_STORE_SERVICE_DEFAULTS,
-  kubepay: KUBEPAY_SERVICE_DEFAULTS,
   'rust-k8s-demo': RUST_K8S_DEMO_SERVICE_DEFAULTS,
 };
 

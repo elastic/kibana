@@ -17,16 +17,6 @@ import {
   getDemoScenarios,
   getScenarioById,
 } from '../src/demo_registry';
-import {
-  installChaosMesh,
-  isChaosMeshInstalled,
-  createChaosScenarios,
-  getChaosScenarioById,
-  applyScenario as applyChaosScenario,
-  deleteScenario as deleteChaosScenario,
-  deleteAllExperiments,
-  listActiveExperiments,
-} from '../src/chaos_mesh';
 
 run(
   async ({ log, addCleanupTask, flags }) => {
@@ -79,84 +69,6 @@ run(
       return Promise.resolve();
     }
 
-    // Handle --list-chaos
-    if (flags['list-chaos']) {
-      const chaosScenarios = createChaosScenarios(demoConfig.namespace);
-      log.info(`Chaos Mesh scenarios for ${demoConfig.displayName}:`);
-      log.info('');
-      log.info('POD CHAOS:');
-      chaosScenarios
-        .filter((s) => s.experiments.some((e) => e.category === 'pod'))
-        .forEach((s) => {
-          log.info(`  ${s.id.padEnd(25)} - ${s.name}`);
-          log.info(`    ${chalk.dim(s.description)}`);
-        });
-      log.info('');
-      log.info('NETWORK CHAOS:');
-      chaosScenarios
-        .filter((s) => s.experiments.some((e) => e.category === 'network'))
-        .forEach((s) => {
-          log.info(`  ${s.id.padEnd(25)} - ${s.name}`);
-          log.info(`    ${chalk.dim(s.description)}`);
-        });
-      log.info('');
-      log.info('STRESS CHAOS:');
-      chaosScenarios
-        .filter((s) => s.experiments.some((e) => e.category === 'stress'))
-        .forEach((s) => {
-          log.info(`  ${s.id.padEnd(25)} - ${s.name}`);
-          log.info(`    ${chalk.dim(s.description)}`);
-        });
-      log.info('');
-      log.info('IO CHAOS:');
-      chaosScenarios
-        .filter((s) => s.experiments.some((e) => e.category === 'io'))
-        .forEach((s) => {
-          log.info(`  ${s.id.padEnd(25)} - ${s.name}`);
-          log.info(`    ${chalk.dim(s.description)}`);
-        });
-      log.info('');
-      log.info('HTTP CHAOS:');
-      chaosScenarios
-        .filter((s) => s.experiments.some((e) => e.category === 'http'))
-        .forEach((s) => {
-          log.info(`  ${s.id.padEnd(25)} - ${s.name}`);
-          log.info(`    ${chalk.dim(s.description)}`);
-        });
-      log.info('');
-      log.info(chalk.dim('Note: Chaos Mesh must be installed. Use --install-chaos to install.'));
-      return Promise.resolve();
-    }
-
-    // Handle --install-chaos
-    if (flags['install-chaos']) {
-      return installChaosMesh(log);
-    }
-
-    // Handle --chaos-status
-    if (flags['chaos-status']) {
-      const installed = await isChaosMeshInstalled();
-      if (!installed) {
-        log.warning('Chaos Mesh is not installed. Use --install-chaos to install.');
-        return Promise.resolve();
-      }
-      log.info('Chaos Mesh is installed.');
-      log.info('');
-      log.info(`Active chaos experiments in namespace ${demoConfig.namespace}:`);
-      const active = await listActiveExperiments(demoConfig.namespace);
-      if (active.length === 0) {
-        log.info('  No active experiments');
-      } else {
-        active.forEach((exp) => log.info(`  ${exp}`));
-      }
-      return Promise.resolve();
-    }
-
-    // Handle --clear-chaos
-    if (flags['clear-chaos']) {
-      return deleteAllExperiments(log, demoConfig.namespace);
-    }
-
     const controller = new AbortController();
 
     addCleanupTask(() => {
@@ -184,48 +96,6 @@ run(
         }
         scenarioIds.push(String(id));
       }
-    }
-
-    // Parse chaos scenario flags
-    const chaosScenarioIds: string[] = [];
-    if (flags.chaos) {
-      const chaosFlags = Array.isArray(flags.chaos) ? flags.chaos : [flags.chaos];
-      for (const id of chaosFlags) {
-        const scenario = getChaosScenarioById(demoConfig.namespace, String(id));
-        if (!scenario) {
-          throw new Error(
-            `Unknown chaos scenario: ${id}. Use --list-chaos to see available chaos scenarios.`
-          );
-        }
-        chaosScenarioIds.push(String(id));
-      }
-    }
-
-    // Handle --apply-chaos (apply chaos scenarios to running cluster)
-    if (flags['apply-chaos'] && chaosScenarioIds.length > 0) {
-      const installed = await isChaosMeshInstalled();
-      if (!installed) {
-        throw new Error('Chaos Mesh is not installed. Use --install-chaos to install first.');
-      }
-
-      for (const id of chaosScenarioIds) {
-        const scenario = getChaosScenarioById(demoConfig.namespace, id);
-        if (scenario) {
-          await applyChaosScenario(log, scenario);
-        }
-      }
-      return Promise.resolve();
-    }
-
-    // Handle --remove-chaos (remove specific chaos scenarios)
-    if (flags['remove-chaos'] && chaosScenarioIds.length > 0) {
-      for (const id of chaosScenarioIds) {
-        const scenario = getChaosScenarioById(demoConfig.namespace, id);
-        if (scenario) {
-          await deleteChaosScenario(log, scenario);
-        }
-      }
-      return Promise.resolve();
     }
 
     // Handle --patch or --reset (apply/remove scenarios on running cluster)
@@ -265,28 +135,14 @@ run(
         - bank-of-anthos: Google Bank of Anthos
         - quarkus-super-heroes: Quarkus Super Heroes
         - aws-retail-store: AWS Retail Store Sample
-        - kubepay: KubePay Spring Microservices
         - rust-k8s-demo: Rust K8s Demo
       
       Reads Elasticsearch connection details from kibana.dev.yml and supports
-      failure scenario injection and Chaos Mesh experiments for testing observability.
+      failure scenario injection for testing observability.
     `,
     flags: {
-      string: ['config', 'logs-index', 'scenario', 'demo', 'version', 'chaos'],
-      boolean: [
-        'teardown',
-        'list-demos',
-        'list-scenarios',
-        'patch',
-        'reset',
-        'list-chaos',
-        'install-chaos',
-        'chaos-status',
-        'clear-chaos',
-        'apply-chaos',
-        'remove-chaos',
-        'rebuild-images',
-      ],
+      string: ['config', 'logs-index', 'scenario', 'demo', 'version'],
+      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset', 'rebuild-images'],
       alias: {
         c: 'config',
         s: 'scenario',
@@ -306,20 +162,11 @@ run(
         --logs-index       Index name for logs (defaults to "logs.otel")
         --list-demos       List all available demo environments
         --list-scenarios   List failure scenarios for selected demo
-        --scenario, -s     Apply a failure scenario (can be repeated for multiple scenarios)
-        --patch, -p        Patch scenarios onto running cluster (no redeploy)
-        --reset, -r        Reset all scenarios to defaults (no redeploy)
+        --scenario, -s     Apply a failure scenario (can be repeated)
+        --patch, -p        Patch scenarios onto running cluster (works with --scenario)
+        --reset, -r        Reset all scenarios to defaults
         --teardown         Stop and remove demo deployment
         --rebuild-images   Force rebuild of custom images (for demos that require building from source)
-
-        Chaos Mesh Options:
-        --list-chaos       List available Chaos Mesh scenarios
-        --install-chaos    Install Chaos Mesh CRDs and controller to cluster
-        --chaos-status     Show Chaos Mesh installation status and active experiments
-        --chaos            Specify a chaos scenario (can be repeated)
-        --apply-chaos      Apply specified chaos scenarios to running cluster
-        --remove-chaos     Remove specified chaos scenarios from cluster
-        --clear-chaos      Remove all chaos experiments from demo namespace
       `,
     },
   }
