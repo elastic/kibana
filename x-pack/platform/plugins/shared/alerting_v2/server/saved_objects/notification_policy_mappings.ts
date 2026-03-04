@@ -26,7 +26,6 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
       type: 'object',
       properties: {
         apiKey: { type: 'binary' },
-        type: { type: 'keyword' },
         owner: { type: 'keyword' },
         createdByUser: { type: 'boolean' },
       },

@@ -19,11 +19,7 @@ export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_poli
 
 export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
 
-export const NotificationPolicyAttributesIncludedInAAD = [
-  'auth.type',
-  'auth.owner',
-  'auth.createdByUser',
-];
+export const NotificationPolicyAttributesIncludedInAAD = ['auth.owner', 'auth.createdByUser'];
 
 export function registerSavedObjects({
   savedObjects,

@@ -30,7 +30,6 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   ),
   auth: schema.object({
     apiKey: schema.maybe(schema.string()),
-    type: schema.oneOf([schema.literal('es'), schema.literal('uiam')]),
     owner: schema.string(),
     createdByUser: schema.boolean(),
   }),

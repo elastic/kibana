@@ -78,7 +78,6 @@ describe('ApiKeyService', () => {
       });
 
       expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
-      expect(result.type).toBe('es');
       expect(result.owner).toBe('test-user');
       expect(result.createdByUser).toBe(false);
     });
@@ -96,7 +95,6 @@ describe('ApiKeyService', () => {
       expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
 
       expect(result.apiKey).toBe(Buffer.from('uiam-key-id:uiam-key-secret').toString('base64'));
-      expect(result.type).toBe('uiam');
       expect(result.owner).toBe('test-user');
       expect(result.createdByUser).toBe(false);
     });
@@ -145,7 +143,6 @@ describe('ApiKeyService', () => {
 
       expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
       expect(result.apiKey).toBe(Buffer.from('my-key-id:my-key-secret').toString('base64'));
-      expect(result.type).toBe('es');
       expect(result.owner).toBe('test-user');
       expect(result.createdByUser).toBe(true);
     });
@@ -163,7 +160,6 @@ describe('ApiKeyService', () => {
 
       const expectedEncoded = Buffer.from(`uiam-id:${uiamKey}`).toString('base64');
       expect(result.apiKey).toBe(expectedEncoded);
-      expect(result.type).toBe('uiam');
       expect(result.createdByUser).toBe(true);
     });
 

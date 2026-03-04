@@ -10,7 +10,6 @@ import type { ApiKeyServiceContract } from './api_key_service';
 export const createMockApiKeyService = (): jest.Mocked<ApiKeyServiceContract> => ({
   create: jest.fn().mockResolvedValue({
     apiKey: 'encoded-es-api-key',
-    type: 'es',
     owner: 'test-user',
     createdByUser: false,
   }),

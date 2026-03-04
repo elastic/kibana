@@ -356,9 +356,6 @@
           },
           "owner": {
             "type": "keyword"
-          },
-          "type": {
-            "type": "keyword"
           }
         }
       }

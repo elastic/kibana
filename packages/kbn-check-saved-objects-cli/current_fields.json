@@ -95,7 +95,6 @@
     "auth.apiKey",
     "auth.createdByUser",
     "auth.owner",
-    "auth.type",
     "createdAt",
     "createdBy",
     "description",

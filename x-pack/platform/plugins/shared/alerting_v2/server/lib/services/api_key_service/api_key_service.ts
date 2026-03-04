@@ -13,7 +13,6 @@ import { inject, injectable } from 'inversify';
 
 export interface ApiKeyAttributes {
   apiKey: string;
-  type: 'es' | 'uiam';
   owner: string;
   createdByUser: boolean;
 }
@@ -82,7 +81,6 @@ export class ApiKeyService implements ApiKeyServiceContract {
 
     return {
       apiKey: encoded,
-      type: isUiamCredential(apiKey) ? 'uiam' : 'es',
       owner: username,
       createdByUser: true,
     };
@@ -100,7 +98,6 @@ export class ApiKeyService implements ApiKeyServiceContract {
 
       return {
         apiKey: encodeApiKey(uiamResult.id, uiamResult.api_key)!,
-        type: 'uiam',
         owner: username,
         createdByUser: false,
       };
@@ -118,7 +115,6 @@ export class ApiKeyService implements ApiKeyServiceContract {
 
     return {
       apiKey: encodeApiKey(esResult.id, esResult.api_key)!,
-      type: 'es',
       owner: username,
       createdByUser: false,
     };

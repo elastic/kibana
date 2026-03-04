@@ -98,7 +98,6 @@ describe('NotificationPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
-            type: 'es',
             owner: 'test-user',
             createdByUser: false,
           },
@@ -118,7 +117,6 @@ describe('NotificationPolicyClient', () => {
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
-            type: 'es',
             owner: 'test-user',
             createdByUser: false,
           },
@@ -159,7 +157,6 @@ describe('NotificationPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
-            type: 'es',
             owner: 'test-user',
             createdByUser: false,
           },
@@ -224,7 +221,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
           apiKey: 'encrypted-api-key',
-          type: 'es',
           owner: 'test-user',
           createdByUser: false,
         },
@@ -248,7 +244,7 @@ describe('NotificationPolicyClient', () => {
         'policy-id-get-1',
         undefined
       );
-      expect(res.auth).toEqual({ type: 'es', owner: 'test-user', createdByUser: false });
+      expect(res.auth).toEqual({ owner: 'test-user', createdByUser: false });
       expect(res.auth).not.toHaveProperty('apiKey');
     });
 
@@ -276,7 +272,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
         auth: {
           apiKey: 'secret-key-2',
-          type: 'es',
           owner: 'user-2',
           createdByUser: false,
         },
@@ -291,7 +286,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
         auth: {
           apiKey: 'secret-key-1',
-          type: 'es',
           owner: 'user-1',
           createdByUser: false,
         },
@@ -324,9 +318,9 @@ describe('NotificationPolicyClient', () => {
       });
 
       expect(res).toHaveLength(2);
-      expect(res[0].auth).toEqual({ type: 'es', owner: 'user-2', createdByUser: false });
+      expect(res[0].auth).toEqual({ owner: 'user-2', createdByUser: false });
       expect(res[0].auth).not.toHaveProperty('apiKey');
-      expect(res[1].auth).toEqual({ type: 'es', owner: 'user-1', createdByUser: false });
+      expect(res[1].auth).toEqual({ owner: 'user-1', createdByUser: false });
       expect(res[1].auth).not.toHaveProperty('apiKey');
     });
 
@@ -343,7 +337,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
         auth: {
           apiKey: 'key-1',
-          type: 'es',
           owner: 'user-1',
           createdByUser: false,
         },
@@ -358,7 +351,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
         auth: {
           apiKey: 'key-3',
-          type: 'es',
           owner: 'user-3',
           createdByUser: false,
         },
@@ -415,7 +407,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
         auth: {
           apiKey: 'valid-key',
-          type: 'es',
           owner: 'valid-user',
           createdByUser: false,
         },
@@ -453,7 +444,7 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).toHaveLength(1);
       expect(res[0].id).toBe('policy-id-valid');
-      expect(res[0].auth).toEqual({ type: 'es', owner: 'valid-user', createdByUser: false });
+      expect(res[0].auth).toEqual({ owner: 'valid-user', createdByUser: false });
       expect(res[0].auth).not.toHaveProperty('apiKey');
     });
   });
@@ -466,7 +457,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
-          type: 'es',
           owner: 'old-user',
           createdByUser: false,
         },
@@ -509,7 +499,6 @@ describe('NotificationPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
-            type: 'es',
             owner: 'test-user',
             createdByUser: false,
           },
@@ -529,7 +518,6 @@ describe('NotificationPolicyClient', () => {
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           auth: {
-            type: 'es',
             owner: 'test-user',
             createdByUser: false,
           },
@@ -579,7 +567,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
-          type: 'es',
           owner: 'old-user',
           createdByUser: false,
         },
@@ -622,7 +609,6 @@ describe('NotificationPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         auth: {
           apiKey: 'some-key',
-          type: 'es',
           owner: 'test-user',
           createdByUser: false,
         },

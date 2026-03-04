@@ -76,7 +76,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.auth).to.be.an('object');
       expect(response.body.auth.owner).to.be.a('string');
       expect(response.body.auth.createdByUser).to.be(true);
-      expect(response.body.auth.type).to.be.a('string');
       expect(response.body.auth.apiKey).to.be(undefined);
     });
 

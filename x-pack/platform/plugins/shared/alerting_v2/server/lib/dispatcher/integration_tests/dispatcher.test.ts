@@ -672,7 +672,6 @@ async function seedRulesAndPolicies(
     destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
     auth: {
       apiKey: 'test-api-key',
-      type: 'es',
       owner: 'elastic',
       createdByUser: false,
     },

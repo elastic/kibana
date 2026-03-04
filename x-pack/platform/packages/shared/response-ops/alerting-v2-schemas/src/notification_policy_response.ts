@@ -17,7 +17,6 @@ export interface NotificationPolicyResponse {
   group_by?: string[];
   throttle?: { interval: string };
   auth: {
-    type: 'es' | 'uiam';
     owner: string;
     createdByUser: boolean;
   };
