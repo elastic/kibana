@@ -36,6 +36,7 @@ import {
   setDefaultToolingLoggingLevel,
 } from './utils';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
+import { DW_LOAD_BALANCER_CONFIG } from './dw_config';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
 import { CloudHandler } from './project_handler/cloud_project_handler';
@@ -427,8 +428,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         ? grepSpecPattern // use the returned concrete file paths
         : globby.sync(specPattern); // convert the glob pattern to concrete file paths
 
-      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
-      const files = retrieveIntegrations(orderedFilePaths);
+      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths, DW_LOAD_BALANCER_CONFIG);
+      const files = retrieveIntegrations(orderedFilePaths, DW_LOAD_BALANCER_CONFIG);
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 
