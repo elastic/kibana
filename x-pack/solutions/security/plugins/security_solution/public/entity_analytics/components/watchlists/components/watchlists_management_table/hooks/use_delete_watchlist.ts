@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useAppToasts } from '@kbn/timelines-plugin/public/hooks/use_app_toasts';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
 
 export const useDeleteWatchlist = (spaceId: string) => {

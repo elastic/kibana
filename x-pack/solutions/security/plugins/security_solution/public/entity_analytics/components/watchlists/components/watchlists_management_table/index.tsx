@@ -27,8 +27,7 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
-import { useDeleteWatchlist } from './hooks/use_delete_watchlist';
-import { useWatchlistsTableData } from './hooks/use_watchlists_table_data';
+import { useDeleteWatchlist, useWatchlistsTableData } from './hooks';
 import { buildWatchlistsManagementTableColumns } from './columns';
 import type { WatchlistTableItemType } from './types';
 
