@@ -119,6 +119,16 @@ describe('Pack utils', () => {
       expect(result).not.toHaveProperty('schedule_id');
       expect(result).not.toHaveProperty('start_date');
     });
+
+    test('includes space_id when spaceId is provided', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
+      expect(convertedQueries.default).toHaveProperty('space_id', 'my-space');
+    });
+
+    test('omits space_id when spaceId is undefined', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries());
+      expect(convertedQueries.default).not.toHaveProperty('space_id');
+    });
   });
 
   describe('convertPackQueriesToSO', () => {

@@ -64,6 +64,16 @@ export const getScheduledActionResultsRoute = (
         try {
           const { scheduleId, executionCount: executionCountStr } = request.params;
           const executionCount = Number(executionCountStr);
+
+          if (isNaN(executionCount) || executionCount < 0) {
+            return response.customError({
+              statusCode: 400,
+              body: {
+                message: `executionCount must be a non-negative integer, got: "${executionCountStr}"`,
+              },
+            });
+          }
+
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
 

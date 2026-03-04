@@ -29,7 +29,8 @@ export const buildScheduledResponsesQuery = ({
   const filters: estypes.QueryDslQueryContainer[] = [
     { exists: { field: 'schedule_id' } },
     // Primary space isolation — response documents carry space_id from Fleet config
-    // TODO: uncomment when response documents start containign space_id
+    // TODO(osquery-space-aware-scheduled-responses): uncomment when response documents
+    // start containing space_id (elastic/security-team#16172)
     // { term: { space_id: spaceId } },
   ];
 

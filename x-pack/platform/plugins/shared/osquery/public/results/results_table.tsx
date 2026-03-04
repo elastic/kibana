@@ -427,7 +427,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             scheduleId={scheduleId}
             executionCount={executionCount}
           />
-          <AddToTimelineButton field="action_id" value={actionId} addToTimeline={addToTimeline} />
+          <AddToTimelineButton
+            field={scheduleId ? 'schedule_id' : 'action_id'}
+            value={scheduleId ?? actionId}
+            addToTimeline={addToTimeline}
+          />
           {liveQueryActionId && (
             <AddToCaseWrapper
               actionId={liveQueryActionId}

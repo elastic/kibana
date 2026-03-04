@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { PackSavedObject } from '../../common/types';
@@ -75,12 +76,19 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             ...restAttributes
           } = sourceAttributes;
 
+          const queriesWithFreshIds = restAttributes.queries?.map((query) => ({
+            ...query,
+            schedule_id: uuidv4(),
+            start_date: now,
+          }));
+
           const newPackSO = await client.create<
             Omit<PackSavedObject, 'saved_object_id' | 'references'>
           >(
             packSavedObjectType,
             {
               ...restAttributes,
+              ...(queriesWithFreshIds ? { queries: queriesWithFreshIds } : {}),
               name: newName,
               enabled: false, // Always disable copy to prevent unexpected deployments
               shards: [],

@@ -61,6 +61,11 @@ describe('copyPackRoute', () => {
         get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       security: {},
+      service: {
+        getPackLookupCache: jest.fn().mockReturnValue({
+          invalidateAll: jest.fn(),
+        }),
+      },
     } as unknown as OsqueryAppContext;
   });
 
@@ -121,6 +126,12 @@ describe('copyPackRoute', () => {
     const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
     expect(createArgs.policy_ids).toBeUndefined();
     expect(createArgs.shards).toEqual([]);
+
+    // Verify copied queries get fresh schedule_id and start_date values
+    for (const query of createArgs.queries) {
+      expect(query.schedule_id).toBeDefined();
+      expect(query.start_date).toBeDefined();
+    }
 
     // Verify all references are cleared (no agent policy or prebuilt asset refs)
     const createOptions = mockSavedObjectsClient.create.mock.calls[0][2];

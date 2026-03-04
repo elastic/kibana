@@ -21,8 +21,12 @@ describe('buildScheduledResponsesQuery', () => {
     });
 
     test('body size is always 0 — aggregation only, no hits returned', () => {
-      expect(buildScheduledResponsesQuery({ pageSize: 10, spaceId: defaultSpaceId }).body.size).toBe(0);
-      expect(buildScheduledResponsesQuery({ pageSize: 100, spaceId: defaultSpaceId }).body.size).toBe(0);
+      expect(
+        buildScheduledResponsesQuery({ pageSize: 10, spaceId: defaultSpaceId }).body.size
+      ).toBe(0);
+      expect(
+        buildScheduledResponsesQuery({ pageSize: 100, spaceId: defaultSpaceId }).body.size
+      ).toBe(0);
     });
 
     test('multi_terms size uses a minimum of 10,000 to support large deployments within a time window', () => {
@@ -89,28 +93,26 @@ describe('buildScheduledResponsesQuery', () => {
       expect(filters).toContainEqual({ exists: { field: 'schedule_id' } });
     });
 
-    test('always includes space_id term filter for space isolation', () => {
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: 'my-space' });
-      const query = result.body.query as Record<string, unknown>;
-      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+    // TODO(osquery-space-aware-scheduled-responses): add space_id filter assertions
+    // when response documents start containing space_id (elastic/security-team#16172)
 
-      expect(filters).toContainEqual({ term: { space_id: 'my-space' } });
-    });
-
-    test('base filters are the first two elements in the filter array', () => {
+    test('exists filter is the first element in the filter array', () => {
       const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       expect(filters[0]).toEqual({ exists: { field: 'schedule_id' } });
-      expect(filters[1]).toEqual({ term: { space_id: defaultSpaceId } });
     });
   });
 
   describe('cursor filter', () => {
     test('adds timestamp range filter when cursor is provided', () => {
       const cursor = '2024-01-15T10:00:00.000Z';
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId, cursor });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        spaceId: defaultSpaceId,
+        cursor,
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -124,9 +126,7 @@ describe('buildScheduledResponsesQuery', () => {
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      const rangeFilter = filters.find(
-        (f) => (f as Record<string, unknown>).range !== undefined
-      );
+      const rangeFilter = filters.find((f) => (f as Record<string, unknown>).range !== undefined);
       expect(rangeFilter).toBeUndefined();
     });
   });
@@ -134,7 +134,11 @@ describe('buildScheduledResponsesQuery', () => {
   describe('scheduleIds filter', () => {
     test('adds terms filter when scheduleIds is a non-empty array', () => {
       const scheduleIds = ['id-1', 'id-2', 'id-3'];
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId, scheduleIds });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        spaceId: defaultSpaceId,
+        scheduleIds,
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -145,7 +149,11 @@ describe('buildScheduledResponsesQuery', () => {
       // An empty scheduleIds array means the search term matched no pack queries,
       // so no scheduled results should be returned. The implementation signals this
       // with a match_none filter.
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId, scheduleIds: [] });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        spaceId: defaultSpaceId,
+        scheduleIds: [],
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -157,14 +165,16 @@ describe('buildScheduledResponsesQuery', () => {
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      const termsFilter = filters.find(
-        (f) => (f as Record<string, unknown>).terms !== undefined
-      );
+      const termsFilter = filters.find((f) => (f as Record<string, unknown>).terms !== undefined);
       expect(termsFilter).toBeUndefined();
     });
 
     test('single scheduleId is passed through as a terms array', () => {
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId, scheduleIds: ['only-one'] });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        spaceId: defaultSpaceId,
+        scheduleIds: ['only-one'],
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -189,7 +199,11 @@ describe('buildScheduledResponsesQuery', () => {
     });
 
     test('adds only gte when only startDate is provided', () => {
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId, startDate: 'now-7d' });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        spaceId: defaultSpaceId,
+        startDate: 'now-7d',
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -199,7 +213,11 @@ describe('buildScheduledResponsesQuery', () => {
     });
 
     test('adds only lte when only endDate is provided', () => {
-      const result = buildScheduledResponsesQuery({ pageSize: 20, spaceId: defaultSpaceId, endDate: 'now' });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        spaceId: defaultSpaceId,
+        endDate: 'now',
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -213,7 +231,7 @@ describe('buildScheduledResponsesQuery', () => {
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      expect(filters).toHaveLength(2); // exists + space_id
+      expect(filters).toHaveLength(1); // exists only (space_id deferred)
     });
   });
 
@@ -221,15 +239,19 @@ describe('buildScheduledResponsesQuery', () => {
     test('includes cursor and scheduleIds filters alongside base filters', () => {
       const cursor = '2024-06-01T00:00:00.000Z';
       const scheduleIds = ['abc', 'def'];
-      const result = buildScheduledResponsesQuery({ pageSize: 10, spaceId: defaultSpaceId, cursor, scheduleIds });
+      const result = buildScheduledResponsesQuery({
+        pageSize: 10,
+        spaceId: defaultSpaceId,
+        cursor,
+        scheduleIds,
+      });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       expect(filters).toContainEqual({ exists: { field: 'schedule_id' } });
-      expect(filters).toContainEqual({ term: { space_id: defaultSpaceId } });
       expect(filters).toContainEqual({ terms: { schedule_id: scheduleIds } });
       expect(filters).toContainEqual({ range: { '@timestamp': { lte: cursor } } });
-      expect(filters).toHaveLength(4);
+      expect(filters).toHaveLength(3);
     });
 
     test('only base filters are present when no optional params are provided', () => {
@@ -237,9 +259,8 @@ describe('buildScheduledResponsesQuery', () => {
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      expect(filters).toHaveLength(2);
+      expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual({ exists: { field: 'schedule_id' } });
-      expect(filters[1]).toEqual({ term: { space_id: defaultSpaceId } });
     });
   });
 });

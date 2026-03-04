@@ -298,21 +298,23 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     }
   }, []);
 
+  const totalItemCount = agentIds?.length ?? data.total ?? 0;
+
   const pagination = useMemo(
     () => ({
       initialPageSize: DEFAULT_PAGE_SIZE,
       pageIndex,
       pageSize,
-      totalItemCount: agentIds?.length ?? 0,
+      totalItemCount,
       pageSizeOptions: [10, 20, 50, 100],
       showPerPageOptions: true,
     }),
-    [pageIndex, pageSize, agentIds?.length]
+    [pageIndex, pageSize, totalItemCount]
   );
 
   const statusTableCss = useMemo(
-    () => createStatusTableCss(pageSize, pageIndex, agentIds?.length ?? 0),
-    [pageSize, pageIndex, agentIds?.length]
+    () => createStatusTableCss(pageSize, pageIndex, totalItemCount),
+    [pageSize, pageIndex, totalItemCount]
   );
 
   // Guard against race conditions when updating isLive

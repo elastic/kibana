@@ -60,6 +60,15 @@ export const getScheduledExecutionDetailsRoute = (
           const { scheduleId, executionCount: executionCountStr } = request.params;
           const executionCount = Number(executionCountStr);
 
+          if (isNaN(executionCount) || executionCount < 0) {
+            return response.customError({
+              statusCode: 400,
+              body: {
+                message: `executionCount must be a non-negative integer, got: "${executionCountStr}"`,
+              },
+            });
+          }
+
           // 1. Look up pack context to find packName, queryId, queryText
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -116,8 +125,7 @@ export const getScheduledExecutionDetailsRoute = (
           const aggsBuckets = responseAgg?.responses?.buckets;
           const successCount =
             aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
-          const errorCount =
-            aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
+          const errorCount = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
 
           const timestamp =
             actionRes.edges.length > 0

@@ -17,7 +17,7 @@ export const allowedExperimentalValues = Object.freeze({
    *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
    *   - Introduces /history and /new routes, redirects legacy /live_queries paths
    */
-  queryHistoryRework: false,
+  queryHistoryRework: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
