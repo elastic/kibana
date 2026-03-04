@@ -88,7 +88,7 @@ spaceTest.describe(
     });
 
     spaceTest('should show chart actions menu on metric card', async ({ pageObjects, page }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 

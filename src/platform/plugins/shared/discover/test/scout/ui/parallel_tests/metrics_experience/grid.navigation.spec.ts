@@ -124,7 +124,7 @@ spaceTest.describe(
       'should render grid with wildcard TS query and WHERE filter',
       async ({ pageObjects }) => {
         const query = `${testData.ESQL_QUERIES.TS_WILDCARD} | WHERE ${FILTER_DIMENSION_NAME} == "${FILTER_DIMENSION_VALUES[0]}"`;
-        await pageObjects.discover.writeEsqlQuery(query);
+        await pageObjects.discover.writeAndSubmitEsqlQuery(query);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
@@ -135,7 +135,7 @@ spaceTest.describe(
     spaceTest(
       'should update grid when selecting a breakdown dimension',
       async ({ pageObjects }) => {
-        await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
 

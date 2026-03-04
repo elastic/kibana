@@ -45,7 +45,7 @@ spaceTest.describe(
     });
 
     spaceTest('should open insights flyout and verify tab content', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
@@ -70,7 +70,7 @@ spaceTest.describe(
     });
 
     spaceTest('should paginate through dimensions in flyout', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
