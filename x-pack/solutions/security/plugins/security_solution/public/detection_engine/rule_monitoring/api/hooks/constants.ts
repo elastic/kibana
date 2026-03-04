@@ -9,5 +9,6 @@ const ONE_MINUTE = 60000;
 
 export const DEFAULT_QUERY_OPTIONS = {
   refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
   staleTime: ONE_MINUTE * 5,
 };

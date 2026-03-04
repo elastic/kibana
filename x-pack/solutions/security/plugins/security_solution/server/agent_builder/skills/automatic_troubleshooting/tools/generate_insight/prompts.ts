@@ -15,6 +15,8 @@ export function getPrompts(insightType: DefendInsightType) {
       return PROMPTS.INCOMPATIBLE_ANTIVIRUS;
     case DefendInsightType.Enum.custom:
       return PROMPTS.CUSTOM;
+    default:
+      throw new Error(`Unsupported insight type: ${insightType}`);
   }
 }
 
