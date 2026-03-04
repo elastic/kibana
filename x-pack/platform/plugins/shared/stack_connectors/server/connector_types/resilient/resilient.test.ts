@@ -14,11 +14,12 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RESILIENT_CONNECTOR_ID } from './constants';
 import { PushToServiceIncidentSchema } from './schema';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Axios } from 'axios';
 
 jest.mock('axios', () => {
   const actual = jest.requireActual('axios');
   return {
-    ...jest.createMockFromModule<typeof import('axios')>('axios'),
+    ...jest.createMockFromModule<Axios>('axios'),
     AxiosError: actual.AxiosError,
     isAxiosError: actual.isAxiosError,
   };
