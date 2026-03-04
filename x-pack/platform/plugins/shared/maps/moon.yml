@@ -107,6 +107,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/cps-utils'
+  - '@kbn/breadcrumbs-utils'
 tags:
   - plugin
   - prod

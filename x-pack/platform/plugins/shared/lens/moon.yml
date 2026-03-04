@@ -148,6 +148,7 @@ dependsOn:
   - '@kbn/react-kibana-context-env'
   - '@kbn/scout'
   - '@kbn/cps-utils'
+  - '@kbn/breadcrumbs-utils'
 tags:
   - plugin
   - prod
