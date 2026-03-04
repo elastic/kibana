@@ -28,10 +28,10 @@ export function workflowMatchesTriggerCondition(
 ): boolean {
   const triggers = workflow.definition?.triggers;
   if (!triggers || triggers.length === 0) {
-    return true;
+    return false;
   }
 
-  const matchingTrigger = triggers.find((t) => t && (t as { type?: string }).type === triggerId);
+  const matchingTrigger = triggers.find((t) => t && t.type === triggerId);
   if (!matchingTrigger) {
     return false;
   }
@@ -39,7 +39,7 @@ export function workflowMatchesTriggerCondition(
   const withBlock = matchingTrigger && 'with' in matchingTrigger ? matchingTrigger.with : undefined;
   const condition =
     withBlock && typeof withBlock === 'object' && withBlock !== null && 'condition' in withBlock
-      ? (withBlock as { condition?: string }).condition
+      ? withBlock.condition
       : undefined;
   const conditionStr = typeof condition === 'string' ? condition.trim() : '';
 

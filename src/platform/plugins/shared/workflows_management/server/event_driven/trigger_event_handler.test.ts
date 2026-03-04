@@ -119,4 +119,66 @@ describe('createTriggerEventHandler', () => {
     });
     expect(runWorkflow).not.toHaveBeenCalled();
   });
+
+  it('should run all workflows and log once per failure when one runWorkflow rejects', async () => {
+    const wf1 = createMockWorkflow({ id: 'wf-1' });
+    const wf2 = createMockWorkflow({ id: 'wf-2' });
+    const wf3 = createMockWorkflow({ id: 'wf-3' });
+
+    const runWorkflow = jest.fn().mockImplementation(async (workflow: { id: string }) => {
+      if (workflow.id === 'wf-2') {
+        throw new Error('Execution failed for wf-2');
+      }
+      return undefined;
+    });
+
+    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2, wf3]);
+
+    const handler = createTriggerEventHandler({
+      api: { runWorkflow } as any,
+      logger: mockLogger,
+      getTriggerEventsClient: () => null,
+      resolveMatchingWorkflowSubscriptions,
+    });
+
+    await handler({
+      timestamp: '2025-01-01T12:00:00.000Z',
+      triggerId: 'cases.updated',
+      spaceId: 'default',
+      payload: {},
+      request: mockRequest,
+    });
+
+    expect(runWorkflow).toHaveBeenCalledTimes(3);
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-1' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-2' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-3' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Event-driven workflow execution failed')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('wf-2'));
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Execution failed for wf-2')
+    );
+  });
 });

@@ -41,7 +41,6 @@ export function createTriggerEventHandler({
 
     const eventContext = { ...payload, timestamp, spaceId };
     const workflows = await resolveMatchingWorkflowSubscriptions({
-    const workflows = await resolveMatchingWorkflowSubscriptions({
       triggerId,
       spaceId,
       eventContext,
@@ -71,32 +70,28 @@ export function createTriggerEventHandler({
       return;
     }
 
-    await Promise.all(
-      workflows.map(async (workflow) => {
-        try {
-          validateWorkflowForExecution(workflow, workflow.id);
-          const workflowToRun: WorkflowExecutionEngineModel = {
-            id: workflow.id,
-            name: workflow.name,
-            enabled: workflow.enabled,
-            definition: workflow.definition,
-            yaml: workflow.yaml,
-          };
-          await api.runWorkflow(
-            workflowToRun,
-            spaceId,
-            { event: eventContext },
-            request,
-            triggerId
-          );
-        } catch (error) {
-          logger.warn(
-            `Event-driven workflow execution failed for workflow ${
-              workflow.id
-            } (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
-          );
-        }
-      })
-    );
+    const runWorkflowPromises = workflows.map(async (workflow) => {
+      validateWorkflowForExecution(workflow, workflow.id);
+      const workflowToRun: WorkflowExecutionEngineModel = {
+        id: workflow.id,
+        name: workflow.name,
+        enabled: workflow.enabled,
+        definition: workflow.definition,
+        yaml: workflow.yaml,
+      };
+      await api.runWorkflow(workflowToRun, spaceId, { event: eventContext }, request, triggerId);
+    });
+
+    const results = await Promise.allSettled(runWorkflowPromises);
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        const workflow = workflows[index];
+        const message =
+          result.reason instanceof Error ? result.reason.message : String(result.reason);
+        logger.warn(
+          `Event-driven workflow execution failed for workflow ${workflow.id} (trigger: ${triggerId}): ${message}`
+        );
+      }
+    });
   };
 }

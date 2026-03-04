@@ -18,8 +18,11 @@ export interface EmitEventDeps {
 /**
  * Emits an event for a trigger type. Call this when something happens that workflows may be subscribed to.
  * The trigger must be registered (e.g. via registerTriggerDefinition); subscribed workflows are resolved and run by the platform.
+ * When the trigger has an eventSchema, the payload is validated against it; validation failure throws.
  *
  * @throws Error if triggerId is not registered
+ * @throws Error if payload does not match the trigger's eventSchema
+ * @throws Error if no trigger event handler has been registered
  */
 export async function emitEvent(params: EmitEventParams, deps: EmitEventDeps): Promise<void> {
   const timestamp = new Date().toISOString();
@@ -32,7 +35,22 @@ export async function emitEvent(params: EmitEventParams, deps: EmitEventDeps): P
     );
   }
 
+  const definition = triggerRegistry.get(triggerId);
+  if (definition?.eventSchema && typeof definition.eventSchema.safeParse === 'function') {
+    const result = definition.eventSchema.safeParse(payload);
+    if (!result.success) {
+      const message = result.error instanceof Error ? result.error.message : String(result.error);
+      throw new Error(
+        `Event payload for trigger "${triggerId}" (space: ${spaceId}) did not match the trigger's eventSchema. ${message}`
+      );
+    }
+  }
+
   if (triggerEventHandler) {
     await triggerEventHandler({ timestamp, triggerId, spaceId, payload, request });
+  } else {
+    throw new Error(
+      `No trigger event handler registered; event for trigger "${triggerId}" (space: ${spaceId}) will not run any workflows.`
+    );
   }
 }

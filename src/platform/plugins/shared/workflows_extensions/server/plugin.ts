@@ -11,6 +11,7 @@ import type {
   CoreSetup,
   CoreStart,
   CustomRequestHandlerContext,
+  Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
@@ -43,12 +44,14 @@ export class WorkflowsExtensionsServerPlugin
       WorkflowsExtensionsServerPluginStartDeps
     >
 {
+  private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
   private triggerEventHandler: TriggerEventHandler | null = null;
   private emitEventFn: ((params: EmitEventParams) => Promise<void>) | null = null;
 
-  constructor(_initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.stepRegistry = new ServerStepRegistry();
     this.triggerRegistry = new TriggerRegistry();
   }
@@ -91,6 +94,11 @@ export class WorkflowsExtensionsServerPlugin
         this.triggerRegistry.register(definition);
       },
       registerTriggerEventHandler: (handler) => {
+        if (this.triggerEventHandler !== null) {
+          this.logger.warn(
+            'A trigger event handler was already registered; it will be overwritten. Only one handler should register (e.g. workflows_management).'
+          );
+        }
         this.triggerEventHandler = handler;
       },
     };

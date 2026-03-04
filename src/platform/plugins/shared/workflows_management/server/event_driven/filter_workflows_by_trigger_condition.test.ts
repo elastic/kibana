@@ -39,16 +39,16 @@ describe('workflowMatchesTriggerCondition', () => {
     warn: jest.fn(),
   } as unknown as Logger;
 
-  it('should return true when workflow has no triggers', () => {
+  it('should return false when workflow has no triggers', () => {
     const workflow = createMockWorkflow({ definition: { triggers: [], steps: [] } });
     expect(workflowMatchesTriggerCondition(workflow, 'cases.updated', { severity: 'high' })).toBe(
-      true
+      false
     );
   });
 
-  it('should return true when workflow definition has no triggers', () => {
+  it('should return false when workflow definition has no triggers', () => {
     const workflow = createMockWorkflow({ definition: { triggers: undefined as any, steps: [] } });
-    expect(workflowMatchesTriggerCondition(workflow, 'cases.updated', {})).toBe(true);
+    expect(workflowMatchesTriggerCondition(workflow, 'cases.updated', {})).toBe(false);
   });
 
   it('should return false when no trigger matches the triggerId', () => {
