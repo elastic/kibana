@@ -337,6 +337,9 @@ describe('generateLayer', () => {
       });
       // No attributes passthrough object for ECS streams
       expect(properties.attributes).toBeUndefined();
+
+      // ECS streams use subobjects: false to keep dotted field names as flat keys
+      expect(result.template.mappings?.subobjects).toBe(false);
     });
 
     it('should use OTel settings for OTel-based root streams', () => {
@@ -418,6 +421,9 @@ describe('generateLayer', () => {
       });
       // No attributes passthrough object for ECS streams
       expect(properties.attributes).toBeUndefined();
+
+      // ECS child streams also use subobjects: false
+      expect(result.template.mappings?.subobjects).toBe(false);
     });
   });
 });
