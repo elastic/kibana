@@ -9,7 +9,7 @@
 
 import type { ServiceGraph, ServiceNode } from '../types';
 import { mulberry32, randHex } from '../placeholders';
-import { serviceStableSeed } from './seed';
+import { deriveSeed } from './seed';
 
 export type MetadataCache = Map<string, Record<string, string | undefined>>;
 export type Metadata = Record<string, string | undefined>;
@@ -66,7 +66,7 @@ export function buildMetadataCache(serviceGraph: ServiceGraph, seed?: number): M
   for (const service of serviceGraph.services) {
     cache.set(
       service.name,
-      generateDeploymentMetadata({ service, seed: serviceStableSeed(seed ?? 0, service.name) })
+      generateDeploymentMetadata({ service, seed: deriveSeed(seed ?? 0, service.name) })
     );
   }
   return cache;

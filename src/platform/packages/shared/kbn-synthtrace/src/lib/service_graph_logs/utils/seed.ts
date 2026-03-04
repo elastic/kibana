@@ -20,9 +20,12 @@ export function resolveEffectiveSeed(
   return (timestamp ?? Date.now()) + index;
 }
 
-export function serviceStableSeed(baseSeed: number, serviceName: string): number {
+/**
+ * Derives a deterministic sub-stream seed from a base seed and an arbitrary name.
+ */
+export function deriveSeed(baseSeed: number, name: string): number {
   // eslint-disable-next-line no-bitwise
-  return (baseSeed ^ hashStr(serviceName)) >>> 0;
+  return (baseSeed ^ hashStr(name)) >>> 0;
 }
 
 /**

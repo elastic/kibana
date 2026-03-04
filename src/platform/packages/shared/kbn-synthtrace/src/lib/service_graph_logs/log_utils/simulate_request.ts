@@ -25,7 +25,7 @@ import {
   SUCCESS_LATENCY_BASE_MS,
   SUCCESS_LATENCY_JITTER_MS,
 } from '../constants';
-import { serviceStableSeed } from '../utils/seed';
+import { deriveSeed } from '../utils/seed';
 import { getOrBuildMetadata, type MetadataCache } from '../utils/metadata';
 import { buildLogDoc, resolveLogLevel } from './shared';
 import {
@@ -95,8 +95,8 @@ function buildOutboundLogs({
       ? ERROR_LATENCY_BASE_MS + Math.floor(rng() * ERROR_LATENCY_JITTER_MS)
       : SUCCESS_LATENCY_BASE_MS + Math.floor(rng() * SUCCESS_LATENCY_JITTER_MS);
     const { message, level } = pickOutboundMessage({
-      seed: serviceStableSeed(svcSeed, edge.target),
-      tickSeed: serviceStableSeed(svcTickSeed, edge.target),
+      seed: deriveSeed(svcSeed, edge.target),
+      tickSeed: deriveSeed(svcTickSeed, edge.target),
       runtime: serviceNode.runtime,
       serviceName: serviceNode.name,
       targetService: targetLabel,
@@ -182,8 +182,8 @@ export function simulateRequest({
     const serviceNode = serviceGraph.services.find((s) => s.name === current);
     if (!serviceNode) return { errored: false, httpStatus: 200, docs: [] };
 
-    const svcSeed = serviceStableSeed(stableSeed, current);
-    const svcTickSeed = serviceStableSeed(tickSeed, current);
+    const svcSeed = deriveSeed(stableSeed, current);
+    const svcTickSeed = deriveSeed(tickSeed, current);
     const metadata = getOrBuildMetadata(serviceNode, svcSeed, metadataCache);
 
     // Failure roll

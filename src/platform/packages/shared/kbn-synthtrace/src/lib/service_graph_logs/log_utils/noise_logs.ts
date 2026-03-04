@@ -10,6 +10,7 @@
 import type { LogDocument } from '@kbn/synthtrace-client';
 import type { InfraDependency, NoiseHealthState, ServiceNode } from '../types';
 import { mulberry32 } from '../placeholders';
+import { deriveSeed } from '../utils/seed';
 import { pickInfraMessage, pickNoiseMessage } from '../utils/templates';
 import { buildMessageOverrides, getOrBuildMetadata } from '../utils/metadata';
 import {
@@ -173,13 +174,18 @@ export function generateNoiseDocs({
     }
   }
 
+  // Separate RNG stream so ghost-mention firing is independent of noise volume.
+  const ghostRng = mulberry32(deriveSeed(seed, 'ghost'));
   for (const ghost of ghostMentions ?? []) {
-    if (rng() >= (ghost.rate ?? DEFAULT_GHOST_MENTION_RATE) || serviceGraph.services.length === 0) {
+    if (
+      ghostRng() >= (ghost.rate ?? DEFAULT_GHOST_MENTION_RATE) ||
+      serviceGraph.services.length === 0
+    ) {
       continue;
     }
     const svc =
       serviceGraph.services.find((s) => s.name === ghost.serviceName) ??
-      serviceGraph.services[Math.floor(rng() * serviceGraph.services.length)];
+      serviceGraph.services[Math.floor(ghostRng() * serviceGraph.services.length)];
     docs.push(
       buildLogDoc({
         service: svc,

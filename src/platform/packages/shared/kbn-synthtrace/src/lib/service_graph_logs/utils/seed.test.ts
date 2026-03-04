@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveEffectiveSeed, serviceStableSeed } from './seed';
+import { deriveSeed, resolveEffectiveSeed } from './seed';
 
 describe('resolveEffectiveSeed', () => {
   it('combines seed + index + timestamp', () => {
@@ -25,14 +25,14 @@ describe('resolveEffectiveSeed', () => {
   });
 });
 
-describe('serviceStableSeed', () => {
+describe('deriveSeed', () => {
   it('is deterministic and unique per (baseSeed, name)', () => {
-    expect(serviceStableSeed(42, 'svc-a')).toBe(serviceStableSeed(42, 'svc-a'));
-    expect(serviceStableSeed(42, 'svc-a')).not.toBe(serviceStableSeed(42, 'svc-b'));
+    expect(deriveSeed(42, 'svc-a')).toBe(deriveSeed(42, 'svc-a'));
+    expect(deriveSeed(42, 'svc-a')).not.toBe(deriveSeed(42, 'svc-b'));
   });
 
   it('returns a valid uint32', () => {
-    const result = serviceStableSeed(0xffffffff, 'test');
+    const result = deriveSeed(0xffffffff, 'test');
     expect(result).toBeGreaterThanOrEqual(0);
     expect(result).toBeLessThanOrEqual(0xffffffff);
   });
