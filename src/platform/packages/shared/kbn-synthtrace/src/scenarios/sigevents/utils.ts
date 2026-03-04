@@ -225,8 +225,8 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
         } else {
           volumeMap[key] = {
             ...volumeMap[key],
-            rate: entry.rate ?? volumeMap[key].rate,
-            every: entry.every ?? volumeMap[key].every,
+            rate: volumeMap[key].rate ?? entry.rate,
+            every: volumeMap[key].every ?? entry.every,
             spikes: [...(volumeMap[key].spikes ?? []), ...(entry.spikes ?? [])],
           };
         }
@@ -301,9 +301,9 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
 
     return {
       generate: ({ range, clients: { logsEsClient } }) => {
-        const { logger } = runOptions;
+        const { logger, from } = runOptions;
         const baseRate = parsedBaseRate;
-        const from = runOptions.from as number;
+
         const baselineWindowMs = duration('1m') * baselineMinutes;
 
         const activeScenario = scenarioId ? mockApp.scenarios[scenarioId] : undefined;
