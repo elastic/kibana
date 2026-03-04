@@ -22,7 +22,7 @@
           "<void, void, never, never>"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 83,
+        "lineNumber": 89,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +38,7 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 87,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -70,7 +70,7 @@
               "[]>) => void; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 91,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -87,7 +87,7 @@
                   "<{}, unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 91,
+                "lineNumber": 99,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -104,7 +104,7 @@
                   "ObservabilitySharedSetup"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 91,
+                "lineNumber": 99,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -148,7 +148,7 @@
               "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 107,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -164,7 +164,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 107,
+                "lineNumber": 115,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -181,7 +181,7 @@
                   "ObservabilitySharedStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 107,
+                "lineNumber": 115,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -201,7 +201,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 129,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4358,7 +4358,7 @@
           "[]>) => void; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 58,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4395,7 +4395,7 @@
           "; }) => void; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 59,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4436,7 +4436,7 @@
           "; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 60,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
