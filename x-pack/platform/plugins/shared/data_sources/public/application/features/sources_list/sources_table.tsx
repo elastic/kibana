@@ -30,6 +30,7 @@ import {
   PAGINATION_ITEMS_PER_PAGE_OPTIONS,
 } from '../../../../common/constants';
 import { getConnectorIcon } from '../../../utils';
+import { slugify } from '../../../../common/utils/slugify';
 import { useKibana } from '../../hooks/use_kibana';
 import { SourcesUtilityBar } from './sources_utility_bar';
 
@@ -246,7 +247,8 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         }),
         align: 'center',
         render: (workflows: string[], source: ActiveSource) => {
-          const path = `?query=${encodeURIComponent(source.name)}`;
+          const workflowPrefix = `${slugify(source.name)}.source.${source.type}`;
+          const path = `?query=${encodeURIComponent(workflowPrefix)}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return workflows.length > 0 ? (
             <EuiLink href={workflowsUrl} data-test-subj={`workflowsLink-${source.id}`}>
@@ -282,7 +284,8 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         width: '120px',
         align: 'right',
         render: (source: ActiveSource) => {
-          const path = `?query=${encodeURIComponent(source.name)}`;
+          const workflowPrefix = `${slugify(source.name)}.source.${source.type}`;
+          const path = `?query=${encodeURIComponent(workflowPrefix)}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return (
             <ActionsCell

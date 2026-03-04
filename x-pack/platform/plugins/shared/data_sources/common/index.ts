@@ -16,3 +16,4 @@ export type {
   BulkDeleteDataSourceResult,
   BulkDeleteDataSourcesResponse,
 } from './types';
+export { slugify } from './utils/slugify';

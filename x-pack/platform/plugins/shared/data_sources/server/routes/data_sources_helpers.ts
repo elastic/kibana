@@ -33,6 +33,7 @@ import type {
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 import type { DeleteDataSourceAndRelatedResourcesResult } from '../../common';
+import { slugify } from '../../common/utils/slugify';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -46,15 +47,6 @@ interface CreateDataSourceAndResourcesParams {
   actions: DataSourcesServerStartDependencies['actions'];
   dataSource: DataSource;
   agentBuilder: DataSourcesServerStartDependencies['agentBuilder'];
-}
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize('NFD') // split accented characters
-    .replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/[^a-z0-9_]+/g, '-') // replace non-alphanumerics with -
-    .replace(/^[-_]+|[-_]+$/g, ''); // trim leading/trailing -
 }
 
 /**
