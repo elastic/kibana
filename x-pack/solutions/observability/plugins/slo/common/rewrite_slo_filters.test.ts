@@ -7,6 +7,7 @@
 
 import type { Filter, FilterStateStore } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { rewriteFilterForSloSummary, rewriteFiltersForSloSummary } from './rewrite_slo_filters';
 
 const makeFilter = (key: string, query: Record<string, unknown>, negate = false): Filter => ({
@@ -174,12 +175,27 @@ describe('rewriteFiltersForSloSummary', () => {
       ]);
     });
 
-    it('rewritten filters are dropped when ignoreFilterIfFieldNotInIndex is true and no data view', () => {
+    it('rewritten filters are dropped when ignoreFilterIfFieldNotInIndex is true with a data view', () => {
       const dashboardFilter = makeFilter('orchestrator.cluster.name', {
         match_phrase: { 'orchestrator.cluster.name': 'prod-cluster' },
       });
       const rewritten = rewriteFiltersForSloSummary([dashboardFilter]);
-      const esQuery = buildQueryFromFilters(rewritten, undefined, {
+      const stubDataView = createStubDataView({
+        spec: {
+          id: 'slo-summary',
+          title: '.slo-observability.summary-v3*',
+          fields: {
+            'slo.groupings': {
+              name: 'slo.groupings',
+              type: 'object',
+              searchable: true,
+              aggregatable: true,
+            },
+            status: { name: 'status', type: 'string', searchable: true, aggregatable: true },
+          },
+        },
+      });
+      const esQuery = buildQueryFromFilters(rewritten, stubDataView, {
         ignoreFilterIfFieldNotInIndex: true,
       });
       expect(esQuery.filter).toEqual([]);
