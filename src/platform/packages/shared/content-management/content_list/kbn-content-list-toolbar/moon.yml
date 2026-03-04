@@ -21,7 +21,9 @@ dependsOn:
   - '@kbn/content-list-assembly'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-mock-data'
+  - '@kbn/content-management-tags'
   - '@kbn/i18n'
+  - '@kbn/shared-ux-utility'
 tags:
   - shared-browser
   - package

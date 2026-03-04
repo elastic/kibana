@@ -12,8 +12,8 @@ import type {
   ESQLAstMmrCommand,
   ESQLCommand,
   ESQLCommandOption,
-} from '../../../types';
-import { isMap, isOptionNode } from '../../../ast/is';
+} from '@elastic/esql/types';
+import { isMap, isOptionNode } from '@elastic/esql';
 import {
   columnExists,
   getFieldsSuggestions,
