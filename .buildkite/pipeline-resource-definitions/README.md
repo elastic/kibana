@@ -17,12 +17,12 @@ or by copying a blank template (see [_new_pipeline.yml](_templates/_new_pipeline
 
 You can validate your pipeline's structural integrity, and it's conformity to baseline rules by running the following command:
 ```bash
-.buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition.sh <path_to_your_pipeline_file>
+node .buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition.sh <path_to_your_pipeline_file>
 ```
 
 Once you've added the file, you should update the [locations.yml](locations.yml) file to include the new pipeline, or run the following command to update it:
 ```bash
-.buildkite/pipeline-resource-definitions/scripts/fix-location-collection.ts
+node .buildkite/pipeline-resource-definitions/scripts/fix-location-collection.ts
 ```
 
 Add your pipeline implementation, commit & push & merge. The pipeline resource will appear in Backstage within minutes, then the pipeline will be added to Buildkite within ~10 minutes.
