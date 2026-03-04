@@ -276,7 +276,7 @@ export function pickInfraMessage({
   seed: number;
   tech?: string;
   overrides?: Record<string, string>;
-  timestamp?: number;
+  timestamp: number;
   serviceName?: string;
 }): string {
   const level = rawLevel === 'info' ? undefined : rawLevel;
@@ -299,7 +299,7 @@ export function pickInfraMessage({
     return `[${category}:${tech ?? '?'}] ${condition} event`;
   }
 
-  const ts = timestamp != null ? new Date(timestamp).toISOString() : new Date().toISOString();
+  const ts = new Date(timestamp).toISOString();
   const template = pick(templates, mulberry32(seed));
   return fillPlaceholders(template, seed, {
     serviceName,

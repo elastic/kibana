@@ -154,6 +154,7 @@ export function generateNoiseDocs({
           rng,
           seed: seed + i,
           degraded,
+          timestamp,
           cachedMetadata: getOrBuildMetadata(emitter.node, seed + i, metadataCache),
         })
       );

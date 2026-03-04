@@ -17,12 +17,12 @@ export interface ServicePhaseOptions {
   service: ServiceNode;
   seed: number;
   cachedMetadata?: Record<string, string | undefined>;
-  timestamp?: number;
+  timestamp: number;
 }
 
 export interface ServiceGraphOptions {
   seed: number;
-  timestamp?: number;
+  timestamp: number;
   serviceGraph: ServiceGraph;
   metadataCache?: MetadataCache;
 }

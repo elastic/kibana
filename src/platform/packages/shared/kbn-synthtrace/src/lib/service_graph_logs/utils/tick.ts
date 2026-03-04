@@ -65,7 +65,7 @@ const resolveFailures = (
 const resolveChannelEvery = (every: number | undefined, index: number): boolean =>
   !every || every <= 1 || index % every === 0;
 
-const cycleTimestamp = (ts: number, cycleMs: number, originMs: number): number => {
+export const cycleTimestamp = (ts: number, cycleMs: number, originMs: number): number => {
   if (ts < originMs) {
     return ts;
   }

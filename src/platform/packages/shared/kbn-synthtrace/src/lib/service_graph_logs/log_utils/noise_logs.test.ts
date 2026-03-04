@@ -34,13 +34,19 @@ describe('generateInfraNoiseLog', () => {
       dep: 'unknown_dep' as never,
       seed: SEED,
       service: K8S_SERVICE,
+      timestamp: TIMESTAMP,
     });
     expect(result).toBeNull();
   });
 
   it('emits info level when not degraded', () => {
     // HEALTH_PROBS.normal has warn=0.05 — most seeds produce info when not degraded.
-    const doc = generateInfraNoiseLog({ dep: 'postgres', seed: SEED, service: K8S_SERVICE });
+    const doc = generateInfraNoiseLog({
+      dep: 'postgres',
+      seed: SEED,
+      service: K8S_SERVICE,
+      timestamp: TIMESTAMP,
+    });
     expect(doc!['log.level']).toBe('info');
   });
 
@@ -51,6 +57,7 @@ describe('generateInfraNoiseLog', () => {
         seed: s,
         degraded: true,
         service: K8S_SERVICE,
+        timestamp: TIMESTAMP,
       });
       return doc!['log.level'];
     });
@@ -64,6 +71,7 @@ describe('generateInfraNoiseLog — with service (metadata populated)', () => {
       dep: 'postgres',
       seed: SEED,
       service: K8S_SERVICE,
+      timestamp: TIMESTAMP,
     });
     expect(doc!['service.name']).toBe(K8S_SERVICE.name);
   });
@@ -73,6 +81,7 @@ describe('generateInfraNoiseLog — with service (metadata populated)', () => {
       dep: 'postgres',
       seed: SEED,
       service: HOST_SERVICE,
+      timestamp: TIMESTAMP,
     });
     const raw = doc as Record<string, unknown>;
     expect(doc!['host.name']).toBeDefined();
@@ -86,6 +95,7 @@ describe('generateInfraNoiseLog — with service (metadata populated)', () => {
       dep: 'postgres',
       seed: SEED,
       service: K8S_SERVICE,
+      timestamp: TIMESTAMP,
     });
     const raw = doc as Record<string, unknown>;
     expect(raw['kubernetes.pod.name']).toBeDefined();
@@ -99,6 +109,7 @@ describe('generateInfraNoiseLog — with service (metadata populated)', () => {
       dep: 'postgres',
       seed: SEED,
       service: HOST_SERVICE,
+      timestamp: TIMESTAMP,
     });
     const raw = doc as Record<string, unknown>;
     expect(raw['kubernetes.pod.name']).toBeUndefined();
@@ -118,6 +129,7 @@ describe('generateInfraNoiseLog — with service (metadata populated)', () => {
       seed: SEED,
       service: K8S_SERVICE,
       cachedMetadata,
+      timestamp: TIMESTAMP,
     });
     expect(doc!['host.name']).toBe('cached-host');
   });
