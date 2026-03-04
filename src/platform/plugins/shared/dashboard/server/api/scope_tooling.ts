@@ -24,6 +24,7 @@ function isPinnedPanel(
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
+  const droppedPanels: { total: number; byType: Record<string, number> } = { total: 0, byType: {} };
   const { pinned_panels, panels, ...rest } = dashboardState;
 
   function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
@@ -35,6 +36,8 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
         warnings.push(
           `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
         );
+        droppedPanels.total += 1;
+        droppedPanels.byType[panel.type] = (droppedPanels.byType[panel.type] ?? 0) + 1;
         return false;
       }
     }
@@ -45,6 +48,8 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
+      droppedPanels.total += 1;
+      droppedPanels.byType[panel.type] = (droppedPanels.byType[panel.type] ?? 0) + 1;
     }
     return Boolean(panelSchema);
   }
@@ -84,5 +89,6 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       panels: mappedPanels,
     },
     warnings,
+    droppedPanels,
   };
 }

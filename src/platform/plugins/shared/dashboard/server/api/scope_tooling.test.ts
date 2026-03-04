@@ -68,6 +68,10 @@ describe('stripUnmappedKeys', () => {
           ],
           "title": "my dashboard",
         },
+        "droppedPanels": Object {
+          "byType": Object {},
+          "total": 0,
+        },
         "warnings": Array [],
       }
     `);
@@ -97,6 +101,12 @@ describe('stripUnmappedKeys', () => {
         "data": Object {
           "panels": Array [],
           "title": "my dashboard",
+        },
+        "droppedPanels": Object {
+          "byType": Object {
+            "typeWithoutSchema": 1,
+          },
+          "total": 1,
         },
         "warnings": Array [
           "Dropped panel 12345, panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
@@ -137,6 +147,12 @@ describe('stripUnmappedKeys', () => {
         "data": Object {
           "panels": Array [],
           "title": "my dashboard",
+        },
+        "droppedPanels": Object {
+          "byType": Object {
+            "typeWithSchema": 1,
+          },
+          "total": 1,
         },
         "warnings": Array [
           "Dropped panel 12345, panel config is not supported. Reason: Unmapped panel type.",
@@ -240,6 +256,10 @@ describe('stripUnmappedKeys', () => {
             },
           ],
           "title": "my dashboard",
+        },
+        "droppedPanels": Object {
+          "byType": Object {},
+          "total": 0,
         },
         "warnings": Array [
           "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",

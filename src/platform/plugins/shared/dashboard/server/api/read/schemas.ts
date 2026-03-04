@@ -12,6 +12,7 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import {
   baseMetaSchema,
   createdMetaSchema,
+  droppedPanelsMetaSchema,
   resolveMetaSchema,
   updatedMetaSchema,
 } from '../meta_schemas';
@@ -20,7 +21,13 @@ export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
+    meta: schema.allOf([
+      baseMetaSchema,
+      createdMetaSchema,
+      updatedMetaSchema,
+      resolveMetaSchema,
+      droppedPanelsMetaSchema,
+    ]),
     spaces: schema.maybe(schema.arrayOf(schema.string())),
     warnings: schema.maybe(schema.arrayOf(schema.string())),
   });

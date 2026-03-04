@@ -8,12 +8,13 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { getRouteConfig } from '../get_route_config';
 import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
+import { counterNames } from '../telemetry/increment_external_counter';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
-export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const searchRoute = router.post({
     path: `${basePath}/search`,
@@ -37,6 +38,8 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       let result;
+      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      dashboardApi.telemetry.incrementExternal(counterNames.external('search'));
       try {
         result = await search(ctx, req.body);
       } catch (e) {
