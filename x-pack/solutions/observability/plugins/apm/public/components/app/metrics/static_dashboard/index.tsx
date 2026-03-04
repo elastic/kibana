@@ -14,8 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
-import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -35,7 +34,6 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   const {
     core: { notifications },
-    uiActions,
   } = useApmPluginContext();
 
   const { serviceName } = useApmServiceContext();
@@ -54,7 +52,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   return (
     <DashboardRenderer
-      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, uiActions)}
+      getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
     />
   );
@@ -62,24 +60,10 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
-  notifications: NotificationsStart,
-  uiActions: UiActionsStart
+  notifications: NotificationsStart
 ): Promise<DashboardCreationOptions> {
   try {
     const { dataView } = dashboardProps;
-    const controlGroupState = {};
-
-    await controlGroupStateBuilder.addDataControlFromField(
-      controlGroupState,
-      {
-        data_view_id: dataView.id ?? '',
-        title: 'Node name',
-        field_name: 'service.node.name',
-        width: 'medium',
-        grow: true,
-      },
-      uiActions
-    );
     const panels = await convertSavedDashboardToPanels(dashboardProps);
 
     if (!panels) {
@@ -87,10 +71,22 @@ async function getCreationOptions(
     }
 
     return {
+      useControlsIntegration: true,
       getInitialInput: () => ({
         viewMode: 'view',
         panels,
-        controlGroupState,
+        pinned_panels: [
+          {
+            type: OPTIONS_LIST_CONTROL,
+            config: {
+              data_view_id: dataView.id ?? '',
+              title: 'Node name',
+              field_name: 'service.node.name',
+            },
+            width: 'medium',
+            grow: true,
+          },
+        ],
       }),
     };
   } catch (error) {

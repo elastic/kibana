@@ -29,7 +29,7 @@ describe('getStepIconType', () => {
   it.each([
     ['globe', 'http'],
     ['console', 'console'],
-    ['tableOfContents', 'data.set'],
+    ['grab', 'data.set'],
     ['clock', 'wait'],
     ['branch', 'if'],
     ['tokenBoolean', 'if-branch'],

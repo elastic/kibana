@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
