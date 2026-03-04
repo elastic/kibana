@@ -38,7 +38,7 @@ export const getErrorMessage = (error: unknown): string => {
 };
 
 const visualizationAttachmentDataSchema = z.object({
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   query: z.string().optional(),
 });
 
