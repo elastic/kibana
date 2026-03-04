@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { ESQLCallbacks, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ILicense } from '@kbn/licensing-types';
@@ -69,7 +69,7 @@ interface UseEsqlCallbacksParams {
   fieldsMetadata?: ESQLEditorDeps['fieldsMetadata'];
   esqlService?: ESQLEditorDeps['esql'];
   histogramBarTarget: number;
-  activeSolutionId?: Parameters<typeof getEditorExtensions>[2];
+  activeSolutionId?: ESQLRegistrySolutionId;
   minimalQueryRef: MutableRefObject<string>;
   dataSourcesCache: MapCache;
   memoizedSources: MemoizedSources;
