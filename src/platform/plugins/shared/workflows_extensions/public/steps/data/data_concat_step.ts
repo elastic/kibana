@@ -13,9 +13,5 @@ import { createPublicStepDefinition } from '../../step_registry/types';
 
 export const dataConcatStepDefinition = createPublicStepDefinition({
   ...dataConcatStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/merge').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: React.lazy(() => import('./concat_icon').then((m) => ({ default: m.ConcatIcon }))),
 });
