@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { UserAtSpaceScenarios, ManageRuleSettingsOnlyUserAtSpace1 } from '../../../../scenarios';
+import {
+  UserAtSpaceScenarios,
+  ManageRuleSettingsOnlyUserAtSpace1,
+  AllWithoutManageRuleSettingsUserAtSpace1,
+} from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import { getFindGaps } from '../../../../rule_gaps_utils';
@@ -273,5 +277,53 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
       });
     }
+
+    describe(AllWithoutManageRuleSettingsUserAtSpace1.id, () => {
+      const { user, space } = AllWithoutManageRuleSettingsUserAtSpace1;
+
+      afterEach(async () => {
+        await objectRemover.removeAll();
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/_test/gap_auto_fill_scheduler/_delete_all`)
+          .set('kbn-xsrf', 'foo')
+          .send({});
+      });
+
+      it('denies scheduler management when manage_rule_settings sub-feature is disabled', async () => {
+        const url = `${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/auto_fill_scheduler`;
+
+        const createResp = await supertest
+          .post(url)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: `update-scheduler-no-manage-settings-${Date.now()}`,
+            schedule: { interval: '1m' },
+            gap_fill_range: 'now-90d',
+            max_backfills: 100,
+            num_retries: 1,
+            scope: ['test-scope'],
+            rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
+          });
+        expect(createResp.statusCode).to.eql(200);
+        const schedulerId = createResp.body.id ?? createResp.body?.body?.id;
+
+        const updateResp = await supertestWithoutAuth
+          .put(`${url}/${schedulerId}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'updated-name',
+            enabled: true,
+            schedule: { interval: '5m' },
+            gap_fill_range: 'now-45d',
+            max_backfills: 250,
+            num_retries: 3,
+            scope: ['test-scope'],
+            rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
+          });
+
+        expect(updateResp.statusCode).to.eql(403);
+      });
+    });
   });
 }
