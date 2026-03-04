@@ -6,7 +6,26 @@ Object {
     Object {
       "set": Object {
         "field": "foo",
-        "if": "ctx._source.active == true",
+        "if": "
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+
+try {
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
+    _parentConditionMet = true;
+  }
+} catch (Exception e) {
+  // _parentConditionMet stays false on error
+}
+
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+ctx._source.active == true
+",
         "ignore_failure": true,
         "on_failure": Array [
           Object {
@@ -53,7 +72,26 @@ Object {
     Object {
       "set": Object {
         "field": "baz",
-        "if": "ctx._source.env == 'prod'",
+        "if": "
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+
+try {
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
+    _parentConditionMet = true;
+  }
+} catch (Exception e) {
+  // _parentConditionMet stays false on error
+}
+
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+ctx._source.env == 'prod'
+",
         "ignore_failure": true,
         "on_failure": Array [
           Object {

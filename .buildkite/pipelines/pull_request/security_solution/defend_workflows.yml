@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
-    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
@@ -18,7 +17,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
