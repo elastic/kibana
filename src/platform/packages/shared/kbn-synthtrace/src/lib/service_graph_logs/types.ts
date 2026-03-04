@@ -198,19 +198,9 @@ export interface ChannelSpike {
 /** Per-channel volume shaping: rate (base doc multiplier), cadence, and spike windows. */
 export interface ChannelEntry {
   /**
-   * Base doc weight per tick. Semantics vary by key type:
-   *
-   * - **Entry service key** — scales the DFS trace multiplier. Defaults to `1`.
-   * - **Other service keys** — extra background docs per tick. Defaults to `1`.
-   *   Set `rate: 0` to suppress background docs while still tracking the service in the volume map.
-   * - **Infra dep keys** — number of infra docs emitted per tick. Defaults to `1`.
-   *   Combine with `spikes` to burst during incidents: `{ spikes: [{ start, scale: 4 }] }`.
-   *
-   * @example
-   * // Emit 1 extra background doc for policy-lookup on every 10th tick:
-   * { 'policy-lookup': { every: 10 } }
-   * // Emit 4 postgres infra docs/tick during a 5-minute incident:
-   * { postgres: { spikes: [{ start: at(0), end: duration('5m'), scale: 4 }] } }
+   * Base doc weight per tick (default `1`).
+   * Entry service: scales the DFS trace multiplier.
+   * Other services / infra deps: extra docs per tick. Use `0` to suppress while keeping the key.
    */
   rate?: number;
   /** Emit only on every N-th tick. Defaults to 1 (every tick). */

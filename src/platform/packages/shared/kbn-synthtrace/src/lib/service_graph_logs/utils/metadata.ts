@@ -9,6 +9,7 @@
 
 import type { ServiceGraph, ServiceNode } from '../types';
 import { mulberry32, randHex } from '../placeholders';
+import { serviceStableSeed } from './seed';
 
 export type MetadataCache = Map<string, Record<string, string | undefined>>;
 export type Metadata = Record<string, string | undefined>;
@@ -62,9 +63,11 @@ export function generateDeploymentMetadata({
 
 export function buildMetadataCache(serviceGraph: ServiceGraph, seed?: number): MetadataCache {
   const cache: MetadataCache = new Map();
-  for (let i = 0; i < serviceGraph.services.length; i++) {
-    const service = serviceGraph.services[i];
-    cache.set(service.name, generateDeploymentMetadata({ service, seed: (seed ?? 0) + i }));
+  for (const service of serviceGraph.services) {
+    cache.set(
+      service.name,
+      generateDeploymentMetadata({ service, seed: serviceStableSeed(seed ?? 0, service.name) })
+    );
   }
   return cache;
 }

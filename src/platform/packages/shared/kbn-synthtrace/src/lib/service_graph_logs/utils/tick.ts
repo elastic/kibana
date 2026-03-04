@@ -262,14 +262,16 @@ export function collectVolumeSkewDocs({
     const effectiveWeight = (svcCfg.rate ?? 1) * spikeMultiplier;
     if (effectiveWeight <= 0) continue;
 
-    const extraCount =
-      effectiveWeight < 1
-        ? (() => {
-            const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
-            const rng = mulberry32(serviceStableSeed(tickSeed, svc.name));
-            return rng() < effectiveWeight ? 1 : 0;
-          })()
-        : Math.round(effectiveWeight);
+    const extraCount = (() => {
+      const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
+      const rng = mulberry32(serviceStableSeed(tickSeed, svc.name));
+      if (effectiveWeight < 1) {
+        return rng() < effectiveWeight ? 1 : 0;
+      }
+      const intPart = Math.floor(effectiveWeight);
+      const fractional = effectiveWeight - intPart;
+      return intPart + (rng() < fractional ? 1 : 0);
+    })();
 
     for (let k = 0; k < extraCount; k++) {
       const svcSeed = serviceStableSeed(seed ?? 0, svc.name);
