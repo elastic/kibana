@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseConfig.getAll(),
-    testFiles: [require.resolve('./index')],
+    testFiles: [require.resolve('.')],
     junit: {
       reportName:
         'X-Pack Cloud Security Posture Functional Tests - Group 6 (CIS Integrations CSPM GCP + Azure)',

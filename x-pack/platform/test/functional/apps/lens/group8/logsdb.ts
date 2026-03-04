@@ -15,11 +15,7 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, timePicker } = getPageObjects([
-    'common',
-    'lens',
-    'timePicker',
-  ]);
+  const { common, lens, timePicker } = getPageObjects(['common', 'lens', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
