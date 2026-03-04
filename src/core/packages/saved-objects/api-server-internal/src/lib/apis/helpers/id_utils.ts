@@ -20,8 +20,13 @@ export const FORBIDDEN_ID_CHARS = ['/'] as const;
  * path traversal attacks against the Elasticsearch REST API.
  *
  * Must be called for all user-provided saved object IDs before they are used in ES requests.
+ * Non-string IDs (e.g. undefined passed despite the type contract) are skipped; other
+ * validators or Elasticsearch itself will handle those.
  */
 export const assertValidId = (id: string): void => {
+  if (typeof id !== 'string') {
+    return;
+  }
   const forbidden = FORBIDDEN_ID_CHARS.filter((char) => id.includes(char));
   if (forbidden.length > 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(

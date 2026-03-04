@@ -72,6 +72,7 @@ export type ValidationHelperMock = jest.Mocked<PublicMethodsOf<ValidationHelper>
 
 const createValidationHelperMock = (): ValidationHelperMock => {
   const mock: ValidationHelperMock = {
+    validateId: jest.fn(),
     validateInitialNamespaces: jest.fn(),
     validateObjectNamespaces: jest.fn(),
     validateObjectForCreate: jest.fn(),
