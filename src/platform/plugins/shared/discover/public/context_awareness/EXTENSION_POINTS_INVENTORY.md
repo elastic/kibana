@@ -12,24 +12,6 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ---
 
-## App wrapper — `getRenderAppWrapper`
-
-**Changes:** Wraps the entire Discover app (React providers, banners).
-
-**Use when:** You need profile-specific context, theme, or messaging.
-
-**Returns:** `FunctionComponent<PropsWithChildren<{}>>`
-
-**Screenshot:**
-![App wrapper example](./docs/extension_points/get_render_app_wrapper.png)
-
-**Implementation examples:**
-- [Security root profile](profile_providers/security/security_root_profile/profile.tsx)
-- [Observability root profile](profile_providers/observability/observability_root_profile/profile.tsx)
-- [Example root profile](profile_providers/example/example_root_profile/profile.tsx)
-
----
-
 ## Default app state — `getDefaultAppState`
 
 **Changes:** Initial columns, row height, breakdown field, chart visibility.
