@@ -79,11 +79,17 @@ export interface ScreenContextAttachmentData {
   additional_data?: Record<string, string>;
 }
 
+export const visualizationTimeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
+
 export const visualizationAttachmentDataSchema = z.object({
   query: z.string(),
   visualization: z.record(z.unknown()),
   chart_type: z.string(),
   esql: z.string(),
+  time_range: visualizationTimeRangeSchema.optional(),
 });
 
 /**
@@ -99,6 +105,8 @@ export interface VisualizationAttachmentData {
   chart_type: string;
   /** The ES|QL query */
   esql: string;
+  /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
+  time_range?: { from: string; to: string };
 }
 
 export const visualizationOriginDataSchema = z.object({

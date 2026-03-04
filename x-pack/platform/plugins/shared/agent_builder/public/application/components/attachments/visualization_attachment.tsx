@@ -32,15 +32,27 @@ export const createVisualizationAttachmentDefinition = ({
         defaultMessage: 'Visualization',
       }),
     getIcon: () => 'lensApp',
-    renderInlineContent: ({ attachment }) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyVisualizeLens
-          lensConfig={attachment.data.visualization}
-          dataViews={startDependencies.dataViews}
-          lens={startDependencies.lens}
-          uiActions={startDependencies.uiActions}
-        />
-      </Suspense>
-    ),
+    renderInlineContent: ({ attachment, screenContext }) => {
+      const screenContextTimeRange =
+        screenContext?.additional_data?.time_from && screenContext?.additional_data?.time_to
+          ? {
+              from: screenContext.additional_data.time_from,
+              to: screenContext.additional_data.time_to,
+            }
+          : undefined;
+      const timeRange = attachment.data.time_range ?? screenContextTimeRange;
+
+      return (
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyVisualizeLens
+            lensConfig={attachment.data.visualization}
+            dataViews={startDependencies.dataViews}
+            lens={startDependencies.lens}
+            uiActions={startDependencies.uiActions}
+            timeRange={timeRange}
+          />
+        </Suspense>
+      );
+    },
   };
 };
