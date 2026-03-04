@@ -1566,7 +1566,6 @@
     "@kbn/babel-register": "link:src/platform/packages/shared/kbn-babel-register",
     "@kbn/babel-transform": "link:src/platform/packages/private/kbn-babel-transform",
     "@kbn/bench": "link:src/platform/packages/shared/kbn-bench",
-    "@kbn/breadcrumbs-utils": "link:src/platform/packages/shared/kbn-breadcrumbs-utils",
     "@kbn/cache-cli": "link:src/platform/packages/shared/kbn-cache-cli",
     "@kbn/capture-oas-snapshot-cli": "link:packages/kbn-capture-oas-snapshot-cli",
     "@kbn/chart-test-jest-helpers": "link:src/platform/packages/shared/chart-test-jest-helpers",
