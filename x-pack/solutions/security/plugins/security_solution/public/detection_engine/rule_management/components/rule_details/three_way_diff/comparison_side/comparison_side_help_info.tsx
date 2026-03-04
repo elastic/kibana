@@ -32,7 +32,11 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
   const optionsWithDescriptions = options.map((option) => getOptionDetails(option));
 
   const button = (
-    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
+    <EuiButtonIcon
+      iconType="question"
+      onClick={togglePopover}
+      aria-label={i18n.VERSION_COMPARISON_HELP_ARIA_LABEL}
+    />
   );
 
   return (

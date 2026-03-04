@@ -18,6 +18,7 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { TestProviders } from '../../common/mock/test_providers';
 import * as i18n from './translations';
+import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 // Mock all dependencies before imports to avoid issues
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
@@ -43,6 +44,15 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
 jest.mock('../../helper_hooks', () => ({
   useHasSecurityCapability: jest.fn(),
 }));
+
+jest.mock('../providers/ai_value/export_provider', () => {
+  return {
+    AIValueExportProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="AIValueExportProvider">{children}</div>
+    ),
+    useAIValueExportContext: jest.fn(),
+  };
+});
 
 // Mock docLinks for NoPrivileges component
 jest.mock('@kbn/doc-links', () => ({
@@ -95,7 +105,7 @@ jest.mock('../../common/hooks/use_global_filter_query', () => ({
 // Mock Lens components
 jest.mock('../../common/components/visualization_actions/lens_embeddable', () => ({
   LensEmbeddable: (props: Record<string, unknown>) => (
-    <div data-testid="lens-embeddable" {...props} />
+    <div data-testid="lens-embeddable" data-shared-item {...props} />
   ),
 }));
 
@@ -127,6 +137,8 @@ const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunc
   typeof useHasSecurityCapability
 >;
 
+const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
+
 describe('AIValue', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -147,10 +159,10 @@ describe('AIValue', () => {
       sourcererDataView: {} as Record<string, unknown>,
     });
     mockUseAlertsPrivileges.mockReturnValue({
-      hasKibanaREAD: true,
       hasIndexRead: true,
       hasIndexUpdateDelete: false,
-      hasKibanaCRUD: false,
+      hasAlertsRead: false,
+      hasAlertsAll: false,
       loading: false,
       isAuthenticated: true,
       hasEncryptionKey: true,
@@ -259,6 +271,16 @@ describe('AIValue', () => {
       const datePicker = screen.getByTestId('superDatePickerToggleQuickMenuButton');
       expect(datePicker).toBeInTheDocument();
     });
+
+    it('should be wrapped in a AIValueExportProvider', () => {
+      render(
+        <TestProviders>
+          <AIValue />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('AIValueExportProvider')).toBeInTheDocument();
+    });
   });
 
   describe('Hook Integration', () => {
@@ -274,6 +296,7 @@ describe('AIValue', () => {
       expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
       expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('socManagement');
       expect(mockUseAlertsPrivileges).toHaveBeenCalled();
+      expect(mockUseAIValueExportContext).toHaveBeenCalled();
     });
   });
 
@@ -312,6 +335,40 @@ describe('AIValue', () => {
       );
 
       expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
+    });
+  });
+
+  describe('export mode', () => {
+    beforeEach(() => {
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: {
+          timeRange: {
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-31T23:59:59.999Z',
+          },
+        },
+        isExportMode: true,
+      });
+
+      render(
+        <TestProviders>
+          <AIValue />
+        </TestProviders>
+      );
+    });
+
+    it('should not render the header of the page', () => {
+      expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
+    });
+
+    it('should have data-shared-items-container with data-shared-items-count matching the number of data-shared-item children', () => {
+      const container = screen.queryByTestId('aiValuePage');
+      expect(container).toBeInTheDocument();
+
+      const sharedItems = container?.querySelectorAll('[data-shared-item]') ?? [];
+      const sharedItemsCount = sharedItems.length;
+
+      expect(container).toHaveAttribute('data-shared-items-count', String(sharedItemsCount));
     });
   });
 });

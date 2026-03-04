@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
-export function getTransforms(
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'],
-  transformEnhancementsOut: EnhancementsRegistry['transformOut']
-) {
+export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
-    transformOutInjectsReferences: true,
-    transformIn: getTransformIn(transformEnhancementsIn),
-    transformOut: getTransformOut(transformEnhancementsOut),
+    transformIn: getTransformIn(drilldownTransforms.transformIn),
+    transformOut: getTransformOut(drilldownTransforms.transformOut),
   };
 }

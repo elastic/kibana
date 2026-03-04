@@ -11,15 +11,26 @@ import { BehaviorSubject, Subject, take } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 describe('initializeUnifiedSearchManager', () => {
-  describe('startComparing$', () => {
+  describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(
+        getSampleDashboardState({
+          filters: [
+            {
+              type: 'condition',
+              condition: {
+                field: 'status',
+                operator: 'is',
+                value: 'active',
+              },
+            },
+          ],
+        })
+      );
       const unifiedSearchManager = initializeUnifiedSearchManager(
         lastSavedState$.value,
-        new BehaviorSubject<ControlGroupApi | undefined>(undefined),
         new BehaviorSubject<boolean>(false),
         new Subject<void>(),
         () => lastSavedState$.value,
@@ -27,7 +38,7 @@ describe('initializeUnifiedSearchManager', () => {
           useUnifiedSearchIntegration: false,
         }
       );
-      unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`Object {}`);
         done();
       });
@@ -38,7 +49,6 @@ describe('initializeUnifiedSearchManager', () => {
         const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
-          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
           new BehaviorSubject<boolean>(false),
           new Subject<void>(),
           () => lastSavedState$.value,
@@ -46,7 +56,7 @@ describe('initializeUnifiedSearchManager', () => {
             useUnifiedSearchIntegration: false,
           }
         );
-        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+        unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
           expect(changes).toMatchInlineSnapshot(`Object {}`);
           done();
         });
@@ -61,7 +71,6 @@ describe('initializeUnifiedSearchManager', () => {
         const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
-          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
           new BehaviorSubject<boolean>(true),
           new Subject<void>(),
           () => lastSavedState$.value,
@@ -69,10 +78,10 @@ describe('initializeUnifiedSearchManager', () => {
             useUnifiedSearchIntegration: false,
           }
         );
-        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+        unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
           expect(changes).toMatchInlineSnapshot(`
             Object {
-              "timeRange": Object {
+              "time_range": Object {
                 "from": "now-30m",
                 "to": "now",
               },
@@ -92,7 +101,6 @@ describe('initializeUnifiedSearchManager', () => {
         const timeRestore$ = new BehaviorSubject<boolean>(false);
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
-          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
           timeRestore$,
           new Subject<void>(),
           () => lastSavedState$.value,
@@ -102,7 +110,7 @@ describe('initializeUnifiedSearchManager', () => {
         );
         let emitCount = 0;
         unifiedSearchManager.internalApi
-          .startComparing$(lastSavedState$)
+          .startComparing(lastSavedState$)
           .pipe(take(2))
           .subscribe((changes) => {
             emitCount++;
@@ -110,7 +118,7 @@ describe('initializeUnifiedSearchManager', () => {
             if (emitCount === 1) {
               expect(changes).toMatchInlineSnapshot(`
               Object {
-                "timeRange": Object {
+                "time_range": Object {
                   "from": "now-30m",
                   "to": "now",
                 },
@@ -132,6 +140,57 @@ describe('initializeUnifiedSearchManager', () => {
           from: 'now-30m',
         });
       });
+    });
+  });
+  describe('getState', () => {
+    test('Should return as code filters', () => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(
+        getSampleDashboardState({
+          filters: [
+            {
+              type: 'condition',
+              condition: {
+                field: 'status',
+                operator: 'is',
+                value: 'active',
+              },
+            },
+          ],
+        })
+      );
+      const unifiedSearchManager = initializeUnifiedSearchManager(
+        lastSavedState$.value,
+        new BehaviorSubject<boolean>(false),
+        new Subject<void>(),
+        () => lastSavedState$.value,
+        {
+          useUnifiedSearchIntegration: false,
+        }
+      );
+      // change the unified search filter
+      unifiedSearchManager.api.setFilters([
+        {
+          meta: {
+            key: 'status',
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              status: 'inactive',
+            },
+          },
+        },
+      ]);
+      expect(unifiedSearchManager.internalApi.getState().filters).toEqual([
+        {
+          type: 'condition',
+          condition: {
+            field: 'status',
+            operator: 'is',
+            value: 'inactive',
+          },
+        },
+      ]);
     });
   });
 });

@@ -17,7 +17,7 @@ import {
 import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 import { processLookups } from '../../../rules/api/util/lookups';
@@ -62,6 +62,8 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
               const dashboardMigrationsClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();
 
+              const { experimentalFeatures } = ctx.securitySolution.getConfig();
+
               await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
               const [lookups, macros] = partition(resources, { type: 'lookup' });
@@ -76,13 +78,16 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
               }));
 
               // Create identified resource documents to keep track of them (without content)
-              const resourceIdentifier = new DashboardResourceIdentifier('splunk');
-              const resourcesToCreate = resourceIdentifier
-                .fromResources(resources)
-                .map<CreateSiemMigrationResourceInput>((resource) => ({
+              const resourceIdentifier = new DashboardResourceIdentifier('splunk', {
+                experimentalFeatures,
+              });
+              const identifiedResources = await resourceIdentifier.fromResources(resources);
+              const resourcesToCreate = identifiedResources.map<CreateSiemMigrationResourceInput>(
+                (resource) => ({
                   ...resource,
                   migration_id: migrationId,
-                }));
+                })
+              );
 
               await Promise.all([
                 dashboardMigrationsClient.data.resources.upsert(resourcesUpsert),

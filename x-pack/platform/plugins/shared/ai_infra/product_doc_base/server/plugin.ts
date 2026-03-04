@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import Path from 'path';
 import type { Logger } from '@kbn/logging';
-import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
@@ -73,6 +71,8 @@ export class ProductDocBasePlugin
     core: CoreStart,
     { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
@@ -85,10 +85,12 @@ export class ProductDocBasePlugin
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       kibanaVersion: this.context.env.packageInfo.version,
-      artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
+      artifactsFolder: 'ai-kb-artifacts',
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
+      artifactRepositoryProxyUrl: this.context.config.get().artifactRepositoryProxyUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),
+      isServerless,
     });
 
     const searchService = new SearchService({
@@ -102,6 +104,7 @@ export class ProductDocBasePlugin
       licensing,
       taskManager,
       auditService: core.security.audit,
+      packageInstaller,
     });
 
     this.internalServices = {
@@ -115,14 +118,24 @@ export class ProductDocBasePlugin
     documentationManager.updateAll().catch((err) => {
       this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
     });
+    documentationManager.updateSecurityLabsAll().catch((err) => {
+      this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
+    });
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),
         update: documentationManager.update.bind(documentationManager),
         updateAll: documentationManager.updateAll.bind(documentationManager),
+        updateSecurityLabsAll:
+          documentationManager.updateSecurityLabsAll.bind(documentationManager),
         uninstall: documentationManager.uninstall.bind(documentationManager),
         getStatus: documentationManager.getStatus.bind(documentationManager),
         getStatuses: documentationManager.getStatuses.bind(documentationManager),
+        installSecurityLabs: documentationManager.installSecurityLabs.bind(documentationManager),
+        uninstallSecurityLabs:
+          documentationManager.uninstallSecurityLabs.bind(documentationManager),
+        getSecurityLabsStatus:
+          documentationManager.getSecurityLabsStatus.bind(documentationManager),
       },
       search: searchService.search.bind(searchService),
     };

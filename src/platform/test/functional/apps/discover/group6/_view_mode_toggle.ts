@@ -11,11 +11,10 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, timePicker, unifiedFieldList, header } = getPageObjects([
+  const { common, discover, timePicker, header } = getPageObjects([
     'common',
     'discover',
     'timePicker',
-    'unifiedFieldList',
     'header',
   ]);
   const esArchiver = getService('esArchiver');
@@ -88,6 +87,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('dscViewModeToggle');
     });
 
+    it('should hide view mode toggle in fullscreen mode', async () => {
+      await testSubjects.existOrFail('dscViewModeToggle');
+
+      await testSubjects.click('dataGridFullScreenButton');
+      await testSubjects.missingOrFail('dscViewModeToggle');
+
+      await testSubjects.click('dataGridFullScreenButton');
+      await testSubjects.existOrFail('dscViewModeToggle');
+    });
+
     it('should not show view mode toggle for ES|QL searches', async () => {
       await testSubjects.click('dscViewModeDocumentButton');
 
@@ -103,13 +112,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('dscViewModeToggle');
       await testSubjects.existOrFail('discoverQueryTotalHits');
       await testSubjects.existOrFail('unifiedDataTableToolbar');
-    });
-
-    it('should show ES|QL columns callout', async () => {
-      await testSubjects.missingOrFail('dscSelectedColumnsCallout');
-      await unifiedFieldList.clickFieldListItemAdd('extension');
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('dscSelectedColumnsCallout');
     });
   });
 }

@@ -23,7 +23,6 @@ const mockDataStreamsClient = {
 };
 
 const mockFailureStoreStats = {
-  config: { enabled: true, retentionPeriod: { custom: '30d' } },
   stats: { count: 100, size: 50000, creationDate: '2023-01-01T00:00:00Z' },
 };
 
@@ -39,6 +38,15 @@ const mockDefinition = {
   stream: {
     name: 'test-stream',
   },
+  effective_failure_store: {
+    lifecycle: {
+      enabled: {
+        data_retention: '30d',
+        is_default_retention: false,
+      },
+    },
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const mockDataStreamStats = {
@@ -97,11 +105,13 @@ beforeEach(() => {
         streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
       },
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockUseTimefilter.mockReturnValue({
     timeState: {},
     timeState$: of({ kind: 'initial' }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockDataStreamsClient.getDataStreamsStats.mockResolvedValue({
@@ -145,17 +155,18 @@ describe('useDataStreamStats', () => {
             size: '2.5 MB',
             sizeBytes: 2500000, // mockDataStreamStats.sizeBytes - mockFailureStoreStats.stats.size
             totalDocs: 500,
+            perDayDocs: 100,
           },
         },
         fs: {
           aggregations: { buckets: [{ key: 1, doc_count: 100 }], interval: '30m' },
-          config: { enabled: true, retentionPeriod: { custom: '30d' } },
           stats: {
             bytesPerDay: 50000,
             bytesPerDoc: 500,
             creationDate: '2023-01-01T00:00:00Z',
             size: 50000,
             count: 100,
+            perDayDocs: 100,
           },
         },
       });
@@ -211,17 +222,18 @@ describe('useDataStreamStats', () => {
             size: '1.0 KB',
             sizeBytes: 1000,
             totalDocs: 0,
+            perDayDocs: 0,
           },
         },
         fs: {
           aggregations: { buckets: [], interval: '30m' },
-          config: { enabled: true, retentionPeriod: { custom: '30d' } },
           stats: {
             bytesPerDay: 0,
             bytesPerDoc: 0,
             creationDate: '2023-01-01T00:00:00Z',
             size: 0,
             count: 0,
+            perDayDocs: 0,
           },
         },
       });
@@ -229,12 +241,22 @@ describe('useDataStreamStats', () => {
 
     it('should handles disabled failure store', async () => {
       mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        config: { enabled: false, retentionPeriod: { custom: '30d' } },
+        stats: null,
       });
+
+      const definitionWithDisabledFS = {
+        stream: {
+          name: 'test-stream',
+        },
+        effective_failure_store: {
+          disabled: {},
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any;
 
       const { result } = renderHook(() =>
         useDataStreamStats({
-          definition: mockDefinition,
+          definition: definitionWithDisabledFS,
           timeState: mockTimestate,
         })
       );
@@ -252,10 +274,10 @@ describe('useDataStreamStats', () => {
             size: '2.5 MB',
             sizeBytes: 2550000,
             totalDocs: 500,
+            perDayDocs: 100,
           },
         },
         fs: {
-          config: { enabled: false, retentionPeriod: { custom: '30d' } },
           aggregations: undefined,
           stats: undefined,
         },

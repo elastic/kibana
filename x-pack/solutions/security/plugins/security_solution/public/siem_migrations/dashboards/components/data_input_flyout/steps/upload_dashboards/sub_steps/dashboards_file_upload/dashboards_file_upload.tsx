@@ -15,7 +15,10 @@ import type {
 import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { SplunkRow } from '../../../../../../../common/hooks/use_parse_file_input';
-import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
+import {
+  parseContent,
+  useParseFileInput,
+} from '../../../../../../../common/hooks/use_parse_file_input';
 import * as i18n from './translations';
 import type { SplunkDashboardsResult, OnMigrationCreated } from '../../../../types';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
@@ -46,8 +49,10 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const onFileParsed = useCallback(
-      (content: Array<SplunkRow<SplunkDashboardsResult>>) => {
-        const dashboards = content.map(formatDashboardRow) as SplunkDashboardsResult[];
+      (content: string) => {
+        const dashboards = parseContent(content).map(
+          formatDashboardRow
+        ) as SplunkDashboardsResult[];
         setUploadedDashboards(dashboards);
         onFileUpload?.(dashboards);
       },

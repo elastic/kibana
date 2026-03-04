@@ -22,6 +22,8 @@
           "() => Promise<void>"
         ],
         "path": "src/platform/packages/private/kbn-health-gateway-server/src/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

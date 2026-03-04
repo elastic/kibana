@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
+import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT } from './application/gaps/types/scheduler';
 
 export const DEFAULT_MAX_ALERTS = 1000;
 
@@ -60,6 +61,9 @@ const rulesSchema = schema.object({
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
+  apiKeyType: schema.oneOf([schema.literal('es'), schema.literal('uiam')], {
+    defaultValue: 'es',
+  }),
 });
 
 export const configSchema = schema.object({
@@ -78,9 +82,17 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
   }),
-  maintenanceWindow: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
+  gapAutoFillScheduler: schema.maybe(
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      timeout: schema.maybe(
+        schema.string({
+          validate: validateDurationSchema,
+          defaultValue: DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
+        })
+      ),
+    })
+  ),
   disabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),

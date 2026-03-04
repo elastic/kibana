@@ -7,10 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { EndpointModelInfoProps } from './endpoint_model_info';
 import { EndpointModelInfo } from './endpoint_model_info';
+import { ServiceIcon } from '../../styles';
 
 interface ServiceProviderProps extends EndpointModelInfoProps {
   service: ServiceProviderKeys;
@@ -19,20 +21,33 @@ interface ServiceProviderProps extends EndpointModelInfoProps {
 export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpointInfo }) => {
   const provider = SERVICE_PROVIDERS[service];
 
-  return provider ? (
+  return (
     <EuiFlexGroup gutterSize="xs" direction="row" alignItems="center">
       <EuiFlexItem grow={0}>
         <EuiIcon
           data-test-subj={`table-column-service-provider-${service}`}
-          type={provider.icon}
-          style={{ marginRight: '8px' }}
+          type={provider ? provider.icon : 'empty'}
+          css={ServiceIcon}
+          title={
+            provider
+              ? i18n.translate(
+                  'xpack.searchInferenceEndpoints.allInferenceEndpoints.table.serviceColumn.serviceIcon.title',
+                  {
+                    defaultMessage: '{serviceName} service logo',
+                    values: {
+                      serviceName: provider.name,
+                    },
+                  }
+                )
+              : undefined
+          }
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
-              {provider.name}
+              {provider ? provider.name : service}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -41,7 +56,5 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : (
-    <span>{service}</span>
   );
 };

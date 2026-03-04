@@ -28,13 +28,14 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
-import type { CasesSearchRequest } from '../../common/types/api';
+import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
 import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
+import type { TemplatesSubClient } from './templates/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
@@ -42,6 +43,7 @@ import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
+  createUnifiedAttachmentTypeRegistryMock,
 } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
@@ -53,7 +55,9 @@ import {
   createLicensingServiceMock,
   createUserActionServiceMock,
   createNotificationServiceMock,
+  createTemplatesServiceMock,
 } from '../services/mocks';
+import { ConfigSchema } from '../config';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -62,6 +66,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     create: jest.fn(),
     bulkCreate: jest.fn(),
     search: jest.fn(),
+    find: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),
     bulkGet: jest.fn(),
@@ -106,7 +111,7 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     getAll: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
+    getAllDocumentsAttachedToCase: jest.fn(),
   });
 };
 
@@ -133,6 +138,20 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   });
 };
 
+type TemplatesSubClientMock = jest.Mocked<TemplatesSubClient>;
+
+const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
+  return lazyObject({
+    getAllTemplates: jest.fn(),
+    getTemplate: jest.fn(),
+    createTemplate: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+    getTags: jest.fn(),
+    getAuthors: jest.fn(),
+  });
+};
+
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
@@ -147,6 +166,7 @@ export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
+  templates: TemplatesSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -156,6 +176,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
+    templates: createTemplatesSubClientMock(),
   });
   return client as unknown as CasesClientMock;
 };
@@ -206,6 +227,7 @@ export const createCasesClientMockArgs = () => {
       userActionService: createUserActionServiceMock(),
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
+      templatesService: createTemplatesServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
@@ -220,6 +242,7 @@ export const createCasesClientMockArgs = () => {
     spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
@@ -230,6 +253,7 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
+    config: ConfigSchema.validate({}),
   };
 };
 
@@ -255,14 +279,38 @@ export const createCasesClientFactoryMockArgs = () => {
     ),
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    config: ConfigSchema.validate({}),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
   };
 };
+
+export const createCasesClientMockFindRequest = (
+  overwrites?: CasesFindRequestWithCustomFields
+): CasesFindRequestWithCustomFields => ({
+  search: '',
+  searchFields: ['title', 'description', 'incremental_id.text'],
+  severity: CaseSeverity.LOW,
+  assignees: [],
+  reporters: [],
+  status: CaseStatuses.open,
+  tags: [],
+  owner: [],
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+  customFields: {},
+  ...overwrites,
+});
 
 export const createCasesClientMockSearchRequest = (
   overwrites?: CasesSearchRequest
 ): CasesSearchRequest => ({
   search: '',
-  searchFields: ['title', 'description', 'incremental_id.text'],
+  searchFields: [
+    'cases.title',
+    'cases.description',
+    'cases.incremental_id.text',
+    'cases-comments.comment',
+  ],
   severity: CaseSeverity.LOW,
   assignees: [],
   reporters: [],

@@ -8,7 +8,7 @@
   "plugin": {
     "id": "automaticImportVTwo",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": [
       "xpack",
       "automatic_import_v2"
@@ -20,7 +20,13 @@
       "actions",
       "stackConnectors",
       "inference",
-      "security"
+      "security",
+      "features",
+      "taskManager",
+      "kibanaUtils"
     ],
+    "requiredBundles": [
+      "esUiShared"
+    ]
   }
 }

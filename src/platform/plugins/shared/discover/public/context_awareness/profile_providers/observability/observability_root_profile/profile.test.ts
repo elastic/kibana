@@ -109,6 +109,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           foo: 'bar',
         }),
@@ -138,6 +139,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           'attributes.foo': 'bar',
         }),
@@ -156,7 +158,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -175,6 +177,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           'scope.attributes.foo': 'bar',
         }),
@@ -193,7 +196,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -212,6 +215,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           'resource.attributes.foo': 'bar',
         }),
@@ -230,7 +234,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

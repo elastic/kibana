@@ -34,6 +34,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
 import type {
@@ -47,7 +48,6 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
@@ -82,7 +82,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   start: string;
   tableId: TableId;
   topRightMenuOptions?: React.ReactNode;
@@ -288,7 +288,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [sort]
   );
 
-  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+  const [loading, { events, rawEvents, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
     useTimelineEvents({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
@@ -345,6 +345,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
+  const nonDeletedRawEvents = useMemo(
+    () => rawEvents.filter((e) => !deletedEventIds.includes(e._id as string)),
+    [deletedEventIds, rawEvents]
+  );
+
   useEffect(() => {
     setQuery({ id: tableId, inspect, loading, refetch });
   }, [inspect, loading, refetch, setQuery, tableId]);
@@ -437,6 +442,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         columnHeaders,
         controlColumns,
         data: nonDeletedEvents,
+        rawEvents: nonDeletedRawEvents,
         fieldBrowserOptions,
         loadingEventIds,
         onRowSelected,
@@ -460,6 +466,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     leadingControlColumns,
     columnHeaders,
     nonDeletedEvents,
+    nonDeletedRawEvents,
     fieldBrowserOptions,
     loadingEventIds,
     onRowSelected,

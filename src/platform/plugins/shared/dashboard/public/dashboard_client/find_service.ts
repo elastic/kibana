@@ -20,7 +20,6 @@ export const findService = {
         id,
         status: 'success',
         attributes: result.data,
-        references: result.data.references ?? [],
       };
     } catch (error) {
       return { id, status: 'error', notFound: error instanceof SavedObjectNotFound, error };
@@ -32,15 +31,14 @@ export const findService = {
     });
   },
   findByTitle: async (title: string) => {
-    const { hits } = await dashboardClient.search({
+    const { dashboards } = await dashboardClient.search({
       search: title,
-      size: 10,
-      options: { onlyTitle: true },
+      per_page: 10,
     });
 
     // The search isn't an exact match, lets see if we can find a single exact match to use
-    const matchingDashboards = hits.filter(
-      (hit) => hit.attributes.title.toLowerCase() === title.toLowerCase()
+    const matchingDashboards = dashboards.filter(
+      (dashboard) => dashboard.data.title.toLowerCase() === title.toLowerCase()
     );
     if (matchingDashboards.length === 1) {
       return { id: matchingDashboards[0].id };

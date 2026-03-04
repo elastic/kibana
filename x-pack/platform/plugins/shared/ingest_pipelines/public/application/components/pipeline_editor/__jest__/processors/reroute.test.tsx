@@ -5,108 +5,82 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const REROUTE_TYPE = 'reroute';
 
 describe('Processor: Reroute', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
-    const {
-      actions: { addProcessor, addProcessorType },
-    } = testBed;
-    // Open the processor flyout
-    addProcessor();
 
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(REROUTE_TYPE);
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: REROUTE_TYPE },
+    });
+
+    await screen.findByTestId('addProcessorForm');
   });
 
   test('saves with no parameter values set', async () => {
-    const {
-      actions: { saveNewProcessor },
-    } = testBed;
-
     // There are no required parameter values
 
     // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({});
   });
 
   test('allows setting Destination parameter', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Set "destination" value
-    form.setInputValue('destinationField.input', 'my-destination');
+    fireEvent.change(within(screen.getByTestId('destinationField')).getByTestId('input'), {
+      target: { value: 'my-destination' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({
       destination: 'my-destination',
     });
   });
 
   test('allows setting Dataset and Namespace parameters', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-      find,
-      component,
-    } = testBed;
-
     // Set a "dataset" value
-    await act(async () => {
-      find('datasetField.input').simulate('change', [{ label: 'nginx' }]);
-      component.update();
+    fireEvent.change(within(screen.getByTestId('datasetField')).getByTestId('input'), {
+      target: { value: 'nginx' },
     });
 
     // Set a "namespace" value
-    await act(async () => {
-      find('namespaceField.input').simulate('change', [{ label: 'default' }]);
-      component.update();
+    fireEvent.change(within(screen.getByTestId('namespaceField')).getByTestId('input'), {
+      target: { value: 'default' },
     });
 
     // Set "ignore_failure" to true (optional)
-    form.toggleEuiSwitch('ignoreFailureSwitch.input');
+    fireEvent.click(within(screen.getByTestId('ignoreFailureSwitch')).getByTestId('input'));
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({
       dataset: ['nginx'],
       namespace: ['default'],
@@ -115,33 +89,27 @@ describe('Processor: Reroute', () => {
   });
 
   test("doesn't set a Destination parameter when Dataset or Namespace is set", async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-      find,
-      component,
-    } = testBed;
-
     // Set "destination" value
-    form.setInputValue('destinationField.input', 'my-destination');
+    fireEvent.change(within(screen.getByTestId('destinationField')).getByTestId('input'), {
+      target: { value: 'my-destination' },
+    });
 
     // Set a "dataset" value
-    await act(async () => {
-      find('datasetField.input').simulate('change', [{ label: 'nginx' }]);
-      component.update();
+    fireEvent.change(within(screen.getByTestId('datasetField')).getByTestId('input'), {
+      target: { value: 'nginx' },
     });
 
     // Set a "namespace" value
-    await act(async () => {
-      find('namespaceField.input').simulate('change', [{ label: 'default' }]);
-      component.update();
+    fireEvent.change(within(screen.getByTestId('namespaceField')).getByTestId('input'), {
+      target: { value: 'default' },
     });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
     // Verify that the "destination" parameter is set to '' (which is mapped to undefined) because "dataset" and "namespace" parameters are set
-    const processors = getProcessorValue(onUpdate, REROUTE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].reroute).toEqual({
       destination: undefined,
       dataset: ['nginx'],

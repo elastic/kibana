@@ -22,7 +22,13 @@ import type {
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '@kbn/lens-common';
+import type {
+  DatasourcePublicAPI,
+  OperationMetadata,
+  Suggestion,
+  UserMessage,
+  Visualization,
+} from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -34,14 +40,13 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
 } from './constants';
-import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
+import { isTimeSeriesOperation } from './time_series';
 import type { FormBasedPersistedState } from '../..';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { HeatmapStyleSettings } from './toolbar_component/style_settings';
-import { HeatmapLegendSettings } from './toolbar_component/legend_settings';
+import { HeatmapStyleSettings, HeatmapLegendSettings } from './toolbar_component';
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -59,6 +64,19 @@ function getAxisName(axis: 'x' | 'y') {
     return horizontal;
   }
   return vertical;
+}
+
+function isTimeBasedXAxisSortingDisabled(
+  state: HeatmapVisualizationState,
+  datasourceLayers: Partial<Record<string, DatasourcePublicAPI>>
+) {
+  const datasource = datasourceLayers[state.layerId];
+  if (!state.xAccessor || datasource == null) {
+    return false;
+  }
+
+  const operation = datasource.getOperationForColumnId(state.xAccessor);
+  return isTimeSeriesOperation(operation);
 }
 
 export const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
@@ -280,10 +298,6 @@ export const getHeatmapVisualization = ({
     return <HeatmapDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  ToolbarComponent(props) {
-    return <HeatmapToolbar {...props} />;
-  },
-
   FlyoutToolbarComponent(props) {
     return (
       <FlyoutToolbar
@@ -329,6 +343,8 @@ export const getHeatmapVisualization = ({
       return null;
     }
 
+    const disableXAxisSorting = isTimeBasedXAxisSortingDisabled(state, datasourceLayers);
+
     const legendFn = buildExpressionFunction<HeatmapLegendExpressionFunctionDefinition>(
       'heatmap_legend',
       {
@@ -352,11 +368,13 @@ export const getHeatmapVisualization = ({
         isYAxisLabelVisible: state.gridConfig.isYAxisLabelVisible,
         isYAxisTitleVisible: state.gridConfig.isYAxisTitleVisible ?? false,
         yTitle: state.gridConfig.yTitle,
+        ySortPredicate: state.gridConfig.ySortPredicate,
         // X-axis
         isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible,
         xAxisLabelRotation: state.gridConfig.xAxisLabelRotation,
         isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible ?? false,
         xTitle: state.gridConfig.xTitle,
+        xSortPredicate: disableXAxisSorting ? undefined : state.gridConfig.xSortPredicate,
       }
     );
 
@@ -393,6 +411,8 @@ export const getHeatmapVisualization = ({
       return null;
     }
 
+    const disableXAxisSorting = isTimeBasedXAxisSortingDisabled(state, datasourceLayers);
+
     const legendFn = buildExpressionFunction<HeatmapLegendExpressionFunctionDefinition>(
       'heatmap_legend',
       {
@@ -412,10 +432,12 @@ export const getHeatmapVisualization = ({
         isYAxisLabelVisible: false,
         isYAxisTitleVisible: false,
         yTitle: state.gridConfig.yTitle,
+        ySortPredicate: state.gridConfig.ySortPredicate,
         // X-axis
         isXAxisLabelVisible: false,
         isXAxisTitleVisible: false,
         xTitle: state.gridConfig.xTitle,
+        xSortPredicate: disableXAxisSorting ? undefined : state.gridConfig.xSortPredicate,
       }
     );
 

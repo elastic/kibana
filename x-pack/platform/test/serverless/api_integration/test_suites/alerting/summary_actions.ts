@@ -27,6 +27,7 @@ import {
   TAGS,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_MUTED,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -52,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.duration.us',
       'kibana.alert.flapping_history',
       'kibana.alert.maintenance_window_ids',
+      'kibana.alert.maintenance_window_names',
       'kibana.alert.reason',
       'kibana.alert.rule.execution.uuid',
       'kibana.alert.rule.execution.timestamp',
@@ -190,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
+        [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
@@ -325,6 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
+        [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
@@ -550,6 +554,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_PREVIOUS_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
+        [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',

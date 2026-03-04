@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import chroma from 'chroma-js';
 import { useEffect } from 'react';
-
-import { monaco } from '@kbn/monaco';
+import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 
 export const WORKFLOWS_MONACO_EDITOR_THEME = 'workflows-theme';
 
 export function useWorkflowsMonacoTheme() {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode, ...rest } = useEuiTheme();
+  const themeBase = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID]({
+    colorMode,
+    euiTheme,
+    ...rest,
+  });
   useEffect(() => {
     monaco.editor.defineTheme(WORKFLOWS_MONACO_EDITOR_THEME, {
-      base: 'vs',
-      inherit: true,
-      rules: [],
+      ...themeBase,
       colors: {
+        ...themeBase.colors,
         'list.hoverForeground': euiTheme.colors.textPrimary,
         'list.hoverBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
         'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
@@ -33,6 +37,10 @@ export function useWorkflowsMonacoTheme() {
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
+        // Subtle highlight for hover - 0.15 alpha means 15% opacity
+        'editor.hoverHighlightBackground': chroma(
+          transparentize(euiTheme.colors.primary, 0.15)
+        ).hex(),
         'editorLineNumber.foreground': euiTheme.colors.textPrimary,
         'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
         'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,
@@ -43,5 +51,5 @@ export function useWorkflowsMonacoTheme() {
         'minimap.background': '#00000000',
       },
     });
-  }, [euiTheme]);
+  }, [themeBase, euiTheme]);
 }

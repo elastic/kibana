@@ -50,6 +50,8 @@ export const dataStreamStatRt = rt.intersection([
     totalDocs: rt.number,
     creationDate: rt.number,
     hasFailureStore: rt.boolean,
+    customRetentionPeriod: rt.string,
+    defaultRetentionPeriod: rt.string,
   }),
 ]);
 
@@ -263,6 +265,7 @@ export const dataStreamDetailsRt = rt.partial({
   userPrivileges: userPrivilegesRt,
   defaultRetentionPeriod: rt.string,
   customRetentionPeriod: rt.string,
+  isServerless: rt.boolean,
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;

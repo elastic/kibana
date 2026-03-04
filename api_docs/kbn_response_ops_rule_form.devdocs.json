@@ -47,7 +47,9 @@
           },
           ">>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,9 @@
             "tags": [],
             "label": "{\n  http,\n  rule,\n}",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+            "lineNumber": 19,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,7 +76,9 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+                "lineNumber": 20,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -101,7 +107,9 @@
                   },
                   ">"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/create_rule.ts",
+                "lineNumber": 21,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -125,7 +133,9 @@
           "UiConfig",
           ">"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,7 +146,9 @@
             "tags": [],
             "label": "{ http }",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+            "lineNumber": 12,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,7 +162,9 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/fetch_ui_config/fetch_ui_config.ts",
+                "lineNumber": 12,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -180,7 +194,9 @@
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,7 +207,9 @@
             "tags": [],
             "label": "{\n  http,\n  id,\n}",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+            "lineNumber": 17,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -205,7 +223,9 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -216,7 +236,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/resolve_rule/resolve_rule.ts",
+                "lineNumber": 19,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -238,7 +260,9 @@
           "RuleActionsAlertsFilterProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +276,9 @@
             "signature": [
               "RuleActionsAlertsFilterProps"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter.tsx",
+            "lineNumber": 34,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -273,7 +299,9 @@
           "RuleActionsAlertsFilterTimeframeProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -287,7 +315,9 @@
             "signature": [
               "RuleActionsAlertsFilterTimeframeProps"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_alerts_filter_timeframe.tsx",
+            "lineNumber": 78,
+            "columnNumber": 99,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -308,7 +338,9 @@
           "RuleActionsNotifyWhenProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+        "lineNumber": 162,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -322,7 +354,9 @@
             "signature": [
               "RuleActionsNotifyWhenProps"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+            "lineNumber": 162,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -365,7 +399,9 @@
           },
           "<MetaData>) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -386,7 +422,9 @@
               },
               "<MetaData>"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -407,7 +445,9 @@
           "RuleTypeModalComponentProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -421,7 +461,9 @@
             "signature": [
               "RuleTypeModalComponentProps"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
+            "lineNumber": 32,
+            "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -456,7 +498,9 @@
           },
           ">) => any"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -485,7 +529,9 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/transform_create_rule_body.ts",
+            "lineNumber": 24,
+            "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -514,7 +560,9 @@
           },
           ">) => any"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -537,7 +585,9 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/transform_update_rule_body.ts",
+            "lineNumber": 24,
+            "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -584,7 +634,9 @@
           },
           ">>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,7 +647,9 @@
             "tags": [],
             "label": "{\n  http,\n  rule,\n  id,\n}",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+            "lineNumber": 42,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -609,7 +663,9 @@
                 "signature": [
                   "HttpSetup"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -632,7 +688,9 @@
                   },
                   ">"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -643,11 +701,60 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+                "lineNumber": 45,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.useRuleTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "useRuleTemplate",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "UseRuleTemplateProps",
+          ") => { isLoading: boolean; isError: boolean; error: unknown; data: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTemplate",
+            "text": "RuleTemplate"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/hooks/use_rule_template.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.useRuleTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "UseRuleTemplateProps"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/hooks/use_rule_template.tsx",
+            "lineNumber": 18,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -672,7 +779,9 @@
           },
           "<Params>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -683,7 +792,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,7 +805,9 @@
             "tags": [],
             "label": "ruleTypeId",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -705,7 +818,9 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -716,7 +831,9 @@
             "tags": [],
             "label": "consumer",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,7 +847,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -744,7 +863,9 @@
             "signature": [
               "Params"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -764,7 +885,9 @@
                 "text": "IntervalSchedule"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -785,7 +908,9 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,7 +924,9 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -813,7 +940,9 @@
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -834,7 +963,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,7 +986,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -876,7 +1009,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/create_rule/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -891,6 +1026,8 @@
         "label": "MinimumScheduleInterval",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -902,6 +1039,8 @@
             "label": "value",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -913,6 +1052,8 @@
             "label": "enforce",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -927,6 +1068,8 @@
         "label": "RuleFormActionsErrors",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -941,6 +1084,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -955,6 +1100,8 @@
         "label": "RuleFormBaseErrors",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -969,6 +1116,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -983,6 +1132,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -997,6 +1148,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1011,6 +1164,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1025,6 +1180,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1039,6 +1196,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1053,6 +1212,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1076,7 +1237,9 @@
           },
           "<Params>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1087,7 +1250,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1101,7 +1266,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1115,7 +1282,9 @@
             "signature": [
               "Params"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1135,7 +1304,9 @@
                 "text": "IntervalSchedule"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1146,7 +1317,9 @@
             "tags": [],
             "label": "consumer",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1167,7 +1340,9 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1188,7 +1363,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1202,7 +1379,9 @@
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1216,7 +1395,9 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1230,7 +1411,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1251,7 +1434,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1272,7 +1457,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1287,6 +1474,8 @@
         "label": "RuleFormParamsErrors",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1308,6 +1497,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1321,7 +1512,9 @@
         "tags": [],
         "label": "RuleFormPlugins",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1335,7 +1528,9 @@
             "signature": [
               "HttpSetup"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1349,7 +1544,9 @@
             "signature": [
               "I18nStart"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1363,7 +1560,9 @@
             "signature": [
               "ThemeServiceSetup"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1377,7 +1576,9 @@
             "signature": [
               "UserProfileService"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1391,7 +1592,9 @@
             "signature": [
               "ApplicationStart"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1405,7 +1608,9 @@
             "signature": [
               "NotificationsStart"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1425,7 +1630,9 @@
                 "text": "ChartsPluginSetup"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1439,7 +1646,9 @@
             "signature": [
               "SettingsStart"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1459,7 +1668,9 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1479,7 +1690,9 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1499,7 +1712,9 @@
                 "text": "UnifiedSearchPublicPluginStart"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1513,7 +1728,9 @@
             "signature": [
               "DocLinksStart"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1575,7 +1792,9 @@
               },
               ">) => void; has: (id: string) => boolean; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1613,7 +1832,9 @@
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1633,7 +1854,9 @@
                 "text": "FieldsMetadataPublicStart"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1654,7 +1877,32 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormPlugins.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1678,7 +1926,9 @@
           },
           "<MetaData>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1698,7 +1948,9 @@
                 "text": "RuleFormPlugins"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1712,7 +1964,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,7 +1980,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1740,7 +1996,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1754,7 +2012,9 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1770,7 +2030,9 @@
             "signature": [
               "((ruleId: string) => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1784,7 +2046,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "lineNumber": 31,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1802,7 +2066,9 @@
             "signature": [
               "((metadata: MetaData) => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1816,7 +2082,9 @@
                 "signature": [
                   "MetaData"
                 ],
-                "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "lineNumber": 32,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1834,7 +2102,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1848,7 +2118,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1869,7 +2141,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1883,7 +2157,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1904,7 +2180,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1918,7 +2196,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1932,7 +2212,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1946,7 +2228,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1960,7 +2244,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1990,7 +2276,9 @@
               },
               ">, \"ruleTypeId\">> | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2004,7 +2292,9 @@
             "signature": [
               "MetaData | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2019,7 +2309,9 @@
               "RuleFormStepId",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2035,7 +2327,9 @@
               "EuiFocusTrapProps",
               ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2059,7 +2353,9 @@
           },
           "<Params, MetaData>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2073,7 +2369,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2094,7 +2392,9 @@
               },
               "<Params>"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2114,7 +2414,9 @@
                 "text": "RuleFormPlugins"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2135,7 +2437,9 @@
               },
               "<Record<string, unknown>, Record<string, unknown>>[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2156,7 +2460,9 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2177,7 +2483,9 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2198,7 +2506,9 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2219,7 +2529,9 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2240,7 +2552,9 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2262,7 +2576,9 @@
               },
               "> | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2284,7 +2600,9 @@
               },
               "> | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2305,7 +2623,9 @@
               },
               "<string, string> & { description?: string | undefined; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2326,7 +2646,9 @@
               },
               "<Params>"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2347,7 +2669,9 @@
               },
               " | null | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2361,7 +2685,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2375,7 +2701,9 @@
             "signature": [
               "MetaData | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2396,7 +2724,9 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2410,7 +2740,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2431,7 +2763,9 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2452,7 +2786,9 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2466,7 +2802,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2491,6 +2829,8 @@
           "<Params>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2502,6 +2842,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2513,6 +2855,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2524,6 +2868,8 @@
             "label": "iconClass",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2540,6 +2886,8 @@
               ") => string) | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2561,6 +2909,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2575,6 +2925,8 @@
                   "Params"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 117,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2590,6 +2942,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 117,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2616,6 +2970,8 @@
               "<Params, Record<string, unknown>, string>>>"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2631,6 +2987,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 630,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2644,6 +3002,8 @@
             "label": "requiresAppContext",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2658,6 +3018,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2672,6 +3034,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2686,6 +3050,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2700,6 +3066,8 @@
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<any>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2724,6 +3092,8 @@
           "<Params, MetaData, ActionGroupIds>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2738,6 +3108,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2752,6 +3124,8 @@
               "Params"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2763,6 +3137,8 @@
             "label": "ruleInterval",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2774,6 +3150,8 @@
             "label": "ruleThrottle",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2788,6 +3166,8 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2802,6 +3182,8 @@
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2816,6 +3198,8 @@
                   "Key"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 96,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2831,6 +3215,8 @@
                   "Params[Key] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 96,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2846,7 +3232,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"uiamApiKey\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -2857,6 +3243,8 @@
               "<Params>[Prop] | null) => void"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2871,6 +3259,8 @@
                   "Prop"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2893,6 +3283,8 @@
                   "<Params>[Prop] | null"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 99,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2911,6 +3303,8 @@
               "(metadata: MetaData) => void"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2925,6 +3319,8 @@
                   "MetaData"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+                "lineNumber": 101,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2949,6 +3345,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2960,6 +3358,8 @@
             "label": "defaultActionGroupId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2981,6 +3381,8 @@
               "<ActionGroupIds>[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2995,6 +3397,8 @@
               "MetaData | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3015,6 +3419,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3035,6 +3441,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3056,6 +3464,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3076,6 +3486,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3089,7 +3501,9 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3103,7 +3517,9 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3123,7 +3539,9 @@
         "signature": [
           "\"/rule/create/:ruleTypeId\""
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/constants/index.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/constants/index.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3138,7 +3556,9 @@
         "signature": [
           "\"/rule/edit/:id\""
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/constants/index.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/constants/index.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3185,7 +3605,9 @@
           },
           ">, \"params\" | \"consumer\" | \"tags\" | \"actions\" | \"schedule\">"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3201,7 +3623,9 @@
           "NotifyWhenSelectOptions",
           "[]"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3241,6 +3665,8 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3272,6 +3698,8 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3284,17 +3712,76 @@
         "label": "RuleDashboardsPlugins",
         "description": [],
         "signature": [
-          "{ contentManagement?: ",
+          "{ uiActions?: ",
           {
-            "pluginId": "contentManagement",
+            "pluginId": "uiActions",
             "scope": "public",
-            "docId": "kibContentManagementPluginApi",
-            "section": "def-public.ContentManagementPublicStart",
-            "text": "ContentManagementPublicStart"
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           " | undefined; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleTemplate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTemplate",
+        "description": [],
+        "signature": [
+          "{ params: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          "; id: string; name: string; tags: string[]; schedule: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; alertDelay?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDelay",
+            "text": "AlertDelay"
+          },
+          " | null | undefined; flapping?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Flapping",
+            "text": "Flapping"
+          },
+          " | null | undefined; artifacts?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Artifacts",
+            "text": "Artifacts"
+          },
+          " | null | undefined; ruleTypeId: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3318,6 +3805,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3333,6 +3822,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3348,6 +3839,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3411,6 +3904,8 @@
           ">) => void; has: (id: string) => boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 130,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3433,6 +3928,8 @@
           "<string, string> & { description?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3462,6 +3959,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3493,6 +3992,8 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3524,6 +4025,25 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 209,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.ShowRequestActivePage",
+        "type": "Type",
+        "tags": [],
+        "label": "ShowRequestActivePage",
+        "description": [],
+        "signature": [
+          "\"create\" | \"update\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "lineNumber": 116,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3548,7 +4068,9 @@
           },
           ">)[]"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/common/apis/update_rule/update_rule.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

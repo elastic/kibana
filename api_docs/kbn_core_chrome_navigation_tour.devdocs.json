@@ -256,7 +256,7 @@
         "label": "TourStepId",
         "description": [],
         "signature": [
-          "\"sidenav-home\" | \"sidenav-more\" | \"sidenav-manage-data\""
+          "\"sidenav-home\" | \"sidenav-more\" | \"sidenav-manage-data\" | \"sidenav-search-getting-started\""
         ],
         "path": "src/core/packages/chrome/navigation-tour/src/types.ts",
         "deprecated": false,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-ast';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstItem, ESQLSingleAstItem } from '@elastic/esql/types';
 import {
   type Condition,
   isAlwaysCondition,
@@ -95,21 +96,30 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       return parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
     }
     if ('contains' in condition) {
-      return Builder.expression.func.binary('like', [
-        field,
-        Builder.expression.literal.string(`*${condition.contains}*`),
+      // Make contains case-insensitive by lowercasing both field and value
+      const lowerField = Builder.expression.func.call('TO_LOWER', [field]);
+      const lowerValue = String(condition.contains).toLowerCase();
+      return Builder.expression.func.call('CONTAINS', [
+        lowerField,
+        Builder.expression.literal.string(lowerValue),
       ]);
     }
     if ('startsWith' in condition) {
-      return Builder.expression.func.binary('like', [
+      return Builder.expression.func.call('STARTS_WITH', [
         field,
-        Builder.expression.literal.string(`${condition.startsWith}*`),
+        Builder.expression.literal.string(String(condition.startsWith)),
       ]);
     }
     if ('endsWith' in condition) {
-      return Builder.expression.func.binary('like', [
+      return Builder.expression.func.call('ENDS_WITH', [
         field,
-        Builder.expression.literal.string(`*${condition.endsWith}`),
+        Builder.expression.literal.string(String(condition.endsWith)),
+      ]);
+    }
+    if ('includes' in condition) {
+      return Builder.expression.func.call('MV_CONTAINS', [
+        field,
+        esqlLiteralFromAny(condition.includes),
       ]);
     }
   } else if (isAndCondition(condition)) {

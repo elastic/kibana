@@ -9,19 +9,21 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
-  _setComputedDataInternal,
+  _clearComputedData,
+  setHasYamlSchemaValidationErrors,
   setWorkflow,
   setYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
+import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
 const mockUseParams = jest.fn();
-const mockUseCapabilities = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseSaveYaml = jest.fn();
 const mockUseUpdateWorkflow = jest.fn();
@@ -34,9 +36,14 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
 }));
-jest.mock('../../../hooks/use_capabilities', () => ({
-  useCapabilities: () => mockUseCapabilities(),
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
 }));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
@@ -72,27 +79,33 @@ describe('WorkflowDetailHeader', () => {
 
   const renderWithProviders = (
     component: React.ReactElement,
-    { isValid = true, hasChanges = false }: { isValid?: boolean; hasChanges?: boolean } = {}
+    {
+      isValid = true,
+      hasChanges = false,
+      hasYamlSchemaValidationErrors = false,
+      serverValid = true,
+    }: {
+      isValid?: boolean;
+      hasChanges?: boolean;
+      hasYamlSchemaValidationErrors?: boolean;
+      serverValid?: boolean;
+    } = {}
   ) => {
     const store = createMockStore();
 
-    // Set up the workflow in the store
-    store.dispatch(setWorkflow(mockWorkflow));
+    // Set up the workflow in the store (with server-side valid flag)
+    store.dispatch(setWorkflow({ ...mockWorkflow, valid: serverValid }));
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
-    // Set computed data to control syntax validation
-    if (isValid) {
-      store.dispatch(
-        _setComputedDataInternal({
-          workflowDefinition: {
-            version: '1',
-            name: 'Test Workflow',
-            enabled: true,
-            triggers: [],
-            steps: [],
-          },
-        })
-      );
+    if (!isValid) {
+      // Clear the computed data that the middleware auto-generated from the yaml,
+      // so that selectIsYamlSyntaxValid returns false
+      store.dispatch(_clearComputedData());
+    }
+
+    // Simulate strict validation errors from Monaco
+    if (hasYamlSchemaValidationErrors) {
+      store.dispatch(setHasYamlSchemaValidationErrors(true));
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -121,16 +134,17 @@ describe('WorkflowDetailHeader', () => {
       },
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
-    mockUseCapabilities.mockReturnValue({
-      canCreateWorkflow: true,
-      canUpdateWorkflow: true,
-      canExecuteWorkflow: true,
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...mockWorkflowsManagementCapabilities,
     });
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
       setActiveTab: jest.fn(),
     });
-    mockUseSaveYaml.mockReturnValue(jest.fn());
+    mockUseSaveYaml.mockReturnValue([
+      jest.fn(),
+      { isLoading: false, error: null, result: undefined },
+    ]);
     mockUseUpdateWorkflow.mockReturnValue(jest.fn());
     mockUseMemoCss.mockReturnValue(jest.fn());
   });
@@ -155,11 +169,37 @@ describe('WorkflowDetailHeader', () => {
     expect(container).toBeTruthy();
   });
 
-  it('disables run workflow button when yaml is invalid', () => {
+  it('disables run workflow button when yaml has syntax errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: false,
     });
     expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
+  });
+
+  it('enables run workflow button when yaml has validation errors', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      hasYamlSchemaValidationErrors: true,
+    });
+    expect(result.getByTestId('runWorkflowHeaderButton')).toBeEnabled();
+  });
+
+  it('disables enabled toggle when yaml has validation errors', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      hasYamlSchemaValidationErrors: true,
+    });
+    const toggle = result.getByRole('switch');
+    expect(toggle).toBeDisabled();
+  });
+
+  it('disables enabled toggle when server reports workflow as invalid (e.g. initial page load)', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      serverValid: false,
+    });
+    const toggle = result.getByRole('switch');
+    expect(toggle).toBeDisabled();
   });
 
   it('enables run workflow button when yaml is valid', () => {

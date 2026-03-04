@@ -58,7 +58,7 @@ function generateId() {
   return uuidv4();
 }
 
-interface StarredQueryMetadata {
+export interface StarredQueryMetadata {
   queryString: string;
   createdAt: string;
   status: 'success' | 'warning' | 'error';
@@ -147,8 +147,8 @@ export class EsqlStarredQueriesService {
       status: favoriteItem.metadata.status,
       id: favoriteItem.id,
     });
-    this.queries$.next(starredQueries);
     this.starredQueries = starredQueries;
+    this.queries$.next(starredQueries);
     await this.client.addFavorite(favoriteItem);
 
     // telemetry, add favorite click event

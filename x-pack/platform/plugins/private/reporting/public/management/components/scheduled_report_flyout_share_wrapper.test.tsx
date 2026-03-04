@@ -10,10 +10,10 @@ import { render, screen } from '@testing-library/react';
 import type { ScheduledReportMenuItem } from './scheduled_report_flyout_share_wrapper';
 import { ScheduledReportFlyoutShareWrapper } from './scheduled_report_flyout_share_wrapper';
 import { useShareTypeContext } from '@kbn/share-plugin/public';
-import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
+import { CreateScheduledReportForm } from './create_scheduled_report_form';
 
-jest.mock('./scheduled_report_flyout_content');
-jest.mocked(ScheduledReportFlyoutContent).mockReturnValue(<div data-test-subj="flyoutContent" />);
+jest.mock('./create_scheduled_report_form');
+jest.mocked(CreateScheduledReportForm).mockReturnValue(<div data-test-subj="flyoutContent" />);
 
 jest.mock('@kbn/share-plugin/public');
 const mockUseShareTypeContext = jest.mocked(useShareTypeContext).mockReturnValue({

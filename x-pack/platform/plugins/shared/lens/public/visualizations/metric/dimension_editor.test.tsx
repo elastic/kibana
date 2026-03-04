@@ -20,8 +20,12 @@ import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { DataType } from '@kbn/lens-common';
-import type { MetricVisualizationState } from './types';
+import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
+import {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_STATE_DEFAULTS,
+} from '@kbn/lens-common';
 import type { Props, SupportingVisType, ApplyColor } from './dimension_editor';
 import {
   DimensionEditor,
@@ -29,7 +33,6 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { GROUP_ID, legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import { getDefaultConfigForMode } from './helpers';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -45,7 +48,6 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/234063
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
@@ -158,23 +160,7 @@ describe('dimension editor', () => {
         />
       );
 
-      const colorModeGroup = screen.queryByRole('group', { name: /Color by value/i });
-      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
-
-      const typeColor = async (color: string) => {
-        if (!staticColorPicker) {
-          throw new Error('Static color picker not found');
-        }
-        await userEvent.clear(staticColorPicker);
-        await userEvent.type(staticColorPicker, color);
-      };
-
-      const clearColor = async () => {
-        if (!staticColorPicker) {
-          throw new Error('Static color picker not found');
-        }
-        await userEvent.clear(staticColorPicker);
-      };
+      const getStaticColorPicker = () => screen.queryByTestId(SELECTORS.COLOR_PICKER);
 
       const iconSelect = screen.getByTestId('lns-icon-select');
       const setIcon = async (icon: string) => {
@@ -209,10 +195,7 @@ describe('dimension editor', () => {
       };
 
       return {
-        colorModeGroup,
-        staticColorPicker,
-        typeColor,
-        clearColor,
+        getStaticColorPicker,
         setIcon,
         clearIcon,
         ...rtlRender,
@@ -227,90 +210,12 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
     });
 
-    it('Color mode switch is shown when the primary metric is numeric', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor();
-      expect(colorModeGroup).toBeInTheDocument();
-    });
-
-    it('Color mode switch is not shown when the primary metric is non-numeric', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor({
+    it('static color control is visible when metric is non-numeric even if palette is set', () => {
+      const { getStaticColorPicker } = renderPrimaryMetricEditor({
         datasource: getNonNumericDatasource(),
+        state: { ...metricAccessorState, palette },
       });
-      expect(colorModeGroup).not.toBeInTheDocument();
-    });
-
-    it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor({
-        datasource: getNumericDatasourceWithArraySupport(),
-      });
-      expect(colorModeGroup).not.toBeInTheDocument();
-    });
-
-    describe('static color controls', () => {
-      it('is hidden when dynamic coloring is enabled', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette },
-        });
-        expect(staticColorPicker).not.toBeInTheDocument();
-      });
-
-      it('is visible if palette is not defined', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette: undefined },
-        });
-        expect(staticColorPicker).toBeInTheDocument();
-      });
-
-      it('is visible when metric is non-numeric even if palette is set', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          datasource: getNonNumericDatasource(),
-          state: { ...metricAccessorState, palette },
-        });
-        expect(staticColorPicker).toBeInTheDocument();
-      });
-
-      it('fills with default EUI visualization color value', () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: {
-            ...metricAccessorState,
-            palette: undefined,
-            color: undefined,
-          },
-        });
-        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
-      });
-
-      it('fills with default vis text color', async () => {
-        const { staticColorPicker } = renderPrimaryMetricEditor({
-          state: {
-            ...metricAccessorState,
-            palette: undefined, // color by value static
-            trendlineLayerId: undefined,
-            showBar: false,
-            color: undefined,
-            applyColorTo: 'value',
-          },
-        });
-        expect(staticColorPicker).toHaveValue(euiThemeVars.euiColorVisText0.toUpperCase());
-      });
-
-      it('sets color', async () => {
-        const { typeColor, clearColor } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette: undefined, color: faker.color.rgb() },
-        });
-
-        const newColor = faker.color.rgb().toUpperCase();
-        await typeColor(newColor);
-        await waitFor(() =>
-          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: newColor }))
-        );
-        await clearColor();
-        await waitFor(() =>
-          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: undefined }))
-        );
-
-        expect(mockSetState).toHaveBeenCalledTimes(2);
-      });
+      expect(getStaticColorPicker()).toBeInTheDocument();
     });
 
     describe('icon select', () => {
@@ -322,7 +227,10 @@ describe('dimension editor', () => {
         });
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ icon: 'compute', iconAlign: metricStateDefaults.iconAlign })
+          expect.objectContaining({
+            icon: 'compute',
+            iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+          })
         );
       });
 
@@ -336,7 +244,7 @@ describe('dimension editor', () => {
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({
             icon: 'compute',
-            iconAlign: legacyMetricStateDefaults.iconAlign,
+            iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
           })
         );
       });
@@ -423,11 +331,11 @@ describe('dimension editor', () => {
       const getSelectedPalette = (name: string) =>
         screen.queryByRole('button', { name: new RegExp(name, 'i') });
 
-      const colorModeGroup = screen.getByRole('group', { name: /Color by value/i });
+      const colorModeGroup = screen.getByRole('group', { name: /Color mode/i });
       const clickOnColorMode = async (mode: 'none' | 'static' | 'dynamic') => {
         const colorByValueOption = getByTitle(colorModeGroup, mode, { exact: false });
         if (!colorByValueOption) {
-          throw new Error(`Supported color by value ${mode} not found`);
+          throw new Error(`Supported color mode ${mode} not found`);
         }
         await userEvent.click(colorByValueOption);
       };
@@ -955,7 +863,7 @@ describe('dimension editor', () => {
         const rtlRender = render(
           <DimensionEditorDataExtraComponent
             {...props}
-            groupId={GROUP_ID.BREAKDOWN_BY}
+            groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
             state={{ ...fullState, breakdownByAccessor: accessor }}
             accessor={accessor}
             setState={mockSetState}
@@ -975,7 +883,7 @@ describe('dimension editor', () => {
             rtlRender.rerender(
               <DimensionEditorDataExtraComponent
                 {...props}
-                groupId={GROUP_ID.BREAKDOWN_BY}
+                groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
                 state={{ ...fullState, breakdownByAccessor: accessor }}
                 accessor={accessor}
                 setState={mockSetState}
@@ -1006,13 +914,14 @@ describe('dimension editor', () => {
         expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
       });
 
-      it.each([[GROUP_ID.METRIC], [GROUP_ID.SECONDARY_METRIC], [GROUP_ID.MAX]])(
-        'should not render for other group types: %s',
-        async (groupId) => {
-          const { container } = renderBreakdownEditorDataSection({ groupId });
-          expect(container).toBeEmptyDOMElement();
-        }
-      );
+      it.each([
+        [LENS_METRIC_GROUP_ID.METRIC],
+        [LENS_METRIC_GROUP_ID.SECONDARY_METRIC],
+        [LENS_METRIC_GROUP_ID.MAX],
+      ])('should not render for other group types: %s', async (groupId) => {
+        const { container } = renderBreakdownEditorDataSection({ groupId });
+        expect(container).toBeEmptyDOMElement();
+      });
     });
   });
 
@@ -1035,7 +944,7 @@ describe('dimension editor', () => {
       );
 
       const supportingVisOptions = {
-        panel: screen.queryByTitle(/panel/i),
+        none: screen.queryByTitle(/none/i),
         // in eui when bar or line become disabled they change from input to button so we have to do this weird check
         bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
         trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
@@ -1044,7 +953,7 @@ describe('dimension editor', () => {
       const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
         if (!supportingVis) {
-          throw new Error(`Supporting visualization ${type} not found`);
+          throw new Error(`Background chart ${type} not found`);
         }
         await userEvent.click(supportingVis);
       };
@@ -1062,6 +971,24 @@ describe('dimension editor', () => {
         await userEvent.click(applyColorTo);
       };
 
+      const colorModeGroup = screen.queryByRole('group', { name: /Color mode/i });
+      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
+
+      const typeColor = async (color: string) => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+        await userEvent.type(staticColorPicker, color);
+      };
+
+      const clearColor = async () => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+      };
+
       return {
         progressDirectionShowing: screen.queryByTestId('lnsMetric_progress_direction_buttons'),
         progressOptions: {
@@ -1073,6 +1000,10 @@ describe('dimension editor', () => {
         applyColorToBtnGroup: screen.queryByTestId('lnsMetric_apply_color_to_buttons'),
         applyColorToOptions,
         clickOnApplyColorToOption,
+        colorModeGroup,
+        staticColorPicker,
+        typeColor,
+        clearColor,
         ...rtlRender,
       };
     }
@@ -1086,18 +1017,18 @@ describe('dimension editor', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
-    describe('supporting visualizations', () => {
+    describe('background visualizations', () => {
       const stateWOTrend = {
         ...metricAccessorState,
         trendlineLayerId: undefined,
       };
 
       describe('reflecting visualization state', () => {
-        it('when `showBar` is false and maximum value is not defined, option `panel` should be selected', () => {
+        it('when `showBar` is false and maximum value is not defined, option `none` should be selected', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
-          expect(supportingVisOptions.panel).toHaveAttribute('aria-pressed', 'true');
+          expect(supportingVisOptions.none).toHaveAttribute('aria-pressed', 'true');
         });
 
         it('when `showBar` is true and maximum value is not defined, bar should be selected', () => {
@@ -1198,17 +1129,17 @@ describe('dimension editor', () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: stateWOTrend,
           });
-          await clickOnSupportingVis('panel');
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
-        it('selects panel from trendline', async () => {
+        it('selects none from trendline', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
-          await clickOnSupportingVis('panel');
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
@@ -1216,7 +1147,7 @@ describe('dimension editor', () => {
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
 
-        it('selects trendline from panel with apply color to value', async () => {
+        it('selects trendline from none with apply color to value', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1229,7 +1160,7 @@ describe('dimension editor', () => {
           );
         });
 
-        it('selects bar from panel with apply color to value', async () => {
+        it('selects bar from none with apply color to value', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: {
               ...metricAccessorState,
@@ -1272,7 +1203,7 @@ describe('dimension editor', () => {
       });
 
       describe('`apply color to` controls', () => {
-        it('should show `apply color to` button group when `Panel` option is selected', async () => {
+        it('should show `apply color to` button group when `None` option is selected', async () => {
           const { applyColorToBtnGroup, applyColorToOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
@@ -1305,7 +1236,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
         });
 
-        it('should show help message when color by value static, supporting visualization is panel, apply color to value', () => {
+        it('should show help message when color mode static, supporting visualization is none, apply color to value', () => {
           renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1321,7 +1252,7 @@ describe('dimension editor', () => {
           );
         });
 
-        it('should show help message when color by value dynamic, supporting visualization is panel, apply color to value', () => {
+        it('should show help message when color mode dynamic, supporting visualization is none, apply color to value', () => {
           renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1331,6 +1262,85 @@ describe('dimension editor', () => {
           });
           expect(screen.getByText(/Color scales might cause accessibility issues./i));
         });
+      });
+    });
+
+    it('Color mode switch is shown when the primary metric is numeric', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor();
+      expect(colorModeGroup).toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is non-numeric', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor({
+        datasource: getNonNumericDatasource(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor({
+        datasource: getNumericDatasourceWithArraySupport(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/253328
+    describe.skip('static color controls', () => {
+      it('is hidden when dynamic coloring is enabled', () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: { ...metricAccessorState, palette },
+        });
+        expect(staticColorPicker).not.toBeInTheDocument();
+      });
+
+      it('is visible if palette is not defined', () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: { ...metricAccessorState, palette: undefined },
+        });
+        expect(staticColorPicker).toBeInTheDocument();
+      });
+
+      it('fills with default EUI visualization color value', () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: {
+            ...metricAccessorState,
+            palette: undefined,
+            color: undefined,
+          },
+        });
+        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
+      });
+
+      it('fills with default vis text color', async () => {
+        const { staticColorPicker } = renderAdditionalSectionEditor({
+          state: {
+            ...metricAccessorState,
+            palette: undefined,
+            trendlineLayerId: undefined,
+            showBar: false,
+            color: undefined,
+            applyColorTo: 'value',
+          },
+        });
+        expect(staticColorPicker).toHaveValue(euiThemeVars.euiColorVisText0.toUpperCase());
+      });
+
+      it('sets color', async () => {
+        const { typeColor, clearColor } = renderAdditionalSectionEditor({
+          state: { ...metricAccessorState, palette: undefined, color: faker.color.rgb() },
+        });
+
+        const newColor = faker.color.rgb().toUpperCase();
+        await typeColor(newColor);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: newColor }))
+        );
+        await clearColor();
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: undefined }))
+        );
+
+        expect(mockSetState).toHaveBeenCalledTimes(2);
       });
     });
   });

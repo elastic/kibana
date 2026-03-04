@@ -24,6 +24,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'double'
     | 'long'
     | 'object'
+    | 'semantic_text'
   );
 
 type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
@@ -73,6 +74,7 @@ const types = {
   byte: createFactory('byte'),
   float: createFactory('float'),
   object: createFactory('object'),
+  semantic_text: createFactory('semantic_text'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
 };
@@ -82,7 +84,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     ? TEnums extends Array<infer TEnum>
       ? TEnum
       : never
-    : string;
+    : string | string[];
   match_only_text: string;
   text: string;
   boolean: boolean;
@@ -96,6 +98,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
         [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
       }
     : object;
+  semantic_text: string;
 }[TProperty['type']];
 
 export type StorageFieldTypeOf<TProperty extends StorageMappingProperty> = PrimitiveOf<TProperty>;

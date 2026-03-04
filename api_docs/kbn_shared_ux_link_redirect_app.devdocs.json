@@ -24,6 +24,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -136,6 +138,30 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -146,18 +172,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
           },
           {
             "plugin": "upgradeAssistant",
@@ -288,66 +302,6 @@
             "path": "x-pack/platform/plugins/private/monitoring/public/components/logs/logs.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/index.tsx"
           },
@@ -420,6 +374,18 @@
             "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
           },
           {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
           },
@@ -466,42 +432,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
           },
           {
             "plugin": "synthetics",
@@ -586,6 +516,18 @@
           {
             "plugin": "searchAssistant",
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -656,6 +598,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+            "lineNumber": 62,
+            "columnNumber": 86,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -685,6 +629,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -797,6 +743,30 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -807,18 +777,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
           },
           {
             "plugin": "upgradeAssistant",
@@ -949,66 +907,6 @@
             "path": "x-pack/platform/plugins/private/monitoring/public/components/logs/logs.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/index.tsx"
           },
@@ -1081,6 +979,18 @@
             "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
           },
           {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
           },
@@ -1127,42 +1037,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
           },
           {
             "plugin": "synthetics",
@@ -1247,6 +1121,18 @@
           {
             "plugin": "searchAssistant",
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -1317,6 +1203,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+            "lineNumber": 62,
+            "columnNumber": 86,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1346,6 +1234,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1458,6 +1348,30 @@
             "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -1468,18 +1382,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/discover_router.tsx"
           },
           {
             "plugin": "upgradeAssistant",
@@ -1610,66 +1512,6 @@
             "path": "x-pack/platform/plugins/private/monitoring/public/components/logs/logs.tsx"
           },
           {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "onechat",
-            "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/index.tsx"
           },
@@ -1742,6 +1584,18 @@
             "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
           },
           {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
           },
@@ -1788,42 +1642,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_create_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_update_slo.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
           },
           {
             "plugin": "synthetics",
@@ -1908,6 +1726,18 @@
           {
             "plugin": "searchAssistant",
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -1978,6 +1808,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+            "lineNumber": 62,
+            "columnNumber": 86,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2000,6 +1832,8 @@
           "\nKibana-specific contextual services to be adapted for this component."
         ],
         "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -2019,6 +1853,8 @@
               "; }; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2037,6 +1873,8 @@
           "\nContextual services for this component."
         ],
         "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -2052,6 +1890,8 @@
               "(url: string) => void | Promise<void>"
             ],
             "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2064,6 +1904,8 @@
                 "label": "url",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+                "lineNumber": 16,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2080,6 +1922,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2120,6 +1964,8 @@
           "> & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>"
         ],
         "path": "src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/deprecated_redirect_app_links.component.tsx",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [],

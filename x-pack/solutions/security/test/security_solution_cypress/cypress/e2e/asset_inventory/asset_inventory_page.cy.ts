@@ -16,7 +16,6 @@ import {
   ID_FILTER_BOX,
   INVESTIGATE_IN_TIMELINE_BUTTON,
   NAME_FILTER_BOX,
-  NO_PRIVILEGES_BOX,
   TAKE_ACTION_BUTTON,
   TIMELINE_BODY,
   TYPE_FILTER_BOX,
@@ -34,6 +33,7 @@ import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ASSET_INVENTORY_URL } from '../../urls/navigation';
 import { postDataView } from '../../tasks/api_calls/common';
+import { NO_PRIVILEGES_BOX } from '../../screens/common/page';
 
 describe('Asset Inventory page - uiSetting disabled', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

@@ -25,6 +25,8 @@
           "{ readonly mode: \"absolute\"; readonly from: string; readonly to: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40,44 +42,8 @@
           "{ esql: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query-server",
-        "id": "def-server.Filter",
-        "type": "Type",
-        "tags": [],
-        "label": "Filter",
-        "description": [],
-        "signature": [
-          "{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.FilterStateStore",
-            "text": "FilterStateStore"
-          },
-          "; }> | undefined; meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query-server",
-        "id": "def-server.FilterMeta",
-        "type": "Type",
-        "tags": [],
-        "label": "FilterMeta",
-        "description": [],
-        "signature": [
-          "{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +59,8 @@
           "{ query: string | Record<string, any>; language: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +76,8 @@
           "{ readonly mode: \"relative\"; readonly from: string; readonly to: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +93,8 @@
           "{ mode?: \"absolute\" | \"relative\" | undefined; from: string; to: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -131,10 +103,82 @@
     "objects": [
       {
         "parentPluginId": "@kbn/es-query-server",
-        "id": "def-server.filterSchema",
+        "id": "def-server.aggregateQuerySchema",
         "type": "Object",
         "tags": [],
-        "label": "filterSchema",
+        "label": "aggregateQuerySchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ esql: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/query.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.querySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "querySchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ query: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | Record<string, any>>; language: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/query.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.storedFilterSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "storedFilterSchema",
         "description": [],
         "signature": [
           {
@@ -185,6 +229,14 @@
             "text": "Type"
           },
           "<string | undefined>; group: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; relation: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -248,7 +300,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; }>; query: ",
+          "<any>; }>; query: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -266,53 +318,17 @@
           },
           "<Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
           "; }> | undefined>; }>"
         ],
-        "path": "src/platform/packages/shared/kbn-es-query-server/src/filter.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query-server",
-        "id": "def-server.querySchema",
-        "type": "Object",
-        "tags": [],
-        "label": "querySchema",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<{ query: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string | Record<string, any>>; language: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string>; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-query-server/src/query.ts",
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/stored_filter.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -359,6 +375,8 @@
           "<\"absolute\" | \"relative\" | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/time_range.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

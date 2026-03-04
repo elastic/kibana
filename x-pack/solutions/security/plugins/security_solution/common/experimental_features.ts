@@ -12,8 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -49,7 +47,19 @@ export const allowedExperimentalValues = Object.freeze({
    * Memory Dump response actions support for Elastic Defend.
    * Release: v9.3
    */
-  responseActionsEndpointMemoryDump: false,
+  responseActionsEndpointMemoryDump: true,
+
+  /**
+   * `runscript` response action for Elastic Defend Endpoint
+   * Release: 9.4
+   */
+  responseActionsEndpointRunScript: false,
+
+  /**
+   * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
+   * Release: 9.4
+   */
+  responseActionsScriptLibraryManagement: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -57,14 +67,14 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Disables ESQL-based risk scoring
-   */
-  disableESQLRiskScoring: false,
-
-  /**
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,
+
+  /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -74,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  entityDetailsHighlightsEnabled: false,
+  entityDetailsHighlightsEnabled: true,
 
   /**
    * Enables the experimental Threat Hunting home experience.
@@ -87,40 +97,25 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
-   */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
    * Enables the storing of gaps in the event log
    */
   storeGapsInEventLogEnabled: true,
 
   /**
-   * Enables scheduling gap fills for rules
-   */
-  bulkFillRuleGapsEnabled: true,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: false,
-
-  /**
-   * Enables the rule's bulk action to manage alert suppression
-   */
-  bulkEditAlertSuppressionEnabled: true,
-
-  /**
-   * Enables the ability to use does not match condition for indicator match rules
-   */
-  doesNotMatchForIndicatorMatchRuleEnabled: true,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
+
+  /**
+   * Enables AI rule creation feature
+   */
+  aiRuleCreationEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -180,7 +175,56 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertsAlignment: false,
+  enableAlertsAndAttacksAlignment: false,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: true,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: true,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Trial Companion feature.
+   */
+  trialCompanionEnabled: false,
+
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: true,
+
+  /**
+   * Enables the Automatic Migration of Splunk dashboards in Security Solution
+   */
+  splunkV2DashboardsEnabled: true,
+
+  /**
+   * Enables Detection Engine Health UI
+   */
+  deHealthUIEnabled: false,
+
+  /**
+   * Enables Rule Health UI
+   */
+  ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

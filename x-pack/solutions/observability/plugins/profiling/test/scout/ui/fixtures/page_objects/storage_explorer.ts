@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingStorageExplorerPage {
   public pageTitle: Locator;
@@ -19,7 +20,7 @@ export class ProfilingStorageExplorerPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/storage-explorer`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForStorageExplorerPage();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string, kuery?: string) {
@@ -30,7 +31,18 @@ export class ProfilingStorageExplorerPage {
       url += `&kuery=${encodeURIComponent(kuery)}`;
     }
     await this.page.goto(url);
-    await this.page.waitForLoadingIndicatorHidden();
+
+    await this.waitForStorageExplorerPage();
+  }
+
+  /*
+   * Waits for the Storage explorer page to be visible
+   */
+  private async waitForStorageExplorerPage() {
+    await this.page
+      .getByTestId('profilingPageTemplate')
+      .getByText('Storage explorer')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Summary Stats methods

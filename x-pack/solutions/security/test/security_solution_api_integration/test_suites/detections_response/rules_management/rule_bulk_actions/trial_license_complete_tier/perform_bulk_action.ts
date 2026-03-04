@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { v4 as uuidV4 } from 'uuid';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
@@ -22,6 +23,13 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import moment from 'moment';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 import {
   binaryToString,
   getSimpleMlRule,
@@ -34,14 +42,11 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllGaps } from '../../../utils/event_log/delete_all_gaps';
 import type { GapEvent } from '../../../utils/event_log/generate_gaps_for_rule';
 import { generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
-import { getGapsByRuleId } from '../../../../../config/services/detections_response/rules/get_gaps_by_rule_id';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -50,6 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   const postBulkAction = () =>
     supertest
@@ -544,6 +550,72 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(rulesResponse.total).toEqual(2);
+    });
+
+    describe('Duplicate bulk action with Response Actions', () => {
+      let superTestResponseActionsNoAuthz: TestAgent;
+      let id: string;
+
+      before(async () => {
+        superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
+          name: ROLE.endpoint_response_actions_no_access,
+          privileges: rolesUsersProvider.loader.getPreDefinedRole(
+            ROLE.endpoint_response_actions_no_access
+          ),
+        });
+      });
+
+      beforeEach(async () => {
+        const { body } = await detectionsApi
+          .createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: uuidV4(),
+              response_actions: [{ action_type_id: '.endpoint', params: { command: 'isolate' } }],
+            }),
+          })
+          .expect(200);
+
+        id = body.id;
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should duplicate rules with response actions when user has authz', async () => {
+        const { body } = await postBulkAction()
+          .on('error', createSupertestErrorLogger(log))
+          .send({
+            ids: [id],
+            action: BulkActionTypeEnum.duplicate,
+            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.results.created[0].response_actions).toEqual([
+          { action_type_id: '.endpoint', params: { command: 'isolate' } },
+        ]);
+      });
+
+      it('should error when duplicating rules with response actions and user DOES NOT have authz', async () => {
+        const { body } = await superTestResponseActionsNoAuthz
+          .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([500]))
+          .send({
+            ids: [id],
+            action: BulkActionTypeEnum.duplicate,
+            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0].message).toEqual(
+          'User is not authorized to create/update isolate response action'
+        );
+      });
     });
 
     describe('edit action', () => {
@@ -2892,7 +2964,7 @@ export default ({ getService }: FtrProviderContext): void => {
               ids: createdRuleIds,
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
-                start_date: new Date(Date.now() + 1000).toISOString(),
+                start_date: new Date(Date.now() + 10000).toISOString(),
                 end_date: backfillEnd.toISOString(),
               },
             },
@@ -3399,6 +3471,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action: BulkActionTypeEnum.duplicate,
           gaps_range_start: '2025-01-01T00:00:00.000Z',
           gaps_range_end: '2025-01-02T00:00:00.000Z',
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
           duplicate: { include_exceptions: false, include_expired_exceptions: false },
         });
 

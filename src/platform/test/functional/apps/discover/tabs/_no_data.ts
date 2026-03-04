@@ -24,8 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const monacoEditor = getService('monacoEditor');
 
-  // This is currently stalling several CI runs
-  describe.skip('has ES data but no custom data view', function () {
+  describe('has ES data but no custom data view', function () {
     beforeEach(async () => {
       await common.navigateToApp('home');
       await kibanaServer.savedObjects.cleanStandardList();
@@ -36,6 +35,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
     });
 

@@ -9,11 +9,9 @@
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SemVer } from 'semver';
 
-import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
-import type { ConsoleConfig, ConsoleConfig7x } from './config';
+import type { ConsoleConfig } from './config';
 
 import { registerRoutes } from './routes';
 
@@ -30,7 +28,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
 
   esLegacyConfigService = new EsLegacyConfigService();
 
-  constructor(private readonly ctx: PluginInitializerContext<ConsoleConfig | ConsoleConfig7x>) {
+  constructor(private readonly ctx: PluginInitializerContext<ConsoleConfig>) {
     this.log = this.ctx.logger.get();
   }
 
@@ -41,17 +39,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
         save: true,
       },
     }));
-    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
-    const config = this.ctx.config.get();
     const globalConfig = this.ctx.config.legacy.get();
-
-    let pathFilters: RegExp[] | undefined;
-    let proxyConfigCollection: ProxyConfigCollection | undefined;
-    if (kibanaVersion.major < 8) {
-      // "pathFilters" and "proxyConfig" are only used in 7.x
-      pathFilters = (config as ConsoleConfig7x).proxyFilter.map((str: string) => new RegExp(str));
-      proxyConfigCollection = new ProxyConfigCollection((config as ConsoleConfig7x).proxyConfig);
-    }
 
     this.esLegacyConfigService.setup(elasticsearch.legacy.config$, cloud);
 
@@ -75,11 +63,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
             ...legacyConfig,
           };
         },
-        // Deprecated settings (only used in 7.x):
-        proxyConfigCollection,
-        pathFilters,
       },
-      kibanaVersion,
     });
   }
 

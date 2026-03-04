@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
+  DataSetStepSchema,
   ElasticsearchStepSchema,
-  HttpStepSchema,
   KibanaStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -36,12 +38,12 @@ export const WaitGraphNodeSchema = GraphNodeSchema.extend({
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
 
-export const HttpGraphNodeSchema = GraphNodeSchema.extend({
+export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  type: z.literal('http'),
-  configuration: HttpStepSchema,
+  type: z.literal('data.set'),
+  configuration: DataSetStepSchema,
 });
-export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
+export type DataSetGraphNode = z.infer<typeof DataSetGraphNodeSchema>;
 
 export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
@@ -60,3 +62,17 @@ export const KibanaGraphNodeSchema = GraphNodeSchema.extend({
   configuration: KibanaStepSchema,
 });
 export type KibanaGraphNode = z.infer<typeof KibanaGraphNodeSchema>;
+
+export const WorkflowExecuteGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.execute'),
+  configuration: WorkflowExecuteStepSchema,
+});
+export type WorkflowExecuteGraphNode = z.infer<typeof WorkflowExecuteGraphNodeSchema>;
+
+export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.executeAsync'),
+  configuration: WorkflowExecuteAsyncStepSchema,
+});
+export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;

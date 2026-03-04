@@ -8,7 +8,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
 echo --- Capture OAS snapshot
-cmd="node scripts/capture_oas_snapshot \
+cmd="node scripts/capture_oas_snapshot\
   --include-path /api/status \
   --include-path /api/alerting/rule/ \
   --include-path /api/alerting/rules \
@@ -21,23 +21,20 @@ cmd="node scripts/capture_oas_snapshot \
   --include-path /api/saved_objects/_export \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder"
-if is_pr && ! is_auto_commit_disabled; then
-  cmd="$cmd --update"
-fi
-
-if [[ $BUILDKITE_PULL_REQUEST != "false" && "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" != "main" ]] || [[ $BUILDKITE_PULL_REQUEST == "false" && "$BUILDKITE_BRANCH" != "main" ]]; then
-  cmd="$cmd --no-serverless"
-fi
 
 run_check() {
   eval "$cmd"
 }
 
 retry 5 15 run_check
+# Bundle hand written specs
+.buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
+.buildkite/scripts/steps/openapi_bundling/final_merge.sh
 
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 
-check_for_changed_files "$cmd" true
-
-.buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
-.buildkite/scripts/steps/openapi_bundling/final_merge.sh
+if is_pr && ! is_auto_commit_disabled; then
+  check_for_changed_files "capture_oas_snapshot.sh" true
+else
+  check_for_changed_files "capture_oas_snapshot.sh" false
+fi

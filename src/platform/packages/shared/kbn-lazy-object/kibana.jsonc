@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/lazy-object",
-  "owner": "@elastic/kibana-operations",
+  "owner": ["@elastic/kibana-operations", "@elastic/observability-ui"],
   "group": "platform",
   "visibility": "shared",
   "devOnly": true

@@ -18,7 +18,7 @@ describe('collectAllStepNames', () => {
   });
 
   it('should return empty array for document without contents', () => {
-    const yamlDocument = { contents: null };
+    const yamlDocument = parseDocument('');
     const result = collectAllStepNames(yamlDocument);
     expect(result).toEqual([]);
   });
@@ -162,5 +162,34 @@ steps:
     // Should only collect direct step names, not those inside 'do' blocks
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('Foreach Step');
+  });
+
+  it('should collect step names from on-failure fallback steps', () => {
+    const yaml = `
+name: Test Workflow
+steps:
+  - name: step_one
+    type: slack
+    on-failure:
+      fallback:
+        - name: notify_failure
+          type: email
+  - name: step_two
+    type: slack
+    on-failure:
+      fallback:
+        - name: notify_failure
+          type: email
+`;
+    const yamlDocument = parseDocument(yaml);
+    const result = collectAllStepNames(yamlDocument);
+
+    expect(result).toHaveLength(4);
+    expect(result.map((r) => r.name)).toEqual([
+      'step_one',
+      'notify_failure',
+      'step_two',
+      'notify_failure',
+    ]);
   });
 });

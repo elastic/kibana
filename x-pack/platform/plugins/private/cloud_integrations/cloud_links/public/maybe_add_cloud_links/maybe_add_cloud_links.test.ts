@@ -97,10 +97,6 @@ describe('maybeAddCloudLinks', () => {
             "title": "Support",
           },
           Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
-          },
-          Object {
             "dataTestSubj": "connectionDetailsHelpLink",
             "onClick": [Function],
             "title": "Connection details",
@@ -174,10 +170,6 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "https://www.elastic.co/support",
             "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",

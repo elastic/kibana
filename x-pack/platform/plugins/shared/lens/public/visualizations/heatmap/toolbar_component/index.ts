@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { HeatmapToolbar } from './toolbar_component';
+export { HeatmapStyleSettings } from './style_settings';
+export { HeatmapLegendSettings } from './legend_settings';

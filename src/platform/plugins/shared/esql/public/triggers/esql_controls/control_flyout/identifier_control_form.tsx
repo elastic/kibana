@@ -12,24 +12,15 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import {
-  EuiComboBox,
-  EuiFormRow,
-  type EuiSwitchEvent,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import {
-  ESQLVariableType,
-  EsqlControlType,
-  type ESQLControlState,
-  type ControlWidthOptions,
-} from '@kbn/esql-types';
-import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import { ControlWidth, ControlLabel } from './shared_form_components';
+import { ControlLabel } from './shared_form_components';
 import { getQueryForFields } from './helpers';
 
 interface IdentifierControlFormProps {
@@ -38,9 +29,9 @@ interface IdentifierControlFormProps {
   variableName: string;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  setControlState: (state: ESQLControlState) => void;
+  setControlState: (state: OptionsListESQLControlState) => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   currentApp?: string;
 }
 
@@ -62,8 +53,8 @@ export function IdentifierControlForm({
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.availableOptions
-      ? initialState.availableOptions.map((option) => {
+    initialState?.available_options
+      ? initialState.available_options.map((option) => {
           return {
             label: option,
             key: option,
@@ -73,8 +64,6 @@ export function IdentifierControlForm({
       : []
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
-  const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
-  const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   useEffect(
     function initAvailableIdentifiersOptions() {
@@ -129,16 +118,6 @@ export function IdentifierControlForm({
     setLabel(e.target.value);
   }, []);
 
-  const onMinimumSizeChange = useCallback((optionId: string) => {
-    if (optionId) {
-      setMinimumWidth(optionId as ControlWidthOptions);
-    }
-  }, []);
-
-  const onGrowChange = useCallback((e: EuiSwitchEvent) => {
-    setGrow(e.target.checked);
-  }, []);
-
   const onCreateOption = useCallback(
     (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
       if (!searchValue.trim()) {
@@ -171,24 +150,20 @@ export function IdentifierControlForm({
     // removes the double question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
-      availableOptions,
-      selectedOptions: [availableOptions[0]],
-      width: minimumWidth,
+      available_options: availableOptions,
+      selected_options: [availableOptions[0]],
       title: label || variableNameWithoutQuestionmark,
-      variableName: variableNameWithoutQuestionmark,
-      variableType,
-      esqlQuery: queryString,
-      controlType: EsqlControlType.STATIC_VALUES,
-      grow,
+      variable_name: variableNameWithoutQuestionmark,
+      variable_type: variableType,
+      esql_query: queryString,
+      control_type: EsqlControlType.STATIC_VALUES,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
     }
   }, [
-    grow,
     initialState,
     label,
-    minimumWidth,
     queryString,
     selectedIdentifiers,
     setControlState,
@@ -229,16 +204,6 @@ export function IdentifierControlForm({
       </EuiFormRow>
 
       <ControlLabel label={label} onLabelChange={onLabelChange} />
-
-      <ControlWidth
-        minimumWidth={minimumWidth}
-        grow={grow}
-        onMinimumSizeChange={onMinimumSizeChange}
-        onGrowChange={onGrowChange}
-        // This property is not compatible with the unified search yet
-        // we will hide this possibility for now
-        hideFitToSpace={currentApp === 'discover'}
-      />
     </>
   );
 }

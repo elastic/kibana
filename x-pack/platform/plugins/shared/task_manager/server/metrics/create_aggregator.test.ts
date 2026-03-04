@@ -17,7 +17,7 @@ import {
 } from '../task_events';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import type { TaskManagerConfig } from '../config';
+import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
 import type { TaskClaimMetric } from './task_claim_metrics_aggregator';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
@@ -43,6 +43,10 @@ const config: TaskManagerConfig = {
     interval: 10000,
   },
   kibanas_per_partition: 2,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   allow_reading_invalid_state: false,
   event_loop_delay: {
     monitor: true,
@@ -78,6 +82,7 @@ const config: TaskManagerConfig = {
     update_by_query: 1000,
   },
   auto_calculate_default_ech_capacity: false,
+  api_key_type: ApiKeyType.ES,
 };
 
 describe('createAggregator', () => {

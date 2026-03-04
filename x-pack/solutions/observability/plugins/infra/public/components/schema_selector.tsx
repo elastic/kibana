@@ -7,11 +7,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiSuperSelect,
@@ -33,61 +32,50 @@ const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvail
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
+const SCHEMA_DOCUMENTATION_LINK = 'https://ela.st/docs-otel-schema-selector-hosts';
+
 const PrependLabel = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>
-            {i18n.translate('xpack.infra.schemaSelector.label', {
-              defaultMessage: 'Schema',
-            })}
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiButtonEmpty
-              data-test-subj="infraSchemaSelectorHelpButton"
-              aria-label={i18n.translate('xpack.infra.schemaSelector.helpButton.ariaLabel', {
-                defaultMessage: 'See schema documentation',
-              })}
-              size="s"
-              onClick={() => setIsPopoverOpen((popoverValue) => !popoverValue)}
+    <EuiPopover
+      button={
+        <EuiFormPrepend
+          element="button"
+          iconRight="question"
+          label={i18n.translate('xpack.infra.schemaSelector.label', {
+            defaultMessage: 'Schema',
+          })}
+          aria-label={i18n.translate('xpack.infra.schemaSelector.helpButton.ariaLabel', {
+            defaultMessage: 'See schema documentation',
+          })}
+          onClick={() => setIsPopoverOpen((popoverValue) => !popoverValue)}
+          data-test-subj="infraSchemaSelectorHelpButton"
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="rightCenter"
+    >
+      <FormattedMessage
+        id="xpack.infra.schemaSelector.description"
+        defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
+        values={{
+          nextLine: <br />,
+          documentation: (
+            <EuiLink
+              data-test-subj="infraSchemaSelectorDocumentationLink"
+              href={SCHEMA_DOCUMENTATION_LINK}
+              target="_blank"
             >
-              <EuiIcon type="question" color="text" />
-            </EuiButtonEmpty>
-          }
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-          anchorPosition="rightCenter"
-        >
-          <FormattedMessage
-            id="xpack.infra.schemaSelector.description"
-            defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
-            values={{
-              nextLine: <br />,
-              documentation: (
-                <EuiLink
-                  data-test-subj="infraSchemaSelectorDocumentationLink"
-                  href={
-                    'https://www.elastic.co/docs/solutions/observability/infra-and-hosts/analyze-compare-hosts#select-data-collection-schema'
-                  }
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.infra.schemaSelector.documentation', {
-                    defaultMessage: 'documentation',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+              {i18n.translate('xpack.infra.schemaSelector.documentation', {
+                defaultMessage: 'documentation',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiPopover>
   );
 };
 

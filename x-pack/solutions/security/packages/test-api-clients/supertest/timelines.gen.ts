@@ -14,6 +14,9 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -43,201 +46,213 @@ import type { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-pl
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
-    /**
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
       * Create a clean draft Timeline or Timeline template for the current user.
 > info
 > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
       */
-    cleanDraftTimelines(props: CleanDraftTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/timeline/_draft', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  cleanDraftTimelines(props: CleanDraftTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/timeline/_draft', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Copies and returns a timeline or timeline template.
 
       */
-    copyTimeline(props: CopyTimelineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Create a new Timeline or Timeline template.
-     */
-    createTimelines(props: CreateTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/timeline', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Delete a note from a Timeline using the note ID.
-     */
-    deleteNote(props: DeleteNoteProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/note', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Delete one or more Timelines or Timeline templates.
-     */
-    deleteTimelines(props: DeleteTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/timeline', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Export Timelines as an NDJSON file.
-     */
-    exportTimelines(props: ExportTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/timeline/_export', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object)
-        .query(props.query);
-    },
-    /**
-     * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
-     */
-    getDraftTimelines(props: GetDraftTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/timeline/_draft', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get all notes for a given document.
-     */
-    getNotes(props: GetNotesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/note', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get the details of an existing saved Timeline or Timeline template.
-     */
-    getTimeline(props: GetTimelineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/timeline', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a list of all saved Timelines or Timeline templates.
-     */
-    getTimelines(props: GetTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/timelines', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Import Timelines.
-     */
-    importTimelines(props: ImportTimelinesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/timeline/_import', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Install or update prepackaged Timelines.
-     */
-    installPrepackedTimelines(
-      props: InstallPrepackedTimelinesProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/timeline/_prepackaged', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
-     */
-    patchTimeline(props: PatchTimelineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/timeline', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Favorite a Timeline or Timeline template for the current user.
-     */
-    persistFavoriteRoute(props: PersistFavoriteRouteProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/timeline/_favorite', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Add a note to a Timeline or update an existing note.
-     */
-    persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/note', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Pin/unpin an event to/from an existing Timeline.
-     */
-    persistPinnedEventRoute(props: PersistPinnedEventRouteProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/pinned_event', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    resolveTimeline(props: ResolveTimelineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/timeline/resolve', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
+  copyTimeline(props: CopyTimelineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Create a new Timeline or Timeline template.
+   */
+  createTimelines(props: CreateTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/timeline', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Delete a note from a Timeline using the note ID.
+   */
+  deleteNote(props: DeleteNoteProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/note', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Delete one or more Timelines or Timeline templates.
+   */
+  deleteTimelines(props: DeleteTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/timeline', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Export Timelines as an NDJSON file.
+   */
+  exportTimelines(props: ExportTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/timeline/_export', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  /**
+   * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
+   */
+  getDraftTimelines(props: GetDraftTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/timeline/_draft', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get all notes for a given document.
+   */
+  getNotes(props: GetNotesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/note', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get the details of an existing saved Timeline or Timeline template.
+   */
+  getTimeline(props: GetTimelineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/timeline', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a list of all saved Timelines or Timeline templates.
+   */
+  getTimelines(props: GetTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/timelines', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Import Timelines.
+   */
+  importTimelines(props: ImportTimelinesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/timeline/_import', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Install or update prepackaged Timelines.
+   */
+  installPrepackedTimelines(
+    props: InstallPrepackedTimelinesProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/timeline/_prepackaged', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
+   */
+  patchTimeline(props: PatchTimelineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/timeline', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Favorite a Timeline or Timeline template for the current user.
+   */
+  persistFavoriteRoute(props: PersistFavoriteRouteProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/timeline/_favorite', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Add a note to a Timeline or update an existing note.
+   */
+  persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/note', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Pin/unpin an event to/from an existing Timeline.
+   */
+  persistPinnedEventRoute(props: PersistPinnedEventRouteProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/pinned_event', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  resolveTimeline(props: ResolveTimelineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/timeline/resolve', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
     },
   };
 }

@@ -201,7 +201,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -225,7 +225,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"appId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"appId\": Required`,
             });
           });
       });
@@ -248,7 +248,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiToken\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type secrets: Field \"apiToken\": Required`,
             });
           });
       });
@@ -268,7 +268,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: error configuring connector action: target url "${mockSwimlane.config.apiUrl}" is not added to the Kibana config xpack.actions.allowedHosts`,
+              message: `error validating connector type config: error configuring connector action: target url "${mockSwimlane.config.apiUrl}" is not added to the Kibana config xpack.actions.allowedHosts`,
             });
           });
       });
@@ -292,7 +292,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"received\": \"not-supported\",\n    \"code\": \"invalid_enum_value\",\n    \"options\": [\n      \"all\",\n      \"alerts\",\n      \"cases\"\n    ],\n    \"path\": [\n      \"connectorType\"\n    ],\n    \"message\": \"Invalid enum value. Expected 'all' | 'alerts' | 'cases', received 'not-supported'\"\n  }\n]`,
+              message: `error validating connector type config: Field \"connectorType\": Invalid enum value. Expected 'all' | 'alerts' | 'cases', received 'not-supported'`,
             });
           });
       });
@@ -349,7 +349,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"pushToService\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'pushToService'\"\n  }\n]`,
+                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'pushToService'`,
               });
             });
         });
@@ -374,7 +374,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"null\",\n    \"path\": [\n      \"subActionParams\"\n    ],\n    \"message\": \"Expected object, received null\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams\": Expected object, received null`,
               });
             });
         });
@@ -398,7 +398,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"commentId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
               });
             });
         });
@@ -422,7 +422,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"comment\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
               });
             });
         });

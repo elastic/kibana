@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import type { DatasetDetailsEbtProps } from '../services/telemetry';
 import { NavigationSource, NavigationTarget } from '../services/telemetry';
@@ -16,7 +15,7 @@ import type { DataStreamDetails } from '../../common/api_types';
 import type { Integration } from '../../common/data_streams_stats/integration';
 import { mapPercentageToQuality } from '../../common/utils';
 import { MASKED_FIELD_PLACEHOLDER, UNKOWN_FIELD_PLACEHOLDER } from '../../common/constants';
-import { calculatePercentage } from '../utils';
+import { calculatePercentage, getSafeDateISORange } from '../utils';
 
 export function useDatasetDetailsTelemetry() {
   const {
@@ -42,8 +41,8 @@ export function useDatasetDetailsTelemetry() {
         canUserViewIntegrations,
         canUserAccessDashboards,
         breakdownField,
-        isNonAggregatable,
-        isBreakdownFieldEcs,
+        isNonAggregatable: isNonAggregatable ?? false,
+        isBreakdownFieldEcs: isBreakdownFieldEcs ?? false,
         integration: integrationDetails.integration?.integration,
       });
     }
@@ -167,7 +166,14 @@ function getDatasetDetailsEbtProps({
   isNonAggregatable: boolean;
   isBreakdownFieldEcs: boolean;
   integration?: Integration;
-}): DatasetDetailsEbtProps {
+}): DatasetDetailsEbtProps | undefined {
+  const dateRange = getSafeDateISORange(timeRange);
+  if (!dateRange) {
+    // Return undefined when date range is invalid - telemetry should not crash the UI
+    return undefined;
+  }
+  const { startDate: from, endDate: to } = dateRange;
+
   const indexName = datasetDetails.rawName;
   const dataStream = {
     dataset: datasetDetails.name ?? '',
@@ -180,7 +186,6 @@ function getDatasetDetailsEbtProps({
   const degradedPercentage = calculatePercentage({ totalDocs, count: degradedDocs });
   const failedPercentage = calculatePercentage({ totalDocs, count: failedDocs });
   const health = mapPercentageToQuality([degradedPercentage, failedPercentage]);
-  const { startDate: from, endDate: to } = getDateISORange(timeRange);
 
   return {
     index_name: indexName,

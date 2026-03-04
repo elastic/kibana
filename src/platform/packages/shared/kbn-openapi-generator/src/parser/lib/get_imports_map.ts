@@ -10,6 +10,7 @@
 import { uniq } from 'lodash';
 import type { OpenApiDocument } from '../openapi_types';
 import { findRefs } from './helpers/find_refs';
+import { isLocalRef } from './helpers/is_local_ref';
 
 export interface ImportsMap {
   [importPath: string]: string[];
@@ -26,6 +27,11 @@ export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
   const importMap: Record<string, string[]> = {}; // key: import path, value: list of symbols to import
   const refs = findRefs(parsedSchema);
   refs.forEach((ref) => {
+    // Skip local references (e.g., #/components/schemas/SomeName) as they don't need imports
+    if (isLocalRef(ref)) {
+      return;
+    }
+
     const refParts = ref.split('#/components/schemas/');
     const importedSymbol = refParts[1];
     let importPath = refParts[0];

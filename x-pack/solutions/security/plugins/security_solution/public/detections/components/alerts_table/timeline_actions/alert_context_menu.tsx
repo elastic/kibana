@@ -15,6 +15,9 @@ import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
+import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
+import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
@@ -232,12 +235,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     refetch: refetchAll,
   });
 
+  const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+    closePopover,
+    ecsRowData,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
             ...addToCaseActionItems,
             ...statusActionItems,
+            ...runWorkflowMenuItem,
             ...alertTagsItems,
             ...alertAssigneesItems,
             ...exceptionActionItems,
@@ -249,6 +258,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             ...(agentId ? osqueryActionItems : []),
           ],
     [
+      runWorkflowMenuItem,
       isEvent,
       ruleId,
       addToCaseActionItems,
@@ -272,8 +282,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
+      ...runAlertWorkflowPanel,
     ],
-    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
+    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels, runAlertWorkflowPanel]
   );
 
   const button = useMemo(() => {
@@ -392,6 +403,10 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   onConfirm,
   alertStatus,
 }) => {
+  const isEndpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 
@@ -455,16 +470,28 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    isWaitingForIndexOrDataView;
+    isWaitingForIndexOrDataView ||
+    isRuleLoading;
 
-  if (isLoading || isRuleLoading) return null;
+  const isEndpointItem = exceptionListType === ExceptionListTypeEnum.ENDPOINT;
 
-  return (
+  if (isLoading) return null;
+
+  return isEndpointItem && isEndpointExceptionsMovedUnderManagement ? (
+    <EndpointExceptionsFlyout
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      alertData={enrichedAlert}
+      alertStatus={alertStatus}
+      isAlertDataLoading={isLoading}
+      rules={memoRule}
+    />
+  ) : (
     <AddExceptionFlyout
       rules={memoRule}
-      isEndpointItem={exceptionListType === ExceptionListTypeEnum.ENDPOINT}
+      isEndpointItem={isEndpointItem}
       alertData={enrichedAlert}
-      isAlertDataLoading={isLoading || isRuleLoading}
+      isAlertDataLoading={isLoading}
       alertStatus={alertStatus}
       isBulkAction={false}
       showAlertCloseOptions

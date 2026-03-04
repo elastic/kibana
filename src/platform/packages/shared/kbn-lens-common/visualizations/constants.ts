@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const LENS_UNKNOWN_VIS = 'UNKNOWN';
+
 export const LENS_CATEGORY_DISPLAY = {
   DEFAULT: 'default',
   INSIDE: 'inside',

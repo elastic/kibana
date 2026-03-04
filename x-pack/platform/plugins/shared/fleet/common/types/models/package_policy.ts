@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
 
 export interface PackagePolicyPackage {
@@ -49,6 +49,7 @@ export interface NewPackagePolicyInputStream {
   };
   release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
 }
 
@@ -66,6 +67,7 @@ export interface NewPackagePolicyInput {
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  deprecated?: DeprecationInfo;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
@@ -86,9 +88,11 @@ export interface NewPackagePolicy {
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
   cloud_connector_id?: string | null;
+  cloud_connector_name?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];

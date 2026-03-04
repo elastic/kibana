@@ -15,7 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-} from '@kbn/esql-ast';
+} from '@elastic/esql';
+import { esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -24,23 +25,13 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
-  ESQLCommand,
-  ESQLAstQueryExpression,
-} from '@kbn/esql-ast';
+  ESQLAstForkCommand,
+} from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
-
-// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
-export function getIndexPatternFromESQLQuery(esql?: string) {
-  const { root } = Parser.parse(esql || '');
-  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices?.map((index) => index.name).join(',');
-}
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
@@ -100,11 +91,10 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
  */
 export function hasTransformationalCommand(esql?: string) {
   if (!esql) return false;
-  const transformationalCommands = ['stats', 'keep'];
   const { root } = Parser.parse(esql);
 
   // Check for direct transformational commands first
-  const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
+  const hasAtLeastOneTransformationalCommand = TRANSFORMATIONAL_COMMANDS.some((command) =>
     root.commands.find(({ name }) => name === command)
   );
 
@@ -114,16 +104,21 @@ export function hasTransformationalCommand(esql?: string) {
   }
 
   // Check for fork commands with all transformational branches
-  const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<ESQLCommand>;
+  const forkCommands = Walker.findAll(
+    root,
+    (node) => node.name === 'fork'
+  ) as Array<ESQLAstForkCommand>;
 
   const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
-    const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
+    const forkArguments = forkCommand?.args;
 
     if (!forkArguments || forkArguments.length === 0) {
       return false;
     }
 
-    return forkArguments.every((branch) => {
+    return forkArguments.every((parens) => {
+      const branch = parens.child;
+
       if (branch.type !== 'query') {
         return false;
       }
@@ -133,7 +128,7 @@ export function hasTransformationalCommand(esql?: string) {
       // Branch must have at least one command and all commands must be transformational
       return (
         branchCommands.length > 0 &&
-        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
+        branchCommands.every((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name))
       );
     });
   });
@@ -215,6 +210,12 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
+  // PromQL queries always use @timestamp as timefield
+  const isPromQLQuery = root.commands.some(({ name }) => name === 'promql');
+  if (isPromQLQuery) {
+    return '@timestamp';
+  }
+
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
@@ -595,4 +596,19 @@ export const missingSortBeforeLimit = (esql: string): boolean => {
     }
   }
   return false;
+};
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * If the query contains PROMQL command, we will exclude it from this check.
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every(({ name }) => name !== 'promql') &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
 };

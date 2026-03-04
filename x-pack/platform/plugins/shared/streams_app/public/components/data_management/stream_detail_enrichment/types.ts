@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  DropDocumentProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
+  ReplaceProcessor,
+  RedactProcessor,
   SetProcessor,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
+  JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
+  ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -22,27 +33,75 @@ import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/confi
  * Processors' types
  */
 
+// GrokFormState uses wrapped patterns for useFieldArray compatibility
+export interface GrokPatternField {
+  value: string;
+}
+
 export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
-  patterns: DraftGrokExpression[];
+  patterns: GrokPatternField[];
 };
+
+export interface InternalNetworksValue {
+  value: string;
+}
 
 export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
+export type DropFormState = DropDocumentProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 export type ConvertFormState = ConvertProcessor;
+export type ReplaceFormState = ReplaceProcessor;
 
+/**
+ * Wrapper for for useFieldArray compatibility
+ */
+export interface RedactPatternField {
+  value: string;
+}
+
+export type RedactFormState = Omit<RedactProcessor, 'patterns'> & {
+  patterns: RedactPatternField[];
+};
 export type SetFormState = SetProcessor;
+export type MathFormState = MathProcessor;
+export type UppercaseFormState = UppercaseProcessor;
+export type LowercaseFormState = LowercaseProcessor;
+export type TrimFormState = TrimProcessor;
+export type JoinFormState = JoinProcessor;
+export type SplitFormState = SplitProcessor;
+export type SortFormState = SortProcessor;
+export type ConcatFormState = ConcatProcessor;
+export type NetworkDirectionFormState = Omit<
+  NetworkDirectionProcessor,
+  'internal_networks' | 'internal_networks_field'
+> & {
+  internal_networks?: InternalNetworksValue[];
+  internal_networks_field?: string;
+};
 
 export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
+  | DropFormState
   | ManualIngestPipelineFormState
   | ConvertFormState
-  | SetFormState;
+  | ReplaceFormState
+  | RedactFormState
+  | SetFormState
+  | MathFormState
+  | UppercaseFormState
+  | LowercaseFormState
+  | TrimFormState
+  | JoinFormState
+  | SplitFormState
+  | SortFormState
+  | ConcatFormState
+  | NetworkDirectionFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
-export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
+export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>
@@ -61,7 +120,7 @@ export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
 
 export type RandomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
-  { type: 'random-samples' }
+  { type: 'latest-samples' }
 >;
 
 export type KqlSamplesDataSourceWithUIAttributes = Extract<
@@ -72,4 +131,9 @@ export type KqlSamplesDataSourceWithUIAttributes = Extract<
 export type CustomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
   { type: 'custom-samples' }
+>;
+
+export type FailureStoreDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'failure-store' }
 >;

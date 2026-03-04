@@ -156,6 +156,41 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should execute email action correctly when replyTo is set', async () => {
+      await supertest
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            replyTo: ['reply@example.com'], // <-- test input
+            subject: 'Test with replyTo',
+            message: 'message',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { message, envelope } = resp.body.data;
+
+          expect(envelope.from).to.be('bob@example.com');
+          expect(envelope.to).to.eql(['kibana-action-test@elastic.co']);
+
+          expect(message.replyTo).to.eql([
+            {
+              address: 'reply@example.com',
+              name: '',
+            },
+          ]);
+          expect(message.subject).to.be('Test with replyTo');
+          expect(message.text).to.be(
+            'message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
+          );
+          expect(message.html).to.be(
+            `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
+          );
+        });
+    });
+
     it('should render html from markdown', async () => {
       await supertest
         .post(`/api/actions/connector/${createdActionId}/_execute`)
@@ -241,7 +276,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"from\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+            message: `error validating connector type config: Field \"from\": Required`,
           });
         });
     });
@@ -268,7 +303,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
+              "error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
           });
         });
 
@@ -294,7 +329,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
+              "error validating connector type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
           });
         });
     });

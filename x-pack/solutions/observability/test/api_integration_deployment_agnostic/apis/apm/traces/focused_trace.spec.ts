@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import type { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { TraceSearchType } from '@kbn/apm-plugin/common/trace_explorer';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateTrace } from './generate_trace';
 

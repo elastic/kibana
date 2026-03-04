@@ -12,9 +12,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
 
 export interface RowViewerProps {
   notifications?: NotificationsStart;
+  chrome: ChromeStart;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
@@ -38,13 +40,17 @@ export function RowViewer({
   columns,
   columnsMeta,
   notifications,
+  chrome,
   flyoutType = 'push',
   onClose,
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
 }: RowViewerProps) {
-  const services = useMemo(() => ({ toastNotifications: notifications?.toasts }), [notifications]);
+  const services = useMemo(
+    () => ({ toastNotifications: notifications?.toasts, chrome }),
+    [notifications, chrome]
+  );
 
   return (
     <UnifiedDocViewerFlyout

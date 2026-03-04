@@ -17,7 +17,7 @@ export const fromFormulaAPItoLensState = (
 ): FormulaIndexPatternColumn => {
   const { formula, format } = options;
 
-  const { filter, timeShift, ...sharedProps } = getLensStateMetricSharedProps(options);
+  const { timeShift, ...sharedProps } = getLensStateMetricSharedProps(options);
 
   return {
     operationType: 'formula',

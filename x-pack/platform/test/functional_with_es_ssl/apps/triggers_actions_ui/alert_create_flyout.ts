@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -147,7 +147,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe('create alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/246218
+  describe.skip('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
@@ -230,6 +231,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulePageFooterSaveButton');
 
       // add new action and remove first one
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
 
       // add webhook connector 2
@@ -478,6 +480,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await pageObjects.header.waitUntilLoadingHasFinished();
 

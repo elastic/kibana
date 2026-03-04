@@ -131,7 +131,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: Error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
+              'error validating connector type config: Error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });

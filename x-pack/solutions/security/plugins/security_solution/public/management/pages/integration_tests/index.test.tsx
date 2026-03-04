@@ -130,7 +130,7 @@ describe('when in the Administration tab', () => {
       });
 
       mockedContext.history.push('/administration/endpoint_exceptions');
-      expect(await render().findByTestId('endpointExceptionsPage-container')).toBeTruthy();
+      expect(await render().findByTestId('endpointExceptionsListPage-container')).toBeTruthy();
     });
 
     it('should display trusted apps list page when `canReadTrustedApplications` is TRUE', async () => {

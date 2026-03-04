@@ -11,15 +11,7 @@
 export * as cli from './src/cli';
 
 // Test framework
-export {
-  expect,
-  test,
-  spaceTest,
-  lighthouseTest,
-  apiTest,
-  globalSetupHook,
-  tags,
-} from './src/playwright';
+export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
 
 // Fixtures & configuration
 export {
@@ -39,6 +31,9 @@ export { measurePerformance, measurePerformanceAsync } from './src/common';
 // EUI components
 export * from './src/playwright/eui_components';
 
+// Kibana-wide components
+export * from './src/playwright/ui_components';
+
 // Scout core types
 export type {
   ScoutPlaywrightOptions,
@@ -55,8 +50,10 @@ export type {
 export type {
   ApiServicesFixture,
   BrowserAuthFixture,
+  RequestAuthFixture,
   SamlAuth,
   SynthtraceFixture,
+  SpaceSolutionView,
 } from './src/playwright';
 
 // Service & configuration types
@@ -73,6 +70,13 @@ export type {
 
 // Authentication types
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type {
+  RoleSessionCredentials,
+  CookieHeader,
+} from './src/playwright/fixtures/scope/worker/core_fixtures';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
+
+// Utility for overriding synthtrace clients
+export { getSynthtraceClient } from './src/common/services/synthtrace';

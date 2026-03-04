@@ -110,6 +110,7 @@ describe('deserializeDataStream', () => {
         failureStoreRetention: {
           customRetentionPeriod: undefined,
           defaultRetentionPeriod: undefined,
+          retentionDisabled: false,
         },
         indexMode: 'standard',
       });
@@ -263,6 +264,7 @@ describe('deserializeDataStream', () => {
           indices: [],
           rollover_on_write: false,
           lifecycle: {
+            enabled: true,
             data_retention: '21d',
           },
         } as any,
@@ -272,6 +274,25 @@ describe('deserializeDataStream', () => {
 
       expect(result.failureStoreRetention).toBeDefined();
       expect(result.failureStoreRetention!.customRetentionPeriod).toBe('21d');
+    });
+
+    it('should extract disabled retention period from failure store config', () => {
+      const dataStreamWithLifecycle = {
+        ...mockDataStreamFromEs,
+        failure_store: {
+          enabled: true,
+          indices: [],
+          rollover_on_write: false,
+          lifecycle: {
+            enabled: false,
+          },
+        } as any,
+      };
+
+      const result = deserializeDataStream(dataStreamWithLifecycle, false);
+
+      expect(result.failureStoreRetention).toBeDefined();
+      expect(result.failureStoreRetention!.retentionDisabled).toBe(true);
     });
   });
 

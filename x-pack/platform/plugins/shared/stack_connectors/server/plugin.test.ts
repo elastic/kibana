@@ -11,6 +11,7 @@ import { StackConnectorsPlugin } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 jest.mock('../common/experimental_features');
 
@@ -34,8 +35,19 @@ describe('Stack Connectors Plugin', () => {
 
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
+      const actionsConfigurationUtilities = actionsSetup.getActionsConfigurationUtilities();
+      (actionsConfigurationUtilities.getWebhookSettings as jest.Mock).mockReturnValue({
+        ssl: { pfx: { enabled: true } },
+      });
+
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(16);
+
+      const specConnectorTypes = Object.values(connectorsSpecs);
+      const builtInConnectorTypesCount = 18;
+
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(
+        builtInConnectorTypesCount + specConnectorTypes.length
+      );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -88,60 +100,87 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         9,
         expect.objectContaining({
+          id: '.http',
+          name: 'HTTP',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        10,
+        expect.objectContaining({
+          id: '.http-system',
+          name: 'HTTP',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        11,
+        expect.objectContaining({
           id: '.cases-webhook',
           name: 'Webhook - Case Management',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        10,
+        12,
         expect.objectContaining({
           id: '.xmatters',
           name: 'xMatters',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        11,
+        13,
         expect.objectContaining({
           id: '.servicenow',
           name: 'ServiceNow ITSM',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        12,
+        14,
         expect.objectContaining({
           id: '.servicenow-sir',
           name: 'ServiceNow SecOps',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        13,
+        15,
         expect.objectContaining({
           id: '.servicenow-itom',
           name: 'ServiceNow ITOM',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        14,
+        16,
         expect.objectContaining({
           id: '.jira',
           name: 'Jira',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        15,
+        17,
         expect.objectContaining({
           id: '.teams',
           name: 'Microsoft Teams',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        16,
+        18,
         expect.objectContaining({
           id: '.torq',
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
+
+      // Spec Connector Types registered
+      specConnectorTypes.forEach((spec, index) => {
+        expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+          builtInConnectorTypesCount + index + 1,
+          expect.objectContaining({
+            id: spec.metadata.id,
+            name: spec.metadata.displayName,
+          })
+        );
+      });
+
+      // SubAction Connectors
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -215,12 +254,19 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         11,
         expect.objectContaining({
+          id: '.mcp',
+          name: 'MCP',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        12,
+        expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        12,
+        13,
         expect.objectContaining({
           id: '.crowdstrike',
           name: 'CrowdStrike',

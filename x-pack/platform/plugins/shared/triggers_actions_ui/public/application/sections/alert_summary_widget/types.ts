@@ -8,7 +8,7 @@
 import type { BrushEndListener, PartialTheme, SettingsProps, Theme } from '@elastic/charts';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 export interface Alert {
@@ -50,9 +50,9 @@ export interface DependencyProps {
 export interface AlertSummaryWidgetProps {
   ruleTypeIds?: string[];
   consumers?: string[];
-  filter?: estypes.QueryDslQueryContainer;
+  filter?: NonNullable<estypes.QueryDslQueryContainer>;
   fullSize?: boolean;
-  onClick?: (status?: AlertStatus) => void;
+  onClick?: (status?: PublicAlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
   chartProps?: ChartProps;
   hideChart?: boolean;

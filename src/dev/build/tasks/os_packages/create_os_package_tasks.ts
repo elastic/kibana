@@ -114,11 +114,13 @@ export const CreateDockerWolfiARM64: Task = {
 
 export const CreateDockerServerless = function (
   architecture: 'x64' | 'aarch64',
-  solution: Solution
+  solution?: Solution
 ): Task {
   const architectureDesc = architecture === 'x64' ? X64 : ARM64;
   return {
-    description: `Creating Docker Serverless ${solution} solution image ${architectureDesc}`,
+    description: `Creating Docker Serverless ${
+      solution ? `'${solution.artifact}' solution` : ''
+    } image ${architectureDesc}`,
 
     async run(config, log, build) {
       await runDockerGenerator(config, log, build, {

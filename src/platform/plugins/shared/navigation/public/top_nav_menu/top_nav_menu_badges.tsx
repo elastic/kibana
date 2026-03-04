@@ -14,12 +14,18 @@ import React, { Fragment } from 'react';
 import type { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import { EuiBadge, EuiBadgeGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
+/**
+ * @deprecated Use coreStart.chrome.setBreadcrumbsBadges API instead
+ */
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;
   toolTipProps?: Partial<EuiToolTipProps>;
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 
+/**
+ * @deprecated Use coreStart.chrome.setBreadcrumbsBadges API instead
+ */
 export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | undefined }) => {
   const { euiTheme } = useEuiTheme();
   if (!badges || badges.length === 0) return null;

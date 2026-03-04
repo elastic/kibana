@@ -32,11 +32,13 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
   validate: (
     model: monaco.editor.ITextModel,
     code: string,
-    callbacks?: Deps
+    callbacks?: Deps,
+    options?: { invalidateColumnsCache?: boolean }
   ) => Promise<{ errors: MarkerDataType[]; warnings: MarkerDataType[] }>;
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+  getInlineCompletionsProvider?: (callbacks?: Deps) => monaco.languages.InlineCompletionsProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
 }
 

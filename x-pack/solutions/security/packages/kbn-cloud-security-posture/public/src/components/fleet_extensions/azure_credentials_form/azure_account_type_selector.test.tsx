@@ -11,10 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AzureAccountTypeSelect } from './azure_account_type_selector';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import * as cloudSetupContext from '../hooks/use_cloud_setup_context';
-import {
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
-} from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 
 // Mock the cloud setup context
 const mockUseCloudSetup = jest.fn();
@@ -204,7 +201,7 @@ describe('AzureAccountTypeSelect', () => {
                 expect.objectContaining({
                   vars: expect.objectContaining({
                     'azure.account_type': {
-                      value: AZURE_ORGANIZATION_ACCOUNT,
+                      value: ORGANIZATION_ACCOUNT,
                       type: 'text',
                     },
                   }),
@@ -219,7 +216,7 @@ describe('AzureAccountTypeSelect', () => {
     it('selects the correct account type when organization is set in policy', () => {
       const propsWithOrgAccount = {
         ...defaultProps,
-        newPolicy: createMockNewPackagePolicy(AZURE_ORGANIZATION_ACCOUNT),
+        newPolicy: createMockNewPackagePolicy(ORGANIZATION_ACCOUNT),
         input: {
           ...defaultProps.input,
           streams: [
@@ -227,7 +224,7 @@ describe('AzureAccountTypeSelect', () => {
               ...defaultProps.input.streams[0],
               vars: {
                 'azure.account_type': {
-                  value: AZURE_ORGANIZATION_ACCOUNT,
+                  value: ORGANIZATION_ACCOUNT,
                   type: 'text',
                 },
               },
@@ -245,7 +242,7 @@ describe('AzureAccountTypeSelect', () => {
     it('selects the correct account type when single account is set in policy', () => {
       const propsWithSingleAccount = {
         ...defaultProps,
-        newPolicy: createMockNewPackagePolicy(AZURE_SINGLE_ACCOUNT),
+        newPolicy: createMockNewPackagePolicy(SINGLE_ACCOUNT),
         input: {
           ...defaultProps.input,
           streams: [
@@ -253,7 +250,7 @@ describe('AzureAccountTypeSelect', () => {
               ...defaultProps.input.streams[0],
               vars: {
                 'azure.account_type': {
-                  value: AZURE_SINGLE_ACCOUNT,
+                  value: SINGLE_ACCOUNT,
                   type: 'text',
                 },
               },
@@ -280,7 +277,7 @@ describe('AzureAccountTypeSelect', () => {
               ...defaultProps.input.streams[0],
               vars: {
                 'azure.account_type': {
-                  value: AZURE_ORGANIZATION_ACCOUNT,
+                  value: ORGANIZATION_ACCOUNT,
                   type: 'text',
                 },
               },
@@ -304,7 +301,7 @@ describe('AzureAccountTypeSelect', () => {
               ...defaultProps.input.streams[0],
               vars: {
                 'azure.account_type': {
-                  value: AZURE_SINGLE_ACCOUNT,
+                  value: SINGLE_ACCOUNT,
                   type: 'text',
                 },
               },
@@ -336,7 +333,7 @@ describe('AzureAccountTypeSelect', () => {
               ...defaultProps.input.streams[0],
               vars: {
                 'azure.account_type': {
-                  value: AZURE_SINGLE_ACCOUNT,
+                  value: SINGLE_ACCOUNT,
                   type: 'text',
                 },
               },
@@ -372,7 +369,7 @@ describe('AzureAccountTypeSelect', () => {
                 expect.objectContaining({
                   vars: expect.objectContaining({
                     'azure.account_type': {
-                      value: AZURE_ORGANIZATION_ACCOUNT,
+                      value: ORGANIZATION_ACCOUNT,
                       type: 'text',
                     },
                   }),
@@ -404,7 +401,7 @@ describe('AzureAccountTypeSelect', () => {
                 expect.objectContaining({
                   vars: expect.objectContaining({
                     'azure.account_type': {
-                      value: AZURE_SINGLE_ACCOUNT,
+                      value: SINGLE_ACCOUNT,
                       type: 'text',
                     },
                   }),
@@ -428,7 +425,7 @@ describe('AzureAccountTypeSelect', () => {
               ...defaultProps.input.streams[0],
               vars: {
                 'azure.account_type': {
-                  value: AZURE_ORGANIZATION_ACCOUNT,
+                  value: ORGANIZATION_ACCOUNT,
                   type: 'text',
                 },
               },

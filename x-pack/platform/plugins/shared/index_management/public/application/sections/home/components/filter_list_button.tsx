@@ -41,6 +41,8 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
     label: (item as Filter).name,
     checked: (item as Filter).checked,
     'data-test-subj': 'filterItem',
+    'aria-selected': (item as Filter).checked === 'on',
+    'aria-label': (item as Filter).name,
   }));
 
   const toggleFilter = (filter: T) => {

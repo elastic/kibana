@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -18,41 +19,60 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
-import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
-import { isTerminalStatus } from '../lib/execution_status';
+import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
-  isLoading: boolean;
+  workflowExecutionDuration?: number;
+  isLoadingStepData?: boolean;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, isLoading }) => {
+  ({ workflowExecutionId, stepExecution, workflowExecutionDuration, isLoadingStepData }) => {
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
     );
 
-    const tabs = useMemo(
-      () => [
+    const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
+    const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
+
+    // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
+    const triggerType = isTriggerPseudoStep
+      ? stepExecution?.stepType?.replace('trigger_', '')
+      : undefined;
+
+    const hasInput = Boolean(stepExecution?.input);
+    const hasError = Boolean(stepExecution?.error);
+
+    const tabs = useMemo(() => {
+      if (isTriggerPseudoStep) {
+        const pseudoTabs: { id: string; name: string }[] = [];
+        if (hasInput) {
+          pseudoTabs.push({
+            id: 'input',
+            name: 'Input',
+          });
+        }
+        return pseudoTabs;
+      }
+      return [
         {
           id: 'output',
-          name: stepExecution?.error ? 'Error' : 'Output',
+          name: hasError ? 'Error' : 'Output',
         },
         {
           id: 'input',
           name: 'Input',
         },
-        {
-          id: 'timeline',
-          name: 'Timeline',
-        },
-      ],
-      [stepExecution]
-    );
+      ];
+    }, [hasInput, hasError, isTriggerPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -62,7 +82,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stepExecution?.stepId, tabs[0].id]);
 
-    if (isLoading || !stepExecution) {
+    if (!stepExecution) {
       return (
         <EuiPanel hasShadow={false} paddingSize="m">
           <EuiSkeletonText lines={1} />
@@ -72,11 +92,23 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       );
     }
 
+    if (isOverviewPseudoStep) {
+      return (
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          workflowExecutionDuration={workflowExecutionDuration}
+        />
+      );
+    }
+
     return (
       <EuiPanel
         hasShadow={false}
         paddingSize="m"
         css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+        data-test-subj={
+          isTriggerPseudoStep ? 'workflowExecutionTrigger' : 'workflowStepExecutionDetails'
+        }
       >
         <EuiFlexGroup
           direction="column"
@@ -91,6 +123,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   isSelected={tab.id === selectedTabId}
                   key={tab.id}
                   css={{ lineHeight: 'normal' }}
+                  data-test-subj={`workflowStepTab_${tab.id}`}
                 >
                   {tab.name}
                 </EuiTab>
@@ -99,17 +132,77 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           </EuiFlexItem>
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
-              {selectedTabId === 'output' && (
-                <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-              )}
-              {selectedTabId === 'input' && (
-                <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-              )}
-              {selectedTabId === 'timeline' && (
-                <StepExecutionTimelineStateful
-                  executionId={workflowExecutionId}
-                  stepExecutionId={stepExecution.id}
-                />
+              {isLoadingStepData ? (
+                <EuiPanel hasShadow={false} paddingSize="m">
+                  <EuiSkeletonText lines={4} />
+                </EuiPanel>
+              ) : (
+                <>
+                  {selectedTabId === 'output' && (
+                    <>
+                      {isTriggerPseudoStep && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflowsManagement.stepExecutionDetails.contextAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: <strong>{`{{ <field> }}`}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                    </>
+                  )}
+                  {selectedTabId === 'input' && (
+                    <>
+                      {isTriggerPseudoStep && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: (
+                                  <strong>
+                                    {triggerType === 'manual'
+                                      ? `{{ inputs.<field> }}`
+                                      : `{{ event.<field> }}`}
+                                  </strong>
+                                ),
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+                    </>
+                  )}
+                </>
               )}
             </EuiFlexItem>
           ) : (

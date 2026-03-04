@@ -7,7 +7,8 @@
 
 import { load } from 'js-yaml';
 import pMap from 'p-map';
-import minimatch from 'minimatch';
+import type { MMRegExp } from 'minimatch';
+import { minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -76,7 +77,10 @@ import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
-import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
+import type {
+  PackageAssetReference,
+  RegistryPolicyTemplate,
+} from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
@@ -466,7 +470,7 @@ function getInstalledPackageSavedObjectDataStreams(
         const patternRegex = new minimatch.Minimatch(stream.name, {
           noglobstar: true,
           nonegate: true,
-        }).makeRe();
+        }).makeRe() as MMRegExp;
 
         return filterActiveDatastreamsName.some((dataStreamName) =>
           dataStreamName.match(patternRegex)
@@ -824,18 +828,20 @@ export async function getInstalledPackageWithAssets(options: {
   if (!installation) {
     return;
   }
-  const assetsReference =
-    (typeof options.assetsFilter !== 'undefined'
-      ? installation.package_assets?.filter(({ path }) =>
-          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
-        )
-      : installation.package_assets) ?? [];
 
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    assetsReference,
-    options.savedObjectsClient
+    installation.package_assets ?? [],
+    options.savedObjectsClient,
+    {
+      shouldFetchBuffer: (reference: PackageAssetReference) => {
+        if (typeof options.assetsFilter === 'undefined' || typeof reference.path === 'undefined') {
+          return true;
+        }
+        return options.assetsFilter(reference.path);
+      },
+    }
   );
 
   if (!esPackage) {
@@ -973,11 +979,16 @@ export async function getAgentTemplateAssetsMap({
 export async function getPackageKnowledgeBase(options: {
   esClient: ElasticsearchClient;
   pkgName: string;
+  abortController?: AbortController;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { esClient, pkgName } = options;
+  const { esClient, pkgName, abortController } = options;
 
   try {
-    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+      esClient,
+      pkgName,
+      abortController
+    );
 
     if (knowledgeBaseItems.length === 0) {
       return undefined;

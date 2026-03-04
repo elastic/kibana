@@ -15,7 +15,10 @@ import {
   BENCHMARK_SCORE_INDEX_PATTERN,
   ALERTS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import {
+  RULES_FEATURE_ID,
+  SECURITY_FEATURE_ID,
+} from '@kbn/security-solution-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const alertsSecurityUserIndices = [
@@ -149,6 +152,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
           base: [],
           feature: {
             [SECURITY_FEATURE_ID]: ['all'],
+            [RULES_FEATURE_ID]: ['all'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],

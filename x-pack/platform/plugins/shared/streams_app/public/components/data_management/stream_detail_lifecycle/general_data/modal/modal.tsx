@@ -5,49 +5,52 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleAll,
   IngestStreamLifecycleDSL,
+  IlmPolicy,
 } from '@kbn/streams-schema';
 import {
+  Streams,
   effectiveToIngestLifecycle,
   isDisabledLifecycle,
   isDslLifecycle,
   isErrorLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
+  isRoot,
 } from '@kbn/streams-schema';
-import { Streams, isRoot } from '@kbn/streams-schema';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModalFooter,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  useGeneratedHtmlId,
-  EuiSwitch,
-  EuiButtonGroup,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { IlmField } from './ilm';
-import { DslField, DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE } from './dsl';
+import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { buildRequestPreviewCodeContent } from '../../../shared/utils';
+import { DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE, DslField } from './dsl';
+import { IlmField } from './ilm';
 
 export type LifecycleEditAction = 'ilm' | 'custom' | 'indefinite';
 
 interface Props {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
-  getIlmPolicies: () => Promise<PolicyFromES[]>;
+  getIlmPolicies: () => Promise<IlmPolicy[]>;
   definition: Streams.ingest.all.GetResponse;
   updateInProgress: boolean;
 }
@@ -64,8 +67,9 @@ export function EditLifecycleModal({
   const isCurrentLifecycleInherit = isInheritLifecycle(definition.stream.ingest.lifecycle);
   const initialSelectedAction: LifecycleEditAction = isIlmLifecycle(definition.effective_lifecycle)
     ? 'ilm'
-    : isDslLifecycle(definition.effective_lifecycle) &&
-      !definition.effective_lifecycle.dsl.data_retention
+    : (isDslLifecycle(definition.effective_lifecycle) &&
+        !definition.effective_lifecycle.dsl.data_retention) ||
+      isDisabledLifecycle(definition.effective_lifecycle)
     ? 'indefinite'
     : 'custom';
 
@@ -76,7 +80,7 @@ export function EditLifecycleModal({
   );
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
-    selectedAction === 'ilm'
+    isCurrentLifecycleInherit || selectedAction === 'ilm'
   );
 
   const isWired = Streams.WiredStream.GetResponse.is(definition);
@@ -115,6 +119,29 @@ export function EditLifecycleModal({
   const initialCustomPeriodValue =
     (definition.effective_lifecycle as IngestStreamLifecycleDSL).dsl?.data_retention ??
     `${DEFAULT_RETENTION_VALUE}${DEFAULT_RETENTION_UNIT.value}`;
+
+  const copyCodeContent = React.useMemo(() => {
+    const updatedLifecycle = buildUpdatedLifecycle(lifecycle, {
+      isInheritToggleOn,
+    });
+
+    if (!updatedLifecycle) {
+      return '';
+    }
+
+    const body = {
+      ingest: {
+        ...definition.stream.ingest,
+        lifecycle: updatedLifecycle,
+      },
+    };
+
+    return buildRequestPreviewCodeContent({
+      method: 'PUT',
+      url: `/api/streams/${definition.stream.name}/_ingest`,
+      body,
+    });
+  }, [definition, isInheritToggleOn, lifecycle]);
 
   return (
     <EuiModal onClose={closeModal} aria-labelledby={modalTitleId} css={{ width: '600px' }}>
@@ -172,9 +199,14 @@ export function EditLifecycleModal({
                       setSelectedAction(initialSelectedAction);
                     }
                     setIsInheritToggleOn(true);
-                    setIsSaveButtonDisabled(false);
+                    setIsSaveButtonDisabled(isCurrentLifecycleInherit);
                   } else {
                     setIsInheritToggleOn(false);
+                    // When disabling inheritance with 'indefinite' selected and lifecycle is disabled,
+                    // convert to DSL lifecycle without data retention so it can be saved
+                    if (selectedAction === 'indefinite' && isDisabledLifecycle(lifecycle)) {
+                      setLifecycle({ dsl: {} });
+                    }
                     setIsSaveButtonDisabled(selectedAction === 'ilm');
                   }
                 }}
@@ -251,46 +283,82 @@ export function EditLifecycleModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="streamsAppModalFooterCancelButton"
-              disabled={updateInProgress}
-              color="primary"
-              onClick={() => closeModal()}
-            >
-              {i18n.translate('xpack.streams.streamDetailLifecycle.cancelLifecycleUpdate', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
+            <EuiCopy textToCopy={copyCodeContent}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
+                  size="s"
+                  iconType="editorCodeBlock"
+                  onClick={copy}
+                  disabled={isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)}
+                >
+                  {copyCodeButtonText}
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="streamsAppModalFooterButton"
-              fill
-              disabled={isSaveButtonDisabled}
-              isLoading={updateInProgress}
-              onClick={() => {
-                if (isInheritToggleOn) {
-                  updateLifecycle({ inherit: {} });
-                  return;
-                }
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="streamsAppModalFooterCancelButton"
+                  disabled={updateInProgress}
+                  color="primary"
+                  onClick={() => closeModal()}
+                >
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.cancelLifecycleUpdate', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
 
-                if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
-                  return;
-                }
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="streamsAppModalFooterButton"
+                  fill
+                  disabled={isSaveButtonDisabled}
+                  isLoading={updateInProgress}
+                  onClick={() => {
+                    const updatedLifecycle = buildUpdatedLifecycle(lifecycle, {
+                      isInheritToggleOn,
+                    });
 
-                updateLifecycle(lifecycle);
-              }}
-            >
-              {i18n.translate('xpack.streams.streamDetailLifecycle.saveButton', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
+                    if (updatedLifecycle) {
+                      updateLifecycle(updatedLifecycle);
+                    }
+                  }}
+                >
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.saveButton', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
   );
+}
+
+const copyCodeButtonText = i18n.translate('xpack.streams.streamDetailLifecycle.copyCodeButton', {
+  defaultMessage: 'Copy API Request',
+});
+
+function buildUpdatedLifecycle(
+  lifecycle: IngestStreamLifecycleAll,
+  { isInheritToggleOn }: { isInheritToggleOn: boolean }
+): IngestStreamLifecycle | undefined {
+  if (isInheritToggleOn) {
+    return { inherit: {} };
+  }
+
+  if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+    return;
+  }
+
+  return lifecycle;
 }

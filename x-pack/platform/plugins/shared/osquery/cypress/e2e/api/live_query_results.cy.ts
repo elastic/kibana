@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import { request } from '../../tasks/common';
 import { loadLiveQuery } from '../../tasks/api_fixtures';
-import { API_VERSIONS } from '../../../common/constants';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('Live query', { tags: ['@ess', '@serverless'] }, () => {

@@ -16,6 +16,7 @@ import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type { DocumentMatchFilterOptions } from '.';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
+import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
@@ -37,10 +38,18 @@ export interface StreamRoutingContext {
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
   suggestedRuleId: string | null;
+  editingSuggestionIndex: number | null;
+  editedSuggestion: PartitionSuggestion | null;
+  isRefreshing: boolean;
+  isConditionEditorValid: boolean;
 }
 
 export type StreamRoutingEvent =
-  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
+  | { type: 'childStreams.mode.changeToIngestMode' }
+  | { type: 'childStreams.mode.changeToQueryMode' }
+  | { type: 'queryStream.create' }
+  | { type: 'queryStream.cancel' }
+  | { type: 'queryStream.save'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
@@ -49,6 +58,7 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
+  | { type: 'routingRule.setConditionEditorValidity'; isValid: boolean }
   | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
   | { type: 'routingSamples.setSelectedPreview'; preview: RoutingSamplesContext['selectedPreview'] }
   | {
@@ -58,4 +68,9 @@ export type StreamRoutingEvent =
       index: number;
       toggle?: boolean;
     }
-  | { type: 'routingRule.reviewSuggested'; id: string };
+  | { type: 'routingRule.reviewSuggested'; id: string }
+  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
+  | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
+  | { type: 'suggestion.changeName'; name: string }
+  | { type: 'suggestion.changeCondition'; condition: Condition }
+  | { type: 'suggestion.saveSuggestion' };

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -10,7 +10,6 @@
     "server/**/*",
   ],
   "kbn_references": [
-    { "path": "../tsconfig.json" },
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/usage-collection-plugin",

@@ -36,7 +36,7 @@ interface PartitionChartMeta {
   showExperimentalBadge?: boolean;
   sortPriority: number;
   description: string;
-  toolbarPopover: {
+  toolbar: {
     isDisabled?: boolean;
     categoryOptions: Array<{
       id: SharedLensPartitionLayerState['categoryDisplay'];
@@ -61,7 +61,7 @@ interface PartitionChartMeta {
   };
 }
 
-const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
+const categoryOptions: PartitionChartMeta['toolbar']['categoryOptions'] = [
   {
     id: CategoryDisplay.HIDE,
     label: i18n.translate('xpack.lens.pieChart.categoriesHideLabel', {
@@ -82,7 +82,7 @@ const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] =
   },
 ];
 
-const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
+const categoryOptionsTreemap: PartitionChartMeta['toolbar']['categoryOptions'] = [
   {
     id: CategoryDisplay.HIDE,
     label: i18n.translate('xpack.lens.pieChart.hideTreemapCategoriesLabel', {
@@ -97,7 +97,7 @@ const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOpti
   },
 ];
 
-const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
+const numberOptions: PartitionChartMeta['toolbar']['numberOptions'] = [
   {
     id: NumberDisplay.HIDDEN,
     label: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
@@ -118,7 +118,7 @@ const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
   },
 ];
 
-const emptySizeRatioOptions: PartitionChartMeta['toolbarPopover']['emptySizeRatioOptions'] = [
+const emptySizeRatioOptions: PartitionChartMeta['toolbar']['emptySizeRatioOptions'] = [
   {
     id: 'emptySizeRatioOption-none',
     value: 0,
@@ -158,7 +158,7 @@ const sharedPieDonutOptions: Omit<PartitionChartMeta, 'id'> = {
     defaultMessage: 'Pie',
   }),
   maxBuckets: 3,
-  toolbarPopover: {
+  toolbar: {
     categoryOptions,
     numberOptions,
     emptySizeRatioOptions,
@@ -188,7 +188,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       defaultMessage: 'Waffle',
     }),
     maxBuckets: 1,
-    toolbarPopover: {
+    toolbar: {
       isDisabled: true,
       categoryOptions: [],
       numberOptions: [],
@@ -211,7 +211,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       defaultMessage: 'Treemap',
     }),
     maxBuckets: 2,
-    toolbarPopover: {
+    toolbar: {
       categoryOptions: categoryOptionsTreemap,
       numberOptions,
     },
@@ -230,7 +230,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       defaultMessage: 'Mosaic',
     }),
     maxBuckets: 2,
-    toolbarPopover: {
+    toolbar: {
       categoryOptions: [],
       numberOptions,
     },

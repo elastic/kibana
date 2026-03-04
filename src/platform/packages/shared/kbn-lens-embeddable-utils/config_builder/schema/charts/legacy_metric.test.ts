@@ -8,6 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
+import type { LegacyMetricState } from './legacy_metric';
 import { legacyMetricStateSchema } from './legacy_metric';
 
 describe('Legacy Metric Schema', () => {
@@ -17,12 +18,14 @@ describe('Legacy Metric Schema', () => {
       type: 'dataView',
       id: 'test-data-view',
     },
-  };
+  } satisfies Partial<LegacyMetricState>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  };
+  } satisfies Partial<LegacyMetricState>;
+
+  type LegacyMetricInput = Omit<LegacyMetricState, keyof typeof defaultValues>;
 
   describe('metric configuration', () => {
     it('validates base count metric operation', () => {
@@ -33,7 +36,7 @@ describe('Legacy Metric Schema', () => {
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated.metric.size).toBeUndefined();
@@ -55,49 +58,34 @@ describe('Legacy Metric Schema', () => {
             value: 'right',
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates metric with color configuration', () => {
-      const colorByValueConfig = [
-        {
-          type: 'dynamic',
-          range: 'absolute',
-          steps: [
-            { type: 'from', from: 0, color: '#blue' },
-            { type: 'to', to: 100, color: '#red' },
-          ],
-        },
-        {
-          type: 'dynamic',
-          range: 'percentage',
-          min: 0,
-          max: 100,
-          steps: [
-            { type: 'from', from: 0, color: '#blue' },
-            { type: 'to', to: 100, color: '#red' },
-          ],
-        },
-      ];
-      for (const color of colorByValueConfig) {
-        const input = {
-          ...baseLegacyMetricConfig,
-          metric: {
-            operation: 'average',
-            field: 'temperature',
-            alignments: { labels: 'top', value: 'left' },
-            size: 'l',
-            apply_color_to: 'value',
-            color,
+      const input = {
+        ...baseLegacyMetricConfig,
+        metric: {
+          operation: 'average',
+          field: 'temperature',
+          alignments: { labels: 'top', value: 'left' },
+          size: 'l',
+          apply_color_to: 'value',
+          color: {
+            type: 'dynamic',
+            range: 'absolute',
+            steps: [
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
+            ],
           },
-        };
+        },
+      } satisfies LegacyMetricInput;
 
-        const validated = legacyMetricStateSchema.validate(input);
-        expect(validated).toEqual({ ...defaultValues, ...input });
-      }
+      const validated = legacyMetricStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
 
@@ -105,10 +93,11 @@ describe('Legacy Metric Schema', () => {
     it('throws on missing metric operation', () => {
       const input = {
         ...baseLegacyMetricConfig,
+        // @ts-expect-error
         metric: {
           field: 'test_field',
         },
-      };
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -120,10 +109,11 @@ describe('Legacy Metric Schema', () => {
           operation: 'count',
           field: 'test_field',
           alignments: {
+            // @ts-expect-error
             labels: 'invalid',
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -147,19 +137,40 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'sum',
           field: 'sales',
+          // @ts-expect-error
           apply_color_to: 'invalid',
           color: {
             type: 'dynamic',
-            min: 0,
-            max: 100,
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies LegacyMetricInput;
+
+      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws when color by value is not absolute', () => {
+      const input = {
+        ...baseLegacyMetricConfig,
+        metric: {
+          operation: 'sum',
+          field: 'sales',
+          apply_color_to: 'background',
+          color: {
+            type: 'dynamic',
+            // @ts-expect-error
+            range: 'percentage',
+            steps: [
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
+            ],
+          },
+        },
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -185,12 +196,12 @@ describe('Legacy Metric Schema', () => {
             type: 'dynamic',
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({
@@ -215,7 +226,7 @@ describe('Legacy Metric Schema', () => {
             value: 'center',
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });

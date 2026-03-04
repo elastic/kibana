@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
 import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
 import type {
   ServerlessPluginSetup,
@@ -41,7 +37,7 @@ export class ServerlessPlugin
     core: CoreStart,
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
-    const { chrome, rendering } = core;
+    const { chrome } = core;
 
     // Casting the "chrome.project" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = chrome as InternalChromeStart;
@@ -60,31 +56,11 @@ export class ServerlessPlugin
       project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
     });
 
-    chrome.navControls.registerRight({
-      order: 1,
-      mount: toMountPoint(
-        <EuiButton
-          href="https://ela.st/serverless-feedback"
-          size={'s'}
-          color={'warning'}
-          iconType={'popout'}
-          iconSide={'right'}
-          target={'_blank'}
-        >
-          {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
-            defaultMessage: 'Give feedback',
-          })}
-        </EuiButton>,
-        rendering
-      ),
-    });
-
     return {
-      initNavigation: (id, navigationTree$, config) => {
-        project.initNavigation(id, navigationTree$, config);
+      initNavigation: (id, navigationTree$) => {
+        project.initNavigation(id, navigationTree$);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
-      setProjectHome: (homeHref: string) => project.setHome(homeHref),
       getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
         if (!roleManagementEnabled) return extendCardNavDefinitions;
 

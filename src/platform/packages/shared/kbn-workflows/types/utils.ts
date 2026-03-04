@@ -10,32 +10,33 @@
 import type {
   ConnectorContractUnion,
   DynamicConnectorContract,
-  EnhancedInternalConnectorContract,
-  EsWorkflow,
+  EsWorkflowCreate,
+  HttpMethod,
+  InternalConnectorContract,
+  StepStabilityLevel,
 } from './v1';
-import { ExecutionStatus } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
+import { getBuiltInStepDefinition } from '../spec/builtin_step_definitions';
 import type {
+  BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   MergeStep,
   ParallelStep,
   Step,
-  TriggerType,
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
-import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
+import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
+import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
+import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
-): Omit<
-  EsWorkflow,
-  'spaceId' | 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'
-> {
+): EsWorkflowCreate {
   // TODO: handle merge, if, foreach, etc.
 
   return {
@@ -44,7 +45,6 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     tags: workflowDefinition.tags ?? [],
     enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
-    deleted_at: null,
     valid: true,
   };
 }
@@ -62,9 +62,22 @@ export function isDangerousStatus(status: ExecutionStatus) {
   return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }
 
+export function isTerminalStatus(status: ExecutionStatus) {
+  return TerminalExecutionStatuses.includes(status);
+}
+
+export function isCancelableStatus(status: ExecutionStatus) {
+  const CancelableStatus: readonly ExecutionStatus[] = [
+    ExecutionStatus.RUNNING,
+    ExecutionStatus.WAITING,
+    ExecutionStatus.WAITING_FOR_INPUT,
+    ExecutionStatus.PENDING,
+  ];
+  return CancelableStatus.includes(status);
+}
+
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
-export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
@@ -77,10 +90,19 @@ export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
 export const isTriggerType = (type: string): type is TriggerType =>
   TriggerTypes.includes(type as TriggerType);
 
+export const isInternalConnector = (
+  connector: ConnectorContractUnion
+): connector is InternalConnectorContract => 'methods' in connector;
+
 export const isDynamicConnector = (
   connector: ConnectorContractUnion
 ): connector is DynamicConnectorContract => 'actionTypeId' in connector;
 
-export const isEnhancedInternalConnector = (
-  connector: ConnectorContractUnion
-): connector is EnhancedInternalConnectorContract => 'examples' in connector;
+export const isHttpMethod = (method: string): method is HttpMethod =>
+  KNOWN_HTTP_METHODS.includes(method as HttpMethod);
+
+export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
+  BuiltInStepProperties.includes(property as BuiltInStepProperty);
+
+export const getBuiltInStepStability = (type: string): StepStabilityLevel | undefined =>
+  getBuiltInStepDefinition(type)?.stability;

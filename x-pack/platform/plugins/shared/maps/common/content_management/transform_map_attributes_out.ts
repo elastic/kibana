@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { TimeRange } from '@kbn/es-query';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
@@ -15,11 +16,11 @@ import { transformLayersOut } from './transform_layers_out';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
-  references: Reference[]
+  findReference: (name: string) => Reference | undefined
 ): MapAttributes {
   const { attributes: injectedAttributes } = injectReferences({
     attributes: storedMapAttributes,
-    references,
+    findReference,
   });
   return {
     title: injectedAttributes.title,
@@ -39,7 +40,7 @@ function parseLayerListJSON(layerListJSON?: string) {
 
 function parseMapStateJSON(mapStateJSON?: string) {
   const parsedMapState = parseJSON<{ [key: string]: unknown }>({}, mapStateJSON);
-  const { refreshConfig, ...rest } = dropUnknownKeys(
+  const { refreshConfig, timeFilters, adHocDataViews, ...rest } = dropUnknownKeys(
     parsedMapState,
     mapStateKeys
   ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
@@ -47,6 +48,19 @@ function parseMapStateJSON(mapStateJSON?: string) {
     ...rest,
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
+      : {}),
+    // BWC drop mode - no longer needed.
+    // mode stored in timeRange with values not supported in timeRangeSchema
+    ...(timeFilters
+      ? { timeFilters: dropUnknownKeys(timeFilters, ['from', 'to']) as TimeRange }
+      : {}),
+    // BWC drop unused adhoc data view keys.
+    ...(adHocDataViews?.length
+      ? {
+          adHocDataViews: adHocDataViews.map((adhocDataView) =>
+            dropUnknownKeys(adhocDataView, ['allowHidden', 'id', 'name', 'timeFieldName', 'title'])
+          ) as MapAttributes['adHocDataViews'],
+        }
       : {}),
   };
 }

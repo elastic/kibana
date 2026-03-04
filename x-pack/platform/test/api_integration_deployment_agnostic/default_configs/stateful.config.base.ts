@@ -14,11 +14,12 @@ import {
 } from '@kbn/mock-idp-utils';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import {
-  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
   defineDockerServersConfig,
+  dockerRegistryPort,
+  packageRegistryDocker,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
@@ -26,7 +27,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { DeploymentAgnosticCommonServices } from '../services';
 import { services } from '../services';
-import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import {
+  AI_ASSISTANT_SNAPSHOT_REPO_PATH,
+  STREAMS_SNAPSHOT_REPO_PATH,
+  LOCAL_PRODUCT_DOC_PATH,
+} from './common_paths';
 
 interface CreateTestConfigOptions<T> {
   esServerArgs?: string[];
@@ -51,17 +56,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
-
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
@@ -93,15 +87,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       servers,
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
-        },
+        registry: packageRegistryDocker,
       }),
       testFiles: options.testFiles,
       security: { disableTestUser: true },
@@ -128,7 +114,9 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
-          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
+          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH},${STREAMS_SNAPSHOT_REPO_PATH}`,
+          // @ts-expect-error - allow custom ES server args from test configs
+          ...(options?.esTestCluster?.serverArgs ?? []),
         ],
         files: [
           // Passing the roles that are equivalent to the ones we have in serverless

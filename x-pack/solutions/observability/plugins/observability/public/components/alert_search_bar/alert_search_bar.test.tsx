@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';

@@ -10,29 +10,26 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const searchFuncationalConfig = await readConfigFile(require.resolve('../config'));
+  const searchFunctionalConfig = await readConfigFile(require.resolve('../config'));
 
   return {
-    ...searchFuncationalConfig.getAll(),
+    ...searchFunctionalConfig.getAll(),
     pageObjects,
     junit: {
       reportName: 'Search Solution UI Functional Tests w/ Feature Flagged Features',
     },
     kbnTestServer: {
-      ...searchFuncationalConfig.get('kbnTestServer'),
+      ...searchFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
-        ...searchFuncationalConfig.get('kbnTestServer.serverArgs'),
+        ...searchFunctionalConfig.get('kbnTestServer.serverArgs'),
         '--xpack.spaces.defaultSolution=es', // Default to Search Solution
         `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
-        `--uiSettings.overrides.agentBuilder:enabled=true`,
-        '--uiSettings.overrides.hideAnnouncements=true',
-        '--feature_flags.overrides.searchSolution.gettingStartedEnabled=true',
       ],
     },
     // load tests in the index file
     testFiles: [require.resolve('../index.feature_flags.ts')],
     apps: {
-      ...searchFuncationalConfig.get('apps'),
+      ...searchFunctionalConfig.get('apps'),
     },
   };
 }

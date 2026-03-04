@@ -7,28 +7,16 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { lazy } from 'react';
 import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
-import { renderIntegrationsLinkCallout } from './integrations_link_callout';
 
-const LazyIconAssets = lazy(() =>
-  import('./v2_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
-);
-
-export const createAssetsNavigationTree = (
-  core: CoreStart,
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => ({
   id: SecurityGroupName.assets,
-  iconV2: LazyIconAssets,
+  icon: 'display',
   title: SecurityLinkGroup[SecurityGroupName.assets].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       link: 'fleet',
@@ -69,10 +57,6 @@ export const createAssetsNavigationTree = (
           link: securityLink(SecurityPageName.policies),
         },
         {
-          id: SecurityPageName.endpointExceptions,
-          link: securityLink(SecurityPageName.endpointExceptions),
-        },
-        {
           id: SecurityPageName.trustedApps,
           link: securityLink(SecurityPageName.trustedApps),
         },
@@ -93,15 +77,16 @@ export const createAssetsNavigationTree = (
           link: securityLink(SecurityPageName.blocklist),
         },
         {
+          id: SecurityPageName.endpointExceptions,
+          link: securityLink(SecurityPageName.endpointExceptions),
+        },
+        {
           id: SecurityPageName.responseActionsHistory,
           link: securityLink(SecurityPageName.responseActionsHistory),
         },
-      ],
-    },
-    {
-      children: [
         {
-          renderItem: () => renderIntegrationsLinkCallout(core),
+          id: SecurityPageName.scriptsLibrary,
+          link: securityLink(SecurityPageName.scriptsLibrary),
         },
       ],
     },

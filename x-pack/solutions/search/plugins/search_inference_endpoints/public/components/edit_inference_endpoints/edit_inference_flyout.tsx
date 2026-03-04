@@ -33,12 +33,30 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
   const onEditSuccess = useCallback(() => {
     refetch();
   }, [refetch]);
+  const onFocusReturn = useCallback(() => {
+    // Defer focus until after any closing animations complete
+    requestAnimationFrame(() => {
+      const actionsButtonParent = document.getElementById(
+        `${selectedInferenceEndpoint.inference_id}-actions`
+      );
+      if (actionsButtonParent) {
+        const actionsButton = actionsButtonParent.querySelector('button');
+        if (actionsButton) {
+          actionsButton.focus();
+        }
+      }
+    });
+    return false;
+  }, [selectedInferenceEndpoint.inference_id]);
 
   const inferenceEndpoint: InferenceEndpoint = {
     config: {
       inferenceId: selectedInferenceEndpoint.inference_id,
       taskType: selectedInferenceEndpoint.task_type,
       provider: selectedInferenceEndpoint.service,
+      ...(selectedInferenceEndpoint.task_settings?.headers
+        ? { headers: selectedInferenceEndpoint.task_settings?.headers }
+        : {}),
       providerConfig: {
         ...flattenObject(selectedInferenceEndpoint.service_settings),
         // NOTE: The below is a workaround for anthropic max_tokens handling.
@@ -62,6 +80,9 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       enforceAdaptiveAllocations={!!serverless}
       onSubmitSuccess={onEditSuccess}
       inferenceEndpoint={inferenceEndpoint}
+      focusTrapProps={{
+        returnFocus: onFocusReturn,
+      }}
     />
   );
 };

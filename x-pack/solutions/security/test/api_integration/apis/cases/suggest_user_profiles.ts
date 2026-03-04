@@ -38,12 +38,13 @@ export default ({ getService }: FtrProviderContext): void => {
       } with roles(s) ${user.roles.join()} can retrieve user profile suggestions`, async () => {
         const profiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
-          req: { name: searchTerm, owners: [owner], size: 1 },
+          req: { name: searchTerm, owners: [owner] },
           auth: { user, space: null },
         });
 
-        expect(profiles.length).to.be(1);
-        expect(profiles[0].user.username).to.eql(searchTerm);
+        expect(profiles.length).to.be(10);
+        const found = profiles.find((profile) => profile.user.username === searchTerm);
+        expect(found !== undefined).to.be.ok();
       });
     }
 

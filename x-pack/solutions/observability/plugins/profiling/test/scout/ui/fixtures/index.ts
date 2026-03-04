@@ -13,16 +13,20 @@ import type {
 } from '@kbn/scout-oblt';
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import { FunctionsPage } from './page_objects/functions';
+import { DifferentialFunctionsPage } from './page_objects/differential_functions';
 import { ProfilingStorageExplorerPage } from './page_objects/storage_explorer';
 import { ProfilingSettingsPage } from './page_objects/settings';
 import { ProfilingHomePage } from './page_objects/home';
+import { FlamegraphPage } from './page_objects/flamegraph';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     functionsPage: FunctionsPage;
+    differentialFunctionsPage: DifferentialFunctionsPage;
     profilingStorageExplorerPage: ProfilingStorageExplorerPage;
     profilingSettingsPage: ProfilingSettingsPage;
     profilingHomePage: ProfilingHomePage;
+    flamegraphPage: FlamegraphPage;
   };
 }
 
@@ -42,6 +46,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       functionsPage: createLazyPageObject(FunctionsPage, page, kbnUrl),
+      differentialFunctionsPage: createLazyPageObject(DifferentialFunctionsPage, page, kbnUrl),
       profilingStorageExplorerPage: createLazyPageObject(
         ProfilingStorageExplorerPage,
         page,
@@ -49,10 +54,12 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       ),
       profilingSettingsPage: createLazyPageObject(ProfilingSettingsPage, page, kbnUrl),
       profilingHomePage: createLazyPageObject(ProfilingHomePage, page, kbnUrl),
+      flamegraphPage: createLazyPageObject(FlamegraphPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
   },
 });
 
-export * as testData from './constants';
+export * as testData from '../../common/fixtures/constants';
+export const EXTENDED_TIMEOUT = 45000 as const;

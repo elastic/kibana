@@ -72,7 +72,6 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjects
     patternsToDelete.map((pattern) => ({ id: pattern, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }))
   );
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const idsToDelete = resolvedObjects.map(({ saved_object }) => saved_object.id);
   await pMap(
     idsToDelete,

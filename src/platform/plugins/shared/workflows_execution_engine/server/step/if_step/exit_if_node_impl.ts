@@ -17,8 +17,11 @@ export class ExitIfNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
-    await this.stepExecutionRuntime.finishStep();
+  public run(): void {
+    const stepState = this.stepExecutionRuntime.getCurrentStepState();
+    const conditionResult = stepState?.conditionResult;
+    this.stepExecutionRuntime.setCurrentStepState(undefined);
+    this.stepExecutionRuntime.finishStep(conditionResult ? { conditionResult } : {});
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -84,6 +84,7 @@
     "@kbn/core-di-mocks",
     "@kbn/core-di-server-internal",
     "@kbn/core-data-streams-server-internal",
+    "@kbn/core-user-activity-server-internal",
   ],
   "exclude": [
     "target/**/*",

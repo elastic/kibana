@@ -35,7 +35,10 @@ import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
 import type { StateManagementConfig } from './initialize_state_management';
-import { apiPublishesInlineEditingCapabilities } from '../type_guards';
+import {
+  apiPublishesInlineEditingCapabilities,
+  apiPublishesIsEditableByUser,
+} from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
 
 function getSupportedTriggers(
@@ -222,22 +225,34 @@ export function initializeEditApi(
   };
 
   const getEditPanel = async (
-    { showOnly, closeFlyout }: { showOnly?: boolean; closeFlyout?: () => void } = {
+    { closeFlyout }: { closeFlyout?: () => void } = {
       closeFlyout: noop,
     }
   ) => {
+    if (canEdit()) {
+      // prevent serializing incomplete state during editing
+      internalApi.updateEditingState(true);
+    }
     // save the initial state in case it needs to revert later on
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
-      onCancel: () => updateState({ ...firstState }),
+      onCancel: () => {
+        internalApi.updateEditingState(false);
+        updateState({ ...firstState });
+      },
       // the getState() here contains the wrong filters references but the input attributes
       // are correct as getInlineEditor() handler is using the getModifiedState() function
-      onApply: showOnly
+      onApply: !canEdit()
         ? noop
-        : (attributes: LensRuntimeState['attributes']) =>
-            updateState({ ...getState(), attributes }),
-      closeFlyout,
+        : (attributes: LensRuntimeState['attributes']) => {
+            internalApi.updateEditingState(false);
+            updateState({ ...getState(), attributes });
+          },
+      closeFlyout: () => {
+        internalApi.updateEditingState(false);
+        closeFlyout?.();
+      },
     });
     return ConfigPanel ?? undefined;
   };
@@ -300,9 +315,18 @@ export function initializeEditApi(
         );
       },
       isReadOnlyEnabled: () => {
+        // Check if user can actually edit this specific dashboard (considering access control)
+        const isEditableByUser = apiPublishesIsEditableByUser(parentApi)
+          ? parentApi.isEditableByUser
+          : true;
+
         return {
           read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
-          write: Boolean(capabilities.dashboard_v2?.showWriteControls && !isManaged(getState())),
+          write: Boolean(
+            capabilities.dashboard_v2?.showWriteControls &&
+              !isManaged(getState()) &&
+              isEditableByUser
+          ),
         };
       },
       onShowConfig: async () => {
@@ -314,7 +338,6 @@ export function initializeEditApi(
           api: parentApi,
           loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
             return getEditPanel({
-              showOnly: true,
               closeFlyout,
             });
           },
@@ -328,7 +351,7 @@ export function initializeEditApi(
         const currentState = getState();
         return getEditPath(
           currentState.savedObjectId,
-          currentState.timeRange,
+          currentState.time_range,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()
         );

@@ -89,6 +89,16 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
+const mockEarliestCaseParams = {
+  filterOptions: { from: undefined, to: undefined, owner: [] },
+  queryParams: {
+    page: 1,
+    perPage: 1,
+    sortField: SortFieldCase.createdAt,
+    sortOrder: 'asc',
+  },
+};
+
 // eslint-disable-next-line prefer-object-spread
 const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
@@ -416,7 +426,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Status'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -425,6 +435,9 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -445,7 +458,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Severity'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -455,6 +468,9 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by title', async () => {
@@ -463,7 +479,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Name'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -473,6 +489,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by updatedOn', async () => {
@@ -481,7 +501,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Updated on'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -491,6 +511,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by category', async () => {
@@ -499,7 +523,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Category'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -508,6 +532,10 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -519,13 +547,17 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -643,9 +675,12 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(DEFAULT_CASES_TABLE_STATE);
+    });
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -980,18 +1015,24 @@ describe('AllCasesListGeneric', () => {
         ).toBeInTheDocument();
 
         // Deactivates assignees filter
-        await userEvent.click(await screen.findByRole('button', { name: 'More' }));
+        await userEvent.click(
+          await screen.findByTestId('options-filter-popover-button-more-filters')
+        );
         await waitForEuiPopoverOpen();
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
 
-        expect(useGetCasesMock).toHaveBeenLastCalledWith({
-          filterOptions: {
-            ...DEFAULT_FILTER_OPTIONS,
-            assignees: [],
-          },
-          queryParams: DEFAULT_QUERY_PARAMS,
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
         });
-
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith({
+            filterOptions: {
+              ...DEFAULT_FILTER_OPTIONS,
+              assignees: [],
+            },
+            queryParams: DEFAULT_QUERY_PARAMS,
+          });
+        });
         // Reopens assignees filter
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
         // Opens the assignees popup

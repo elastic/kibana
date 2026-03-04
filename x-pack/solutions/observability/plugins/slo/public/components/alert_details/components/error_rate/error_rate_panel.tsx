@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,41 +17,42 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { sloDetailsHistoryLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_EVALUATION_VALUE, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import { encode } from '@kbn/rison';
+import { ALERT_EVALUATION_VALUE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { GetSLOResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ErrorRateChart } from '../../../slo/error_rate_chart';
-import type { TimeRange } from '../../../slo/error_rate_chart/use_lens_definition';
 import type { BurnRateAlert } from '../../types';
 import { getActionGroupWindow } from '../../utils/alert';
 import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
-import { getDataTimeRange } from '../../utils/time_range';
-
-function getAlertTimeRange(timeRange: { gte: string; lte?: string }): TimeRange {
-  return {
-    from: new Date(timeRange.gte),
-    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
-  };
-}
+import { getAlertTimeRange, getChartTimeRange } from '../../utils/time_range';
 
 interface Props {
   alert: BurnRateAlert;
   slo?: GetSLOResponse;
   isLoading: boolean;
 }
-
 export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const {
-    services: { http },
+    services: {
+      http,
+      share: {
+        url: { locators },
+      },
+    },
   } = useKibana();
-  const dataTimeRange = getDataTimeRange(alert);
+  const chartTimeRange = getChartTimeRange(alert);
   const actionGroupWindow = getActionGroupWindow(alert);
-  // @ts-ignore
-  const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
+  const alertTimeRange = getAlertTimeRange(alert);
+
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
+
+  const historyLocator = locators.get(sloDetailsHistoryLocatorID);
 
   if (isLoading) {
     return <EuiLoadingChart size="m" data-test-subj="loading" />;
@@ -81,7 +81,18 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               <EuiLink
                 color="text"
                 data-test-subj="o11yErrorRatePanelSloDetailsLink"
-                href={http.basePath.prepend(alert.link!)}
+                href={
+                  historyLocator?.getRedirectUrl({
+                    id: slo.id,
+                    instanceId: slo.instanceId,
+                    encodedAppState: encode({
+                      range: { from: chartTimeRange.from, to: chartTimeRange.to },
+                    }),
+                  }) ??
+                  http.basePath.prepend(
+                    paths.sloDetails(slo.id, slo.instanceId, undefined, 'history')
+                  )
+                }
               >
                 <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
                 <FormattedMessage
@@ -93,7 +104,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              <span>{getLastDurationInUnit(dataTimeRange)}</span>
+              <span>{getLastDurationInUnit(chartTimeRange)}</span>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -116,7 +127,6 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                     </span>
                   </EuiText>
                 </EuiFlexItem>
-
                 <EuiFlexItem>
                   <EuiStat
                     title={`${numeral(burnRate).format('0.[00]')}x`}
@@ -150,7 +160,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
           <EuiFlexItem grow={5}>
             <ErrorRateChart
               slo={slo}
-              dataTimeRange={dataTimeRange}
+              dataTimeRange={chartTimeRange}
               alertTimeRange={alertTimeRange}
               threshold={actionGroupWindow!.burnRateThreshold}
               variant="danger"

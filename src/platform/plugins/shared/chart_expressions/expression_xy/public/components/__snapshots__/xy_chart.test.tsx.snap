@@ -566,7 +566,7 @@ exports[`XYChart component it renders area 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -602,19 +602,22 @@ exports[`XYChart component it renders area 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -944,10 +947,17 @@ exports[`XYChart component it renders area 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -995,22 +1005,25 @@ exports[`XYChart component it renders area 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -1130,6 +1143,7 @@ exports[`XYChart component it renders area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -2007,7 +2021,7 @@ exports[`XYChart component it renders bar 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -2043,19 +2057,22 @@ exports[`XYChart component it renders bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -2385,10 +2402,17 @@ exports[`XYChart component it renders bar 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -2436,22 +2460,25 @@ exports[`XYChart component it renders bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -2571,6 +2598,7 @@ exports[`XYChart component it renders bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -3448,7 +3476,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -3484,19 +3512,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -3826,10 +3857,17 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -3877,22 +3915,25 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -4012,6 +4053,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -4889,7 +4931,7 @@ exports[`XYChart component it renders line 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -4925,19 +4967,22 @@ exports[`XYChart component it renders line 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -5267,10 +5312,17 @@ exports[`XYChart component it renders line 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -5318,22 +5370,25 @@ exports[`XYChart component it renders line 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -5453,6 +5508,7 @@ exports[`XYChart component it renders line 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -6330,7 +6386,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -6366,19 +6422,22 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -6708,10 +6767,17 @@ exports[`XYChart component it renders stacked area 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -6759,22 +6825,25 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -6894,6 +6963,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -7771,7 +7841,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -7807,19 +7877,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -8149,10 +8222,17 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -8200,22 +8280,25 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -8335,6 +8418,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -9212,7 +9296,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -9248,19 +9332,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -9590,10 +9677,17 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -9641,22 +9735,25 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -9776,6 +9873,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -10672,7 +10770,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -10708,19 +10806,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -11050,10 +11151,17 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -11101,22 +11209,25 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -11236,6 +11347,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -12203,7 +12315,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -12239,19 +12351,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -12581,10 +12696,17 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -12632,22 +12754,25 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -12767,6 +12892,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -13727,7 +13853,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                       "opacity": 0.25,
                     },
                   },
-                  "opacity": 0.3,
+                  "opacity": 0.2,
                   "visible": true,
                 },
                 "fit": Object {
@@ -13763,19 +13889,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "never",
                 },
                 "pointVisibilityMinDistance": 20,
@@ -14105,10 +14234,17 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "highlighter": Object {
                 "point": Object {
                   "fill": "__use__series__color__",
-                  "opacity": 0.5,
-                  "radius": 5,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "onHover": Object {
+                    "fill": "__use__series__color__",
+                    "opacity": 0.5,
+                    "radius": 5,
+                    "stroke": "__use__empty__color__",
+                    "strokeWidth": 0,
+                  },
+                  "opacity": 1,
+                  "radius": 3,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                 },
               },
               "legend": Object {
@@ -14156,22 +14292,25 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "strokeWidth": 2.5,
                   },
                   "opacity": 1,
-                  "strokeWidth": 2,
+                  "strokeWidth": 1.5,
                   "visible": true,
                 },
                 "point": Object {
                   "dimmed": Object {
-                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "fill": "#FFFFFF",
                     "stroke": "rgba(202, 211, 226, 0.15)",
                   },
-                  "fill": "__use__series__color__",
+                  "fill": "#FFFFFF",
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__empty__color__",
-                  "strokeWidth": 0,
+                  "stroke": "__use__series__color__",
+                  "strokeWidth": 1.5,
                   "visible": "auto",
                 },
-                "pointVisibilityMinDistance": 40,
+                "pointVisibilityMinDistance": 20,
               },
               "metric": Object {
                 "barBackground": "#ECF1F9",
@@ -14291,6 +14430,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}

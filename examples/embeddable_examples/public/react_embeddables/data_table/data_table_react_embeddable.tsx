@@ -15,8 +15,8 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
+  initializeUnsavedChanges,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -39,7 +39,7 @@ export const getDataTableFactory = (
 ): EmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = initialState.rawState;
+    const state = initialState;
     const timeRangeManager = initializeTimeRangeManager(state);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const titleManager = initializeTitleManager(state);
@@ -55,10 +55,8 @@ export const getDataTableFactory = (
 
     const serializeState = () => {
       return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-        },
+        ...titleManager.getLatestState(),
+        ...timeRangeManager.getLatestState(),
       };
     };
 
@@ -74,9 +72,8 @@ export const getDataTableFactory = (
         };
       },
       onReset: (lastSaved) => {
-        const lastSavedState = lastSaved?.rawState;
-        timeRangeManager.reinitializeState(lastSavedState);
-        titleManager.reinitializeState(lastSavedState);
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
       },
     });
 

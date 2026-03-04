@@ -23,6 +23,14 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
 
+      // install with force flag to bypass package verification error
+      await supertest
+        .post(`/api/fleet/epm/packages/elastic_agent`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({ force: true })
+        .expect(200);
+
       // Create agent policies using the Fleet API
       // Policy 1 - regular policy without tamper protection
       const policy1Response = await supertest

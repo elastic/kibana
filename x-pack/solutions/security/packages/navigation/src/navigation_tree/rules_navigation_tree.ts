@@ -11,16 +11,11 @@ import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-export const createRulesNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createRulesNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.rules,
   title: SecurityLinkGroup[SecurityGroupName.rules].title,
-  iconV2: 'securitySignal',
+  icon: 'securitySignal',
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       title: i18nStrings.rules.management.title,
@@ -29,7 +24,6 @@ export const createRulesNavigationTree = (
         {
           id: SecurityPageName.rules,
           link: securityLink(SecurityPageName.rules),
-          renderAs: 'item',
           children: [
             {
               id: SecurityPageName.rulesManagement,
@@ -43,6 +37,10 @@ export const createRulesNavigationTree = (
               id: SecurityPageName.rulesCreate,
               link: securityLink(SecurityPageName.rulesCreate),
             },
+            {
+              id: SecurityPageName.aiRuleCreation,
+              link: securityLink(SecurityPageName.aiRuleCreation),
+            },
           ],
         },
         {
@@ -52,11 +50,6 @@ export const createRulesNavigationTree = (
         {
           id: SecurityPageName.exceptions,
           link: securityLink(SecurityPageName.exceptions),
-        },
-        {
-          id: SecurityPageName.siemMigrationsRules,
-          link: securityLink(SecurityPageName.siemMigrationsRules),
-          sideNavVersion: 'v1',
         },
       ],
     },

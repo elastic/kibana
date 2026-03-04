@@ -24,6 +24,7 @@ import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
 import type { UIExtensionsStorage } from '../types';
 import { ExperimentalFeaturesService } from '../services';
+import { ConfigContext } from '../hooks/use_config';
 
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
@@ -76,6 +77,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
   const mountHistory = new CoreScopedHistory(history, basePath);
+  const config = createConfigurationMock();
 
   ExperimentalFeaturesService.init(allowedExperimentalValues);
 
@@ -85,7 +87,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
         <Router history={mountHistory}>
           <QueryClientProvider client={queryClient}>
             <KibanaContextProvider services={{ ...startServices }}>
-              {children}
+              <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
             </KibanaContextProvider>
           </QueryClientProvider>
         </Router>
@@ -97,7 +99,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     history,
     mountHistory,
     startServices,
-    config: createConfigurationMock(),
+    config,
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
@@ -158,10 +160,13 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   ExperimentalFeaturesService.init(allowedExperimentalValues);
   const startServices = createStartServices(basePath);
+  const config = createConfigurationMock();
   const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
-        <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+        <KibanaContextProvider services={{ ...startServices }}>
+          <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
+        </KibanaContextProvider>
       </startServices.i18n.Context>
     );
   });
@@ -172,7 +177,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
       basePath
     ),
     startServices,
-    config: createConfigurationMock(),
+    config,
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),

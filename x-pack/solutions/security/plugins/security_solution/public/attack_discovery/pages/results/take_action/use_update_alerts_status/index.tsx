@@ -39,7 +39,7 @@ export const useUpdateAlertsStatus = () => {
     {
       onSuccess: (data: UpdatedAlertsResponse, variables: UpdateAlertsStatusParams) => {
         const { ids, kibanaAlertWorkflowStatus } = variables;
-        const { updated, version_conflicts } = data; // eslint-disable-line @typescript-eslint/naming-convention
+        const { updated, version_conflicts } = data;
 
         const alertsCount = ids.length; // total alerts
         const allAlertsUpdated = updated === alertsCount;

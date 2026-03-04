@@ -92,6 +92,11 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  'messages.refusal': {
+    type: 'text',
+    array: false,
+    required: false,
+  },
   'messages.reader': {
     type: 'object',
     array: false,

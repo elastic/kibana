@@ -4,93 +4,124 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
-import { merge } from 'lodash';
-import systemPromptTemplate from './system_prompt.text';
-import userPromptTemplate from './user_prompt.text';
+import featuresUserPrompt from './user_prompt.text';
+import featuresSystemPrompt from './system_prompt.text';
 
-const systemsSchemaBase = {
+export { featuresSystemPrompt as featuresPrompt };
+
+const featuresSchema = {
   type: 'object',
   properties: {
-    systems: {
+    features: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
-          name: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier for the feature.',
+          },
+          type: {
             type: 'string',
           },
-          filter: {
+          subtype: {
+            type: 'string',
+          },
+          description: {
+            type: 'string',
+            description: 'A summary of the feature.',
+          },
+          title: {
+            type: 'string',
+            description: 'Very short human-readable title for UI (e.g. table, flyout header).',
+          },
+          properties: {
+            type: 'object',
+            description:
+              'Stable, low-cardinality identifying properties. Must contain at least one key/value.',
+            properties: {},
+            minProperties: 1,
+            additionalProperties: true,
+          },
+          confidence: {
+            type: 'number',
+            minimum: 0,
+            maximum: 100,
+          },
+          evidence: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
+          },
+          evidence_doc_ids: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'Evidence sources for traceability. This must be the Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Keep an empty array when not applicable.',
+          },
+          tags: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'The tags that describe the feature.',
+          },
+          meta: {
             type: 'object',
             properties: {},
+            description: 'Useful metadata that is not captured in other properties.',
+            additionalProperties: true,
           },
         },
+        required: [
+          'id',
+          'type',
+          'subtype',
+          'description',
+          'title',
+          'properties',
+          'confidence',
+          'evidence',
+          'tags',
+        ],
       },
     },
   },
-  required: ['systems'],
+  required: ['features'],
 } as const;
 
-const systemsSchema = merge({}, systemsSchemaBase, {
-  properties: {
-    systems: {
-      items: {
-        required: ['name', 'filter'],
-      },
-    },
-  },
-} as const);
-
-const finalSystemsSchema = merge({}, systemsSchema);
-
-export interface ValidateSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-  }>;
-}
-
-export interface FinalizeSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-    description: string;
-  }>;
-}
-
-export const IdentifySystemsPrompt = createPrompt({
-  name: 'identify_systems',
-  input: z.object({
-    stream: z.object({
-      name: z.string(),
-      description: z.string(),
+export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: string }) {
+  return createPrompt({
+    name: 'identify_features',
+    input: z.object({
+      sample_documents: z.string(),
     }),
-    dataset_analysis: z.string(),
-    initial_clustering: z.string(),
-    condition_schema: z.string(),
-  }),
-})
-  .version({
-    system: {
-      mustache: {
-        template: systemPromptTemplate,
-      },
-    },
-    template: {
-      mustache: {
-        template: userPromptTemplate,
-      },
-    },
-    tools: {
-      validate_systems: {
-        description: `Validate systems before finalizing`,
-        schema: systemsSchema,
-      },
-      finalize_systems: {
-        description: 'Finalize system identification',
-        schema: finalSystemsSchema,
-      },
-    },
   })
-  .get();
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: featuresUserPrompt,
+        },
+      },
+      tools: {
+        finalize_features: {
+          description: 'Finalize features identification',
+          schema: featuresSchema,
+        },
+      },
+    })
+    .get();
+}

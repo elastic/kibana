@@ -48,6 +48,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function ensureApiKeyDoesNotExist(apiKeyName: string) {
+    await retry.try(async () => {
+      log.debug(`Checking if API key ("${apiKeyName}") does not exist.`);
+      const exists = await pageObjects.apiKeys.doesApiKeyExist(apiKeyName);
+      if (exists) {
+        throw new Error(`API key ("${apiKeyName}") still exists when it should not.`);
+      }
+      log.debug(`API key ("${apiKeyName}") does not exist.`);
+    });
+  }
+
   describe('Home page', function () {
     before(async () => {
       await clearAllApiKeys(es, log);
@@ -495,13 +506,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('active/expired filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.clickExpiryFilters('active');
         await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+        await ensureApiKeyDoesNotExist('test_api_key');
 
         await pageObjects.apiKeys.clickExpiryFilters('expired');
         await ensureApiKeysExist(['test_api_key']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+        await ensureApiKeyDoesNotExist('my api key');
 
         // reset filter buttons
         await pageObjects.apiKeys.clickExpiryFilters('expired');
@@ -525,6 +537,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('username filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.clickUserNameDropdown();
         expect(
           await testSubjects.exists('userProfileSelectableOption-system_indices_superuser')
@@ -542,6 +555,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('search bar works as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
 
         await ensureApiKeysExist(['test_user_api_key']);
@@ -551,6 +565,74 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setSearchBarValue('"api"');
         await ensureApiKeysExist(['my api key']);
+      });
+
+      it('loads default view', async () => {
+        // Default view should be personal API keys
+        await ensureApiKeysExist(['test_user_api_key', 'test_api_key']);
+      });
+    });
+
+    describe('pagination', function () {
+      const apiKeyPrefix = 'pagination-test-key';
+
+      before(async () => {
+        await clearAllApiKeys(es, log);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+
+        // Create 30 API keys to test pagination (default page size is 25)
+        for (let batch = 0; batch < 3; batch++) {
+          await Promise.all(
+            Array.from({ length: 10 }, (_, i) => {
+              const index = batch * 10 + i;
+              return es.security.createApiKey({
+                name: `${apiKeyPrefix}-${index.toString().padStart(2, '0')}`,
+                role_descriptors: {},
+              });
+            })
+          );
+        }
+
+        await pageObjects.common.navigateToApp('apiKeys');
+      });
+
+      after(async () => {
+        await clearAllApiKeys(es, log);
+      });
+
+      it('should show Previous button disabled on first page', async () => {
+        const isPreviousEnabled = await pageObjects.apiKeys.isPreviousPageButtonEnabled();
+        expect(isPreviousEnabled).to.be(false);
+      });
+
+      it('should show Next button enabled when there are more results', async () => {
+        const isNextEnabled = await pageObjects.apiKeys.isNextPageButtonEnabled();
+        expect(isNextEnabled).to.be(true);
+      });
+
+      it('should navigate to next page and enable Previous button', async () => {
+        await pageObjects.apiKeys.clickNextPageButton();
+
+        await retry.try(async () => {
+          const isPreviousEnabled = await pageObjects.apiKeys.isPreviousPageButtonEnabled();
+          expect(isPreviousEnabled).to.be(true);
+        });
+      });
+
+      it('should disable Next button when there are no more results', async () => {
+        await retry.try(async () => {
+          const isNextEnabled = await pageObjects.apiKeys.isNextPageButtonEnabled();
+          expect(isNextEnabled).to.be(false);
+        });
+      });
+
+      it('should navigate back to first page when clicking Previous', async () => {
+        await pageObjects.apiKeys.clickPreviousPageButton();
+
+        await retry.try(async () => {
+          const isPreviousEnabled = await pageObjects.apiKeys.isPreviousPageButtonEnabled();
+          expect(isPreviousEnabled).to.be(false);
+        });
       });
     });
   });

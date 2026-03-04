@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { getRegularEcsField } from '@kbn/streams-schema';
+import { getFormattedError } from '../../../util/errors';
 import { useControls } from './hooks/use_controls';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { SchemaEditorProps, SchemaField } from './types';
@@ -40,6 +41,7 @@ export function SchemaEditor({
   withFieldSimulation = false,
   withTableActions = false,
   withToolbar = true,
+  enableGeoPointSuggestions = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
   const [isLoadingRecommendations, setIsLoadingRecommendations] = React.useState(false);
@@ -80,7 +82,7 @@ export function SchemaEditor({
         });
         onFieldSelection(selection, false);
       } catch (err) {
-        notifications.toasts.addError(err, {
+        notifications.toasts.addError(getFormattedError(err), {
           title: i18n.translate('xpack.streams.schemaEditor.fetchRecommendationsError', {
             defaultMessage: 'Error fetching field type recommendations',
           }),
@@ -91,6 +93,22 @@ export function SchemaEditor({
     },
     [fields, fieldsMetadata, notifications.toasts, onFieldSelection, onFieldUpdate]
   );
+
+  const filteredFields = React.useMemo(() => {
+    const geoPointFields = new Set(
+      fields.filter((f) => f.type === 'geo_point' || f.esType === 'geo_point').map((f) => f.name)
+    );
+
+    return fields.filter((f) => {
+      const latMatch = f.name.match(/^(.*)\.lat$/);
+      const lonMatch = f.name.match(/^(.*)\.lon$/);
+
+      if (latMatch && geoPointFields.has(latMatch[1])) return false;
+      if (lonMatch && geoPointFields.has(lonMatch[1])) return false;
+
+      return true;
+    });
+  }, [fields]);
 
   const toolbarVisibility = React.useMemo(() => {
     if (!withToolbar) {
@@ -171,15 +189,17 @@ export function SchemaEditor({
 
   return (
     <SchemaEditorContextProvider
-      fields={fields}
+      fields={filteredFields}
       onFieldSelection={onFieldSelection}
       fieldSelection={fieldSelection}
       isLoading={isLoading}
       onFieldUpdate={onFieldUpdate}
+      onAddField={onAddField}
       stream={stream}
       withControls={withControls}
       withFieldSimulation={withFieldSimulation}
       withTableActions={withTableActions}
+      enableGeoPointSuggestions={enableGeoPointSuggestions}
     >
       <EuiFlexGroup
         direction="column"
@@ -210,7 +230,7 @@ export function SchemaEditor({
           controls={controls}
           withToolbar={toolbarVisibility}
           defaultColumns={defaultColumns}
-          fields={fields}
+          fields={filteredFields}
           stream={stream}
           withTableActions={withTableActions}
           selectedFields={fieldSelection}

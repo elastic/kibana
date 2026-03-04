@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MultiSelectFilterOption } from '../multi_select_filter';
 import { MultiSelectFilter } from '../multi_select_filter';
-import { MORE_FILTERS_LABEL } from '../translations';
 
 export const MoreFiltersSelectable = ({
   options,
@@ -20,17 +21,19 @@ export const MoreFiltersSelectable = ({
   isLoading: boolean;
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <MultiSelectFilter
-      buttonLabel={MORE_FILTERS_LABEL}
-      buttonIconType="plus"
+      buttonIconType="pencil"
       hideActiveOptionsNumber
-      id="filters"
+      id="more-filters"
       onChange={onChange}
       options={options}
       selectedOptionKeys={activeFilters}
-      transparentBackground={true}
       isLoading={isLoading}
+      buttonCss={css`
+        margin-left: -${euiTheme.size.xs};
+      `}
     />
   );
 };

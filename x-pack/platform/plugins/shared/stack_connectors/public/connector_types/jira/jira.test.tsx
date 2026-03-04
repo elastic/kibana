@@ -36,7 +36,7 @@ describe('jira action params validation', () => {
       subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
@@ -50,7 +50,7 @@ describe('jira action params validation', () => {
       subActionParams: { incident: { summary: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': ['Summary is required.'],
         'subActionParams.incident.labels': [],
@@ -67,7 +67,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': ['Labels cannot contain spaces.'],
@@ -84,7 +84,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
@@ -108,7 +108,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
@@ -134,7 +134,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],

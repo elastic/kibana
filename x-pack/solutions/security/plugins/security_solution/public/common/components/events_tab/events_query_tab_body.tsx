@@ -12,6 +12,8 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
@@ -30,7 +32,6 @@ import {
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
@@ -46,7 +47,6 @@ import {
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 import { useUserPrivileges } from '../user_privileges';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
@@ -171,7 +171,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     tableId,
     from: startDate,
     to: endDate,
-    scopeId: SourcererScopeName.default,
+    scopeId: PageScope.default,
   }) as CustomBulkAction;
 
   const caseEventsBulkActions = useBulkAddEventsToCaseActions({
@@ -195,22 +195,18 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           filterQuery={filterQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
-          sourcererScopeId={
-            newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-          }
+          sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
         />
       )}
       <StatefulEventsViewer
         topRightMenuOptions={toggleExternalAlertsCheckbox}
-        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+        cellActionsTriggerId={SECURITY_CELL_ACTIONS_DEFAULT}
         start={startDate}
         end={endDate}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={
-          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-        }
+        sourcererScope={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

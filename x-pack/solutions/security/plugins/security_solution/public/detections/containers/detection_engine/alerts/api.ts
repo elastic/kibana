@@ -16,6 +16,7 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_ALERTS_INDEX_URL,
+  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -49,6 +50,29 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
       version: '2023-10-31',
+      method: 'POST',
+      body: JSON.stringify(query),
+      signal,
+    }
+  );
+};
+
+/**
+ * Fetch Unified Alerts (detection and attack alerts) by providing a query
+ *
+ * @param query String to match a dsl
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchQueryUnifiedAlerts = async <Hit, Aggregations>({
+  query,
+  signal,
+}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
+    DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+    {
+      version: '1',
       method: 'POST',
       body: JSON.stringify(query),
       signal,

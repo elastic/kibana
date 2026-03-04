@@ -22,9 +22,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
-import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
+import type { ISloTelemetryClient } from './services/telemetry';
 
 interface Props {
   core: CoreStart;
@@ -38,6 +38,7 @@ interface Props {
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   sloClient: SLORepositoryClient;
+  telemetry?: ISloTelemetryClient;
 }
 
 export const renderApp = ({
@@ -52,6 +53,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry,
   experimentalFeatures,
   sloClient,
+  telemetry,
 }: Props) => {
   const { element, history } = appMountParameters;
 
@@ -110,6 +112,7 @@ export const renderApp = ({
                 observabilityRuleTypeRegistry,
                 experimentalFeatures,
                 sloClient,
+                telemetry,
               }}
             >
               <Router history={history}>
@@ -141,9 +144,7 @@ export const renderApp = ({
 };
 
 function App() {
-  const { isServerless } = usePluginContext();
-
-  const routes = getRoutes(isServerless);
+  const routes = getRoutes();
 
   return (
     <Routes enableExecutionContextTracking={true}>

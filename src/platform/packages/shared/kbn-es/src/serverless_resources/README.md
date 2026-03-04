@@ -61,6 +61,16 @@ curl -H "Authorization: Bearer AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVT
 
 The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed a serverless cluster with this token.
 
+## Universal Identity and Access Management (UIAM) resources
+
+The UIAM CosmosDB Emulator certificates used for its HTTPS endpoints (`uiam_cosmosdb.pfx`) are generated using the following commands from the root directory of Elasticsearch and are valid for 50 years:
+```shell
+bin/elasticsearch-certutil ca --out uiam_cosmosdb_ca.pfx -days 18250 --pass secret
+bin/elasticsearch-certutil cert --out uiam_cosmosdb.pfx -days 18250 --ca uiam_cosmosdb_ca.pfx --ca-pass secret --name uiam --dns localhost,host.docker.internal,127.0.0.1,uiam,uiam-cosmosdb --pass secret
+```
+
+The custom UIAM service entrypoint shell script (`run_java_with_custom_ca.sh`) is used to import the CosmosDB Emulator certificates bundle into the trust store, as explained in the [Azure CosmosDB Emulator guide](https://learn.microsoft.com/en-us/azure/cosmos-db/emulator-linux#installing-certificates-for-java-sdk).
+
 ## Overriding resources
 
 The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `yarn es serverless` command.

@@ -17,7 +17,7 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV4: [
+          siemV5: [
             'all',
 
             'policy_management_read',
@@ -27,12 +27,13 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
             'event_filters_read',
             'host_isolation_exceptions_read',
             'blocklist_all',
-            'endpoint_exceptions_all',
+            'endpoint_exceptions_read',
 
             'host_isolation_all',
             'process_operations_all',
             'actions_log_management_all',
           ],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

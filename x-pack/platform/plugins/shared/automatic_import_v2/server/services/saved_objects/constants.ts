@@ -12,8 +12,11 @@ export const TASK_STATUSES = {
   pending: 'pending',
   processing: 'processing',
   completed: 'completed',
+  approved: 'approved',
   failed: 'failed',
-};
+  cancelled: 'cancelled',
+  deleting: 'deleting',
+} as const;
 
 export const INPUT_TYPES = {
   awsCloudwatch: 'aws-cloudwatch',
@@ -30,4 +33,7 @@ export const INPUT_TYPES = {
   kafka: 'kafka',
   tcp: 'tcp',
   udp: 'udp',
-};
+} as const;
+
+// Saved Objects Operations
+export const BULK_DELETE_CHUNK_SIZE = 50;

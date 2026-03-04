@@ -40,7 +40,7 @@ describe('d3security action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [], subAction: [] },
     });
   });
@@ -55,7 +55,7 @@ describe('d3security action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body is required.'],
         subAction: [],
@@ -68,7 +68,7 @@ describe('d3security action params validation', () => {
       subActionParams: { body: '{"message": "test"}' },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         subAction: ['Action is required.'],
@@ -82,7 +82,7 @@ describe('d3security action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body is required.'],
         subAction: [],

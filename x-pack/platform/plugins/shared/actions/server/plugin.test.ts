@@ -19,6 +19,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
+import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
 import type { ActionType, ActionsApiRequestHandlerContext } from './types';
 import type { ActionsConfig } from './config';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -120,6 +121,7 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
         cloud: cloudMock.createSetup(),
+        usageApi: usageApiPluginMock.createSetupContract(),
       };
       coreSetup.getStartServices.mockResolvedValue([
         coreMock.createStart(),
@@ -789,6 +791,7 @@ describe('Actions Plugin', () => {
             isSystemActionType: false,
             validate: { params: expect.any(Object) },
             isDeprecated: false,
+            source: 'stack',
           },
         ]);
 

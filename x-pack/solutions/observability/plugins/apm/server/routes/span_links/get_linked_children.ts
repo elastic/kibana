@@ -6,8 +6,7 @@
  */
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { isEmpty } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SPAN_ID,
@@ -93,29 +92,35 @@ async function fetchLinkedChildrenOfSpan({
 
   const linkedChildren = response.hits.hits.map((hit) => {
     const source = 'span' in hit._source ? hit._source : undefined;
-    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+    const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields).build();
 
+    const spanLinksArray = source?.span?.links
+      ? Array.isArray(source?.span?.links)
+        ? source.span.links
+        : [source.span.links]
+      : undefined;
     return {
       ...event,
-      span: {
-        ...event.span,
-        links: source?.span?.links ?? mapOtelToSpanLink(event.links),
-      },
+      [SPAN_LINKS]:
+        spanLinksArray ??
+        mapOtelToSpanLink({
+          trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
+          span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
+        }),
     };
   });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
-  return linkedChildren.filter((linkedChild) => {
-    const spanLinks = linkedChild?.span?.links?.filter((spanLink) => {
-      return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
-    });
-    return !isEmpty(spanLinks);
-  });
+  return linkedChildren.filter((linkedChild) =>
+    linkedChild[SPAN_LINKS].some(
+      (spanLink) => spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true)
+    )
+  );
 }
 
 function getSpanId(
   linkedChild: Awaited<ReturnType<typeof fetchLinkedChildrenOfSpan>>[number]
 ): string {
-  return (linkedChild.span.id ?? linkedChild.transaction?.id) as string;
+  return (linkedChild[SPAN_ID] ?? linkedChild[TRANSACTION_ID]) as string;
 }
 
 export async function getSpanLinksCountById({
@@ -137,7 +142,7 @@ export async function getSpanLinksCountById({
   });
 
   return linkedChildren.reduce<Record<string, number>>((acc, item) => {
-    item.span?.links?.forEach((link) => {
+    item[SPAN_LINKS].forEach((link) => {
       // Ignores span links that don't belong to this trace
       if (link.trace.id === traceId) {
         acc[link.span.id] = (acc[link.span.id] || 0) + 1;
@@ -168,10 +173,8 @@ export async function getLinkedChildrenOfSpan({
     end,
   });
 
-  return linkedChildren.map((item) => {
-    return {
-      trace: { id: item.trace.id },
-      span: { id: getSpanId(item) },
-    };
-  });
+  return linkedChildren.map((item) => ({
+    trace: { id: item[TRACE_ID] },
+    span: { id: getSpanId(item) },
+  }));
 }

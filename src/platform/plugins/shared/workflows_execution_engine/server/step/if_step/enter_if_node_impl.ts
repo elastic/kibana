@@ -8,11 +8,11 @@
  */
 
 import { KQLSyntaxError } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
-import { evaluateKql } from './eval_kql';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
 export class EnterIfNodeImpl implements NodeImplementation {
@@ -25,7 +25,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
@@ -51,8 +51,13 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const renderedCondition =
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
     const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
-    await this.stepExecutionRuntime.setInput({
+    this.stepExecutionRuntime.setInput({
+      rawCondition: thenNode.condition as string,
       condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
+    // set the condition result to the step state so that it can be used in the exit node
+    this.stepExecutionRuntime.setCurrentStepState({
       conditionResult: evaluatedConditionResult,
     });
 
@@ -94,20 +99,32 @@ export class EnterIfNodeImpl implements NodeImplementation {
   private evaluateCondition(condition: string | boolean | undefined): boolean {
     if (typeof condition === 'boolean') {
       return condition;
-    } else if (typeof condition === 'undefined') {
-      return false; // Undefined condition defaults to false
+    }
+    if (typeof condition === 'undefined') {
+      return false;
     }
 
-    try {
-      return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
-    } catch (error) {
-      if (error instanceof KQLSyntaxError) {
-        throw new Error(
-          `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(error)}`
-        );
+    if (typeof condition === 'string') {
+      try {
+        return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
+      } catch (error) {
+        if (error instanceof KQLSyntaxError) {
+          throw new Error(
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
+          );
+        }
+        throw error;
       }
-
-      throw error;
     }
+
+    throw new Error(
+      `Invalid condition type for step ${this.node.stepId}. ` +
+        `Got ${JSON.stringify(
+          condition
+        )} (type: ${typeof condition}), but expected boolean or string. ` +
+        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
+    );
   }
 }

@@ -11,15 +11,18 @@ import type {
   Plugin,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import type { MetricsDataPluginSetup, MetricsDataPluginStartDeps } from './types';
+import type { MetricsDataPluginStartDeps } from './types';
 import { MetricsDataClient } from './client';
 import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetricIndicesRoute } from './routes/metric_indices';
 
+export type MetricsDataPluginSetup = ReturnType<MetricsDataPlugin['setup']>;
+export type MetricsDataPluginStart = ReturnType<MetricsDataPlugin['start']>;
+
 export class MetricsDataPlugin
-  implements Plugin<MetricsDataPluginSetup, {}, {}, MetricsDataPluginStartDeps>
+  implements Plugin<MetricsDataPluginSetup, MetricsDataPluginStart, {}, MetricsDataPluginStartDeps>
 {
   private metricsClient: MetricsDataClient | null = null;
 

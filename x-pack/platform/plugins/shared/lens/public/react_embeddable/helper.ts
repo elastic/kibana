@@ -5,31 +5,36 @@
  * 2.0.
  */
 
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import type {
+  DatasourceStates,
+  FormBasedPersistedState,
+  GeneralDatasourceStates,
+  LensRuntimeState,
+  LensSerializedState,
+  StructuredDatasourceStates,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
+import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { SerializedTitles, ViewMode } from '@kbn/presentation-publishing';
 import {
+  apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
   type PublishingSubject,
-  apiHasExecutionContext,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { RenderMode } from '@kbn/expressions-plugin/common';
-import type {
-  LensByValueSerializedState,
-  LensRuntimeState,
-  LensSerializedState,
-  StructuredDatasourceStates,
-  DatasourceStates,
-  GeneralDatasourceStates,
-  FormBasedPersistedState,
-  TextBasedPersistedState,
-} from '@kbn/lens-common';
+
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import type { LensEmbeddableStartServices } from './types';
 
 export function createEmptyLensState(
@@ -68,9 +73,10 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  { savedObjectId, ...state }: LensSerializedState
+  state: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
+  const savedObjectId = 'savedObjectId' in state ? state.savedObjectId : undefined;
 
   if (savedObjectId) {
     try {
@@ -89,7 +95,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformInitialState(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -162,12 +168,129 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformInitialState(state: LensSerializedState): LensSerializedState {
-  // TODO add api conversion
-  return state;
+export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
+  const builder = getLensBuilder();
+
+  if (!builder?.isEnabled) {
+    // builder not enabled, return the state as is
+    return state as LensSerializedState;
+  }
+
+  const chartType = builder.getType(state.attributes);
+
+  if (!builder.isSupported(chartType)) {
+    return state as LensSerializedState;
+  }
+
+  if (!state.attributes) {
+    // Not sure if this is possible
+    throw new Error('attributes are missing');
+  }
+
+  // check if already converted
+  if (!isLensAPIFormat(state.attributes)) {
+    return state as LensSerializedState;
+  }
+
+  const attributes = builder.fromAPIFormat(state.attributes);
+
+  return {
+    ...state,
+    attributes,
+  };
 }
 
-export function transformOutputState(state: LensSerializedState): LensByValueSerializedState {
-  // TODO add api conversion
-  return state;
+/**
+ * !Important! call stripInheritedContext before transforming to API config
+ */
+export function transformToApiConfig(state: StrippedLensState): LensSerializedAPIConfig {
+  const { savedObjectId, attributes } = state;
+
+  if (savedObjectId) {
+    return {
+      savedObjectId,
+    };
+  }
+
+  const builder = getLensBuilder();
+
+  if (!builder?.isEnabled) {
+    // builder not enabled, return the state as is
+    return state as LensByValueSerializedAPIConfig;
+  }
+
+  const chartType = builder.getType(attributes);
+
+  if (!builder.isSupported(chartType)) {
+    // TODO: remove this once all formats are supported
+    return state as LensByValueSerializedAPIConfig;
+  }
+
+  if (!attributes) {
+    // This should only ever handle by-value state.
+    throw new Error('attributes are missing');
+  }
+
+  const apiConfigAttributes = builder.toAPIFormat({
+    ...attributes,
+    visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
+  });
+
+  return {
+    ...state,
+    attributes: apiConfigAttributes,
+  };
+}
+
+/**
+ * Keys that should be persisted at the panel level.
+ * All other properties from LensSerializedState are inherited from the
+ * dashboard/container or are runtime-only and should not be persisted.
+ *
+ * TODO - LensSerializedState should really be paired down to match this list.
+ * it is currently used as a runtime state object but it shouldn't be.
+ */
+type IncludedPanelStateKeys =
+  | 'savedObjectId'
+  | 'attributes'
+  | 'references'
+  | 'time_range'
+  | keyof SerializedTitles
+  | keyof SerializedDrilldowns;
+
+export type StrippedLensState = Pick<LensSerializedState, IncludedPanelStateKeys>;
+
+/**
+ * The serialized state contains many properties that are inherited from the dashboard or other container
+ * or are runtime-only (like executionContext) and should not be persisted at the panel
+ * level. This function strips those out to ensure only panel-level state is persisted.
+ */
+export function stripInheritedContext(state: LensSerializedState): StrippedLensState {
+  const {
+    savedObjectId,
+    attributes,
+    // LensWithReferences
+    references,
+    // LensUnifiedSearchContext (only time_range is panel-level)
+    time_range,
+    // SerializedTitles
+    title,
+    description,
+    hide_title,
+    hide_border,
+    // SerializedDrilldowns
+    drilldowns,
+  } = state;
+
+  return {
+    savedObjectId,
+    attributes,
+    references,
+    time_range,
+    title,
+    description,
+    hide_title,
+    hide_border,
+    drilldowns,
+  };
 }

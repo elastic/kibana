@@ -21,6 +21,8 @@
           "Importer"
         ],
         "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,6 +43,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,6 +59,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,6 +81,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
+                "lineNumber": 15,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -90,209 +98,14 @@
     "interfaces": [
       {
         "parentPluginId": "fileUpload",
-        "id": "def-public.FileUploadComponentProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "FileUploadComponentProps",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.isIndexingTriggered",
-            "type": "boolean",
-            "tags": [],
-            "label": "isIndexingTriggered",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.onFileSelect",
-            "type": "Function",
-            "tags": [],
-            "label": "onFileSelect",
-            "description": [],
-            "signature": [
-              "(geojsonFile: GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>, name: string, previewCoverage: number) => void"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.FileUploadComponentProps.onFileSelect.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "geojsonFile",
-                "description": [],
-                "signature": [
-                  "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.FileUploadComponentProps.onFileSelect.$2",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.FileUploadComponentProps.onFileSelect.$3",
-                "type": "number",
-                "tags": [],
-                "label": "previewCoverage",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.onFileClear",
-            "type": "Function",
-            "tags": [],
-            "label": "onFileClear",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.enableImportBtn",
-            "type": "Function",
-            "tags": [],
-            "label": "enableImportBtn",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.disableImportBtn",
-            "type": "Function",
-            "tags": [],
-            "label": "disableImportBtn",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.onUploadComplete",
-            "type": "Function",
-            "tags": [],
-            "label": "onUploadComplete",
-            "description": [],
-            "signature": [
-              "(results: ",
-              {
-                "pluginId": "fileUpload",
-                "scope": "public",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-public.FileUploadGeoResults",
-                "text": "FileUploadGeoResults"
-              },
-              ") => void"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.FileUploadComponentProps.onUploadComplete.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "results",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fileUpload",
-                    "scope": "public",
-                    "docId": "kibFileUploadPluginApi",
-                    "section": "def-public.FileUploadGeoResults",
-                    "text": "FileUploadGeoResults"
-                  }
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.FileUploadComponentProps.onUploadError",
-            "type": "Function",
-            "tags": [],
-            "label": "onUploadError",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fileUpload",
         "id": "def-public.FileUploadGeoResults",
         "type": "Interface",
         "tags": [],
         "label": "FileUploadGeoResults",
         "description": [],
         "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -304,6 +117,8 @@
             "label": "indexPatternId",
             "description": [],
             "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,6 +130,8 @@
             "label": "geoFieldName",
             "description": [],
             "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,6 +161,8 @@
               ".GEO_SHAPE"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -355,6 +174,8 @@
             "label": "docCount",
             "description": [],
             "path": "x-pack/platform/plugins/private/file_upload/public/lazy_load_bundle/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -369,6 +190,8 @@
         "label": "IImporter",
         "description": [],
         "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,6 +206,8 @@
               "(data: ArrayBuffer) => { success: boolean; }"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -397,6 +222,8 @@
                   "ArrayBuffer"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 21,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -435,6 +262,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -449,6 +278,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -464,6 +295,8 @@
                   "IndicesIndexSettings"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -479,6 +312,8 @@
                   "MappingTypeMapping"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -502,6 +337,8 @@
                   " | undefined)[]"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -517,6 +354,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -532,6 +371,8 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -560,6 +401,8 @@
               "[], signal?: AbortSignal | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -574,6 +417,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -589,6 +434,8 @@
                   "MappingTypeMapping"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -611,6 +458,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -626,6 +475,8 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -652,6 +503,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -666,6 +519,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -681,6 +536,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -696,6 +553,8 @@
                   "(progress: number) => void"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -711,6 +570,8 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -729,6 +590,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -745,6 +608,8 @@
               "() => string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -761,6 +626,8 @@
               "() => string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -777,6 +644,8 @@
               "() => Promise<{ start: number | null; end: number | null; }>"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -795,6 +664,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -809,6 +680,8 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -827,6 +700,8 @@
         "label": "Props",
         "description": [],
         "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -838,6 +713,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -852,6 +729,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -866,6 +745,8 @@
               "(name: string, error?: string | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -880,6 +761,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+                "lineNumber": 18,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -895,6 +778,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+                "lineNumber": 18,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -913,6 +798,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -929,6 +816,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/components/geo_upload_form/index_name_form.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -949,9 +838,11 @@
       "label": "FileUploadPluginStart",
       "description": [],
       "signature": [
-        "FileUploadStartApi"
+        "FileUploadPluginStartApi"
       ],
       "path": "x-pack/platform/plugins/private/file_upload/public/plugin.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

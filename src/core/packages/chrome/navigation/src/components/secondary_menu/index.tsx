@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import React, { forwardRef } from 'react';
+import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import type { BadgeType } from '../../../types';
+import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
-import { BetaBadge } from '../beta_badge';
-import type { BadgeType } from '../../../types';
 
 export interface SecondaryMenuProps {
   badgeType?: BadgeType;
   children: ReactNode;
+  isNew?: boolean;
   isPanel?: boolean;
   title: string;
 }
@@ -31,11 +32,8 @@ interface SecondaryMenuComponent
   Section: typeof SecondaryMenuSectionComponent;
 }
 
-/**
- * This menu is reused between the side nav panel and the side nav popover.
- */
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, isPanel = false, title }, ref) => {
+  ({ badgeType, children, title, isNew = false }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
@@ -45,21 +43,21 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       gap: ${euiTheme.size.xs};
     `;
 
+    const titleStyles = css`
+      ${headerStyle}
+      background: ${euiTheme.colors.backgroundBasePlain};
+      border-radius: ${euiTheme.border.radius.medium};
+    `;
+
     return (
       <div ref={ref}>
-        <EuiTitle
-          css={css`
-            ${headerStyle}
-            background: ${isPanel
-              ? euiTheme.colors.backgroundBaseSubdued
-              : euiTheme.colors.backgroundBasePlain};
-            border-radius: ${euiTheme.border.radius.medium};
-          `}
-          size="xs"
-        >
+        <EuiTitle css={titleStyles} size="xs">
           <div css={titleWithBadgeStyles}>
             <h4>{title}</h4>
-            {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+            {/* Always show non-new badges, only show new ones if isNew check allows it */}
+            {badgeType && (badgeType !== 'new' || isNew) && (
+              <BetaBadge type={badgeType} alignment="text-bottom" />
+            )}
           </div>
         </EuiTitle>
         {children}
@@ -68,6 +66,9 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
   }
 );
 
+/**
+ * This menu is reused between the side nav panel and the side nav popover.
+ */
 export const SecondaryMenu = Object.assign(SecondaryMenuBase, {
   Item: SecondaryMenuItemComponent,
   Section: SecondaryMenuSectionComponent,

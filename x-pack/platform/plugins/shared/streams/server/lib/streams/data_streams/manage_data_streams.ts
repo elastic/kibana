@@ -12,9 +12,21 @@ import type {
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
 } from '@kbn/streams-schema';
-import type { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { Streams } from '@kbn/streams-schema';
+import type {
+  IndicesDataStreamFailureStore,
+  IndicesPutDataLifecycleRequest,
+  IndicesSimulateTemplateTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { getErrorMessage, parseError } from '../errors/parse_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -56,9 +68,12 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
-  } catch (error: any) {
-    logger.error(`Error creating data stream: ${error.message}`);
-    throw error;
+  } catch (error) {
+    const { type, message } = parseError(error);
+    if (type !== 'resource_already_exists_exception') {
+      logger.error(`Error creating data stream: ${message}`);
+      throw error;
+    }
   }
 }
 
@@ -68,8 +83,8 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
       () => esClient.indices.deleteDataStream({ name }, { ignore: [404] }),
       { logger }
     );
-  } catch (error: any) {
-    logger.error(`Error deleting data stream: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error deleting data stream: ${getErrorMessage(error)}`);
     throw error;
   }
 }
@@ -110,8 +125,8 @@ export interface DataStreamMappingsUpdateResponse {
     name: string;
     applied_to_data_stream: boolean;
     error?: string;
-    mappings: Record<string, any>;
-    effective_mappings: Record<string, any>;
+    mappings: Record<string, unknown>;
+    effective_mappings: Record<string, unknown>;
   }>;
 }
 
@@ -169,12 +184,14 @@ export async function updateDataStreamsLifecycle({
         },
       });
     } else if (isDslLifecycle(lifecycle)) {
+      const dslDownsampling = lifecycle.dsl.downsample;
       await retryTransientEsErrors(
         () =>
           esClient.indices.putDataLifecycle({
             name: names,
             data_retention: lifecycle.dsl.data_retention,
-          }),
+            ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
+          } as IndicesPutDataLifecycleRequest),
         { logger }
       );
 
@@ -210,12 +227,14 @@ export async function updateDataStreamsLifecycle({
 
           const templateLifecycle = getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
+            const templateDownsampling = templateLifecycle.dsl.downsample;
             await retryTransientEsErrors(
               () =>
                 esClient.indices.putDataLifecycle({
                   name,
                   data_retention: templateLifecycle.dsl.data_retention,
-                }),
+                  ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
+                } as IndicesPutDataLifecycleRequest),
               { logger }
             );
           } else {
@@ -238,8 +257,8 @@ export async function updateDataStreamsLifecycle({
         })
       );
     }
-  } catch (err: any) {
-    logger.error(`Error updating data stream lifecycle: ${err.message}`);
+  } catch (err) {
+    logger.error(`Error updating data stream lifecycle: ${getErrorMessage(err)}`);
     throw err;
   }
 }
@@ -270,6 +289,71 @@ export async function putDataStreamsSettings({
     .map(({ error }) => error);
   if (errors.length) {
     throw new Error(errors.join('\n'));
+  }
+}
+
+export async function updateDataStreamsFailureStore({
+  esClient,
+  logger,
+  failureStore,
+  stream,
+  isServerless,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  failureStore: FailureStore;
+  stream: Streams.all.Definition;
+  isServerless: boolean;
+}) {
+  try {
+    let failureStoreConfig: IndicesDataStreamFailureStore;
+
+    // Handle { inherit: {} }
+    if (isInheritFailureStore(failureStore)) {
+      const response = await retryTransientEsErrors(
+        () => esClient.indices.simulateIndexTemplate({ name: stream.name }),
+        { logger }
+      );
+      // If not template, disable the failure store. Empty object would cause Elasticsearch error.
+      // @ts-expect-error index simulate response is not well typed
+      failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
+        enabled: false,
+      };
+    } else if (isEnabledLifecycleFailureStore(failureStore)) {
+      // Handle { lifecycle: { enabled: { data_retention?: string } } }
+      const dataRetention = failureStore.lifecycle.enabled?.data_retention;
+      failureStoreConfig = {
+        enabled: true,
+        ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
+      };
+    } else if (isDisabledLifecycleFailureStore(failureStore)) {
+      // Handle { lifecycle: { disabled: {} } }
+      // lifecycle cannot be disabled in serverless
+      failureStoreConfig = {
+        enabled: true,
+        ...(isServerless ? {} : { lifecycle: { enabled: false } }),
+      };
+    } else {
+      // Handle { disabled: {} }
+      failureStoreConfig = {
+        enabled: false,
+      };
+    }
+
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putDataStreamOptions(
+          {
+            name: stream.name,
+            failure_store: failureStoreConfig,
+          },
+          { meta: true }
+        ),
+      { logger }
+    );
+  } catch (err) {
+    logger.error(`Error updating data stream failure store: ${getErrorMessage(err)}`);
+    throw err;
   }
 }
 

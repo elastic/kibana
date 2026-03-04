@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { LensByValueSerializedState } from '@kbn/lens-common';
-import type { LensTransformDependencies } from '.';
-import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';
+import type { LensSerializedState } from '@kbn/lens-common';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
+import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
+import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { flow } from 'lodash';
+import { transformToV1LensItemAttributes } from '../content_management/v1';
+import { transformToV2LensItemAttributes } from '../content_management/v2';
 import { injectLensReferences } from '../references';
 import type {
   LensByRefTransformOutResult,
@@ -16,27 +21,29 @@ import type {
   LensTransformOut,
 } from './types';
 import { findLensReference, isByRefLensState } from './utils';
+import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 
 /**
- * Transform from Lens Serialized State to Lens API format
+ * Transform from Lens Stored State to Lens API format
  */
-export const getTransformOut = ({
-  transformEnhancementsOut,
-}: LensTransformDependencies): LensTransformOut => {
-  return function transformOut(state, references) {
-    const enhancements = state.enhancements
-      ? transformEnhancementsOut?.(state.enhancements, references ?? [])
-      : undefined;
-    const enhancementsState = (
-      enhancements ? { enhancements } : {}
-    ) as DynamicActionsSerializedState;
+export const getTransformOut = (
+  builder: LensConfigBuilder,
+  transformDrilldownsOut: DrilldownTransforms['transformOut']
+): LensTransformOut => {
+  return function transformOut(storedState, panelReferences) {
+    const transformsFlow = flow(
+      transformTitlesOut<LensSerializedState>,
+      transformTimeRangeOut<LensSerializedState>,
+      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
+    );
 
-    const savedObjectRef = findLensReference(references);
+    const state = transformsFlow(storedState);
+
+    const savedObjectRef = findLensReference(panelReferences);
 
     if (savedObjectRef && isByRefLensState(state)) {
       return {
         ...state,
-        ...enhancementsState,
         savedObjectId: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
@@ -45,20 +52,34 @@ export const getTransformOut = ({
     const injectedState = injectLensReferences(
       {
         ...state,
-        ...enhancementsState,
         attributes: migratedAttributes,
       },
-      references
+      panelReferences
     );
 
-    return injectedState satisfies LensByValueTransformOutResult;
+    const chartType = builder.getType(migratedAttributes);
+
+    if (!builder.isSupported(chartType)) {
+      // TODO: remove this once all formats are supported
+      return injectedState as LensByValueTransformOutResult;
+    }
+
+    const apiConfig = builder.toAPIFormat({
+      ...migratedAttributes,
+      visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
+    });
+
+    return {
+      ...state,
+      attributes: apiConfig,
+    } satisfies LensByValueTransformOutResult;
   };
 };
 
 /**
  * Handles transforming old lens SO in dashboard to v1 Lens SO
  */
-function migrateAttributes(attributes: LensByValueSerializedState['attributes']) {
+function migrateAttributes(attributes: LensByValueSerializedState['attributes']): LensAttributes {
   if (!attributes) {
     throw new Error('Why are attributes undefined?');
   }
@@ -69,15 +90,16 @@ function migrateAttributes(attributes: LensByValueSerializedState['attributes'])
     throw new Error('Missing visualizationType');
   }
 
-  const version = attributes.version ?? 0;
-
-  let newAttributes = { ...attributes };
-  if (version < LENS_ITEM_VERSION_V1) {
-    newAttributes = {
-      ...newAttributes,
-      ...transformToV1LensItemAttributes({ ...attributes, visualizationType }),
+  const newAttributes = { ...attributes, visualizationType };
+  if (isLensAttributesV0(newAttributes) || isLensAttributesV1(newAttributes)) {
+    const v1Attributes = transformToV1LensItemAttributes(newAttributes);
+    const v2Attributes = transformToV2LensItemAttributes({ ...v1Attributes, visualizationType });
+    return {
+      ...attributes,
+      ...v2Attributes,
+      version: LENS_ITEM_VERSION_V2 as LensAttributes['version'],
     };
   }
 
-  return newAttributes;
+  return newAttributes as LensAttributes;
 }

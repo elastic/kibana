@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
 import { unset } from 'lodash';
+
+import type { Type } from '@kbn/config-schema';
+
 import { LensConfigBuilder } from '../config_builder';
 import type { LensAttributes } from '../types';
 import type { LensApiState } from '../schema';
@@ -27,8 +29,7 @@ import { lensApiStateSchema } from '../schema';
  * - Validates against the general lensApiStateSchema
  */
 export function validateConverter(attributes: LensAttributes, schema: Type<any>) {
-  const builder = new LensConfigBuilder();
-
+  const builder = new LensConfigBuilder(undefined, true);
   const newApiConfig = builder.toAPIFormat(attributes);
 
   expect(() => {
@@ -98,5 +99,5 @@ export function validateAPIConverter(
   const filteredApiConfig = structuredClone(apiConfig);
   excludedFields?.forEach((fieldPath) => unset(filteredApiConfig, fieldPath));
 
-  expect(newApiConfig).toEqual(expect.objectContaining(filteredApiConfig));
+  expect(newApiConfig).toMatchObject(filteredApiConfig);
 }

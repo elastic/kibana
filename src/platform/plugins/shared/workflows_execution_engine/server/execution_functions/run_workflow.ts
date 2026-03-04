@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import apm from 'elastic-apm-node';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
+import type { WorkflowsMeteringService } from '../metering';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -22,33 +20,25 @@ export async function runWorkflow({
   workflowRunId,
   spaceId,
   taskAbortController,
-  workflowExecutionRepository,
-  stepExecutionRepository,
-  logsRepository,
-  coreStart,
-  esClient,
-  actions,
-  taskManager,
   logger,
   config,
   fakeRequest,
   dependencies,
+  workflowsExecutionEngine,
+  meteringService,
 }: {
   workflowRunId: string;
   spaceId: string;
   taskAbortController: AbortController;
-  coreStart: CoreStart;
-  esClient: ElasticsearchClient;
-  workflowExecutionRepository: WorkflowExecutionRepository;
-  stepExecutionRepository: StepExecutionRepository;
-  logsRepository: LogsRepository;
-  actions: ActionsPluginStartContract;
-  taskManager: WorkflowsExecutionEnginePluginStartDeps['taskManager'];
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
+  // Span for setup/initialization phase
+  const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -56,37 +46,81 @@ export async function runWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    clientToUse,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
+    workflowTaskManager,
+    workflowExecutionRepository,
+    esClient,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
-    actions,
-    taskManager,
-    esClient,
     logger,
     config,
-    workflowExecutionRepository,
-    stepExecutionRepository,
-    logsRepository,
-    coreStart,
     dependencies,
-    fakeRequest // Provided by Task Manager's first-class API key support
+    fakeRequest,
+    workflowsExecutionEngine
   );
-  await workflowRuntime.start();
+  setupSpan?.end();
 
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient: clientToUse,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
-    taskAbortController,
-  });
+  // Span for runtime initialization (graph building, topsort, etc.)
+  const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
+  try {
+    await workflowRuntime.start();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(
+      `Workflow execution ${workflowRunId} failed during runtime start: ${errorMessage}`
+    );
+    if (errorStack) {
+      logger.error(`Workflow execution ${workflowRunId} runtime start error stack: ${errorStack}`);
+    }
+    throw error;
+  } finally {
+    startSpan?.end();
+  }
+
+  // Span for the main execution loop
+  const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+    loopSpan?.setOutcome('success');
+  } catch (error) {
+    loopSpan?.setOutcome('failure');
+    throw error;
+  } finally {
+    loopSpan?.end();
+  }
+
+  // Report metering after execution completes and state is flushed.
+  // This is fire-and-forget: the metering service handles retries and
+  // will no-op for non-terminal states (e.g., WAITING for resume).
+  if (meteringService) {
+    try {
+      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowRunId,
+        spaceId
+      );
+      if (finalExecution) {
+        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+      }
+    } catch (err) {
+      logger.warn(
+        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
 }

@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
+import type { StepStabilityLevel } from '@kbn/workflows';
+
 interface ActionBase {
   id: string;
   label: string;
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  stability?: StepStabilityLevel;
 }
 
 export interface ActionGroup extends ActionBase {
-  iconType: string;
+  iconType: IconType;
   options: ActionOptionData[];
 }
 
@@ -27,7 +31,7 @@ export interface ActionConnectorGroup extends ActionBase {
 
 export interface ActionOption extends ActionBase {
   id: string;
-  iconType: string;
+  iconType: IconType;
 }
 
 export interface ActionConnectorOption extends ActionBase {

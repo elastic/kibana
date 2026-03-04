@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -8,7 +8,8 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts"
+    "server/**/*.ts",
+    "test/**/*.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -27,11 +28,8 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/router-utils",
-    "@kbn/core-user-profile-browser",
-    "@kbn/core-application-browser",
-    "@kbn/core-feature-flags-browser",
-    "@kbn/core-chrome-navigation-tour",
-    "@kbn/split-button"
+    "@kbn/split-button",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

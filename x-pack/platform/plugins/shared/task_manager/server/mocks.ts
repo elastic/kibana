@@ -41,6 +41,7 @@ const createStartMock = () => {
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
     registerEncryptedSavedObjectsClient: jest.fn(),
+    registerApiKeyInvalidateFn: jest.fn(),
   });
 
   return mock;

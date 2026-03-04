@@ -11,17 +11,16 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  CONNECTOR_ID,
+  DEFAULT_MODEL,
+  DEFAULT_URL,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
   StreamingResponseSchema,
-} from '../../../common/bedrock/schema';
-import {
-  BEDROCK_CONNECTOR_ID,
-  DEFAULT_BEDROCK_MODEL,
-  DEFAULT_BEDROCK_URL,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_TIMEOUT_MS,
-} from '../../../common/bedrock/constants';
+  ConverseResponseSchema,
+} from '@kbn/connector-schemas/bedrock';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import type { AxiosError } from 'axios';
@@ -31,7 +30,7 @@ jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 // @ts-ignore
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
 const mockSend = jest.fn();
-const encodedModel = encodeURIComponent(DEFAULT_BEDROCK_MODEL);
+const encodedModel = encodeURIComponent(DEFAULT_MODEL);
 
 const DEFAULT_MESSAGES = [
   {
@@ -63,15 +62,13 @@ const DEFAULT_PAYLOAD = {
 const DEFAULT_CONVERSE_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: { toolChoice: {} },
-  modelId: DEFAULT_BEDROCK_MODEL,
+  modelId: DEFAULT_MODEL,
 };
 
 const DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: {},
-  modelId: DEFAULT_BEDROCK_MODEL,
+  modelId: DEFAULT_MODEL,
 };
 
 describe('BedrockConnector', () => {
@@ -119,10 +116,10 @@ describe('BedrockConnector', () => {
 
   const connector = new BedrockConnector({
     configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: {
-      apiUrl: DEFAULT_BEDROCK_URL,
-      defaultModel: DEFAULT_BEDROCK_MODEL,
+      apiUrl: DEFAULT_URL,
+      defaultModel: DEFAULT_MODEL,
     },
     secrets: { accessKey: '123', secret: 'secret' },
     logger,
@@ -154,9 +151,39 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/invoke`,
             service: 'bedrock',
           },
+          { accessKeyId: '123', secretAccessKey: 'secret' }
+        );
+      });
+
+      it('passes an explicit region to the signer for custom endpoints', async () => {
+        mockSigner.mockClear();
+        const customConnector = new BedrockConnector({
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: CONNECTOR_ID },
+          config: {
+            apiUrl: 'https://custom.endpoint.example',
+            region: 'us-west-1',
+            defaultModel: DEFAULT_MODEL,
+          },
+          secrets: { accessKey: '123', secret: 'secret' },
+          logger,
+          services: actionsMock.createServices(),
+        });
+        // @ts-ignore
+        customConnector.request = mockRequest;
+
+        await customConnector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
+
+        expect(mockSigner).toHaveBeenCalledWith(
+          expect.objectContaining({
+            host: 'custom.endpoint.example',
+            region: 'us-west-1',
+            service: 'bedrock',
+          }),
           { accessKeyId: '123', secretAccessKey: 'secret' }
         );
       });
@@ -167,7 +194,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: DEFAULT_BODY,
@@ -197,7 +224,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunActionResponseSchema,
             data: v2Body,
@@ -255,6 +282,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/invoke-with-response-stream`,
             service: 'bedrock',
           },
@@ -268,7 +296,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
@@ -289,7 +317,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
@@ -329,7 +357,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -384,7 +412,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -433,7 +461,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/invoke-with-response-stream`,
+            url: `${DEFAULT_URL}/model/${modelOverride}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -485,7 +513,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -529,7 +557,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -575,7 +603,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -625,7 +653,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -652,7 +680,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -735,12 +763,29 @@ describe('BedrockConnector', () => {
           { signal: undefined, command: preconfiguredCommand },
           connectorUsageCollector
         );
-        expect(preconfiguredCommand.input.modelId).toBe(DEFAULT_BEDROCK_MODEL);
+        expect(preconfiguredCommand.input.modelId).toBe(DEFAULT_MODEL);
       });
     });
 
     describe('converse', () => {
       const aiAssistantBody = DEFAULT_PAYLOAD;
+
+      const converseResponse = {
+        output: {
+          message: {
+            role: 'assistant',
+            content: [{ type: 'text', text: mockResponseString }],
+          },
+        },
+        stopReason: 'end_turn',
+        usage: { inputTokens: 41, outputTokens: 64 },
+      };
+
+      beforeEach(() => {
+        mockRequest = jest.fn().mockResolvedValue({ headers: {}, data: converseResponse });
+        // @ts-ignore
+        connector.request = mockRequest;
+      });
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.converse(aiAssistantBody, connectorUsageCollector);
@@ -749,14 +794,15 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify(DEFAULT_CONVERSE_REQUEST_PAYLOAD),
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message!.content[0].text).toEqual(mockResponseString);
       });
 
       it('formats messages from user, assistant, and system', async () => {
@@ -776,9 +822,9 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               ...DEFAULT_CONVERSE_REQUEST_PAYLOAD,
               messages: [
@@ -789,10 +835,12 @@ describe('BedrockConnector', () => {
               ],
               inferenceConfig: {},
             }),
+            signal: undefined,
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
 
       it('adds system message from argument', async () => {
@@ -821,9 +869,9 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               messages: [
                 {
@@ -840,16 +888,15 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {
-                toolChoice: {},
-              },
               system: [{ type: 'text', text: 'This is a system message' }],
-              modelId: DEFAULT_BEDROCK_MODEL,
+              modelId: DEFAULT_MODEL,
             }),
+            signal: undefined,
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
 
       it('combines argument system message with conversation system message', async () => {
@@ -882,9 +929,9 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               messages: [
                 {
@@ -905,16 +952,15 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {
-                toolChoice: {},
-              },
               system: [{ type: 'text', text: 'This is a system message' }],
-              modelId: DEFAULT_BEDROCK_MODEL,
+              modelId: DEFAULT_MODEL,
             }),
+            signal: undefined,
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
@@ -924,14 +970,13 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               messages: [{ role: 'user', content: 'Hello world' }],
               inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-              toolConfig: { toolChoice: {} },
-              modelId: DEFAULT_BEDROCK_MODEL,
+              modelId: DEFAULT_MODEL,
             }),
             timeout,
             signal,
@@ -973,6 +1018,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/converse-stream`,
             service: 'bedrock',
           },
@@ -986,7 +1032,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
@@ -1009,7 +1055,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
@@ -1023,8 +1069,7 @@ describe('BedrockConnector', () => {
               inferenceConfig: {
                 stopSequences: ['\n\nHuman:'],
               },
-              toolConfig: {},
-              modelId: DEFAULT_BEDROCK_MODEL,
+              modelId: DEFAULT_MODEL,
             }),
             timeout,
             signal,
@@ -1049,7 +1094,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             signal: undefined,
@@ -1100,7 +1145,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            url: `${DEFAULT_URL}/model/${encodedModel}/converse-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             signal: undefined,
@@ -1141,7 +1186,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/converse-stream`,
+            url: `${DEFAULT_URL}/model/${modelOverride}/converse-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             timeout: 200000,

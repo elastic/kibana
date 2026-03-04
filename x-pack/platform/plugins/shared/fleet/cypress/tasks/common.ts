@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
-import { API_VERSIONS } from '../../common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 import type { ROLES } from './privileges';
 
@@ -78,14 +78,11 @@ const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
-
-  // other keys in incompatible format
-  // TODO: remove in https://github.com/elastic/kibana/issues/239313
-  window.localStorage.setItem('solutionNavigationTour:completed', 'true');
 };
 
 const disableFleetTours = (window: Window) => {
   window.localStorage.setItem('fleet.autoUpgradeAgentsTour', JSON.stringify({ active: false }));
+  window.localStorage.setItem('fleet.agentExportCSVTour', JSON.stringify({ active: false }));
 };
 
 export const waitForPageToBeLoaded = () => {

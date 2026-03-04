@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
 
@@ -25,7 +25,6 @@
     "types/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
@@ -68,10 +67,8 @@
     "@kbn/discover-utils",
     "@kbn/content-management-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/reporting-server",
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/code-editor",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
@@ -82,7 +79,8 @@
     "@kbn/content-management-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }

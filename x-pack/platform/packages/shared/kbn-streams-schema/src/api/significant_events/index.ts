@@ -7,8 +7,9 @@
 
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
-import type { Condition } from '@kbn/streamlang';
-import type { StreamQueryKql } from '../../queries';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { EsqlQuery, StreamQuery } from '../../queries';
+import type { TaskStatus } from '../../tasks/types';
 
 /**
  * SignificantEvents Get Response
@@ -29,32 +30,65 @@ type ChangePointsValue = Partial<{
   trend: string;
 }>;
 
-type SignificantEventsResponse = StreamQueryKql & {
-  occurrences: Array<{ date: string; count: number }>;
+interface SignificantEventOccurrence {
+  date: string;
+  count: number;
+}
+
+type SignificantEventsResponse = StreamQuery & {
+  stream_name: string;
+  occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
+  rule_backed: boolean;
 };
 
-type SignificantEventsGetResponse = SignificantEventsResponse[];
+interface SignificantEventsGetResponse {
+  significant_events: SignificantEventsResponse[];
+  aggregated_occurrences: SignificantEventOccurrence[];
+}
 
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
-  'occurrences' | 'change_points' | 'kql'
+  'occurrences' | 'change_points' | 'esql'
 >;
 
 interface GeneratedSignificantEventQuery {
   title: string;
-  kql: string;
-  feature?: {
-    name: string;
-    filter: Condition;
-  };
+  esql: EsqlQuery;
+  severity_score: number;
+  evidence?: string[];
 }
 
 type SignificantEventsGenerateResponse = Observable<
-  ServerSentEventBase<'generated_query', { query: GeneratedSignificantEventQuery }>
+  ServerSentEventBase<
+    'generated_queries',
+    { queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }
+  >
 >;
+
+interface SignificantEventsQueriesGenerationResult {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
+}
+
+type SignificantEventsQueriesGenerationTaskResult =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | {
+      status: TaskStatus.Failed;
+      error: string;
+    }
+  | ({
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
+    } & SignificantEventsQueriesGenerationResult);
 
 export type {
   SignificantEventsResponse,
@@ -62,4 +96,6 @@ export type {
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 };

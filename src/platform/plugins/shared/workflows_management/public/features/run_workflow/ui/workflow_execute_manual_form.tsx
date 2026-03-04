@@ -8,56 +8,19 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-
-const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
-  return z.object(
-    inputs.reduce((acc, input) => {
-      switch (input.type) {
-        case 'string':
-          acc[input.name] = input.required ? z.string() : z.string().optional();
-          break;
-        case 'number':
-          acc[input.name] = input.required ? z.number() : z.number().optional();
-          break;
-        case 'boolean':
-          acc[input.name] = input.required ? z.boolean() : z.boolean().optional();
-          break;
-        case 'choice':
-          acc[input.name] = input.required
-            ? z.enum(input.options as [string, ...string[]])
-            : z.enum(input.options as [string, ...string[]]).optional();
-          break;
-        case 'array': {
-          const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-          const { minItems, maxItems } = input;
-          const applyConstraints = (
-            schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
-          ) => {
-            let s = schema;
-            if (minItems != null) s = s.min(minItems);
-            if (maxItems != null) s = s.max(maxItems);
-            return s;
-          };
-          const arr = z.union(
-            arraySchemas.map(applyConstraints) as [
-              z.ZodArray<z.ZodString>,
-              z.ZodArray<z.ZodNumber>,
-              z.ZodArray<z.ZodBoolean>
-            ]
-          );
-          acc[input.name] = input.required ? arr : arr.optional();
-          break;
-        }
-      }
-      return acc;
-    }, {} as Record<string, z.ZodType>)
-  );
-};
+import type { WorkflowYaml } from '@kbn/workflows';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
+import type { z } from '@kbn/zod/v4';
+import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
+import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 interface WorkflowExecuteManualFormProps {
   definition: WorkflowYaml | null;
@@ -67,36 +30,28 @@ interface WorkflowExecuteManualFormProps {
   setErrors: (errors: string | null) => void;
 }
 
-type WorkflowInputPlaceholder =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | ((input: z.infer<typeof WorkflowInputSchema>) => string);
-
-const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
-  string: 'Enter a string',
-  number: 0,
-  boolean: false,
-  choice: (input: z.infer<typeof WorkflowInputSchema>) =>
-    `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
-  array: (input: z.infer<typeof WorkflowInputSchema>) =>
-    'Enter array of strings, numbers or booleans',
-};
-
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
-  const inputPlaceholder: Record<string, WorkflowInputPlaceholder> = {};
+  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
+  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
 
-  if (definition.inputs) {
-    definition.inputs.forEach((input: z.infer<typeof WorkflowInputSchema>) => {
-      let placeholder: WorkflowInputPlaceholder = defaultWorkflowInputsMappings[input.type];
-      if (typeof placeholder === 'function') {
-        placeholder = placeholder(input);
-      }
-      inputPlaceholder[input.name] = input.default || placeholder;
-    });
+  if (!normalizedInputs?.properties) {
+    return '{}';
+  }
+
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as legacy format and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  // If defaults were applied and not empty, use them; otherwise generate samples
+  if (defaults && typeof defaults === 'object' && Object.keys(defaults).length > 0) {
+    return JSON.stringify(defaults, null, 2);
+  }
+
+  // Fallback to generating samples if no defaults are available
+  const inputPlaceholder: Record<string, unknown> = {};
+  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+    inputPlaceholder[propertyName] = generateSampleFromJsonSchema(jsonSchema);
   }
 
   return JSON.stringify(inputPlaceholder, null, 2);
@@ -110,7 +65,7 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(definition?.inputs || []),
+    () => buildInputsZodValidator(normalizeInputsToJsonSchema(definition?.inputs)),
     [definition?.inputs]
   );
 
@@ -144,11 +99,34 @@ export const WorkflowExecuteManualForm = ({
     [setValue, definition?.inputs, inputsValidator, setErrors]
   );
 
+  // Validate inputs on initial load and when definition changes
   useEffect(() => {
-    if (!value && definition) {
-      handleChange(getDefaultWorkflowInput(definition));
+    if (definition?.inputs && value) {
+      try {
+        const res = inputsValidator.safeParse(JSON.parse(value));
+        if (!res.success) {
+          setErrors(
+            res.error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          );
+        } else {
+          setErrors(null);
+        }
+      } catch (e: Error | unknown) {
+        // Ignore JSON parse errors
+      }
     }
-  }, [definition, value, handleChange]);
+  }, [definition?.inputs, inputsValidator, value, setErrors]);
+
+  // Set defaults if value is empty or only contains empty object
+  useEffect(() => {
+    if (definition) {
+      const isEmpty = !value || value.trim() === '' || value.trim() === '{}';
+      if (isEmpty) {
+        handleChange(getDefaultWorkflowInput(definition));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -206,7 +184,7 @@ export const WorkflowExecuteManualForm = ({
               renderWhitespace: 'all',
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
-              theme: 'vs-light',
+              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               formatOnType: true,
               quickSuggestions: false,
               suggestOnTriggerCharacters: false,

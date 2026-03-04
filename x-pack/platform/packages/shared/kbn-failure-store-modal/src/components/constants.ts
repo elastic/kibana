@@ -54,7 +54,15 @@ export const extraTimeUnits = [
   },
 ];
 
-export const failureStorePeriodOptions = [
+export const getFailureStorePeriodOptions = (disableButtonLabel?: string) => [
+  {
+    id: 'disabledLifecycle',
+    label:
+      disableButtonLabel ??
+      i18n.translate('xpack.failureStoreModal.form.options.disabledPeriodLabel', {
+        defaultMessage: 'Disabled',
+      }),
+  },
   {
     id: 'default',
     label: i18n.translate('xpack.failureStoreModal.form.options.defaultPeriodLabel', {

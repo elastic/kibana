@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiIcon, EuiFormPrepend } from '@elastic/eui';
 import type {
   LensPartitionVisualizationState as PieVisualizationState,
   VisualizationToolbarProps,
@@ -25,7 +25,7 @@ export function PartitionAppearanceSettings(
 ) {
   const { state, setState } = props;
   const layer = state.layers[0];
-  const { emptySizeRatioOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
+  const { emptySizeRatioOptions } = PartitionChartsMeta[state.shape].toolbar;
 
   const onEmptySizeRatioChange = useCallback(
     ([option]: Array<EuiComboBoxOptionOption<string>>) => {
@@ -76,7 +76,9 @@ export function PartitionAppearanceSettings(
         options={options}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
-        prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
+        prepend={
+          selectedOption?.icon ? <EuiFormPrepend iconLeft={selectedOption.icon} /> : undefined
+        }
       />
     </EuiFormRow>
   );

@@ -35,6 +35,7 @@ import type {
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
+import type { DatasetType } from './schema/dataset';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -125,7 +126,8 @@ const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
 // Getting the spec from a data view is a heavy operation, that's why the result is cached.
 export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   let adHocDataViews = {};
-  [...new Set(Object.values(dataviews))].forEach((d) => {
+
+  [...Array.from(new Set(Object.values(dataviews)))].forEach((d) => {
     adHocDataViews = {
       ...adHocDataViews,
       ...getAdhocDataView(d),
@@ -346,7 +348,11 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
 }
 
 export function isLensAPIFormat(config: unknown): config is LensApiState {
-  return typeof config === 'object' && config !== null && 'type' in config;
+  // We need to check the type is not lens because embeddable logic sometimes add it for some reason.
+  // See https://github.com/elastic/kibana/issues/250115
+  return (
+    typeof config === 'object' && config !== null && 'type' in config && config.type !== 'lens'
+  );
 }
 
 export function isLensLegacyFormat(config: unknown): config is LensConfig {
@@ -359,6 +365,14 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(dataset: LensApiState['dataset']) {
+export function isEsqlTableTypeDataset(
+  dataset: DatasetType
+): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
   return dataset.type === 'esql' || dataset.type === 'table';
+}
+
+export function groupIsNotCollapsed(def: {
+  collapse_by?: string;
+}): def is { collapse_by: undefined } {
+  return def.collapse_by == null;
 }

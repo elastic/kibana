@@ -131,10 +131,18 @@ export const EventAttachmentRt = rt.intersection([
 ]);
 
 export type AlertAttachmentPayload = rt.TypeOf<typeof AlertAttachmentPayloadRt>;
-export type EventAttachmentPayload = rt.TypeOf<typeof EventAttachmentPayloadRt>;
 export type AlertAttachmentAttributes = rt.TypeOf<typeof AlertAttachmentAttributesRt>;
 export type AlertAttachment = rt.TypeOf<typeof AlertAttachmentRt>;
+
+export type EventAttachmentPayload = rt.TypeOf<typeof EventAttachmentPayloadRt>;
+export type EventAttachmentAttributes = rt.TypeOf<typeof EventAttachmentAttributesRt>;
 export type EventAttachment = rt.TypeOf<typeof EventAttachmentRt>;
+
+export const DocumentAttachmentAttributesRt = rt.union([
+  AlertAttachmentAttributesRt,
+  EventAttachmentAttributesRt,
+]);
+export type DocumentAttachmentAttributes = rt.TypeOf<typeof DocumentAttachmentAttributesRt>;
 
 /**
  * Actions

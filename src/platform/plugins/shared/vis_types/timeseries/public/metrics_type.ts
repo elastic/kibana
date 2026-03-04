@@ -92,15 +92,21 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   return resolvedIndexPatterns;
 }
 
+export const TSVB_ICON = 'visVisualBuilder';
+export const TSVB_TITLE = i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', {
+  defaultMessage: 'TSVB',
+});
+export const TSVB_DESCRIPTION = i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
+  defaultMessage: 'Create visualizations using time series data.',
+});
+
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
   name: VIS_TYPE,
-  title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
-  description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Create visualizations using time series data.',
-  }),
-  icon: 'visVisualBuilder',
+  title: TSVB_TITLE,
+  description: TSVB_DESCRIPTION,
+  icon: TSVB_ICON,
   group: VisGroups.LEGACY,
   order: 10,
   visConfig: {

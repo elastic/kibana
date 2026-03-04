@@ -26,9 +26,15 @@ interface UserAuthenticationAttributes extends BasicAttributes {
   providerType: string;
 }
 
-export type SecurityTelemetryAttributes = BasicAttributes &
+interface GetCurrentProfileAttributes extends BasicAttributes {
+  profileActivationRequired?: boolean;
+  apiKeyRetrievalRequired?: boolean;
+}
+
+export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
   Partial<PrivilegeRegistrationAttributes> &
-  Partial<UserAuthenticationAttributes>;
+  Partial<UserAuthenticationAttributes> &
+  Partial<GetCurrentProfileAttributes>;
 
 class SecurityTelemetry {
   private readonly meter = metrics.getMeter('kibana.security');
@@ -38,12 +44,32 @@ class SecurityTelemetry {
   private readonly sessionCreationDuration: Histogram<Attributes>;
   private readonly logoutCounter: Counter<Attributes>;
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
+  private readonly getCurrentProfileCounter: Counter<Attributes>;
+
+  // Adds more boundaries in 50-500ms range where most operations typically fall
+  private readonly DEFAULT_BUCKET_BOUNDARIES = [
+    50, 75, 100, 150, 200, 250, 300, 400, 500, 650, 800, 1000, 1500, 2000, 3000, 5000, 7500, 10000,
+    20000,
+  ];
+
+  // Provides detailed buckets in the 1.5s-4s range where most operations occur
+  private readonly PRIVILEGE_REGISTRATION_BUCKET_BOUNDARIES = [
+    0, 200, 350, 500, 650, 800, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 10000, 20000,
+  ];
+
+  // Provides detailed buckets in the under 1.5s range where most operations occur
+  private readonly LOGIN_DURATION_BUCKET_BOUNDARIES = [
+    0, 50, 100, 220, 280, 340, 400, 500, 650, 800, 1000, 1500, 2000, 3000, 5000, 7500, 10000, 20000,
+  ];
 
   constructor() {
-    this.loginDuration = this.meter.createHistogram('auth.saml.login.duration', {
+    this.loginDuration = this.meter.createHistogram('auth.login.duration', {
       description: 'Duration of login attempts',
       unit: 'ms',
       valueType: ValueType.DOUBLE,
+      advice: {
+        explicitBucketBoundaries: this.LOGIN_DURATION_BUCKET_BOUNDARIES,
+      },
     });
 
     this.userProfileActivationDuration = this.meter.createHistogram(
@@ -52,6 +78,9 @@ class SecurityTelemetry {
         description: 'Duration of user profile activation attempts',
         unit: 'ms',
         valueType: ValueType.DOUBLE,
+        advice: {
+          explicitBucketBoundaries: this.DEFAULT_BUCKET_BOUNDARIES,
+        },
       }
     );
 
@@ -59,6 +88,9 @@ class SecurityTelemetry {
       description: 'Duration of session creation attempts',
       unit: 'ms',
       valueType: ValueType.DOUBLE,
+      advice: {
+        explicitBucketBoundaries: this.DEFAULT_BUCKET_BOUNDARIES,
+      },
     });
 
     this.logoutCounter = this.meter.createCounter('auth.logout.attempts', {
@@ -73,18 +105,44 @@ class SecurityTelemetry {
         description: 'Duration of privilege registration',
         unit: 'ms',
         valueType: ValueType.DOUBLE,
+        advice: {
+          explicitBucketBoundaries: this.PRIVILEGE_REGISTRATION_BUCKET_BOUNDARIES,
+        },
+      }
+    );
+
+    this.getCurrentProfileCounter = this.meter.createCounter(
+      'user_profiles.get_current.invocations',
+      {
+        description: 'Number of invocations of getCurrent',
+        unit: '1',
+        valueType: ValueType.INT,
       }
     );
   }
 
   private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
-    const { application, providerType, outcome, deletedPrivileges, ...rest } = attributes;
+    const {
+      application,
+      providerType,
+      outcome,
+      deletedPrivileges,
+      profileActivationRequired,
+      apiKeyRetrievalRequired,
+      ...rest
+    } = attributes;
 
     const transformed: Attributes = {
       ...(application ? { application } : {}),
       ...(deletedPrivileges ? { 'deleted.privileges': deletedPrivileges } : {}),
       ...(providerType ? { 'auth.provider.type': providerType } : {}),
-      ...(outcome ? { 'auth.outcome': outcome } : {}),
+      ...(outcome ? { outcome } : {}),
+      ...(profileActivationRequired
+        ? { 'profile.get_current.profile_activation_required': profileActivationRequired }
+        : {}),
+      ...(apiKeyRetrievalRequired
+        ? { 'profile.get_current.api_key_retrieval_required': apiKeyRetrievalRequired }
+        : {}),
       ...rest,
     };
 
@@ -123,6 +181,11 @@ class SecurityTelemetry {
     const transformedAttributes =
       this.transformAttributes<PrivilegeRegistrationAttributes>(attributes);
     this.privilegeRegistrationDuration.record(duration, transformedAttributes);
+  };
+
+  recordGetCurrentProfileInvocation = (attributes: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
+    this.getCurrentProfileCounter.add(1, transformedAttributes);
   };
 }
 

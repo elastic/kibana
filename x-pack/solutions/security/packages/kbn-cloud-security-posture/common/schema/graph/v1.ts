@@ -6,16 +6,29 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ApiMessageCode } from '../../types/graph/v1';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
+
+const PINNED_IDS_MAX_SIZE = 1024;
+
+/**
+ * Entity ID for relationship queries.
+ * isOrigin indicates whether this entity is the center/origin of the graph
+ * (relevant when opening graph from entity flyout).
+ */
+export const entityIdSchema = schema.object({
+  id: schema.string(),
+  isOrigin: schema.boolean(),
+});
 
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
-    originEventIds: schema.arrayOf(
-      schema.object({ id: schema.string(), isAlert: schema.boolean() })
+    pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
+    // Origin event IDs - optional, may be empty when opening from entity flyout
+    originEventIds: schema.maybe(
+      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }))
     ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
@@ -43,6 +56,8 @@ export const graphRequestSchema = schema.object({
         }),
       })
     ),
+    // Entity IDs for fetching relationships from entity store (optional, may be empty when opening from events flyout)
+    entityIds: schema.maybe(schema.arrayOf(entityIdSchema)),
   }),
 });
 
@@ -59,6 +74,8 @@ export const entitySchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
+  availableInEntityStore: schema.maybe(schema.boolean()),
+  ecsParentField: schema.maybe(schema.string()),
 });
 
 export const nodeDocumentDataSchema = schema.object({
@@ -82,15 +99,20 @@ export const nodeDocumentDataSchema = schema.object({
   entity: schema.maybe(entitySchema),
 });
 
+export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';
+
 export const graphResponseSchema = () =>
   schema.object({
     nodes: schema.arrayOf(
-      schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
+      schema.oneOf([
+        entityNodeDataSchema,
+        groupNodeDataSchema,
+        labelNodeDataSchema,
+        relationshipNodeDataSchema,
+      ])
     ),
     edges: schema.arrayOf(edgeDataSchema),
-    messages: schema.maybe(
-      schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
-    ),
+    messages: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))),
   });
 
 export const nodeColorSchema = schema.oneOf([
@@ -114,6 +136,7 @@ export const nodeShapeSchema = schema.oneOf([
   schema.literal('diamond'),
   schema.literal('label'),
   schema.literal('group'),
+  schema.literal('relationship'),
 ]);
 
 export const nodeBaseDataSchema = schema.object({
@@ -160,6 +183,14 @@ export const labelNodeDataSchema = schema.allOf([
     uniqueAlertsCount: schema.maybe(schema.number()),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+  }),
+]);
+
+export const relationshipNodeDataSchema = schema.allOf([
+  nodeBaseDataSchema,
+  schema.object({
+    shape: schema.literal('relationship'),
+    parentId: schema.maybe(schema.string()),
   }),
 ]);
 

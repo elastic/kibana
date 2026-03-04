@@ -8,7 +8,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -47,23 +47,18 @@ export const getErrorBudgetEmbeddableFactory = ({
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
-      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(
-        initialState.rawState,
-        {
-          sloId: undefined,
-          sloInstanceId: undefined,
-        }
-      );
+      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(initialState, {
+        sloId: undefined,
+        sloInstanceId: undefined,
+      });
       const reload$ = new Subject<boolean>();
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloErrorBudgetManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloErrorBudgetManager.getLatestState(),
         };
       }
 
@@ -78,8 +73,8 @@ export const getErrorBudgetEmbeddableFactory = ({
           sloInstanceId: 'referenceEquality',
         }),
         onReset: (lastState) => {
-          sloErrorBudgetManager.reinitializeState(lastState?.rawState);
-          titleManager.reinitializeState(lastState?.rawState);
+          sloErrorBudgetManager.reinitializeState(lastState);
+          titleManager.reinitializeState(lastState);
         },
       });
 

@@ -9,12 +9,8 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
-  LENS_VIS_API_PATH,
-  LENS_API_VERSION,
-  LENS_API_ACCESS,
-  LENS_CONTENT_TYPE,
-} from '../../../../common/constants';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
+import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
 import type { CMItemResultMeta, RegisterAPIRouteFn } from '../../types';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
@@ -22,7 +18,7 @@ import { getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -88,7 +84,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
         }
 
         const resultMeta: CMItemResultMeta = result.meta;
-        const responseItem = getLensResponseItem(result.item, resultMeta);
+        const responseItem = getLensResponseItem(builder, result.item, resultMeta);
 
         return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
           body: responseItem,

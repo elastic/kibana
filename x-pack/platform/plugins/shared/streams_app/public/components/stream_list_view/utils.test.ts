@@ -11,9 +11,12 @@ import type { Direction } from '@elastic/eui';
 import { ms } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/ms';
 
 const createStream = (name: string, retention: string | undefined): ListStreamDetail => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lifecycle = retention ? { dsl: { data_retention: retention } } : ({} as any);
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream: { name } as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     effective_lifecycle: lifecycle as any,
     data_stream: undefined,
   } as unknown as ListStreamDetail;
@@ -65,7 +68,7 @@ describe('buildStreamRows', () => {
       'metrics-c.child2',
       'metrics-c.child3',
     ];
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction, {});
     expect(rows.map((r) => r.stream.name)).toEqual(expected);
   });
 
@@ -84,7 +87,7 @@ describe('buildStreamRows', () => {
       'logs-a.child2',
       'logs-a.child1',
     ];
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'desc' as Direction);
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'desc' as Direction, {});
     expect(rows.map((r) => r.stream.name)).toEqual(expected);
   });
 
@@ -103,7 +106,7 @@ describe('buildStreamRows', () => {
       'logs-b.child2 (3.0h)',
       'logs-b.child3 (5.0h)',
     ];
-    const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction);
+    const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction, {});
     expect(rows.map((r) => `${r.stream.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
@@ -122,12 +125,12 @@ describe('buildStreamRows', () => {
       'logs-a.child3 (6.0h)',
       'logs-a.child2 (4.0h)',
     ];
-    const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction);
+    const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction, {});
     expect(rows.map((r) => `${r.stream.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
   it('always lists a child immediately after its parent', () => {
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction, {});
     const indexOf = (n: string) => rows.findIndex((r) => r.stream.name === n);
     expect(indexOf('logs-a.child1')).toBeGreaterThan(indexOf('logs-a'));
     expect(indexOf('logs-a.child2')).toBeGreaterThan(indexOf('logs-a'));
@@ -172,7 +175,7 @@ describe('filterCollapsedStreamRows', () => {
     cChild1,
   ]).map(enrichStream);
 
-  const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+  const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction, {});
 
   it('returns all rows when no streams are collapsed', () => {
     const collapsed = new Set<string>();
@@ -235,10 +238,12 @@ describe('filterCollapsedStreamRows', () => {
 
   it('filters out grandchildren if parent is collapsed', () => {
     // Add a grandchild for testing
-    const grandchild = createStream('logs-a.child1.grandchild', '1h');
+    const logsOtel = createStream('logs.otel', '1d');
+    const logsOtelChild = createStream('logs.otel.child1', '8h');
+    const grandchild = createStream('logs.otel.child1.grandchild', '1h');
     const streamsWithGrandchild = asTrees([
-      rootA,
-      aChild1,
+      logsOtel,
+      logsOtelChild,
       grandchild,
       aChild2,
       aChild3,
@@ -254,12 +259,13 @@ describe('filterCollapsedStreamRows', () => {
     const rowsWithGrandchild = buildStreamRows(
       streamsWithGrandchild,
       'nameSortKey',
-      'asc' as Direction
+      'asc' as Direction,
+      {}
     );
-    const collapsed = new Set<string>(['logs-a.child1']);
+    const collapsed = new Set<string>(['logs.otel.child1']);
     const filtered = filterCollapsedStreamRows(rowsWithGrandchild, collapsed, 'nameSortKey');
     // Should include logs-a.child1, but not its grandchild
-    expect(filtered.map((r) => r.stream.name)).toContain('logs-a.child1');
-    expect(filtered.map((r) => r.stream.name)).not.toContain('logs-a.child1.grandchild');
+    expect(filtered.map((r) => r.stream.name)).toContain('logs.otel.child1');
+    expect(filtered.map((r) => r.stream.name)).not.toContain('logs.otel.child1.grandchild');
   });
 });

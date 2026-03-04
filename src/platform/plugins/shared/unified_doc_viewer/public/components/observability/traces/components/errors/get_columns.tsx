@@ -8,11 +8,12 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiText, EuiTextTruncate, EuiLink } from '@elastic/eui';
+import { EuiText, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
+import { where } from '@kbn/esql-composer';
 import {
   TRACE_ID,
   SPAN_ID,
@@ -21,8 +22,78 @@ import {
   ERROR_ID,
   EXCEPTION_MESSAGE,
 } from '@kbn/apm-types';
-import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
+import { DiscoverEsqlLink } from '../discover_esql_link';
+
+function createWhereClause({
+  traceId,
+  docId,
+  source,
+  item,
+}: {
+  traceId: string;
+  docId?: string;
+  source: ErrorsByTraceId['source'];
+  item: ErrorsByTraceId['traceErrors'][0];
+}) {
+  let queryString = `${TRACE_ID} == ?traceId`;
+  const params: Array<Record<string, unknown>> = [{ traceId }];
+
+  if (docId) {
+    queryString += ` AND ${SPAN_ID} == ?docId`;
+    params.push({ docId });
+  }
+
+  if (source === 'apm') {
+    queryString += ` AND ${PROCESSOR_EVENT} == ?processorEvent`;
+    params.push({ processorEvent: 'error' });
+
+    queryString += ` AND ${ERROR_ID} == ?errorId`;
+    params.push({ errorId: item.error.id });
+  }
+
+  if (source === 'unprocessedOtel') {
+    if (item?.eventName) {
+      queryString += ` AND ${EVENT_NAME} == ?eventName`;
+      params.push({ eventName: item.eventName });
+    }
+    if (item?.error?.exception?.message) {
+      queryString += ` AND ${EXCEPTION_MESSAGE} == ?exceptionMessage`;
+      params.push({ exceptionMessage: item.error.exception.message });
+    }
+  }
+
+  return where(queryString, params);
+}
+
+const ErrorMessageLinkCell = ({
+  traceId,
+  docId,
+  source,
+  item,
+}: {
+  traceId: string;
+  docId?: string;
+  source: ErrorsByTraceId['source'];
+  item: ErrorsByTraceId['traceErrors'][0];
+}) => {
+  const { indexes } = useDataSourcesContext();
+  const errorLabel = getErrorMessage(item.error);
+
+  const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
+
+  return (
+    <DiscoverEsqlLink
+      indexPattern={indexes.apm.errors}
+      whereClause={createWhereClause({ traceId, docId, source, item })}
+      tabLabel={errorLabel}
+      dataTestSubj="error-group-link"
+    >
+      {content}
+    </DiscoverEsqlLink>
+  );
+};
 
 const getErrorMessage = (error: ErrorData) => {
   if (error?.exception?.message) {
@@ -37,15 +108,13 @@ const getErrorMessage = (error: ErrorData) => {
 };
 
 export const getColumns = ({
-  generateDiscoverLink,
   traceId,
   docId,
   source,
 }: {
-  generateDiscoverLink: GenerateDiscoverLink;
   traceId: string;
   docId?: string;
-  source: string;
+  source: ErrorsByTraceId['source'];
 }): Array<EuiBasicTableColumn<ErrorsByTraceId['traceErrors'][0]>> => [
   {
     field: 'name',
@@ -55,37 +124,13 @@ export const getColumns = ({
     ),
     sortable: (item) => item.error?.exception?.message || '',
     render: (_, item) => {
-      const href = generateDiscoverLink({
-        [TRACE_ID]: traceId,
-        ...(docId && { [SPAN_ID]: docId }),
-        ...(source === 'apm' ? { [PROCESSOR_EVENT]: 'error', [ERROR_ID]: item.error.id } : null),
-        ...(source === 'unprocessedOtel'
-          ? {
-              [EVENT_NAME]: item?.eventName,
-              [EXCEPTION_MESSAGE]: item?.error?.exception?.message,
-            }
-          : null),
-      });
-
-      const content = (
-        <EuiTextTruncate
-          data-test-subj="error-exception-message"
-          text={getErrorMessage(item.error)}
-        />
-      );
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          {href ? (
-            <EuiLink data-test-subj="error-group-link" href={href}>
-              {content}
-            </EuiLink>
-          ) : (
-            content
-          )}
+          <ErrorMessageLinkCell traceId={traceId} docId={docId} source={source} item={item} />
           <EuiText size="s" />
 
           <EuiText size="xs" color="subdued">

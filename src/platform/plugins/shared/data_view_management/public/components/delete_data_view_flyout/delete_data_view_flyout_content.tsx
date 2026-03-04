@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,6 +45,13 @@ const spacesColumnName = i18n.translate('indexPatternManagement.dataViewTable.sp
 const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTitle', {
   defaultMessage: 'Data views selected for deletion',
 });
+
+const relationshipsTableCaption = i18n.translate(
+  'indexPatternManagement.dataViewTable.relationshipsTableCaption',
+  {
+    defaultMessage: 'Kibana objects using this data view',
+  }
+);
 
 export const spacesWarningText = i18n.translate(
   'indexPatternManagement.dataViewTable.deleteWarning',
@@ -79,6 +87,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const toggleDetails = (id: string) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -122,7 +131,11 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
               <EuiSpacer size="xs" />
             </>
           )}
-          <EuiBasicTable items={relationships[id]} columns={relationsColumns} />
+          <EuiBasicTable
+            tableCaption={relationshipsTableCaption}
+            items={relationships[id]}
+            columns={relationsColumns}
+          />
         </div>
       );
       itemIdToExpandedRowMapValues[id] = relationsTable;
@@ -175,14 +188,19 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                 onClick={() => toggleDetails(id)}
                 aria-label={itemIdToExpandedRowMapValues[id] ? 'Collapse' : 'Expand'}
                 color="danger"
+                size={isMobile ? 's' : 'm'}
               >
                 <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                  <EuiText>
-                    {i18n.translate('indexPatternManagement.dataViewTable.review', {
-                      defaultMessage: 'Review',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
+                  {!isMobile && (
+                    <>
+                      <EuiText>
+                        {i18n.translate('indexPatternManagement.dataViewTable.review', {
+                          defaultMessage: 'Review',
+                        })}
+                      </EuiText>
+                      <EuiSpacer size="xs" />
+                    </>
+                  )}
                   <EuiIcon type={itemIdToExpandedRowMapValues[id] ? 'arrowDown' : 'arrowRight'} />
                 </EuiFlexGroup>
               </EuiButtonEmpty>

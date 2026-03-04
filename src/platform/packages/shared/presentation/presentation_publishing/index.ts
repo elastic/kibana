@@ -35,13 +35,24 @@ export type { FetchContext } from './interfaces/fetch/fetch_context';
 export {
   type PublishesPauseFetch,
   apiPublishesPauseFetch,
+  type PublishesEditablePauseFetch,
+  apiPublishesEditablePauseFetch,
 } from './interfaces/fetch/publishes_pause_fetch';
 export {
   initializeTimeRangeManager,
   timeRangeComparators,
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
+export { transformTimeRangeOut } from './interfaces/fetch/bwc/time_range_transforms';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
+export {
+  apiAppliesFilters,
+  type AppliesFilters,
+  apiAppliesTimeslice,
+  type AppliesTimeslice,
+  apiHasUseGlobalFiltersSetting,
+  type HasUseGlobalFiltersSetting,
+} from './interfaces/fetch/applies_filters';
 export {
   apiPublishesFilters,
   apiPublishesPartialUnifiedSearch,
@@ -56,6 +67,13 @@ export {
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
+export {
+  apiPublishesProjectRouting,
+  type PublishesProjectRouting,
+  apiPublishesProjectRoutingOverrides,
+  type ProjectRoutingOverrides,
+  type PublishesProjectRoutingOverrides,
+} from './interfaces/fetch/publishes_project_routing';
 export {
   apiHasAppContext,
   type EmbeddableAppContext,
@@ -87,7 +105,6 @@ export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api'
 export {
   apiHasSerializableState,
   type HasSerializableState,
-  type SerializedPanelState,
 } from './interfaces/has_serializable_state';
 export {
   apiHasSupportedTriggers,
@@ -155,12 +172,19 @@ export {
   type PublishesWritableTitle,
 } from './interfaces/titles/publishes_title';
 export {
+  apiPublishesHideBorder,
+  apiPublishesWritableHideBorder,
+  type PublishesHideBorder,
+  type PublishesWritableHideBorder,
+} from './interfaces/titles/publishes_hide_border';
+export {
   initializeTitleManager,
   stateHasTitles,
   titleComparators,
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
+export { transformTitlesOut } from './interfaces/titles/bwc/titles_transforms';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
@@ -168,4 +192,82 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
-export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';
+export { SAVED_OBJECT_REF_NAME } from './constants';
+export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';
+export type { PublishesSearchSession } from './interfaces/fetch/publishes_search_session';
+
+// =============================================
+// Container interfaces (merged from removed @kbn/presentation-containers package, to avoid circular dependencies between packages)
+// =============================================
+
+export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/containers/can_add_new_panel';
+
+export {
+  apiHasSerializedChildState,
+  type HasSerializedChildState,
+} from './interfaces/containers/child_state';
+
+export { childrenUnsavedChanges$ } from './interfaces/containers/unsaved_changes/children_unsaved_changes';
+
+export { initializeUnsavedChanges } from './interfaces/containers/unsaved_changes/initialize_unsaved_changes';
+
+export {
+  apiCanDuplicatePanels,
+  apiCanExpandPanels,
+  apiCanPinPanels,
+  apiHasPinnedPanels,
+  type CanDuplicatePanels,
+  type CanExpandPanels,
+  type CanPinPanels,
+} from './interfaces/containers/panel_management';
+
+export {
+  apiCanBeDuplicated,
+  apiCanBeCustomized,
+  apiCanBeExpanded,
+  apiCanBePinned,
+  type IsDuplicable,
+  type IsExpandable,
+  type IsCustomizable,
+  type IsPinnable,
+  type HasPanelCapabilities,
+} from './interfaces/containers/panel_capabilities';
+
+export {
+  type CanAddNewSection,
+  apiCanAddNewSection,
+} from './interfaces/containers/can_add_new_section';
+
+export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/containers/performance_trackers';
+
+export {
+  type HasLastSavedChildState,
+  apiHasLastSavedChildState,
+} from './interfaces/containers/last_saved_child_state';
+
+export {
+  apiIsPresentationContainer,
+  apiPublishesChildren,
+  combineCompatibleChildrenApis,
+  getContainerParentFromAPI,
+  listenForCompatibleApi,
+  apiHasSections,
+  type PanelPackage,
+  type PresentationContainer,
+  type HasSections,
+} from './interfaces/containers/presentation_container';
+
+export {
+  apiPublishesSettings,
+  type PublishesSettings,
+} from './interfaces/containers/publishes_settings';
+
+export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
+
+export {
+  apiSupportsPassThroughContext,
+  type PassThroughContext,
+} from './interfaces/containers/pass_through_context';

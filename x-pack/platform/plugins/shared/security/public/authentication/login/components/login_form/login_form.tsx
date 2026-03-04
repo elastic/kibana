@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -37,12 +36,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LoginValidator } from './validate_login';
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
+import type { FormMessage } from '../../../components';
+import { MessageType, renderMessage } from '../../../components';
 
 export interface LoginFormProps {
   http: HttpStart;
   notifications: NotificationsStart;
   selector: LoginSelector;
-  message?: { type: MessageType.Danger | MessageType.Info; content: string };
+  message?: FormMessage;
   loginAssistanceMessage: string;
   loginHelp?: string;
   authProviderHint?: string;
@@ -54,9 +55,7 @@ interface State {
     | { type: LoadingStateType.Selector; providerName: string };
   username: string;
   password: string;
-  message:
-    | { type: MessageType.None }
-    | { type: MessageType.Danger | MessageType.Info; content: string };
+  message: FormMessage;
   mode: PageMode;
   previousMode: PageMode;
 }
@@ -66,12 +65,6 @@ enum LoadingStateType {
   Form,
   Selector,
   AutoLogin,
-}
-
-export enum MessageType {
-  None,
-  Info,
-  Danger,
 }
 
 export enum PageMode {
@@ -131,7 +124,17 @@ const assistanceCss = (theme: UseEuiTheme) => css`
 `;
 
 export class LoginForm extends Component<LoginFormProps, State> {
+  private readonly noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
+    defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
+    values: { origin: window.location.origin },
+  });
+
   private readonly validator: LoginValidator;
+
+  /**
+   * Available providers that match the current origin.
+   */
+  private readonly availableProviders: LoginSelectorProvider[];
 
   /**
    * Optional provider that was suggested by the `auth_provider_hint={providerName}` query string parameter. If provider
@@ -142,10 +145,15 @@ export class LoginForm extends Component<LoginFormProps, State> {
 
   constructor(props: LoginFormProps) {
     super(props);
+
+    this.availableProviders = this.props.selector.providers.filter((provider) =>
+      this.providerMatchesOrigin(provider)
+    );
+
     this.validator = new LoginValidator({ shouldValidate: false });
 
     this.suggestedProvider = this.props.authProviderHint
-      ? this.props.selector.providers.find(({ name }) => name === this.props.authProviderHint)
+      ? this.availableProviders.find(({ name }) => name === this.props.authProviderHint)
       : undefined;
 
     // Switch to the Form mode right away if provider from the hint requires it.
@@ -158,7 +166,14 @@ export class LoginForm extends Component<LoginFormProps, State> {
       loadingState: { type: LoadingStateType.None },
       username: '',
       password: '',
-      message: this.props.message || { type: MessageType.None },
+      message:
+        this.props.message ??
+        (this.availableProviders.length === 0
+          ? {
+              type: MessageType.Danger,
+              content: this.noProvidersMessage,
+            }
+          : { type: MessageType.None }),
       mode,
       previousMode: mode,
     };
@@ -178,7 +193,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     return (
       <Fragment>
         {this.renderLoginAssistanceMessage()}
-        {this.renderMessage()}
+        {renderMessage(this.state.message)}
         {this.renderContent()}
         {this.renderPageModeSwitchLink()}
       </Fragment>
@@ -200,44 +215,11 @@ export class LoginForm extends Component<LoginFormProps, State> {
     );
   };
 
-  private renderMessage = () => {
-    const { message } = this.state;
-    if (message.type === MessageType.Danger) {
-      return (
-        <Fragment>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="danger"
-            data-test-subj="loginErrorMessage"
-            title={message.content}
-            role="alert"
-          />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
-
-    if (message.type === MessageType.Info) {
-      return (
-        <Fragment>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="primary"
-            data-test-subj="loginInfoMessage"
-            title={message.content}
-            role="status"
-          />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
-
-    return null;
-  };
-
   public renderContent() {
+    if (this.availableProviders.length === 0) {
+      return;
+    }
+
     switch (this.state.mode) {
       case PageMode.Form:
         return this.renderLoginForm();
@@ -341,7 +323,8 @@ export class LoginForm extends Component<LoginFormProps, State> {
   };
 
   private renderSelector = () => {
-    const providers = this.props.selector.providers.filter((p) => p.showInSelector);
+    const providers = this.availableProviders.filter((p) => p.showInSelector);
+
     return (
       <EuiPanel data-test-subj="loginSelector" paddingSize="none">
         {providers.map((provider) => {
@@ -515,9 +498,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     });
 
     // We try to log in with the provider that uses login form and has the lowest order.
-    const providerToLoginWith = this.props.selector.providers.find(
-      (provider) => provider.usesLoginForm
-    )!;
+    const providerToLoginWith = this.availableProviders.find((provider) => provider.usesLoginForm)!;
 
     try {
       const { location } = await this.props.http.post<{ location: string }>(
@@ -605,9 +586,17 @@ export class LoginForm extends Component<LoginFormProps, State> {
   private showLoginSelector() {
     return (
       this.props.selector.enabled &&
-      this.props.selector.providers.some(
-        (provider) => !provider.usesLoginForm && provider.showInSelector
-      )
+      this.availableProviders.some((provider) => !provider.usesLoginForm && provider.showInSelector)
+    );
+  }
+
+  private providerMatchesOrigin(provider: LoginSelectorProvider): boolean {
+    const { origin } = window.location;
+    return (
+      !provider.origin ||
+      (Array.isArray(provider.origin)
+        ? provider.origin.includes(origin)
+        : provider.origin === origin)
     );
   }
 }

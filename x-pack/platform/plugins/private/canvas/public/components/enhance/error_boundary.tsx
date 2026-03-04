@@ -30,6 +30,7 @@ const ErrorBoundaryComponent: FC<ComponentProps> = (props) => {
 
 ErrorBoundaryComponent.propTypes = {
   children: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   error: PropTypes.object,
   errorInfo: PropTypes.object,
   resetErrorState: PropTypes.func.isRequired,

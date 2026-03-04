@@ -9,7 +9,6 @@ import { Send } from '@langchain/langgraph';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
-import type { OriginalDashboardVendor } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type {
   MigrateDashboardState,
@@ -32,7 +31,7 @@ const DEFAULT_PANELS_CONCURRENCY = 4;
 
 export interface TranslatePanel {
   node: TranslatePanelNode;
-  conditionalEdge: (state: MigrateDashboardState) => Send[];
+  conditionalEdge: (state: MigrateDashboardState) => Promise<Send[]>;
   subgraph: ReturnType<typeof getTranslatePanelGraph>;
 }
 // This is a special node, it's goal is to use map-reduce to translate the dashboard panels in parallel.
@@ -92,14 +91,18 @@ export const getTranslatePanelNode = (params: MigrateDashboardGraphParams): Tran
     },
 
     // Fan-out: `conditionalEdge` that Send all individual "translatePanel" to be executed in parallel
-    conditionalEdge: (state: MigrateDashboardState) => {
+    conditionalEdge: async (state: MigrateDashboardState) => {
       // Pre-condition: `state.parsed_original_dashboard.panels` must not be empty, otherwise the execution will stop here
       const panels = state.parsed_original_dashboard.panels ?? [];
-      return panels.map((panel, i) => {
-        const resources = filterIdentifiedResources(
-          state.original_dashboard.vendor,
+      const sendNodePromises: Send[] = [];
+      for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i];
+        const resources = await filterIdentifiedResources(
           state.resources,
-          panel
+          panel,
+          new DashboardResourceIdentifier(state.original_dashboard.vendor, {
+            experimentalFeatures: params.experimentalFeatures,
+          })
         );
         const description = state.panel_descriptions[panel.id];
         const translatePanelParams: TranslatePanelNodeParams = {
@@ -109,8 +112,10 @@ export const getTranslatePanelNode = (params: MigrateDashboardGraphParams): Tran
           resources,
           index: i,
         };
-        return new Send('translatePanel', translatePanelParams);
-      });
+        sendNodePromises.push(new Send('translatePanel', translatePanelParams));
+      }
+
+      return sendNodePromises;
     },
 
     subgraph: translatePanelSubGraph, // Only for the diagram generation
@@ -121,13 +126,12 @@ export const getTranslatePanelNode = (params: MigrateDashboardGraphParams): Tran
  * This function filters the stored resource data that have been received for the entire dashboard,
  * and returns only the resources that have been identified for each specific panel query.
  */
-function filterIdentifiedResources(
-  vendor: OriginalDashboardVendor,
+async function filterIdentifiedResources(
   resources: MigrationResources,
-  panel: ParsedPanel
-): MigrationResources {
-  const resourceIdentifier = new DashboardResourceIdentifier(vendor);
-  const identifiedResources = resourceIdentifier.fromQuery(panel.query);
+  panel: ParsedPanel,
+  resourceIdentifier: DashboardResourceIdentifier
+): Promise<MigrationResources> {
+  const identifiedResources = await resourceIdentifier.fromQuery(panel.query);
 
   const { macros, lookups } = identifiedResources.reduce<{ macros: string[]; lookups: string[] }>(
     (acc, { type, name }) => {

@@ -45,9 +45,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.openSection(
-      'search_project_nav_footer.project_settings_project_nav'
-    );
+
     await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
     // await testSubjects.click('app-card-triggersActionsConnectors');
@@ -122,7 +120,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders the rule details', async () => {
         const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
-        const ruleType = await testSubjects.getVisibleText('ruleTypeLabel');
+        const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).toEqual('Elasticsearch query');
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
 
@@ -298,6 +296,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should open edit rule flyout', async () => {
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toBe(false);
@@ -322,6 +322,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should reset rule when canceling an edit', async () => {
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
@@ -335,6 +337,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
+        await actionsButton.click();
         await editButton.click();
 
         await testSubjects.click('ruleFormStep-details');
@@ -428,6 +431,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await openFirstRule(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
@@ -525,6 +530,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 

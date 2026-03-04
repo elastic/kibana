@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
@@ -18,16 +17,11 @@ import { TargetFieldSelector } from './target_field';
 export const ConvertProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector
-        fieldKey="from"
-        helpText={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertFieldHelpText',
-          { defaultMessage: 'The field to convert.' }
-        )}
-      />
+      <ProcessorFieldSelector fieldKey="from" helpText="" />
       <ConvertTypeSelector />
       <EuiSpacer size="m" />
       <TargetFieldSelector />
+      <EuiSpacer size="m" />
       <FieldsAccordion>
         <ProcessorConditionEditor />
       </FieldsAccordion>

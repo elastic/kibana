@@ -16,7 +16,9 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   SecurityPageName,
+  ENTITY_ANALYTICS_WATCHLISTS_PATH,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
@@ -24,7 +26,10 @@ import { EntityStoreManagementPage } from './pages/entity_store_management_page'
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
+import { EntityThreatHuntingPage } from './pages/entity_threat_hunting_page';
+import { EntityAnalyticsWatchlistsManagementPage } from './pages/entity_analytics_watchlists_management_page';
 
+// ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
     <EntityAnalyticsManagementPage />
@@ -45,6 +50,7 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
 });
 EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
 
+// ---- Asset criticality redirect route ----
 const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
   return (
     <Routes>
@@ -69,6 +75,7 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
 EntityAnalyticsAssetClassificationContainer.displayName =
   'EntityAnalyticsAssetClassificationContainer';
 
+// ---- Entity store routes ----
 const EntityAnalyticsEntityStoreWrapper = () => (
   <PluginTemplateWrapper>
     <EntityStoreManagementPage />
@@ -90,6 +97,7 @@ const EntityAnalyticsEntityStoreContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsEntityStoreContainer.displayName = 'EntityAnalyticsEntityStoreContainer';
 
+// ---- Landing routes ----
 const EntityAnalyticsLandingWrapper = () => (
   <PluginTemplateWrapper>
     <EntityAnalyticsLandingPage />
@@ -107,6 +115,7 @@ const EntityAnalyticsLandingContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
 
+// ---- Privileged user monitoring routes ----
 const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
   <PluginTemplateWrapper>
     <EntityAnalyticsPrivilegedUserMonitoringPage />
@@ -129,6 +138,29 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
 EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
+// ---- Watchlists routes ----
+const EntityAnalyticsWatchlistsWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityAnalyticsWatchlistsManagementPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityAnalyticsWatchlistsContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_WATCHLISTS_PATH}
+        exact
+        component={EntityAnalyticsWatchlistsWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsWatchlistsContainer.displayName = 'EntityAnalyticsWatchlistsContainer';
+
+// ---- Overview routes ----
 const EntityAnalyticsOverviewWrapper = () => (
   <PluginTemplateWrapper>
     <OverviewDashboard />
@@ -150,6 +182,29 @@ const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
 
+// ---- Threat hunting routes ----
+const EntityThreatHuntingWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityThreatHuntingPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityThreatHuntingContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_THREAT_HUNTING_PATH}
+        exact
+        component={EntityThreatHuntingWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityThreatHuntingContainer.displayName = 'EntityThreatHuntingContainer';
+
+// ---- Route definitions ----
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -177,6 +232,13 @@ export const routes = [
     ),
   },
   {
+    path: ENTITY_ANALYTICS_WATCHLISTS_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsWatchlistsContainer,
+      SecurityPageName.entityAnalyticsWatchlists
+    ),
+  },
+  {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
@@ -188,6 +250,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsOverviewContainer,
       SecurityPageName.entityAnalyticsOverview
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityThreatHuntingContainer,
+      SecurityPageName.entityAnalyticsThreatHunting
     ),
   },
 ];

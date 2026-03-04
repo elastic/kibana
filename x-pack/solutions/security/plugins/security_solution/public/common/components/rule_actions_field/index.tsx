@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
@@ -15,6 +15,7 @@ import type { ActionAccordionFormProps } from '@kbn/triggers-actions-ui-plugin/p
 import styled from 'styled-components';
 
 import type {
+  ActionConnector,
   ActionVariables,
   NotifyWhenSelectOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -27,6 +28,7 @@ import type {
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SavedObjectAttribute } from '@kbn/core-saved-objects-common/src/server_types';
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../common/constants';
 import type { FieldHook } from '../../../shared_imports';
 import { useFormContext } from '../../../shared_imports';
@@ -34,8 +36,8 @@ import { useKibana } from '../../lib/kibana';
 import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,
-  FORM_ON_ACTIVE_ALERT_OPTION,
   FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_ON_ACTIVE_ALERT_OPTION,
   FORM_SUMMARY_BODY_MESSAGE,
 } from './translations';
 
@@ -87,6 +89,7 @@ interface Props {
   summaryMessageVariables: ActionVariables;
   defaultRuleFrequency?: RuleActionFrequency;
   minimumThrottleInterval?: ActionAccordionFormProps['minimumThrottleInterval'];
+  onNewConnectorCreated?: (connector: ActionConnector) => void;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -125,6 +128,7 @@ export const RuleActionsField: React.FC<Props> = ({
   summaryMessageVariables,
   defaultRuleFrequency = NOTIFICATION_DEFAULT_FREQUENCY,
   minimumThrottleInterval,
+  onNewConnectorCreated,
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
@@ -154,19 +158,25 @@ export const RuleActionsField: React.FC<Props> = ({
   );
 
   const setActionIdByIndex = useCallback(
-    (id: string, index: number) => {
+    (id: string, index: number, connector?: ActionConnector) => {
       const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
       if (isEmpty(updatedActions[index].params)) {
         setIsInitializingAction(true);
       }
       updatedActions[index] = deepMerge(updatedActions[index], { id });
+      if (connector) {
+        onNewConnectorCreated?.(connector);
+      }
+
       field.setValue(updatedActions);
     },
-    [field, actions]
+    [field, actions, onNewConnectorCreated]
   );
 
   const setAlertActionsProperty = useCallback(
-    (updatedActions: RuleAction[]) => field.setValue(updatedActions),
+    (updatedActions: RuleAction[]) => {
+      field.setValue(updatedActions);
+    },
     [field]
   );
 
@@ -208,7 +218,7 @@ export const RuleActionsField: React.FC<Props> = ({
         const updatedAlertsFilter = { ...alertsFilter };
 
         if (value) {
-          updatedAlertsFilter[key] = value;
+          updatedAlertsFilter[key] = value as unknown as SavedObjectAttribute;
         } else {
           delete updatedAlertsFilter[key];
         }

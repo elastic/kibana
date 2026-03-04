@@ -11,33 +11,15 @@ import { getSampleDashboardState } from '../../mocks';
 import { coreServices } from '../../services/kibana_services';
 import { saveDashboard } from './save_dashboard';
 import type { DashboardState } from '../../../server';
-import type { Reference } from '@kbn/content-management-utils';
 
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 jest.mock('../../dashboard_client', () => ({
   dashboardClient: {
-    create: (dashboardState: DashboardState, references: Reference[]) =>
-      mockCreate(dashboardState, references),
-    update: (id: string, dashboardState: DashboardState, references: Reference[]) =>
-      mockUpdate(id, dashboardState, references),
+    create: (dashboardState: DashboardState) => mockCreate(dashboardState),
+    update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
   },
 }));
-
-/* contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
-  if (options.id === undefined) {
-    return { item: { id: 'newlyGeneratedId' } };
-  }
-
-  throw new Error('Update should be used when id is provided');
-});
-
-contentManagementService.client.update = jest.fn().mockImplementation(({ id }) => {
-  if (id === undefined) {
-    throw new Error('Update needs an id');
-  }
-  return { item: { id } };
-});*/
 
 describe('Save dashboard state', () => {
   beforeEach(() => {
@@ -45,21 +27,19 @@ describe('Save dashboard state', () => {
   });
 
   it('should save the dashboard using the same ID', async () => {
-    mockUpdate.mockResolvedValue({ item: { id: 'Boogaloo' } });
+    mockUpdate.mockResolvedValue({ id: 'Boogaloo' });
     const dashboardState = {
       ...getSampleDashboardState(),
       title: 'BOO',
     };
-    const references: Reference[] = [];
     const result = await saveDashboard({
       dashboardState,
       lastSavedId: 'Boogaloo',
-      references,
       saveOptions: {},
     });
 
     expect(result.id).toBe('Boogaloo');
-    expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState, references);
+    expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState);
     expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BOO' was saved`,
       className: 'eui-textBreakWord',
@@ -68,14 +48,13 @@ describe('Save dashboard state', () => {
   });
 
   it('should save the dashboard using a new id, and return redirect required', async () => {
-    mockCreate.mockResolvedValue({ item: { id: 'newlyGeneratedId' } });
+    mockCreate.mockResolvedValue({ id: 'newlyGeneratedId' });
     const result = await saveDashboard({
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooToo',
       },
       lastSavedId: 'Boogaloonie',
-      references: [],
       saveOptions: { saveAsCopy: true },
     });
 
@@ -93,7 +72,6 @@ describe('Save dashboard state', () => {
         title: 'BooThree',
       },
       lastSavedId: 'Boogatoonie',
-      references: [],
       saveOptions: { saveAsCopy: true },
     });
 

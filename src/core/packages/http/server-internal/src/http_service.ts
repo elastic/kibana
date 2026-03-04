@@ -23,6 +23,7 @@ import type { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type {
   RequestHandlerContextBase,
   IContextContainer,
@@ -33,6 +34,7 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
+import type { DocLinksServicePreboot } from '@kbn/core-doc-links-server';
 import type { RouterOptions } from '@kbn/core-http-router-server-internal';
 import { Router } from '@kbn/core-http-router-server-internal';
 
@@ -56,11 +58,13 @@ import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
+  docLinks: DocLinksServicePreboot;
 }
 
 export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
+  userActivity: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -105,6 +109,7 @@ export class HttpService
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
+
     const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup({
@@ -114,7 +119,9 @@ export class HttpService
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
+        this.log.debug(
+          `Kibana server is not ready yet ${req.method}:${req.url.href}. For troubleshooting guidance, see ${deps.docLinks.links.server.troubleshootServerNotReady}`
+        );
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)
@@ -188,6 +195,7 @@ export class HttpService
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
       executionContext: deps.executionContext,
+      userActivity: deps.userActivity,
     });
 
     registerCoreHandlers(serverContract, config, this.env, this.log);
@@ -234,6 +242,9 @@ export class HttpService
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
+      setRedactedSessionIdGetter: (getter) => {
+        this.httpServer.setRedactedSessionIdGetter(getter);
+      },
     };
   }
 

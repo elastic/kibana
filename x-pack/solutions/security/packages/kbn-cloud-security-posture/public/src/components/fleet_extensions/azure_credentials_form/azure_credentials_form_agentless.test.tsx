@@ -27,9 +27,10 @@ jest.mock('../hooks/use_cloud_setup_context');
 jest.mock('../utils');
 jest.mock('./get_azure_credentials_form_options');
 
-// Mock CloudConnectorSetup component
-jest.mock('../cloud_connector/cloud_connector_setup', () => ({
-  CloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+// Mock CloudConnectorSetup component (lazy loaded from Fleet)
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/public'),
+  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
 }));
 
 // Mock the utilities
@@ -260,6 +261,125 @@ describe('AzureCredentialsFormAgentless', () => {
       expect(screen.getByTestId('doc-link')).toHaveTextContent(
         '/app/cloud-security-posture/overview/azure'
       );
+    });
+  });
+
+  describe('supports_cloud_connector management', () => {
+    beforeEach(() => {
+      mockUseCloudSetup.mockReturnValue(getDefaultCloudSetup());
+      mockGetAzureAgentlessCredentialFormOptions.mockReturnValue({
+        service_principal_with_client_secret: {
+          label: 'Service Principal',
+          fields: [],
+        },
+        cloud_connectors: {
+          label: 'Cloud Connectors',
+          fields: [],
+        },
+      });
+      mockGetAzureCloudConnectorsCredentialsFormOptions.mockReturnValue({
+        service_principal_with_client_secret: {
+          label: 'Service Principal',
+          fields: [],
+        },
+        cloud_connectors: {
+          label: 'Cloud Connectors',
+          fields: [],
+        },
+      });
+      mockGetInputVarsFields.mockReturnValue([]);
+    });
+
+    it('should set supports_cloud_connector to false when credential type is service_principal_with_client_secret', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithSupport = {
+        ...mockNewPolicy,
+        supports_cloud_connector: true, // Start with true
+      };
+
+      mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
+
+      renderWithIntl(
+        <AzureCredentialsFormAgentless
+          {...defaultProps}
+          newPolicy={mockPolicyWithSupport}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        }),
+      });
+    });
+
+    it('should not call updatePolicy when credential type is cloud_connectors', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithSupport = {
+        ...mockNewPolicy,
+        supports_cloud_connector: true, // Already correct
+      };
+
+      mockGetAgentlessCredentialsType.mockReturnValue('cloud_connectors');
+
+      renderWithIntl(
+        <AzureCredentialsFormAgentless
+          {...defaultProps}
+          newPolicy={mockPolicyWithSupport}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      // Should not be called since CloudConnectorSetup will handle setting to true
+      expect(mockUpdatePolicyFn).not.toHaveBeenCalled();
+    });
+
+    it('should clear cloud_connector_id when switching away from cloud_connectors', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithConnector = {
+        ...mockNewPolicy,
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-123',
+      };
+
+      mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
+
+      renderWithIntl(
+        <AzureCredentialsFormAgentless
+          {...defaultProps}
+          newPolicy={mockPolicyWithConnector}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        }),
+      });
+    });
+
+    it('should not call updatePolicy when supports_cloud_connector is already false with non-cloud_connectors credential', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithoutSupport = {
+        ...mockNewPolicy,
+        supports_cloud_connector: false, // Already correct
+      };
+
+      mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
+
+      renderWithIntl(
+        <AzureCredentialsFormAgentless
+          {...defaultProps}
+          newPolicy={mockPolicyWithoutSupport}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      expect(mockUpdatePolicyFn).not.toHaveBeenCalled();
     });
   });
 });

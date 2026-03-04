@@ -12,12 +12,14 @@ import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
-  fromSavedObjectTabToSavedSearch,
+  fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk } from '../utils';
-import { setDataView } from './data_views';
+import { setDataView } from './tab_state_data_view';
 import { updateTabs } from './tabs';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
+import type { DiscoverAppState } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -51,27 +53,28 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+        let initialAppState: DiscoverAppState | undefined;
 
         if (tabStateContainer) {
-          const savedSearch = await fromSavedObjectTabToSavedSearch({
-            tab,
-            discoverSession,
-            services,
-          });
-          const dataView = savedSearch.searchSource.getField('index');
+          const searchSource = await fromSavedObjectTabToSearchSource({ tab, services });
+          const dataView = searchSource.getField('index');
 
           if (dataView) {
             dispatch(setDataView({ tabId: tab.id, dataView }));
           }
 
-          tabStateContainer.savedSearchState.set(savedSearch);
-          tabStateContainer.actions.undoSavedSearchChanges();
-          tabStateContainer.appState.resetInitialState();
+          initialAppState = getInitialAppState({
+            initialUrlState: undefined,
+            persistedTab: tab,
+            dataView,
+            services,
+          });
         }
 
         const tabState = fromSavedObjectTabToTabState({
           tab,
           existingTab: selectTab(state, tab.id),
+          initialAppState,
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.

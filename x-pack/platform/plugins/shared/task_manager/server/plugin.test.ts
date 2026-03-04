@@ -9,7 +9,7 @@ import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import type { TaskManagerConfig } from './config';
+import { ApiKeyType, type TaskManagerConfig } from './config';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -33,6 +33,10 @@ const pluginInitializerContextParams = {
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   request_capacity: 1000,
   allow_reading_invalid_state: false,
   discovery: {
@@ -70,6 +74,7 @@ const pluginInitializerContextParams = {
     update_by_query: 1000,
   },
   auto_calculate_default_ech_capacity: false,
+  api_key_type: ApiKeyType.ES,
 };
 
 describe('TaskManagerPlugin', () => {

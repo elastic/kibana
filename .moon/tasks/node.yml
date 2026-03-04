@@ -5,6 +5,3 @@ fileGroups:
   default:
     - '**/*'
   production: [ ]
-  src:
-    - 'src/**/*'
-

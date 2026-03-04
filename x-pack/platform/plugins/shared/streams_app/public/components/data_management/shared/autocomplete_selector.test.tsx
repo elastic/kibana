@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import { AutocompleteSelector } from './autocomplete_selector';
 
 jest.mock('@kbn/react-field', () => ({
@@ -159,14 +160,20 @@ describe('AutocompleteSelector', () => {
   });
 
   describe('Field Type Icons', () => {
-    it('renders field type icons when suggestions include type information', async () => {
+    it('renders field type icons when showIcon is true and suggestions include type information', async () => {
       const suggestionsWithTypes = [
-        { name: '@timestamp', type: 'date' },
-        { name: 'log.level', type: 'keyword' },
-        { name: 'message', type: 'text' },
+        { name: '@timestamp', type: 'date', icon: true },
+        { name: 'log.level', type: 'keyword', icon: true },
+        { name: 'message', type: 'text', icon: true },
       ];
 
-      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          suggestions={suggestionsWithTypes}
+          showIcon={true}
+        />
+      );
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -178,9 +185,18 @@ describe('AutocompleteSelector', () => {
     });
 
     it('renders unknown icons for fields without type information', async () => {
-      const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
+      const suggestionsWithoutTypes = [
+        { name: '@timestamp', icon: true },
+        { name: 'log.level', icon: true },
+      ];
 
-      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          suggestions={suggestionsWithoutTypes}
+          showIcon={true}
+        />
+      );
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -189,10 +205,32 @@ describe('AutocompleteSelector', () => {
       expect(screen.getAllByTestId('field-icon-unknown')).toHaveLength(2);
     });
 
-    it('shows icon for selected field when type is available', () => {
+    it('does not render icons when showIcon is false', async () => {
       const suggestionsWithTypes = [
+        { name: '@timestamp', type: 'date' },
         { name: 'log.level', type: 'keyword' },
-        { name: 'message', type: 'text' },
+      ];
+
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          suggestions={suggestionsWithTypes}
+          showIcon={false}
+        />
+      );
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that no icons are rendered
+      expect(screen.queryByTestId('field-icon-date')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+    });
+
+    it('does not show icon for selected value (icons only in dropdown)', () => {
+      const suggestionsWithTypes = [
+        { name: 'log.level', type: 'keyword', icon: true },
+        { name: 'message', type: 'text', icon: true },
       ];
 
       render(
@@ -200,26 +238,100 @@ describe('AutocompleteSelector', () => {
           {...defaultProps}
           value="log.level"
           suggestions={suggestionsWithTypes}
+          showIcon={true}
         />
       );
 
-      // Icon should be visible in the selected value
-      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
+      // Selected value should not have icon (only dropdown options have icons)
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
     });
 
-    it('shows unknown icon for selected field when type is not available', () => {
-      const suggestionsWithoutTypes = [{ name: 'log.level' }, { name: 'message' }];
+    it('hides icons for suggestions when icon is not present', async () => {
+      const suggestionsWithTypes = [
+        { name: '@timestamp', type: 'date' },
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+        { name: 'test_field' },
+      ];
+
+      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that field icons are not rendered for fields with types
+      expect(screen.queryByTestId('field-icon-date')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-text')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Prepend Element', () => {
+    it('does not render prepend element when not provided', () => {
+      render(<AutocompleteSelector {...defaultProps} />);
+
+      expect(screen.queryByTestId('test-prepend-element')).not.toBeInTheDocument();
+    });
+
+    it('renders prepend element when provided', () => {
+      const prependElement = (
+        <span data-test-subj="test-prepend-element">Prepend</span>
+      ) as unknown as EuiComboBoxProps<string>['prepend'];
+      render(<AutocompleteSelector {...defaultProps} prepend={prependElement} />);
+
+      expect(screen.getByTestId('test-prepend-element')).toBeInTheDocument();
+      expect(screen.getByText('Prepend')).toBeInTheDocument();
+    });
+
+    it('renders checkbox as prepend element', () => {
+      const prependCheckbox = (
+        <input
+          type="checkbox"
+          data-test-subj="test-prepend-checkbox"
+          defaultChecked
+          aria-label="Test checkbox"
+        />
+      ) as unknown as EuiComboBoxProps<string>['prepend'];
+      render(<AutocompleteSelector {...defaultProps} prepend={prependCheckbox} />);
+
+      const checkbox = screen.getByTestId('test-prepend-checkbox') as HTMLInputElement;
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it('allows interaction with prepended checkbox while using combobox', async () => {
+      const handleCheckboxChange = jest.fn();
+      const handleComboboxChange = jest.fn();
+
+      const prependCheckbox = (
+        <input
+          type="checkbox"
+          data-test-subj="test-prepend-checkbox"
+          onChange={handleCheckboxChange}
+          aria-label="Test checkbox"
+        />
+      ) as unknown as EuiComboBoxProps<string>['prepend'];
 
       render(
         <AutocompleteSelector
           {...defaultProps}
-          value="log.level"
-          suggestions={suggestionsWithoutTypes}
+          prepend={prependCheckbox}
+          onChange={handleComboboxChange}
         />
       );
 
-      // Unknown icon should be visible in the selected value
-      expect(screen.getByTestId('field-icon-unknown')).toBeInTheDocument();
+      // Click the checkbox
+      const checkbox = screen.getByTestId('test-prepend-checkbox');
+      await userEvent.click(checkbox);
+      expect(handleCheckboxChange).toHaveBeenCalled();
+
+      // Also ensure combobox still works
+      const input = screen.getByTestId('comboBoxSearchInput');
+      await userEvent.type(input, 'test-value');
+      await userEvent.keyboard('{Enter}');
+      expect(handleComboboxChange).toHaveBeenCalledWith('test-value');
     });
   });
 });

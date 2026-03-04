@@ -5,23 +5,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "imageEmbeddable",
-        "id": "def-public.IMAGE_CLICK_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "IMAGE_CLICK_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"IMAGE_CLICK_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/private/image_embeddable/public/actions/image_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "server": {
@@ -41,6 +25,8 @@
           "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -56,6 +42,8 @@
           "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -68,9 +56,19 @@
         "label": "ImageEmbeddableState",
         "description": [],
         "signature": [
-          "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly enhancements?: any; readonly hidePanelTitles?: boolean | undefined; readonly imageConfig: Readonly<{ altText?: string | undefined; backgroundColor?: string | undefined; } & { src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }>; }"
+          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly hide_border?: boolean | undefined; readonly drilldowns?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "server",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-server.DrilldownState",
+            "text": "DrilldownState"
+          },
+          "[] | undefined; readonly imageConfig: Readonly<{ altText?: string | undefined; backgroundColor?: string | undefined; } & { src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -83,7 +81,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-common.IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS",
+        "type": "Array",
+        "tags": [],
+        "label": "IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const flappingSchema = schema.object({
+  enabled: schema.maybe(schema.boolean()),
   lookBackWindow: schema.number(),
   statusChangeThreshold: schema.number(),
 });

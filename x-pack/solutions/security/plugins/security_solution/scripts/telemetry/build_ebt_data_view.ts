@@ -45,9 +45,24 @@ async function cli(): Promise<void> {
     space_id: spaceId,
     telemetry_type: telemetryType,
   } = namedArgs;
+
+  // Validate required arguments
+  if (!apiKey || apiKey === 'undefined' || apiKey.trim() === '') {
+    logger.error('Error: api_key is required but was not provided or is empty.');
+    logger.error(`Received arguments: ${JSON.stringify(namedArgs, null, 2)}`);
+    logger.error(`process.argv: ${process.argv}`);
+    throw new Error('api_key is required');
+  }
+
+  if (!kibanaUrl || kibanaUrl === 'undefined' || kibanaUrl.trim() === '') {
+    logger.error('Error: kibana_url is required but was not provided or is empty.');
+    logger.error(`Received arguments: ${JSON.stringify(namedArgs, null, 2)}`);
+    throw new Error('kibana_url is required');
+  }
+
   // writes to either the browser or server side security solution data view
-  const dataViewName = `security-solution-ebt-kibana-${telemetryType}`;
-  logger.info(`API key: ${apiKey}`);
+  const dataViewName = `security-solution-ebt-kibana-${telemetryType || 'browser'}`;
+  logger.info(`API key: ${apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined'}`);
   logger.info(`Kibana URL: ${kibanaUrl}`);
   logger.info(`Space ID: ${spaceId}`);
   logger.info(`Data view name: ${dataViewName}`);

@@ -122,6 +122,7 @@ exports[`DocumentsPanel renders 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
+    tableCaption="Sync job document statistics"
     tableLayout="fixed"
   />
 </FlyoutPanel>

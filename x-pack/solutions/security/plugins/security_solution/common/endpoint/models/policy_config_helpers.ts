@@ -325,3 +325,24 @@ export const removeDeviceControl = (policy: PolicyConfig): PolicyConfig => {
     },
   };
 };
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with Linux DNS events field removed.
+ * Used when the linuxDnsEvents feature flag is disabled.
+ *
+ * @param policy
+ * @returns PolicyConfig without Linux dns field
+ */
+export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
+  const { dns: linuxDns, ...linuxEventsRest } = policy.linux.events;
+
+  return {
+    ...policy,
+    linux: {
+      ...policy.linux,
+      events: {
+        ...linuxEventsRest,
+      },
+    },
+  };
+};

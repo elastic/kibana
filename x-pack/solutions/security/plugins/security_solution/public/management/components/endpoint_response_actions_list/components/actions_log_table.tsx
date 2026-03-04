@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import {
   type CriteriaWithPagination,
   EuiAvatar,
@@ -420,6 +420,12 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         <EuiHorizontalRule margin="xs" />
         <EuiBasicTable
           data-test-subj={dataTestSubj}
+          tableCaption={i18n.translate(
+            'xpack.securitySolution.responseActionsList.table.tableCaption',
+            {
+              defaultMessage: 'Response action log entries',
+            }
+          )}
           items={items}
           columns={columns}
           itemId="id"

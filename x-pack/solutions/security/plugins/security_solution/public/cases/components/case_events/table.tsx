@@ -12,23 +12,23 @@ import type {
 import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
-import { type DataView } from '@kbn/data-views-plugin/public';
 import {
-  getPageRowIndex,
   addBuildingBlockStyle,
-  defaultHeaders,
-  DataTableComponent,
   dataTableActions,
+  DataTableComponent,
+  defaultHeaders,
+  getPageRowIndex,
   getTableByIdSelector,
   tableDefaults,
 } from '@kbn/securitysolution-data-table';
+import { type DataView } from '@kbn/data-views-plugin/public';
 import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
-import React, { useMemo, useEffect, useContext, type FC, useState, useCallback } from 'react';
+import React, { type FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ThemeContext } from 'styled-components';
 import { EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
-import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
+import { SECURITY_CELL_ACTIONS_CASE_EVENTS } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
@@ -201,7 +201,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
       id={EVENTS_TABLE_FOR_CASES_ID}
       totalItems={eventIds.length}
       unitCountText={TABLE_UNIT}
-      cellActionsTriggerId={SecurityCellActionsTrigger.CASE_EVENTS}
+      cellActionsTriggerId={SECURITY_CELL_ACTIONS_CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}
       loadPage={noop}
       pagination={pagination}

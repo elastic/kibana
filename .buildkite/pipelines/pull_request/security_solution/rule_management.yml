@@ -4,16 +4,11 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
@@ -24,14 +19,9 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -44,16 +34,11 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -64,14 +49,9 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -84,16 +64,11 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -104,16 +79,11 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -124,14 +94,9 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -144,14 +109,9 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -164,14 +124,9 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -184,14 +139,9 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:

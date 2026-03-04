@@ -453,7 +453,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               loading={isRelatedHostLoading}
               data-test-subj={USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID}
               pagination={pagination}
-              message={
+              tableCaption={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.entities.relatedHostsCaption',
+                { defaultMessage: "User's related hosts" }
+              )}
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsNoDataDescription"
                   defaultMessage="No hosts identified"

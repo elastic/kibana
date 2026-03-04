@@ -7,6 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
+import type { OriginalRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -72,7 +73,10 @@ export function getTranslateRuleGraph({
 }
 
 const translatableRouter = (state: TranslateRuleState) => {
-  if (!state.inline_query) {
+  if (
+    (state.original_rule.vendor === 'splunk' && !state.inline_query) ||
+    (state.original_rule.vendor === 'qradar' && !state.nl_query)
+  ) {
     return 'translationResult';
   }
   return 'retrieveIntegrations';
@@ -82,9 +86,23 @@ const validationRouter = (state: TranslateRuleState) => {
   if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
+  if (state.original_rule.vendor === 'qradar') {
+    // we do not need ecs mapping for qradar rules
+    return 'translationResult';
+  }
+
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
 
   return 'translationResult';
 };
+
+export function getVendorRouter(vendor: OriginalRule['vendor']) {
+  return function qradarConditionalEdge(state: TranslateRuleState): string {
+    if (state.original_rule.vendor === vendor) {
+      return `is_${vendor}`;
+    }
+    return `is_not_${vendor}`;
+  };
+}

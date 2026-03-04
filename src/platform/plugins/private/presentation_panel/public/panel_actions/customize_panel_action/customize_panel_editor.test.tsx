@@ -44,6 +44,7 @@ describe('customize panel editor', () => {
       setTitle,
       description$,
       setDescription,
+      isCustomizable: true,
     };
   });
 

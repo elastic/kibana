@@ -7,63 +7,31 @@
 
 import React from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
-
-import * as i18n from './translations';
+import { SERVICE_PROVIDER_DESCRIPTIONS } from '../../constants';
 
 export interface EndpointModelInfoProps {
   endpointInfo: InferenceInferenceEndpointInfo;
 }
 
-const descriptions: Record<string, string> = {
-  [ServiceProviderKeys.elastic]: i18n.TOKEN_BASED_BILLING_DESCRIPTION,
-  [ServiceProviderKeys.elasticsearch]: i18n.RESOURCE_BASED_BILLING_DESCRIPTION,
-};
-
 export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointInfo }) => {
-  const serviceSettings = endpointInfo.service_settings;
-  const modelId =
-    'model_id' in serviceSettings
-      ? serviceSettings.model_id
-      : 'model' in serviceSettings
-      ? serviceSettings.model
-      : undefined;
-
-  const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
   const description = endpointInfo?.inference_id.startsWith('.')
-    ? descriptions[endpointInfo?.service ?? '']
+    ? SERVICE_PROVIDER_DESCRIPTIONS[endpointInfo?.service ?? '']
     : undefined;
+
+  const attributes = endpointModelAtrributes(endpointInfo);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column">
-      {modelId && (
+      {description && (
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" direction="row">
-            <EuiFlexItem grow={0}>
-              <EuiText size="s" color="subdued">
-                {description ?? modelId}
-              </EuiText>
-            </EuiFlexItem>
-            {isEligibleForMITBadge ? (
-              <EuiFlexItem grow={0}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="popout"
-                  iconSide="right"
-                  href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
-                  target="_blank"
-                  data-test-subj={'mit-license-badge'}
-                >
-                  {i18n.MIT_LICENSE}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}{' '}
-          </EuiFlexGroup>
+          <EuiText size="s" color="subdued">
+            {description}
+          </EuiText>
         </EuiFlexItem>
       )}
-      <EuiFlexItem>{endpointModelAtrributes(endpointInfo)}</EuiFlexItem>
+      {attributes && <EuiFlexItem>{attributes}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };

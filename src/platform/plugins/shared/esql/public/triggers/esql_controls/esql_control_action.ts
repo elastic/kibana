@@ -10,14 +10,21 @@
 import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom, of } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  type ESQLControlVariable,
+  type ControlTriggerSource,
+  TelemetryControlCancelledReason,
+} from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
 function isESQLVariableType(value: string): value is ESQLVariableType {
@@ -32,11 +39,15 @@ interface Context {
   queryString: string;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
-  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  onSaveControl?: (
+    controlState: OptionsListESQLControlState,
+    updatedQuery: string
+  ) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   parentApi?: unknown;
+  triggerSource?: ControlTriggerSource;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -73,6 +84,7 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
     parentApi,
+    triggerSource,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -86,6 +98,17 @@ export class CreateESQLControlAction implements Action<Context> {
     } catch (error) {
       // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
     }
+
+    const telemetryService = new ESQLEditorTelemetryService(this.core.analytics);
+
+    const onClose = (flyoutRef: OverlayRef) => {
+      onCancelControl?.();
+      flyoutRef.close();
+      telemetryService.trackEsqlControlConfigCancelled(
+        variableType,
+        TelemetryControlCancelledReason.CLOSE_BUTTON
+      );
+    };
 
     openLazyFlyout({
       core: this.core,
@@ -106,6 +129,8 @@ export class CreateESQLControlAction implements Action<Context> {
           initialState,
           closeFlyout,
           currentApp,
+          triggerSource,
+          telemetryService,
         });
       },
       flyoutProps: {
@@ -114,9 +139,9 @@ export class CreateESQLControlAction implements Action<Context> {
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
         // When queryString is present (i.e. flyout opened from the ES|QL editor),
-        // use onCancelControl as the onClose handler to ensure proper nested flyout closing behavior.
+        // use the local onClose as the onClose handler to ensure proper nested flyout closing behavior.
         // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
-        ...(queryString && { onClose: onCancelControl }),
+        ...(queryString && { onClose }),
       },
     });
   }

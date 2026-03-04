@@ -22,6 +22,7 @@ import {
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import type { DashboardRedirect } from '../types';
 import { findService } from '../../dashboard_client';
+import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -36,6 +37,7 @@ export const DashboardListingPage = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
+  const { getListingTabs } = useDashboardMountContext();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
@@ -110,6 +112,7 @@ export const DashboardListingPage = ({
           getDashboardUrl={(id, timeRestore) => {
             return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
           }}
+          getTabs={getListingTabs}
         />
       )}
     </>

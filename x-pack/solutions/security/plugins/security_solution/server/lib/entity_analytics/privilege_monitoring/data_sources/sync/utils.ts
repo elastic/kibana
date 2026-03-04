@@ -6,6 +6,7 @@
  */
 
 import type { BulkResponse, ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import moment from 'moment';
 
 export const getErrorFromBulkResponse = (resp: BulkResponse): ErrorCause[] =>
   resp.errors
@@ -19,4 +20,12 @@ export const errorsMsg = (errors: ErrorCause[]): string => {
     return errors.map((e) => `${e.type}: ${e.reason}`).join('; ');
   }
   return 'No errors found';
+};
+
+export const isTimestampGreaterThan = (date1: string, date2: string) => {
+  const m1 = moment(date1);
+  const m2 = moment(date2);
+  if (!m1.isValid()) return false;
+  if (!m2.isValid()) return true;
+  return m1.isAfter(m2);
 };

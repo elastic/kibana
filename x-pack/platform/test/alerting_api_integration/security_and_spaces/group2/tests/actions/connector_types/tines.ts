@@ -110,7 +110,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"url\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"url\": Required`,
             });
           });
       });
@@ -133,7 +133,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://tines.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://tines.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -152,7 +152,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"token\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"email\": Required;\n [2]: Field \"token\": Required`,
             });
           });
       });
@@ -230,7 +230,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"number\",\n    \"received\": \"nan\",\n    \"path\": [\n      \"storyId\"\n    ],\n    \"message\": \"Expected number, received nan\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"storyId\": Expected number, received nan)`,
           });
         });
 
@@ -273,7 +273,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"number\",\n    \"received\": \"nan\",\n    \"path\": [\n      \"webhook\",\n      \"storyId\"\n    ],\n    \"message\": \"Expected number, received nan\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"webhook.storyId\": Expected number, received nan)`,
           });
         });
 
@@ -296,7 +296,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"webhook\",\n      \"name\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"webhook.name\": Required)`,
           });
         });
       });

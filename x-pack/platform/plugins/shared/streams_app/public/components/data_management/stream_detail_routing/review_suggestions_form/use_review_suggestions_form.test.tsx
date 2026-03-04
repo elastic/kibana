@@ -8,22 +8,16 @@
 import { act, renderHook } from '@testing-library/react';
 import { useReviewSuggestionsForm } from './use_review_suggestions_form';
 import type { Condition } from '@kbn/streamlang';
-import { showErrorToast } from '../../../../hooks/use_streams_app_fetch';
+import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 
 jest.mock('react-use/lib/useUpdateEffect', () => {
   return (cb: () => void, deps: unknown[]) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ReactImport = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ReactImport.useEffect(cb, deps as any);
   };
 });
-
-// Mock the Kibana hook
-const mockNotifications = {
-  toasts: {
-    addError: jest.fn(),
-  },
-};
 
 const mockStreamsRepositoryClient = {
   stream: jest.fn(),
@@ -31,7 +25,6 @@ const mockStreamsRepositoryClient = {
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
-    core: { notifications: mockNotifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
@@ -50,8 +43,9 @@ jest.mock('@kbn/react-hooks', () => ({
 }));
 
 // Mock the error toast function
-jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  showErrorToast: jest.fn(),
+const mockShowFetchErrorToast = jest.fn();
+jest.mock('../../../../hooks/use_fetch_error_toast', () => ({
+  useFetchErrorToast: () => mockShowFetchErrorToast,
 }));
 
 // Mock the actor ref hook; capture sent events for assertions
@@ -63,12 +57,17 @@ jest.mock('../state_management/stream_routing_state_machine', () => ({
 
 const condition: Condition = { field: 'service.name', eq: 'api' };
 
-const setupSuggestionsApi = () => {
+const setupSuggestionsApi = ({
+  reason,
+}: {
+  reason?: 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+} = {}) => {
   const mockResponse = {
     partitions: [
       { name: 'logs.api', condition },
       { name: 'logs.ui', condition },
     ],
+    reason,
   };
 
   // Mock the Observable stream
@@ -86,13 +85,13 @@ describe('useReviewSuggestionsForm', () => {
   beforeEach(() => {
     mockSend.mockReset();
     mockStreamsRepositoryClient.stream.mockReset();
-    mockNotifications.toasts.addError.mockReset();
-    (showErrorToast as jest.Mock).mockReset();
+    mockShowFetchErrorToast.mockReset();
   });
 
   it('initializes with undefined suggestions and not loading', () => {
     const { result } = renderHook(() => useReviewSuggestionsForm());
     expect(result.current.suggestions).toBeUndefined();
+    expect(result.current.suggestionReason).toBeUndefined();
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
 
@@ -128,7 +127,7 @@ describe('useReviewSuggestionsForm', () => {
   });
 
   it('resetForm clears suggestions and sends suggestion.preview blank event', async () => {
-    setupSuggestionsApi();
+    setupSuggestionsApi({ reason: 'all_data_partitioned' });
 
     const { result } = renderHook(() => useReviewSuggestionsForm());
 
@@ -148,6 +147,7 @@ describe('useReviewSuggestionsForm', () => {
     });
 
     expect(result.current.suggestions).toBeUndefined();
+    expect(result.current.suggestionReason).toBeUndefined();
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'suggestion.preview',
@@ -313,6 +313,7 @@ describe('useReviewSuggestionsForm', () => {
       }),
     };
     mockStreamsRepositoryClient.stream.mockReturnValue(mockObservable);
+    const showFetchErrorToast = useFetchErrorToast();
 
     const { result } = renderHook(() => useReviewSuggestionsForm());
 
@@ -325,7 +326,7 @@ describe('useReviewSuggestionsForm', () => {
       });
     });
 
-    expect(showErrorToast).toHaveBeenCalledWith(mockNotifications, error);
+    expect(showFetchErrorToast).toHaveBeenCalledWith(error);
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
 
@@ -342,6 +343,7 @@ describe('useReviewSuggestionsForm', () => {
     mockStreamsRepositoryClient.stream.mockReturnValue(mockObservable);
 
     const { result } = renderHook(() => useReviewSuggestionsForm());
+    const showFetchErrorToast = useFetchErrorToast();
 
     await act(async () => {
       await result.current.fetchSuggestions({
@@ -352,7 +354,7 @@ describe('useReviewSuggestionsForm', () => {
       });
     });
 
-    expect(showErrorToast).not.toHaveBeenCalled();
+    expect(showFetchErrorToast).not.toHaveBeenCalled();
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
 
@@ -361,7 +363,7 @@ describe('useReviewSuggestionsForm', () => {
     const mockObservable = {
       subscribe: jest.fn((observer) => {
         resolveObserver = () => {
-          observer.next({ partitions: [] });
+          observer.next({ partitions: [], reason: 'no_clusters' as const });
           observer.complete();
         };
       }),
@@ -390,5 +392,22 @@ describe('useReviewSuggestionsForm', () => {
     });
 
     expect(result.current.isLoadingSuggestions).toBe(false);
+  });
+
+  it('sets suggestion reason from API response', async () => {
+    setupSuggestionsApi({ reason: 'all_data_partitioned' });
+
+    const { result } = renderHook(() => useReviewSuggestionsForm());
+
+    await act(async () => {
+      await result.current.fetchSuggestions({
+        streamName: 'test-stream',
+        connectorId: 'test-connector',
+        start: 0,
+        end: 1000,
+      });
+    });
+
+    expect(result.current.suggestionReason).toBe('all_data_partitioned');
   });
 });

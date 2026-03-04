@@ -87,6 +87,13 @@ export class TaskPool {
   }
 
   /**
+   * Gets the IDs of current tasks in pool
+   */
+  public getCurrentTasksInPool(): string[] {
+    return Array.from(this.tasksInPool.keys());
+  }
+
+  /**
    * Gets how much capacity is currently in use.
    */
   public get usedCapacity() {

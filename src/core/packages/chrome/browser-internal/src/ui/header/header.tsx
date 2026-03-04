@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import type { Observable } from 'rxjs';
+
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
@@ -33,8 +34,10 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { HeaderAppMenu } from './header_app_menu';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -43,9 +46,9 @@ import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
-import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
 import { HeaderPageAnnouncer } from './header_page_announcer';
+import { useHasAppMenuConfig } from '../use_has_app_menu_config';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -60,7 +63,6 @@ export interface HeaderProps {
   docLinks: DocLinksStart;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  forceAppSwitcherNavigation$: Observable<boolean>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
@@ -73,7 +75,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
-  isFixed: boolean;
+  appMenu$: Observable<AppMenuConfig | undefined>;
 }
 
 export function Header({
@@ -87,12 +89,13 @@ export function Header({
   globalHelpExtensionMenuLinks$,
   customBranding$,
   isServerless,
-  isFixed,
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
+
+  const hasBetaConfig = useHasAppMenuConfig(observables.appMenu$);
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
@@ -101,12 +104,11 @@ export function Header({
 
   return (
     <>
-      {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
-            position={isFixed ? 'fixed' : 'static'}
+            position={'static'}
             className="header__firstBar"
             sections={[
               {
@@ -117,8 +119,6 @@ export function Header({
                   />,
                   <HeaderLogo
                     href={homeHref}
-                    forceNavigation$={observables.forceAppSwitcherNavigation$}
-                    navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
                     loadingCount$={observables.loadingCount$}
                     customBranding$={customBranding$}
@@ -162,7 +162,7 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__secondBar">
+          <EuiHeader position={'static'} className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
@@ -208,7 +208,11 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderActionMenu mounter={headerActionMenuMounter} />
+                {hasBetaConfig ? (
+                  <HeaderAppMenu config={observables.appMenu$} />
+                ) : (
+                  <HeaderActionMenu mounter={headerActionMenuMounter} />
+                )}
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

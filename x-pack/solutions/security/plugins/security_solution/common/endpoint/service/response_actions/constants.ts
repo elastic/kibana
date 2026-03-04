@@ -41,14 +41,13 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
-  'isolate',
-  'kill-process',
-  'suspend-process',
-];
+export type EnabledAutomatedResponseActionsCommands = Extract<
+  ResponseActionsApiCommandNames,
+  'isolate' | 'kill-process' | 'suspend-process'
+>;
 
-export type EnabledAutomatedResponseActionsCommands =
-  (typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)[number];
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: EnabledAutomatedResponseActionsCommands[] =
+  ['isolate', 'kill-process', 'suspend-process'];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -82,11 +81,11 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'get-file',
   'execute',
+  'memory-dump',
   'upload',
   'scan',
   'runscript',
   'cancel',
-  'memory-dump',
 ] as const;
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
@@ -154,21 +153,21 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   'memory-dump': 'memory-dump',
 });
 
-export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
-  Record<ConsoleResponseActionCommands, EndpointCapabilities>
+export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = deepFreeze<
+  Record<ConsoleResponseActionCommands, EndpointCapabilities[]>
 >({
-  isolate: 'isolation',
-  release: 'isolation',
-  execute: 'execute',
-  'get-file': 'get_file',
-  processes: 'running_processes',
-  'kill-process': 'kill_process',
-  'suspend-process': 'suspend_process',
-  upload: 'upload_file',
-  scan: 'scan',
-  runscript: 'runscript',
-  cancel: 'cancel',
-  'memory-dump': 'memdump_kernel',
+  isolate: ['isolation'],
+  release: ['isolation'],
+  execute: ['execute'],
+  'get-file': ['get_file'],
+  processes: ['running_processes'],
+  'kill-process': ['kill_process'],
+  'suspend-process': ['suspend_process'],
+  upload: ['upload_file'],
+  scan: ['scan'],
+  runscript: ['runscript'],
+  cancel: ['cancel'],
+  'memory-dump': ['memdump_process', 'memdump_kernel'],
 });
 
 /**

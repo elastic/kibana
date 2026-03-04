@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,7 +9,6 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/data-views-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/ui-theme",
     "@kbn/utility-types",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
@@ -24,6 +23,8 @@
     "@kbn/cloud-security-posture",
     "@kbn/react-kibana-context-theme",
     "@kbn/expandable-flyout",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/fleet-plugin",
+    "@kbn/core-http-browser",
   ]
 }

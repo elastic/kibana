@@ -8,6 +8,7 @@
 import { performance } from 'perf_hooks';
 
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,7 +16,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
-import { HTTPAuthorizationHeader } from './http_authentication';
 import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
@@ -42,6 +42,7 @@ import {
   SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
+import { LogoutReason } from '../../common/types';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -315,7 +316,7 @@ export class Authenticator {
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
 
-    // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
+    // Login attempt can target a specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
     // attempts we may not know what provider exactly can handle that attempt and we have to try
     // every enabled provider of the specified type).
@@ -368,6 +369,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue,
         });
@@ -452,6 +454,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue: existingSession.value,
         });
@@ -564,6 +567,7 @@ export class Authenticator {
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
+        providerInstance: provider,
         authenticationResult,
         existingSessionValue,
       });
@@ -758,10 +762,12 @@ export class Authenticator {
     request: KibanaRequest,
     {
       provider,
+      providerInstance,
       authenticationResult,
       existingSessionValue,
     }: {
       provider: AuthenticationProvider;
+      providerInstance: BaseAuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSessionValue: Readonly<SessionValue> | null;
     }
@@ -821,7 +827,6 @@ export class Authenticator {
 
     const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
     const isNewSessionAuthenticated = !!authenticationResult.user;
-
     const providerHasChanged = !!existingSessionValue && !ownsSession;
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
@@ -845,14 +850,23 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      this.logger.debug(
-        'Session is authenticated, existing unauthenticated session will be invalidated.'
-      );
-      await this.invalidateSessionValue({
-        request,
-        sessionValue: existingSessionValue,
-        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
-      });
+      if (
+        providerInstance.shouldInvalidateIntermediateSessionAfterLogin(existingSessionValue?.state)
+      ) {
+        this.logger.debug(
+          'Session is authenticated, existing unauthenticated session will be invalidated.'
+        );
+        await this.invalidateSessionValue({
+          request,
+          sessionValue: existingSessionValue,
+          skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
+        });
+      } else {
+        this.logger.info(
+          `Session is authenticated, but the existing unauthenticated session is still needed and won't be invalidated.`
+        );
+      }
+
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
@@ -862,7 +876,7 @@ export class Authenticator {
 
     let userProfileId = existingSessionValue?.userProfileId;
 
-    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // If the authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
     const shouldActivateProfile = authenticationResult.userProfileGrant;
 
@@ -891,14 +905,20 @@ export class Authenticator {
     }
 
     let newSessionValue: Readonly<SessionValue> | null;
+
     if (!existingSessionValue) {
       const startTime = performance.now();
-      newSessionValue = await this.session.create(request, {
-        username: authenticationResult.user?.username,
-        userProfileId,
-        provider,
-        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-      });
+
+      newSessionValue = await this.session.create(
+        request,
+        {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        },
+        authenticationResult.stateCookieOptions
+      );
 
       const duration = performance.now() - startTime;
 
@@ -1079,7 +1099,11 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
-    if (this.options.customLogoutURL) {
+    const sessionExpired =
+      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ===
+      LogoutReason.SESSION_EXPIRED;
+
+    if (this.options.customLogoutURL && !sessionExpired) {
       return this.options.customLogoutURL;
     }
 
@@ -1088,7 +1112,7 @@ export class Authenticator {
     const searchParams = new URLSearchParams();
     for (const [key, defaultValue] of [
       [NEXT_URL_QUERY_STRING_PARAMETER, null],
-      [LOGOUT_REASON_QUERY_STRING_PARAMETER, 'LOGGED_OUT'],
+      [LOGOUT_REASON_QUERY_STRING_PARAMETER, LogoutReason.LOGGED_OUT],
     ] as Array<[string, string | null]>) {
       const value = request.url.searchParams.get(key) || defaultValue;
       if (value) {

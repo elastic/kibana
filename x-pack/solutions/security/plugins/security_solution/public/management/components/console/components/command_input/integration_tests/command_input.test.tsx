@@ -409,7 +409,9 @@ describe('When entering data into the Console input', () => {
 
       await typeKeyboardKey('{enter}');
 
-      expect(renderResult.getByTestId('test-userCommandText').textContent).toEqual('isolate');
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-userCommandText').textContent).toEqual('isolate');
+      });
     });
 
     it('should show correct hint when cursor is between input', async () => {

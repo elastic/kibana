@@ -92,7 +92,7 @@ describe('suggestion_panel', () => {
 
     preloadedState = {
       datasourceStates: {
-        testDatasource: {
+        formBased: {
           isLoading: false,
           state: '',
         },
@@ -100,8 +100,9 @@ describe('suggestion_panel', () => {
       visualization: {
         activeId: 'testVis',
         state: {},
+        selectedLayerId: null,
       },
-      activeDatasourceId: 'testDatasource',
+      activeDatasourceId: 'formBased',
     };
 
     defaultProps = {
@@ -118,7 +119,7 @@ describe('suggestion_panel', () => {
     };
 
     defaultDatasourceMap = {
-      testDatasource: mockDatasource,
+      formBased: mockDatasource,
     };
   });
 
@@ -209,7 +210,7 @@ describe('suggestion_panel', () => {
     beforeEach(() => {
       suggestionState = {
         datasourceStates: {
-          testDatasource: {
+          formBased: {
             isLoading: false,
             state: '',
           },
@@ -217,6 +218,7 @@ describe('suggestion_panel', () => {
         visualization: {
           activeId: 'vis2',
           state: {},
+          selectedLayerId: null,
         },
       };
 
@@ -408,8 +410,8 @@ describe('suggestion_panel', () => {
     const newPreloadedState = {
       ...preloadedState,
       datasourceStates: {
-        testDatasource: {
-          ...preloadedState.datasourceStates!.testDatasource,
+        formBased: {
+          ...preloadedState.datasourceStates!.formBased,
           state: missingIndexPatternsState,
         },
       },

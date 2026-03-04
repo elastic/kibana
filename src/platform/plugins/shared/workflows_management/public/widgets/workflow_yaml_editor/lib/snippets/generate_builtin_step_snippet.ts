@@ -63,14 +63,26 @@ export function generateBuiltInStepSnippet(
         steps: [{ name: 'merge-step', type: '# Add step type here' }],
       };
       break;
-    case 'http':
+    case 'data.set':
       parameters = {
-        with: { url: 'https://api.example.com', method: 'GET' },
+        with: {
+          variable_name: 'value',
+          another_variable: '{{steps.previous_step.output}}',
+        },
       };
       break;
     case 'wait':
       parameters = {
         with: { duration: '5s' },
+      };
+      break;
+    case 'workflow.execute':
+    case 'workflow.executeAsync':
+      parameters = {
+        with: {
+          'workflow-id': 'workflow-id',
+          inputs: {},
+        },
       };
       break;
     default:

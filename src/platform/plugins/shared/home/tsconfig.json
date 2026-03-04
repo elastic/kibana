@@ -1,10 +1,10 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "../../../../../typings/emotion.d.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-views-plugin",

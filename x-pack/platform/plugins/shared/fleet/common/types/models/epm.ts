@@ -18,7 +18,12 @@ import type {
 } from '../../constants';
 import type { CloudConnectors, ValueOf } from '..';
 
-import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecCategory,
+  RegistryVarGroup,
+} from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -66,6 +71,7 @@ export enum KibanaAssetType {
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -86,6 +92,7 @@ export enum KibanaSavedObjectType {
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -102,6 +109,7 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
+  esqlView = 'esql_view',
 }
 
 export type FleetElasticsearchAssetType = Exclude<
@@ -233,6 +241,13 @@ export interface ConfigurationLink {
   type: Action | NextStep;
   content?: string;
 }
+export interface DeprecationInfo {
+  description: string;
+  since?: string;
+  replaced_by?: Partial<
+    Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>
+  >;
+}
 
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
@@ -253,6 +268,8 @@ export enum RegistryPolicyTemplateKeys {
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
+  dynamic_signal_types = 'dynamic_signal_types',
+  deprecated = 'deprecated',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -264,6 +281,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
   [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
+  [RegistryPolicyTemplateKeys.deprecated]?: DeprecationInfo;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -278,6 +296,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.template_path]: string;
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
 export type RegistryPolicyTemplate =
@@ -294,6 +313,8 @@ export enum RegistryInputKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   deployment_modes = 'deployment_modes',
+  hide_in_var_group_options = 'hide_in_var_group_options',
+  deprecated = 'deprecated',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -308,6 +329,8 @@ export interface RegistryInput {
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
   [RegistryInputKeys.deployment_modes]?: string[];
+  [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
+  [RegistryInputKeys.deprecated]?: DeprecationInfo;
 }
 
 export enum RegistryStreamKeys {
@@ -319,6 +342,8 @@ export enum RegistryStreamKeys {
   vars = 'vars',
   template_path = 'template_path',
   ingestion_method = 'ingestion_method',
+  var_groups = 'var_groups',
+  deprecated = 'deprecated',
 }
 
 export interface RegistryStream {
@@ -330,6 +355,8 @@ export interface RegistryStream {
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
   [RegistryStreamKeys.ingestion_method]?: string;
+  [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
+  [RegistryStreamKeys.deprecated]?: DeprecationInfo;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -356,6 +383,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates'
   | 'categories'
   | 'discovery'
+  | 'deprecated'
 >;
 
 // from /categories
@@ -514,6 +542,7 @@ export enum RegistryVarsEntryKeys {
   min_duration = 'min_duration',
   max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
+  deprecated = 'deprecated',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -540,6 +569,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.min_duration]?: string;
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
+  [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -655,9 +685,11 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_PRECHECK = 'install_precheck',
+  INSTALL_ESQL_VIEWS = 'install_esql_views',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
-  CREATE_ALERTING_RULES = 'create_alerting_rules',
+  CREATE_ALERTING_ASSETS = 'create_alerting_assets',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',

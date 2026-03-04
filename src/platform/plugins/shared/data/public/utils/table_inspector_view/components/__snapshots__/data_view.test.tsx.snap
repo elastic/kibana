@@ -16,7 +16,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         No data available
       </h2>
       <div
-        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
         class="euiText emotion-euiText-m-euiTextColor-subdued"
@@ -174,7 +174,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
 exports[`Inspector Data View component should render single table without selector 1`] = `
 Array [
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -187,6 +187,7 @@ Array [
         id="inspectorDownloadData"
       >
         <button
+          aria-expanded="false"
           class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
           type="button"
         >
@@ -211,7 +212,7 @@ Array [
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -229,6 +230,7 @@ Array [
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -301,6 +303,7 @@ Array [
             class="euiPopover emotion-euiPopover-inline-block"
           >
             <button
+              aria-expanded="false"
               class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
               data-test-subj="tablePaginationPopoverButton"
               type="button"
@@ -309,7 +312,7 @@ Array [
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page: 20
                 </span>
@@ -369,7 +372,7 @@ Array [
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       1
                     </span>
@@ -402,7 +405,7 @@ Array [
 exports[`Inspector Data View component should support multiple datatables 1`] = `
 Array [
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -440,6 +443,7 @@ Array [
               id="inspectorTableChooser"
             >
               <button
+                aria-expanded="false"
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
                 data-test-subj="inspectorTableChooser"
                 type="button"
@@ -448,7 +452,7 @@ Array [
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     Table 1
                   </span>
@@ -471,6 +475,7 @@ Array [
         id="inspectorDownloadData"
       >
         <button
+          aria-expanded="false"
           class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
           type="button"
         >
@@ -495,7 +500,7 @@ Array [
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -513,6 +518,7 @@ Array [
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -586,6 +592,7 @@ Array [
             class="euiPopover emotion-euiPopover-inline-block"
           >
             <button
+              aria-expanded="false"
               class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
               data-test-subj="tablePaginationPopoverButton"
               type="button"
@@ -594,7 +601,7 @@ Array [
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page: 20
                 </span>
@@ -654,7 +661,7 @@ Array [
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       1
                     </span>

@@ -8,10 +8,11 @@
 import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
+import type { AttachmentType } from '../../../common';
 import type {
-  BulkCreateAttachmentsRequest,
-  AttachmentPatchRequest,
-  AttachmentRequest,
+  BulkCreateAttachmentsRequestV2,
+  AttachmentPatchRequestV2,
+  AttachmentRequestV2,
   FindAttachmentsQueryParams,
 } from '../../../common/types/api';
 
@@ -26,12 +27,12 @@ export interface AddArgs {
   /**
    * The attachment values.
    */
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
-  attachments: BulkCreateAttachmentsRequest;
+  attachments: BulkCreateAttachmentsRequestV2;
 }
 
 /**
@@ -115,12 +116,13 @@ export interface BulkGetArgs {
   attachmentIDs: string[];
 }
 
-export interface GetAllAlertsAttachToCase {
+export interface GetAllDocumentsAttachedToCase {
   /**
    * The ID of the case to retrieve the alerts from
    */
   caseId: string;
   filter?: KueryNode;
+  attachmentTypes?: AttachmentType[];
 }
 
 /**
@@ -134,7 +136,7 @@ export interface UpdateArgs {
   /**
    * The full attachment request with the fields updated with appropriate values
    */
-  updateRequest: AttachmentPatchRequest;
+  updateRequest: AttachmentPatchRequestV2;
 }
 
 export interface HapiReadableStream extends Readable {

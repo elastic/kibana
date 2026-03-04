@@ -32,7 +32,7 @@ export function ManualMitigations() {
       <CreateEditComponentTemplateLink
         areIntegrationAssetsAvailable={areIntegrationAssetsAvailable}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <CreateEditPipelineLink areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
     </EuiSkeletonRectangle>
   );

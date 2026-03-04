@@ -48,7 +48,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 
   const { euiTheme } = useEuiTheme();
   const avatarStyles = css({
-    'margin-right': euiTheme.size.s,
+    marginRight: euiTheme.size.s,
   });
   const accordionStyles = css({
     padding: `${euiTheme.size.m} 0`,

@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import React, { Suspense } from 'react';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,12 +22,12 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import {
   AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -50,8 +57,6 @@ import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { AwsInputFieldMapping, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-
-import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AwsAgentlessFormProps {
   cloud: CloudSetup;
@@ -104,14 +109,9 @@ const updatePolicyCloudConnectorSupport = (
     return;
   }
 
-  if (awsCredentialsType === 'cloud_connectors' && !newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  } else if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
+  // Ensure cloud connector support is false if credential type is not cloud_connectors
+  // (CloudConnectorSetup component handles setting it to true when cloud_connectors is selected)
+  if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
     updatePolicy({
       updatedPolicy: {
         ...newPolicy,
@@ -129,7 +129,7 @@ const getCloudFormationConfig = (
 
   return {
     isSupported,
-    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
+    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
     templateUrl: automationCredentialTemplate || '',
   };
 };
@@ -158,13 +158,23 @@ export const AwsCredentialsFormAgentless = ({
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  updatePolicyCloudConnectorSupport(
+  // Update cloud connector support when relevant values change
+  React.useEffect(() => {
+    updatePolicyCloudConnectorSupport(
+      awsCredentialsType,
+      newPolicy,
+      updatePolicy,
+      input,
+      awsPolicyType
+    );
+  }, [
     awsCredentialsType,
+    newPolicy.supports_cloud_connector,
+    input,
+    awsPolicyType,
     newPolicy,
     updatePolicy,
-    input,
-    awsPolicyType
-  );
+  ]);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
@@ -333,17 +343,24 @@ export const AwsCredentialsFormAgentless = ({
       )}
 
       {awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
-        <CloudConnectorSetup
-          templateName={templateName}
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloud={cloud}
-          cloudProvider={AWS_PROVIDER}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyCloudConnectorSetup
+            templateName={templateName}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            cloud={cloud}
+            cloudProvider={AWS_PROVIDER}
+            accountType={accountType}
+            iacTemplateUrl={getTemplateUrlFromPackageInfo(
+              packageInfo,
+              templateName ?? '',
+              SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+            )}
+          />
+        </Suspense>
       )}
       <ReadDocumentation url={awsOverviewPath} />
     </>

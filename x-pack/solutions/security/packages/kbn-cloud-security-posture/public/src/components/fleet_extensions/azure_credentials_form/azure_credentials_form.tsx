@@ -206,6 +206,17 @@ export const AzureCredentialsForm = ({
   });
   const { azurePolicyType, azureEnabled, azureManualFieldsEnabled } = useCloudSetup();
 
+  // Ensure supports_cloud_connector is false for agent-based deployments
+  if (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }

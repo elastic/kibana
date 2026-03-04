@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type from 'type-detect';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -22,7 +23,6 @@ import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
@@ -304,12 +304,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      const { state, nonce, redirect } =
+      const { state, nonce, realm, redirect } =
         (await this.options.client.asInternalUser.transport.request({
           method: 'POST',
           path: '/_security/oidc/prepare',
           body: params,
         })) as any;
+
+      if (realm !== this.realm) {
+        this.logger.debug(
+          `Provider is configured with the "${this.realm}" realm and isn't compatible with the "${realm}" ` +
+            `realm used by Elasticsearch to prepare the authentication request. Skipping provider…`
+        );
+        return AuthenticationResult.notHandled();
+      }
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       return AuthenticationResult.redirectTo(

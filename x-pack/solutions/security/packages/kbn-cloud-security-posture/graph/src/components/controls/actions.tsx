@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
@@ -112,8 +113,10 @@ export const Actions = ({
     SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
     true
   );
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (shouldShowSearchBarButtonTour) {
+  if (shouldShowSearchBarButtonTour && isTourEnabled) {
     if (searchFilterCounter > 0) {
       setIsSearchBarTourOpen(true);
       setShouldShowSearchBarButtonTour(false);

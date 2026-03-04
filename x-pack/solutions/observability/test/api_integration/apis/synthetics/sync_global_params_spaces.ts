@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
+      await testPrivateLocations.cleanupFleetPolicies();
       await kServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
       _browserMonitorJson = getFixtureJson('browser_monitor');

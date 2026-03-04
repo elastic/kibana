@@ -6,13 +6,11 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
-import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
-import { NO_FEATURE } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
-  index: StreamQueryKql;
+  index: StreamQuery;
 }
 interface SignificantEventsApiBulkOperationDelete {
   delete: { id: string };
@@ -23,22 +21,12 @@ type SignificantEventsApiBulkOperation =
   | SignificantEventsApiBulkOperationDelete;
 
 interface SignificantEventsApi {
-  upsertQuery: (query: StreamQueryKql) => Promise<void>;
+  upsertQuery: (query: StreamQuery) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string, feature?: Feature) => SignificantEventsGenerateResponse;
-  abort: () => void;
 }
 
-export function useSignificantEventsApi({
-  name,
-  start,
-  end,
-}: {
-  name: string;
-  start: number;
-  end: number;
-}): SignificantEventsApi {
+export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
   const {
     dependencies: {
       start: {
@@ -47,11 +35,10 @@ export function useSignificantEventsApi({
     },
   } = useKibana();
 
-  const { signal, abort, refresh } = useAbortController();
+  const { signal } = useAbortController();
 
   return {
-    upsertQuery: async ({ feature, kql, title, id }) => {
-      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
+    upsertQuery: async ({ id, ...body }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -59,11 +46,7 @@ export function useSignificantEventsApi({
             name,
             queryId: id,
           },
-          body: {
-            kql,
-            title,
-            feature: effectiveFeature,
-          },
+          body,
         },
       });
     },
@@ -93,31 +76,6 @@ export function useSignificantEventsApi({
           },
         },
       });
-    },
-    generate: (connectorId: string, feature?: Feature) => {
-      return streamsRepositoryClient.stream(
-        `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
-        {
-          signal,
-          params: {
-            path: {
-              name,
-            },
-            query: {
-              connectorId,
-              from: new Date(start).toString(),
-              to: new Date(end).toString(),
-            },
-            body: {
-              feature,
-            },
-          },
-        }
-      );
-    },
-    abort: () => {
-      abort();
-      refresh();
     },
   };
 }

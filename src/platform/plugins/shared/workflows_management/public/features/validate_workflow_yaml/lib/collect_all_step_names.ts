@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { isPair, isScalar, visit } from 'yaml';
-import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
+import { type Document, isPair, isScalar, visit } from 'yaml';
+import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { StepNameInfo } from '../model/types';
 
-export function collectAllStepNames(yamlDocument: any): StepNameInfo[] {
+export function collectAllStepNames(yamlDocument: Document): StepNameInfo[] {
   const stepNames: StepNameInfo[] = [];
 
-  if (!yamlDocument?.contents) return stepNames;
+  if (!yamlDocument?.contents || yamlDocument.errors.length > 0) {
+    return stepNames;
+  }
 
   visit(yamlDocument, {
     Scalar(key, node, ancestors) {
@@ -42,8 +42,9 @@ export function collectAllStepNames(yamlDocument: any): StepNameInfo[] {
 
       // Use the same logic as getStepNode to identify step names
       const path = getPathFromAncestors(ancestors);
+      const parentContainer = path.length >= 3 ? path[path.length - 3] : undefined;
       const isInSteps =
-        path.length >= 3 && (path[path.length - 3] === 'steps' || path[path.length - 3] === 'else');
+        parentContainer === 'steps' || parentContainer === 'else' || parentContainer === 'fallback';
 
       if (isInSteps) {
         const [startOffset, endOffset] = node.range;

@@ -155,4 +155,28 @@ export class SyntheticsMonitorTestService {
     expect(deleteResponse.status).to.eql(statusCode);
     return deleteResponse;
   }
+
+  async createMaintenanceWindow(spaceId?: string) {
+    const path = spaceId
+      ? `/s/${spaceId}/internal/alerting/rules/maintenance_window`
+      : '/internal/alerting/rules/maintenance_window';
+    const response = await this.supertest
+      .post(path)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        title: 'test-maintenance-window',
+        duration: 60 * 60 * 1000, // 1 hr
+        r_rule: {
+          dtstart: new Date().toISOString(),
+          tzid: 'UTC',
+          freq: 0,
+          count: 1,
+        },
+        category_ids: ['management'],
+      });
+
+    expect(response.status).to.equal(200);
+
+    return response.body;
+  }
 }

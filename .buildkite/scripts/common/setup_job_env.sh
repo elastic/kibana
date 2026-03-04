@@ -122,11 +122,14 @@ EOF
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
-  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-  export ELASTIC_APM_SERVER_URL
+  # unset APM creds to ensure APM data gets sent to preconfigured APM cluster (kibana-cloud-apm)
+  if ! is_pr_with_label "ci:collect-apm"; then
+    ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+    export ELASTIC_APM_SERVER_URL
 
-  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-  export ELASTIC_APM_API_KEY
+    ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+    export ELASTIC_APM_API_KEY
+  fi
 }
 
 # Set up GenAI keys
@@ -142,6 +145,43 @@ EOF
   if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
     export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
+  fi
+}
+
+# Set up Kibana Evals secrets
+{
+  if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
+    echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
+
+    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+    # Validate config shape (safe; does not print secrets)
+    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+
+    # Eval suites require this for the LLM-as-a-judge connector selection
+    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+
+    # Export the vault config so eval-owned scripts can extract LiteLLM / connector
+    # settings without needing vault access themselves.
+    # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
+    export KBN_EVALS_CONFIG_B64
+    KBN_EVALS_CONFIG_B64="$(printf '%s' "$KBN_EVALS_CONFIG_JSON" | base64)"
+
+    # Elasticsearch cluster for evaluation results export
+    export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    export EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Optional: separate cluster for trace-based evaluators
+    export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    export TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Optional: trace exporters for the Playwright worker process (supports http/grpc/phoenix/langfuse)
+    TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
+      export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
+    fi
+
+    # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
+    export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi
 }
 
@@ -196,6 +236,19 @@ EOF
   export VAULT_ROLE_ID
   VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
   export VAULT_SECRET_ID
+}
+
+# Set up EIS Cloud Connected Mode (CCM) API key
+# Note: This secret is in the legacy vault, requires approle authentication
+{
+  if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
+    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
+    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
+    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+  fi
 }
 
 # Inject moon remote-cache credentials on CI

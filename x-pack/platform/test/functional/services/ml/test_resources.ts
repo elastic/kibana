@@ -47,14 +47,6 @@ export function MachineLearningTestResourcesProvider(
       await kibanaServer.uiSettings.unset('dateFormat:tz');
     },
 
-    async disableKibanaAnnouncements() {
-      await kibanaServer.uiSettings.update({ hideAnnouncements: true });
-    },
-
-    async resetKibanaAnnouncements() {
-      await kibanaServer.uiSettings.unset('hideAnnouncements');
-    },
-
     async savedObjectExistsById(
       id: string,
       objectType: SavedObjectType,

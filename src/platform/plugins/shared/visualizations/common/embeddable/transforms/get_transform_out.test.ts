@@ -7,14 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { getTransformOut } from './get_transform_out';
 import type { StoredVis } from './types';
 
 describe('getTransformOut', () => {
-  const transformEnhancementsOutMock = jest
-    .fn()
-    .mockReturnValue({ dynamiceActions: 'transformedOutValue' });
+  const storedDrilldown = {
+    dashboardRefName: 'someRef',
+    type: 'dashboard_drilldown',
+    label: 'Go to dashboard',
+    trigger: 'some_trigger',
+  };
+  const drilldownReference = {
+    id: '5678',
+    name: 'someRef',
+    type: 'dashboard',
+  };
+
+  const transformEnhancementsOutMock = jest.fn((state, references) => {
+    const { dashboardRefName, ...restOfDrilldown } = storedDrilldown;
+    return {
+      ...state,
+      drilldowns: [
+        {
+          ...restOfDrilldown,
+          // hardcoding reference injection
+          // production code would get id from reference matching dashboardRefName
+          dashboard_id: 'someRef',
+        },
+      ],
+    };
+  });
 
   const transformOut = getTransformOut(transformEnhancementsOutMock);
 
@@ -23,10 +45,7 @@ describe('getTransformOut', () => {
       expect(
         transformOut(
           {
-            enhancements: {
-              dynamiceActions: 'originalValue',
-            } as unknown as DynamicActionsSerializedState['enhancements'],
-            timeRange: { from: '15-now', to: 'now' },
+            drilldowns: [storedDrilldown],
             title: 'custom title',
             uiState: 'someUiState',
           },
@@ -36,23 +55,20 @@ describe('getTransformOut', () => {
               name: 'savedObjectRef',
               type: 'visualization',
             },
-            {
-              id: '5678',
-              name: 'someRef',
-              type: 'testType',
-            },
+            drilldownReference,
           ]
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "enhancements": Object {
-            "dynamiceActions": "transformedOutValue",
-          },
+          "drilldowns": Array [
+            Object {
+              "dashboard_id": "someRef",
+              "label": "Go to dashboard",
+              "trigger": "some_trigger",
+              "type": "dashboard_drilldown",
+            },
+          ],
           "savedObjectId": "1234",
-          "timeRange": Object {
-            "from": "15-now",
-            "to": "now",
-          },
           "title": "custom title",
           "uiState": "someUiState",
         }
@@ -65,9 +81,7 @@ describe('getTransformOut', () => {
       expect(
         transformOut(
           {
-            enhancements: {
-              dynamiceActions: 'originalValue',
-            } as unknown as DynamicActionsSerializedState['enhancements'],
+            drilldowns: [storedDrilldown],
             savedVis: {
               data: {
                 searchSource: {
@@ -75,7 +89,6 @@ describe('getTransformOut', () => {
                 },
               },
             } as StoredVis,
-            timeRange: { from: '15-now', to: 'now' },
             title: 'custom title',
           },
           [
@@ -84,28 +97,25 @@ describe('getTransformOut', () => {
               name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
               type: 'index-pattern',
             },
-            {
-              id: '5678',
-              name: 'someRef',
-              type: 'testType',
-            },
+            drilldownReference,
           ]
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "enhancements": Object {
-            "dynamiceActions": "transformedOutValue",
-          },
+          "drilldowns": Array [
+            Object {
+              "dashboard_id": "someRef",
+              "label": "Go to dashboard",
+              "trigger": "some_trigger",
+              "type": "dashboard_drilldown",
+            },
+          ],
           "savedVis": Object {
             "data": Object {
               "searchSource": Object {
                 "index": "1234",
               },
             },
-          },
-          "timeRange": Object {
-            "from": "15-now",
-            "to": "now",
           },
           "title": "custom title",
         }

@@ -22,6 +22,8 @@
       "searchNavigation",
       "usageCollection",
       "sampleDataIngest",
+      "dataViews",
+      "agentBuilder",
     ],
     "requiredBundles": [
       "kibanaReact"

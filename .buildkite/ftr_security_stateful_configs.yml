@@ -26,9 +26,6 @@ disabled:
   - x-pack/solutions/security/test/security_solution_cypress/cli_config.ts
   - x-pack/solutions/security/test/security_solution_cypress/config.ts
 
-  # Playwright
-  - x-pack/solutions/security/test/security_solution_playwright/playwright.config.ts
-
   # Gen AI Evals run weekly via their own pipeline
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts
 
@@ -44,6 +41,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/unified_alerts/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/date_types/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/float/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/integer/basic_license_essentials_tier/configs/ess.config.ts
@@ -94,9 +92,16 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/telemetry/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/user_roles/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/privileges/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/privileges/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_details/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/ess.config.ts
@@ -110,7 +115,9 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts:
+      queue: n2-4-spot
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/endpoint_exceptions_moved_ff.ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/ess.config.ts
@@ -121,7 +128,9 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/search_ai_lake_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/scripts_library/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/endpoint_exceptions_moved_ff.ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts

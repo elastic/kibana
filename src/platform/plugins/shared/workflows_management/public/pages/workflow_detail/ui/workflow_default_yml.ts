@@ -9,11 +9,18 @@
 
 export const workflowDefaultYaml = `name: New workflow
 enabled: false
+description: This is a new workflow
 triggers:
   - type: manual
+
+inputs:
+  - name: message
+    type: string
+    default: "hello world"
+
 steps:
-  - name: first-step
+  - name: hello_world_step
     type: console
     with:
-      message: First step executed
+      message: "{{ inputs.message }}"
 `;

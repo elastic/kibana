@@ -18,6 +18,9 @@ Object {
           "default": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
           "type": "string",
         },
+        "region": Object {
+          "type": "string",
+        },
         "temperature": Object {
           "type": "number",
         },
@@ -799,15 +802,19 @@ Object {
         "bcc": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
         "cc": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
         "kibanaFooterLink": Object {
@@ -838,14 +845,24 @@ Object {
             "null",
           ],
         },
+        "replyTo": Object {
+          "items": Object {
+            "maxLength": 512,
+            "type": "string",
+          },
+          "maxItems": 10,
+          "type": "array",
+        },
         "subject": Object {
           "type": "string",
         },
         "to": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
       },
@@ -967,6 +984,9 @@ Object {
             },
             "contextWindowLength": Object {
               "type": "number",
+            },
+            "defaultModel": Object {
+              "type": "string",
             },
             "headers": Object {
               "additionalProperties": Object {
@@ -1146,6 +1166,323 @@ Object {
       "required": Array [
         "subAction",
       ],
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .http 1`] = `
+Object {
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "accessTokenUrl": Object {
+          "type": "string",
+        },
+        "additionalFields": Object {
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "authType": Object {
+          "default": "webhook-authentication-basic",
+          "enum": Array [
+            "webhook-authentication-basic",
+            "webhook-authentication-ssl",
+            "webhook-oauth2-client-credentials",
+            null,
+          ],
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "ca": Object {
+          "type": "string",
+        },
+        "certType": Object {
+          "enum": Array [
+            "ssl-crt-key",
+            "ssl-pfx",
+          ],
+          "type": "string",
+        },
+        "clientId": Object {
+          "type": "string",
+        },
+        "hasAuth": Object {
+          "default": true,
+          "type": "boolean",
+        },
+        "headers": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": Object {
+                "type": "string",
+              },
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
+          "default": null,
+        },
+        "scope": Object {
+          "type": "string",
+        },
+        "url": Object {
+          "format": "uri",
+          "type": "string",
+        },
+        "verificationMode": Object {
+          "enum": Array [
+            "none",
+            "certificate",
+            "full",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "url",
+      ],
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .http 2`] = `
+Object {
+  "$ref": "#/definitions/secrets",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "secrets": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "clientSecret": Object {
+          "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "crt": Object {
+          "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "key": Object {
+          "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "password": Object {
+          "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "pfx": Object {
+          "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+        "secretHeaders": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": Object {
+                "type": "string",
+              },
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
+          "default": null,
+        },
+        "user": Object {
+          "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
+        },
+      },
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .http 3`] = `
+Object {
+  "$ref": "#/definitions/params",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "params": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "body": Object {
+          "type": "string",
+        },
+        "fetcher": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "follow_redirects": Object {
+              "type": "boolean",
+            },
+            "keep_alive": Object {
+              "type": "boolean",
+            },
+            "max_redirects": Object {
+              "type": "number",
+            },
+            "skip_ssl_verification": Object {
+              "type": "boolean",
+            },
+          },
+          "type": "object",
+        },
+        "headers": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "method": Object {
+          "default": "GET",
+          "enum": Array [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+          ],
+          "type": "string",
+        },
+        "path": Object {
+          "type": "string",
+        },
+        "query": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "url": Object {
+          "format": "uri",
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .http-system 1`] = `
+Object {
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .http-system 2`] = `
+Object {
+  "$ref": "#/definitions/secrets",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "secrets": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .http-system 3`] = `
+Object {
+  "$ref": "#/definitions/params",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "params": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "body": Object {
+          "type": "string",
+        },
+        "fetcher": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "follow_redirects": Object {
+              "type": "boolean",
+            },
+            "keep_alive": Object {
+              "type": "boolean",
+            },
+            "max_redirects": Object {
+              "type": "number",
+            },
+            "skip_ssl_verification": Object {
+              "type": "boolean",
+            },
+          },
+          "type": "object",
+        },
+        "headers": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "method": Object {
+          "default": "GET",
+          "enum": Array [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+          ],
+          "type": "string",
+        },
+        "path": Object {
+          "type": "string",
+        },
+        "query": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "url": Object {
+          "format": "uri",
+          "type": "string",
+        },
+      },
       "type": "object",
     },
   },
@@ -1722,6 +2059,113 @@ Object {
 `;
 
 exports[`Connector type config checks detect connector type changes for: .jira-service-management 3`] = `
+Object {
+  "$ref": "#/definitions/params",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "params": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "subAction": Object {
+          "type": "string",
+        },
+        "subActionParams": Object {
+          "additionalProperties": true,
+          "default": Object {},
+          "properties": Object {},
+          "type": "object",
+        },
+      },
+      "required": Array [
+        "subAction",
+      ],
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .mcp 1`] = `
+Object {
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "apiKeyHeaderName": Object {
+          "minLength": 1,
+          "type": "string",
+        },
+        "apiKeyHeaderValue": Object {
+          "type": "string",
+        },
+        "authType": Object {
+          "enum": Array [
+            "none",
+            "bearer",
+            "apiKey",
+            "basic",
+          ],
+          "type": "string",
+        },
+        "hasAuth": Object {
+          "default": true,
+          "type": "boolean",
+        },
+        "headers": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "serverUrl": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "serverUrl",
+      ],
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .mcp 2`] = `
+Object {
+  "$ref": "#/definitions/secrets",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "secrets": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "apiKey": Object {
+          "type": "string",
+        },
+        "password": Object {
+          "type": "string",
+        },
+        "secretHeaders": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        "token": Object {
+          "type": "string",
+        },
+        "user": Object {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .mcp 3`] = `
 Object {
   "$ref": "#/definitions/params",
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -3505,7 +3949,6 @@ Object {
               },
             },
             "required": Array [
-              "id",
               "name",
             ],
             "type": "object",
@@ -3589,6 +4032,15 @@ Object {
                   "maxItems": 1,
                   "type": "array",
                 },
+                "channelNames": Object {
+                  "items": Object {
+                    "maxLength": 200,
+                    "minLength": 2,
+                    "type": "string",
+                  },
+                  "maxItems": 1,
+                  "type": "array",
+                },
                 "channels": Object {
                   "items": Object {
                     "type": "string",
@@ -3624,6 +4076,13 @@ Object {
               "additionalProperties": false,
               "properties": Object {
                 "channelIds": Object {
+                  "items": Object {
+                    "type": "string",
+                  },
+                  "maxItems": 1,
+                  "type": "array",
+                },
+                "channelNames": Object {
                   "items": Object {
                     "type": "string",
                   },
@@ -4564,6 +5023,10 @@ Object {
             "inputs": Object {},
             "spaceId": Object {
               "type": "string",
+            },
+            "summaryMode": Object {
+              "default": true,
+              "type": "boolean",
             },
             "workflowId": Object {
               "type": "string",

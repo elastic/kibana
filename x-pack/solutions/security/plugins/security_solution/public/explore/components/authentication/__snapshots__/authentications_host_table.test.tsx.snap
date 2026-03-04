@@ -145,7 +145,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     data-test-subj="paginated-basic-table"
   >
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -336,7 +336,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     </table>
   </div>
   <div
-    class="euiFlexGroup c3 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    class="euiFlexGroup c3 emotion-euiFlexGroup-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -354,7 +354,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
             class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
           >
             <span
-              class="eui-textTruncate euiButtonEmpty__text"
+              class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
             >
               Rows per page: 10
             </span>
@@ -414,7 +414,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   1
                 </span>
@@ -434,7 +434,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   2
                 </span>
@@ -454,7 +454,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   3
                 </span>
@@ -474,7 +474,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   4
                 </span>
@@ -494,7 +494,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   5
                 </span>

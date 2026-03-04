@@ -28,6 +28,7 @@ interface ProvidersCommonConfigType {
   description?: Type<string>;
   hint?: Type<string>;
   icon?: Type<string>;
+  origin?: Type<string[] | string>;
   session?: Type<{ idleTimeout?: Duration | null; lifespan?: Duration | null }>;
 }
 
@@ -41,6 +42,16 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
+const providerOriginSchema = schema.uri({
+  validate(originConfig) {
+    const url = new URL(originConfig);
+
+    if (originConfig !== url.origin) {
+      return `expected a lower-case origin (scheme, host, and optional port) but got: ${originConfig}`;
+    }
+  },
+});
+
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
@@ -49,6 +60,9 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     description: schema.maybe(schema.string()),
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
+    origin: schema.maybe(
+      schema.oneOf([providerOriginSchema, schema.arrayOf(providerOriginSchema)])
+    ),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     session: schema.object({
       idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
@@ -326,15 +340,29 @@ export const ConfigSchema = schema.object({
         // to prevent potential misconfiguration.
         schema.maybe(schema.uri({ scheme: ['https', 'http'] }))
       ),
-      ssl: schema.object({
-        verificationMode: schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        ),
-        certificateAuthorities: schema.maybe(
-          schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-        ),
-      }),
+      ssl: schema.object(
+        {
+          verificationMode: schema.oneOf(
+            [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+            { defaultValue: 'full' }
+          ),
+          certificateAuthorities: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+          ),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+        },
+        {
+          validate: (rawConfig) => {
+            if (rawConfig.certificate && !rawConfig.key) {
+              return 'must specify [ssl.key] when [ssl.certificate] is specified';
+            }
+            if (rawConfig.key && !rawConfig.certificate) {
+              return 'must specify [ssl.certificate] when [ssl.key] is specified';
+            }
+          },
+        }
+      ),
       sharedSecret: schema.conditional(
         schema.siblingRef('enabled'),
         true,

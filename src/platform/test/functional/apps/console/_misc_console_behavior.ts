@@ -13,11 +13,13 @@ import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { LARGE_INPUT } from './large_input';
+import { QUOTE_HEAVY_INPUT } from './quote_heavy_input';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
   describe('misc console behavior', function testMiscConsoleBehavior() {
@@ -261,6 +263,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('clickable links', () => {
+      let initialWindowHandles: string[];
+
+      beforeEach(async () => {
+        initialWindowHandles = await browser.getAllWindowHandles();
+      });
+
+      afterEach(async () => {
+        // Close any new tabs that were opened
+        const currentHandles = await browser.getAllWindowHandles();
+        if (currentHandles.length > initialWindowHandles.length) {
+          // Close all new tabs
+          for (let i = initialWindowHandles.length; i < currentHandles.length; i++) {
+            await browser.switchToWindow(currentHandles[i]);
+            await browser.closeCurrentWindow();
+          }
+          // Switch back to the original tab
+          await browser.switchToWindow(initialWindowHandles[0]);
+        }
+      });
+
+      it('should open URL in new tab when clicking on a link in the input editor', async () => {
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('# https://www.elastic.co');
+
+        // Wait for Monaco to detect and decorate the link
+        await retry.waitFor('link to be detected by Monaco', async () => {
+          const inputEditor = await testSubjects.find('consoleMonacoEditor');
+          const detectedLinks = await inputEditor.findAllByCssSelector('.detected-link');
+          return detectedLinks.length > 0;
+        });
+
+        const inputEditor = await testSubjects.find('consoleMonacoEditor');
+        const detectedLink = await inputEditor.findByCssSelector('.detected-link');
+
+        // Perform Cmd/Ctrl+Click on the detected link
+        const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await browser
+          .getActions()
+          .keyDown(modifierKey)
+          .click(detectedLink._webElement)
+          .keyUp(modifierKey)
+          .perform();
+
+        // Wait for a new tab to open
+        await retry.waitFor('new tab to open after clicking link', async () => {
+          const handles = await browser.getAllWindowHandles();
+          return handles.length > initialWindowHandles.length;
+        });
+
+        const windowHandles = await browser.getAllWindowHandles();
+        expect(windowHandles.length).to.be.greaterThan(initialWindowHandles.length);
+
+        await browser.switchToWindow(windowHandles[windowHandles.length - 1]);
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('elastic.co');
+      });
+    });
+
     it('should work fine with a large content', async () => {
       await PageObjects.console.clearEditorText();
 
@@ -271,21 +332,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       writeFileSync(filePath, LARGE_INPUT, 'utf8');
 
-      // Set file to upload and wait for the editor to be updated
-      await PageObjects.console.setFileToUpload(filePath);
-      await PageObjects.console.acceptFileImport();
-      await PageObjects.common.sleep(1000);
+      try {
+        // Set file to upload and wait for the editor to be updated
+        await PageObjects.console.setFileToUpload(filePath);
+        await PageObjects.console.acceptFileImport();
+        await PageObjects.common.sleep(1000);
 
-      // The autocomplete should still show up without causing stack overflow
-      await PageObjects.console.enterText(`GET _search\n`);
-      await PageObjects.console.enterText(`{\n\t"query": {`);
-      await PageObjects.console.pressEnter();
-      await PageObjects.console.sleepForDebouncePeriod();
-      await PageObjects.console.promptAutocomplete();
-      expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        // The autocomplete should still show up without causing stack overflow
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      } finally {
+        unlinkSync(filePath);
+      }
+    });
 
-      // Clean up input file
-      unlinkSync(filePath);
+    it('should remain responsive with quote-heavy JSON payloads', async () => {
+      // This test targets the specific freeze scenario fixed in the ES|QL context detection.
+      // Before the fix, pasting JSON with many escaped quotes (e.g., serialized error messages)
+      // caused super-linear runtime in checkForTripleQuotesAndEsqlQuery, freezing the editor.
+      await PageObjects.console.clearEditorText();
+
+      const filePath = resolve(
+        REPO_ROOT,
+        `target/functional-tests/downloads/console_import_quote_heavy_input`
+      );
+      writeFileSync(filePath, QUOTE_HEAVY_INPUT, 'utf8');
+
+      try {
+        // Set file to upload and wait for the editor to be updated
+        await PageObjects.console.setFileToUpload(filePath);
+        await PageObjects.console.acceptFileImport();
+        await PageObjects.common.sleep(1000);
+
+        // Ensure we start a new request after the imported payload (it may not end with a newline).
+        await PageObjects.console.pressEnter();
+
+        // Reuse the same request shape as the existing "large content" test to guarantee suggestions exist.
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      } finally {
+        unlinkSync(filePath);
+      }
     });
   });
 }

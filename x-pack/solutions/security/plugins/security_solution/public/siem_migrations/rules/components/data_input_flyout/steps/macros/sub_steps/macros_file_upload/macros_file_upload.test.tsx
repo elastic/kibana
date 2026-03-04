@@ -11,9 +11,15 @@ import { MacrosFileUpload } from './macros_file_upload';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 
-jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => ({
-  useParseFileInput: jest.fn(),
-}));
+jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => {
+  const { parseContent } = jest.requireActual(
+    '../../../../../../../common/hooks/use_parse_file_input'
+  );
+  return {
+    parseContent,
+    useParseFileInput: jest.fn(),
+  };
+});
 
 jest.mock('../../../../../../../common/components', () => ({
   UploadFileButton: ({
@@ -34,7 +40,7 @@ jest.mock('../../../../../../../common/components', () => ({
 describe('MacrosFileUpload', () => {
   const mockUseParseFileInput = useParseFileInput as jest.Mock;
   const mockParseFile = jest.fn();
-  let onFileParsedCallback: (content: Array<{ result: Record<string, string> }>) => void;
+  let onFileParsedCallback: (content: string) => void;
 
   beforeEach(() => {
     mockUseParseFileInput.mockImplementation((onFileParsed: typeof onFileParsedCallback) => {
@@ -77,7 +83,7 @@ describe('MacrosFileUpload', () => {
     expect(mockParseFile).toHaveBeenCalledWith([file]);
 
     await act(async () => {
-      onFileParsedCallback([{ result: { title: 'test', definition: 'test' } }]);
+      onFileParsedCallback('[{ "result": { "title": "test", "definition": "test" } }]');
     });
 
     const uploadButton = getByText('Upload');

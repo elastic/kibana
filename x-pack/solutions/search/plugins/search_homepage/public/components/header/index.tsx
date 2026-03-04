@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiImage } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  useCurrentEuiBreakpoint,
+  EuiImage,
+} from '@elastic/eui';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
@@ -16,22 +23,26 @@ export const SearchHomepageHeader: React.FC = () => {
   const { euiTheme, colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
   const { cloud } = useKibana().services;
+  const currentBreakpoint = useCurrentEuiBreakpoint();
 
   return (
-    <EuiPageTemplate.Section
-      data-test-subj="search-homepage-header"
-      paddingSize="none"
-      color="subdued"
-    >
+    <EuiPageTemplate.Section data-test-subj="search-homepage-header" paddingSize="none">
       <EuiFlexGroup
         gutterSize="m"
         alignItems="stretch"
         style={{
           paddingLeft: euiTheme.size.xxl,
           paddingRight: euiTheme.size.xxl,
+          flexFlow: currentBreakpoint === 'xs' ? 'column-reverse' : 'initial',
         }}
       >
-        <EuiFlexItem style={{ alignSelf: 'center' }}>
+        <EuiFlexItem
+          style={{
+            alignSelf: 'center',
+            paddingTop: euiTheme.size.xxl,
+            paddingBottom: euiTheme.size.xxl,
+          }}
+        >
           {cloud?.isServerlessEnabled ? <StatelessHeaderPromo /> : <StatefulHeaderPromo />}
         </EuiFlexItem>
 

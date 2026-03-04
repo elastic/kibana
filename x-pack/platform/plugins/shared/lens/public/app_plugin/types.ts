@@ -27,10 +27,11 @@ import type {
   LensDocument,
   LensInspector,
 } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 
 export interface RedirectToOriginProps {
-  state?: LensSerializedState;
+  state?: LensSerializedAPIConfig;
   isCopied?: boolean;
 }
 
@@ -75,6 +76,8 @@ export interface LensTopNavMenuProps {
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensSerializedState;
+  // State passed in by the container when editing from a dashboard panel
+  incomingState?: EmbeddableEditorState;
   getIsByValueMode: () => boolean;
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;

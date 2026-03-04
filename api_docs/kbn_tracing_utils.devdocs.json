@@ -43,6 +43,8 @@
           "WithActiveSpan"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/create_with_active_span.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +65,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/create_with_active_span.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -79,6 +83,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/create_with_active_span.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -102,6 +108,8 @@
           ") => boolean | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/is_entry_span.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,6 +124,8 @@
               "ReadableSpan"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/is_entry_span.ts",
+            "lineNumber": 17,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,6 +147,8 @@
           " | undefined) => T) => T"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,6 +163,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 40,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,6 +182,8 @@
               " | undefined) => T"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 40,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -197,6 +213,8 @@
           " | undefined) => T) => T"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,6 +229,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -232,6 +252,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -249,6 +271,8 @@
               " | undefined) => T"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -280,6 +304,8 @@
           " | undefined) => T) => T"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -294,6 +320,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -315,6 +343,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -330,6 +360,8 @@
               "Context"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -347,6 +379,8 @@
               " | undefined) => T"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -368,6 +402,8 @@
           "(args: Args) => unknown"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -382,6 +418,8 @@
               "Args"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 58,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -411,6 +449,8 @@
           "SpanOptions"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -426,6 +466,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

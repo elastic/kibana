@@ -18,7 +18,7 @@ import {
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import type {
   CasesWebhookPublicConfigurationType,
   ExternalServiceIncidentResponse,
@@ -92,7 +92,7 @@ export const createExternalService = (
     throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
 
-  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets?.secretHeaders);
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,

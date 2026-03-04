@@ -42,7 +42,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         osquery: ['all'],
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
-        siemV4: [
+        siemV5: [
           'all',
           'endpoint_list_all',
           'trusted_applications_all',
@@ -53,6 +53,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
           'endpoint_exceptions_all',
           'policy_management_all',
         ],
+        securitySolutionRulesV2: ['all'],
         securitySolutionTimeline: ['all'],
         securitySolutionNotes: ['all'],
         stackAlerts: ['all'],

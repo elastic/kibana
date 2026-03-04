@@ -10,6 +10,7 @@ import type {
   EntityNodeDataModel,
   GroupNodeDataModel,
   LabelNodeDataModel,
+  RelationshipNodeDataModel,
   EdgeDataModel,
   NodeShape,
   NodeColor,
@@ -68,7 +69,16 @@ export interface LabelNodeViewModel
   eventClickHandler?: EventClickCallback;
 }
 
-export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;
+export interface RelationshipNodeViewModel
+  extends Record<string, unknown>,
+    RelationshipNodeDataModel,
+    BaseNodeDataViewModel {}
+
+export type NodeViewModel =
+  | EntityNodeViewModel
+  | GroupNodeViewModel
+  | LabelNodeViewModel
+  | RelationshipNodeViewModel;
 
 export type NodeProps = xyNodeProps<Node<NodeViewModel>>;
 

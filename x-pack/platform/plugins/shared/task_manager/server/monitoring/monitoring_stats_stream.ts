@@ -128,11 +128,7 @@ export function createMonitoringStatsStream(
 
 export function summarizeMonitoringStats(
   logger: Logger,
-  {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    last_update,
-    stats: { runtime, workload, configuration, utilization },
-  }: MonitoringStats,
+  { last_update, stats: { runtime, workload, configuration, utilization } }: MonitoringStats,
   config: TaskManagerConfig,
   assumedKibanaInstances: number
 ): RawMonitoringStats {

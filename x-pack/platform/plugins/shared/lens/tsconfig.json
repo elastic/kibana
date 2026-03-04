@@ -1,9 +1,16 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
+  ],
   "kbn_references": [
     "@kbn/spaces-plugin",
     "@kbn/core",
@@ -19,7 +26,6 @@
     "@kbn/url-forwarding-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-enhanced-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/saved-objects-plugin",
@@ -88,7 +94,6 @@
     "@kbn/field-utils",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
-    "@kbn/presentation-containers",
     "@kbn/discover-utils",
     "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
@@ -107,7 +112,6 @@
     "@kbn/licensing-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
     "@kbn/transpose-utils",
@@ -123,13 +127,21 @@
     "@kbn/core-http-server",
     "@kbn/presentation-util",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/controls-plugin",
-    "@kbn/controls-schemas",
-    "@kbn/controls-constants",
+    "@kbn/lens-embeddable-utils",
     "@kbn/visualizations-common",
     "@kbn/css-utils",
     "@kbn/lens-common",
+    "@kbn/lens-common-2",
     "@kbn/react-kibana-context-common",
+    "@kbn/control-group-renderer",
+    "@kbn/unified-tabs",
+    "@kbn/cps",
+    "@kbn/kql",
+    "@kbn/core-base-browser-mocks",
+    "@kbn/react-kibana-context-env",
+    "@kbn/scout",
+    "@kbn/cps-utils",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }

@@ -15,10 +15,12 @@ import { InstallStatus, type PackageInfo } from '../../../../../types';
 import {
   useAuthz,
   useGetPackageInstallStatus,
+  useGetRollbackAvailableCheck,
   useLicense,
   useRollbackPackage,
 } from '../../../../../hooks';
 import { useInstalledIntegrationsActions } from '../../installed_integrations/hooks/use_installed_integrations_actions';
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 interface RollbackButtonProps {
   packageInfo: PackageInfo & { installationInfo?: InstallationInfo };
@@ -27,16 +29,12 @@ interface RollbackButtonProps {
 export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonProps) {
   const canRollbackPackages = useAuthz().integrations.installPackages;
   const licenseService = useLicense();
+  const { isAvailable, reason } = useGetRollbackAvailableCheck(packageInfo.name);
   const hasPreviousVersion = !!packageInfo?.installationInfo?.previous_version;
   const isRollbackTTLExpired = !!packageInfo.installationInfo?.is_rollback_ttl_expired;
   const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
-  const isDisabled =
-    !canRollbackPackages ||
-    !hasPreviousVersion ||
-    isUploadedPackage ||
-    isCustomPackage ||
-    !licenseService.isEnterprise() ||
-    isRollbackTTLExpired;
+  const isRegistryPackage = packageInfo.installationInfo?.install_source === 'registry';
+
   const {
     actions: { bulkRollbackIntegrationsWithConfirmModal },
   } = useInstalledIntegrationsActions();
@@ -44,6 +42,22 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(packageInfo.name);
   const isRollingBack = installationStatus === InstallStatus.rollingBack;
+  const isReinstalling = installationStatus === InstallStatus.reinstalling;
+  const isUninstalling = installationStatus === InstallStatus.uninstalling;
+  const isInstalling = installationStatus === InstallStatus.installing;
+
+  const isDisabled =
+    !canRollbackPackages ||
+    !hasPreviousVersion ||
+    isUploadedPackage ||
+    !isRegistryPackage ||
+    isCustomPackage ||
+    !licenseService.isEnterprise() ||
+    isRollbackTTLExpired ||
+    !isAvailable ||
+    isReinstalling ||
+    isUninstalling ||
+    isInstalling;
 
   const openRollbackModal = useCallback(async () => {
     await rollbackPackage(packageInfo, bulkRollbackIntegrationsWithConfirmModal);
@@ -62,7 +76,7 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
         id="xpack.fleet.integrations.rollbackPackage.rollbackPackageButtonLabel"
         defaultMessage="Rollback {title}"
         values={{
-          title: packageInfo.title,
+          title: wrapTitleWithDeprecated({ packageInfo }),
         }}
       />
     </EuiButton>
@@ -93,6 +107,11 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
                 id="xpack.fleet.integrations.rollbackPackage.customTooltip"
                 defaultMessage="Custom integrations cannot be rolled back."
               />
+            ) : !isRegistryPackage ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.registryTooltip"
+                defaultMessage="This integration was not installed from the registry and cannot be rolled back."
+              />
             ) : !licenseService.isEnterprise() ? (
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.licenseTooltip"
@@ -103,6 +122,8 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
                 id="xpack.fleet.integrations.rollbackPackage.rollbackTTLExpiredTooltip"
                 defaultMessage="You can no longer roll back this integration."
               />
+            ) : !isAvailable && reason ? (
+              reason
             ) : null
           }
         >

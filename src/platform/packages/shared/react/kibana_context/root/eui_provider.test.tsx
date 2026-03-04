@@ -117,6 +117,12 @@ describe('KibanaEuiProvider', () => {
           EuiFlyout: {
             includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
           },
+          EuiPopover: {
+            repositionOnScroll: true,
+          },
+          EuiToolTip: {
+            repositionOnScroll: true,
+          },
         },
       }),
       expect.anything()

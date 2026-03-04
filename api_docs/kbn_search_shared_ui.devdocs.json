@@ -14,6 +14,8 @@
           "({ name, serviceType, iconPath, showTooltip, }: ConnectorIconProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "ConnectorIconProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+            "lineNumber": 18,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -47,6 +51,8 @@
           "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, maxWidth, minWidth, }: FormInfoFieldProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,80 +67,8 @@
               "FormInfoFieldProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.iconPlayground",
-        "type": "Function",
-        "tags": [],
-        "label": "iconPlayground",
-        "description": [],
-        "signature": [
-          "({ size, ...rest }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/playground.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.iconPlayground.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ size = 'm', ...rest }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/playground.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.iconRobot",
-        "type": "Function",
-        "tags": [],
-        "label": "iconRobot",
-        "description": [],
-        "signature": [
-          "({ size, ...rest }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/robot.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.iconRobot.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ size = 'm', ...rest }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/robot.tsx",
+            "lineNumber": 34,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +88,8 @@
           "({ actions, backButton, body, description, icon, isComingSoon, comingSoonLabel, title, }: SearchEmptyPromptProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,6 +104,8 @@
               "SearchEmptyPromptProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+            "lineNumber": 35,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -191,6 +129,8 @@
           "\"search_elastic_llm_cost_info_skip\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -206,6 +146,8 @@
           "\"https://your_deployment_url\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,6 +163,8 @@
           "\"gettingStartedVisited\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -236,21 +180,8 @@
           "\"search_onboarding_global_empty_state_skip\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.SEARCH_GETTING_STARTED_FEATURE_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_GETTING_STARTED_FEATURE_FLAG",
-        "description": [],
-        "signature": [
-          "\"searchSolution.gettingStartedEnabled\""
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -266,6 +197,8 @@
           "\"search_onboarding_workflow\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -278,9 +211,11 @@
         "label": "WorkflowId",
         "description": [],
         "signature": [
-          "\"default\" | \"vector\" | \"semantic\""
+          "\"semantic\" | \"default\" | \"vector\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

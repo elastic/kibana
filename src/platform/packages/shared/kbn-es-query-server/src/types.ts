@@ -15,7 +15,6 @@ import type {
   relativeTimeRangeSchema,
 } from './time_range';
 import type { aggregateQuerySchema, querySchema } from './query';
-import type { filterSchema, filterMetaSchema } from './filter';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
 export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
@@ -23,6 +22,3 @@ export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
 
 export type Query = Writable<TypeOf<typeof querySchema>>;
 export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
-
-export type Filter = Writable<TypeOf<typeof filterSchema>>;
-export type FilterMeta = Writable<TypeOf<typeof filterMetaSchema>>;

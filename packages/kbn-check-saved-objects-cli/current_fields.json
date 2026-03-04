@@ -22,6 +22,7 @@
     "actions.actionRef",
     "actions.actionTypeId",
     "actions.group",
+    "actions.params",
     "alertTypeId",
     "artifacts",
     "artifacts.investigation_guide",
@@ -85,15 +86,22 @@
     "snoozeSchedule.skipRecurrences",
     "tags",
     "throttle",
+    "uiamApiKey",
     "updatedAt",
     "updatedBy"
   ],
   "alerting_rule_template": [
+    "description",
     "name",
     "ruleTypeId",
     "tags"
   ],
   "api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
+  "api_key_to_invalidate": [
     "apiKeyId",
     "createdAt"
   ],
@@ -260,6 +268,12 @@
     "type"
   ],
   "cloud": [],
+  "cloud-connect-api-key": [
+    "apiKey",
+    "clusterId",
+    "createdAt",
+    "updatedAt"
+  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -310,6 +324,13 @@
     "title",
     "version"
   ],
+  "data_connector": [
+    "kscIds",
+    "name",
+    "toolIds",
+    "type",
+    "workflowIds"
+  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
@@ -319,12 +340,7 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "metadata.created_at",
-    "metadata.sample_count",
-    "metadata.version",
-    "result",
-    "result.field_mapping",
-    "result.ingest_pipeline"
+    "result"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -342,8 +358,15 @@
     "error",
     "filter",
     "integrationName",
+    "integrations",
+    "integrations.syncData",
+    "integrations.syncData.lastFullSync",
+    "integrations.syncData.lastUpdateProcessed",
+    "integrations.syncMarkerIndex",
     "managed",
+    "managedVersion",
     "matchers",
+    "matchersModifiedByUser",
     "name",
     "type"
   ],
@@ -363,6 +386,30 @@
   ],
   "entity-discovery-api-key": [
     "apiKey"
+  ],
+  "entity-engine-descriptor-v2": [
+    "error",
+    "error.action",
+    "error.message",
+    "logExtractionState",
+    "logExtractionState.additionalIndexPattern",
+    "logExtractionState.additionalIndexPatterns",
+    "logExtractionState.delay",
+    "logExtractionState.docsLimit",
+    "logExtractionState.fieldHistoryLength",
+    "logExtractionState.filter",
+    "logExtractionState.frequency",
+    "logExtractionState.lastExecutionTimestamp",
+    "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationId",
+    "logExtractionState.paginationTimestamp",
+    "logExtractionState.timeout",
+    "status",
+    "type",
+    "versionState",
+    "versionState.isMigratedFromV1",
+    "versionState.state",
+    "versionState.version"
   ],
   "entity-engine-status": [
     "fieldHistoryLength",
@@ -537,6 +584,7 @@
     "download_source_id",
     "fleet_server_host_id",
     "global_data_tags",
+    "has_agent_version_conditions",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -559,6 +607,7 @@
     "updated_by"
   ],
   "fleet-cloud-connector": [
+    "accountType",
     "cloudProvider",
     "created_at",
     "name",
@@ -630,6 +679,13 @@
     "policy_id",
     "token_plain"
   ],
+  "gap_auto_fill_scheduler": [
+    "createdAt",
+    "enabled",
+    "name",
+    "ruleTypeConsumerPairs",
+    "updatedAt"
+  ],
   "graph-workspace": [
     "description",
     "kibanaSavedObjectMeta",
@@ -666,6 +722,7 @@
     "download_source_id",
     "fleet_server_host_id",
     "global_data_tags",
+    "has_agent_version_conditions",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -795,23 +852,24 @@
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
+    "download_source_auth_secret_storage_requirements_met",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
+    "ilm_migration_status",
+    "integration_knowledge_enabled",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met",
+    "ssl_secret_storage_requirements_met",
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
   "integration-config": [
     "created_by",
+    "created_by_profile_uid",
     "data_stream_count",
     "integration_id",
     "metadata",
-    "metadata.created_at",
-    "metadata.description",
-    "metadata.title",
-    "metadata.version",
     "status"
   ],
   "intercept_interaction_record": [],
@@ -864,6 +922,11 @@
     "title",
     "uiStateJSON",
     "version"
+  ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
@@ -962,7 +1025,8 @@
     "installation_status",
     "last_installation_date",
     "product_name",
-    "product_version"
+    "product_version",
+    "resource_type"
   ],
   "query": [
     "description",
@@ -994,7 +1058,8 @@
     "unInstallCount"
   ],
   "scheduled_report": [
-    "createdBy"
+    "createdBy",
+    "title"
   ],
   "search": [
     "description",
@@ -1005,6 +1070,7 @@
     "realmName",
     "realmType",
     "sessionId",
+    "status",
     "username"
   ],
   "search-telemetry": [],
@@ -1021,7 +1087,11 @@
     "provider"
   ],
   "security-rule": [
+    "name",
+    "risk_score",
     "rule_id",
+    "severity",
+    "tags",
     "version"
   ],
   "security-solution-signals-migration": [
@@ -1172,12 +1242,17 @@
     "version"
   ],
   "slo-settings": [],
+  "slo_template": [
+    "name",
+    "tags"
+  ],
   "space": [
     "disabledFeatures",
     "name",
     "solution"
   ],
   "spaces-usage-stats": [],
+  "stream-prompts": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
@@ -1262,6 +1337,10 @@
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
+  "trial-companion-nba-milestone": [
+    "dismiss",
+    "openTODOs"
+  ],
   "ui-metric": [
     "count"
   ],
@@ -1296,6 +1375,12 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "watchlist-config": [
+    "description",
+    "managed",
+    "name",
+    "riskModifier"
   ],
   "workplace_search_telemetry": []
 }

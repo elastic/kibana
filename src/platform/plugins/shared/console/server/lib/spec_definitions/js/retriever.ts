@@ -12,6 +12,31 @@ import { ChunkingSettings } from './shared';
 
 export const retriever = (specService: SpecDefinitionsService) => {
   specService.addGlobalAutocompleteRules('retriever', {
+    diversify: {
+      __template: {
+        type: '',
+        field: '',
+        retriever: {},
+      },
+      // only `mmr` is available at the moment. More to come in the future.
+      type: { __one_of: ['mmr'] },
+      field: '{field}',
+      retriever: {
+        __scope_link: '.',
+      },
+      // size is only applicable for 'mmr' diversify type
+      size: 10,
+      rank_window_size: 100,
+      query_vector: [],
+      query_vector_builder: {
+        text_embedding: {
+          model_id: '',
+          model_text: '',
+        },
+      },
+      // lambda is only applicable for 'mmr' diversify type
+      lambda: 0.5,
+    },
     knn: {
       __template: {
         field: '',

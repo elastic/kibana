@@ -147,7 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"expected\": \"'Azure OpenAI'\",\n            \"received\": \"undefined\",\n            \"code\": \"invalid_type\",\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"expected\": \"'OpenAI'\",\n            \"received\": \"undefined\",\n            \"code\": \"invalid_type\",\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"expected\": \"'Other'\",\n            \"received\": \"undefined\",\n            \"code\": \"invalid_type\",\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"defaultModel\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [],\n    \"message\": \"Invalid input\"\n  }\n]`,
+              message: `error validating connector type config: 2 errors:\n [1]: Field \"apiProvider\": Required, Required, Required;\n [2]: Field \"defaultModel\": Required`,
             });
           });
       });
@@ -167,7 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"received\": \"OpenAI\",\n            \"code\": \"invalid_enum_value\",\n            \"options\": [\n              \"Azure OpenAI\"\n            ],\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Invalid enum value. Expected 'Azure OpenAI', received 'OpenAI'\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"apiUrl\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"apiUrl\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"received\": \"OpenAI\",\n            \"code\": \"invalid_enum_value\",\n            \"options\": [\n              \"Other\"\n            ],\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Invalid enum value. Expected 'Other', received 'OpenAI'\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"apiUrl\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"defaultModel\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [],\n    \"message\": \"Invalid input\"\n  }\n]`,
+              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiProvider\": Invalid enum value. Expected 'Azure OpenAI', received 'OpenAI', Invalid enum value. Expected 'Other', received 'OpenAI';\n [2]: Field \"apiUrl\": Required, Required, Required;\n [3]: Field \"defaultModel\": Required`,
             });
           });
       });
@@ -191,7 +191,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -211,7 +211,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+                'error validating connector type secrets: [apiKey]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -236,7 +236,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Certificate data must be provided for PKI',
+                'error validating connector type secrets: Certificate data must be provided for PKI',
             });
           });
       });
@@ -261,7 +261,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Private key data must be provided for PKI',
+                'error validating connector type secrets: Private key data must be provided for PKI',
             });
           });
       });
@@ -286,7 +286,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
+                'error validating connector type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
             });
           });
       });
@@ -311,7 +311,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
+                'error validating connector type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
             });
           });
       });
@@ -383,6 +383,47 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         expect(body.status).to.equal('ok');
         expect(body.connector_id).to.equal(createdAction.id);
       });
+
+      it('should return 200 when creating an Azure connector with defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+              defaultModel: 'gpt-4o',
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config.defaultModel).to.equal('gpt-4o');
+      });
+
+      it('should return 200 when creating an Azure connector without defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config).to.not.have.property('defaultModel');
+      });
     });
 
     describe('executor', () => {
@@ -415,7 +456,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: genAiActionId,
-            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+            message: `error validating action params: Field \"subAction\": Required`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -646,7 +687,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: genAiActionId,
-              message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating action params: Field \"subAction\": Required`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

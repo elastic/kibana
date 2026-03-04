@@ -12,9 +12,12 @@ import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('../performance/query_performance_tracking', () => {
   return {
-    startQueryPerformanceTracking: () => {},
+    startQueryPerformanceTracking: jest.fn(),
   };
 });
+
+import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -57,6 +60,12 @@ describe('loadDashboardApi', () => {
         query: lastSavedQuery,
       }),
     });
+
+    window.performance.getEntriesByName = jest.fn().mockReturnValue([
+      {
+        startTime: 12345,
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -108,6 +117,26 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
         query: queryFromUrl,
+      });
+    });
+  });
+
+  describe('performance monitoring', () => {
+    test('should start performance tracking on load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+
+      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
+        DASHBOARD_DURATION_START_MARK,
+        'mark'
+      );
+      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+        firstLoad: true,
+        creationStartTime: 12345,
       });
     });
   });

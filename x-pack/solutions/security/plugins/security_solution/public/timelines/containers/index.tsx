@@ -25,7 +25,6 @@ import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
-import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
@@ -46,6 +45,7 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
+import { DETECTIONS_TABLE_IDS } from '../../detections/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -106,6 +106,7 @@ export interface UseTimelineEventsProps {
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
   fetchNotes?: boolean;
+  dateRangeField?: string;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -159,6 +160,7 @@ export const useTimelineEventsHandler = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  dateRangeField,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs, TimelineEventsSearchHandler] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
@@ -176,7 +178,7 @@ export const useTimelineEventsHandler = ({
   const { startTracking } = useTrackHttpRequest();
 
   const clearSignalsState = useCallback(() => {
-    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
+    if (id != null && DETECTIONS_TABLE_IDS.some((timelineId) => timelineId === id)) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }
@@ -395,6 +397,7 @@ export const useTimelineEventsHandler = ({
           timerange: prevRequest?.timerange ?? {},
           runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
           ...deStructureEqlOptions(prevEqlRequest),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const timerange =
@@ -462,6 +465,7 @@ export const useTimelineEventsHandler = ({
           sort,
           ...timerange,
           ...(eqlOptions ? eqlOptions : {}),
+          ...(dateRangeField ? { dateRangeField } : {}),
         } as const;
 
         if (activeBatch !== newActiveBatch) {
@@ -490,6 +494,7 @@ export const useTimelineEventsHandler = ({
     sort,
     fields,
     runtimeMappings,
+    dateRangeField,
   ]);
 
   /*
@@ -543,6 +548,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  dateRangeField,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
   const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>(defaultEvents);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
@@ -560,6 +566,7 @@ export const useTimelineEvents = ({
     sort,
     skip,
     timerangeKind,
+    dateRangeField,
   });
 
   useEffect(() => {

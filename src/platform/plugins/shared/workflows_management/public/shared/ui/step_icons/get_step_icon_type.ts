@@ -9,36 +9,41 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-export const getStepIconType = (stepType: string) => {
+export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
+  switch (triggerType) {
+    case 'trigger_manual':
+      return 'play';
+    case 'trigger_alert':
+      return 'warning';
+    case 'trigger_document':
+      return 'document';
+    case 'trigger_scheduled':
+      return 'clock';
+    default:
+      return 'info';
+  }
+};
+
+export const getStepIconType = (nodeType: string): EuiIconType => {
   let iconType: EuiIconType = 'info';
-  switch (stepType) {
+
+  switch (nodeType) {
+    // built-in node types
     case 'http':
       iconType = 'globe';
       break;
     case 'console':
       iconType = 'console';
       break;
-    case 'email':
-      iconType = 'email';
+    case 'data.set':
+      iconType = 'tableOfContents';
       break;
-    case 'slack':
-    case 'slack_api':
-      iconType = 'logoSlack';
+    case 'workflow.execute':
+    case 'workflow.executeAsync':
+      iconType = 'link';
       break;
-    case 'inference':
-    case 'inference.completion':
-    case 'inference.unified_completion':
-      iconType = 'sparkles';
-      break;
-    case 'manual':
-      iconType = 'accessibility';
-      break;
-    case 'alert':
-      iconType = 'warning';
-      break;
-    case 'scheduled':
-      iconType = 'clock';
-      break;
+
+    // flow control nodes
     case 'wait':
       iconType = 'clock';
       break;
@@ -49,6 +54,9 @@ export const getStepIconType = (stepType: string) => {
     case 'if':
       iconType = 'branch';
       break;
+    case 'if-branch':
+      iconType = 'tokenBoolean';
+      break;
     case 'enter-foreach':
     case 'foreach':
       iconType = 'refresh';
@@ -56,11 +64,30 @@ export const getStepIconType = (stepType: string) => {
     case 'foreach-iteration':
       iconType = 'tokenNumber';
       break;
-    case 'if-branch':
-      iconType = 'tokenBoolean';
+
+    // connectors which use EUI icons
+    case 'email':
+      iconType = 'email';
       break;
+    case 'slack':
+    case 'slack_api':
+      iconType = 'logoSlack';
+      break;
+    case 'inference':
+      iconType = 'sparkles';
+      break;
+
+    // other connectors
+    // will be handled by in getStackConnectorIcon
+
     default:
-      iconType = 'document';
+      if (nodeType.startsWith('elasticsearch')) {
+        iconType = 'logoElasticsearch';
+      } else if (nodeType.startsWith('kibana')) {
+        iconType = 'logoKibana';
+      } else {
+        iconType = 'plugs';
+      }
       break;
   }
   return iconType;

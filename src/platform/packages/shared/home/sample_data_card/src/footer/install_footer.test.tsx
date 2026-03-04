@@ -17,6 +17,12 @@ import type { Services } from '../services';
 import { SampleDataCardProvider } from '../services';
 import { getMockServices } from '../mocks';
 
+// Mock the polling functions to resolve immediately in tests
+jest.mock('../hooks/poll_sample_data_status', () => ({
+  pollForInstallation: jest.fn(async () => Promise.resolve()),
+  pollForRemoval: jest.fn(async () => Promise.resolve()),
+}));
+
 describe('install footer', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -64,10 +70,11 @@ describe('install footer', () => {
   });
 
   test('should not invoke onInstall when install button is clicked and an error is thrown', async () => {
+    const installSampleDataSet = jest.fn(async () => {
+      throw new Error('error');
+    });
     const component = mount(<InstallFooter {...props} />, {
-      installSampleDataSet: () => {
-        throw new Error('error');
-      },
+      installSampleDataSet,
     });
 
     await act(async () => {

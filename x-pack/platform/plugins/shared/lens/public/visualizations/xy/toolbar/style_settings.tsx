@@ -11,7 +11,6 @@ import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ScaleType } from '@elastic/charts';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type {
   AxesSettingsConfig,
@@ -23,9 +22,9 @@ import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
-import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
-import { XyTitlesAndTextSettings } from './titles_and_text_popover';
-import { XyAxisSettings, popoverConfig } from './axis_settings';
+import { XyAppearanceSettings, getValueLabelDisableReason } from './appearance_settings';
+import { XyTitlesAndTextSettings } from './titles_and_text_settings';
+import { XyAxisSettings, axisConfig } from './axis_settings';
 import type { AxisGroupConfiguration } from '../axes_configuration';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { getDataLayers } from '../visualization_helpers';
@@ -282,10 +281,12 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
-    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+    filteredBarLayers.some(
+      (layer) => layer.accessors.length > 1 || (layer.splitAccessors ?? []).length > 0
+    );
 
   const isTimeHistogramModeEnabled = dataLayers.some(
-    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+    ({ xAccessor, layerId, seriesType, splitAccessors }) => {
       if (!xAccessor) {
         return false;
       }
@@ -294,7 +295,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
       return (
         getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
         xAccessorOp?.isBucketed &&
-        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') || (splitAccessors ?? []).length === 0) &&
         (seriesType.includes('stacked') ||
           !seriesType.includes('bar') ||
           !chartHasMoreThanOneBarSeries)
@@ -329,7 +330,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
         initialIsOpen
         isDisabled={isAppearanceSettingDisabled}
       >
-        <XyAppearanceSettings datasourceLayers={frame.datasourceLayers} {...props} />
+        <XyAppearanceSettings {...props} />
       </EuiAccordion>
       <EuiHorizontalRule margin="m" />
       {/* Titles and text. Note: Hidden when Area and Line visualizations are selected */}
@@ -343,7 +344,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
             paddingSize="s"
             initialIsOpen
           >
-            <XyTitlesAndTextSettings datasourceLayers={props.frame.datasourceLayers} {...props} />
+            <XyTitlesAndTextSettings {...props} />
           </EuiAccordion>
           <EuiHorizontalRule margin="m" />
         </>
@@ -366,7 +367,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
               Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
             }
           >
-            <p>{popoverConfig('yLeft', isHorizontal).popoverTitle}</p>
+            <p>{axisConfig('yLeft', isHorizontal).popoverTitle}</p>
           </TooltipWrapper>
         }
         paddingSize="s"
@@ -403,7 +404,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
       <EuiAccordion
         id="x-axis"
         data-test-subj="x-axis"
-        buttonContent={popoverConfig('x', isHorizontal).popoverTitle}
+        buttonContent={axisConfig('x', isHorizontal).popoverTitle}
         paddingSize="s"
         initialIsOpen
       >
@@ -450,7 +451,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
               Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length === 0
             }
           >
-            <p>{popoverConfig('yRight', isHorizontal).popoverTitle}</p>
+            <p>{axisConfig('yRight', isHorizontal).popoverTitle}</p>
           </TooltipWrapper>
         }
         paddingSize="s"

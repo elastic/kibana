@@ -40,6 +40,12 @@ export const MaxPeriodFilterExistsTypeRT = rt.type({
   period: BasicMetricValueRT,
 });
 
+// Filter aggregation that wraps another aggregation (e.g., filter + top_metrics)
+export const FilterWithNestedAggRT = rt.intersection([
+  rt.type({ doc_count: rt.number }),
+  rt.record(rt.string, rt.unknown),
+]);
+
 export const MetricValueTypeRT = rt.union([
   BasicMetricValueRT,
   NormalizedMetricValueRT,

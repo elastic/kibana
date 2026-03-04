@@ -98,6 +98,7 @@ PaletteArgInput.propTypes = {
   argId: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   renderError: PropTypes.func,
 };
 

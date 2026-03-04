@@ -45,6 +45,7 @@ export {
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -104,3 +105,19 @@ export {
 } from './check_fleet_server_versions';
 
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+
+export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
+
+// Generic var_group helpers
+export type { VarGroupSelection } from './var_group_helpers';
+export {
+  getSelectedOption,
+  getVisibleVarsForOption,
+  getVarsControlledByVarGroups,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isVarInSelectedVarGroupOption,
+} from './var_group_helpers';
+
+// Cloud Connector accessor module
+export * from './cloud_connectors';

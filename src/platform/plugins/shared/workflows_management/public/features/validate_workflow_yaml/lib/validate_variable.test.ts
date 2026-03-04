@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Mock the imports
 jest.mock('../../../../common/lib/parse_variable_path');
@@ -16,13 +16,16 @@ jest.mock('../../workflow_context/lib/get_foreach_state_schema');
 
 import { validateVariable } from './validate_variable';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod';
+import { getSchemaAtPath } from '../../../../common/lib/zod';
+import {
+  InvalidForeachParameterError,
+  InvalidForeachParameterErrorCodes,
+} from '../../workflow_context/lib/errors';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
 import type { VariableItem } from '../model/types';
 
 const mockParseVariablePath = parseVariablePath as jest.MockedFunction<typeof parseVariablePath>;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
-const mockGetZodTypeName = getZodTypeName as jest.MockedFunction<typeof getZodTypeName>;
 const mockGetForeachItemSchema = getForeachItemSchema as jest.MockedFunction<
   typeof getForeachItemSchema
 >;
@@ -83,39 +86,21 @@ describe('validateVariable', () => {
       type: 'foreach',
     });
     mockParseVariablePath.mockReturnValue({
-      errors: ['Invalid JSON'],
-      propertyPath: null,
-    } as any);
-    mockGetForeachItemSchema.mockReturnValue(z.array(z.number()));
-
-    const result = validateVariable(variableItem, mockContext);
-
-    expect(result).toMatchObject({
-      message: null,
-      severity: null,
-      owner: 'variable-validation',
-      hoverMessage: expect.stringContaining('(property)'),
-    });
-  });
-
-  it('should handle foreach variables with parse errors that throw', () => {
-    const variableItem = createVariableItem({
-      key: 'invalid json',
-      type: 'foreach',
-    });
-    mockParseVariablePath.mockReturnValue({
-      errors: ['Invalid JSON'],
+      errors: ['Invalid property path'],
       propertyPath: null,
     } as any);
     mockGetForeachItemSchema.mockImplementation(() => {
-      throw new Error('Invalid JSON');
+      throw new InvalidForeachParameterError(
+        'Unable to parse foreach parameter as JSON',
+        InvalidForeachParameterErrorCodes.INVALID_JSON
+      );
     });
 
     const result = validateVariable(variableItem, mockContext);
 
     expect(result).toMatchObject({
-      message: 'Foreach parameter can be an array or a JSON string. invalid json is not valid JSON',
-      severity: 'error',
+      message: 'Unable to parse foreach parameter as JSON',
+      severity: 'warning',
       owner: 'variable-validation',
       hoverMessage: null,
     });
@@ -178,7 +163,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'nonexistent.variable',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(null);
+    mockGetSchemaAtPath.mockReturnValue({ schema: null, scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -199,14 +184,13 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'stringVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.string());
-    mockGetZodTypeName.mockReturnValue('string');
-
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: null });
+    mockGetForeachItemSchema.mockReturnValue(
+      z.unknown().describe('Unable to determine foreach item type')
+    );
     const result = validateVariable(variableItem, mockContext);
-
     expect(result).toMatchObject({
-      message:
-        'Foreach parameter should be an array or a JSON string. stringVar is unknown string, engine will try to parse it as JSON in runtime, but it might fail',
+      message: 'Unable to determine foreach item type',
       severity: 'warning',
       owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
@@ -221,8 +205,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'externalVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(schema);
-    mockGetZodTypeName.mockReturnValue('any');
+    mockGetSchemaAtPath.mockReturnValue({ schema, scopedToPath: 'externalVar' });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -240,8 +223,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'unknownVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.unknown());
-    mockGetZodTypeName.mockReturnValue('unknown');
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.unknown(), scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -259,8 +241,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'test.variable',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.string());
-    mockGetZodTypeName.mockReturnValue('string');
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'test.variable' });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -278,8 +259,10 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'response.data.items[0].name',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.string());
-    mockGetZodTypeName.mockReturnValue('string');
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.string(),
+      scopedToPath: 'response.data.items[0].name',
+    });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -301,8 +284,11 @@ describe('validateVariable', () => {
       propertyPath: 'inputs.days_to_plan',
     } as any);
     // Mock the schema as an array with default value (ZodDefault wrapper)
-    mockGetSchemaAtPath.mockReturnValue(z.array(z.string()).default(['monday', 'tuesday']));
-    mockGetZodTypeName.mockReturnValue('array');
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.array(z.string()).default(['monday', 'tuesday']),
+      scopedToPath: 'inputs.days_to_plan',
+    });
+    mockGetForeachItemSchema.mockReturnValue(z.string());
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -324,8 +310,10 @@ describe('validateVariable', () => {
       propertyPath: 'inputs.items',
     } as any);
     // Mock the schema as a plain array without default
-    mockGetSchemaAtPath.mockReturnValue(z.array(z.string()));
-    mockGetZodTypeName.mockReturnValue('array');
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.array(z.string()),
+      scopedToPath: 'inputs.items',
+    });
 
     const result = validateVariable(variableItem, mockContext);
 

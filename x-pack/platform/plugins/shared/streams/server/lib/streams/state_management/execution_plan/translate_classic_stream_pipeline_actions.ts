@@ -112,7 +112,6 @@ async function createStreamsManagedPipeline({
   });
 
   // Remove properties from the GET response that cannot be in the PUT request
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_date_millis, modified_date_millis, ...safeTemplate } =
     indexTemplate.index_template as IndicesIndexTemplate & {
       created_date_millis: number;
@@ -166,18 +165,18 @@ async function updateExistingStreamsManagedPipeline({
 }) {
   let processors = pipeline.processors ?? [];
   const existingPipelineProcessors = processors
-    .filter((processor) => processor.pipeline !== undefined)
-    .map((processor) => processor.pipeline?.name);
+    .filter((processor) => processor?.pipeline !== undefined)
+    .map((processor) => processor!.pipeline!.name);
 
   for (const action of actions) {
     if (action.type === 'append_processor_to_ingest_pipeline') {
-      if (!existingPipelineProcessors.includes(action.processor.pipeline?.name)) {
+      if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
       }
     } else {
       processors = processors.filter(
         (processor) =>
-          processor.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
+          processor?.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -216,18 +215,18 @@ async function updateExistingUserManagedPipeline({
 
   let processors = targetPipeline?.processors ?? [];
   const existingPipelineProcessors = processors
-    .filter((processor) => processor.pipeline !== undefined)
-    .map((processor) => processor.pipeline?.name);
+    .filter((processor) => processor?.pipeline !== undefined)
+    .map((processor) => processor!.pipeline!.name);
 
   for (const action of actions) {
     if (action.type === 'append_processor_to_ingest_pipeline') {
-      if (!existingPipelineProcessors.includes(action.processor.pipeline?.name)) {
+      if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
       }
     } else {
       processors = processors.filter(
         (processor) =>
-          processor.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
+          processor?.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -262,7 +261,7 @@ async function findPipelineToModify(
   }
 
   const streamProcessor = pipeline.processors?.find(
-    (processor) => processor.pipeline && processor.pipeline.name.includes('@stream.')
+    (processor) => processor?.pipeline && processor.pipeline.name.includes('@stream.')
   );
 
   if (streamProcessor) {
@@ -273,7 +272,7 @@ async function findPipelineToModify(
   }
 
   const customProcessor = pipeline.processors?.findLast(
-    (processor) => processor.pipeline && processor.pipeline.name.endsWith('@custom')
+    (processor) => processor?.pipeline && processor.pipeline.name.endsWith('@custom')
   );
 
   if (customProcessor) {

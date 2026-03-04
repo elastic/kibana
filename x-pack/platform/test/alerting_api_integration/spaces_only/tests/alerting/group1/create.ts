@@ -670,6 +670,41 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should allow multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
+        const multipleSystemAction = {
+          id: 'system-connector-test.system-action-allow-multiple',
+          params: {},
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [multipleSystemAction, multipleSystemAction],
+            })
+          );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.actions.length).to.eql(2);
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        const action1 = response.body.actions[0];
+        const action2 = response.body.actions[1];
+
+        expect(action1.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action1.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action1.uuid).to.not.be(undefined);
+
+        expect(action2.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action2.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action2.uuid).to.not.be(undefined);
+
+        // UUIDs should be different
+        expect(action1.uuid).to.not.eql(action2.uuid);
+      });
+
       describe('create rule flapping', () => {
         afterEach(async () => {
           await resetRulesSettings(supertest, 'space1');
@@ -682,6 +717,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 flapping: {
+                  enabled: false,
                   look_back_window: 5,
                   status_change_threshold: 5,
                 },
@@ -692,12 +728,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
           expect(response.body.flapping).to.eql({
+            enabled: false,
             look_back_window: 5,
             status_change_threshold: 5,
           });
         });
 
-        it('should throw if flapping is created when global flapping is off', async () => {
+        it('should not throw if flapping is created when global flapping is off', async () => {
           await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -713,16 +750,21 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 flapping: {
+                  enabled: true,
                   look_back_window: 5,
                   status_change_threshold: 5,
                 },
               })
             );
 
-          expect(response.statusCode).eql(400);
-          expect(response.body.message).eql(
-            'Error creating rule: can not create rule with flapping if global flapping is disabled'
-          );
+          expect(response.status).to.eql(200);
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body.flapping).to.eql({
+            enabled: true,
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
         });
 
         it('should throw if flapping is invalid', async () => {

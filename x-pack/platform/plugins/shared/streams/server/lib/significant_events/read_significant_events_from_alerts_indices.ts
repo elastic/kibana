@@ -5,41 +5,56 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
+import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { AssetClient } from '../streams/assets/asset_client';
-import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
+import type { QueryLink } from '../../../common/queries';
+import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
+import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { name: string; from: Date; to: Date; bucketSize: string },
+  params: {
+    streamNames?: string[];
+    from: Date;
+    to: Date;
+    bucketSize: string;
+    query?: string;
+    filters?: QueryLinkFilters;
+  },
   dependencies: {
-    assetClient: AssetClient;
+    queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { assetClient, scopedClusterClient } = dependencies;
-  const { name, from, to, bucketSize } = params;
+  const { queryClient, scopedClusterClient } = dependencies;
+  const { streamNames = [], from, to, bucketSize, query, filters } = params;
 
-  const { [name]: queryLinks } = await assetClient.getAssetLinks([name], ['query']);
+  const queryLinks = query
+    ? await queryClient.findQueries(streamNames, query, filters)
+    : await queryClient.getQueryLinks(streamNames, filters);
+
   if (isEmpty(queryLinks)) {
-    return [];
+    return { significant_events: [], aggregated_occurrences: [] };
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
+  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => queryLink.rule_id);
   const ruleIds = Object.keys(queryLinkByRuleId);
 
   const response = await scopedClusterClient.asCurrentUser
     .search<
       unknown,
       {
+        aggregated_occurrences: AggregationsMultiBucketAggregateBase<{
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+        }>;
         by_rule: AggregationsTermsAggregateBase<{
           key: string;
           doc_count: number;
@@ -77,6 +92,16 @@ export async function readSignificantEventsFromAlertsIndices(
         },
       },
       aggs: {
+        aggregated_occurrences: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: bucketSize,
+            extended_bounds: {
+              min: from.toISOString(),
+              max: to.toISOString(),
+            },
+          },
+        },
         by_rule: {
           terms: {
             field: 'kibana.alert.rule.uuid',
@@ -94,7 +119,6 @@ export async function readSignificantEventsFromAlertsIndices(
               },
             },
             change_points: {
-              // @ts-expect-error
               change_point: {
                 buckets_path: 'occurrences>_count',
               },
@@ -104,10 +128,10 @@ export async function readSignificantEventsFromAlertsIndices(
       },
     })
     .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      const { type, message } = parseError(err);
+      if (type === 'security_exception') {
         throw new SecurityError(
-          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          `Cannot read significant events, insufficient privileges: ${message}`,
           { cause: err }
         );
       }
@@ -115,19 +139,26 @@ export async function readSignificantEventsFromAlertsIndices(
     });
 
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
-    return queryLinks.map((queryLink) => ({
-      id: queryLink.query.id,
-      title: queryLink.query.title,
-      kql: queryLink.query.kql,
-      feature: queryLink.query.feature,
-      occurrences: [],
-      change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
+    return {
+      significant_events: queryLinks.map((queryLink) => ({
+        ...toStreamQuery(queryLink),
+        stream_name: queryLink.stream_name,
+        occurrences: [],
+        change_points: {
+          type: {
+            stationary: { p_value: 0, change_point: 0 },
+          },
         },
-      },
-    }));
+        rule_backed: queryLink.rule_backed,
+      })),
+      aggregated_occurrences: [],
+    };
   }
+
+  const aggregatedBuckets = response.aggregations.aggregated_occurrences.buckets;
+  const aggregatedOccurrences = isArray(aggregatedBuckets)
+    ? aggregatedBuckets.map((bucket) => ({ date: bucket.key_as_string, count: bucket.doc_count }))
+    : [];
 
   const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
     const ruleId = bucket.key;
@@ -136,16 +167,15 @@ export async function readSignificantEventsFromAlertsIndices(
     const changePoints = get(bucket, 'change_points') ?? {};
 
     return {
-      id: queryLink.query.id,
-      title: queryLink.query.title,
-      kql: queryLink.query.kql,
-      feature: queryLink.query.feature,
+      ...toStreamQuery(queryLink),
+      stream_name: queryLink.stream_name,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
             count: occurrence.doc_count,
           }))
         : [],
+      rule_backed: queryLink.rule_backed,
       change_points: changePoints,
     };
   });
@@ -154,17 +184,21 @@ export async function readSignificantEventsFromAlertsIndices(
   const notFoundSignificantEvents = queryLinks
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
-      id: queryLink.query.id,
-      title: queryLink.query.title,
-      kql: queryLink.query.kql,
-      feature: queryLink.query.feature,
+      ...toStreamQuery(queryLink),
+      stream_name: queryLink.stream_name,
       occurrences: [],
       change_points: {
         type: {
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      rule_backed: queryLink.rule_backed,
     }));
 
-  return [...significantEvents, ...notFoundSignificantEvents];
+  return {
+    significant_events: [...significantEvents, ...notFoundSignificantEvents],
+    aggregated_occurrences: aggregatedOccurrences,
+  };
 }
+
+const toStreamQuery = (queryLink: QueryLink): StreamQuery => queryLink.query;

@@ -9,36 +9,42 @@ import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { Ingest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
-import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
+import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
+import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
+import { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import type { QueryAsset } from '../../../../common/assets';
+import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
-import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
 
 async function getAssets({
   name,
-  assetClient,
+  queryClient,
+  attachmentClient,
 }: {
   name: string;
-  assetClient: AssetClient;
+  queryClient: QueryClient;
+  attachmentClient: AttachmentClient;
 }): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
-  const assets = await assetClient.getAssets(name);
+  const [assets, attachments] = await Promise.all([
+    queryClient.getAssets(name),
+    attachmentClient.getAttachments(name),
+  ]);
 
-  const dashboards = assets
-    .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
-    .map((asset) => asset[ASSET_ID]);
+  const dashboards = attachments
+    .filter((attachment) => attachment.type === 'dashboard')
+    .map((attachment) => attachment.id);
 
   const queries = assets
-    .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
+    .filter((asset): asset is Query => asset[ASSET_TYPE] === 'query')
     .map((asset) => asset.query);
 
-  const rules = assets
-    .filter((asset) => asset[ASSET_TYPE] === 'rule')
-    .map((asset) => asset[ASSET_ID]);
+  const rules = attachments
+    .filter((attachment) => attachment.type === 'rule')
+    .map((attachment) => attachment.id);
 
   return {
     dashboards,
@@ -49,18 +55,21 @@ async function getAssets({
 
 async function updateWiredIngest({
   streamsClient,
-  assetClient,
+  queryClient,
+  attachmentClient,
   name,
   ingest,
 }: {
   streamsClient: StreamsClient;
-  assetClient: AssetClient;
+  queryClient: QueryClient;
+  attachmentClient: AttachmentClient;
   name: string;
-  ingest: WiredIngest;
+  ingest: WiredIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
-    assetClient,
+    queryClient,
+    attachmentClient,
   });
 
   const definition = await streamsClient.getStream(name);
@@ -69,7 +78,7 @@ async function updateWiredIngest({
     throw badData(`Can't update wired capabilities of a non-wired stream`);
   }
 
-  const { name: _name, ...stream } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
     dashboards,
@@ -89,18 +98,21 @@ async function updateWiredIngest({
 
 async function updateClassicIngest({
   streamsClient,
-  assetClient,
+  queryClient,
+  attachmentClient,
   name,
   ingest,
 }: {
   streamsClient: StreamsClient;
-  assetClient: AssetClient;
+  queryClient: QueryClient;
+  attachmentClient: AttachmentClient;
   name: string;
-  ingest: ClassicIngest;
+  ingest: ClassicIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
-    assetClient,
+    queryClient,
+    attachmentClient,
   });
 
   const definition = await streamsClient.getStream(name);
@@ -109,7 +121,7 @@ async function updateClassicIngest({
     throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
-  const { name: _name, ...stream } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,
@@ -186,11 +198,11 @@ const upsertIngestRoute = createServerRoute({
       name: z.string(),
     }),
     body: z.object({
-      ingest: Ingest.right,
+      ingest: IngestUpsertRequest.right,
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, assetClient } = await getScopedClients({
+    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -203,11 +215,23 @@ const upsertIngestRoute = createServerRoute({
       throw badData(`_ingest is only supported on Wired and Classic streams`);
     }
 
-    if (WiredIngest.is(ingest)) {
-      return await updateWiredIngest({ streamsClient, assetClient, name, ingest });
+    if (WiredIngestUpsertRequest.is(ingest)) {
+      return await updateWiredIngest({
+        streamsClient,
+        queryClient,
+        attachmentClient,
+        name,
+        ingest,
+      });
     }
 
-    return await updateClassicIngest({ streamsClient, assetClient, name, ingest });
+    return await updateClassicIngest({
+      streamsClient,
+      queryClient,
+      attachmentClient,
+      name,
+      ingest,
+    });
   },
 });
 

@@ -15,6 +15,7 @@ import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { PdfExportType } from '.';
@@ -72,6 +73,7 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: screenshottingMock,
+    licensing: licensingMock.createStart(),
   });
 
   getScreenshotsSpy.mockImplementation((opts) => {

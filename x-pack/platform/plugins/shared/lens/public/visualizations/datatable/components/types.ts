@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
-import type { Datatable, DatatableColumnMeta, RenderMode } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type { ILensInterpreterRenderHandlers, LensCellValueAction } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableProps } from '../../../../common/expressions';
@@ -17,7 +17,6 @@ export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   dispatchEvent: ILensInterpreterRenderHandlers['event'];
   getType: (meta?: DatatableColumnMeta) => IAggType | undefined;
-  renderMode: RenderMode;
   paletteService: PaletteRegistry;
   theme: CoreSetup['theme'];
   interactive: boolean;
@@ -25,7 +24,7 @@ export type DatatableRenderProps = DatatableProps & {
 
   /**
    * A boolean for each table row, which is true if the row active
-   * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
+   * ON_CLICK_ROW actions attached to it, otherwise false.
    */
   rowHasRowClickTriggerActions?: boolean[];
   /**
