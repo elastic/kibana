@@ -17,7 +17,7 @@ import {
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import type { ConnectorSpec } from '../../connector_spec';
+import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
@@ -81,10 +81,9 @@ export const AmazonS3: ConnectorSpec = {
           defaultMessage: 'Your AWS Access Key ID',
         }),
       }),
-    secretAccessKey: z
-      .string()
-      .min(1)
+    secretAccessKey: UISchemas.secret()
       .describe('AWS Secret Access Key')
+      .min(1)
       .meta({
         sensitive: true,
         widget: 'password',
