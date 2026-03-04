@@ -85,7 +85,8 @@ Add **defensive cleanup in `beforeAll`** to handle leftover data from a previous
 
 ```typescript
 // Correct
-import { spaceTest, tags, expect } from '@kbn/scout-security/ui';
+import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 // Wrong — bypasses Security Solution fixtures
 import { spaceTest, tags, expect } from '@kbn/scout/ui';
