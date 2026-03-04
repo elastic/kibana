@@ -34,6 +34,9 @@ dependsOn:
   - '@kbn/object-versioning-utils'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/react-query'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

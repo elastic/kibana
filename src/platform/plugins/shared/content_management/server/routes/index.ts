@@ -7,12 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  registerFavorites,
-  type GetFavoritesResponse,
-  type FavoritesSetup,
-  type AddFavoriteResponse,
-  type RemoveFavoriteResponse,
-  getFavoritesForTypes,
-  favoritesSavedObjectName,
-} from './src';
+export { registerListRoute } from './list';
