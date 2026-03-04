@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Parser, BasicPrettyPrinter, isProperNode } from '@kbn/esql-language';
-import type { ESQLAstItem, ESQLForkParens, ESQLSingleAstItem } from '@kbn/esql-language';
+import { Parser, BasicPrettyPrinter, isProperNode } from '@elastic/esql';
+import type { ESQLAstItem, ESQLForkParens, ESQLSingleAstItem } from '@elastic/esql/types';
 
 export interface SplitQueryResult {
   /** The query without the last WHERE clause */
