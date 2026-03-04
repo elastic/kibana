@@ -9,14 +9,10 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
+import type { TransportRequestMetadata } from '@elastic/elasticsearch';
 import type { OnRequestHandler } from '../create_transport';
 
-/**
- * APIs that use NDJSON (newline-delimited JSON) bodies. For these, `project_routing` must be
- * passed as a query parameter rather than in the body, since injecting into the body would
- * corrupt the NDJSON format and cause ES to return an `illegal_argument_exception`.
- */
-const NDJSON_APIS = new Set(['msearch', 'msearch_template']);
+type AcceptedParams = NonNullable<TransportRequestMetadata['acceptedParams']>;
 
 /** @internal */
 export function getCpsRequestHandler(
@@ -25,11 +21,11 @@ export function getCpsRequestHandler(
 ): OnRequestHandler {
   return (_ctx, params, _options) => {
     const body = isPlainObject(params.body) ? (params.body as Record<string, unknown>) : undefined;
-    const ndjsonApi = isNdjsonApi(params);
+    const { acceptedParams } = params.meta ?? {};
 
     if (cpsEnabled) {
-      if (shouldApplyProjectRouting(params.meta?.acceptedParams)) {
-        if (ndjsonApi) {
+      if (isProjectRoutingAccepted(acceptedParams)) {
+        if (isProjectRoutingInQuery(acceptedParams)) {
           injectProjectRoutingQueryString(projectRouting, params);
         } else {
           if (body?.pit) {
@@ -50,8 +46,34 @@ export function getCpsRequestHandler(
   };
 }
 
-function isNdjsonApi(params: Parameters<OnRequestHandler>[1]): boolean {
-  return NDJSON_APIS.has(params.meta?.name ?? '');
+/**
+ * Returns true if `project_routing` is an accepted parameter for this API, regardless of whether
+ * it goes in the query string or the body.
+ *
+ * Handles both the legacy flat-array form (produced by older client versions or raw
+ * `transport.request()` callers) and the current structured form introduced in elasticsearch-js
+ * v9.3.3, which differentiates between path, body, and query parameters.
+ */
+function isProjectRoutingAccepted(acceptedParams: AcceptedParams | undefined): boolean {
+  if (!acceptedParams) return false;
+  if (Array.isArray(acceptedParams)) return acceptedParams.includes('project_routing');
+  return (
+    acceptedParams.body.includes('project_routing') ||
+    acceptedParams.query.includes('project_routing')
+  );
+}
+
+/**
+ * Returns true when `project_routing` must be sent as a query parameter rather than in the
+ * request body. This applies to NDJSON-body APIs (e.g. `msearch`, `msearch_template`) where
+ * injecting into the body would corrupt the newline-delimited format.
+ *
+ * Relies on the structured `acceptedParams` introduced in elasticsearch-js v9.3.3. Falls back to
+ * body injection for flat-array `acceptedParams` (legacy or direct `transport.request()` callers).
+ */
+function isProjectRoutingInQuery(acceptedParams: AcceptedParams | undefined): boolean {
+  if (!acceptedParams || Array.isArray(acceptedParams)) return false;
+  return acceptedParams.query.includes('project_routing');
 }
 
 function stripProjectRoutingBody(body: Record<string, unknown> | undefined): void {
@@ -142,8 +164,4 @@ function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]):
       .join('\n');
   }
   // Buffer and ReadableStream: cannot safely parse or rewrite — skip.
-}
-
-function shouldApplyProjectRouting(acceptedParams: string[] | undefined): boolean {
-  return Boolean(acceptedParams?.includes('project_routing'));
 }
