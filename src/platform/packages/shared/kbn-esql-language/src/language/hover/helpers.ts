@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { Walker, within, type WalkerAstNode } from '../../ast';
-import type { PromQLFunction, PromQLLiteral, PromQLSelector } from '../../embedded_languages';
+import { Walker, within, type WalkerAstNode } from '@elastic/esql';
+import type { PromQLFunction, PromQLLiteral, PromQLSelector } from '@elastic/esql';
 import { getPromqlFunctionSignatureHover } from './get_function_signature_hover';
 
 export const getVariablesHoverContent = (

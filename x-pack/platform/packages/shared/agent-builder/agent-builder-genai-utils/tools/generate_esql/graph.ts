@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
@@ -55,14 +55,10 @@ export const createNlToEsqlGraph = ({
   model,
   esClient,
   docBase,
-  logger,
-  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
-  logger?: Logger;
-  events?: ToolEventEmitter;
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
