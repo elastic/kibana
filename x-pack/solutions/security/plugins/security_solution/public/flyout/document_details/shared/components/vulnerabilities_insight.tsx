@@ -24,7 +24,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/public';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';

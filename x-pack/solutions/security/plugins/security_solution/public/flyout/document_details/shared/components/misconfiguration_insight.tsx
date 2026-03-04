@@ -22,7 +22,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common/domain/euid/entity_filters';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/public';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';

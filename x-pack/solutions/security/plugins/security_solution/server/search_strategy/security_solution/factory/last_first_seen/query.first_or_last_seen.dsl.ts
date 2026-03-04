@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/public';
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';

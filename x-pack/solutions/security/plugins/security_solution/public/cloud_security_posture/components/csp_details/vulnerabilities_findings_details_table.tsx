@@ -9,7 +9,11 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  buildEntityFlyoutPreviewQueryWithStatus,
+  VULNERABILITY_QUERY_FIELD,
+} from '@kbn/cloud-security-posture-common';
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
   VulnerabilitiesFindingDetailFields,
@@ -42,6 +46,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 import { get } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -93,13 +98,19 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     };
 
     const { data } = useVulnerabilitiesFindings({
-      query: buildVulnerabilityEntityFlyoutPreviewQuery(entityIdentifiers, currentFilter),
+      query: buildEntityFlyoutPreviewQueryWithStatus(
+        buildEntityFiltersFromEntityIdentifiers(entityIdentifiers),
+        currentFilter || undefined,
+        VULNERABILITY_QUERY_FIELD
+      ),
       sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,
     });
 
-    const { counts } = useHasVulnerabilities(entityIdentifiers);
+    const { counts } = useHasVulnerabilities(
+      buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    );
 
     const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
 

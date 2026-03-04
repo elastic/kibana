@@ -11,7 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';

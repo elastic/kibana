@@ -36,8 +36,9 @@ export * from './constants';
 export {
   extractErrorMessage,
   buildMutedRulesFilter,
-  buildMisconfigurationEntityFlyoutPreviewQuery,
-  buildVulnerabilityEntityFlyoutPreviewQuery,
+  buildEntityFlyoutPreviewQueryWithStatus,
+  MISCONFIGURATION_QUERY_FIELD,
+  VULNERABILITY_QUERY_FIELD,
 } from './utils/helpers';
 export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
 export { createDetectionRule } from './rules/create_detection_rule';

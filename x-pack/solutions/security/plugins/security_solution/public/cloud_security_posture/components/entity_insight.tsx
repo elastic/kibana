@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
@@ -43,9 +44,11 @@ export const EntityInsight = <T,>({
   const insightContent: React.ReactElement[] = [];
 
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } =
-    useHasMisconfigurations(entityIdentifiers);
+    useHasMisconfigurations(buildEntityFlyoutPreviewCspOptions(entityIdentifiers));
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
 
   const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && 'host.name' in entityIdentifiers;
 

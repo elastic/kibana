@@ -7,6 +7,7 @@
 
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityIdentifiers } from '../../../document_details/shared/utils';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
@@ -25,8 +26,12 @@ export const useOpenGenericEntityDetailsLeftPanel = (
 ) => {
   const { entityIdentifiers, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers,

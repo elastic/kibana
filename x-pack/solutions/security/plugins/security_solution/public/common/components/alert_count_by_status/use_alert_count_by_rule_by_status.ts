@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ESBoolQuery } from '../../../../common/typed_json';

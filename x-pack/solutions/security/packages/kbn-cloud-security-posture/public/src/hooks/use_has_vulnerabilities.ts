@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { useVulnerabilitiesPreview } from './use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '../utils/vulnerability_helpers';
 
-export const useHasVulnerabilities = (entityIdentifiers: Record<string, string>) => {
-  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
+export const useHasVulnerabilities = (options: UseCspOptions) => {
+  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview(options);
 
   const {
     CRITICAL = 0,

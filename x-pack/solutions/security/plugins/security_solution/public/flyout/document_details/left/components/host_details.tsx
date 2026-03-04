@@ -31,6 +31,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -238,8 +239,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     from,
     queryId: 'HostEntityOverview',
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
 
   const openDetailsPanel = useNavigateToHostDetails({
     entityIdentifiers,

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/public';
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter } from '../../../../common/search_strategy';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';

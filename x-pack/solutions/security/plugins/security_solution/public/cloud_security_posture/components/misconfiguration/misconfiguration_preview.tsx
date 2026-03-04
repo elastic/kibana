@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 import { i18n } from '@kbn/i18n';
 import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
@@ -114,7 +115,7 @@ export const MisconfigurationsPreview = ({
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { hasMisconfigurationFindings, passedFindings, failedFindings } =
-    useHasMisconfigurations(entityIdentifiers);
+    useHasMisconfigurations(buildEntityFlyoutPreviewCspOptions(entityIdentifiers));
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {

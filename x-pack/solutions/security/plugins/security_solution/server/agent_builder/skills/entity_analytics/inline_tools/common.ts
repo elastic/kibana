@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { DEFAULT_DATA_VIEW_ID, DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { IdentifierType } from '../../../../../common/api/entity_analytics/common/common.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics/types';

@@ -39,7 +39,6 @@
     "@kbn/grouping",
     "@kbn/std",
     "@kbn/react-query",
-    "@kbn/kql",
-    "@kbn/entity-store"
+    "@kbn/kql"
   ]
 }

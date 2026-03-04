@@ -7,7 +7,7 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/public';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';

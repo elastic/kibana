@@ -9,6 +9,15 @@ import { EntityStorePlugin } from './plugin';
 
 export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
 
+export {
+  euid,
+  buildEntityFiltersFromEntityIdentifiers,
+  buildGenericEntityFlyoutPreviewQuery,
+  FF_ENABLE_ENTITY_STORE_V2,
+  ALL_ENTITY_TYPES,
+} from '../common';
+export type { EntityType, IdentitySourceFields } from '../common';
+
 export function plugin() {
   return new EntityStorePlugin();
 }

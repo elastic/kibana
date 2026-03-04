@@ -20,7 +20,8 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { euid } from '@kbn/entity-store/common';
+import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import { euid } from '@kbn/entity-store/public';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -164,7 +165,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
   const isRiskScoreExist = !!userRiskData?.user?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers,
     to,

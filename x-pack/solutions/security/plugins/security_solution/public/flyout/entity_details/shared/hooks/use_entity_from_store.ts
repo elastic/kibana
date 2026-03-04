@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/public';
 import type {
   HostEntity,
   UserEntity,

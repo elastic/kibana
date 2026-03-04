@@ -17,8 +17,10 @@ import { i18n } from '@kbn/i18n';
 import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_STATUS,
-  buildMisconfigurationEntityFlyoutPreviewQuery,
+  buildEntityFlyoutPreviewQueryWithStatus,
+  MISCONFIGURATION_QUERY_FIELD,
 } from '@kbn/cloud-security-posture-common';
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsMisconfigurationPanelExpandableFlyoutPropsPreview } from '@kbn/cloud-security-posture';
@@ -34,6 +36,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
@@ -136,13 +139,19 @@ export const MisconfigurationFindingsDetailsTable = memo(
     sortFieldDirection[sortField] = sortDirection;
 
     const { data, isLoading } = useMisconfigurationFindings({
-      query: buildMisconfigurationEntityFlyoutPreviewQuery(entityIdentifiers, currentFilter),
+      query: buildEntityFlyoutPreviewQueryWithStatus(
+        buildEntityFiltersFromEntityIdentifiers(entityIdentifiers),
+        currentFilter || undefined,
+        MISCONFIGURATION_QUERY_FIELD
+      ),
       sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,
     });
 
-    const { passedFindings, failedFindings } = useHasMisconfigurations(entityIdentifiers);
+    const { passedFindings, failedFindings } = useHasMisconfigurations(
+      buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    );
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);

@@ -6,10 +6,53 @@
  */
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common/domain/euid/entity_filters';
 
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 import { GENERIC_ENTITY_INDEX_ENRICH_POLICY, ENTITIES_LATEST_INDEX } from '../constants';
+
+/** Query field for misconfiguration findings (result.evaluation) */
+export const MISCONFIGURATION_QUERY_FIELD = 'result.evaluation';
+/** Query field for vulnerability findings (vulnerability.severity) */
+export const VULNERABILITY_QUERY_FIELD = 'vulnerability.severity';
+
+/**
+ * Builds a bool query for entity flyout preview: entity filters plus optional status/queryField clause.
+ * Use with entity filters from @kbn/entity-store (e.g. buildEntityFiltersFromEntityIdentifiers).
+ *
+ * @param entityFilters - Pre-built entity filters (e.g. from buildEntityFiltersFromEntityIdentifiers)
+ * @param status - Optional status value to filter on (case-insensitive)
+ * @param queryField - Optional field name for the status term query (e.g. MISCONFIGURATION_QUERY_FIELD or VULNERABILITY_QUERY_FIELD)
+ */
+export const buildEntityFlyoutPreviewQueryWithStatus = (
+  entityFilters: QueryDslQueryContainer[],
+  status?: string,
+  queryField?: string
+): { bool: { filter: QueryDslQueryContainer[] } } => {
+  const statusClause: QueryDslQueryContainer | undefined =
+    status && queryField
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  [queryField]: {
+                    value: status,
+                    case_insensitive: true,
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        }
+      : undefined;
+
+  return {
+    bool: {
+      filter: statusClause ? [...entityFilters, statusClause] : entityFilters,
+    },
+  };
+};
 
 interface BuildEntityAlertsQueryParams {
   field: string;
@@ -57,24 +100,6 @@ export const buildMutedRulesFilter = (
   });
 
   return mutedRulesFilterQuery;
-};
-
-// Higher-order function for Misconfiguration
-export const buildMisconfigurationEntityFlyoutPreviewQuery = (
-  entityIdentifiers: Record<string, string>,
-  status?: string
-) => {
-  const queryField = 'result.evaluation';
-  return buildGenericEntityFlyoutPreviewQuery(entityIdentifiers, status, queryField);
-};
-
-// Higher-order function for Vulnerability
-export const buildVulnerabilityEntityFlyoutPreviewQuery = (
-  entityIdentifiers: Record<string, string>,
-  status?: string
-) => {
-  const queryField = 'vulnerability.severity';
-  return buildGenericEntityFlyoutPreviewQuery(entityIdentifiers, status, queryField);
 };
 
 export const buildEntityAlertsQuery = ({
