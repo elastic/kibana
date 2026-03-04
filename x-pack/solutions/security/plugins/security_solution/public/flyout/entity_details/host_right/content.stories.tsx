@@ -40,7 +40,7 @@ export const Default = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
+      entityIdentifiers={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
@@ -69,7 +69,7 @@ export const NoObservedData = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
+      entityIdentifiers={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
@@ -98,7 +98,7 @@ export const Loading = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
+      entityIdentifiers={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}

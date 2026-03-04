@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityType, sourceFieldToText } from './helpers';
+import { getEntityType, sanitizeEntityRecordForUpsert, sourceFieldToText } from './helpers';
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import type {
@@ -187,6 +187,45 @@ describe('helpers', () => {
       expect(() => getEntityType(unknownEntity)).toThrow(
         'Unexpected entity: {"@timestamp":"2021-08-02T14:00:00.000Z","entity":{"name":"unknown_entity","source":"logs-test"}}'
       );
+    });
+  });
+
+  describe('sanitizeEntityRecordForUpsert', () => {
+    it('strips top-level agent and keeps only allowed HostEntity keys', () => {
+      const recordWithExtras = {
+        '@timestamp': '2026-03-04T15:24:56.317Z',
+        entity: {
+          id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
+          name: 'MacBookPro.localdomain',
+          EngineMetadata: { Type: 'host', UntypedId: 'B377958D-B4A8-5FCA-B237-F2DE40404617' },
+        },
+        host: { name: 'MacBookPro.localdomain' },
+        agent: { id: 'bbcb2260-62b6-45ae-8e9a-4077419e38a7', type: 'auditbeat' },
+        asset: { criticality: 'high_impact' },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(recordWithExtras);
+
+      expect(out).not.toHaveProperty('agent');
+      expect(out).toHaveProperty('entity');
+      expect(out).toHaveProperty('host');
+      expect(out).toHaveProperty('asset');
+      expect((out as HostEntity).asset?.criticality).toBe('high_impact');
+    });
+
+    it('omits entity.EngineMetadata so backend does not reject it as not allowed to be updated', () => {
+      const recordWithUntypedId = {
+        entity: {
+          id: 'host:abc-123',
+          name: 'myhost',
+          EngineMetadata: { Type: 'host', UntypedId: 'B377958D-B4A8-5FCA-B237-F2DE40404617' },
+        },
+        host: { name: 'myhost' },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(recordWithUntypedId);
+
+      expect(out.entity.EngineMetadata).toBeUndefined();
     });
   });
 

@@ -84,7 +84,7 @@ export const UserPanelContent = ({
         </>
       )}
       <AssetCriticalityAccordion
-        entity={{ name: userName, type: EntityType.user }}
+        entity={{ identifiers: entityIdentifiers, name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}
         entityRecord={entityRecord}
         criticalityFromEntityStore={criticalityFromEntityStore}
@@ -96,6 +96,7 @@ export const UserPanelContent = ({
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
+        entityIdentifiers={entityIdentifiers}
         userName={userName}
         observedUser={observedUser}
         contextID={contextID}

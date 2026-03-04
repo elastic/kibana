@@ -8,6 +8,7 @@
 import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type {
@@ -155,5 +156,6 @@ export interface ModalState {
 
 export interface Entity {
   name: string;
+  identifiers: EntityIdentifiers;
   type: EntityType;
 }

@@ -38,6 +38,7 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
+import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
@@ -76,27 +77,29 @@ export const HostPanel = ({
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
-  // Guard: entityIdentifiers and contextID with fallbacks to prevent "Unable to load page" errors
-  const safeEntityIdentifiers = useMemo(() => entityIdentifiers ?? {}, [entityIdentifiers]);
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const hasValidIdentifiers =
-    safeEntityIdentifiers && Object.keys(safeEntityIdentifiers).length > 0;
+  const hasValidIdentifiers = entityIdentifiers && Object.keys(entityIdentifiers).length > 0;
 
   // Extract hostName from entityIdentifiers
   // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
   const effectiveHostName = useMemo<string>(() => {
     if (!hasValidIdentifiers) return '';
     const hostNameFromIdentifiers =
-      safeEntityIdentifiers['host.name'] || Object.values(safeEntityIdentifiers)[0];
+      entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0];
     return (hostNameFromIdentifiers as string) ?? '';
-  }, [safeEntityIdentifiers, hasValidIdentifiers]);
+  }, [entityIdentifiers, hasValidIdentifiers]);
 
-  const { to, from, setQuery, deleteQuery } = useGlobalTime();
+  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const entityFromStoreResult = useEntityFromStore({
+    entityIdentifiers,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
   const hostFilterQuery = useMemo(
     () =>
-      buildEntityFilterFromEntityIdentifiers(EntityType.host, safeEntityIdentifiers) ??
+      buildEntityFilterFromEntityIdentifiers(EntityType.host, entityIdentifiers) ??
       (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [safeEntityIdentifiers, effectiveHostName]
+    [entityIdentifiers, effectiveHostName]
   );
 
   const riskScoreState = useRiskScore({
@@ -122,12 +125,12 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(safeEntityIdentifiers);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(safeEntityIdentifiers);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers: safeEntityIdentifiers,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -142,7 +145,16 @@ export const HostPanel = ({
     setQuery,
   });
 
-  const observedHost = useObservedHost(safeEntityIdentifiers, scopeId);
+  const observedHost = useObservedHost(
+    entityIdentifiers,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
+
+  // When entity store v2 is enabled, use the first entity from the store that matches entityIdentifiers
+  const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
+    ? observedHost.entityRecord ?? undefined
+    : undefined;
   const { upsertEntity } = useEntityAnalyticsRoutes();
 
   const riskScoreStateFromStore =
@@ -170,7 +182,7 @@ export const HostPanel = ({
   );
 
   const openDetailsPanel = useNavigateToHostDetails({
-    entityIdentifiers: safeEntityIdentifiers,
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -203,9 +215,13 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader entityIdentifiers={safeEntityIdentifiers} lastSeen={observedHost.lastSeen} />
+      <HostPanelHeader
+        entityIdentifiers={entityIdentifiers}
+        lastSeen={observedHost.lastSeen}
+        entity={entityFromStore}
+      />
       <HostPanelContent
-        entityIdentifiers={safeEntityIdentifiers}
+        entityIdentifiers={entityIdentifiers}
         observedHost={observedHost}
         riskScoreState={effectiveRiskScoreState}
         contextID={safeContextID}
@@ -214,6 +230,7 @@ export const HostPanel = ({
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
         isPreviewMode={isPreviewMode}
+        entity={entityFromStore}
         entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
         criticalityFromEntityStore={
           entityStoreV2Enabled && observedHost.entityRecord?.asset?.criticality
@@ -228,13 +245,14 @@ export const HostPanel = ({
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter
-          entityIdentifiers={safeEntityIdentifiers}
+          entityIdentifiers={entityIdentifiers}
           contextID={safeContextID}
           scopeId={scopeId}
+          entity={entityFromStore}
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (
-        <HostPanelFooter entityIdentifiers={safeEntityIdentifiers} />
+        <HostPanelFooter entityIdentifiers={entityIdentifiers} entity={entityFromStore} />
       )}
     </>
   );

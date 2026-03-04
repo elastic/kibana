@@ -92,7 +92,11 @@ export const GenericEntityFlyoutContent = ({
   return (
     <FlyoutBody>
       <AssetCriticalityAccordion
-        entity={{ name: entityDisplayValue, type: EntityType.generic }}
+        entity={{
+          identifiers: entityIdentifiers,
+          name: entityDisplayValue as string,
+          type: EntityType.generic,
+        }}
         onChange={() => {
           uiMetricService.trackUiMetric(
             METRIC_TYPE.CLICK,

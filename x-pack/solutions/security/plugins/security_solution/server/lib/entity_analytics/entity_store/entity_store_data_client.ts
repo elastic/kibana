@@ -36,6 +36,7 @@ import {
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
   ENTITY_STORE_UPDATES_INDEX_PATTERN,
+  FF_ENABLE_ENTITY_STORE_V2,
 } from '../../../../common/entity_analytics/entity_store/constants';
 import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
 import {
@@ -355,6 +356,14 @@ export class EntityStoreDataClient {
     );
 
     return getEnabledEntityTypes(genericEntityStoreEnabled);
+  }
+
+  /**
+   * Returns whether Entity Store v2 is enabled via the advanced setting.
+   * When true, CRUD and search use the unified v2 index and updates stream.
+   */
+  public async isEntityStoreV2Enabled(): Promise<boolean> {
+    return this.uiSettingsClient.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   }
 
   public async status({

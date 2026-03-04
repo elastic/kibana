@@ -178,8 +178,10 @@ export const UserPanel = ({
 
   const handleSaveAssetCriticalityViaEntityStore = useCallback(
     async (updatedRecord: Parameters<typeof upsertEntity>[0]['body']) => {
+      console.log('updatedRecord', updatedRecord);
       await upsertEntity({ entityType: 'user', body: updatedRecord, force: true });
       observedUser.refetchEntityStore?.();
+
       calculateEntityRiskScore();
     },
     [upsertEntity, observedUser, calculateEntityRiskScore]

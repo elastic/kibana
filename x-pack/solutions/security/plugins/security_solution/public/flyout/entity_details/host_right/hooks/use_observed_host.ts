@@ -16,14 +16,16 @@ import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
+import type {
+  EntityStoreRecord,
+  EntityFromStoreResult,
+} from '../../shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../../../common/lib/kibana';
-import { useEntityFromStore } from '../../shared/hooks/use_entity_from_store';
 
 export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -33,7 +35,8 @@ export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'>
 
 export const useObservedHost = (
   entityIdentifiers: Record<string, string>,
-  scopeId: string
+  scopeId: string,
+  entityFromStore?: EntityFromStoreResult<HostItem> | null
 ): ObservedHostResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
@@ -52,17 +55,8 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const entityFromStore = useEntityFromStore({
-    entityIdentifiers,
-    entityType: 'host',
-    skip: !entityStoreV2Enabled || isInitializing,
-  });
-
   const hostName = useMemo(
-    () =>
-      entityIdentifiers['host.name'] ||
-      Object.values(entityIdentifiers)[0] ||
-      '',
+    () => entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0] || '',
     [entityIdentifiers]
   );
 
@@ -77,10 +71,10 @@ export const useObservedHost = (
 
   useQueryInspector({
     deleteQuery,
-    inspect: entityStoreV2Enabled ? entityFromStore.inspect : inspectObservedHost,
-    loading: entityStoreV2Enabled ? entityFromStore.isLoading : isLoading,
+    inspect: entityStoreV2Enabled ? entityFromStore?.inspect : inspectObservedHost,
+    loading: entityStoreV2Enabled ? entityFromStore?.isLoading ?? false : isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: entityStoreV2Enabled ? entityFromStore.refetch : refetch,
+    refetch: entityStoreV2Enabled ? entityFromStore?.refetch ?? (() => {}) : refetch,
     setQuery,
   });
 
@@ -103,7 +97,7 @@ export const useObservedHost = (
   });
 
   return useMemo((): ObservedHostResult => {
-    if (entityStoreV2Enabled) {
+    if (entityStoreV2Enabled && entityFromStore) {
       return {
         details: (entityFromStore.entity ?? {}) as HostItem,
         isLoading: entityFromStore.isLoading,
@@ -119,6 +113,16 @@ export const useObservedHost = (
         refetchEntityStore: entityFromStore.refetch,
       };
     }
+    if (entityStoreV2Enabled) {
+      return {
+        details: {} as HostItem,
+        isLoading: true,
+        firstSeen: { date: undefined, isLoading: true },
+        lastSeen: { date: undefined, isLoading: true },
+        entityRecord: null,
+        refetchEntityStore: undefined,
+      };
+    }
     return {
       details: hostDetails,
       isLoading: isLoading || loadingLastSeen || loadingFirstSeen,
@@ -130,15 +134,12 @@ export const useObservedHost = (
     };
   }, [
     entityStoreV2Enabled,
-    entityFromStore.entity,
-    entityFromStore.firstSeen,
-    entityFromStore.isLoading,
-    entityFromStore.lastSeen,
-    firstSeen,
     hostDetails,
     isLoading,
-    lastSeen,
-    loadingFirstSeen,
     loadingLastSeen,
+    loadingFirstSeen,
+    firstSeen,
+    lastSeen,
+    entityFromStore,
   ]);
 };

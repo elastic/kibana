@@ -59,10 +59,7 @@ export const useObservedUser = (
   });
 
   const userName = useMemo(
-    () =>
-      entityIdentifiers['user.name'] ||
-      Object.values(entityIdentifiers)[0] ||
-      '',
+    () => entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
     [entityIdentifiers]
   );
 
@@ -70,7 +67,7 @@ export const useObservedUser = (
     useObservedUserDetails({
       endDate: to,
       startDate: from,
-      entityIdentifiers,
+      userName,
       indexNames: securityDefaultPatterns,
       skip: isInitializing || entityStoreV2Enabled,
     });
@@ -130,16 +127,17 @@ export const useObservedUser = (
     };
   }, [
     entityStoreV2Enabled,
-    entityFromStore.entity,
-    entityFromStore.entityRecord,
-    entityFromStore.firstSeen,
-    entityFromStore.isLoading,
-    entityFromStore.lastSeen,
+    observedUserDetails,
+    loadingObservedUser,
+    loadingLastSeen,
+    loadingFirstSeen,
     firstSeen,
     lastSeen,
-    loadingFirstSeen,
-    loadingLastSeen,
-    loadingObservedUser,
-    observedUserDetails,
+    entityFromStore.entity,
+    entityFromStore.isLoading,
+    entityFromStore.firstSeen,
+    entityFromStore.lastSeen,
+    entityFromStore.entityRecord,
+    entityFromStore.refetch,
   ]);
 };

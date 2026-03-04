@@ -10,6 +10,7 @@ import {
   ENTITY_HISTORY,
   ENTITY_RESET,
   ENTITY_SCHEMA_VERSION_V1,
+  ENTITY_UPDATES,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 
@@ -93,6 +94,14 @@ export const getEntitiesIndexNameV2 = (_entityType: EntityTypeOpenAPI, namespace
   entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_LATEST,
+    definitionId: `security_${namespace}`,
+  });
+
+/** Returns the Entity Store v2 updates data stream name. Single unified stream per namespace. */
+export const getEntityUpdatesDataStreamNameV2 = (namespace: string) =>
+  entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_UPDATES,
     definitionId: `security_${namespace}`,
   });
 

@@ -107,6 +107,29 @@ describe('EntityStoreCrudClient', () => {
         },
       });
     });
+
+    it('when entity store v2 is enabled uses v2 index and entity type filter', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 1 }));
+
+      const response = await client.deleteEntity('host', { id: 'host-1' });
+      expect(response).toStrictEqual({ deleted: true });
+
+      expect(esClientMock.deleteByQuery).toBeCalledWith({
+        conflicts: 'proceed',
+        index: '.entities.v2.latest.security_default',
+        query: {
+          bool: {
+            must: [
+              { term: { 'entity.id': 'host-1' } },
+              { term: { 'entity.EngineMetadata.Type': 'host' } },
+            ],
+          },
+        },
+      });
+    });
   });
 
   describe('update single entity', () => {
@@ -256,6 +279,52 @@ describe('EntityStoreCrudClient', () => {
         refresh: 'wait_for',
       });
 
+      expect(v4Spy).toBeCalledTimes(1);
+    });
+
+    it('when entity store v2 is enabled uses v2 index and updates stream and skips createLatestIndexEntity when 0 updated', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+
+      const doc: Entity = {
+        entity: {
+          id: 'host-1',
+          attributes: {
+            privileged: true,
+          },
+        },
+      };
+
+      await client.upsertEntity('host', doc);
+
+      expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
+        index: '.entities.v2.latest.security_default',
+        query: {
+          bool: {
+            must: [
+              { term: { 'entity.id': 'host-1' } },
+              { term: { 'entity.EngineMetadata.Type': 'host' } },
+            ],
+          },
+        },
+        script: expect.any(Object),
+        refresh: true,
+      });
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v2.updates.security_default',
+        id: '123',
+        document: expect.any(Object),
+        refresh: 'wait_for',
+      });
+      expect(esClientMock.transform.previewTransform).not.toHaveBeenCalled();
       expect(v4Spy).toBeCalledTimes(1);
     });
 
@@ -814,6 +883,29 @@ describe('EntityStoreCrudClient', () => {
       expect(esClientMock.bulk).toBeCalledTimes(4);
 
       expect(esClientMock.bulk).toMatchSnapshot();
+    });
+
+    it('when entity store v2 is enabled bulk writes to single v2 updates stream', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(true));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      await client.upsertEntitiesBulk([
+        { type: 'user', record: { entity: { id: 'user-1', attributes: { privileged: true } } } },
+        { type: 'host', record: { entity: { id: 'host-1', attributes: { privileged: true } } } },
+      ]);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        index: '.entities.v2.updates.security_default',
+        operations: expect.any(Array),
+      });
+      const ops = esClientMock.bulk.mock.calls[0][0].operations;
+      expect(ops.length).toBe(4); // create + doc for user, create + doc for host
     });
 
     it('when valid create entity using force', async () => {

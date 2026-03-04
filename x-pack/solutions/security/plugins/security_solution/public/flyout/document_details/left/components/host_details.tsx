@@ -192,7 +192,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     id: hostDetailsQueryId,
     startDate: from,
     endDate: to,
-    entityIdentifiers,
+    hostName,
     indexNames: selectedPatterns,
     skip: entityStoreV2Enabled || selectedPatterns.length === 0,
   });

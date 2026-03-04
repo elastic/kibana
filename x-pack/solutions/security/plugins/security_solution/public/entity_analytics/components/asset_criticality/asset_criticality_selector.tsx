@@ -37,6 +37,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import type { Entity as ApiEntity } from '../../../../common/api/entity_analytics';
+import { sanitizeEntityRecordForUpsert } from '../entity_store/helpers';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { PICK_ASSET_CRITICALITY } from './translations';
 import { AssetCriticalityBadge } from './asset_criticality_badge';
@@ -179,13 +180,14 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
     }) => {
       if (!entityRecord || !onSaveViaEntityStore) return;
       const criticalityLevel = params.criticalityLevel;
-      const updatedRecord: ApiEntity = {
+      const updatedRecord: ApiEntity = sanitizeEntityRecordForUpsert({
         ...entityRecord,
         asset: {
           ...entityRecord.asset,
           criticality: criticalityLevel === 'unassigned' ? undefined : criticalityLevel,
         },
-      };
+      });
+      console.log('updatedRecord', updatedRecord);
       await onSaveViaEntityStore(updatedRecord);
       onChange?.();
     },
@@ -194,11 +196,12 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
   const criticalityFromStoreState: State | null = useMemo(() => {
     if (!entityRecord || !onSaveViaEntityStore) return null;
     return {
-      status: criticalityFromEntityStore && criticalityFromEntityStore !== 'unassigned' ? 'update' : 'create',
+      status:
+        criticalityFromEntityStore && criticalityFromEntityStore !== 'unassigned'
+          ? 'update'
+          : 'create',
       query: {
-        data: criticalityFromEntityStore
-          ? { criticality_level: criticalityFromEntityStore }
-          : null,
+        data: criticalityFromEntityStore ? { criticality_level: criticalityFromEntityStore } : null,
         isLoading: false,
         isError: false,
         error: null,
@@ -264,7 +267,7 @@ export const AssetCriticalityTitle = () => (
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="info" color="subdued" />
+        <EuiIcon type="info" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiToolTip>

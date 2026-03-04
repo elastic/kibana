@@ -19,6 +19,7 @@ const createEntityStoreDataClientMock = () =>
     status: jest.fn(),
     isEngineRunning: jest.fn(),
     isCapabilityEnabled: jest.fn(),
+    isEntityStoreV2Enabled: jest.fn().mockResolvedValue(false),
   } as unknown as jest.Mocked<EntityStoreDataClient>);
 
 export const entityStoreDataClientMock = { create: createEntityStoreDataClientMock };

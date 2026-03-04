@@ -24,16 +24,23 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 interface HostPanelHeaderProps {
   entityIdentifiers: EntityIdentifiers;
   lastSeen: FirstLastSeenData;
+  /** When entity store v2 is enabled: entity record from the store. */
+  entity?: EntityStoreRecord;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ entityIdentifiers, lastSeen }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({
+  entityIdentifiers,
+  lastSeen,
+  entity,
+}: HostPanelHeaderProps) => {
   const hostName = useMemo(
     () =>
       entityIdentifiers[EntityIdentifierFields.hostName] ||
@@ -49,10 +56,7 @@ export const HostPanelHeader = ({ entityIdentifiers, lastSeen }: HostPanelHeader
     [lastSeenDate]
   );
 
-  const hostDetailsPath = useMemo(
-    () => getHostDetailsUrl(hostName, undefined, entityIdentifiers),
-    [hostName, entityIdentifiers]
-  );
+  const hostDetailsPath = useMemo(() => getHostDetailsUrl(hostName, undefined), [hostName]);
 
   return (
     <FlyoutHeader data-test-subj="host-panel-header">
