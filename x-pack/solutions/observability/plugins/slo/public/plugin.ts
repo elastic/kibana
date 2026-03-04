@@ -19,14 +19,19 @@ import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
-import type { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
+import type {
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+  SingleOverviewCustomState,
+} from '../common/embeddables/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
@@ -39,12 +44,14 @@ import type {
   SLOPublicStart,
 } from './types';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { SloTelemetryService } from './services/telemetry';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly telemetryService = new SloTelemetryService();
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: { enabled: false },
   };
@@ -59,6 +66,8 @@ export class SLOPlugin
     plugins: SLOPublicPluginsSetup
   ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    this.telemetryService.setup(core.analytics);
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
@@ -86,6 +95,7 @@ export class SLOPlugin
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
         sloClient,
+        telemetry: this.telemetryService.start(coreStart.analytics),
       });
     };
     const appUpdater$ = this.appUpdater$;
@@ -134,8 +144,11 @@ export class SLOPlugin
 
         pluginsStart.presentationUtil.registerPanelPlacementSettings(
           SLO_OVERVIEW_EMBEDDABLE_ID,
-          (serializedState?: SloOverviewEmbeddableState) => {
-            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+          (serializedState?: OverviewEmbeddableState) => {
+            if (
+              (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
+              (serializedState as GroupOverviewCustomState)?.group_filters
+            ) {
               return { placementSettings: { width: 24, height: 8 } };
             }
             return { placementSettings: { width: 12, height: 8 } };
@@ -213,6 +226,7 @@ export class SLOPlugin
       isServerless: !!plugins.serverless,
       experimentalFeatures: this.experimentalFeatures,
       sloClient,
+      telemetry: this.telemetryService.start(core.analytics),
     });
 
     const getCreateSLOFormFlyout = lazyWithContextProviders(
