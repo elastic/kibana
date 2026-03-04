@@ -84,7 +84,7 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
 
   const onViewInAgentBuilder = useCallback(() => {
     reportAddToChatClick({
-      pathway: 'attack_discovery_take_action',
+      pathway: 'attacks_page_group_take_action',
       attachments: ['alert'],
     });
     openAgentBuilderFlyout();
