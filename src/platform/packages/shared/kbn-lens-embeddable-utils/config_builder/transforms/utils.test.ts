@@ -540,14 +540,14 @@ describe('filtersAndQueryToLensState', () => {
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
     expect(result.filters).toHaveLength(2);
-    expect(result.references).toHaveLength(0);
+    expect(result.references).toHaveLength(1);
     expect(result.filters).toMatchObject([
       {
-        meta: { index: 'dv-1' },
+        meta: { index: 'filter-ref-dv-1' },
         query: { match_phrase: { category: 'shoes' } },
       },
       {
-        meta: { index: 'dv-1' },
+        meta: { index: 'filter-ref-dv-1' },
         query: { match_all: {} },
       },
     ]);
@@ -616,8 +616,12 @@ describe('filtersAndQueryToLensState', () => {
 
     expect(result.filters).toHaveLength(1);
     expect(result.references).toHaveLength(1);
-    expect(result.filters[0].meta.index).toEqual(result.references[0].name);
-    expect(result.references[0]).toMatchObject({ type: 'index-pattern', id: 'dv-1' });
+    expect(result.filters[0].meta.index).toEqual('filter-ref-dv-2');
+    expect(result.references[0]).toMatchObject({
+      type: 'index-pattern',
+      id: 'dv-2',
+      name: 'filter-ref-dv-2',
+    });
   });
 });
 

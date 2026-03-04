@@ -19,7 +19,6 @@ import type {
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
@@ -532,10 +531,6 @@ function injectFilterReferences(filters: Filter[], references: SavedObjectRefere
 }
 
 function extractFilterReferences(filters: Filter[], references: SavedObjectReference[]) {
-  const referencedDataViewIds = new Set(
-    references.filter((r) => r.type === INDEX_PATTERN_ID).map((r) => r.id)
-  );
-
   const extractedReferences: SavedObjectReference[] = [];
   const extract = (filter: Filter): Filter => {
     const extractedParams =
@@ -549,24 +544,22 @@ function extractFilterReferences(filters: Filter[], references: SavedObjectRefer
         : filter;
     }
 
-    if (!referencedDataViewIds.has(filter.meta.index)) {
-      return extractedParams !== undefined
-        ? { ...filter, meta: { ...filter.meta, params: extractedParams } }
-        : filter;
-    }
+    const referenceName = `filter-ref-${filter.meta.index}`;
+    const existingRef = extractedReferences.find((r) => r.name === referenceName);
 
-    const id = uuidv4();
-    extractedReferences.push({
-      type: INDEX_PATTERN_ID,
-      name: id,
-      id: filter.meta.index,
-    });
+    if (!existingRef) {
+      extractedReferences.push({
+        type: INDEX_PATTERN_ID,
+        name: referenceName,
+        id: filter.meta.index,
+      });
+    }
 
     return {
       ...filter,
       meta: {
         ...filter.meta,
-        index: id,
+        index: referenceName,
         ...(extractedParams !== undefined ? { params: extractedParams } : {}),
       },
     };
