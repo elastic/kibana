@@ -28,21 +28,28 @@ const mockFindItems = jest.fn(
 const mockTags = [
   { id: 'tag-1', name: 'Production', description: '', color: '#FF0000', managed: false },
   { id: 'tag-2', name: 'Development', description: '', color: '#00FF00', managed: false },
+  { id: 'tag-3', name: 'New World', description: '', color: '#0000FF', managed: false },
 ];
 
 const mockParseSearchQuery = jest.fn((queryText: string) => {
-  // Simple mock: extract `tag:Name` patterns and return the rest as `searchQuery`.
-  const tagPattern = /tag:(\S+)/g;
-  const tagNames: string[] = [];
+  // Simple mock: extract `tag:Name` and `tag:"Multi Word"` patterns, resolve names
+  // to IDs via `mockTags`, and return the remaining text as `searchQuery`.
+  // This mirrors the real `parseSearchQueryCore` which resolves names to IDs.
+  const tagPattern = /tag:(?:"([^"]+)"|(\S+))/g;
+  const resolvedIds: string[] = [];
   let match = tagPattern.exec(queryText);
   while (match) {
-    tagNames.push(match[1]);
+    const name = match[1] ?? match[2];
+    const tag = mockTags.find((t) => t.name === name);
+    if (tag) {
+      resolvedIds.push(tag.id);
+    }
     match = tagPattern.exec(queryText);
   }
-  const searchQuery = queryText.replace(/tag:\S+\s*/g, '').trim();
+  const searchQuery = queryText.replace(/tag:(?:"[^"]+?"|\S+)\s*/g, '').trim();
   return {
     searchQuery,
-    tagIds: tagNames.length > 0 ? tagNames : undefined,
+    tagIds: resolvedIds.length > 0 ? resolvedIds : undefined,
     tagIdsToExclude: undefined,
   };
 });
@@ -333,7 +340,7 @@ describe('ContentListToolbar', () => {
         const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
         expect(lastCall[0].searchQuery).toBe('my query');
         expect(lastCall[0].filters.tag).toEqual({
-          include: ['Production'],
+          include: ['tag-1'],
           exclude: [],
         });
       });
@@ -373,6 +380,67 @@ describe('ContentListToolbar', () => {
         const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
         expect(lastCall[0].searchQuery).toContain('tag:Production my query');
         expect(lastCall[0].filters.tag).toBeUndefined();
+      });
+    });
+
+    it('parses quoted multi-word tag names and resolves them to IDs', async () => {
+      const Wrapper = createWrapper({ tagsService: mockTagsService });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      await userEvent.type(searchBox, 'tag:"New World" my query');
+
+      await waitFor(() => {
+        expect(mockParseSearchQuery).toHaveBeenCalledWith('tag:"New World" my query');
+      });
+
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('my query');
+        expect(lastCall[0].filters.tag).toEqual({
+          include: ['tag-3'],
+          exclude: [],
+        });
+      });
+    });
+
+    it('preserves existing filters when parseSearchQuery throws', async () => {
+      // First render with a working parser so we can establish a known filter state.
+      const Wrapper = createWrapper({ tagsService: mockTagsService });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+
+      // Set up initial state: type a valid tag query to populate filters.
+      await userEvent.type(searchBox, 'tag:Production');
+      await waitFor(() => {
+        expect(mockFindItems.mock.calls.length).toBeGreaterThan(0);
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
+      });
+
+      // Now make the parser throw on the next keystroke.
+      mockParseSearchQuery.mockImplementationOnce(() => {
+        throw new Error('parse failure');
+      });
+
+      // Type another character to trigger a new change event.
+      await userEvent.type(searchBox, ' x');
+
+      // The existing tag filter should be preserved; the raw queryText must not
+      // become the `search` value (which would leak tag syntax to findItems).
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
+        expect(lastCall[0].searchQuery).not.toContain('tag:');
       });
     });
   });

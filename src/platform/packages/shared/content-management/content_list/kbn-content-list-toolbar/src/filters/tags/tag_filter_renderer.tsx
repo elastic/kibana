@@ -85,7 +85,11 @@ export const TagFilterRenderer = ({
     }
     try {
       return tagServices.getTagList();
-    } catch {
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn('[TagFilterRenderer] getTagList failed', e);
+      }
       return [];
     }
   }, [tagServices]);

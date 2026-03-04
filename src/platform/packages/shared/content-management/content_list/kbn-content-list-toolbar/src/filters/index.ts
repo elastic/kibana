@@ -15,6 +15,7 @@ export {
   type TagFilterProps,
   TagFilterRenderer,
   type TagFilterRendererProps,
+  useTagQueryParser,
 } from './tags';
 
 // Common popover components.
@@ -43,6 +44,9 @@ export {
   type ModifierKeyTipProps,
   type FilterCountBadgeProps,
 } from './filter_utils';
+
+// Query parser pipeline — implement `QueryParser` to add a new filter type.
+export { parseFiltersFromQuery, type QueryParser, type QueryParserResult } from './query_parser';
 
 // Part factory and context (used by `useFilters` hook).
 export { filter, type FilterPresets, type FilterContext } from './part';

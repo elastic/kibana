@@ -51,3 +51,11 @@ export {
   FilterCountBadge,
   type FilterType,
 } from './src/filters';
+
+// Query parser pipeline — implement `QueryParser` to add a new filter type.
+export {
+  parseFiltersFromQuery,
+  useTagQueryParser,
+  type QueryParser,
+  type QueryParserResult,
+} from './src/filters';

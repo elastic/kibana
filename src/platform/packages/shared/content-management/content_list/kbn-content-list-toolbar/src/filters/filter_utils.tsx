@@ -117,14 +117,7 @@ export const useFieldQueryFilter = ({
   onChange,
   singleSelection = false,
 }: UseFieldQueryFilterOptions): UseFieldQueryFilterResult => {
-  // When the caller already has a parsed `Query` object (e.g. from `EuiSearchBar`), use
-  // it directly. Only fall back to `Query.parse(text)` when the raw text is all we have.
-  const { parsedQuery, hasParseError } = useMemo(() => {
-    if (query) {
-      return { parsedQuery: query, hasParseError: false };
-    }
-    return { parsedQuery: null, hasParseError: false };
-  }, [query]);
+  const parsedQuery = query ?? null;
 
   const selection = useMemo((): FilterSelection => {
     if (!parsedQuery) {
@@ -133,17 +126,35 @@ export const useFieldQueryFilter = ({
 
     const result: FilterSelection = {};
 
-    const includeClause = parsedQuery.ast.getOrFieldClause(fieldName, undefined, true, 'eq');
-    if (includeClause) {
-      toArray(includeClause.value).forEach((v) => {
+    // Read OR-field clauses (`field:(A or B)`) — the primary format written by the UI.
+    const includeOrClause = parsedQuery.ast.getOrFieldClause(fieldName, undefined, true, 'eq');
+    if (includeOrClause) {
+      toArray(includeOrClause.value).forEach((v) => {
         result[String(v)] = 'include';
       });
     }
 
-    const excludeClause = parsedQuery.ast.getOrFieldClause(fieldName, undefined, false, 'eq');
-    if (excludeClause) {
-      toArray(excludeClause.value).forEach((v) => {
+    const excludeOrClause = parsedQuery.ast.getOrFieldClause(fieldName, undefined, false, 'eq');
+    if (excludeOrClause) {
+      toArray(excludeOrClause.value).forEach((v) => {
         result[String(v)] = 'exclude';
+      });
+    }
+
+    // Also read simple field clauses (`field:value` or `-field:value`) so that
+    // values typed manually by the user are reflected as active in the popover.
+    // Only write if the key isn't already captured by an OR-field clause above —
+    // OR-clauses are the primary format written by the UI and take precedence.
+    const simpleClauses = parsedQuery.ast.getFieldClauses(fieldName);
+    if (simpleClauses) {
+      simpleClauses.forEach((clause) => {
+        const type: FilterType = clause.match === 'must' ? 'include' : 'exclude';
+        toArray(clause.value).forEach((v) => {
+          const key = String(v);
+          if (!result[key]) {
+            result[key] = type;
+          }
+        });
       });
     }
 
@@ -157,27 +168,25 @@ export const useFieldQueryFilter = ({
 
   const toggle = useCallback(
     (value: string, targetType: FilterType) => {
-      // Don't modify when query has parse error — preserve the user's in-progress text.
-      if (hasParseError) {
-        return;
-      }
-
       // Use existing parsed query or create empty one.
       let q = parsedQuery ?? Query.parse('');
       const currentState = getState(value);
 
       // In single selection mode, clear all existing selections first.
       if (singleSelection) {
-        q = q.removeOrFieldClauses(fieldName);
+        // Remove both OR-field and simple field clauses so no stale values remain.
+        q = q.removeOrFieldClauses(fieldName).removeSimpleFieldClauses(fieldName);
         // If clicking the already-selected value, just clear it (toggle off).
         if (currentState === targetType) {
           onChange?.(q);
           return;
         }
       } else {
-        // Multi-select: just remove the current value if it's already set.
+        // Multi-select: remove the current value if it's already set.
+        // Chain both removal methods to handle values written by the UI (OR-field)
+        // and values typed manually by the user (simple field clause).
         if (currentState) {
-          q = q.removeOrFieldValue(fieldName, value);
+          q = q.removeOrFieldValue(fieldName, value).removeSimpleFieldValue(fieldName, value);
         }
       }
 
@@ -187,16 +196,16 @@ export const useFieldQueryFilter = ({
 
       onChange?.(q);
     },
-    [hasParseError, parsedQuery, getState, fieldName, onChange, singleSelection]
+    [parsedQuery, getState, fieldName, onChange, singleSelection]
   );
 
   const clearAll = useCallback(() => {
-    // Don't modify when query has parse error — preserve the user's in-progress text.
-    if (hasParseError || !parsedQuery) {
+    if (!parsedQuery) {
       return;
     }
-    onChange?.(parsedQuery.removeOrFieldClauses(fieldName));
-  }, [hasParseError, parsedQuery, fieldName, onChange]);
+    // Remove both OR-field clauses and simple field clauses (e.g. `field:value` typed manually).
+    onChange?.(parsedQuery.removeOrFieldClauses(fieldName).removeSimpleFieldClauses(fieldName));
+  }, [parsedQuery, fieldName, onChange]);
 
   return {
     selection,

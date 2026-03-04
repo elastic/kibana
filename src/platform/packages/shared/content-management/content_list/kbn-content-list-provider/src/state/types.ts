@@ -8,7 +8,7 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ActiveFilters } from '../datasource';
+import type { ActiveFilters, FilterCounts } from '../datasource';
 import type { ContentListItem } from '../item';
 
 /**
@@ -96,7 +96,7 @@ export interface ContentListQueryData {
   /**
    * Per-filter counts from the full result set. See {@link FindItemsResult.counts}.
    */
-  counts?: Record<string, Record<string, number>>;
+  counts?: Record<string, FilterCounts>;
   /**
    * Whether the initial data load is in progress (no data available yet).
    *

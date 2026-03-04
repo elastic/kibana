@@ -25,14 +25,16 @@ export const mockFavoritesClient = {
 // Mock Tags Service
 // =============================================================================
 
-const resolveTagNamesToIds = (tagNames: string[], tags: Tag[]): string[] =>
-  tagNames.reduce<string[]>((ids, name) => {
+const resolveTagNamesToIds = (tagNames: string[], tags: Tag[]): string[] => {
+  const ids: string[] = [];
+  tagNames.forEach((name) => {
     const tag = tags.find((t) => t.name === name);
     if (tag?.id) {
       ids.push(tag.id);
     }
-    return ids;
-  }, []);
+  });
+  return ids;
+};
 
 /**
  * Parses EUI query syntax to extract `tag:Name` and `-tag:Name` clauses,
@@ -87,7 +89,7 @@ const parseSearchQuery = (searchQuery: string): ParsedQuery => {
   }
 
   return {
-    searchQuery: query.removeOrFieldClauses('tag').text,
+    searchQuery: query.removeOrFieldClauses('tag').removeSimpleFieldClauses('tag').text,
     tagIds: unique.length > 0 ? unique : undefined,
     tagIdsToExclude: uniqueExclude.length > 0 ? uniqueExclude : undefined,
   };

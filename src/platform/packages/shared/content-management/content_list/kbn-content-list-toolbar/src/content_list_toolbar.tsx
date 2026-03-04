@@ -16,9 +16,11 @@ import {
   useContentListSearch,
   useContentListFilters,
 } from '@kbn/content-list-provider';
-import { useTagServices } from '@kbn/content-management-tags';
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
+import { parseFiltersFromQuery } from './filters/query_parser';
+import type { QueryParser } from './filters/query_parser';
+import { useTagQueryParser } from './filters/tags/use_tag_query_parser';
 import { useFilters } from './hooks';
 import { SelectionBar } from './selection_bar';
 
@@ -83,14 +85,23 @@ const ContentListToolbarComponent = ({
   const { labels, supports } = useContentListConfig();
   const { search, setSearch, isSupported: searchIsSupported } = useContentListSearch();
   const { filters: currentFilters } = useContentListFilters();
-  const tagServices = useTagServices();
   const filters = useFilters(children);
 
   // Keep a ref so the error-recovery branch of handleSearchChange can read the
   // latest filters without making them a useCallback dependency (which would
-  // cause the callback to re-create on every tag toggle).
+  // cause the callback to re-create on every filter toggle).
   const currentFiltersRef = useRef(currentFilters);
   currentFiltersRef.current = currentFilters;
+
+  // Assemble the query parser pipeline. Each filter type contributes a parser that
+  // extracts its field syntax (e.g. `tag:name`, `createdBy:user`) from the query
+  // text and maps it to `ActiveFilters`. Add new parsers here as filter PRs land —
+  // `handleSearchChange` itself never needs to change.
+  const tagParser = useTagQueryParser();
+  const queryParsers = useMemo(
+    (): ReadonlyArray<QueryParser> => [tagParser].filter((p): p is QueryParser => p !== null),
+    [tagParser]
+  );
 
   const handleSearchChange = useCallback(
     ({ queryText, error }: EuiSearchBarOnChangeArgs) => {
@@ -98,41 +109,35 @@ const ContentListToolbarComponent = ({
         return;
       }
 
-      if (tagServices?.parseSearchQuery) {
+      if (queryParsers.length > 0) {
         try {
-          const { searchQuery, tagIds, tagIdsToExclude } = tagServices.parseSearchQuery(queryText);
-          const hasTags =
-            (tagIds && tagIds.length > 0) || (tagIdsToExclude && tagIdsToExclude.length > 0);
-
-          setSearch(queryText, {
-            search: searchQuery?.trim() || undefined,
-            ...(hasTags && {
-              tag: { include: tagIds ?? [], exclude: tagIdsToExclude ?? [] },
-            }),
-          });
+          const { searchQuery, filters: parsedFilters } = parseFiltersFromQuery(
+            queryText,
+            queryParsers
+          );
+          setSearch(queryText, { search: searchQuery.trim() || undefined, ...parsedFilters });
         } catch (e) {
-          // Preserve existing filters on parse failure so structured
-          // filters aren't silently dropped while the search bar still
-          // displays filter syntax.
+          // Preserve existing filters on parse failure so structured filters aren't silently
+          // dropped while the search bar still displays filter syntax. In particular, keep
+          // the existing `search` value rather than using `queryText` directly — doing so
+          // would leak raw filter syntax (e.g. `tag:foo`) into the text search sent to `findItems`.
           if (process.env.NODE_ENV !== 'production') {
             // eslint-disable-next-line no-console
             console.warn(
-              '[ContentListToolbar] parseSearchQuery failed, preserving existing filters',
+              '[ContentListToolbar] query parser failed, preserving existing filters',
               e
             );
           }
-          setSearch(queryText, {
-            ...currentFiltersRef.current,
-            search: queryText?.trim() || undefined,
-          });
+          setSearch(queryText, { ...currentFiltersRef.current });
         }
       } else {
+        // No parsers registered — treat the entire query as plain text search.
         // `queryText` preserves the raw input (including whitespace) for display fidelity.
         // `filters.search` is trimmed so data fetching ignores leading/trailing spaces.
         setSearch(queryText, { search: queryText.trim() || undefined });
       }
     },
-    [setSearch, tagServices]
+    [setSearch, queryParsers]
   );
 
   // Only include the selection bar when selection is supported to avoid
