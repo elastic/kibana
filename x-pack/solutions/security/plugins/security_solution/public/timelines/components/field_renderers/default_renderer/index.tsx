@@ -28,9 +28,7 @@ interface DefaultFieldRendererProps {
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 /** Normalizes a value to string[] for use as rowItems (ES fields can be single value or array). */
-export const toFieldRendererItems = (
-  value: string | string[] | null | undefined
-): string[] =>
+export const toFieldRendererItems = (value: string | string[] | null | undefined): string[] =>
   Array.isArray(value) ? value : value != null ? [value] : [];
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({

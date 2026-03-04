@@ -19,7 +19,10 @@ describe('buildQuery', () => {
       hostEntityIdentifiers: { 'host.name': 'siem-kibana', 'host.domain': 'example.com' },
     };
     const dsl = buildQuery(options);
-    const filter = dsl.query?.bool?.filter as Array<{ bool?: unknown; term?: Record<string, string> }>;
+    const filter = dsl.query?.bool?.filter as Array<{
+      bool?: unknown;
+      term?: Record<string, string>;
+    }>;
     expect(Array.isArray(filter)).toBe(true);
     expect(filter.length).toBeGreaterThanOrEqual(2);
     const hasEntityFilter = filter.some((clause) => clause?.bool != null);

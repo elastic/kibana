@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { euid } from '../../../../../../../../plugins/entity_store/common';
+import { euid } from '@kbn/entity-store/common';
 import type { RelatedUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
 export const buildRelatedUsersQuery = ({

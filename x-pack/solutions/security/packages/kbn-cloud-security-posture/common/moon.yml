@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-common'
   - '@kbn/ftr-common-functional-services'
+  - '@kbn/entity-store'
 tags:
   - shared-common
   - package

@@ -17,12 +17,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../../entity_store/common/domain/euid/entity_filters';
 import {
   type CloudSecurityUiCounters,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common/domain/euid/entity_filters';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';

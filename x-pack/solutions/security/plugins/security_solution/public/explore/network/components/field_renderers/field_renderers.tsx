@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { euid } from '../../../../../../entity_store/common';
+import { euid } from '@kbn/entity-store/common';
 import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '../../../../../../../plugins/entity_store/common';
+import { euid } from '@kbn/entity-store/common';
 import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import {

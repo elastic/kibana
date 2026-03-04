@@ -89,11 +89,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
       'host.entity.id': { values: ['host-entity-123'] },
       'host.name': { values: ['my-host'] },
     };
-    const result = convertHighlightedFieldsToTableRow(
-      highlightedFields,
-      scopeId,
-      showCellActions
-    );
+    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
     const hostNameRow = result.find((r) => r.field === 'host.name');
     expect(hostNameRow?.description.entityIdentifiers).toEqual({
       'host.entity.id': 'host-entity-123',
@@ -106,11 +102,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
       'user.entity.id': { values: ['user-entity-456'] },
       'user.name': { values: ['my-user'] },
     };
-    const result = convertHighlightedFieldsToTableRow(
-      highlightedFields,
-      scopeId,
-      showCellActions
-    );
+    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
     const userNameRow = result.find((r) => r.field === 'user.name');
     expect(userNameRow?.description.entityIdentifiers).toEqual({
       'user.entity.id': 'user-entity-456',
@@ -123,11 +115,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
       'host.name': { values: ['my-host'] },
       'user.name': { values: ['my-user'] },
     };
-    const result = convertHighlightedFieldsToTableRow(
-      highlightedFields,
-      scopeId,
-      showCellActions
-    );
+    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
     const userNameRow = result.find((r) => r.field === 'user.name');
     const hostNameRow = result.find((r) => r.field === 'host.name');
     // user.name row should only have user.* keys (getUserEntityIdentifiers adds host fields when user.name exists)
@@ -142,11 +130,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
     const highlightedFields = {
       'process.name': { values: ['node.exe'] },
     };
-    const result = convertHighlightedFieldsToTableRow(
-      highlightedFields,
-      scopeId,
-      showCellActions
-    );
+    const result = convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions);
     expect(result[0].description.entityIdentifiers).toBeUndefined();
   });
 });

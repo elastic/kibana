@@ -10,15 +10,16 @@ import type { EntityIdentifiers } from '../utils';
 import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
 import { getHostEntityIdentifiers, getUserEntityIdentifiers } from '../utils';
-import { HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import {
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+} from '../../../../timelines/components/timeline/body/renderers/constants';
 
 const filterEntityIdentifiersByPrefix = (
   identifiers: EntityIdentifiers,
   prefix: 'host.' | 'user.'
 ): EntityIdentifiers =>
-  Object.fromEntries(
-    Object.entries(identifiers).filter(([key]) => key.startsWith(prefix))
-  );
+  Object.fromEntries(Object.entries(identifiers).filter(([key]) => key.startsWith(prefix)));
 
 /**
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
@@ -48,15 +49,15 @@ export const convertHighlightedFieldsToTableRow = (
       fieldName === HOST_NAME_FIELD_NAME
         ? getHostEntityIdentifiers({} as never, getFieldsData)
         : fieldName === USER_NAME_FIELD_NAME
-          ? getUserEntityIdentifiers({} as never, getFieldsData)
-          : null;
+        ? getUserEntityIdentifiers({} as never, getFieldsData)
+        : null;
 
     const entityIdentifiers =
       rawEntityIdentifiers && fieldName === HOST_NAME_FIELD_NAME
         ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'host.')
         : rawEntityIdentifiers && fieldName === USER_NAME_FIELD_NAME
-          ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'user.')
-          : null;
+        ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'user.')
+        : null;
 
     return {
       field,

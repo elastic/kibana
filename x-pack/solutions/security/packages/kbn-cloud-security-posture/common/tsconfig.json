@@ -17,7 +17,6 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/data-views-plugin",
-    "@kbn/entity-store",
     "@kbn/i18n",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
@@ -25,5 +24,6 @@
     "@kbn/core",
     "@kbn/core-http-common",
     "@kbn/ftr-common-functional-services",
+    "@kbn/entity-store",
   ]
 }

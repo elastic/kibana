@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common';
 import { useVulnerabilitiesPreview } from './use_vulnerabilities_preview';
-import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../../security/plugins/entity_store/common';
 import { hasVulnerabilitiesData } from '../utils/vulnerability_helpers';
 
 export const useHasVulnerabilities = (entityIdentifiers: Record<string, string>) => {

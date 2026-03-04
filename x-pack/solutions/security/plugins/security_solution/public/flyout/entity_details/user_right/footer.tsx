@@ -16,8 +16,7 @@ export const UserPanelFooter = ({
   entityIdentifiers: EntityIdentifiers;
 }) => {
   const userName = useMemo(
-    () =>
-      entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
+    () => entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
     [entityIdentifiers]
   );
 
