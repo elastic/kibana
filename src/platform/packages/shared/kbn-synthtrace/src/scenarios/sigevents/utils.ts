@@ -323,7 +323,7 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
 
         const noise: NoiseConfig | undefined =
           scenarioNoise || ghostMentions
-            ? { ...scenarioNoise, ...(ghostMentions ? { ghostMentions } : {}) }
+            ? { ...(scenarioNoise ?? {}), ...(ghostMentions ? { ghostMentions } : {}) }
             : undefined;
 
         const cycleDurationMs = activeScenario?.cycleDurationMinutes
