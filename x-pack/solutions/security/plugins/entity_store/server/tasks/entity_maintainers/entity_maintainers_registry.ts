@@ -26,7 +26,7 @@ export class EntityMaintainersRegistry {
   register({ id, interval, description }: Omit<EntityMaintainerTaskEntry, 'taskStatus'>): void {
     this.tasks.set(id, {
       interval,
-      taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+      taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
       description,
     });
   }

@@ -109,7 +109,7 @@ describe('EntityMaintainersClient', () => {
       entityMaintainersRegistry.get.mockReturnValue({
         id: 'maintainer-a',
         interval: '5m',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
       });
       const client = createClient();
       const request = createMockRequest();
@@ -134,7 +134,7 @@ describe('EntityMaintainersClient', () => {
       entityMaintainersRegistry.get.mockReturnValue({
         id: 'maintainer-a',
         interval: '5m',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
       });
       const err = new Error('schedule failed');
       (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(err);
@@ -149,7 +149,7 @@ describe('EntityMaintainersClient', () => {
   describe('startAll', () => {
     it('should schedule all registered tasks and update each to STARTED', async () => {
       const entries: EntityMaintainerTaskEntry[] = [
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED },
         { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STOPPED },
       ];
       entityMaintainersRegistry.getAll.mockReturnValue(entries);
@@ -175,7 +175,7 @@ describe('EntityMaintainersClient', () => {
 
     it('should propagate error when any schedule fails', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED },
       ]);
       (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(
         new Error('schedule failed')

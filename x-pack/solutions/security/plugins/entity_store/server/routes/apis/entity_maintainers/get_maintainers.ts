@@ -63,15 +63,15 @@ export function registerGetMaintainers(router: EntityStorePluginRouter) {
           ctx,
           req,
           res
-        ): Promise<IKibanaResponse<{ list: EntityMaintainerResponseItem[] }>> => {
+        ): Promise<IKibanaResponse<{ maintainers: EntityMaintainerResponseItem[] }>> => {
           const entityStoreCtx = await ctx.entityStore;
           const { entityMaintainersClient } = entityStoreCtx;
-          const maintainers = await entityMaintainersClient.getMaintainers();
-          const list: EntityMaintainerResponseItem[] = maintainers.map(
+          const clientMaintainers = await entityMaintainersClient.getMaintainers();
+          const formattedMaintainers: EntityMaintainerResponseItem[] = clientMaintainers.map(
             toGetMaintainersResponseItem
           );
 
-          return res.ok({ body: { list } });
+          return res.ok({ body: { maintainers: formattedMaintainers } });
         }
       )
     );

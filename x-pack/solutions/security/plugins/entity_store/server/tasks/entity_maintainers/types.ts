@@ -9,7 +9,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 export const EntityMaintainerTaskStatus = {
-  NOT_STARTED: 'not_started',
+  NEVER_STARTED: 'never_started',
   STARTED: 'started',
   STOPPED: 'stopped',
 } as const;

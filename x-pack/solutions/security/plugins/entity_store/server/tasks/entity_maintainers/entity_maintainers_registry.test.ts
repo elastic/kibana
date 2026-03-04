@@ -22,13 +22,13 @@ describe('EntityMaintainersRegistry', () => {
   });
 
   describe('register', () => {
-    it('should add an entry and getAll returns it with not_started status', () => {
+    it('should add an entry and getAll returns it with never_started status', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
       expect(registry.getAll()).toEqual([
         {
           id: 'maintainer-a',
           interval: '5m',
-          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         },
       ]);
       expect(registry.getAll()[0].description).toBeUndefined();
@@ -41,12 +41,12 @@ describe('EntityMaintainersRegistry', () => {
         {
           id: 'maintainer-a',
           interval: '1m',
-          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         },
         {
           id: 'maintainer-b',
           interval: '5m',
-          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         },
       ]);
       expect(registry.getAll()[0].description).toBeUndefined();
@@ -60,7 +60,7 @@ describe('EntityMaintainersRegistry', () => {
         {
           id: 'maintainer-a',
           interval: '10m',
-          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         },
       ]);
     });
@@ -74,7 +74,7 @@ describe('EntityMaintainersRegistry', () => {
       expect(registry.get('maintainer-a')).toEqual({
         id: 'maintainer-a',
         interval: '5m',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         description: 'Maintains entity index',
       });
     });
@@ -90,7 +90,7 @@ describe('EntityMaintainersRegistry', () => {
       expect(registry.get('maintainer-a')).toEqual({
         id: 'maintainer-a',
         interval: '5m',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
       });
       expect(registry.get('maintainer-a')!.description).toBeUndefined();
     });
@@ -148,7 +148,7 @@ describe('EntityMaintainersRegistry', () => {
         {
           id: 'maintainer-a',
           interval: '10m',
-          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         },
       ]);
     });
@@ -162,7 +162,7 @@ describe('EntityMaintainersRegistry', () => {
         {
           id: 'maintainer-a',
           interval: '5m',
-          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         },
       ]);
     });
