@@ -101,11 +101,7 @@ export const dataConcatStepDefinition = createServerStepDefinition({
         return { error: new Error('"arrays" must be a non-empty array of arrays') };
       }
 
-      const flattenDepth = flatten
-        ? typeof flatten === 'number'
-          ? flatten
-          : 1
-        : 0;
+      const flattenDepth = flatten ? (typeof flatten === 'number' ? flatten : 1) : 0;
 
       const outcome = concatSinglePass(
         rawArrays,
