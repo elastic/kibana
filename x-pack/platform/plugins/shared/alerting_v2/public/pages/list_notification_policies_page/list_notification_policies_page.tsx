@@ -136,26 +136,16 @@ export const ListNotificationPoliciesPage = () => {
         </EuiFlexGroup>
       ),
     },
+
     {
-      field: 'throttle',
+      field: 'updatedAt',
       name: (
         <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.throttle"
-          defaultMessage="Throttle"
+          id="xpack.alertingV2.notificationPoliciesList.column.updatedAt"
+          defaultMessage="Last update"
         />
       ),
-      render: (throttle: NotificationPolicyResponse['throttle']) =>
-        throttle ? <EuiBadge color="hollow">{throttle.interval}</EuiBadge> : '-',
-    },
-    {
-      field: 'createdAt',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.createdAt"
-          defaultMessage="Created at"
-        />
-      ),
-      render: (createdAt: string) => new Date(createdAt).toLocaleString(),
+      render: (updatedAt: string) => new Date(updatedAt).toLocaleString(),
     },
     {
       name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
