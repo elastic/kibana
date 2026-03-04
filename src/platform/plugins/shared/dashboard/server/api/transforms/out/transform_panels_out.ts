@@ -8,7 +8,8 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
@@ -54,7 +55,10 @@ export function transformPanelsOut(
 
 const defaultTransform = (
   config: SavedDashboardPanel['embeddableConfig']
-): SavedDashboardPanel['embeddableConfig'] => transformTitlesOut(config);
+): SavedDashboardPanel['embeddableConfig'] => {
+  const transformsFlow = flow(transformTitlesOut, transformTimeRangeOut);
+  return transformsFlow(config);
+};
 
 function transformPanelProperties(
   storedPanel: SavedDashboardPanel,

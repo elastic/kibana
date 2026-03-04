@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -56,8 +55,7 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    feature: query.feature,
-    kqlQuery: query.kql.query,
+    esqlQuery: query.esql.query,
     timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
@@ -85,13 +83,7 @@ export function PreviewDataSparkPlot({
   } = useKibana();
   const useUrl = share.url.locators.useUrl;
 
-  // Compute the ES|QL query client-side for the Discover link because
-  // query.esql.query is populated server-side on save and does not exist
-  // yet during creation or live editing.
-  const discoverEsqlQuery = useMemo(
-    () => (isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : ''),
-    [definition, query, isQueryValid]
-  );
+  const discoverEsqlQuery = query.esql.query;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({
