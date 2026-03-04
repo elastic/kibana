@@ -410,4 +410,5 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
     });
+  });
 }
