@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
 import Boom from '@hapi/boom';
-import { esql } from '@kbn/esql-language';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {

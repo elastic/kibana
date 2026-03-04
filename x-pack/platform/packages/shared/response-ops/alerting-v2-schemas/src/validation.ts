@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 
 const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
 
