@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export CYPRESS_LIGHTWEIGHT_BOOTSTRAP=true
+
 source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-security-solution-chrome
