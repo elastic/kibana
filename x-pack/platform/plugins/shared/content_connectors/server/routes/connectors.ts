@@ -1373,12 +1373,7 @@ export function registerConnectorRoutes({
       );
 
       return response.ok({
-        body: {
-          api_key: apiKeyResult.api_key,
-          encoded: apiKeyResult.encoded,
-          id: apiKeyResult.id,
-          name: apiKeyResult.name,
-        },
+        body: apiKeyResult,
         headers: { 'content-type': 'application/json' },
       });
     })
