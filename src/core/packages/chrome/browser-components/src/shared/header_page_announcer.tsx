@@ -13,15 +13,16 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
-
-import type { HeaderProps } from './header';
+import type { Observable } from 'rxjs';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/src/core/packages/rendering/server-internal/src/views/template.tsx#L35
 const SEPARATOR = ' - ';
 
 export const HeaderPageAnnouncer: FC<{
-  breadcrumbs$: HeaderProps['breadcrumbs$'];
-  customBranding$: HeaderProps['customBranding$'];
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  customBranding$: Observable<CustomBranding>;
 }> = ({ breadcrumbs$, customBranding$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
   const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
