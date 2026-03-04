@@ -15,8 +15,7 @@ import { useChromeComponentsDeps } from '../../context';
 import { Navigation } from './navigation';
 
 export const GridLayoutProjectSideNav = () => {
-  const { basePath, application, project, navLinks$, sideNav } =
-    useChromeComponentsDeps();
+  const { basePath, application, project, navLinks$, sideNav } = useChromeComponentsDeps();
 
   const isCollapsed = useObservable(sideNav.collapsed$, sideNav.initialCollapsed);
   const updateLayout = useLayoutUpdate();
