@@ -30,7 +30,7 @@ import type { FeatureFlags } from './infra/feature_flags';
 import type { CcsLogsExtractionClient } from './domain/logs_extraction';
 import type { LogsExtractionClient } from './domain/logs_extraction';
 import type { CRUDClient } from './domain/crud_client';
-import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
