@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { PublishesSavedSearch } from '@kbn/discover-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch } from '@kbn/discover-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { LicenseCheckState } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -94,7 +94,7 @@ describe('GetCsvReportPanelAction', () => {
 
     context = {
       embeddable: {
-        type: 'search',
+        type: SEARCH_EMBEDDABLE_TYPE,
         savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
         getInspectorAdapters: () => null,
         getInput: () => ({
