@@ -6,12 +6,7 @@
  */
 
 import type { Feature, Streams } from '@kbn/streams-schema';
-import {
-  ensureMetadata,
-  getIndexPatternsForStream,
-  getSourcesForStream,
-  replaceFromSources,
-} from '@kbn/streams-schema';
+import { ensureMetadata, getSourcesForStream, replaceFromSources } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
