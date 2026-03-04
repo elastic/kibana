@@ -28,6 +28,7 @@ export async function getActiveMaintenanceWindows(
   cacheIntervalMs?: number
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
+  const perPage = 1000;
 
   const startDate = new Date();
   const startDateISO = startDate.toISOString();
@@ -51,10 +52,22 @@ export async function getActiveMaintenanceWindows(
   ]);
 
   try {
-    const { saved_objects: savedObjects } = await findMaintenanceWindowSo({
+    const firstPageResponse = await findMaintenanceWindowSo({
       savedObjectsClient,
-      savedObjectsFindOptions: { filter },
+      savedObjectsFindOptions: { filter, page: 1, perPage },
     });
+
+    const savedObjects = [...firstPageResponse.saved_objects];
+    const total = firstPageResponse.total;
+
+    for (let page = 2; savedObjects.length < total; page += 1) {
+      const response = await findMaintenanceWindowSo({
+        savedObjectsClient,
+        savedObjectsFindOptions: { filter, page, perPage },
+      });
+
+      savedObjects.push(...response.saved_objects);
+    }
 
     return savedObjects.map((savedObject) => {
       return transformMaintenanceWindowAttributesToMaintenanceWindow({

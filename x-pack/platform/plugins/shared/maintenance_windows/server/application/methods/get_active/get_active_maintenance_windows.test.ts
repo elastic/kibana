@@ -232,6 +232,52 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
     expect(result).toEqual([]);
   });
 
+  it('should return all active maintenance windows when SO find response is paginated', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    const firstPageSavedObjects = Array.from({ length: 20 }, (_, i) => ({
+      attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+      id: `test-${i + 1}`,
+    }));
+    const secondPageSavedObjects = Array.from({ length: 15 }, (_, i) => ({
+      attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+      id: `test-${i + 21}`,
+    }));
+
+    savedObjectsClient.find.mockResolvedValueOnce({
+      page: 1,
+      per_page: 1000,
+      total: 35,
+      saved_objects: firstPageSavedObjects,
+    } as unknown as SavedObjectsFindResponse);
+    savedObjectsClient.find.mockResolvedValueOnce({
+      page: 2,
+      per_page: 1000,
+      total: 35,
+      saved_objects: secondPageSavedObjects,
+    } as unknown as SavedObjectsFindResponse);
+
+    const result = await getActiveMaintenanceWindows(mockContext);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+    expect(savedObjectsClient.find.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        page: 1,
+        perPage: 1000,
+      })
+    );
+    expect(savedObjectsClient.find.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        page: 2,
+        perPage: 1000,
+      })
+    );
+    expect(result).toHaveLength(35);
+    expect(result.map((mw) => mw.id)).toEqual(
+      [...firstPageSavedObjects, ...secondPageSavedObjects].map((savedObject) => savedObject.id)
+    );
+  });
+
   it('should log and throw if an error is thrown', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
