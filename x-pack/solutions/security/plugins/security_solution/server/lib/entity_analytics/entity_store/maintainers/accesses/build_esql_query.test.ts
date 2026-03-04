@@ -56,6 +56,7 @@ describe('buildEsqlQuery', () => {
       const query = buildEsqlQuery('default');
       expect(query).toContain('"RemoteInteractive"');
       expect(query).toContain('"Interactive"');
+      expect(query).toContain('"Network"');
     });
 
     it('filters for successful outcomes', () => {

@@ -60,7 +60,7 @@ export function buildEsqlQuery(namespace: string, skipEntityFields: boolean = fa
 
   return `FROM ${getIndexPattern(namespace)}
 | WHERE event.action == "log_on"
-    AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive")
+    AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")
     AND event.outcome == "success"
     AND (${userIdFilter})
     AND (${hostIdFilter})

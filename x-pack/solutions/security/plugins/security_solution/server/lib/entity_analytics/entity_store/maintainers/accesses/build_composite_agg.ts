@@ -20,7 +20,11 @@ export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) => ({
       filter: [
         { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
         { term: { 'event.action': 'log_on' } },
-        { terms: { 'process.Ext.session_info.logon_type': ['RemoteInteractive', 'Interactive'] } },
+        {
+          terms: {
+            'process.Ext.session_info.logon_type': ['RemoteInteractive', 'Interactive', 'Network'],
+          },
+        },
         { term: { 'event.outcome': 'success' } },
         euid.getEuidDslDocumentsContainsIdFilter('user'),
         euid.getEuidDslDocumentsContainsIdFilter('host'),
