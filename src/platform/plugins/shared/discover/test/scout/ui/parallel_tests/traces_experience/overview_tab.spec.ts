@@ -114,15 +114,11 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify Errors section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeVisible({
-              timeout: 30_000,
-            });
+            await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeVisible();
           });
 
           await spaceTest.step('verify Span Links section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.spanLinksSection).toBeVisible({
-              timeout: 30_000,
-            });
+            await expect(pageObjects.tracesExperience.flyout.spanLinksSection).toBeVisible();
           });
         }
       );
