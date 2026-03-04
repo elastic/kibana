@@ -36,7 +36,7 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
 export const getUpdatedMetricState = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {
-  const { secondaryPrefix, valuesTextAlign, titleWeight: _titleWeight, ...restState } = state;
+  const { secondaryPrefix, valuesTextAlign, titleWeight, ...restState } = state;
   let newState = { ...restState };
 
   if (valuesTextAlign) {
