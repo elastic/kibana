@@ -201,7 +201,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
       };
 
       const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
-      console.log({ parentApi, isPinned });
+
       return {
         api,
         Component: () => {
