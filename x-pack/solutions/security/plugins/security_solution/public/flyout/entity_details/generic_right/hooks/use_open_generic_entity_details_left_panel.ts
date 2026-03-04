@@ -8,7 +8,7 @@
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EntityIdentifiers } from '../../../../document_details/shared/utils';
+import type { EntityIdentifiers } from '../../../document_details/shared/utils';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';

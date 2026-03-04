@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import type { EntityIdentifiers } from '../../../common/components/link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
@@ -63,7 +63,6 @@ export const UserPanelHeader = ({
     [oktaTimestamp, entraTimestamp, observedUserLastSeenDate]
   );
 
-  console.log('entityIdentifiers', entityIdentifiers);
   return (
     <FlyoutHeader data-test-subj="user-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -84,12 +83,7 @@ export const UserPanelHeader = ({
         <EuiFlexItem grow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.users}
-            path={getTabsOnUsersDetailsUrl(
-              userName,
-              UsersTableType.events,
-              undefined,
-              entityIdentifiers
-            )}
+            path={getTabsOnUsersDetailsUrl(userName, UsersTableType.events, undefined)}
             target={'_blank'}
             external={false}
             css={linkTitleCSS}

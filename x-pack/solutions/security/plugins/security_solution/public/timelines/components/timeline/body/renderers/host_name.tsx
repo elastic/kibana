@@ -56,11 +56,7 @@ const HostNameComponent: React.FC<Props> = ({
        * if and only if renderer is running inside security solution app
        * we check for event and timeline context
        * */
-      if (
-        !eventContext ||
-        !isInTimelineContext ||
-        !eventContext.enableHostDetailsFlyout
-      ) {
+      if (!eventContext || !isInTimelineContext || !eventContext.enableHostDetailsFlyout) {
         return;
       }
 
@@ -79,7 +75,7 @@ const HostNameComponent: React.FC<Props> = ({
         },
       });
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, entityIdentifiers]
+    [onClick, eventContext, isInTimelineContext, entityIdentifiers, hostName, openFlyout, contextId]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -92,7 +88,6 @@ const HostNameComponent: React.FC<Props> = ({
         isButton={isButton}
         onClick={isInTimelineContext || !isInSecurityApp ? openHostDetailsSidePanel : undefined}
         title={title}
-        entityIdentifiers={entityIdentifiers ?? undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
@@ -105,7 +100,6 @@ const HostNameComponent: React.FC<Props> = ({
       isInSecurityApp,
       openHostDetailsSidePanel,
       title,
-      entityIdentifiers,
     ]
   );
 

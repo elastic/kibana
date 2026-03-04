@@ -9,7 +9,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback, useMemo } from 'react';
 import { EntityType } from '../../../../../common/search_strategy';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../../../document_details/shared/utils';
+import type { EntityIdentifiers } from '../../../document_details/shared/utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';

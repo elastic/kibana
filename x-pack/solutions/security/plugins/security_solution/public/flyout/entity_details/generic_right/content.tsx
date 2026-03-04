@@ -22,7 +22,7 @@ import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
-import type { EntityIdentifiers } from '../../../../document_details/shared/utils';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';

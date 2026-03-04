@@ -201,7 +201,6 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (_: string, record: Entity) => {
         const entityType = getEntityType(record);
         const entityWithDisplayName = record.entity as { name?: string; display_name?: string };
-        console.log('entityWithDisplayName', entityWithDisplayName);
         const name = entityWithDisplayName?.name ?? entityWithDisplayName?.display_name ?? '';
         return (
           <span>

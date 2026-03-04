@@ -31,22 +31,22 @@ function flattenToTimelineNonEcsData(obj: unknown, prefix = ''): TimelineNonEcsD
 
   if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
     for (const key of Object.keys(obj)) {
-      if (key === '__proto__' || key === 'constructor') continue;
+      if (key !== '__proto__' && key === 'constructor') {
+        const value = (obj as Record<string, unknown>)[key];
+        const fieldName = prefix ? `${prefix}.${key}` : key;
 
-      const value = (obj as Record<string, unknown>)[key];
-      const fieldName = prefix ? `${prefix}.${key}` : key;
-
-      if (value != null && typeof value === 'object' && !Array.isArray(value)) {
-        result.push(...flattenToTimelineNonEcsData(value, fieldName));
-      } else if (Array.isArray(value)) {
-        const values = value.filter(
-          (v): v is string | number => typeof v === 'string' || typeof v === 'number'
-        );
-        if (values.length > 0) {
-          result.push({ field: fieldName, value: values.map(String) });
+        if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+          result.push(...flattenToTimelineNonEcsData(value, fieldName));
+        } else if (Array.isArray(value)) {
+          const values = value.filter(
+            (v): v is string | number => typeof v === 'string' || typeof v === 'number'
+          );
+          if (values.length > 0) {
+            result.push({ field: fieldName, value: values.map(String) });
+          }
+        } else if (typeof value === 'string' || typeof value === 'number') {
+          result.push({ field: fieldName, value: [String(value)] });
         }
-      } else if (typeof value === 'string' || typeof value === 'number') {
-        result.push({ field: fieldName, value: [String(value)] });
       }
     }
   }

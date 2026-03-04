@@ -187,7 +187,6 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
           criticality: criticalityLevel === 'unassigned' ? undefined : criticalityLevel,
         },
       });
-      console.log('updatedRecord', updatedRecord);
       await onSaveViaEntityStore(updatedRecord);
       onChange?.();
     },
