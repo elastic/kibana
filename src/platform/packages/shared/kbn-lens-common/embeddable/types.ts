@@ -31,6 +31,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type {
   PublishesDataViews,
   PublishingSubject,
+  SerializedTimeRange,
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -44,9 +45,9 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { Ast } from '@kbn/interpreter';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   IndexPatternMap,
   IndexPatternRef,
@@ -193,6 +194,10 @@ export interface LensPublicCallbacks extends LensApiProps {
    * Let the consumer overwrite embeddable user messages
    */
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
+  /**
+   * Optional user messages from the consumer.
+   */
+  userMessages?: UserMessage[];
   onAlertRule?: (data: unknown) => void;
 }
 
@@ -201,10 +206,9 @@ export interface LensPublicCallbacks extends LensApiProps {
  */
 export type LensApiCallbacks = Simplify<ViewInDiscoverCallbacks & IntegrationCallbacks>;
 
-export interface LensUnifiedSearchContext {
+export interface LensUnifiedSearchContext extends SerializedTimeRange {
   filters?: Filter[];
   query?: Query | AggregateQuery;
-  timeRange?: TimeRange;
   timeslice?: [number, number];
   searchSessionId?: string;
   lastReloadRequestTime?: number;
@@ -255,8 +259,8 @@ export type LensSerializedSharedState = Simplify<
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
-    Omit<LensSharedProps, 'noPadding'> &
-    Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
+    SerializedDrilldowns &
+    Omit<LensSharedProps, 'noPadding'> & { isNewPanel?: boolean }
 >;
 
 export type LensByValueSerializedState = Simplify<LensSerializedSharedState & LensByValueBase>;
@@ -328,8 +332,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 'time_range'> & {
   hidePanelTitles?: boolean;
+  timeRange?: TimeRange;
 };
 
 /**
@@ -428,6 +433,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  paddingTop?: boolean;
   abortController?: AbortController;
 }
 

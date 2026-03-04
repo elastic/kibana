@@ -1440,6 +1440,108 @@ const firstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
@@ -1810,6 +1912,108 @@ const lastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -2345,6 +2549,17 @@ const medianDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'long',
+          optional: false,
+          description: 'Expression that outputs values to calculate the median of.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'tdigest',
           optional: false,
           description: 'Expression that outputs values to calculate the median of.',
         },
@@ -3471,7 +3686,8 @@ const stCentroidAggDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.ST_CENTROID_AGG,
   description: i18n.translate('kbn-esql-language.esql.definitions.st_centroid_agg', {
-    defaultMessage: 'Calculate the spatial centroid over a field with spatial point geometry type.',
+    defaultMessage:
+      'Calculate the spatial centroid over a field with spatial geometry type.\nSupports `geo_point` and `cartesian_point`, as well as `geo_shape` and `cartesian_shape`.',
   }),
   preview: true,
   alias: undefined,
@@ -3491,11 +3707,35 @@ const stCentroidAggDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: '',
+        },
+      ],
+      license: 'platinum',
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description: '',
         },
       ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: '',
+        },
+      ],
+      license: 'platinum',
       returnType: 'geo_point',
     },
   ],

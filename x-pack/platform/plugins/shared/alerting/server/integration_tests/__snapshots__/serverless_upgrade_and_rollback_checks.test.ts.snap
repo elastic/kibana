@@ -3418,6 +3418,57 @@ Object {
       ],
       "type": "alternatives",
     },
+    "noDataBehavior": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "recover",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "remainActive",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "alertOnNoData",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
     "searchConfiguration": Object {
       "flags": Object {
         "default": Object {

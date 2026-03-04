@@ -48,7 +48,8 @@ const packages: PackageListItem[] = [
   },
 ];
 
-describe('<Wrapper />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253852
+describe.skip('<Wrapper />', () => {
   it('should render a loading skeleton while creating the dataView', async () => {
     (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,

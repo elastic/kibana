@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "typings/**/*",
-    "public/**/*.json"
+    "public/**/*.json",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -52,6 +53,7 @@
     "@kbn/server-route-repository-utils",
     "@kbn/react-kibana-mount",
     "@kbn/core-rendering-browser",
+    "@kbn/scout-oblt",
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,3 +6,4 @@
  */
 
 export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+export const FALLBACK_DEFAULT_CONNECTOR_ID = 'Anthropic-Claude-Sonnet-4-5';

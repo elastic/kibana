@@ -30,8 +30,9 @@ export function createOutputTokensEvaluator({
         const { columns, values } = response;
         const row = values[0];
         const outputTokensIdx = columns.findIndex((col) => col.name === 'output_tokens');
-        return row[outputTokensIdx] ?? 0;
+        return row[outputTokensIdx];
       },
+      isResultValid: (result) => result !== null && result > 0,
     },
   });
 }
@@ -56,8 +57,9 @@ export function createInputTokensEvaluator({
         const { columns, values } = response;
         const row = values[0];
         const inputTokensIdx = columns.findIndex((col) => col.name === 'input_tokens');
-        return row[inputTokensIdx] ?? 0;
+        return row[inputTokensIdx];
       },
+      isResultValid: (result) => result !== null && result > 0,
     },
   });
 }
@@ -82,8 +84,9 @@ export function createCachedTokensEvaluator({
         const { columns, values } = response;
         const row = values[0];
         const cachedTokensIdx = columns.findIndex((col) => col.name === 'cached_tokens');
-        return row[cachedTokensIdx] ?? 0;
+        return row[cachedTokensIdx];
       },
+      isResultValid: (result) => result !== null,
     },
   });
 }

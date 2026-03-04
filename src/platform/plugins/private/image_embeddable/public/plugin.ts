@@ -14,7 +14,6 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
@@ -38,7 +37,6 @@ export interface ImageEmbeddableStartDependencies {
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   screenshotMode?: ScreenshotModePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -63,12 +61,11 @@ export class ImageEmbeddablePlugin
     plugins: ImageEmbeddableSetupDependencies
   ): SetupContract {
     plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-      const [_, { getImageEmbeddableFactory }, [__, { embeddableEnhanced }]] = await Promise.all([
+      const [_, { getImageEmbeddableFactory }] = await Promise.all([
         untilPluginStartServicesReady(),
         import('./image_embeddable/get_image_embeddable_factory'),
-        core.getStartServices(),
       ]);
-      return getImageEmbeddableFactory({ embeddableEnhanced });
+      return getImageEmbeddableFactory();
     });
     return {};
   }

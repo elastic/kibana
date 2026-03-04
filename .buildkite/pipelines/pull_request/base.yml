@@ -9,7 +9,7 @@ steps:
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
@@ -75,12 +75,28 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
+    label: 'Linting (with oxlint)'
+    agents:
+      machineType: c4d-standard-32
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-c,us-central1-a
+      diskSizeGb: 105
+    key: linting_with_oxlint
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:
-      machineType: n2-standard-4
+      machineType: c4d-standard-2
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-c,us-central1-a
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -91,7 +107,7 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c4d-standard-4
+      machineType: c4d-highmem-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
@@ -112,15 +128,14 @@ steps:
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      JEST_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
+      FTR_CONFIGS_DEPS: 'build'
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2d-standard-8
@@ -129,8 +144,8 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'
@@ -157,15 +172,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
       diskSizeGb: 105
     key: build_api_docs
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_oas_snapshot
-      - check_types
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'

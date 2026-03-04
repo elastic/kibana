@@ -66,7 +66,7 @@ export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) 
       color={euiTheme.colors.backgroundBasePlain}
       dataTestSubj="queryModeSection"
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup css={{ maxInlineSize: '100%' }}>
         <EuiFlexItem grow={6} css={QueryViewContainer(euiTheme)}>
           <EuiPanel paddingSize="none" hasShadow={false} css={PanelFillContainer}>
             <EuiResizableContainer direction="vertical" css={FullHeight}>
