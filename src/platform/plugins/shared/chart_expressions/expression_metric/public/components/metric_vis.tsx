@@ -60,7 +60,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden={true} />;
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -99,10 +99,9 @@ export const MetricVis = ({
 }: MetricVisComponentProps) => {
   const grid = useRef<MetricSpec['data']>([[]]);
   const {
-    euiTheme,
+    euiTheme: { colors },
     highContrastMode,
   } = useEuiTheme();
-  const { colors } = euiTheme;
   const defaultColor = colors.emptyShade;
 
   const onRenderChange = useCallback<RenderChangeListener>(
