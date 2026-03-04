@@ -72745,6 +72745,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_DefaultParams'
             - $ref: '#/components/schemas/Security_Detections_API_ProcessesParams'
+            - $ref: '#/components/schemas/Security_Detections_API_RunscriptParams'
       required:
         - action_type_id
         - params
@@ -76125,6 +76126,42 @@ components:
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
       type: integer
+    Security_Detections_API_RunScriptOsConfigValues:
+      minProperties: 1
+      type: object
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
+        timeout:
+          description: Specify the timeout in seconds for the script execution
+          example: 60
+          type: integer
+    Security_Detections_API_RunscriptParams:
+      description: |
+        > warn
+        > This functionality is currently not available
+      type: object
+      properties:
+        command:
+          enum:
+            - runscript
+          type: string
+        comment:
+          description: Add a note that explains or describes the action. You can find your comment in the response actions history log
+          type: string
+        config:
+          type: object
+          properties:
+            linux:
+              $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
+            macos:
+              $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
+            windows:
+              $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
+      required:
+        - command
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
