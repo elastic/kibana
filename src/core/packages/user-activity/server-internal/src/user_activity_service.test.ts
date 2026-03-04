@@ -17,6 +17,7 @@ import { UserActivityService } from './user_activity_service';
 import type { InternalUserActivityServiceSetup } from './types';
 
 const TEST_ACTION = 'test_action' as UserActivityActionId;
+const OTHER_ACTION = 'other_action' as UserActivityActionId;
 
 const defaultConfig = {
   enabled: true,
@@ -31,6 +32,7 @@ const defaultConfig = {
       },
     ],
   ]),
+  filters: [],
 };
 
 describe('UserActivityService', () => {
@@ -141,6 +143,147 @@ describe('UserActivityService', () => {
       });
 
       expect(loggingSystemMock.collect(coreWithDisabledConfig.logger).info).toHaveLength(0);
+    });
+
+    it('does nothing when action is dropped by filters', () => {
+      const coreWithFilters = mockCoreContext.create();
+      coreWithFilters.configService.atPath.mockReturnValue(
+        new BehaviorSubject({
+          ...defaultConfig,
+          filters: [{ policy: 'drop', actions: [TEST_ACTION] }],
+        })
+      );
+      const filteredService = new UserActivityService(coreWithFilters).setup({
+        logging: loggingService,
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should not log',
+        event: { action: TEST_ACTION, type: 'change' },
+        object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(0);
+    });
+
+    it('logs only kept actions when using keep policy', () => {
+      const coreWithFilters = mockCoreContext.create();
+      coreWithFilters.configService.atPath.mockReturnValue(
+        new BehaviorSubject({
+          ...defaultConfig,
+          filters: [{ policy: 'keep', actions: [TEST_ACTION] }],
+        })
+      );
+      const filteredService = new UserActivityService(coreWithFilters).setup({
+        logging: loggingService,
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should log',
+        event: { action: TEST_ACTION, type: 'change' },
+        object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should not log',
+        event: { action: OTHER_ACTION, type: 'change' },
+        object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(1);
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info[0][0]).toBe('Should log');
+    });
+
+    it('supports keep + drop together (drop wins for matching actions)', () => {
+      const coreWithFilters = mockCoreContext.create();
+      coreWithFilters.configService.atPath.mockReturnValue(
+        new BehaviorSubject({
+          ...defaultConfig,
+          filters: [
+            { policy: 'keep', actions: [TEST_ACTION, OTHER_ACTION] },
+            { policy: 'drop', actions: [OTHER_ACTION] },
+          ],
+        })
+      );
+      const filteredService = new UserActivityService(coreWithFilters).setup({
+        logging: loggingService,
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should log',
+        event: { action: TEST_ACTION, type: 'change' },
+        object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should not log',
+        event: { action: OTHER_ACTION, type: 'change' },
+        object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(1);
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info[0][0]).toBe('Should log');
+    });
+
+    it('applies multiple keep filters (intersection)', () => {
+      const coreWithFilters = mockCoreContext.create();
+      coreWithFilters.configService.atPath.mockReturnValue(
+        new BehaviorSubject({
+          ...defaultConfig,
+          filters: [
+            { policy: 'keep', actions: [TEST_ACTION] },
+            { policy: 'keep', actions: [TEST_ACTION, OTHER_ACTION] },
+          ],
+        })
+      );
+      const filteredService = new UserActivityService(coreWithFilters).setup({
+        logging: loggingService,
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should log',
+        event: { action: TEST_ACTION, type: 'change' },
+        object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should not log',
+        event: { action: OTHER_ACTION, type: 'change' },
+        object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(1);
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info[0][0]).toBe('Should log');
+    });
+
+    it('applies multiple drop filters (union)', () => {
+      const coreWithFilters = mockCoreContext.create();
+      coreWithFilters.configService.atPath.mockReturnValue(
+        new BehaviorSubject({
+          ...defaultConfig,
+          filters: [
+            { policy: 'drop', actions: [TEST_ACTION] },
+            { policy: 'drop', actions: [OTHER_ACTION] },
+          ],
+        })
+      );
+      const filteredService = new UserActivityService(coreWithFilters).setup({
+        logging: loggingService,
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should not log',
+        event: { action: TEST_ACTION, type: 'change' },
+        object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
+      });
+
+      filteredService.trackUserAction({
+        message: 'Should not log',
+        event: { action: OTHER_ACTION, type: 'change' },
+        object: { id: 'obj-2', name: 'Test', type: 'test', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(0);
     });
   });
 
