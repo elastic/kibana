@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -215,6 +216,21 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
+        const { uiSettings } = await ctx.core;
+        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+
+        // Temporary route-level gate: keep API defaults unchanged while hiding visibility controls
+        // until the experimental features setting is enabled.
+        if (!experimentalFeaturesEnabled && request.body.visibility !== undefined) {
+          return response.badRequest({
+            body: {
+              message:
+                'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.',
+            },
+          });
+        }
 
         try {
           const profile = await service.create(request.body);
@@ -341,6 +357,21 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
+        const { uiSettings } = await ctx.core;
+        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+
+        // Temporary route-level gate: keep API defaults unchanged while hiding visibility controls
+        // until the experimental features setting is enabled.
+        if (!experimentalFeaturesEnabled && request.body.visibility !== undefined) {
+          return response.badRequest({
+            body: {
+              message:
+                'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.',
+            },
+          });
+        }
 
         try {
           const profile = await service.update(request.params.id, request.body);
