@@ -16,20 +16,23 @@ import {
   type SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
   selectTabSavedSearch,
+  type InternalStateStore,
+  type RuntimeStateManager,
 } from '../../../state_management/redux';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
 import { DiscoverSessionSaveModal } from './save_modal';
 
 export interface OnSaveDiscoverSessionParams {
   services: DiscoverServices;
-  state: DiscoverStateContainer;
+  tabId: string;
+  internalStateStore: InternalStateStore;
+  runtimeStateManager: RuntimeStateManager;
   initialCopyOnSave?: boolean;
   onClose?: () => void;
   onSaveCb?: (valueState?: SavedSearchByValueAttributes) => void;
@@ -37,16 +40,18 @@ export interface OnSaveDiscoverSessionParams {
 
 export const onSaveDiscoverSession = async ({
   services,
-  state,
+  tabId,
+  internalStateStore,
+  runtimeStateManager,
   initialCopyOnSave,
   onClose,
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
   if (services.embeddableEditor.isByValueEditor()) {
     const savedSearch = await selectTabSavedSearch({
-      tabId: state.getCurrentTab().id,
-      getState: state.internalState.getState,
-      runtimeStateManager: state.runtimeStateManager,
+      tabId,
+      getState: internalStateStore.getState,
+      runtimeStateManager,
       services,
     });
 
@@ -55,13 +60,13 @@ export const onSaveDiscoverSession = async ({
 
     onSaveCb?.({ ...attributes, references });
   } else {
-    const internalState = state.internalState.getState();
+    const internalState = internalStateStore.getState();
     const persistedDiscoverSession = internalState.persistedDiscoverSession;
     const allTabs = selectAllTabs(internalState);
 
     const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
     const isTimeBased = allTabs.some((tab) => {
-      const tabRuntimeState = selectTabRuntimeState(state.runtimeStateManager, tab.id);
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
       const tabDataView = tabRuntimeState.currentDataView$.getValue();
 
       if (tabDataView) {
@@ -90,7 +95,7 @@ export const onSaveDiscoverSession = async ({
       };
 
       try {
-        response = await state.internalState
+        response = await internalStateStore
           .dispatch(
             internalStateActions.saveDiscoverSession({
               newTitle,

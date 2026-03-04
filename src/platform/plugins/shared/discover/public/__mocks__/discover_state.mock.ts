@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type {
+  DiscoverStateContainerParams,
+  ExtendedDiscoverStateContainer,
+} from '../customizations';
+import { getExtendedDiscoverStateContainer } from '../customizations';
 import {
   getDataStateContainer,
   type DiscoverDataStateContainer,
@@ -203,6 +207,9 @@ export function getDiscoverInternalStateMock({
     internalState,
     runtimeStateManager,
     services,
+    customizationContext,
+    stateStorageContainer,
+    searchSessionManager,
     initializeTabs: async ({
       persistedDiscoverSession,
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
@@ -240,13 +247,13 @@ export function getDiscoverInternalStateMock({
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
 
-        if (tabRuntimeState.stateContainer$.getValue()) {
+        if (tabRuntimeState.dataStateContainer$.getValue()) {
           throw new Error(`Tab with ID "${tabId}" has already been initialized`);
         }
 
         const injectCurrentTab = createTabActionInjector(tabId);
         const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-        const stateContainer: DiscoverStateContainer = {
+        const stateContainerParams: DiscoverStateContainerParams = {
           internalState,
           injectCurrentTab,
           getCurrentTab,
@@ -256,7 +263,7 @@ export function getDiscoverInternalStateMock({
           customizationContext,
         };
         const customizationService = await getConnectedCustomizationService({
-          stateContainer,
+          stateContainer: stateContainerParams,
           customizationCallbacks: [],
           services,
         });
@@ -266,15 +273,15 @@ export function getDiscoverInternalStateMock({
           searchSessionManager,
           internalState,
           runtimeStateManager,
-          injectCurrentTab: stateContainer.injectCurrentTab,
-          getCurrentTab: stateContainer.getCurrentTab,
+          injectCurrentTab,
+          getCurrentTab,
         });
 
         await internalState.dispatch(
           internalStateActions.initializeSingleTab({
             tabId,
             initializeSingleTabParams: {
-              stateContainer,
+              internalState,
               customizationService,
               dataStateContainer,
               dataViewSpec: undefined,
@@ -288,7 +295,10 @@ export function getDiscoverInternalStateMock({
           await toolkit.waitForDataFetching({ tabId });
         }
 
-        return { stateContainer, customizationService, dataStateContainer };
+        return {
+          customizationService,
+          dataStateContainer,
+        };
       }
     ),
     waitForDataFetching: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
@@ -332,6 +342,11 @@ export function getDiscoverInternalStateMock({
     getCurrentTab: assertTabsAreInitialized(() => {
       return selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
     }),
+    injectCurrentTab: assertTabsAreInitialized(
+      <T, R>(action: (payload: T & { tabId: string }) => R) =>
+        (payload: T) =>
+          action({ ...payload, tabId: internalState.getState().tabs.unsafeCurrentId })
+    ),
     getCurrentTabDataStateContainer: assertTabsAreInitialized(() => {
       const tabId = internalState.getState().tabs.unsafeCurrentId;
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
@@ -389,10 +404,41 @@ export function getDiscoverInternalStateMock({
 }
 
 /**
- * @deprecated
+ * Internal test-only extension of ExtendedDiscoverStateContainer that includes
+ * additional properties needed for core state management tests.
+ * This is NOT the public interface - external consumers should only use ExtendedDiscoverStateContainer.
+ *
+ * This interface includes all properties from DiscoverStateContainerParams plus
+ * the computed properties from ExtendedDiscoverStateContainer.
+ */
+export interface TestDiscoverStateContainer
+  extends ExtendedDiscoverStateContainer,
+    DiscoverStateContainerParams {}
+
+/**
+ * @deprecated Use `getDiscoverInternalStateMock` instead.
+ *
  * This util was from before we implemented Discover tabs,
  * and is not well suited for tabs-first state tests.
- * Prefer {@link getDiscoverInternalStateMock} for new tests.
+ *
+ * Migration example:
+ * ```typescript
+ * // Before:
+ * const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+ * stateContainer.internalState.dispatch(
+ *   stateContainer.injectCurrentTab(internalStateActions.setAppState)({ appState })
+ * );
+ *
+ * // After:
+ * const toolkit = getDiscoverInternalStateMock();
+ * await toolkit.initializeTabs();
+ * await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+ * toolkit.internalState.dispatch(
+ *   toolkit.injectCurrentTab(internalStateActions.setAppState)({ appState })
+ * );
+ * ```
+ *
+ * Access state via `toolkit.internalState`, `toolkit.runtimeStateManager`, `toolkit.injectCurrentTab()`.
  */
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -497,7 +543,7 @@ export function getDiscoverStateMock({
 
   const injectCurrentTab = createTabActionInjector(currentTabId);
   const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
-  const container: DiscoverStateContainer = {
+  const containerParams: DiscoverStateContainerParams = {
     internalState,
     injectCurrentTab,
     getCurrentTab,
@@ -506,6 +552,14 @@ export function getDiscoverStateMock({
     searchSessionManager,
     customizationContext,
   };
+  const extendedContainer = getExtendedDiscoverStateContainer(containerParams, services);
+
+  // Create test container with additional properties for core state management tests
+  const container: TestDiscoverStateContainer = {
+    ...extendedContainer,
+    ...containerParams,
+  };
+
   const tabRuntimeState = selectTabRuntimeState(
     runtimeStateManager,
     internalState.getState().tabs.unsafeCurrentId
@@ -513,9 +567,9 @@ export function getDiscoverStateMock({
 
   tabRuntimeState.customizationService$.next({
     ...createCustomizationService(),
+    stateContainer: extendedContainer,
     cleanup: async () => {},
   });
-  tabRuntimeState.stateContainer$.next(container);
 
   if (finalSavedSearch) {
     const dataView = finalSavedSearch.searchSource.getField('index');
@@ -532,36 +586,129 @@ export function getDiscoverStateMock({
   return container;
 }
 
+export interface CreateDataStateContainerParams {
+  internalState: ReturnType<typeof createInternalStateStore>;
+  runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
+  injectCurrentTab: ReturnType<typeof createTabActionInjector>;
+  getCurrentTab: () => TabState;
+  services?: DiscoverServices;
+}
+
 /**
  * Creates a `dataStateContainer` for testing purposes.
  * This is primarily used when calling `initializeSingleTab` which stores the container.
+ *
+ * @deprecated Prefer using `toolkit.initializeSingleTab()` which creates and stores the dataStateContainer.
+ * If you need to create one manually, use the object-based signature with individual params.
  */
 export function createDataStateContainer(
-  stateContainer: DiscoverStateContainer,
-  services: DiscoverServices = discoverServiceMock
+  stateContainer: TestDiscoverStateContainer,
+  services?: DiscoverServices
+): DiscoverDataStateContainer;
+export function createDataStateContainer(
+  params: CreateDataStateContainerParams
+): DiscoverDataStateContainer;
+export function createDataStateContainer(
+  paramsOrStateContainer: CreateDataStateContainerParams | TestDiscoverStateContainer,
+  servicesArg?: DiscoverServices
 ): DiscoverDataStateContainer {
-  const { runtimeStateManager, internalState } = stateContainer;
+  // Handle legacy signature: (stateContainer, services) - TestDiscoverStateContainer has these extra props
+  if (
+    'searchSessionManager' in paramsOrStateContainer &&
+    'getCurrentTab' in paramsOrStateContainer
+  ) {
+    const stateContainer = paramsOrStateContainer as TestDiscoverStateContainer;
+    const services = servicesArg ?? discoverServiceMock;
+    return getDataStateContainer({
+      internalState: stateContainer.internalState,
+      services,
+      searchSessionManager: stateContainer.searchSessionManager,
+      runtimeStateManager: stateContainer.runtimeStateManager,
+      injectCurrentTab: stateContainer.injectCurrentTab,
+      getCurrentTab: stateContainer.getCurrentTab,
+    });
+  }
+
+  // Handle new signature: (params)
+  const {
+    internalState,
+    runtimeStateManager,
+    searchSessionManager,
+    injectCurrentTab,
+    getCurrentTab,
+    services = discoverServiceMock,
+  } = paramsOrStateContainer as CreateDataStateContainerParams;
 
   return getDataStateContainer({
     internalState,
     services,
-    searchSessionManager: stateContainer.searchSessionManager,
+    searchSessionManager,
     runtimeStateManager,
-    injectCurrentTab: stateContainer.injectCurrentTab,
-    getCurrentTab: stateContainer.getCurrentTab,
+    injectCurrentTab,
+    getCurrentTab,
   });
+}
+
+export interface GetOrCreateDataStateParams {
+  internalState: ReturnType<typeof createInternalStateStore>;
+  runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
+  injectCurrentTab: ReturnType<typeof createTabActionInjector>;
+  getCurrentTab: () => TabState;
+  services?: DiscoverServices;
 }
 
 /**
  * Returns an existing `dataStateContainer` from the runtime state, or creates and stores a new one
  * if it doesn't exist. This is useful for tests that need `dataStateContainer` without going through
  * the full `initializeSingleTab` flow (e.g., tests using `initializeAndSync` directly).
+ *
+ * @deprecated Prefer using `toolkit.initializeSingleTab()` which handles this automatically.
+ * If you need to create one manually, use the object-based signature with individual params.
  */
 export function getOrCreateDataStateFromMock(
-  stateContainer: DiscoverStateContainer,
-  services: DiscoverServices = discoverServiceMock
+  stateContainer: TestDiscoverStateContainer,
+  services?: DiscoverServices
+): DiscoverDataStateContainer;
+export function getOrCreateDataStateFromMock(
+  params: GetOrCreateDataStateParams
+): DiscoverDataStateContainer;
+export function getOrCreateDataStateFromMock(
+  paramsOrStateContainer: GetOrCreateDataStateParams | TestDiscoverStateContainer,
+  servicesArg?: DiscoverServices
 ): DiscoverDataStateContainer {
-  const { runtimeStateManager, internalState } = stateContainer;
+  // Handle legacy signature: (stateContainer, services) - TestDiscoverStateContainer has these extra props
+  if (
+    'searchSessionManager' in paramsOrStateContainer &&
+    'getCurrentTab' in paramsOrStateContainer
+  ) {
+    const stateContainer = paramsOrStateContainer as TestDiscoverStateContainer;
+    const { runtimeStateManager, internalState } = stateContainer;
+    const services = servicesArg ?? discoverServiceMock;
+    const tabId = internalState.getState().tabs.unsafeCurrentId;
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    const existing = tabRuntimeState.dataStateContainer$.getValue();
+    if (existing) {
+      return existing;
+    }
+
+    const dataStateContainer = createDataStateContainer(stateContainer, services);
+    tabRuntimeState.dataStateContainer$.next(dataStateContainer);
+    return dataStateContainer;
+  }
+
+  // Handle new signature: (params)
+  const {
+    internalState,
+    runtimeStateManager,
+    searchSessionManager,
+    injectCurrentTab,
+    getCurrentTab,
+    services = discoverServiceMock,
+  } = paramsOrStateContainer as GetOrCreateDataStateParams;
+
   const tabId = internalState.getState().tabs.unsafeCurrentId;
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
 
@@ -571,7 +718,14 @@ export function getOrCreateDataStateFromMock(
     return existing;
   }
 
-  const dataStateContainer = createDataStateContainer(stateContainer, services);
+  const dataStateContainer = createDataStateContainer({
+    internalState,
+    runtimeStateManager,
+    searchSessionManager,
+    injectCurrentTab,
+    getCurrentTab,
+    services,
+  });
   tabRuntimeState.dataStateContainer$.next(dataStateContainer);
 
   return dataStateContainer;

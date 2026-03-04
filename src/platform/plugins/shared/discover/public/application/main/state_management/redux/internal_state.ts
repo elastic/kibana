@@ -495,7 +495,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId, services);
+          selectTabRuntimeInternalState(runtimeStateManager, listenerApi.getState, tabId, services);
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -514,7 +514,12 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id, services),
+            internalState: selectTabRuntimeInternalState(
+              runtimeStateManager,
+              listenerApi.getState,
+              tab.id,
+              services
+            ),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
@@ -579,17 +584,22 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getInternalStateStore: () => InternalStateStore;
   getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
+  options: Omit<
+    InternalStateDependencies,
+    'getInternalState$' | 'getInternalStateStore' | 'getCascadedDocumentsStateManager'
+  >
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getInternalStateStore: () => internalState,
     getCascadedDocumentsStateManager: (tabId) => {
       return createCascadedDocumentsStateManager({
         internalState,

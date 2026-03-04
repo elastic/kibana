@@ -58,7 +58,7 @@ const setup = async ({
     })
   );
 
-  const { stateContainer, dataStateContainer } = await toolkit.initializeSingleTab({
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
@@ -95,7 +95,6 @@ const setup = async ({
 
   const props: DiscoverMainContentProps = {
     dataView,
-    stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,

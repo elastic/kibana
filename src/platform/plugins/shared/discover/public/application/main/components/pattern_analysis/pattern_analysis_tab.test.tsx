@@ -63,7 +63,7 @@ describe('PatternAnalysisTab', () => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
@@ -80,7 +80,7 @@ describe('PatternAnalysisTab', () => {
 
     const result = render(getComponent(toolkit));
 
-    return { ...result, toolkit, stateContainer };
+    return { ...result, toolkit };
   };
 
   const getSearchSourceData = () => {

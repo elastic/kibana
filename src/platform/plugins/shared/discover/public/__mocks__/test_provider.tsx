@@ -26,7 +26,7 @@ import { DiscoverMainProvider } from '../application/main/state_management/disco
 import { type ScopedProfilesManager } from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { TestDiscoverStateContainer } from './discover_state.mock';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartPortalsRenderer } from '../application/main/components/chart';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -50,7 +50,6 @@ export const DiscoverToolkitTestProvider = ({
   const internalState = useObservable(internalState$, toolkit.internalState.getState());
   const currentTabId = internalState.tabs.unsafeCurrentId;
   const currentTabRuntimeState = selectTabRuntimeState(toolkit.runtimeStateManager, currentTabId);
-  const stateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
   const customizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const adHocDataViews = useRuntimeState(toolkit.runtimeStateManager.adHocDataViews$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
@@ -62,9 +61,10 @@ export const DiscoverToolkitTestProvider = ({
   const scopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
 
   return (
-    <DiscoverTestProvider
+    <DiscoverTestProviderInternal
       services={toolkit.services}
-      stateContainer={stateContainer}
+      internalState={toolkit.internalState}
+      runtimeStateManager={toolkit.runtimeStateManager}
       customizationService={customizationService}
       scopedProfilesManager={scopedProfilesManager}
       scopedEbtManager={scopedEbtManager}
@@ -77,7 +77,11 @@ export const DiscoverToolkitTestProvider = ({
 
 export type DiscoverTestProviderProps = PropsWithChildren<{
   services?: DiscoverServices;
-  stateContainer?: DiscoverStateContainer;
+  /**
+   * @deprecated Use `DiscoverToolkitTestProvider` with the toolkit from `getDiscoverInternalStateMock()` instead.
+   * The stateContainer is only needed for the customization framework context (DiscoverMainProvider).
+   */
+  stateContainer?: TestDiscoverStateContainer;
   customizationService?: DiscoverCustomizationService;
   scopedProfilesManager?: ScopedProfilesManager;
   scopedEbtManager?: ScopedDiscoverEBTManager;
@@ -165,6 +169,94 @@ export const DiscoverTestProvider = ({
       </RuntimeStateManagerProvider>
     );
   }
+
+  return (
+    <KibanaRenderContextProvider {...services.core}>
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
+  );
+};
+
+type DiscoverTestProviderInternalProps = PropsWithChildren<{
+  services?: DiscoverServices;
+  internalState: InternalStateMockToolkit['internalState'];
+  runtimeStateManager: InternalStateMockToolkit['runtimeStateManager'];
+  customizationService?: DiscoverCustomizationService;
+  scopedProfilesManager?: ScopedProfilesManager;
+  scopedEbtManager?: ScopedDiscoverEBTManager;
+  runtimeState?: CombinedRuntimeState;
+  currentTabId?: string;
+  usePortalsRenderer?: boolean;
+}>;
+
+const DiscoverTestProviderInternal = ({
+  services: originalServices,
+  internalState,
+  runtimeStateManager,
+  customizationService,
+  runtimeState,
+  scopedProfilesManager: originalScopedProfilesManager,
+  scopedEbtManager: originalScopedEbtManager,
+  currentTabId,
+  usePortalsRenderer,
+  children,
+}: DiscoverTestProviderInternalProps) => {
+  const [queryClient] = useState(() => new QueryClient());
+  const services = useMemo(
+    () => originalServices ?? createDiscoverServicesMock(),
+    [originalServices]
+  );
+  const scopedEbtManager = useMemo(
+    () => originalScopedEbtManager ?? services.ebtManager.createScopedEBTManager(),
+    [originalScopedEbtManager, services.ebtManager]
+  );
+  const scopedProfilesManager = useMemo(
+    () =>
+      originalScopedProfilesManager ??
+      services.profilesManager.createScopedProfilesManager({ scopedEbtManager }),
+    [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
+  );
+
+  children = (
+    <ScopedServicesProvider
+      scopedProfilesManager={scopedProfilesManager}
+      scopedEBTManager={scopedEbtManager}
+    >
+      {children}
+    </ScopedServicesProvider>
+  );
+
+  if (runtimeState) {
+    children = <RuntimeStateProvider {...runtimeState}>{children}</RuntimeStateProvider>;
+  }
+
+  if (currentTabId && !usePortalsRenderer) {
+    children = <CurrentTabProvider currentTabId={currentTabId}>{children}</CurrentTabProvider>;
+  }
+
+  if (customizationService) {
+    children = (
+      <DiscoverCustomizationProvider value={customizationService}>
+        {children}
+      </DiscoverCustomizationProvider>
+    );
+  }
+
+  if (usePortalsRenderer) {
+    children = (
+      <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
+        {children}
+      </ChartPortalsRenderer>
+    );
+  }
+
+  children = (
+    <RuntimeStateManagerProvider value={runtimeStateManager}>
+      <InternalStateProvider store={internalState}>{children}</InternalStateProvider>
+    </RuntimeStateManagerProvider>
+  );
 
   return (
     <KibanaRenderContextProvider {...services.core}>

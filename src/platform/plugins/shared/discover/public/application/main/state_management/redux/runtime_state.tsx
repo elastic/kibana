@@ -13,11 +13,10 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
-import type { DiscoverStateContainer } from '../discover_state';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ScopedProfilesManager } from '../../../../context_awareness';
-import type { TabState } from './types';
+import type { DiscoverInternalState, TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
@@ -37,7 +36,6 @@ export interface UnifiedHistogramConfig {
 }
 
 interface TabRuntimeState {
-  stateContainer?: DiscoverStateContainer;
   dataStateContainer?: DiscoverDataStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
@@ -56,7 +54,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataView' | 'stateContainer' | 'dataStateContainer'
+  'currentDataView' | 'dataStateContainer'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -101,7 +99,6 @@ export const createTabRuntimeState = ({
   );
 
   return {
-    stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
     dataStateContainer$: new BehaviorSubject<DiscoverDataStateContainer | undefined>(undefined),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
@@ -134,18 +131,18 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
 
 export const selectTabRuntimeInternalState = (
   runtimeStateManager: RuntimeStateManager,
+  getState: () => DiscoverInternalState,
   tabId: string,
   services: DiscoverServices
 ): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const stateContainer = tabRuntimeState?.stateContainer$.getValue();
   const dataView = tabRuntimeState?.currentDataView$.getValue();
 
-  if (!stateContainer || !dataView) {
+  if (!dataView) {
     return undefined;
   }
 
-  const tabState = selectTab(stateContainer.internalState.getState(), tabId);
+  const tabState = selectTab(getState(), tabId);
   const { dataRequestParams, appState, globalState } = tabState;
   const searchSource = createSearchSource({
     dataView,

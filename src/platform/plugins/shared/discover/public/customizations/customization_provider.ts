@@ -11,13 +11,30 @@ import { createContext, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
 import { from } from 'rxjs';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type {
   CustomizationCallback,
   DiscoverCustomizationContext,
   ExtendedDiscoverStateContainer,
 } from './types';
+import type {
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+} from '../application/main/state_management/redux';
+import type { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
+
+export interface DiscoverStateContainerParams {
+  internalState: InternalStateStore;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
+  runtimeStateManager: RuntimeStateManager;
+  stateStorage: IKbnUrlStateStorage;
+  searchSessionManager: DiscoverSearchSessionManager;
+  customizationContext: DiscoverCustomizationContext;
+}
 import type {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
@@ -59,14 +76,18 @@ export const useDiscoverCustomization = <TCustomizationId extends DiscoverCustom
 };
 
 export interface ConnectedCustomizationService extends DiscoverCustomizationService {
+  stateContainer: ExtendedDiscoverStateContainer;
   cleanup: () => Promise<void>;
 }
 
 export const getExtendedDiscoverStateContainer = (
-  stateContainer: DiscoverStateContainer,
+  stateContainer: DiscoverStateContainerParams,
   services: DiscoverServices
 ): ExtendedDiscoverStateContainer => ({
-  ...stateContainer,
+  internalState: stateContainer.internalState,
+  injectCurrentTab: stateContainer.injectCurrentTab,
+  getCurrentTab: stateContainer.getCurrentTab,
+  stateStorage: stateContainer.stateStorage,
   createAppStateObservable: () =>
     createTabAppStateObservable({
       tabId: stateContainer.getCurrentTab().id,
@@ -100,10 +121,8 @@ export const getExtendedDiscoverStateContainer = (
     });
   },
   internalActions: {
-    fetchData: internalStateActions.fetchData,
-    openDiscoverSession: internalStateActions.openDiscoverSession,
-    updateGlobalState: internalStateActions.updateGlobalState,
     setAppState: internalStateActions.setAppState,
+    updateGlobalState: internalStateActions.updateGlobalState,
     updateAppStateAndReplaceUrl: internalStateActions.updateAppStateAndReplaceUrl,
     resetAppState: internalStateActions.resetAppState,
     initializeAndSync: internalStateActions.initializeAndSync,
@@ -117,7 +136,7 @@ export const getConnectedCustomizationService = async ({
   services,
 }: {
   customizationCallbacks: CustomizationCallback[];
-  stateContainer: DiscoverStateContainer;
+  stateContainer: DiscoverStateContainerParams;
   services: DiscoverServices;
 }): Promise<ConnectedCustomizationService> => {
   const customizations = createCustomizationService();
@@ -132,6 +151,7 @@ export const getConnectedCustomizationService = async ({
 
   return {
     ...customizations,
+    stateContainer,
     cleanup: async () => {
       const cleanups = await initialize();
       cleanups.forEach((cleanup) => cleanup());

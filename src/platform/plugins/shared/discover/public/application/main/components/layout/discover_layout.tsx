@@ -39,7 +39,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -85,11 +84,7 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   </QueryClientProvider>
 ));
 
-export interface DiscoverLayoutProps {
-  stateContainer: DiscoverStateContainer;
-}
-
-export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+export function DiscoverLayout() {
   const {
     trackUiMetric,
     capabilities,
@@ -400,7 +395,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <>
         <DiscoverHistogramLayout
           dataView={dataView}
-          stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
           onAddFilter={onFilter}
@@ -414,7 +408,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     resultState,
     dataView,
-    stateContainer,
     currentColumns,
     viewMode,
     onFilter,
@@ -477,7 +470,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     >
       <TopNavMemoized
         savedQuery={savedQuery}
-        stateContainer={stateContainer}
         esqlModeErrors={esqlModeErrors}
         esqlModeWarning={esqlModeWarning}
         onFieldEdited={onFieldEdited}

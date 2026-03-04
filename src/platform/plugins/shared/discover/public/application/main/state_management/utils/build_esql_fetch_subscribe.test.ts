@@ -17,12 +17,9 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import {
-  getDiscoverStateMock,
-  getOrCreateDataStateFromMock,
-} from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { internalStateActions } from '../redux';
 import type { DiscoverAppState } from '../redux';
@@ -30,7 +27,7 @@ import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 
 async function getTestProps({
   query,
-  dataViewsService = discoverServiceMock.dataViews,
+  dataViewsService,
   appState,
   defaultFetchStatus = FetchStatus.PARTIAL,
   resetTheHook,
@@ -44,16 +41,39 @@ async function getTestProps({
   const replaceUrlState = jest
     .spyOn(internalStateActions, 'updateAppStateAndReplaceUrl')
     .mockClear();
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  const dataState = getOrCreateDataStateFromMock(stateContainer);
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+
+  const services = createDiscoverServicesMock();
+  if (dataViewsService) {
+    services.dataViews = dataViewsService;
+  }
+
+  const toolkit = getDiscoverInternalStateMock({ services });
+  await toolkit.initializeTabs();
+  const { dataStateContainer: dataState } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+    skipWaitForDataFetching: true,
+  });
+
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.updateAppState)({
       appState: { columns: [], ...appState },
     })
   );
+
+  // Reset the profile state to match the expected initial state for tests
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+      resetDefaultProfileState: {
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+        hideChart: false,
+      },
+    })
+  );
   const dataViewList = [dataViewMock as DataViewListItem];
-  jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
-  await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
+  jest.spyOn(services.dataViews, 'getIdsWithTitle').mockResolvedValue(dataViewList);
+  await toolkit.internalState.dispatch(internalStateActions.loadDataViewList());
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,
@@ -67,8 +87,8 @@ async function getTestProps({
   }
 
   return {
-    dataViews: dataViewsService,
-    stateContainer,
+    dataViews: services.dataViews,
+    toolkit,
     dataState,
     savedSearch: savedSearchMock,
     replaceUrlState,
@@ -88,15 +108,12 @@ const msgComplete = {
   query,
 };
 
-const getDataViewsService = () => {
-  const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+const getDataViewsService = (services = createDiscoverServicesMock()) => {
+  const dataViewsCreateMock = services.dataViews.create as jest.Mock;
   dataViewsCreateMock.mockImplementation(() => ({
     ...dataViewMock,
   }));
-  return {
-    ...discoverServiceMock.dataViews,
-    create: dataViewsCreateMock,
-  };
+  return services.dataViews;
 };
 
 const setupTest = async ({
@@ -117,27 +134,28 @@ const setupTest = async ({
     defaultFetchStatus,
     resetTheHook,
   });
-  const { stateContainer } = props;
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+  const { toolkit } = props;
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.assignNextDataView)({
       dataView: dataViewMock,
     })
   );
-  return props;
+  const tabId = toolkit.getCurrentTab().id;
+  return { ...props, tabId };
 };
 
 // Testing buildEsqlFetchSubscribe through the state container
 // since the logic is pretty intertwined with the state management
 describe('buildEsqlFetchSubscribe', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
-    const { replaceUrlState, dataState } = await setupTest({ useDataViewsService: true });
+    const { replaceUrlState, dataState, tabId } = await setupTest({ useDataViewsService: true });
 
     replaceUrlState.mockClear();
 
     dataState.data$.documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: ['field1', 'field2'] },
     });
   });
@@ -153,7 +171,7 @@ describe('buildEsqlFetchSubscribe', () => {
   });
 
   test('should change viewMode to undefined (default) if it was PATTERN_LEVEL', async () => {
-    const { replaceUrlState } = await setupTest({
+    const { replaceUrlState, tabId } = await setupTest({
       appState: {
         viewMode: VIEW_MODE.PATTERN_LEVEL,
       },
@@ -161,13 +179,13 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { viewMode: undefined },
     });
   });
 
   test('changing an ES|QL query with different result columns should change state when loading and finished', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     documents$.next(msgComplete);
     replaceUrlState.mockClear();
@@ -188,14 +206,14 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1'] },
       });
     });
   });
 
   test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     documents$.next(msgComplete);
     replaceUrlState.mockClear();
@@ -215,14 +233,14 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1'] },
       });
     });
   });
 
   test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern and columns are the same', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
@@ -257,14 +275,14 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1', 'field2'] },
       });
     });
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
@@ -285,7 +303,7 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1'] },
       });
     });
@@ -307,7 +325,7 @@ describe('buildEsqlFetchSubscribe', () => {
   });
 
   test('if its not an ES|QL query coming along, it should be ignored', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
@@ -339,14 +357,14 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1'] },
       });
     });
   });
 
   test('it should not overwrite existing state columns on initial fetch', async () => {
-    const { replaceUrlState, dataState } = await setupTest({
+    const { replaceUrlState, dataState, tabId } = await setupTest({
       appState: {
         columns: ['field1'],
       },
@@ -369,7 +387,7 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1', 'field2'] },
       });
     });
@@ -388,13 +406,13 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: ['field1'] },
     });
   });
 
   test('should overwrite existing undefined columns on initial fetch if transformational query', async () => {
-    const { replaceUrlState, dataState } = await setupTest({
+    const { replaceUrlState, dataState, tabId } = await setupTest({
       appState: {
         columns: undefined,
       },
@@ -418,7 +436,7 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1'] },
       });
     });
@@ -449,7 +467,7 @@ describe('buildEsqlFetchSubscribe', () => {
   });
 
   test('it should not overwrite existing state columns on initial fetch and non transformational commands', async () => {
-    const { replaceUrlState, dataState } = await setupTest({
+    const { replaceUrlState, dataState, tabId } = await setupTest({
       appState: {
         columns: ['field1'],
       },
@@ -469,13 +487,13 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: ['field1', 'field2'] },
     });
   });
 
   test('it should overwrite existing state columns on transitioning from a query with non transformational commands to a query with transformational', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
     documents$.next({
@@ -491,7 +509,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: ['field1', 'field2'] },
     });
     replaceUrlState.mockClear();
@@ -508,13 +526,13 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: ['field1'] },
     });
   });
 
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
-    const { stateContainer, replaceUrlState, dataState } = await setupTest({
+    const { toolkit, replaceUrlState, dataState, tabId } = await setupTest({
       appState: {
         columns: [],
       },
@@ -538,8 +556,8 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { columns: ['field1', 'field2'] },
       })
     );
@@ -573,13 +591,13 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: ['field1'] },
     });
   });
 
   test('changing an ES|QL query with an index pattern that not corresponds to a dataview should return results', async () => {
-    const { stateContainer, dataState, replaceUrlState } = await setupTest({});
+    const { toolkit, dataState, replaceUrlState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
     documents$.next(msgComplete);
@@ -597,8 +615,8 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-* | keep field1' },
     });
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.assignNextDataView)({
         dataView: dataViewAdHoc,
       })
     );
@@ -606,19 +624,19 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
+        tabId,
         appState: { columns: ['field1'] },
       });
     });
   });
 
   it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
-    const { stateContainer, dataState } = await setupTest({
+    const { toolkit, dataState } = await setupTest({
       appState: { query: { esql: 'from pattern' } },
       defaultFetchStatus: FetchStatus.LOADING,
     });
     const documents$ = dataState.data$.documents$;
-    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+    expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       hideChart: false,
       rowHeight: false,
@@ -628,8 +646,8 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
     });
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { query: { esql: 'from pattern1' } },
       })
     );
@@ -638,7 +656,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
         rowHeight: true,
@@ -649,8 +667,8 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
         resetDefaultProfileState: {
           columns: false,
           rowHeight: false,
@@ -659,8 +677,8 @@ describe('buildEsqlFetchSubscribe', () => {
         },
       })
     );
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { query: { esql: 'from pattern1' } },
       })
     );
@@ -669,7 +687,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
@@ -680,8 +698,8 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { query: { esql: 'from pattern2' } },
       })
     );
@@ -690,7 +708,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern2' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -728,7 +746,7 @@ describe('buildEsqlFetchSubscribe', () => {
   });
 
   test('non-transformational query with columns at or below threshold should show individual columns', async () => {
-    const { replaceUrlState, dataState } = await setupTest({});
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     replaceUrlState.mockClear();
 
@@ -751,17 +769,17 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId: 'the-saved-search-id-with-timefield',
+      tabId,
       appState: { columns: expectedColumns },
     });
   });
 
   it('should call setResetDefaultProfileState correctly when columns change', async () => {
-    const { stateContainer, dataState } = await setupTest({});
+    const { toolkit, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+    expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -773,7 +791,7 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result1,
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
@@ -786,7 +804,7 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result2,
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: false,
         breakdownField: false,

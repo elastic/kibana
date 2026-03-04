@@ -25,7 +25,6 @@ import { useI18n } from '@kbn/i18n-react';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
@@ -44,6 +43,8 @@ import {
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
+  useInternalStateStore,
+  useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
@@ -55,7 +56,6 @@ import { useDataState } from '../../hooks/use_data_state';
 export const useTopNavLinks = ({
   dataView,
   services,
-  state,
   onOpenInspector,
   hasUnsavedChanges,
   isEsqlMode,
@@ -65,7 +65,6 @@ export const useTopNavLinks = ({
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
-  state: DiscoverStateContainer;
   onOpenInspector: () => void;
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
@@ -75,6 +74,8 @@ export const useTopNavLinks = ({
 }): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
+  const internalStateStore = useInternalStateStore();
+  const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
   const currentTab = useCurrentTabSelector((tabState) => tabState);
@@ -120,7 +121,7 @@ export const useTopNavLinks = ({
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
-        stateContainer: state,
+        currentTab,
       });
       items.push(alertsAppMenuItem);
     }
@@ -181,7 +182,6 @@ export const useTopNavLinks = ({
     const shareAppMenuItem = getShareAppMenuItem({
       discoverParams,
       services,
-      stateContainer: state,
       hasIntegrations: hasShareIntegration,
       hasUnsavedChanges,
       currentTab,
@@ -197,7 +197,6 @@ export const useTopNavLinks = ({
     discoverParams,
     appId,
     onOpenInspector,
-    state,
     dispatch,
     isEsqlMode,
     currentDataView,
@@ -259,7 +258,9 @@ export const useTopNavLinks = ({
         run: async () => {
           await onSaveDiscoverSession({
             services,
-            state,
+            tabId: currentTab.id,
+            internalStateStore,
+            runtimeStateManager,
             onSaveCb: isEmbeddedEditor ? services.embeddableEditor.transferBackToEditor : undefined,
           });
         },
@@ -299,7 +300,9 @@ export const useTopNavLinks = ({
                       await onSaveDiscoverSession({
                         initialCopyOnSave: true,
                         services,
-                        state,
+                        tabId: currentTab.id,
+                        internalStateStore,
+                        runtimeStateManager,
                       });
                     },
                     id: 'saveAs',
@@ -315,10 +318,10 @@ export const useTopNavLinks = ({
                     run: async () => {
                       dismissFlyouts([DiscoverFlyouts.lensEdit]);
 
-                      const internalState = state.internalState.getState();
+                      const internalState = internalStateStore.getState();
 
                       if (internalState.persistedDiscoverSession) {
-                        await state.internalState
+                        await internalStateStore
                           .dispatch(internalStateActions.resetDiscoverSession())
                           .unwrap();
                       }
@@ -352,7 +355,9 @@ export const useTopNavLinks = ({
     isEsqlMode,
     dataView,
     dispatch,
-    state,
+    currentTab,
+    internalStateStore,
+    runtimeStateManager,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
     persistedDiscoverSession,

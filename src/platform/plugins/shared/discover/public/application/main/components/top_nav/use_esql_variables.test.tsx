@@ -68,10 +68,10 @@ describe('useESQLVariables', () => {
   const setup = async () => {
     const toolkit = getDiscoverInternalStateMock();
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
-    return { toolkit, stateContainer };
+    return { toolkit };
   };
 
   const renderUseESQLVariables = async ({

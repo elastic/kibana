@@ -21,6 +21,7 @@ import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../__mocks__/services';
+import { createTabActionInjector, selectTab } from '../application/main/state_management/redux';
 
 describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -35,11 +36,19 @@ describe('getConnectedCustomizationService', () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({ services });
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
-      tabId: toolkit.getCurrentTab().id,
-    });
+    const tabId = toolkit.getCurrentTab().id;
+    const injectCurrentTab = createTabActionInjector(tabId);
+    const getCurrentTab = () => selectTab(toolkit.internalState.getState(), tabId);
     const servicePromise = getConnectedCustomizationService({
-      stateContainer,
+      stateContainer: {
+        internalState: toolkit.internalState,
+        runtimeStateManager: toolkit.runtimeStateManager,
+        stateStorage: toolkit.stateStorageContainer,
+        searchSessionManager: toolkit.searchSessionManager,
+        customizationContext: toolkit.customizationContext,
+        injectCurrentTab,
+        getCurrentTab,
+      },
       customizationCallbacks,
       services,
     });

@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import type { DiscoverStateContainer } from './discover_state';
+import type { ExtendedDiscoverStateContainer } from '../../../customizations';
 import { InternalStateProvider } from './redux';
 
 function createStateHelpers() {
-  const context = React.createContext<DiscoverStateContainer | null>(null);
+  const context = React.createContext<ExtendedDiscoverStateContainer | null>(null);
 
   return {
     Provider: context.Provider,
@@ -25,7 +25,7 @@ export const DiscoverMainProvider = ({
   value,
   children,
 }: React.PropsWithChildren<{
-  value: DiscoverStateContainer;
+  value: ExtendedDiscoverStateContainer;
 }>) => {
   return (
     <DiscoverStateProvider value={value}>

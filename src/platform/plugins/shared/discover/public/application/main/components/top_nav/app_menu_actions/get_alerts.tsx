@@ -17,10 +17,10 @@ import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import type { TabState } from '../../../state_management/redux/types';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -40,8 +40,8 @@ const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   onFinishAction: () => void;
-  stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
+  currentTab: TabState;
+}> = ({ currentTab, discoverParams, services, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -52,7 +52,6 @@ const CreateAlertFlyout: React.FC<{
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
   const timeField = getTimeField(dataView);
-  const currentTab = stateContainer.getCurrentTab();
   const { query, savedQuery: savedQueryId } = currentTab.appState;
 
   /**
@@ -120,11 +119,11 @@ const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
+  currentTab,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
+  currentTab: TabState;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -169,7 +168,7 @@ export const getAlertsAppMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
-              stateContainer={stateContainer}
+              currentTab={currentTab}
             />
           );
         },

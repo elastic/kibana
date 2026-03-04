@@ -32,7 +32,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   type DiscoverAppState,
   selectTabCombinedFilters,
@@ -67,7 +66,6 @@ export interface UseUnifiedHistogramOptions {
 }
 
 export const useDiscoverHistogram = (
-  stateContainer: DiscoverStateContainer,
   options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();

@@ -18,7 +18,6 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -30,7 +29,10 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
   useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
+  useInternalStateStore,
+  selectTab,
 } from '../../state_management/redux';
 
 const DROP_PROPS = {
@@ -48,7 +50,6 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: (options: {
@@ -67,13 +68,14 @@ export const DiscoverMainContent = ({
   onAddFilter,
   onFieldEdited,
   columns,
-  stateContainer,
   onDropFieldToTable,
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
+  const internalStateStore = useInternalStateStore();
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const updateAppStateAndReplaceUrl = useCurrentTabAction(
     internalStateActions.updateAppStateAndReplaceUrl
@@ -99,7 +101,7 @@ export const DiscoverMainContent = ({
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
         dispatch(updateAppStateAndReplaceUrl({ appState: { viewMode: mode } })).then(() => {
-          const appState = stateContainer.getCurrentTab().appState;
+          const appState = selectTab(internalStateStore.getState(), currentTabId).appState;
 
           if (appState.viewMode === mode) {
             resolve(mode);
@@ -109,7 +111,14 @@ export const DiscoverMainContent = ({
         });
       });
     },
-    [dispatch, updateAppStateAndReplaceUrl, stateContainer, trackUiMetric, updateAppState]
+    [
+      dispatch,
+      updateAppStateAndReplaceUrl,
+      internalStateStore,
+      currentTabId,
+      trackUiMetric,
+      updateAppState,
+    ]
   );
 
   const isEsqlMode = useIsEsqlMode();
@@ -169,7 +178,6 @@ export const DiscoverMainContent = ({
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
-                stateContainer={stateContainer}
                 onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
                 isEsqlMode={isEsqlMode}

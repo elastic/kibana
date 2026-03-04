@@ -13,10 +13,13 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { internalStateSlice, type TabActionPayload } from '../internal_state';
+import {
+  internalStateSlice,
+  type InternalStateStore,
+  type TabActionPayload,
+} from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
-import type { DiscoverStateContainer } from '../../discover_state';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews } from './data_views';
 import { setDataView } from './tab_state_data_view';
@@ -39,7 +42,7 @@ import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 
 export interface InitializeSingleTabsParams {
-  stateContainer: DiscoverStateContainer;
+  internalState: InternalStateStore;
   customizationService: ConnectedCustomizationService;
   dataStateContainer: DiscoverDataStateContainer;
   dataViewSpec: DataViewSpec | undefined;
@@ -53,7 +56,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     {
       tabId,
       initializeSingleTabParams: {
-        stateContainer,
+        internalState,
         customizationService,
         dataStateContainer,
         dataViewSpec,
@@ -70,13 +73,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
-    const {
-      currentDataView$,
-      stateContainer$,
-      dataStateContainer$,
-      customizationService$,
-      scopedEbtManager$,
-    } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
+      selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
      * New tab initialization with the restored data if available
@@ -197,7 +195,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         currentDataView: persistedTabDataView,
         isEsqlMode,
         services,
-        internalState: stateContainer.internalState,
+        internalState,
         runtimeStateManager,
       });
 
@@ -300,7 +298,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
-    stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
     dataStateContainer$.next(dataStateContainer);
 

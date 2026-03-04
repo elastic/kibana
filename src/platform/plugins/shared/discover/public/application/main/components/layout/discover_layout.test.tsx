@@ -64,12 +64,12 @@ const setup = async ({
     })
   );
 
-  const { stateContainer, dataStateContainer } = await toolkit.initializeSingleTab({
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.setDataRequestParams)({
       dataRequestParams: {
         timeRangeAbsolute: {
           from: '2020-05-14T11:05:13.590',
@@ -97,7 +97,7 @@ const setup = async ({
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
-      <DiscoverLayout stateContainer={stateContainer} />
+      <DiscoverLayout />
     </DiscoverToolkitTestProvider>
   );
 

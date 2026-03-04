@@ -19,7 +19,6 @@ import {
   useAppStateSelector,
   useCurrentTabSelector,
 } from '../../state_management/redux';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FetchStatus } from '../../../types';
 import type { FieldStatisticsTableProps } from './types';
 import {
@@ -29,9 +28,7 @@ import {
   useInternalStateDispatch,
 } from '../../state_management/redux';
 
-type FieldStatisticsTabProps = Omit<FieldStatisticsTableProps, 'query' | 'filters'> & {
-  stateContainer: DiscoverStateContainer;
-};
+type FieldStatisticsTabProps = Omit<FieldStatisticsTableProps, 'query' | 'filters'>;
 
 export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo((props) => {
   const services = useDiscoverServices();

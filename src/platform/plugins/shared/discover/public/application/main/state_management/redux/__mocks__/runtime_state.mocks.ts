@@ -12,7 +12,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ScopedDiscoverEBTManager } from '../../../../../ebt_manager';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import type { ScopedProfilesManager } from '../../../../../context_awareness';
-import type { DiscoverStateContainer } from '../../discover_state';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import {
   createRuntimeStateManager,
@@ -25,7 +24,6 @@ export function getTabRuntimeStateMock(
   attrs: Partial<ReactiveTabRuntimeState> = {}
 ): ReactiveTabRuntimeState {
   return {
-    stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
     dataStateContainer$: new BehaviorSubject<DiscoverDataStateContainer | undefined>(undefined),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined

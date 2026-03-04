@@ -33,6 +33,7 @@ export const internalStateActions = {
 
 export {
   InternalStateProvider,
+  useInternalStateStore,
   useInternalStateDispatch,
   useInternalStateSelector,
   CurrentTabProvider,

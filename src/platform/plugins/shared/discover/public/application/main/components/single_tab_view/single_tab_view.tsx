@@ -17,8 +17,8 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getDataStateContainer } from '../../state_management/discover_data_state_container';
+import type { DiscoverStateContainerParams } from '../../../../customizations';
 import {
   RuntimeStateProvider,
   internalStateActions,
@@ -73,7 +73,7 @@ export const SingleTabView = ({
   const appInitializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const currentTabInitializationState = useCurrentTabSelector((tab) => tab.initializationState);
-  const currentStateContainer = useCurrentTabRuntimeState((tab) => tab.stateContainer$);
+  const currentDataStateContainer = useCurrentTabRuntimeState((tab) => tab.dataStateContainer$);
   const currentCustomizationService = useCurrentTabRuntimeState((tab) => tab.customizationService$);
   const scopedProfilesManager = useCurrentTabRuntimeState((tab) => tab.scopedProfilesManager$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
@@ -93,7 +93,7 @@ export const SingleTabView = ({
     } = {}) => {
       const injectCurrentTab = createTabActionInjector(currentTabId);
       const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
-      const stateContainer: DiscoverStateContainer = {
+      const stateContainerParams: DiscoverStateContainerParams = {
         internalState,
         injectCurrentTab,
         getCurrentTab,
@@ -103,7 +103,7 @@ export const SingleTabView = ({
         customizationContext,
       };
       const customizationService = await getConnectedCustomizationService({
-        stateContainer,
+        stateContainer: stateContainerParams,
         customizationCallbacks,
         services,
       });
@@ -111,16 +111,16 @@ export const SingleTabView = ({
       const dataStateContainer = getDataStateContainer({
         services,
         searchSessionManager,
-        internalState: stateContainer.internalState,
+        internalState,
         runtimeStateManager,
-        injectCurrentTab: stateContainer.injectCurrentTab,
-        getCurrentTab: stateContainer.getCurrentTab,
+        injectCurrentTab,
+        getCurrentTab,
       });
 
       dispatch(
         initializeSingleTab({
           initializeSingleTabParams: {
-            stateContainer,
+            internalState,
             customizationService,
             dataStateContainer,
             dataViewSpec,
@@ -178,19 +178,19 @@ export const SingleTabView = ({
     );
   }
 
-  if (!currentStateContainer || !currentCustomizationService || !currentDataView) {
+  if (!currentDataStateContainer || !currentCustomizationService || !currentDataView) {
     return <BrandedLoadingIndicator />;
   }
 
   return (
     <DiscoverCustomizationProvider value={currentCustomizationService}>
-      <DiscoverMainProvider value={currentStateContainer}>
+      <DiscoverMainProvider value={currentCustomizationService.stateContainer}>
         <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
           <ScopedServicesProvider
             scopedProfilesManager={scopedProfilesManager}
             scopedEBTManager={scopedEbtManager}
           >
-            <DiscoverMainApp stateContainer={currentStateContainer} />
+            <DiscoverMainApp />
           </ScopedServicesProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>

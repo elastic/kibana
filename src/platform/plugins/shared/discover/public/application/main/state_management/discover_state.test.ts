@@ -21,7 +21,7 @@ jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
 }));
 
-import type { DiscoverStateContainer } from './discover_state';
+import type { TestDiscoverStateContainer } from '../../../__mocks__/discover_state.mock';
 import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
   fromSavedSearchToSavedObjectTab,
@@ -117,7 +117,7 @@ describe('Discover state', () => {
 
   describe('Test discover state', () => {
     let history: History<HistoryLocationState>;
-    let state: DiscoverStateContainer;
+    let state: TestDiscoverStateContainer;
     const getCurrentUrl = () => history.createHref(history.location);
 
     beforeEach(async () => {
@@ -206,7 +206,7 @@ describe('Discover state', () => {
   describe('Test discover state with overridden state storage', () => {
     let history: History<HistoryLocationState>;
     let stateStorage: IKbnUrlStateStorage;
-    let state: DiscoverStateContainer;
+    let state: TestDiscoverStateContainer;
 
     beforeEach(async () => {
       jest.useFakeTimers();
@@ -295,7 +295,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -519,7 +519,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -557,7 +557,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -638,7 +638,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -667,7 +667,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -696,7 +696,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -725,7 +725,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -757,7 +757,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -792,7 +792,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -828,7 +828,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -868,7 +868,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -892,7 +892,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -910,7 +910,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -943,7 +943,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -964,7 +964,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -992,7 +992,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1039,7 +1039,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             esqlControls: undefined,
@@ -1084,7 +1084,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             esqlControls: undefined,
@@ -1126,7 +1126,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: dataViewSpecMock,
             defaultUrlState: undefined,
@@ -1161,7 +1161,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1192,7 +1192,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1213,7 +1213,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1237,7 +1237,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1261,7 +1261,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1308,7 +1308,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1362,7 +1362,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1389,7 +1389,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1454,7 +1454,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
-            stateContainer: state,
+            internalState: state.internalState,
             customizationService,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
@@ -1475,7 +1475,7 @@ describe('Discover state', () => {
 
   describe('Test discover state with embedded mode', () => {
     let history: History<HistoryLocationState>;
-    let state: DiscoverStateContainer;
+    let state: TestDiscoverStateContainer;
     const getCurrentUrl = () => history.createHref(history.location);
 
     beforeEach(async () => {

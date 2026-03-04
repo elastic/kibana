@@ -21,9 +21,6 @@ import type { DiscoverDataStateContainer } from '../discover_data_state_containe
 describe('buildStateSubscribe', () => {
   let toolkit: ReturnType<typeof getDiscoverInternalStateMock>;
   let services: ReturnType<typeof createDiscoverServicesMock>;
-  let stateContainer: Awaited<
-    ReturnType<ReturnType<typeof getDiscoverInternalStateMock>['initializeSingleTab']>
-  >['stateContainer'];
   let dataState: DiscoverDataStateContainer;
 
   const setup = async () => {
@@ -38,7 +35,6 @@ describe('buildStateSubscribe', () => {
       tabId: toolkit.getCurrentTab().id,
       skipWaitForDataFetching: true,
     });
-    stateContainer = result.stateContainer;
     dataState = result.dataStateContainer;
 
     dataState.refetch$.next = jest.fn();
@@ -170,7 +166,7 @@ describe('buildStateSubscribe', () => {
     expect(dataState.reset).toBeCalledTimes(1);
 
     toolkit.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.resetAppState)({
+      toolkit.injectCurrentTab(internalStateActions.resetAppState)({
         appState: {
           dataSource: newDataSource,
         },

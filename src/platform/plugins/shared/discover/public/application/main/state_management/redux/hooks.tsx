@@ -13,6 +13,7 @@ import {
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
+  createStoreHook,
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext } from 'react';
@@ -42,6 +43,10 @@ export const InternalStateProvider = ({
     {children}
   </ReduxProvider>
 );
+
+export const useInternalStateStore = createStoreHook(
+  internalStateContext
+) as () => InternalStateStore;
 
 export const useInternalStateDispatch = createDispatchHook(
   internalStateContext

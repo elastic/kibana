@@ -73,7 +73,7 @@ export const setTabs: InternalStateThunkActionCreator<
       const newRecentlyClosedTab: TabState = { ...tab };
       // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
       newRecentlyClosedTab.initialInternalState =
-        selectTabRuntimeInternalState(runtimeStateManager, tab.id, services) ??
+        selectTabRuntimeInternalState(runtimeStateManager, getState, tab.id, services) ??
         cloneDeep(tab.initialInternalState);
       newRecentlyClosedTab.attributes = cloneDeep(tab.attributes);
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
@@ -175,8 +175,12 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
 
         tab.initialInternalState =
-          selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId, services) ??
-          cloneDeep(existingTabToDuplicateFrom.initialInternalState);
+          selectTabRuntimeInternalState(
+            runtimeStateManager,
+            getState,
+            item.duplicatedFromId,
+            services
+          ) ?? cloneDeep(existingTabToDuplicateFrom.initialInternalState);
         tab.attributes = cloneDeep(existingTabToDuplicateFrom.attributes);
         tab.appState = cloneDeep(existingTabToDuplicateFrom.appState);
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
@@ -234,9 +238,9 @@ export const updateTabs: InternalStateThunkActionCreator<
     if (selectedTabHasChanged) {
       const nextTab = updatedTabs.find((tab) => tab.id === selectedTab.id);
       const nextTabRuntimeState = selectTabRuntimeState(runtimeStateManager, selectedTab.id);
-      const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
+      const nextTabDataStateContainer = nextTabRuntimeState?.dataStateContainer$.getValue();
 
-      if (nextTab && nextTabStateContainer) {
+      if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
 
