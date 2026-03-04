@@ -779,7 +779,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     nowInstant: Date,
     searchSessionId?: string,
     forceDSL?: boolean,
-    projectRouting?: ProjectRouting
+    projectRouting?: ProjectRouting,
+    maxDataPoints?: number
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (

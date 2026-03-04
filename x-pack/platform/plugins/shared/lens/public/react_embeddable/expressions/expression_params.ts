@@ -9,7 +9,6 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
-import type { Ast } from '@kbn/interpreter';
 import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -62,43 +61,21 @@ interface GetExpressionRendererPropsParams {
   maxDataPoints?: number;
 }
 
-function injectMaxDataPoints(ast: Ast, maxDataPoints: number): Ast {
-  if (!ast.chain) {
-    return ast;
-  }
-  return {
-    ...ast,
-    chain: ast.chain.map((fn) => {
-      if (fn.function === 'esql') {
-        return {
-          ...fn,
-          arguments: {
-            ...fn.arguments,
-            maxDataPoints: [maxDataPoints],
-          },
-        };
-      }
-      return fn;
-    }),
-  };
-}
-
 async function getExpressionFromDocument(
   document: LensDocument,
   documentToExpression: (
     doc: LensDocument,
-    forceDSL?: boolean
+    forceDSL?: boolean,
+    maxDataPoints?: number
   ) => Promise<DocumentToExpressionReturnType>,
   forceDSL?: boolean,
   maxDataPoints?: number
 ) {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState, activeDatasourceState } =
-    await documentToExpression(document, forceDSL);
-
-  const finalAst = ast && maxDataPoints ? injectMaxDataPoints(ast, maxDataPoints) : ast;
+    await documentToExpression(document, forceDSL, maxDataPoints);
 
   return {
-    expression: finalAst ? toExpression(finalAst) : null,
+    expression: ast ? toExpression(ast) : null,
     indexPatterns,
     indexPatternRefs,
     activeVisualizationState,

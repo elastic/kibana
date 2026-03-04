@@ -28,15 +28,11 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
-  filter,
-  firstValueFrom,
   map,
   merge,
-  of,
   pipe,
   skip,
   tap,
-  timeout,
   type Subscription,
 } from 'rxjs';
 import { getEditPath } from '../../common/constants';
@@ -63,7 +59,8 @@ export type ReloadReason =
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
-  | 'searchContext';
+  | 'searchContext'
+  | 'containerWidth';
 
 function getSearchContext(parentApi: unknown) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
@@ -231,23 +228,7 @@ export function loadEmbeddableData(
       services
     );
 
-    // Wait for the actual panel width from the ResizeObserver.
-    // On first load the component hasn't mounted yet, so containerWidth$ is 0.
-    // Awaiting here yields to the event loop, letting React render the outer div
-    // and the ResizeObserver to fire. Falls back to window.innerWidth after 500ms
-    // (e.g. panel in a collapsed section that never mounts).
-    let containerWidth = internalApi.containerWidth$.getValue();
-    if (containerWidth === 0) {
-      containerWidth = await firstValueFrom(
-        internalApi.containerWidth$.pipe(
-          filter((w) => w > 0),
-          timeout({
-            first: 500,
-            with: () => of(typeof window !== 'undefined' ? window.innerWidth : 0),
-          })
-        )
-      );
-    }
+    const containerWidth = internalApi.containerWidth$.getValue();
 
     // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
@@ -334,6 +315,10 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
+    ),
+    internalApi.containerWidth$.pipe(
+      waitUntilChanged(),
+      map(() => 'containerWidth' as ReloadReason)
     )
   );
 
@@ -341,7 +326,15 @@ export function loadEmbeddableData(
     // on search context change, reload
     fetch$(api)
       .pipe(debounceTime(0))
-      .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
+      .subscribe((fetchContext) => {
+        // For ES|QL queries, defer the first reload until the panel width is measured
+        // so that downsampling can be applied. The containerWidth$ trigger handles
+        // the initial load once the ResizeObserver fires.
+        if (api.isTextBasedLanguage() && internalApi.containerWidth$.getValue() === 0) {
+          return;
+        }
+        reload('searchContext' as ReloadReason, fetchContext);
+      }),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {

@@ -7,42 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, isAssignment } from '@elastic/esql';
+import { Parser, Walker, walk, isAssignment } from '@elastic/esql';
 import type { ESQLFunction } from '@elastic/esql/types';
-import { getLimitFromESQLQuery } from './query_parsing_helpers';
-import { queryCannotBeSampled } from './query_cannot_be_sampled';
 
 const MIN_SAMPLE_RATE = 0.001;
 const MAX_SAMPLE_RATE = 1.0;
-
-const hasExistingApproximationSetting = (query: string): boolean => {
-  const { root } = Parser.parse(query);
-  if (!root.header?.length) {
-    return false;
-  }
-  return root.header.some((cmd) => {
-    if (cmd.name !== 'set' || !cmd.args?.length) {
-      return false;
-    }
-    return cmd.args.some((arg) => {
-      if (!isAssignment(arg)) {
-        return false;
-      }
-      const fn = arg as ESQLFunction;
-      return fn.args[0] && 'name' in fn.args[0] && fn.args[0].name === 'approximation';
-    });
-  });
-};
-
-const hasExistingSampleCommand = (query: string): boolean => {
-  const { root } = Parser.parse(query);
-  return root.commands.some(({ name }) => name === 'sample');
-};
-
-const hasExistingStatsCommand = (query: string): boolean => {
-  const { root } = Parser.parse(query);
-  return root.commands.some(({ name }) => name === 'stats');
-};
+const DEFAULT_ESQL_LIMIT = 1000;
+const UNSAMPLABLE_FUNCTIONS = ['match', 'qstr'];
 
 /**
  * Applies automatic downsampling to an ES|QL query based on the available
@@ -63,25 +34,59 @@ export const applyDownsampling = (query: string, maxDataPoints: number): string 
     return query;
   }
 
-  if (hasExistingSampleCommand(query)) {
+  const { root } = Parser.parse(query);
+
+  if (root.commands.some(({ name }) => name === 'sample')) {
     return query;
   }
 
-  if (hasExistingApproximationSetting(query)) {
+  const hasApproximation = root.header?.some((cmd) => {
+    if (cmd.name !== 'set' || !cmd.args?.length) {
+      return false;
+    }
+    return cmd.args.some((arg) => {
+      if (!isAssignment(arg)) {
+        return false;
+      }
+      const fn = arg as ESQLFunction;
+      return fn.args[0] && 'name' in fn.args[0] && fn.args[0].name === 'approximation';
+    });
+  });
+
+  if (hasApproximation) {
     return query;
   }
 
-  const hasStats = hasExistingStatsCommand(query);
-
-  if (hasStats) {
+  if (root.commands.some(({ name }) => name === 'stats')) {
     return `SET approximation = true;\n${query}`;
   }
 
-  if (queryCannotBeSampled({ esql: query })) {
+  const hasUnsamplableFunction = UNSAMPLABLE_FUNCTIONS.some(
+    (f) =>
+      Walker.hasFunction(root, f) ||
+      root.commands.some((c) => c.text.toLowerCase().includes(`${f}(`))
+  );
+
+  if (hasUnsamplableFunction) {
     return query;
   }
 
-  const currentLimit = getLimitFromESQLQuery(query);
+  const limitCommands = root.commands.filter(({ name }) => name === 'limit');
+  let currentLimit = DEFAULT_ESQL_LIMIT;
+  if (limitCommands.length) {
+    const limits: number[] = [];
+    walk(root.commands, {
+      visitLiteral: (node) => {
+        if (!isNaN(Number(node.value))) {
+          limits.push(Number(node.value));
+        }
+      },
+    });
+    if (limits.length) {
+      currentLimit = Math.min(...limits);
+    }
+  }
+
   const rate = Math.min(MAX_SAMPLE_RATE, Math.max(MIN_SAMPLE_RATE, maxDataPoints / currentLimit));
 
   if (rate >= MAX_SAMPLE_RATE) {

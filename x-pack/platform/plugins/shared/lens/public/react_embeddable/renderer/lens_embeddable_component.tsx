@@ -68,10 +68,13 @@ export function LensEmbeddableComponent({
   const lastReportedWidth = useRef<number>(0);
 
   useEffect(() => {
-    if (
-      containerWidth > 0 &&
-      Math.abs(containerWidth - lastReportedWidth.current) > WIDTH_CHANGE_THRESHOLD
-    ) {
+    if (containerWidth <= 0) {
+      return;
+    }
+    const isFirstMeasurement = lastReportedWidth.current === 0;
+    const exceedsThreshold =
+      Math.abs(containerWidth - lastReportedWidth.current) > WIDTH_CHANGE_THRESHOLD;
+    if (isFirstMeasurement || exceedsThreshold) {
       lastReportedWidth.current = containerWidth;
       internalApi.updateContainerWidth(containerWidth);
     }

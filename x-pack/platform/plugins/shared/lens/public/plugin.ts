@@ -363,7 +363,7 @@ export class LensPlugin {
         coreStart,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: (doc: LensDocument, forceDSL?: boolean) =>
+        documentToExpression: (doc: LensDocument, forceDSL?: boolean, maxDataPoints?: number) =>
           this.editorFrameService!.documentToExpression(doc, {
             dataViews: plugins.dataViews,
             storage: new Storage(localStorage),
@@ -371,6 +371,7 @@ export class LensPlugin {
             timefilter: plugins.data.query.timefilter.timefilter,
             nowProvider: plugins.data.nowProvider,
             forceDSL,
+            maxDataPoints,
             eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
