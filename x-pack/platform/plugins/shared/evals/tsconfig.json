@@ -3,14 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -25,6 +19,7 @@
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-http-router-server-mocks"
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/code-editor"
   ]
 }

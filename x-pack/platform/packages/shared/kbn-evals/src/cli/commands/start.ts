@@ -329,6 +329,10 @@ export const startCmd: Command<void> = {
       EVALUATION_CONNECTOR_ID: evaluationConnectorId,
     };
 
+    if (suite) {
+      envOverrides.EVAL_SUITE_ID = suite.id;
+    }
+
     const localEsUrl = readLocalEsUrl(repoRoot);
 
     if (!process.env.TRACING_ES_URL && localEsUrl) {

@@ -84,7 +84,7 @@ describe('ExampleScoresTable', () => {
 
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
-    expect(screen.getByText('Criteria: 0.950')).toBeInTheDocument();
+    expect(screen.getByText('Criteria: 0.95')).toBeInTheDocument();
     expect(screen.getByText('Correctness: n/a')).toBeInTheDocument();
 
     fireEvent.click(

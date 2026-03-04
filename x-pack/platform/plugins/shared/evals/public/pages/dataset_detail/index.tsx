@@ -43,6 +43,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { CodeEditor } from '@kbn/code-editor';
 import { useHistory, useParams } from 'react-router-dom';
 import type {
   DatasetExample,
@@ -86,7 +87,7 @@ const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
 const formatDate = (value?: string) => (value ? new Date(value).toLocaleString() : '-');
 
 const formatScore = (score: number | null | undefined) =>
-  score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(3);
+  score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
 
 const truncatedCellStyles = css`
   overflow: hidden;
@@ -681,27 +682,51 @@ export const DatasetDetailPage: React.FC = () => {
             {isEditingExample ? (
               <EuiForm component="form">
                 <EuiFormRow label={i18n.FLYOUT_INPUT_SECTION} fullWidth>
-                  <EuiTextArea
-                    rows={6}
+                  <CodeEditor
+                    languageId="json"
+                    height="200px"
                     value={editInput}
-                    onChange={(e) => setEditInput(e.target.value)}
-                    fullWidth
+                    onChange={(value: string) => setEditInput(value)}
+                    options={{
+                      minimap: { enabled: false },
+                      wordWrap: 'on',
+                      automaticLayout: true,
+                      lineNumbers: 'on',
+                      tabSize: 2,
+                      fontSize: 14,
+                    }}
                   />
                 </EuiFormRow>
                 <EuiFormRow label={i18n.FLYOUT_OUTPUT_SECTION} fullWidth>
-                  <EuiTextArea
-                    rows={8}
+                  <CodeEditor
+                    languageId="json"
+                    height="260px"
                     value={editOutput}
-                    onChange={(e) => setEditOutput(e.target.value)}
-                    fullWidth
+                    onChange={(value: string) => setEditOutput(value)}
+                    options={{
+                      minimap: { enabled: false },
+                      wordWrap: 'on',
+                      automaticLayout: true,
+                      lineNumbers: 'on',
+                      tabSize: 2,
+                      fontSize: 14,
+                    }}
                   />
                 </EuiFormRow>
                 <EuiFormRow label={i18n.FLYOUT_METADATA_SECTION} fullWidth>
-                  <EuiTextArea
-                    rows={4}
+                  <CodeEditor
+                    languageId="json"
+                    height="140px"
                     value={editMetadata}
-                    onChange={(e) => setEditMetadata(e.target.value)}
-                    fullWidth
+                    onChange={(value: string) => setEditMetadata(value)}
+                    options={{
+                      minimap: { enabled: false },
+                      wordWrap: 'on',
+                      automaticLayout: true,
+                      lineNumbers: 'on',
+                      tabSize: 2,
+                      fontSize: 14,
+                    }}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -802,27 +827,51 @@ export const DatasetDetailPage: React.FC = () => {
             ) : null}
             <EuiForm component="form">
               <EuiFormRow label={i18n.FLYOUT_INPUT_SECTION} fullWidth>
-                <EuiTextArea
-                  rows={6}
+                <CodeEditor
+                  languageId="json"
+                  height="200px"
                   value={createInput}
-                  onChange={(e) => setCreateInput(e.target.value)}
-                  fullWidth
+                  onChange={(value: string) => setCreateInput(value)}
+                  options={{
+                    minimap: { enabled: false },
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    lineNumbers: 'on',
+                    tabSize: 2,
+                    fontSize: 14,
+                  }}
                 />
               </EuiFormRow>
               <EuiFormRow label={i18n.FLYOUT_OUTPUT_SECTION} fullWidth>
-                <EuiTextArea
-                  rows={8}
+                <CodeEditor
+                  languageId="json"
+                  height="260px"
                   value={createOutput}
-                  onChange={(e) => setCreateOutput(e.target.value)}
-                  fullWidth
+                  onChange={(value: string) => setCreateOutput(value)}
+                  options={{
+                    minimap: { enabled: false },
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    lineNumbers: 'on',
+                    tabSize: 2,
+                    fontSize: 14,
+                  }}
                 />
               </EuiFormRow>
               <EuiFormRow label={i18n.FLYOUT_METADATA_SECTION} fullWidth>
-                <EuiTextArea
-                  rows={4}
+                <CodeEditor
+                  languageId="json"
+                  height="140px"
                   value={createMetadata}
-                  onChange={(e) => setCreateMetadata(e.target.value)}
-                  fullWidth
+                  onChange={(value: string) => setCreateMetadata(value)}
+                  options={{
+                    minimap: { enabled: false },
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    lineNumbers: 'on',
+                    tabSize: 2,
+                    fontSize: 14,
+                  }}
                 />
               </EuiFormRow>
             </EuiForm>

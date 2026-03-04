@@ -25,7 +25,7 @@ const truncate = (value: string, maxLength: number) =>
   value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 
 const formatScore = (score: number | null | undefined) =>
-  score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(3);
+  score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
 
 interface EvaluatorScoreBadge {
   key: string;
