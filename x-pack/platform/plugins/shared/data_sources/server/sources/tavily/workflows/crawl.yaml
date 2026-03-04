@@ -30,10 +30,13 @@ inputs:
     required: false
     description: 'Natural language instructions for the crawler specifying which types of pages to return'
   - name: extract_depth
-    type: string
+    type: choice
+    options:
+      - basic
+      - advanced
     required: false
     default: 'basic'
-    description: 'Depth of extraction: basic or advanced. Advanced retrieves more data including tables and embedded content.'
+    description: 'Depth of extraction. Advanced retrieves more data including tables and embedded content.'
 steps:
   - name: tavily-crawl
     type: mcp.callTool
