@@ -46,9 +46,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
 
     const projectType = cloud.serverless.projectType || '';
     const productOffering =
-      projectType === 'search'
-        ? 'Elasticsearch'
-        : `Elastic ${capitalize(projectType)}`.trim();
+      projectType === 'search' ? 'Elasticsearch' : `Elastic ${capitalize(projectType)}`.trim();
 
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();
