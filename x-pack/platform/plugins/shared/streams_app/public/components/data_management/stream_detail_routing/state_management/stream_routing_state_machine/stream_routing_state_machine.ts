@@ -146,7 +146,7 @@ export const streamRoutingMachine = setup({
       return {
         bulkFork: {
           ...bulkFork,
-          results: [...bulkFork.results, { index: item.index, success: params.success }],
+          results: [...bulkFork.results, { name: item.name, success: params.success }],
         },
       };
     }),

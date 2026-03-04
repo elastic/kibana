@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
@@ -175,7 +175,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     acceptSuggestion,
     rejectSuggestion,
     updateSuggestion,
-    selectedSuggestionIndexes,
+    selectedSuggestionNames,
     toggleSuggestionSelection,
     isSuggestionSelected,
     bulkAcceptSuggestions,
@@ -184,6 +184,13 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   } = useReviewSuggestionsForm();
 
   const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
+  const { acknowledgeBulkFork } = useStreamRoutingEvents();
+  const isBulkForkComplete = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: { bulkForking: 'complete' } } })
+  );
+  const bulkForkResults = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.bulkFork?.results
+  );
 
   const handleBulkAccept = () => {
     setShowBulkAcceptModal(true);
@@ -287,10 +294,29 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     );
   };
 
-  const handleBulkAcceptSuccess = (successfulIndexes: number[]) => {
-    bulkAcceptSuggestions(successfulIndexes);
-    setShowBulkAcceptModal(false);
-  };
+  const handleBulkAcceptSuccess = useCallback(
+    (successfulNames: string[]) => {
+      bulkAcceptSuggestions(successfulNames);
+      setShowBulkAcceptModal(false);
+    },
+    [bulkAcceptSuggestions]
+  );
+
+  useEffect(() => {
+    if (isBulkForkComplete && !showBulkAcceptModal && bulkForkResults) {
+      const successfulNames = bulkForkResults
+        .filter((r) => r.success)
+        .map((r) => r.name);
+      bulkAcceptSuggestions(successfulNames);
+      acknowledgeBulkFork();
+    }
+  }, [
+    isBulkForkComplete,
+    showBulkAcceptModal,
+    bulkForkResults,
+    bulkAcceptSuggestions,
+    acknowledgeBulkFork,
+  ]);
 
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
     <NoDataEmptyPrompt
@@ -323,7 +349,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
       {showBulkAcceptModal && suggestions && (
         <BulkCreateStreamsConfirmationModal
           suggestions={suggestions}
-          selectedIndexes={selectedSuggestionIndexes}
+          selectedNames={selectedSuggestionNames}
           onClose={() => setShowBulkAcceptModal(false)}
           onSuccess={handleBulkAcceptSuccess}
         />
@@ -416,7 +442,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   resetForm={resetForm}
                   suggestions={suggestions}
                   updateSuggestion={updateSuggestion}
-                  selectedSuggestionIndexes={selectedSuggestionIndexes}
+                  selectedSuggestionNames={selectedSuggestionNames}
                   toggleSuggestionSelection={toggleSuggestionSelection}
                   isSuggestionSelected={isSuggestionSelected}
                   onBulkAccept={handleBulkAccept}

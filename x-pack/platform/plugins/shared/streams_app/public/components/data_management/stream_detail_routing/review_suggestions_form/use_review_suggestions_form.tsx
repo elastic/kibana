@@ -54,9 +54,7 @@ export function useReviewSuggestionsForm() {
     undefined
   );
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const [selectedSuggestionIndexes, setSelectedSuggestionIndexes] = useState<Set<number>>(
-    new Set()
-  );
+  const [selectedSuggestionNames, setSelectedSuggestionNames] = useState<Set<string>>(new Set());
 
   const abortController = useAbortController();
 
@@ -90,24 +88,15 @@ export function useReviewSuggestionsForm() {
   const removeSuggestion = (index: number) => {
     if (!suggestions) return;
 
+    const removedName = suggestions[index].name;
     const updatedSuggestions = suggestions.toSpliced(index, 1);
 
-    // Update selected indexes after removal
-    setSelectedSuggestionIndexes((prevSelected) => {
-      const newSelected = new Set<number>();
-      prevSelected.forEach((selectedIndex) => {
-        if (selectedIndex < index) {
-          newSelected.add(selectedIndex);
-        } else if (selectedIndex > index) {
-          // Shift down indexes that come after the removed item
-          newSelected.add(selectedIndex - 1);
-        }
-        // Don't include the removed index
-      });
-      return newSelected;
+    setSelectedSuggestionNames((prev) => {
+      const next = new Set(prev);
+      next.delete(removedName);
+      return next;
     });
 
-    // Reset form when all partitions are removed
     if (isEmpty(updatedSuggestions)) {
       resetForm();
     } else {
@@ -115,44 +104,35 @@ export function useReviewSuggestionsForm() {
     }
   };
 
-  const toggleSuggestionSelection = (index: number) => {
-    setSelectedSuggestionIndexes((prevSelected) => {
-      const newSelected = new Set(prevSelected);
-      if (newSelected.has(index)) {
-        newSelected.delete(index);
+  const toggleSuggestionSelection = (name: string) => {
+    setSelectedSuggestionNames((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
       } else {
-        newSelected.add(index);
+        next.add(name);
       }
-      return newSelected;
+      return next;
     });
   };
 
   const clearSuggestionSelection = () => {
-    setSelectedSuggestionIndexes(new Set());
+    setSelectedSuggestionNames(new Set());
   };
 
   const selectAllSuggestions = () => {
     if (!suggestions) return;
-    setSelectedSuggestionIndexes(new Set(suggestions.map((_, index) => index)));
+    setSelectedSuggestionNames(new Set(suggestions.map((s) => s.name)));
   };
 
-  // Bulk accept: removes multiple suggestions at once after successful fork operations
-  // Indexes should be sorted in descending order to avoid shifting issues
-  const bulkAcceptSuggestions = (indexes: number[]) => {
+  const bulkAcceptSuggestions = (names: string[]) => {
     if (!suggestions) return;
 
-    // Sort indexes in descending order to remove from end first
-    const sortedIndexes = [...indexes].sort((a, b) => b - a);
+    const nameSet = new Set(names);
+    const updatedSuggestions = suggestions.filter((s) => !nameSet.has(s.name));
 
-    let updatedSuggestions = [...suggestions];
-    for (const index of sortedIndexes) {
-      updatedSuggestions = updatedSuggestions.toSpliced(index, 1);
-    }
+    setSelectedSuggestionNames(new Set());
 
-    // Clear selection since all selected items are being removed
-    setSelectedSuggestionIndexes(new Set());
-
-    // Reset form when all partitions are removed
     if (isEmpty(updatedSuggestions)) {
       resetForm();
     } else {
@@ -181,7 +161,7 @@ export function useReviewSuggestionsForm() {
     abortController.abort();
     abortController.refresh();
     setSuggestions(undefined);
-    setSelectedSuggestionIndexes(new Set());
+    setSelectedSuggestionNames(new Set());
     setSuggestionReason(undefined);
     resetPreview();
   };
@@ -218,12 +198,11 @@ export function useReviewSuggestionsForm() {
       }
       removeSuggestion(index);
     },
-    // Bulk selection state and functions
-    selectedSuggestionIndexes,
+    selectedSuggestionNames,
     toggleSuggestionSelection,
     clearSuggestionSelection,
     selectAllSuggestions,
-    isSuggestionSelected: (index: number) => selectedSuggestionIndexes.has(index),
+    isSuggestionSelected: (name: string) => selectedSuggestionNames.has(name),
     bulkAcceptSuggestions,
   };
 }

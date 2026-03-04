@@ -412,7 +412,7 @@ describe('useReviewSuggestionsForm', () => {
   });
 
   describe('bulk selection', () => {
-    it('toggleSuggestionSelection adds and removes indexes from selection', async () => {
+    it('toggleSuggestionSelection adds and removes names from selection', async () => {
       setupSuggestionsApi();
 
       const { result } = renderHook(() => useReviewSuggestionsForm());
@@ -426,29 +426,26 @@ describe('useReviewSuggestionsForm', () => {
         });
       });
 
-      // Select first suggestion
       act(() => {
-        result.current.toggleSuggestionSelection(0);
+        result.current.toggleSuggestionSelection('logs.api');
       });
 
-      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(true);
-      expect(result.current.isSuggestionSelected(0)).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(true);
+      expect(result.current.isSuggestionSelected('logs.api')).toBe(true);
 
-      // Select second suggestion
       act(() => {
-        result.current.toggleSuggestionSelection(1);
+        result.current.toggleSuggestionSelection('logs.ui');
       });
 
-      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(true);
-      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
 
-      // Deselect first suggestion
       act(() => {
-        result.current.toggleSuggestionSelection(0);
+        result.current.toggleSuggestionSelection('logs.api');
       });
 
-      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(false);
-      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(false);
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
     });
 
     it('selectAllSuggestions selects all suggestions', async () => {
@@ -469,9 +466,9 @@ describe('useReviewSuggestionsForm', () => {
         result.current.selectAllSuggestions();
       });
 
-      expect(result.current.selectedSuggestionIndexes.size).toBe(2);
-      expect(result.current.isSuggestionSelected(0)).toBe(true);
-      expect(result.current.isSuggestionSelected(1)).toBe(true);
+      expect(result.current.selectedSuggestionNames.size).toBe(2);
+      expect(result.current.isSuggestionSelected('logs.api')).toBe(true);
+      expect(result.current.isSuggestionSelected('logs.ui')).toBe(true);
     });
 
     it('clearSuggestionSelection clears all selections', async () => {
@@ -488,22 +485,20 @@ describe('useReviewSuggestionsForm', () => {
         });
       });
 
-      // Select all
       act(() => {
         result.current.selectAllSuggestions();
       });
 
-      expect(result.current.selectedSuggestionIndexes.size).toBe(2);
+      expect(result.current.selectedSuggestionNames.size).toBe(2);
 
-      // Clear selection
       act(() => {
         result.current.clearSuggestionSelection();
       });
 
-      expect(result.current.selectedSuggestionIndexes.size).toBe(0);
+      expect(result.current.selectedSuggestionNames.size).toBe(0);
     });
 
-    it('removeSuggestion shifts selected indexes correctly', async () => {
+    it('removeSuggestion removes the name from selection', async () => {
       setupSuggestionsApi();
 
       const { result } = renderHook(() => useReviewSuggestionsForm());
@@ -517,21 +512,18 @@ describe('useReviewSuggestionsForm', () => {
         });
       });
 
-      // Select second suggestion (index 1)
       act(() => {
-        result.current.toggleSuggestionSelection(1);
+        result.current.toggleSuggestionSelection('logs.ui');
       });
 
-      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
 
-      // Remove first suggestion (index 0)
       act(() => {
         result.current.removeSuggestion(0);
       });
 
-      // Selection should shift down
-      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(true);
-      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(false);
+      expect(result.current.selectedSuggestionNames.has('logs.ui')).toBe(true);
+      expect(result.current.selectedSuggestionNames.has('logs.api')).toBe(false);
     });
 
     it('bulkAcceptSuggestions removes multiple suggestions at once', async () => {
@@ -562,22 +554,18 @@ describe('useReviewSuggestionsForm', () => {
         });
       });
 
-      // Select first and third suggestions
       act(() => {
-        result.current.toggleSuggestionSelection(0);
-        result.current.toggleSuggestionSelection(2);
+        result.current.toggleSuggestionSelection('logs.api');
+        result.current.toggleSuggestionSelection('logs.db');
       });
 
-      // Bulk accept selected suggestions
       act(() => {
-        result.current.bulkAcceptSuggestions([0, 2]);
+        result.current.bulkAcceptSuggestions(['logs.api', 'logs.db']);
       });
 
-      // Only the middle suggestion should remain
       expect(result.current.suggestions).toHaveLength(1);
       expect(result.current.suggestions![0].name).toBe('logs.ui');
-      // Selection should be cleared
-      expect(result.current.selectedSuggestionIndexes.size).toBe(0);
+      expect(result.current.selectedSuggestionNames.size).toBe(0);
     });
 
     it('bulkAcceptSuggestions resets form when all suggestions are removed', async () => {
@@ -594,9 +582,8 @@ describe('useReviewSuggestionsForm', () => {
         });
       });
 
-      // Bulk accept all suggestions
       act(() => {
-        result.current.bulkAcceptSuggestions([0, 1]);
+        result.current.bulkAcceptSuggestions(['logs.api', 'logs.ui']);
       });
 
       expect(result.current.suggestions).toBeUndefined();

@@ -43,7 +43,7 @@ export interface ReviewSuggestionsFormProps
     | 'acceptSuggestion'
     | 'rejectSuggestion'
     | 'updateSuggestion'
-    | 'selectedSuggestionIndexes'
+    | 'selectedSuggestionNames'
     | 'toggleSuggestionSelection'
     | 'isSuggestionSelected'
     | 'selectAllSuggestions'
@@ -67,7 +67,7 @@ export function ReviewSuggestionsForm({
   rejectSuggestion,
   updateSuggestion,
   onRegenerate,
-  selectedSuggestionIndexes,
+  selectedSuggestionNames,
   toggleSuggestionSelection,
   isSuggestionSelected,
   onBulkAccept,
@@ -101,10 +101,10 @@ export function ReviewSuggestionsForm({
   const { editSuggestion } = useStreamRoutingEvents();
 
   const allSelected =
-    selectedSuggestionIndexes.size === suggestions.length && suggestions.length > 0;
+    selectedSuggestionNames.size === suggestions.length && suggestions.length > 0;
   const someSelected =
-    selectedSuggestionIndexes.size > 0 && selectedSuggestionIndexes.size < suggestions.length;
-  const noneSelected = selectedSuggestionIndexes.size === 0;
+    selectedSuggestionNames.size > 0 && selectedSuggestionNames.size < suggestions.length;
+  const noneSelected = selectedSuggestionNames.size === 0;
 
   const handleMasterCheckboxChange = useCallback(() => {
     if (allSelected || someSelected) {
@@ -200,8 +200,8 @@ export function ReviewSuggestionsForm({
                   onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
                   onEdit={editSuggestion}
                   onSave={(updatedSuggestion) => updateSuggestion(index, updatedSuggestion)}
-                  isSelectedForBulk={isSuggestionSelected(index)}
-                  onToggleSelection={() => toggleSuggestionSelection(index)}
+                  isSelectedForBulk={isSuggestionSelected(partition.name)}
+                  onToggleSelection={() => toggleSuggestionSelection(partition.name)}
                 />
                 <EuiSpacer size="s" />
               </NestedView>
@@ -219,7 +219,7 @@ export function ReviewSuggestionsForm({
                 >
                   {i18n.translate('xpack.streams.reviewSuggestionsForm.acceptSelectedButton', {
                     defaultMessage: 'Accept selected ({count})',
-                    values: { count: selectedSuggestionIndexes.size },
+                    values: { count: selectedSuggestionNames.size },
                   })}
                 </EuiButton>
               </EuiFlexItem>

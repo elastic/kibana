@@ -32,14 +32,14 @@ import { type PartitionSuggestion } from './use_review_suggestions_form';
 
 export function BulkCreateStreamsConfirmationModal({
   suggestions,
-  selectedIndexes,
+  selectedNames,
   onClose,
   onSuccess,
 }: {
   suggestions: PartitionSuggestion[];
-  selectedIndexes: Set<number>;
+  selectedNames: Set<string>;
   onClose: () => void;
-  onSuccess: (successfulIndexes: number[]) => void;
+  onSuccess: (successfulNames: string[]) => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const { bulkForkStreams, acknowledgeBulkFork } = useStreamRoutingEvents();
@@ -55,23 +55,19 @@ export function BulkCreateStreamsConfirmationModal({
   );
 
   const selectedSuggestions = useMemo(
-    () =>
-      Array.from(selectedIndexes)
-        .sort((a, b) => a - b)
-        .map((index) => ({ index, suggestion: suggestions[index] })),
-    [selectedIndexes, suggestions]
+    () => suggestions.filter((s) => selectedNames.has(s.name)),
+    [selectedNames, suggestions]
   );
 
   const totalCount = selectedSuggestions.length;
   const results = useMemo(() => bulkFork?.results ?? [], [bulkFork?.results]);
   const progress = results.length;
-  const hasFailures = results.some((r) => !r.success);
   const successCount = results.filter((r) => r.success).length;
-  const failureCount = results.filter((r) => !r.success).length;
+  const failureCount = results.length - successCount;
+  const hasFailures = failureCount > 0;
 
   const handleConfirm = useCallback(() => {
-    const items = selectedSuggestions.map(({ index, suggestion }) => ({
-      index,
+    const items = selectedSuggestions.map((suggestion) => ({
       name: suggestion.name,
       condition: suggestion.condition,
     }));
@@ -80,28 +76,28 @@ export function BulkCreateStreamsConfirmationModal({
 
   useEffect(() => {
     if (isComplete && !hasFailures && results.length > 0) {
-      const successfulIndexes = results.map((r) => r.index);
+      const successfulNames = results.map((r) => r.name);
       acknowledgeBulkFork();
-      onSuccess(successfulIndexes);
+      onSuccess(successfulNames);
     }
   }, [isComplete, hasFailures, results, acknowledgeBulkFork, onSuccess]);
 
   const handleClose = useCallback(() => {
-    if (bulkFork) {
+    if (isComplete && bulkFork) {
       acknowledgeBulkFork();
     }
     onClose();
-  }, [bulkFork, acknowledgeBulkFork, onClose]);
+  }, [isComplete, bulkFork, acknowledgeBulkFork, onClose]);
 
   const handleDone = useCallback(() => {
-    const successfulIndexes = results.filter((r) => r.success).map((r) => r.index);
+    const successfulNames = results.filter((r) => r.success).map((r) => r.name);
     acknowledgeBulkFork();
-    onSuccess(successfulIndexes);
+    onSuccess(successfulNames);
   }, [results, acknowledgeBulkFork, onSuccess]);
 
   return (
     <EuiModal
-      onClose={isForking ? () => {} : handleClose}
+      onClose={handleClose}
       aria-labelledby={modalTitleId}
       data-test-subj="streamsAppBulkCreateStreamsConfirmationModal"
     >
@@ -123,7 +119,7 @@ export function BulkCreateStreamsConfirmationModal({
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.streams.bulkCreateStreams.progressText', {
                 defaultMessage: 'Creating stream {current} of {total}...',
-                values: { current: progress, total: totalCount },
+                values: { current: progress + 1, total: totalCount },
               })}
             </EuiText>
             <EuiSpacer size="m" />
@@ -159,8 +155,8 @@ export function BulkCreateStreamsConfirmationModal({
         </EuiText>
         <EuiSpacer size="m" />
 
-        {selectedSuggestions.map(({ index, suggestion }, arrayIndex) => {
-          const result = results.find((r) => r.index === index);
+        {selectedSuggestions.map((suggestion, arrayIndex) => {
+          const result = results.find((r) => r.name === suggestion.name);
           const hasResult = result !== undefined;
           const isSuccess = result?.success === true;
 
@@ -228,7 +224,6 @@ export function BulkCreateStreamsConfirmationModal({
             <>
               <EuiButtonEmpty
                 onClick={handleClose}
-                isDisabled={isForking}
                 data-test-subj="streamsAppBulkCreateStreamsConfirmationModalCancelButton"
               >
                 {i18n.translate('xpack.streams.bulkCreateStreams.cancel', {

@@ -102,7 +102,7 @@ export const useStreamRoutingEvents = () => {
           success: finalSnapshot.matches({ ready: { ingestMode: 'idle' } }),
         };
       },
-      bulkForkStreams: (items: Array<{ index: number; name: string; condition: Condition }>) => {
+      bulkForkStreams: (items: Array<{ name: string; condition: Condition }>) => {
         service.send({ type: 'routingRule.bulkFork', items });
       },
       acknowledgeBulkFork: () => {

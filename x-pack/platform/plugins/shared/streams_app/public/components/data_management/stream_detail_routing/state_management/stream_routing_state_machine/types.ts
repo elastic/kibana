@@ -33,13 +33,12 @@ export interface StreamRoutingInput {
 }
 
 export interface BulkForkItem {
-  index: number;
   name: string;
   condition: Condition;
 }
 
 export interface BulkForkResult {
-  index: number;
+  name: string;
   success: boolean;
 }
 
