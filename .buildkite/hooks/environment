@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Use treeless clone to reduce checkout time.
+# Objects are fetched on demand, which saves ~10-15s per agent on initial clone.
+# The reference mirror at /opt/git-mirrors still provides local object reuse.
+export BUILDKITE_GIT_CLONE_FLAGS="${BUILDKITE_GIT_CLONE_FLAGS:---filter=tree:0}"
+
+# Reduce refspec to only fetch the branch we need, not all refs
+export BUILDKITE_GIT_FETCH_FLAGS="${BUILDKITE_GIT_FETCH_FLAGS:---prune --filter=tree:0}"
+
+# Minimize git clean time by only cleaning tracked directories
+export BUILDKITE_GIT_CLEAN_FLAGS="${BUILDKITE_GIT_CLEAN_FLAGS:--ffdx}"
