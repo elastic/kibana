@@ -984,9 +984,9 @@ export function getConditionMonacoSchemaConfig(): {
   schema: object;
 } | null {
   try {
-    const jsonSchema = zodToJsonSchema(conditionZodSchema, {
-      name: 'ConditionSchema',
-      target: 'jsonSchema7',
+    const jsonSchema = z.toJSONSchema(conditionZodSchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
     });
 
     const schema = fixConditionSchema(jsonSchema);

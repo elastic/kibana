@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { insightsSchema } from './schema';
+import { insightsSchema } from './client/insight_tool';
 
 describe('insightsSchema', () => {
   /**
