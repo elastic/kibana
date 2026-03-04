@@ -214,7 +214,7 @@ export const getOverviewEmbeddableFactory = ({
         const fetchContext = useFetchContext(api);
         const mergedFilters = useMemo(
           () => [
-            ...(groupFilters?.filters ?? []),
+            ...(toStoredFilters(groupFilters?.filters) ?? []),
             ...rewriteFiltersForSloSummary(fetchContext.filters ?? []),
           ],
           [groupFilters?.filters, fetchContext.filters]
@@ -248,7 +248,7 @@ export const getOverviewEmbeddableFactory = ({
                       groupBy={groupBy}
                       groups={groups}
                       kqlQuery={kqlQuery}
-                      filters={toStoredFilters(mergedFilters) ?? []}
+                      filters={mergedFilters}
                       reloadSubject={reload$}
                     />
                   </EuiFlexItem>

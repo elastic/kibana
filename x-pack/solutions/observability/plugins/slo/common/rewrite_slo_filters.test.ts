@@ -6,6 +6,7 @@
  */
 
 import type { Filter, FilterStateStore } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { rewriteFilterForSloSummary, rewriteFiltersForSloSummary } from './rewrite_slo_filters';
 
 const makeFilter = (key: string, query: Record<string, unknown>, negate = false): Filter => ({
@@ -156,6 +157,42 @@ describe('rewriteFiltersForSloSummary', () => {
       expect(results[0].meta.key).toBe('slo.groupings.orchestrator.cluster.name');
       expect(results[1].meta.key).toBe('slo.tags');
       expect(results[2].meta.key).toBe('slo.groupings.host.name');
+    });
+  });
+
+  describe('integration with buildQueryFromFilters', () => {
+    it('rewritten filters produce valid ES query with ignoreFilterIfFieldNotInIndex: false', () => {
+      const dashboardFilter = makeFilter('orchestrator.cluster.name', {
+        match_phrase: { 'orchestrator.cluster.name': 'prod-cluster' },
+      });
+      const rewritten = rewriteFiltersForSloSummary([dashboardFilter]);
+      const esQuery = buildQueryFromFilters(rewritten, undefined, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
+      expect(esQuery.filter).toEqual([
+        { match_phrase: { 'slo.groupings.orchestrator.cluster.name': 'prod-cluster' } },
+      ]);
+    });
+
+    it('rewritten filters are dropped when ignoreFilterIfFieldNotInIndex is true and no data view', () => {
+      const dashboardFilter = makeFilter('orchestrator.cluster.name', {
+        match_phrase: { 'orchestrator.cluster.name': 'prod-cluster' },
+      });
+      const rewritten = rewriteFiltersForSloSummary([dashboardFilter]);
+      const esQuery = buildQueryFromFilters(rewritten, undefined, {
+        ignoreFilterIfFieldNotInIndex: true,
+      });
+      expect(esQuery.filter).toEqual([]);
+    });
+
+    it('preserves rewritten filter output as a valid Filter object (not AsCodeFilter)', () => {
+      const dashboardFilter = makeFilter('orchestrator.cluster.name', {
+        match_phrase: { 'orchestrator.cluster.name': 'prod-cluster' },
+      });
+      const [rewritten] = rewriteFiltersForSloSummary([dashboardFilter]);
+      expect(rewritten).toHaveProperty('meta.key', 'slo.groupings.orchestrator.cluster.name');
+      expect(rewritten).toHaveProperty('query');
+      expect(rewritten).toHaveProperty('$state');
     });
   });
 });
