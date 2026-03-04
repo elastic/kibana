@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
@@ -83,7 +84,7 @@ const dashboardCanvasContentStyles = {
       display: 'none !important',
     },
   }),
-  actions: ({ euiTheme }) =>
+  actions: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
     }),
