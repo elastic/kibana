@@ -18,27 +18,22 @@ Object {
             "items": Object {
               "additionalProperties": false,
               "properties": Object {
-                "eventCount": Object {
-                  "description": "Number of events detected by this query",
-                  "type": "number",
+                "event_count": Object {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer",
                 },
-                "featureName": Object {
-                  "description": "The system or feature the query was generated for (e.g., kubernetes, nginx)",
+                "query_title": Object {
                   "type": "string",
                 },
-                "queryTitle": Object {
-                  "description": "The title of the query that detected these events",
-                  "type": "string",
-                },
-                "streamName": Object {
-                  "description": "The name of the stream where this evidence was found",
+                "stream_name": Object {
                   "type": "string",
                 },
               },
               "required": Array [
-                "streamName",
-                "queryTitle",
-                "eventCount",
+                "stream_name",
+                "query_title",
+                "event_count",
               ],
               "type": "object",
             },
