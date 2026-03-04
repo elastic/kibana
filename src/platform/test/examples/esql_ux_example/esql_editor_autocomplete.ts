@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('ES|QL Editor autocomplete', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/255931
+  describe.skip('ES|QL Editor autocomplete', function () {
     beforeEach(async () => {
       await esql.setEsqlEditorQuery('');
     });
