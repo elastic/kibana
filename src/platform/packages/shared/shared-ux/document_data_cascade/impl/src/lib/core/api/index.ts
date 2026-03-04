@@ -9,7 +9,14 @@
 
 import type { Row } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import { useCallback, useLayoutEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useLayoutEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   useDataCascadeState,
   type GroupNode,
@@ -17,6 +24,10 @@ import {
   type IStoreState,
 } from '../../../store_provider';
 import { calculateActiveStickyIndex, type UseVirtualizerReturnType } from '../virtualizer';
+import type {
+  ChildVirtualizerController,
+  ConnectedChildState,
+} from '../virtualizer/child_virtualizer_controller';
 
 /**
  * Snapshot of data cascade ui state for use with useSyncExternalStore.
@@ -33,6 +44,16 @@ export interface DataCascadeUISnapshot<
   activeStickyIndex: number | null;
   totalRowCount: number;
   totalSize: number;
+  /**
+   * The index of the topmost virtual item that is currently in view,
+   * value is a derivative of the virtualizer's current scroll offset.
+   */
+  scrollAnchorItemIndex: number | null;
+  /**
+   * State of all child virtualizers connected via the controller.
+   * Empty when no children are connected.
+   */
+  connectedChildren: ReadonlyMap<string, ConnectedChildState>;
 }
 
 /**
@@ -50,6 +71,7 @@ export interface DataCascadeUISnapshotStore<G extends GroupNode, L extends LeafN
 export interface UseExposePublicApiOptions<G extends GroupNode> {
   rows: Row<G>[];
   enableStickyGroupHeader: boolean;
+  childController?: ChildVirtualizerController | null;
 }
 
 /**
@@ -73,6 +95,8 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   totalSize: 0,
   expanded: {},
   rowSelection: {},
+  scrollAnchorItemIndex: null,
+  connectedChildren: new Map(),
 });
 
 /**
@@ -149,6 +173,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
   }, []);
 
   const getSnapshot = useCallback((): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot, []);
+
   const getServerSnapshot = useCallback(
     (): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot,
     []
@@ -172,6 +197,20 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
       }, 100),
     []
   );
+
+  useEffect(() => () => notifyListeners.cancel(), [notifyListeners]);
+
+  useEffect(() => {
+    const childController = options.childController;
+    if (!childController) return;
+    return childController.subscribe(() => {
+      storeRef.current.snapshot = {
+        ...storeRef.current.snapshot,
+        connectedChildren: new Map(childController.getConnectedChildren()),
+      };
+      storeRef.current.listeners.forEach((listener) => listener());
+    });
+  }, [options.childController]);
 
   /** scans updates from virtualizer instance and updates the store snapshot. */
   const collectVirtualizerStateChanges = useCallback(
@@ -198,6 +237,8 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
           activeStickyIndex,
           scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
           totalSize: instance.getTotalSize ? instance.getTotalSize() : 0,
+          scrollAnchorItemIndex:
+            instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null,
         };
 
         notifyListeners();
