@@ -3530,13 +3530,13 @@
           },
           "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>> & ",
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & ",
           {
             "pluginId": "embeddable",
             "scope": "server",
