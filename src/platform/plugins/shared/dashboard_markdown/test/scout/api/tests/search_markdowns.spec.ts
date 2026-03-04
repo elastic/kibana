@@ -19,6 +19,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    await kbnClient.savedObjects.cleanStandardList();
     viewerCredentials = await requestAuth.getApiKey('viewer');
     const createPromises = Array.from({ length: TOTAL_MARKDOWNS }, (_, i) =>
       kbnClient.savedObjects.create({
