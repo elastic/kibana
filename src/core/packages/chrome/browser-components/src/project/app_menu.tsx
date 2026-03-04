@@ -46,11 +46,7 @@ export const AppMenuBar = () => {
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={styles.root}
     >
-      {hasBetaConfig ? (
-        <HeaderAppMenu />
-      ) : (
-        <HeaderActionMenu mounter={headerActionMenuMounter} />
-      )}
+      {hasBetaConfig ? <HeaderAppMenu /> : <HeaderActionMenu mounter={headerActionMenuMounter} />}
     </div>
   );
 };
