@@ -115,8 +115,6 @@ function buildInfraDocs({
   svc,
   dep,
   failingDeps,
-  failingServiceErrors,
-  currentFailures,
   depFailingErrorType,
   timestamp,
   metadataCache,
@@ -125,14 +123,12 @@ function buildInfraDocs({
   svc: ServiceNode;
   dep: InfraDependency;
   failingDeps: Set<string>;
-  failingServiceErrors: Map<string, ErrorType>;
-  currentFailures: FailureMap | undefined;
   depFailingErrorType: ErrorType | undefined;
   timestamp: number;
   metadataCache: MetadataCache | undefined;
   effectiveSeed: number;
 }): Array<Partial<LogDocument>> {
-  const infraDocs = generateInfraDoc({
+  return generateInfraDoc({
     service: svc,
     dep,
     isFailing: failingDeps.has(dep),
@@ -141,27 +137,6 @@ function buildInfraDocs({
     metadataCache,
     seed: effectiveSeed,
   });
-
-  const cachedMeta = metadataCache?.get(svc.name);
-  const serviceErrorType = failingServiceErrors.get(svc.name);
-  let k8sErrorType: 'k8s_oom' | 'k8s_crash_loop_backoff' | undefined;
-  if (serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff') {
-    const svcFailureCfg = currentFailures?.services?.[svc.name];
-    const k8sRng = mulberry32(deriveSeed(effectiveSeed, svc.name));
-    if (!svcFailureCfg || svcFailureCfg.rate <= 0 || k8sRng() < svcFailureCfg.rate) {
-      k8sErrorType = serviceErrorType;
-    }
-  }
-
-  const hostDocs = generateHostSystemLog({
-    service: svc,
-    seed: effectiveSeed,
-    cachedMetadata: cachedMeta,
-    timestamp,
-    errorType: k8sErrorType,
-  });
-
-  return [...infraDocs, ...hostDocs];
 }
 
 export function resolveTickState({
@@ -337,8 +312,6 @@ export function collectInfraDocs({
         svc,
         dep,
         failingDeps,
-        failingServiceErrors,
-        currentFailures,
         depFailingErrorType,
         timestamp,
         metadataCache,
@@ -346,6 +319,28 @@ export function collectInfraDocs({
       })
     );
   }
+
+  // Host/k8s system log: at most once per tick, independent of infra rate/volume.
+  const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
+  const serviceErrorType = failingServiceErrors.get(svc.name);
+  let k8sErrorType: 'k8s_oom' | 'k8s_crash_loop_backoff' | undefined;
+  if (serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff') {
+    const svcFailureCfg = currentFailures?.services?.[svc.name];
+    const k8sRng = mulberry32(deriveSeed(tickSeed, svc.name));
+    if (!svcFailureCfg || svcFailureCfg.rate <= 0 || k8sRng() < svcFailureCfg.rate) {
+      k8sErrorType = serviceErrorType;
+    }
+  }
+  result.push(
+    ...generateHostSystemLog({
+      service: svc,
+      seed: tickSeed,
+      cachedMetadata: metadataCache?.get(svc.name),
+      timestamp,
+      errorType: k8sErrorType,
+    })
+  );
+
   return result;
 }
 
