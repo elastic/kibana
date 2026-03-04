@@ -464,15 +464,16 @@ import {
   ActionButtonType,
   type ActionButton,
   type AttachmentRenderProps,
+  type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 
 interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
-  registerActionButtons?: (buttons: ActionButton[]) => void;
+  callbacks: CanvasRenderCallbacks;
 }
 
 const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
   attachment,
-  registerActionButtons,
+  callbacks: { registerActionButtons, updateOrigin },
 }) => {
   const [api, setApi] = useState<MyApi | undefined>();
 
@@ -487,10 +488,14 @@ const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
         label: 'Save',
         icon: 'save',
         type: ActionButtonType.PRIMARY,
-        handler: () => api.save(),
+        handler: async () => {
+          const savedObjectId = await api.save();
+          // Link the attachment to the saved object
+          await updateOrigin({ saved_object_id: savedObjectId });
+        },
       },
     ]);
-  }, [api, registerActionButtons]);
+  }, [api, registerActionButtons, updateOrigin]);
 
   return (
     <MyEditor onApiReady={setApi} />
@@ -500,15 +505,19 @@ const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
 // In the attachment definition:
 export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   // ...
-  renderCanvasContent: (props, registerActionButtons) => (
-    <MyCanvasContent {...props} registerActionButtons={registerActionButtons} />
+  renderCanvasContent: (props, callbacks) => (
+    <MyCanvasContent {...props} callbacks={callbacks} />
   ),
 };
 ```
 
 #### Linking by-value attachments to persistent storage with updateOrigin
 
-The `getActionButtons` params include an `updateOrigin` callback that allows you to link a by-value attachment to its persistent storage location (e.g., a saved object) after it has been saved.
+The `updateOrigin` callback allows you to link a by-value attachment to its persistent storage location (e.g., a saved object) after it has been saved.
+
+This callback is available in two places:
+- **`getActionButtons` params** - for static action buttons defined at registration time
+- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Registering action buttons dynamically](#registering-action-buttons-dynamically) above)
 
 **When to use `updateOrigin`:**
 
