@@ -36,6 +36,7 @@ describe('executeDashboardOperations', () => {
           type: 'lens',
           panelId: 'existing-panel',
           visualization: { type: 'metric' },
+          grid: { w: 12, h: 9 },
         },
       ],
     };
@@ -45,6 +46,7 @@ describe('executeDashboardOperations', () => {
       panelId: 'generated-panel',
       visualization: { type: 'xy' },
       title: 'Generated panel',
+      grid: { w: 24, h: 9 },
     };
 
     const operations: DashboardOperation[] = [
@@ -102,11 +104,13 @@ describe('executeDashboardOperations', () => {
       type: 'lens',
       panelId: 'generated-1',
       visualization: { type: 'xy' },
+      grid: { w: 24, h: 9 },
     };
     const attachmentPanel: AttachmentPanel = {
       type: 'lens',
       panelId: 'from-attachment',
       visualization: { type: 'metric' },
+      grid: { w: 12, h: 9 },
     };
 
     const result = await executeDashboardOperations({
@@ -196,6 +200,7 @@ describe('executeDashboardOperations', () => {
             type: 'lens',
             panelId: 'generated-panel-1',
             visualization: { type: 'metric' },
+            grid: { w: 12, h: 9 },
           },
         ],
         failures: [],

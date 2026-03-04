@@ -12,6 +12,7 @@ import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-ag
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isGenericAttachmentPanel,
+  panelGridSchema,
   type GenericAttachmentPanel,
   type LensAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
@@ -40,6 +41,7 @@ export const getErrorMessage = (error: unknown): string => {
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.unknown()),
   query: z.string().optional(),
+  grid: panelGridSchema,
 });
 
 const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachmentPanel[] => {
@@ -48,7 +50,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachment
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
 
-  const { visualization, query } = parseResult.data;
+  const { visualization, query, grid } = parseResult.data;
   const title =
     typeof visualization.title === 'string'
       ? visualization.title
@@ -60,6 +62,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachment
       panelId: uuidv4(),
       visualization: visualization as LensApiSchemaType,
       title,
+      grid,
       ...(query ? { query } : {}),
     },
   ];

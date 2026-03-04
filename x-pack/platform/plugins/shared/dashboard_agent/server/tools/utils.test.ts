@@ -60,6 +60,7 @@ describe('resolvePanelsFromAttachments', () => {
           visualization: { type: 'metric', title: 'Request count' },
           chart_type: 'metric',
           esql: 'FROM logs-* | STATS count(*)',
+          grid: { w: 12, h: 9 },
         },
       }),
     });
@@ -128,6 +129,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { w: 12, h: 9 },
       },
     ];
 
@@ -152,6 +154,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { w: 12, h: 9 },
       },
     ];
 
@@ -191,6 +194,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { w: 12, h: 9 },
       },
     ];
 

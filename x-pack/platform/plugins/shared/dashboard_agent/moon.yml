@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/dashboard-markdown'
   - '@kbn/management-settings-ids'
   - '@kbn/lens-plugin'
-  - '@kbn/css-utils'
 tags:
   - plugin
   - prod

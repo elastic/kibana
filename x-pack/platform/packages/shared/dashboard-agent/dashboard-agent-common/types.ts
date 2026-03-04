@@ -38,7 +38,7 @@ export const lensAttachmentPanelSchema = z.object({
   /** ES|QL query used (if applicable) */
   esql: z.string().optional(),
   /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
-  grid: panelGridSchema.optional(),
+  grid: panelGridSchema,
 });
 
 /**
