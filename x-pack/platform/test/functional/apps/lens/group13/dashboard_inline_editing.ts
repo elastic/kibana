@@ -7,15 +7,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize, security } = getPageObjects([
+  const { dashboard, visualize, lens, timeToVisualize } = getPageObjects([
     'dashboard',
     'visualize',
     'lens',
     'timeToVisualize',
-    'security',
   ]);
   const log = getService('log');
-  const securityService = getService('security');
   const listingTable = getService('listingTable');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');

@@ -10,20 +10,13 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
   const pageObjects = getPageObjects(['cspSecurity']);
-  describe(
-    'Cloud Security Posture - Group 6 (CIS Integrations CSPM GCP + Azure)',
-    function () {
-      before(async () => {
-        await pageObjects.cspSecurity.createRoles();
-        await pageObjects.cspSecurity.createUsers();
-      });
+  describe('Cloud Security Posture - Group 6 (CIS Integrations CSPM GCP + Azure)', function () {
+    before(async () => {
+      await pageObjects.cspSecurity.createRoles();
+      await pageObjects.cspSecurity.createUsers();
+    });
 
-      loadTestFile(
-        require.resolve('../group4/pages/cis_integrations/cspm/cis_integration_gcp')
-      );
-      loadTestFile(
-        require.resolve('../group4/pages/cis_integrations/cspm/cis_integration_azure')
-      );
-    }
-  );
+    loadTestFile(require.resolve('../group4/pages/cis_integrations/cspm/cis_integration_gcp'));
+    loadTestFile(require.resolve('../group4/pages/cis_integrations/cspm/cis_integration_azure'));
+  });
 }
