@@ -150,7 +150,6 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
     data: state.groupNodes,
     state: state.table,
     columns,
-    debugTable: false,
     enableRowSelection,
     getCoreRowModel: coreRowModel,
     getExpandedRowModel: expandedRowModel,
