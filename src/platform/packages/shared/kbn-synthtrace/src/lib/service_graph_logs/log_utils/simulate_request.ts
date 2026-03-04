@@ -188,8 +188,9 @@ export function simulateRequest({
 
     // Failure roll
     const directFailConf = resolvedFailures?.[current];
-    const isFailing = (directFailConf?.rate ?? 0) > AMBIENT_ERROR_RATE;
-    const directError = rng() < Math.max(AMBIENT_ERROR_RATE, directFailConf?.rate ?? 0);
+    const errorRate = directFailConf ? directFailConf.rate ?? 1 : AMBIENT_ERROR_RATE;
+    const directError = rng() < errorRate;
+    const isFailing = directFailConf !== undefined && errorRate > 0;
     const emitWarn = !directError && isFailing && resolveLogLevel(isFailing, rng) === 'warn';
 
     // Visit downstream

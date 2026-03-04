@@ -249,14 +249,14 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
       merged.noise = { volume: mergedNoiseVolume };
     }
 
-    const seenMessages = new Set<string>();
-    const ghostMentions = list
-      .flatMap((r) => r.ghostMentions ?? [])
-      .filter((g) => {
-        if (seenMessages.has(g.message)) return false;
-        seenMessages.add(g.message);
-        return true;
-      });
+    // First phase that defines a message wins; later phases with the same message are ignored.
+    const ghostMentionMap = new Map<string, NonNullable<NoiseConfig['ghostMentions']>[number]>();
+    for (const r of list) {
+      for (const g of r.ghostMentions ?? []) {
+        if (!ghostMentionMap.has(g.message)) ghostMentionMap.set(g.message, g);
+      }
+    }
+    const ghostMentions = [...ghostMentionMap.values()];
     if (ghostMentions.length > 0) {
       merged.ghostMentions = ghostMentions;
     }
