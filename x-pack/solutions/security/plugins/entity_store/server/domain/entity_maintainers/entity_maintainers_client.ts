@@ -144,7 +144,7 @@ export class EntityMaintainersClient {
         const { id, interval, description } = entry;
         const taskId = getTaskId(id, this.namespace);
         let taskSnapshot: TaskSnapshot | undefined;
-        let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NOT_STARTED;
+        let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NEVER_STARTED;
 
         try {
           const task = await this.taskManager.get(taskId);
