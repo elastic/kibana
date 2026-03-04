@@ -10,7 +10,7 @@ import {
   securityServiceMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import { getIsSuperuserFromRequest, getUserFromRequest } from './utils';
+import { hasVisibilityAccessOverrideFromRequest, getUserFromRequest } from './utils';
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -79,59 +79,40 @@ describe('getUserFromRequest', () => {
   });
 });
 
-describe('getIsSuperuserFromRequest', () => {
-  let security: ReturnType<typeof securityServiceMock.createStart>;
+describe('hasVisibilityAccessOverrideFromRequest', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    security = securityServiceMock.createStart();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('returns true for real requests when getCurrentUser has superuser role', async () => {
-    const request = httpServerMock.createKibanaRequest();
-
-    security.authc.getCurrentUser.mockReturnValue({
+  it('returns true when privilege check authorizes override privilege', async () => {
+    esClient.security.hasPrivileges.mockResolvedValue({
+      application: {},
+      cluster: {},
+      has_all_requested: true,
+      index: {},
       username: 'testuser',
-      profile_uid: 'profile-123',
-      roles: ['superuser'],
-    } as any);
+    });
 
-    const result = await getIsSuperuserFromRequest({ request, security, esClient });
+    const result = await hasVisibilityAccessOverrideFromRequest({ esClient });
 
     expect(result).toBe(true);
-    expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
-    expect(esClient.security.authenticate).not.toHaveBeenCalled();
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
   });
 
-  it('returns false for real requests when getCurrentUser has no superuser role', async () => {
-    const request = httpServerMock.createKibanaRequest();
-
-    security.authc.getCurrentUser.mockReturnValue({
+  it('returns false when privilege check does not authorize override privilege', async () => {
+    esClient.security.hasPrivileges.mockResolvedValue({
+      application: {},
+      cluster: {},
+      has_all_requested: false,
+      index: {},
       username: 'testuser',
-      profile_uid: 'profile-123',
-      roles: ['kibana_admin'],
-    } as any);
+    });
 
-    const result = await getIsSuperuserFromRequest({ request, security, esClient });
+    const result = await hasVisibilityAccessOverrideFromRequest({ esClient });
 
     expect(result).toBe(false);
-    expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
-    expect(esClient.security.authenticate).not.toHaveBeenCalled();
-  });
-
-  it('falls back to ES authenticate roles for fake requests', async () => {
-    const request = httpServerMock.createFakeKibanaRequest({});
-
-    esClient.security.authenticate.mockResolvedValue({
-      username: 'task-manager-user',
-      roles: ['superuser'],
-    } as any);
-
-    const result = await getIsSuperuserFromRequest({ request, security, esClient });
-
-    expect(result).toBe(true);
-    expect(security.authc.getCurrentUser).not.toHaveBeenCalled();
-    expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
   });
 });

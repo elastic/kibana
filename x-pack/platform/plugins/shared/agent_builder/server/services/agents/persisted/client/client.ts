@@ -19,7 +19,7 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { getIsSuperuserFromRequest, getUserFromRequest } from '../../../utils';
+import { hasVisibilityAccessOverrideFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
   AgentDeleteRequest,
@@ -75,9 +75,7 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
-  const isSuperuser = await getIsSuperuserFromRequest({
-    request,
-    security,
+  const hasVisibilityAccessOverride = await hasVisibilityAccessOverrideFromRequest({
     esClient: scopedClient.asCurrentUser,
   });
   const esClient = scopedClient.asInternalUser;
@@ -86,7 +84,7 @@ export const createClient = async ({
   return new AgentClientImpl({
     storage,
     user,
-    isSuperuser,
+    hasVisibilityAccessOverride,
     request,
     space,
     toolsService,
@@ -100,14 +98,14 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
-  private readonly isSuperuser: boolean;
+  private readonly hasVisibilityAccessOverride: boolean;
   private readonly logger: Logger;
 
   constructor({
     storage,
     toolsService,
     user,
-    isSuperuser,
+    hasVisibilityAccessOverride,
     request,
     space,
     logger,
@@ -115,7 +113,7 @@ class AgentClientImpl implements AgentClient {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
-    isSuperuser: boolean;
+    hasVisibilityAccessOverride: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -124,7 +122,7 @@ class AgentClientImpl implements AgentClient {
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
-    this.isSuperuser = isSuperuser;
+    this.hasVisibilityAccessOverride = hasVisibilityAccessOverride;
     this.space = space;
     this.logger = logger;
   }
@@ -168,7 +166,7 @@ class AgentClientImpl implements AgentClient {
 
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
     const filters = [createSpaceDslFilter(this.space)];
-    if (!this.isSuperuser) {
+    if (!this.hasVisibilityAccessOverride) {
       filters.push(buildVisibilityReadFilter({ user: this.user }));
     }
 
@@ -227,7 +225,7 @@ class AgentClientImpl implements AgentClient {
         source,
         update: profileUpdate,
         user: this.user,
-        isSuperuser: this.isSuperuser,
+        hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
       })
     ) {
       throw createAgentNotFoundError({ agentId });
@@ -292,12 +290,12 @@ class AgentClientImpl implements AgentClient {
         ? hasReadAccess({
             source: document._source,
             user: this.user,
-            isSuperuser: this.isSuperuser,
+            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
           })
         : hasWriteAccess({
             source: document._source,
             user: this.user,
-            isSuperuser: this.isSuperuser,
+            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
           });
 
     if (!hasRequestedAccess) {

@@ -9,6 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UserIdAndName } from '@kbn/agent-builder-common';
+import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
+
+const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
 
 /**
  * Resolves the current user from a request.
@@ -41,25 +44,32 @@ export const getUserFromRequest = async ({
   return { username: authResponse.username };
 };
 
+const VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE = 'agent_builder:visibility_access_override'; // intentionally unregistered privilege
+
 /**
- * Resolves whether the request is executing as a superuser.
+ * Returns `true` only for users with wildcard Elasticsearch privileges (for example `superuser`).
+ *
+ * We intentionally check an application privilege name that is not registered by Kibana
+ * (`agent_builder:visibility_access_override`). Because this privilege is unregistered, normal
+ * roles fail this check, while wildcard roles (for example application/cluster `*`/`all`) pass.
+ *
+ * This is used as an internal visibility-access override, independent of feature/sub-feature
+ * grants.
  */
-export const getIsSuperuserFromRequest = async ({
-  request,
-  security,
+export const hasVisibilityAccessOverrideFromRequest = async ({
   esClient,
 }: {
-  request: KibanaRequest;
-  security: SecurityServiceStart;
   esClient: ElasticsearchClient;
 }): Promise<boolean> => {
-  if (!request.isFakeRequest) {
-    const authUser = security.authc.getCurrentUser(request);
-    if (authUser) {
-      return authUser.roles?.includes('superuser') ?? false;
-    }
-  }
+  const { has_all_requested: hasVisibilityAccessOverride } = await esClient.security.hasPrivileges({
+    application: [
+      {
+        application: KIBANA_APPLICATION,
+        resources: ['*'],
+        privileges: [VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE],
+      },
+    ],
+  });
 
-  const authResponse = await esClient.security.authenticate();
-  return authResponse.roles.includes('superuser');
+  return hasVisibilityAccessOverride;
 };

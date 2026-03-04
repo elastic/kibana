@@ -12,27 +12,35 @@ import type { AgentProperties } from '../storage';
 export const hasReadAccess = ({
   source,
   user,
-  isSuperuser,
+  hasVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  isSuperuser: boolean;
+  hasVisibilityAccessOverride: boolean;
 }) => {
   const visibility = source.visibility ?? AgentVisibility.Public;
-  return isSuperuser || isOwner({ source, user }) || visibility !== AgentVisibility.Private;
+  return (
+    hasVisibilityAccessOverride ||
+    isOwner({ source, user }) ||
+    visibility !== AgentVisibility.Private
+  );
 };
 
 export const hasWriteAccess = ({
   source,
   user,
-  isSuperuser,
+  hasVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  isSuperuser: boolean;
+  hasVisibilityAccessOverride: boolean;
 }) => {
   const visibility = source.visibility ?? AgentVisibility.Public;
-  return isSuperuser || isOwner({ source, user }) || visibility === AgentVisibility.Public;
+  return (
+    hasVisibilityAccessOverride ||
+    isOwner({ source, user }) ||
+    visibility === AgentVisibility.Public
+  );
 };
 
 export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => {
@@ -63,29 +71,29 @@ export const validateVisibilityUpdateAccess = ({
   source,
   update,
   user,
-  isSuperuser,
+  hasVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   update: AgentUpdateRequest;
   user: UserIdAndName;
-  isSuperuser: boolean;
+  hasVisibilityAccessOverride: boolean;
 }) => {
   const isVisibilityChange =
     update.visibility !== undefined &&
     update.visibility !== (source.visibility ?? AgentVisibility.Public);
 
-  return !isVisibilityChange || canChangeVisibility({ source, user, isSuperuser });
+  return !isVisibilityChange || canChangeVisibility({ source, user, hasVisibilityAccessOverride });
 };
 
 const canChangeVisibility = ({
   source,
   user,
-  isSuperuser,
+  hasVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  isSuperuser: boolean;
-}) => isSuperuser || isOwner({ source, user });
+  hasVisibilityAccessOverride: boolean;
+}) => hasVisibilityAccessOverride || isOwner({ source, user });
 
 const isOwner = ({ source, user }: { source: AgentProperties; user: UserIdAndName }) =>
   (user.id !== undefined && user.id === source.created_by_id) ||
