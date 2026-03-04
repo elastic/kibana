@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback } from 'react';
-import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import {
@@ -31,18 +30,6 @@ const MetricsExperienceGridWrapper = (
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const { onFilter } = props;
-
-  // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
-  const handleFilter = useCallback(
-    (event: ExpressionRendererEvent['data']) => {
-      if (onFilter) {
-        onFilter(event);
-      }
-      event.preventDefault();
-    },
-    [onFilter]
-  );
 
   const onBreakdownFieldChange = useCallback(
     (nextBreakdownField?: string) => {
@@ -54,7 +41,6 @@ const MetricsExperienceGridWrapper = (
   return (
     <UnifiedMetricsExperienceGrid
       {...props}
-      onFilter={handleFilter}
       actions={props.actions}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}

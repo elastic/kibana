@@ -23,7 +23,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE, QuerySource } from '@kbn/esql-types';
+import {
+  type RecommendedQuery,
+  REGISTRY_EXTENSIONS_ROUTE,
+  QuerySource,
+  ESQL_CLASSIC_SOLUTION_ID,
+} from '@kbn/esql-types';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
@@ -45,7 +50,8 @@ export const HelpPopover: React.FC<{
   const currentQueryRef = useRef<string>('');
   currentQueryRef.current = actions?.currentQuery ?? '';
 
-  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
+  const activeSolutionNavId = useObservable(chrome.getActiveSolutionNavId$());
+  const activeSolutionId = activeSolutionNavId ?? ESQL_CLASSIC_SOLUTION_ID;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
 
@@ -180,6 +186,14 @@ export const HelpPopover: React.FC<{
     if (solutionsRecommendedQueries.length) {
       recommendedQueries.push(
         ...solutionsRecommendedQueries.map((recommendedQuery) => {
+          // If the query is standalone, return the query string directly
+          if (recommendedQuery.isStandalone) {
+            return {
+              label: recommendedQuery.name,
+              queryString: recommendedQuery.query,
+            };
+          }
+
           const template = prettifyQueryTemplate(recommendedQuery.query);
           // Check if query starts with FROM or TS
           const startsWithTs = recommendedQuery.query.startsWith('TS');
