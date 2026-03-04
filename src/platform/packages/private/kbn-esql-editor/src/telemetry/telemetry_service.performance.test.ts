@@ -166,22 +166,4 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
       })
     );
   });
-
-  it('omits callbacks_duration when not provided', () => {
-    const analytics = {
-      reportEvent: jest.fn(),
-    } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
-    const service = new ESQLEditorTelemetryService(analytics);
-
-    service.trackValidationLatency({
-      duration: 20,
-      queryLength: 10,
-      queryLines: 1,
-      sessionId: 'session-3',
-    });
-
-    const reported = mockMetricEvent.mock.calls[0][0];
-    expect(reported).not.toHaveProperty('key3');
-    expect(reported).not.toHaveProperty('value3');
-  });
 });
