@@ -30,7 +30,7 @@ function* flattenIterator(arr: unknown[], depth: number): Generator<unknown> {
 }
 
 function resolveToArray(rendered: unknown, index: number): unknown[] {
-  if (rendered === null || rendered === undefined) return [];
+  if (rendered == null) return [];
   if (!Array.isArray(rendered)) {
     throw new Error(
       `Input at index ${index} is not an array (got ${typeof rendered}). Each entry in "arrays" must resolve to an array.`
