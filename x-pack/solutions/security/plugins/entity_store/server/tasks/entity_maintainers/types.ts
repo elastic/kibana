@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { CRUDClient } from '../../domain/crud_client';
 
 export const EntityMaintainerTaskStatus = {
-  NOT_STARTED: 'not_started',
+  NEVER_STARTED: 'never_started',
   STARTED: 'started',
   STOPPED: 'stopped',
 } as const;

@@ -301,7 +301,7 @@ describe('EntityMaintainersClient', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         id: 'm1',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
         interval: '5m',
         description: 'Maintainer one',
         taskSnapshot: undefined,
