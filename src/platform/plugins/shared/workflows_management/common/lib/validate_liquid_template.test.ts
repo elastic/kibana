@@ -45,6 +45,64 @@ describe('validateLiquidTemplate (common)', () => {
     it('should return empty array for plain text', () => {
       expect(validateLiquidTemplate('Just plain text without any liquid syntax')).toEqual([]);
     });
+
+    it('should return empty array when comment lines contain valid liquid syntax', () => {
+      const yamlString = `name: test
+# {{ steps.foo.output | json }}
+steps:
+  - name: step1
+    type: console`;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
+
+    it('should return empty array when comment lines contain invalid liquid syntax', () => {
+      const yamlString = `name: test
+# {{ unclosed
+# {% unknownTag %}
+steps:
+  - name: step1
+    type: console`;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
+
+    it('should return empty array for indented comment lines with liquid variables', () => {
+      const yamlString = `name: test
+steps:
+  - name: step1
+    # old: "{{ deprecated_var | unknownFilter }}"
+    type: console`;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
+
+    it('should return empty array when inline comments contain valid liquid syntax', () => {
+      const yamlString = `name: test
+steps:
+  - name: step1
+    type: console  # was {{ steps.old.output | json }}
+    with:
+      message: hello`;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
+
+    it('should return empty array when inline comments contain invalid liquid syntax', () => {
+      const yamlString = `name: test
+steps:
+  - name: step1
+    type: console  # {{ unclosed
+    with:
+      message: hello`;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
+
+    it('should not strip # inside quoted strings while stripping inline comments', () => {
+      const yamlString = `name: test
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "value # not a comment"  # {{ realComment }}`;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
   });
 
   describe('invalid templates', () => {
@@ -76,6 +134,23 @@ describe('validateLiquidTemplate (common)', () => {
 
     it('should not return errors for single-brace text', () => {
       expect(validateLiquidTemplate('Hello { not liquid } world')).toEqual([]);
+    });
+
+    it('should still return errors for invalid liquid on non-comment lines even when comments are present', () => {
+      const yamlString = `# valid comment with {{ var }}
+name: test
+message: "{{ name | unknownFilter }}"`;
+      const result = validateLiquidTemplate(yamlString);
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('unknownFilter');
+      expect(result[0].startLine).toBe(3);
+    });
+
+    it('should still return errors for invalid liquid before an inline comment on the same line', () => {
+      const yamlString = 'message: "{{ name | unknownFilter }}" # valid comment';
+      const result = validateLiquidTemplate(yamlString);
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('unknownFilter');
     });
   });
 
