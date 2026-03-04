@@ -83,7 +83,11 @@ export default function ({ getService }: FtrProviderContext) {
       const ids = response.hits.hits.map(({ _id }: { _id?: string }) => _id!);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
-      expect(ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
+      expect(
+        ids.includes(
+          `ui-metric:kibana-user_agent:${userAgentMetric.userAgent.replace(/\//g, '-')}`
+        )
+      ).to.eql(true);
     });
 
     it('aggregates multiple events with same eventID', async () => {

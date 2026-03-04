@@ -30,7 +30,9 @@ export async function storeUiReport(
     // User Agent
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
-      const savedObjectId = `${key}:${userAgent}`;
+      // Forward slashes in the user agent string (e.g. "Mozilla/5.0") are replaced before
+      // being embedded in the saved object ID to comply with the SOR path-traversal restriction.
+      const savedObjectId = `${key}:${userAgent.replace(/\//g, '-')}`;
       return await internalRepository.create(
         'ui-metric',
         { count: 1 },
