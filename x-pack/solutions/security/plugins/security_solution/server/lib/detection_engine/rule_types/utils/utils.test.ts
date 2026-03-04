@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
@@ -44,7 +44,6 @@ import {
   getDisabledActionsWarningText,
   calculateFromValue,
   stringifyAfterKey,
-  checkForNoReadableIndices,
 } from './utils';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -476,66 +475,6 @@ describe('utils', () => {
       });
 
       expect(exceptions).toEqual([]);
-    });
-  });
-
-  describe('checkForNoReadableIndices', () => {
-    type ResponseType = TransportResult<estypes.FieldCapsResponse, unknown>;
-    // creating a partial response type to override the default response
-    const buildFieldCapsMockResponse = (overrides: Partial<ResponseType> = {}): ResponseType =>
-      ({
-        body: {
-          indices: [],
-          fields: {},
-        },
-        ...overrides,
-      } as ResponseType);
-    const fieldCapsResponse = buildFieldCapsMockResponse();
-
-    test('returns foundNoIndices true when the fieldCapsResponse is empty', async () => {
-      const { foundNoIndices } = await checkForNoReadableIndices({
-        fieldCapsResponse,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(foundNoIndices).toBeTruthy();
-    });
-
-    test('logs a special Endpoint Security message when the rule name is "Endpoint Security"', async () => {
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'Endpoint Security',
-      });
-      await checkForNoReadableIndices({
-        fieldCapsResponse,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'Unable to find indices matching ["logs-endpoint.alerts-*"]. This warning will persist until one of the following occurs: a matching index is created, the rule is disabled, or an Elastic agent with Endpoint Security and enrolled in Fleet sends an alert.',
-      });
-    });
-
-    test('logs a generic missing-index message when the rule name is not "Endpoint Security"', async () => {
-      // SUT uses rule execution logger's context to check the rule name
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'NOT Endpoint Security',
-      });
-
-      await checkForNoReadableIndices({
-        fieldCapsResponse,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'Unable to find indices matching: ["logs-endpoint.alerts-*"]. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.',
-      });
     });
   });
 

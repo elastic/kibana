@@ -78,52 +78,9 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
-import {
-  SECURITY_NUM_EXCEPTION_ITEMS,
-  SECURITY_NUM_INDICES_MATCHING_PATTERN,
-  SECURITY_QUERY_SPAN_S,
-} from './apm_field_names';
+import { SECURITY_NUM_EXCEPTION_ITEMS, SECURITY_QUERY_SPAN_S } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
-
-export const checkForNoReadableIndices = async (args: {
-  fieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
-  inputIndices: string[];
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<{
-  foundNoIndices: boolean;
-  warningMessage: string | undefined;
-}> => {
-  const { fieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
-  const { ruleName } = ruleExecutionLogger.context;
-
-  agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: fieldCapsResponse.body.indices.length,
-  });
-
-  if (isEmpty(fieldCapsResponse.body.indices)) {
-    const errorStringGeneric = `Unable to find indices matching: ${JSON.stringify(
-      inputIndices
-    )}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`.trimEnd();
-    const errorStringEndpointSecurity = `Unable to find indices matching ${JSON.stringify(
-      inputIndices
-    )}. This warning will persist until one of the following occurs: a matching index is created, the rule is disabled, or an Elastic agent with Endpoint Security and enrolled in Fleet sends an alert.`;
-    const errorString =
-      ruleName === 'Endpoint Security' ? errorStringEndpointSecurity : errorStringGeneric;
-
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString,
-    });
-
-    return {
-      foundNoIndices: true,
-      warningMessage: errorString,
-    };
-  }
-
-  return { foundNoIndices: false, warningMessage: undefined };
-};
 
 export const hasTimestampFields = async (args: {
   timestampField: string;
