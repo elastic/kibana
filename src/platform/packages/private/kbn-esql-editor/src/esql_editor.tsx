@@ -39,7 +39,9 @@ import type {
   ESQLControlVariable,
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
+  ESQLRegistrySolutionId,
 } from '@kbn/esql-types';
+import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -194,7 +196,9 @@ const ESQLEditorInternal = function ESQLEditor({
     [core.http, core.userProfile, usageCollection]
   );
 
-  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+  const activeSolutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
+  const activeSolutionId: ESQLRegistrySolutionId =
+    (activeSolutionNavId as ESQLRegistrySolutionId) ?? ESQL_CLASSIC_SOLUTION_ID;
 
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
@@ -487,7 +491,7 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -727,9 +731,8 @@ const ESQLEditorInternal = function ESQLEditor({
     fieldsMetadata,
     esqlService,
     histogramBarTarget,
-    activeSolutionId: activeSolutionId ?? undefined,
+    activeSolutionId,
     minimalQueryRef,
-    abortControllerRef,
     dataSourcesCache,
     memoizedSources,
     esqlFieldsCache,
@@ -780,7 +783,7 @@ const ESQLEditorInternal = function ESQLEditor({
     search: data.search.search,
     getTimeRange: () => data.query.timefilter.timefilter.getTime(),
     signal: abortControllerRef.current.signal,
-    activeSolutionId: activeSolutionId ?? undefined,
+    activeSolutionId,
     telemetryService,
   });
 
