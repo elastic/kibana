@@ -30,6 +30,7 @@ interface UseUserDetails {
   userName: string;
   id?: string;
   indexNames: string[];
+  isExploreContext?: boolean;
   skip?: boolean;
   startDate: string;
 }
@@ -39,6 +40,7 @@ export const useObservedUserDetails = ({
   userName,
   indexNames,
   id = OBSERVED_USER_QUERY_ID,
+  isExploreContext = false,
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
@@ -75,6 +77,7 @@ export const useObservedUserDetails = ({
       factoryQueryType: UsersQueries.observedDetails,
       userName,
       entityIdentifiers: { 'user.name': userName },
+      isExploreContext,
       timerange: {
         interval: '12h',
         from: startDate,
@@ -82,7 +85,7 @@ export const useObservedUserDetails = ({
       },
       filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     }),
-    [endDate, indexNames, startDate, userName]
+    [endDate, indexNames, startDate, userName, isExploreContext]
   );
 
   useEffect(() => {

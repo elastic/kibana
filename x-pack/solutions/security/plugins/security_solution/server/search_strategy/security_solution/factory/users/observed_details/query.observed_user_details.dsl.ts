@@ -18,8 +18,13 @@ export const buildObservedUserDetailsQuery = ({
   defaultIndex,
   timerange: { from, to },
   filterQuery,
+  isExploreContext,
 }: ObservedUserDetailsRequestOptions): ISearchRequestParams => {
-  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+  const userName = entityIdentifiers['user.name'];
+  const entityFilters =
+    isExploreContext && userName
+      ? { term: { 'user.name': userName } }
+      : euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
   const filter: QueryDslQueryContainer[] = [
     ...createQueryFilterClauses(filterQuery),
     ...(entityFilters ? [entityFilters] : []),

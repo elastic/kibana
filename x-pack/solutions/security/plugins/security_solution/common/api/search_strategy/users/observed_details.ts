@@ -14,6 +14,7 @@ import { UsersQueries } from '../model/factory_query_type';
 
 export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
   entityIdentifiers: z.record(z.string(), z.string()),
+  isExploreContext: z.boolean().optional(),
   skip: z.boolean().optional(),
   timerange,
   inspect,

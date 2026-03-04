@@ -172,6 +172,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     startDate: from,
     userName: detailName,
     indexNames: selectedPatterns,
+    isExploreContext: true,
     skip: selectedPatterns.length === 0,
   });
 
@@ -270,6 +271,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 <UserOverview
                   entityIdentifiers={{ 'user.name': detailName }}
                   id={QUERY_ID}
+                  isExploreContext
                   isInDetailsSidePanel={false}
                   data={userDetails}
                   anomaliesData={anomaliesData}

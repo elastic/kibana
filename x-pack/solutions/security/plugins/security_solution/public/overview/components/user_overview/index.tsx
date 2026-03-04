@@ -69,6 +69,8 @@ export interface UserSummaryProps {
   firstSeenFromEntityStore?: string;
   /** When using Entity Store v2: last seen from entity lifecycle. */
   lastSeenFromEntityStore?: string;
+  /** When true (e.g. from explore pages), only user.name from entityIdentifiers is used with a terms filter; entityIdentifiers filter is not applied. */
+  isExploreContext?: boolean;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -100,14 +102,18 @@ export const UserOverview = React.memo<UserSummaryProps>(
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
+    isExploreContext = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
 
-    // Extract user name from entityIdentifiers for buildUserNamesFilter
-    // Priority: user.name > user.id > user.email > user.entity.id > first available value
+    // Extract user name: when isExploreContext only use user.name and apply terms filter;
+    // otherwise use entityIdentifiers with priority fallback for buildUserNamesFilter (terms).
     const userName = useMemo(() => {
+      if (isExploreContext) {
+        return entityIdentifiers['user.name'] ?? '';
+      }
       return (
         entityIdentifiers['user.name'] ||
         entityIdentifiers['user.id'] ||
@@ -116,7 +122,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         Object.values(entityIdentifiers)[0] ||
         ''
       );
-    }, [entityIdentifiers]);
+    }, [entityIdentifiers, isExploreContext]);
 
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
