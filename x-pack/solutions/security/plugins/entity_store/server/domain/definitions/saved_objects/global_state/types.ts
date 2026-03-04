@@ -30,7 +30,7 @@ export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = 
     logsExtraction: {
       type: 'object',
       properties: {
-        filter: { type: 'text' },
+        filter: { type: 'keyword' },
         additionalIndexPatterns: { type: 'keyword' },
         fieldHistoryLength: { type: 'integer' },
         lookbackPeriod: { type: 'keyword' },
