@@ -187,7 +187,6 @@ export const complexMetricAttributes: LensAttributes = {
       color: '#FFf',
       showBar: true,
       primaryPosition: 'top',
-      titleWeight: 'normal',
       secondaryAlign: 'left',
       secondaryTrend: {
         type: 'none',
