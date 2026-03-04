@@ -31,9 +31,12 @@ apiTest.describe(
       });
 
       // enable feature flag
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+      await kbnClient.uiSettings.update(
+        {
+          [FF_ENABLE_ENTITY_STORE_V2]: true,
+        },
+        { space: spaceId }
+      );
 
       // Install the entity store
       const response = await apiClient.post(inSpace(ENTITY_STORE_ROUTES.INSTALL), {
