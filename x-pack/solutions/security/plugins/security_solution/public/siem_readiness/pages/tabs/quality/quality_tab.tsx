@@ -106,13 +106,17 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return withStatus.filter((category) => category.items.length > 0);
   }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
 
-  // Calculate total incompatible indices
+  // Calculate total incompatible indices - count unique indices only
   const totalIncompatibleIndices = useMemo(() => {
-    return categories.reduce(
-      (sum, category) =>
-        sum + category.items.filter((item) => item.status === 'incompatible').length,
-      0
-    );
+    const uniqueIncompatibleIndices = new Set<string>();
+    categories.forEach((category) => {
+      category.items
+        .filter((item) => item.status === 'incompatible')
+        .forEach((item) => {
+          uniqueIncompatibleIndices.add(item.indexName);
+        });
+    });
+    return uniqueIncompatibleIndices.size;
   }, [categories]);
 
   const hasIncompatibleIndices = totalIncompatibleIndices > 0;
