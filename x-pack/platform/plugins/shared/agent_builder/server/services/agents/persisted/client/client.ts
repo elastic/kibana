@@ -32,14 +32,14 @@ import type { AgentsUsingToolsResult, PersistedAgentDefinition } from '../types'
 import type { AgentProfileStorage, AgentProperties } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
-import { validateToolSelection } from '../utils/tools';
+import { validateToolSelection } from './utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import {
   buildVisibilityReadFilter,
   hasReadAccess,
   validateVisibilityUpdateAccess,
   hasWriteAccess,
-} from '../utils/access_control';
+} from './utils/access_control';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;

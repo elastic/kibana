@@ -34,10 +34,13 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     visibility: document._source.visibility ?? AgentVisibility.Public,
-    created_by: {
-      id: document._source.created_by_id,
-      username: document._source.created_by_name ?? 'unknown',
-    },
+    created_by:
+      document._source.created_by_id || document._source.created_by_name
+        ? {
+            id: document._source.created_by_id,
+            username: document._source.created_by_name ?? 'unknown',
+          }
+        : undefined,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,

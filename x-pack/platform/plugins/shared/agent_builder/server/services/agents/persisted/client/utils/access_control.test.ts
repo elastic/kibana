@@ -6,7 +6,7 @@
  */
 
 import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
-import type { AgentProperties } from '../client/storage';
+import type { AgentProperties } from '../storage';
 import {
   hasReadAccess,
   hasWriteAccess,

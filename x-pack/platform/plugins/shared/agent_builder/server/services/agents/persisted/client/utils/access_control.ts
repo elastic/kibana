@@ -6,8 +6,8 @@
  */
 
 import { AgentVisibility, type UserIdAndName } from '@kbn/agent-builder-common';
-import type { AgentUpdateRequest } from '../../../../../common/agents';
-import type { AgentProperties } from '../client/storage';
+import type { AgentUpdateRequest } from '../../../../../../common/agents';
+import type { AgentProperties } from '../storage';
 
 export const hasReadAccess = ({
   source,
@@ -85,14 +85,8 @@ const canChangeVisibility = ({
   source: AgentProperties;
   user: UserIdAndName;
   isSuperuser: boolean;
-}) => {
-  return isSuperuser || isOwner({ source, user });
-};
+}) => isSuperuser || isOwner({ source, user });
 
-const isOwner = ({ source, user }: { source: AgentProperties; user: UserIdAndName }) => {
-  if (user.id !== undefined && user.id === source.created_by_id) {
-    return true;
-  }
-
-  return user.username === source.created_by_name;
-};
+const isOwner = ({ source, user }: { source: AgentProperties; user: UserIdAndName }) =>
+  (user.id !== undefined && user.id === source.created_by_id) ||
+  user.username === source.created_by_name;

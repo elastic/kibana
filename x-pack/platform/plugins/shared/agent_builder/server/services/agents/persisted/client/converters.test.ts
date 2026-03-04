@@ -120,8 +120,8 @@ describe('fromEs', () => {
 
     const definition = fromEs(document);
 
-    expect(definition.visibility).toEqual('public');
-    expect(definition.created_by).toEqual({ username: 'unknown' });
+    expect(definition.visibility).toEqual(AgentVisibility.Public);
+    expect(definition.created_by).toBeUndefined();
   });
 });
 

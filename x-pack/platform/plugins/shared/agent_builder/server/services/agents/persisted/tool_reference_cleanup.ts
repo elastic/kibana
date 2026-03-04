@@ -11,7 +11,7 @@ import type { AgentProfileStorage, AgentProperties } from './client/storage';
 import type { AgentRef } from '../../../../common/http_api/tools';
 import type { AgentsUsingToolsResult } from './types';
 import { updateRequestToEs } from './client/converters';
-import { removeToolIdsFromToolSelection } from './utils/tools';
+import { removeToolIdsFromToolSelection } from './client/utils/tools';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 
 const SEARCH_SIZE = 1000;
