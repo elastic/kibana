@@ -649,7 +649,7 @@
             "label": "titleWeight",
             "description": [],
             "signature": [
-              "\"bold\" | \"normal\""
+              "\"bold\" | 500 | \"normal\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 59,
@@ -1171,7 +1171,7 @@
             "label": "titleWeight",
             "description": [],
             "signature": [
-              "\"bold\" | \"normal\""
+              "\"bold\" | 500 | \"normal\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 43,
