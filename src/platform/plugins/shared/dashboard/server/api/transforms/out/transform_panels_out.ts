@@ -73,14 +73,14 @@ function transformPanelProperties(
   isDashboardAppRequest: boolean = false
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
-  const { embeddableConfig, gridData, panelIndex } = panel;
+  const { embeddableConfig, gridData, panelIndex, type } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
-  const type = panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
-  const transforms = embeddableService?.getTransforms(type);
+  const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transforms = embeddableService?.getTransforms(transformType);
 
   let transformedPanelConfig;
   try {

@@ -6,7 +6,6 @@
  */
 
 import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
@@ -50,12 +49,12 @@ export function registerLensEmbeddableTransforms(
   builder: LensConfigBuilder
 ) {
   embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
-    getTransforms: (drilldownTransforms: DrilldownTransforms) =>
+    getTransforms: (drilldownTransforms) =>
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
         transformOut: getTransformOut(builder, drilldownTransforms.transformOut, false),
       } satisfies LensTransforms),
-    getSchema: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+    getSchema: (getDrilldownsSchema) => {
       return getLensPanelSchema(getDrilldownsSchema);
     },
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
@@ -103,7 +102,7 @@ const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType)
     }
   );
 
-const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+export const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   schema.oneOf(
     [getLensByValuePanelSchema(getDrilldownsSchema), getLensByRefPanelSchema(getDrilldownsSchema)],
     {

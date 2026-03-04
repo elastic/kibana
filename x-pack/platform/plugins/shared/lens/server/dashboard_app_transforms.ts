@@ -6,7 +6,6 @@
  */
 
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -15,19 +14,21 @@ import { LENS_DASHBOARD_APP_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
-import { lensPanelSchema } from './transforms';
+import { getLensPanelSchema } from './transforms';
 
 export function registerLensEmbeddableTransformsForDashboardApp(
   embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
 ) {
   embeddableSetup.registerTransforms(LENS_DASHBOARD_APP_TYPE, {
-    getTransforms: (drilldownTransforms: DrilldownTransforms) =>
+    getTransforms: (drilldownTransforms) =>
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, true),
         transformOut: getTransformOut(builder, drilldownTransforms.transformOut, true),
       } satisfies LensTransforms),
-    getSchema: () => (builder.isEnabled ? lensPanelSchema : undefined),
+    getSchema: (getDrilldownsSchema) => {
+      return builder.isEnabled ? getLensPanelSchema(getDrilldownsSchema) : undefined;
+    },
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
 
