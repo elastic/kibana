@@ -95,7 +95,7 @@ function getFieldDiscoveryInstructions() {
   `);
 }
 
-function getKqlInstructions() {
+export function getKqlInstructions() {
   return dedent(`
     <kql_syntax>
     ### KQL (Kibana Query Language)
@@ -103,9 +103,10 @@ function getKqlInstructions() {
     - Match: \`field: value\`, \`field: (a OR b OR c)\`
     - Range: \`field > 100\`, \`field >= 10 AND field <= 20\`
     - Wildcards: \`field: prefix*\` (trailing only)
-    - Negation: \`NOT field: value\`
+    - Negation: \`NOT field: value\`, \`NOT message: "noisy string"\`
     - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
-    - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
+    - Exists: \`field: *\` (field has any value)
+    - Phrases: \`message: "connection refused"\` (exact phrase in text)
     </kql_syntax>
   `);
 }

@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { registerObservabilityAgent } from './agent/register_observability_agent';
+import { registerLogSearchAgent } from './agent/register_log_search_agent';
 import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
 import type {
@@ -50,6 +51,10 @@ export class ObservabilityAgentBuilderPlugin
   ): ObservabilityAgentBuilderPluginSetup {
     registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
       this.logger.error(`Error registering observability agent: ${error}`);
+    });
+
+    registerLogSearchAgent({ core, plugins, logger: this.logger }).catch((error) => {
+      this.logger.error(`Error registering log search agent: ${error}`);
     });
 
     registerTools({

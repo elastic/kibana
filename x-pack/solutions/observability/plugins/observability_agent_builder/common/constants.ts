@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// Agent ID
+// Agent IDs
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
+export const OBSERVABILITY_LOG_SEARCH_AGENT_ID = 'observability.log_search_agent';
 
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
