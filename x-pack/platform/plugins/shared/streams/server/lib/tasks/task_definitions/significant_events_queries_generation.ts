@@ -96,8 +96,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                           connectorId,
                           start,
                           end,
-                          system,
-                          sampleDocsSize,
                           systemPrompt: significantEventsPromptOverride,
                         },
                         {
