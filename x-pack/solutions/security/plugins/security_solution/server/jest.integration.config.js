@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-oblt';
-
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/server'],
+  haste: {
+    throwOnCollision: false,
+  },
+  forceExit: true,
+};
