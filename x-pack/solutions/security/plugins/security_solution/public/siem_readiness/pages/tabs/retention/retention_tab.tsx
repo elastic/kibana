@@ -78,15 +78,13 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
   // Match data streams to categories by checking if backing index contains data stream name
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
-    if (!categoriesData?.mainCategoriesMap || !retentionData?.items) return [];
-
     const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
 
-    for (const category of categoriesData.mainCategoriesMap) {
+    for (const category of categoriesData?.mainCategoriesMap ?? []) {
       const isActive = activeCategories.includes(category.category as MainCategories);
       if (isActive) {
         const matchingRetention: RetentionInfoWithStatus[] = [];
-        for (const retention of retentionData.items) {
+        for (const retention of retentionData?.items ?? []) {
           const hasMatch = category.indices.some((idx) =>
             idx.indexName.includes(retention.indexName)
           );
