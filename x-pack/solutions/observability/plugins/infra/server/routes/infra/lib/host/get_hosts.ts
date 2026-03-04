@@ -127,8 +127,9 @@ const getHostNames = async ({
   ]);
 
   const availableHostsSet = new Set(availableHosts);
-  const hostsToRemove = new Set(allHosts.filter((h) => !availableHostsSet.has(h)));
-  const verifiedApmHosts = (apmHosts ?? []).filter((h) => !hostsToRemove.has(h));
+  const hostsToFilterOut = new Set(allHosts.filter((h) => !availableHostsSet.has(h)));
+  // Filter out hosts that match the filter but the APM Integration could retrieve them anyway
+  const verifiedApmHosts = (apmHosts ?? []).filter((h) => !hostsToFilterOut.has(h));
 
   return [...new Set([...availableHosts, ...verifiedApmHosts])];
 };

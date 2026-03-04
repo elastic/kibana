@@ -14,7 +14,7 @@ import { assertQueryStructure } from '../utils';
 import { getDocumentsFilter } from '../helpers/query';
 import { getFilteredHostNames } from './get_filtered_hosts';
 
-const HOSTS_TO_REMOVE_LIMIT = 10000;
+const HOSTS_LIMIT = 10000;
 
 export async function getHostsCount({
   infraMetricsClient,
@@ -40,7 +40,7 @@ export async function getHostsCount({
       query,
       from,
       to,
-      limit: HOSTS_TO_REMOVE_LIMIT,
+      limit: HOSTS_LIMIT,
       schema,
     }),
     getDocumentsFilter({
@@ -53,7 +53,7 @@ export async function getHostsCount({
   ]);
 
   const availableHostsSet = new Set(availableHosts);
-  const hostsToRemove = allHosts.filter((h) => !availableHostsSet.has(h));
+  const hostsToFilterOut = allHosts.filter((h) => !availableHostsSet.has(h));
 
   const response = await infraMetricsClient.search(
     {
@@ -71,8 +71,9 @@ export async function getHostsCount({
               },
             },
           ],
-          ...(hostsToRemove.length > 0 && {
-            must_not: [{ terms: { [HOST_NAME_FIELD]: hostsToRemove } }],
+          // Filter out hosts that match the filter but the APM Integration could retrieve them anyway
+          ...(hostsToFilterOut.length > 0 && {
+            must_not: [{ terms: { [HOST_NAME_FIELD]: hostsToFilterOut } }],
           }),
         },
       },
