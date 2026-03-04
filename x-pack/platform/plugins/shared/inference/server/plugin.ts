@@ -246,7 +246,13 @@ export class InferencePlugin
         return loadDefaultConnector({ actions: pluginsStart.actions, request, esClient });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
-        return getConnectorById({ connectorId: id, actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        return getConnectorById({
+          connectorId: id,
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+        });
       },
 
       getInferenceEndpoints: async (request: KibanaRequest, taskType?: string) => {

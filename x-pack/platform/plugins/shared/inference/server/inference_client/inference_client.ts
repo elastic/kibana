@@ -19,6 +19,7 @@ import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
 import { getConnectorById } from '../util/get_connector_by_id';
+import { getConnectorList } from '../util/get_connector_list';
 import { createPromptApi } from '../prompt';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
@@ -88,8 +89,11 @@ export function createInferenceClient({
     chatComplete,
     output,
     prompt,
+    listConnectors: async () => {
+      return await getConnectorList({ actions, request, esClient });
+    },
     getConnectorById: async (connectorId: string) => {
-      return await getConnectorById({ connectorId, actions, request });
+      return await getConnectorById({ connectorId, actions, request, esClient });
     },
     bindTo: (options: BoundOptions) => {
       return bindClient(client, options);

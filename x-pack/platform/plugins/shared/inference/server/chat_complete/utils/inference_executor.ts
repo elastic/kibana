@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getConnectorById } from '../../util/get_connector_by_id';
 
@@ -56,11 +57,13 @@ export const getInferenceExecutor = async ({
   connectorId,
   actions,
   request,
+  esClient,
 }: {
   connectorId: string;
   actions: ActionsPluginStart;
   request: KibanaRequest;
+  esClient: ElasticsearchClient;
 }) => {
-  const connector = await getConnectorById({ connectorId, actions, request });
+  const connector = await getConnectorById({ connectorId, actions, request, esClient });
   return createInferenceExecutor({ actions, connector, request });
 };

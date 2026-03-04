@@ -37,6 +37,10 @@ export interface InferenceClient extends InferenceEventEmitter {
    */
   prompt: PromptAPI;
   /**
+   * Returns all available inference connectors and inference endpoints.
+   */
+  listConnectors: () => Promise<InferenceConnector[]>;
+  /**
    * `getConnectorById` returns an inference connector by id.
    * Non-inference connectors will throw an error.
    */
@@ -68,6 +72,10 @@ export interface BoundInferenceClient extends InferenceEventEmitter {
    * and execute the most appropriate version.
    */
   prompt: BoundPromptAPI;
+  /**
+   * Returns all available inference connectors and inference endpoints.
+   */
+  listConnectors: () => Promise<InferenceConnector[]>;
   /**
    * `getConnectorById` returns an inference connector by id.
    * Non-inference connectors will throw an error.

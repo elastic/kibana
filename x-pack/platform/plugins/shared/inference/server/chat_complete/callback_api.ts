@@ -197,7 +197,7 @@ function createConnectorPipeline({
   stream?: boolean;
 }) {
   return forkJoin({
-    executor: from(getInferenceExecutor({ connectorId, request, actions })),
+    executor: from(getInferenceExecutor({ connectorId, request, actions, esClient })),
     anonymizationRules: from(anonymizationRulesPromise),
   }).pipe(
     switchMap(({ executor, anonymizationRules }) => {

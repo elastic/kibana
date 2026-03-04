@@ -101,6 +101,7 @@ describe('createChatModel', () => {
       connectorId: '.my-connector',
       actions,
       request,
+      esClient: mockEsClient,
     });
   });
 

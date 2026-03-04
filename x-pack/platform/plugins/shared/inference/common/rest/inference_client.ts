@@ -32,20 +32,23 @@ export function createInferenceRestClient({
     chatComplete,
     prompt: createPromptRestApi({ fetch, signal }),
     output: createOutputApi(chatComplete),
+    listConnectors: async () => {
+      const { connectors } = await fetch<{ connectors: InferenceConnector[] }>(
+        '/internal/inference/connectors',
+        { method: 'GET', signal }
+      );
+      return connectors;
+    },
     getConnectorById: async (connectorId: string) => {
-      return fetch<{ connectors: InferenceConnector[] }>('/internal/inference/connectors', {
-        method: 'GET',
-        signal,
-      }).then(({ connectors }) => {
-        const matchingConnector = connectors.find(
-          (connector) => connector.connectorId === connectorId
-        );
+      const connectors = await client.listConnectors();
+      const matchingConnector = connectors.find(
+        (connector) => connector.connectorId === connectorId
+      );
 
-        if (!matchingConnector) {
-          throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 404);
-        }
-        return matchingConnector;
-      });
+      if (!matchingConnector) {
+        throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 404);
+      }
+      return matchingConnector;
     },
   };
   return client;
