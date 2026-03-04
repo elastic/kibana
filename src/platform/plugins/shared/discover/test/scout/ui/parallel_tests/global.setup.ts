@@ -10,7 +10,7 @@
 import { globalSetupHook } from '@kbn/scout';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, simpleTrace } from '../fixtures/traces_experience';
+import { TRACES, simpleTrace, richTrace } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -32,12 +32,17 @@ globalSetupHook(
       log.debug('[setup:traces] Fleet agents setup completed');
     }
 
-    const traceData: SynthtraceGenerator<ApmFields> = simpleTrace({
+    const timeRange = {
       from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
       to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
-    });
+    };
 
+    const traceData: SynthtraceGenerator<ApmFields> = simpleTrace(timeRange);
     await apmSynthtraceEsClient.index(traceData);
-    log.debug('[setup:traces] APM trace data indexed');
+    log.debug('[setup:traces] APM simple trace data indexed');
+
+    const { apmData: richApmData } = richTrace(timeRange);
+    await apmSynthtraceEsClient.index(richApmData);
+    log.debug('[setup:traces] APM rich trace data indexed');
   }
 );
