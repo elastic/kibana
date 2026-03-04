@@ -32,7 +32,7 @@ describe('AgentBuilderNavControl', () => {
     jest.clearAllMocks();
   });
 
-  it('toggles the flyout when the nav button is clicked', () => {
+  it('toggles the sidebar when the nav button is clicked', () => {
     const toggleConversationFlyout = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
@@ -60,7 +60,7 @@ describe('AgentBuilderNavControl', () => {
     expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
   });
 
-  it('toggles the flyout on Cmd/Ctrl+; keyboard shortcut', () => {
+  it('toggles the sidebar on Cmd/Ctrl+; keyboard shortcut', () => {
     const toggleConversationFlyout = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
@@ -89,7 +89,7 @@ describe('AgentBuilderNavControl', () => {
     expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
   });
 
-  it('opens the flyout when openChat$ emits Agent', () => {
+  it('opens the sidebar when openChat$ emits Agent', () => {
     const toggleConversationFlyout = jest.fn();
     const openConversationFlyout = jest.fn();
     const completeOpenChat = jest.fn();

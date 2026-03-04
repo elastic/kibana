@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { createActorContext, useSelector } from '@xstate5/react';
+import { createActorContext, useSelector } from '@xstate/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import type {
   StreamlangProcessorDefinition,

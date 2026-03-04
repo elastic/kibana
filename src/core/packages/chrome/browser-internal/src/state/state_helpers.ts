@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
 
 export interface State<T> {
   /** Stable observable - same reference every call */
   $: Observable<T>;
-  /** Raw BehaviorSubject for derived observables */
-  subject$: BehaviorSubject<T>;
   /** Get current value synchronously */
   get: () => T;
   /** Set new value */
@@ -43,8 +41,7 @@ export function createState<T>(initialValue: T): State<T> {
   const subject$ = new BehaviorSubject<T>(initialValue);
 
   return {
-    $: subject$.asObservable(),
-    subject$,
+    $: subject$.pipe(distinctUntilChanged()),
     get: () => subject$.getValue(),
     set: (value: T) => subject$.next(value),
     update: (fn: (current: T) => T) => subject$.next(fn(subject$.getValue())),

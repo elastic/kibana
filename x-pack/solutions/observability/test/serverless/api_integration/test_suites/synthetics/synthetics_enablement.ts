@@ -171,6 +171,21 @@ export default function ({ getService }: FtrProviderContext) {
           await enablementDelete();
         }
       });
+      it('is idempotent when already disabled', async () => {
+        const delResponse = await enablementDelete();
+        expect(delResponse.body).eql({});
+      });
+
+      it('is idempotent across consecutive deletes', async () => {
+        await enablementPut();
+
+        const firstDeleteResponse = await enablementDelete();
+        expect(firstDeleteResponse.body).eql({});
+
+        const secondDeleteResponse = await enablementDelete();
+        expect(secondDeleteResponse.body).eql({});
+      });
+
       it('admin can delete api key', async () => {
         await enablementPut();
 

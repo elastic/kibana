@@ -55,12 +55,12 @@ describe('useChartLayers', () => {
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    expect(layer.breakdown).toBe('service.name'); // Single dimension as string
+    expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });
 
-  it('should return a line chart configuration with first dimension when multiple dimensions are provided', () => {
+  it('should return a line chart configuration with array when multiple dimensions are provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         metric: mockMetric,
@@ -74,8 +74,8 @@ describe('useChartLayers', () => {
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    // Lens uses first dimension only after revert
-    expect(layer.breakdown).toBe('service.name');
+    // Lens natively supports multiple dimensions - pass all dimensions as array
+    expect(layer.breakdown).toEqual(['service.name', 'host.name']);
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });

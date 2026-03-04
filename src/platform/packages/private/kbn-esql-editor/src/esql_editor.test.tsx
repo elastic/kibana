@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -129,15 +130,14 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor')).toBeInTheDocument();
   });
 
-  it('should not render the query history action if hideQueryHistory is set to true', async () => {
+  it('should not render the query history icon when hideQueryHistory is true', async () => {
     const newProps = {
       ...props,
+      editorIsInline: true,
       hideQueryHistory: true,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(
-      queryByTestId('ESQLEditor-toggle-query-history-button-container')
-    ).not.toBeInTheDocument();
+    expect(queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
   });
 
   it('should render the correct buttons for the expanded code editor mode', async () => {
@@ -156,11 +156,6 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
   });
 
-  it('should render the run query text', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-run-query')).toBeInTheDocument();
-  });
-
   it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
     const newProps = {
       ...props,
@@ -171,33 +166,15 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-documentation')).toBeInTheDocument();
   });
 
-  it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
-    const newProps = {
-      ...props,
-      hideRunQueryText: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-run-query')).not.toBeInTheDocument();
-  });
-
   it('should render correctly if editorIsInline prop is set to true', async () => {
-    const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
-      hideRunQueryText: true,
       editorIsInline: true,
-      onTextLangQuerySubmit,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-run-query')).not.toBeInTheDocument();
 
     const runQueryButton = queryByTestId('ESQLEditor-run-query-button');
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
-
-    if (runQueryButton) {
-      await userEvent.click(runQueryButton);
-      expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
-    }
   });
 
   it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {

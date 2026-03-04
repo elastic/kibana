@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T18:23:02.003Z",
-  "sha1": "7981c2762e9d2285b5eb6d07193edb20ca0a294e",
+  "sha1": "8825cfbf28dd674e252bbabde6c5205007bb49cf",
   "tests": [
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
@@ -49,12 +48,11 @@
       "title": "Copy integration can copy nginx package policy",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/copy_integration.spec.ts",
-        "line": 121,
+        "line": 120,
         "column": 7
       }
     },
@@ -105,8 +103,7 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
@@ -119,8 +116,7 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible and user only see agents tab",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",

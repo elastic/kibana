@@ -20,6 +20,8 @@ project:
 dependsOn:
   - '@kbn/react-query'
   - '@kbn/content-list-mock-data'
+  - '@kbn/i18n'
+  - '@kbn/i18n'
 tags:
   - shared-browser
   - package

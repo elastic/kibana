@@ -58,6 +58,10 @@ import type {
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
+import type {
+  AttachmentAttributesV2,
+  UnifiedAttachmentPayload,
+} from '../../common/types/domain/attachment/v2';
 
 /**
  * Default sort field for querying saved objects.
@@ -216,14 +220,22 @@ export const getAlertInfoFromComments = (comments: AttachmentRequest[] = []): Al
     return acc;
   }, []);
 
-type NewCommentArgs = AttachmentRequest & {
-  createdDate: string;
-  owner: string;
-  email?: string | null;
-  full_name?: string | null;
-  username?: string | null;
-  profile_uid?: string;
-};
+export type NewCommentArgs =
+  | (AttachmentRequest & {
+      createdDate: string;
+      owner: string;
+      email?: string | null;
+      full_name?: string | null;
+      username?: string | null;
+      profile_uid?: string;
+    })
+  | (UnifiedAttachmentPayload & {
+      createdDate: string;
+      email?: string | null;
+      full_name?: string | null;
+      username?: string | null;
+      profile_uid?: string;
+    });
 
 export const transformNewComment = ({
   createdDate,
@@ -232,7 +244,7 @@ export const transformNewComment = ({
   username,
   profile_uid: profileUid,
   ...comment
-}: NewCommentArgs): AttachmentAttributes => {
+}: NewCommentArgs): AttachmentAttributesV2 => {
   return {
     ...comment,
     created_at: createdDate,

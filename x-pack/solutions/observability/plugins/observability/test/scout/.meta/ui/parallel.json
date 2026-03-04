@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-06T14:35:32.876Z",
-  "sha1": "b1913fd60fafdaaba55379bc242987d75b64aa6c",
+  "sha1": "29d7b2f68e770aba1831cbed98c558f36f6f0fa8",
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -21,7 +20,7 @@
     {
       "id": "a9b59e66421b951-c63c54ed2add824",
       "title": "Alert Details Page should show an error when the alert does not exist",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -30,14 +29,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-d4dadee02e92d57",
       "title": "Alert Details Page should show a tabbed view",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -46,14 +45,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 69,
+        "line": 70,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-dd4dba6c9c632ce",
       "title": "Alert Details Page should show a Threshold Alert Overview section",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -62,14 +61,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 80,
+        "line": 81,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-aef937b4a8d10ab",
       "title": "Alert Details Page should show an Alerts History section",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -78,14 +77,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-56bb30050edffc8",
       "title": "Alert Details Page should show Metadata tab panel when Metadata tab is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -94,14 +93,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-8d6ba1a0e3b98d2",
       "title": "Alert Details Page should show an empty prompt in the Investigation Guide tab when no guide is set",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -110,14 +109,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 105,
+        "line": 106,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-c97a3632a71b56d",
       "title": "Alert Details Page should show a Related Alerts table when Related Alerts tab is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -126,14 +125,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 9
       }
     },
     {
       "id": "a9b59e66421b951-bcfc6f52ba8e770",
       "title": "Alert Details Page should show a Related Dashboard component when Related Dashboards tab is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -142,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 9
       }
     },
@@ -245,7 +244,7 @@
     {
       "id": "d727dcfffd97d68-e91ca78d2096478",
       "title": "Custom Threshold Rule - Ad-hoc Data View should create a custom threshold rule with an ad-hoc data view",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -254,14 +253,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 9
       }
     },
     {
       "id": "19ff7375d931f4e-920679a76f69971",
       "title": "Custom threshold preview chart should render the empty chart only once at bootstrap",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -270,14 +269,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 9
       }
     },
     {
       "id": "19ff7375d931f4e-30615e975f2f139",
       "title": "Custom threshold preview chart should handle the error message correctly",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -286,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 9
       }
     },
@@ -309,7 +308,7 @@
     {
       "id": "06878172d9c56e6-ece821f6c3bbd60",
       "title": "Rule Details Page - Admin should navigate from rules table to rule details and display page correctly",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -318,14 +317,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 34,
+        "line": 45,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-e5a9cc15ae46b2a",
       "title": "Rule Details Page - Admin should load rule details page directly by URL",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -334,14 +333,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 61,
+        "line": 72,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-a10166571f2daf4",
       "title": "Rule Details Page - Admin should display alert summary widget on the page",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -350,14 +349,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 70,
+        "line": 81,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-daabe00867abf81",
       "title": "Rule Details Page - Admin should navigate to alerts tab with active filter when clicking active alerts",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -366,14 +365,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 78,
+        "line": 89,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-553570ada722d2a",
       "title": "Rule Details Page - Admin should navigate to alerts tab with all statuses when clicking total alerts",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -382,14 +381,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 96,
+        "line": 107,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-b977afb55e35f29",
       "title": "Rule Details Page - Admin should show edit and delete actions for admin user",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -398,14 +397,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 115,
+        "line": 126,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-cce1d74e8b769f6",
       "title": "Rule Details Page - Admin should close actions popover when clicking actions button again",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -414,14 +413,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 131,
+        "line": 142,
         "column": 9
       }
     },
     {
       "id": "06878172d9c56e6-c7422a09250b93c",
       "title": "Rule Details Page - Admin should display dashboard options in related dashboards dropdown when editing rule",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -430,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 151,
+        "line": 162,
         "column": 9
       }
     },

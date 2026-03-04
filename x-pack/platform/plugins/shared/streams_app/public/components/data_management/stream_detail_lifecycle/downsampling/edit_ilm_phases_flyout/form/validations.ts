@@ -22,6 +22,7 @@ type MinAgePhase = Exclude<PhaseName, 'hot'>;
  * `_meta.warm.minAgeValue`). We keep access centralized to reduce `any`/casts at call sites.
  */
 type StreamsIlmFlatFormData = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IlmValidationFunc<V = unknown> = ValidationFunc<any, string, V>;
 type IlmValidationArg<V = unknown> = Parameters<IlmValidationFunc<V>>[0];
 
@@ -110,14 +111,16 @@ export const minAgeGreaterThanPreviousPhase =
 
       const minAgeValue = getAsString(formData, `_meta.${p}.minAgeValue`);
       const minAgeUnit = getAsString(formData, `_meta.${p}.minAgeUnit`, 'd') as PreservedTimeUnit;
-      const milli = getAsNumber(formData, `_meta.${p}.minAgeToMilliSeconds`, -1);
-
+      const milliFromForm = getAsNumber(formData, `_meta.${p}.minAgeToMilliSeconds`, Number.NaN);
       const computed = toMilliseconds(minAgeValue, minAgeUnit);
+
       const esFormat =
         minAgeValue.trim() === '' ? undefined : `${Number(minAgeValue)}${String(minAgeUnit)}`;
 
+      const milli = Number.isFinite(milliFromForm) && milliFromForm >= 0 ? milliFromForm : computed;
+
       return {
-        milli: typeof milli === 'number' ? milli : computed,
+        milli,
         esFormat,
       };
     };

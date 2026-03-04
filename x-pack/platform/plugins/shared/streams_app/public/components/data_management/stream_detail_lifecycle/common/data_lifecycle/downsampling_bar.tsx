@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { getDownsamplingColor } from '../../helpers/downsampling_colors';
+import { useDownsamplingColors } from '../../hooks/use_downsampling_colors';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
 import { DownsamplingPhase } from './downsampling_phase';
 
@@ -77,16 +77,23 @@ export interface DownsamplingBarProps {
   segments?: DownsamplingSegment[] | null;
   gridTemplateColumns: string;
   onRemoveStep?: (stepNumber: number) => void;
+  onEditStep?: (stepNumber: number, phaseName?: string) => void;
+  editedPhaseName?: string;
   canManageLifecycle: boolean;
+  isEditLifecycleFlyoutOpen?: boolean;
 }
 
 export const DownsamplingBar = ({
   segments,
   gridTemplateColumns,
   onRemoveStep,
+  onEditStep,
+  editedPhaseName,
   canManageLifecycle,
+  isEditLifecycleFlyoutOpen,
 }: DownsamplingBarProps) => {
   const { euiTheme } = useEuiTheme();
+  const { getDownsamplingColor } = useDownsamplingColors();
 
   if (!segments) {
     return null;
@@ -116,7 +123,7 @@ export const DownsamplingBar = ({
           responsive={false}
           css={{
             gridTemplateColumns,
-            paddingRight: euiTheme.size.xs,
+            paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
           }}
         >
@@ -147,7 +154,12 @@ export const DownsamplingBar = ({
                     phaseName={segment.phaseName}
                     color={getDownsamplingColor(segment.stepIndex ?? index)}
                     onRemoveStep={onRemoveStep}
+                    onEditStep={onEditStep}
+                    isBeingEdited={Boolean(
+                      editedPhaseName && segment.phaseName && segment.phaseName === editedPhaseName
+                    )}
                     canManageLifecycle={canManageLifecycle}
+                    isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
                   />
                 ) : segment.isDelete ? (
                   <EuiPanel

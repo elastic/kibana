@@ -166,9 +166,29 @@ export const GetFullAgentPolicyRequestSchema = {
     agentPolicyId: schema.string(),
   }),
   query: schema.object({
-    download: schema.maybe(schema.boolean()),
-    standalone: schema.maybe(schema.boolean()),
-    kubernetes: schema.maybe(schema.boolean()),
+    download: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the policy as a downloadable file' },
+      })
+    ),
+    standalone: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the policy formatted for standalone agents' },
+      })
+    ),
+    kubernetes: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the policy formatted for Kubernetes deployment' },
+      })
+    ),
+    revision: schema.maybe(
+      schema.number({
+        meta: {
+          description:
+            'If provided, returns the policy at the specified revision. Cannot be used with standalone or kubernetes flags.',
+        },
+      })
+    ),
   }),
 };
 

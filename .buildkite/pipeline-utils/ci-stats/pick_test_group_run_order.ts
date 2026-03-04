@@ -75,16 +75,25 @@ export async function pickTestGroupRunOrder() {
   const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
   const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
 
-  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
-    ? parseFloat(process.env.JEST_MAX_MINUTES)
-    : 40;
-  if (Number.isNaN(JEST_MAX_MINUTES)) {
-    throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
+  const JEST_UNIT_MAX_MINUTES = process.env.JEST_UNIT_MAX_MINUTES
+    ? parseFloat(process.env.JEST_UNIT_MAX_MINUTES)
+    : 35;
+  if (Number.isNaN(JEST_UNIT_MAX_MINUTES)) {
+    throw new Error(`invalid JEST_UNIT_MAX_MINUTES: ${process.env.JEST_UNIT_MAX_MINUTES}`);
+  }
+
+  const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
+    ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
+    : 35;
+  if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
+    throw new Error(
+      `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
+    );
   }
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37;
+    : 30;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
@@ -158,7 +167,7 @@ export async function pickTestGroupRunOrder() {
       ? process.env.JEST_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build'];
+      : [];
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
@@ -244,6 +253,7 @@ export async function pickTestGroupRunOrder() {
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    durationPercentile: 75,
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
@@ -296,15 +306,19 @@ export async function pickTestGroupRunOrder() {
       {
         type: UNIT_TYPE,
         defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_UNIT_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 4,
+        concurrency: 3,
         names: filteredJestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_INTEGRATION_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 2,
+        concurrency: 1,
         names: filteredJestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
@@ -314,6 +328,7 @@ export async function pickTestGroupRunOrder() {
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
+        warmupMin: 3,
         names,
       })),
     ],
@@ -392,7 +407,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
             parallelism: unit.count,
-            timeout_in_minutes: 120,
+            timeout_in_minutes: 50,
             key: 'jest',
             agents: expandAgentQueue('n2-4-spot', 110),
             depends_on: JEST_CONFIGS_DEPS,
@@ -412,7 +427,7 @@ export async function pickTestGroupRunOrder() {
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
             // TODO: Reduce once we have identified the cause of random long-running tests
-            timeout_in_minutes: 75,
+            timeout_in_minutes: 50,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot', 105),
             depends_on: JEST_CONFIGS_DEPS,
@@ -448,7 +463,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 120,
+                  timeout_in_minutes: 50,
                   agents: expandAgentQueue(queue, 105),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
