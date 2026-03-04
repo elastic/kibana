@@ -102,8 +102,6 @@ tags:
       Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
     x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
-<<<<<<< HEAD
-=======
     description: |
       Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
     x-displayName: Elastic Package Manager (EPM)
@@ -111,7 +109,6 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
->>>>>>> 63d16dd3a10 (adding missing descriptions for tags (#237011))
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -133,13 +130,9 @@ tags:
       Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
     x-displayName: Fleet proxies
   - name: Fleet Server hosts
-<<<<<<< HEAD
-  - name: Fleet service tokens
-=======
     description: |
       Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
     x-displayName: Fleet Server hosts
->>>>>>> 63d16dd3a10 (adding missing descriptions for tags (#237011))
   - name: Fleet uninstall tokens
     description: |
       Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
@@ -291,11 +284,7 @@ tags:
       description: Space overview
   - name: streams
     description: |
-<<<<<<< HEAD
-      Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
-=======
       Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
->>>>>>> 63d16dd3a10 (adding missing descriptions for tags (#237011))
     x-displayName: Streams
   - name: system
     x-displayName: System
@@ -38610,26 +38599,20 @@ paths:
               keyword_custom_format:
                 value:
                   description: This parses the first found ipv4 only
-                  deserializer: '{{value}}'
                   id: keyword_custom_format_list
                   name: Simple list with a keyword using a custom format
-                  serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                   type: keyword
             schema:
               type: object
               properties:
                 description:
                   $ref: '#/components/schemas/Security_Lists_API_ListDescription'
-                deserializer:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
                 id:
                   $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
                   $ref: '#/components/schemas/Security_Lists_API_ListName'
-                serializer:
-                  $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
                 type:
                   $ref: '#/components/schemas/Security_Lists_API_ListType'
                 version:
@@ -38699,11 +38682,9 @@ paths:
                     created_at: '2025-01-09T18:25:39.604Z'
                     created_by: elastic
                     description: This parses the first found ipv4 only
-                    deserializer: '{{value}}'
                     id: keyword_custom_format_list
                     immutable: false
                     name: Simple list with a keyword using a custom format
-                    serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
                     updated_at: '2025-01-09T18:25:39.604Z'
@@ -40144,29 +40125,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListType'
-        - description: |
-            Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-            - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-          in: query
-          name: serializer
-          required: false
-          schema:
-            example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-            type: string
-        - description: |
-            Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-            - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-            - `{{{gte}}},{{{lte}}}` - Date range values.
-          in: query
-          name: deserializer
-          required: false
-          schema:
-            example: '{{value}}'
-            type: string
         - description: Determines when changes made by the request are made visible to search.
           in: query
           name: refresh
@@ -68768,8 +68726,6 @@ components:
           type: string
         description:
           $ref: '#/components/schemas/Security_Lists_API_ListDescription'
-        deserializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
         id:
           $ref: '#/components/schemas/Security_Lists_API_ListId'
         immutable:
@@ -68778,8 +68734,6 @@ components:
           $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
         name:
           $ref: '#/components/schemas/Security_Lists_API_ListName'
-        serializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
@@ -68814,15 +68768,6 @@ components:
       format: nonempty
       minLength: 1
       type: string
-    Security_Lists_API_ListDeserializer:
-      description: |
-        Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-        - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-        - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-        - `{{{gte}}},{{{lte}}}` - Date range values.
-      example: '{{value}}'
-      type: string
     Security_Lists_API_ListId:
       description: Value list's identifier.
       example: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -68847,16 +68792,12 @@ components:
           description: Autogenerated value - user that created object.
           example: elastic
           type: string
-        deserializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
         id:
           $ref: '#/components/schemas/Security_Lists_API_ListItemId'
         list_id:
           $ref: '#/components/schemas/Security_Lists_API_ListId'
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
-        serializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
@@ -68963,14 +68904,6 @@ components:
         - cluster
         - index
         - application
-    Security_Lists_API_ListSerializer:
-      description: |
-        Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-        - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-        - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-      example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-      type: string
     Security_Lists_API_ListType:
       description: |
         Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
