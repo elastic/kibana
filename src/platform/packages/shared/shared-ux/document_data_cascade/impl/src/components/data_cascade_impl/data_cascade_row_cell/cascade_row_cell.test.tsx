@@ -31,7 +31,11 @@ const renderComponent = ({
     'cascadeGroups' | 'initialGroupColumn'
   >) => {
   return render(
-    <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
+    <DataCascadeProvider
+      data={[]}
+      cascadeGroups={cascadeGroups}
+      initialGroupColumn={initialGroupColumn}
+    >
       {/* @ts-expect-error -- we don't need to provide all the props */}
       <CascadeRowCellPrimitive
         size="m"
