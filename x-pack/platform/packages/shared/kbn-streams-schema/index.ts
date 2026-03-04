@@ -53,6 +53,7 @@ export {
   extractWhereExpression,
   getFromSources,
   normalizeEsqlQuery,
+  replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
 

@@ -6,11 +6,7 @@
  */
 
 import type { Feature, Streams } from '@kbn/streams-schema';
-import {
-  getFromSources,
-  getIndexPatternsForStream,
-  getStreamTypeFromDefinition,
-} from '@kbn/streams-schema';
+import { ensureMetadata, getIndexPatternsForStream, replaceFromSources } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -41,19 +37,6 @@ interface Query {
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function validateFromClause(esql: string, expectedSources: string[]): void {
-  const actualSources = getFromSources(esql).sort();
-  const sorted = [...expectedSources].sort();
-
-  if (actualSources.join(',') !== sorted.join(',')) {
-    throw new Error(
-      `Invalid FROM clause: expected sources [${sorted.join(', ')}] but got [${actualSources.join(
-        ', '
-      )}]`
-    );
-  }
 }
 
 /**
@@ -94,8 +77,7 @@ export async function generateSignificantEvents({
   const toolUsage = createDefaultSignificantEventsToolUsage();
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
-  const streamType = getStreamTypeFromDefinition(stream);
-  const expectedFromSources = getIndexPatternsForStream(stream);
+  const targetSources = getIndexPatternsForStream(stream);
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -103,7 +85,6 @@ export async function generateSignificantEvents({
       input: {
         name: stream.name,
         description: stream.description,
-        stream_type: streamType,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
@@ -160,15 +141,15 @@ export async function generateSignificantEvents({
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
               try {
-                validateFromClause(query.esql, expectedFromSources);
+                const rewritten = ensureMetadata(replaceFromSources(query.esql, targetSources));
 
                 await esClient.esql.query({
-                  query: `${query.esql}\n| LIMIT 0`,
+                  query: `${rewritten}\n| LIMIT 0`,
                   format: 'json',
                 });
 
                 return {
-                  query,
+                  query: { ...query, esql: rewritten },
                   valid: true,
                   status: 'Added',
                   error: undefined,

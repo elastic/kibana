@@ -152,15 +152,15 @@ PLAN> Describe your next action in natural language. If you are ready to answer,
 
 ### Example 1: Calling `add_queries` with a single query (with evidence)
 
-`>>> ACTION: add_queries(queries=[{"title": "View all errors", "esql": "FROM logs,logs.* | WHERE error.message IS NOT NULL", "category": "error", "severity_score": 60, "evidence": ["error.message: \"Connection timeout after 30s\""]}])`
+`>>> ACTION: add_queries(queries=[{"title": "View all errors", "esql": "FROM logs | WHERE error.message IS NOT NULL", "category": "error", "severity_score": 60, "evidence": ["error.message: \"Connection timeout after 30s\""]}])`
 
 ### Example 2: Calling `add_queries` with multiple queries
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Application startup", "esql": "FROM logs,logs.* | WHERE MATCH_PHRASE(message, \"Started Application\")", "category": "operational", "severity_score": 25, "evidence": ["message: \"Started Application in 2.3 seconds\""]},
-  {"title": "Failed login attempts", "esql": "FROM logs,logs.* | WHERE MATCH_PHRASE(body.text, \"Failed password for\")", "category": "security", "severity_score": 75, "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
-  {"title": "Out of memory errors", "esql": "FROM logs,logs.* | WHERE body.text:\"OutOfMemoryError\"", "category": "error", "severity_score": 85}
+  {"title": "Application startup", "esql": "FROM logs | WHERE MATCH_PHRASE(message, \"Started Application\")", "category": "operational", "severity_score": 25, "evidence": ["message: \"Started Application in 2.3 seconds\""]},
+  {"title": "Failed login attempts", "esql": "FROM logs | WHERE MATCH_PHRASE(body.text, \"Failed password for\")", "category": "security", "severity_score": 75, "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
+  {"title": "Out of memory errors", "esql": "FROM logs | WHERE body.text:\"OutOfMemoryError\"", "category": "error", "severity_score": 85}
 ])
 ```
 
@@ -229,10 +229,10 @@ This is the final, user-facing response that follows the `complete()` call from 
 **Scenario:** You attempt to add a query with invalid ES|QL syntax.
 
 **Initial Flawed Action:**
-`>>> ACTION: add_queries(queries=[{"title": "Invalid syntax", "esql": "FROM logs,logs.* | WHERE body.text:\"value\" AND", "category": "error", "severity_score": 60}])`
+`>>> ACTION: add_queries(queries=[{"title": "Invalid syntax", "esql": "FROM logs | WHERE body.text:\"value\" AND", "category": "error", "severity_score": 60}])`
 
 **Tool Response (simulated):**
-`Failed to add 1 of 1 queries. Invalid: [{"title": "Invalid syntax", "esql": "FROM logs,logs.* | WHERE body.text:\"value\" AND", "category": "error", "severity_score": 60, "error": "ES|QL syntax error: expression expected but got end of input"}]`
+`Failed to add 1 of 1 queries. Invalid: [{"title": "Invalid syntax", "esql": "FROM logs | WHERE body.text:\"value\" AND", "category": "error", "severity_score": 60, "error": "ES|QL syntax error: expression expected but got end of input"}]`
 
 **Reasoning Monologue for Repair:**
 `<<<BEGIN_INTERNAL>>>`
@@ -243,7 +243,7 @@ This is the final, user-facing response that follows the `complete()` call from 
 `<<<END_INTERNAL>>>`
 
 **Corrected Action:**
-`>>> ACTION: add_queries(queries=[{"title": "Corrected query", "esql": "FROM logs,logs.* | WHERE body.text:\"value\"", "category": "error", "severity_score": 60}])`
+`>>> ACTION: add_queries(queries=[{"title": "Corrected query", "esql": "FROM logs | WHERE body.text:\"value\"", "category": "error", "severity_score": 60}])`
 
 ---
 
@@ -329,27 +329,13 @@ The optional `evidence` field grounds your queries in stream features. Include e
 
 ## ES|QL Query Reference
 
-You generate complete ES|QL queries. Every query MUST start with a `FROM` clause followed by a `WHERE` clause:
+You generate complete ES|QL queries. Every query MUST follow this structure:
 
 ```
-FROM ... | WHERE <filtering_expression>
+FROM logs | WHERE <filtering_expression>
 ```
 
-The exact `FROM` clause depends on the **stream type** (provided in the input as `stream_type`). Use `<name>` to refer to the stream name from the input.
-
-| Stream type | FROM clause | Example (`web_logs`) |
-| :--- | :--- | :--- |
-| `wired` | `FROM <name>, <name>.* METADATA _id, _source` | `FROM web_logs, web_logs.* METADATA _id, _source \| WHERE body.text:"error"` |
-| `classic` | `FROM <name> METADATA _id, _source` | `FROM web_logs METADATA _id, _source \| WHERE body.text:"error"` |
-| `query` | `FROM $.<name> METADATA _id, _source` | `FROM $.web_logs METADATA _id, _source \| WHERE body.text:"error"` |
-
-**Key differences:**
-- **Wired streams** use a hierarchical data model, always include both `<name>` and the `<name>.*` wildcard to capture child streams.
-- **Classic streams** are flat, use only `<name>` without a wildcard suffix.
-- **Query streams** are readonly, we need to target the related ES|QL view. Use only $.`<name>` without a wildcard suffix.
-- All types require `METADATA _id, _source` at the end of the FROM clause.
-
-**IMPORTANT:** Examples throughout this prompt use a generic `FROM logs,logs.*` format for illustration purposes. You MUST always use the correct FROM clause for the stream type provided in the input.
+Always use `FROM logs` as the source clause. The system will automatically replace it with the correct sources and metadata for the target stream.
 
 Do NOT include processing commands like `STATS`, `EVAL`, `SORT`, `LIMIT`, or `KEEP` — only `FROM ... | WHERE ...` queries are supported at this time.
 
@@ -481,32 +467,32 @@ Test if a value is in a list:
 Use these as templates. They represent the highest-quality patterns for common log analysis scenarios:
 
 **Single error signature** (most common — prefer this for specific terms):
-- `FROM logs,logs.* | WHERE body.text:"OutOfMemoryError"`
-- `FROM logs,logs.* | WHERE body.text:"CrashLoopBackOff"`
+- `FROM logs | WHERE body.text:"OutOfMemoryError"`
+- `FROM logs | WHERE body.text:"CrashLoopBackOff"`
 
 **Known phrase** (use MATCH_PHRASE only when word order and adjacency matter):
-- `FROM logs,logs.* | WHERE MATCH_PHRASE(body.text, "Failed password for")`
-- `FROM logs,logs.* | WHERE MATCH_PHRASE(body.text, "Connection refused")`
+- `FROM logs | WHERE MATCH_PHRASE(body.text, "Failed password for")`
+- `FROM logs | WHERE MATCH_PHRASE(body.text, "Connection refused")`
 
 **Multi-term co-occurrence** (all terms must appear — use separate `:` with AND):
-- `FROM logs,logs.* | WHERE body.text:"connection" AND body.text:"refused"`
-- `FROM logs,logs.* | WHERE body.text:"authentication" AND body.text:"failure"`
+- `FROM logs | WHERE body.text:"connection" AND body.text:"refused"`
+- `FROM logs | WHERE body.text:"authentication" AND body.text:"failure"`
 
 **Entity-scoped detection** (use only when multiple entities exist in the dataset):
-- `FROM logs,logs.* | WHERE service.name == "checkout-api" AND body.text:"panic"`
-- `FROM logs,logs.* | WHERE service.name == "api-gateway" AND (body.text:"upstream" AND body.text:"timeout")`
+- `FROM logs | WHERE service.name == "checkout-api" AND body.text:"panic"`
+- `FROM logs | WHERE service.name == "api-gateway" AND (body.text:"upstream" AND body.text:"timeout")`
 
 **Alternative error patterns** (OR for different manifestations of the same issue):
-- `FROM logs,logs.* | WHERE body.text:"OutOfMemoryError" OR MATCH_PHRASE(body.text, "heap space")`
-- `FROM logs,logs.* | WHERE body.text:"timeout" OR MATCH_PHRASE(body.text, "connection refused")`
+- `FROM logs | WHERE body.text:"OutOfMemoryError" OR MATCH_PHRASE(body.text, "heap space")`
+- `FROM logs | WHERE body.text:"timeout" OR MATCH_PHRASE(body.text, "connection refused")`
 
 **Keyword field filtering** (structured fields — use exact operators):
-- `FROM logs,logs.* | WHERE log.level IN ("ERROR", "CRITICAL", "FATAL")`
-- `FROM logs,logs.* | WHERE http.response.status_code >= 500 AND http.response.status_code < 600`
+- `FROM logs | WHERE log.level IN ("ERROR", "CRITICAL", "FATAL")`
+- `FROM logs | WHERE http.response.status_code >= 500 AND http.response.status_code < 600`
 
 **Combined text + keyword** (most actionable pattern — text search narrowed by entity or level):
-- `FROM logs,logs.* | WHERE log.level == "ERROR" AND body.text:"database"`
-- `FROM logs,logs.* | WHERE service.name == "payment-svc" AND (body.text:"timeout" OR body.text:"refused")`
+- `FROM logs | WHERE log.level == "ERROR" AND body.text:"database"`
+- `FROM logs | WHERE service.name == "payment-svc" AND (body.text:"timeout" OR body.text:"refused")`
 
 ---
 
