@@ -75,7 +75,6 @@ export const RuleSchedule: React.FC<Props> = React.forwardRef<HTMLInputElement, 
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
               fullWidth
-              compressed={true}
               prepend={[SCHEDULE_TITLE_PREFIX]}
               isInvalid={!!errors}
               value={intervalNumber}
@@ -92,7 +91,6 @@ export const RuleSchedule: React.FC<Props> = React.forwardRef<HTMLInputElement, 
           <EuiFlexItem grow={3}>
             <EuiSelect
               fullWidth
-              compressed={true}
               value={intervalUnit}
               options={getTimeOptions(intervalNumber ?? 1)}
               onChange={onIntervalUnitChange}

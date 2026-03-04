@@ -124,7 +124,6 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
       <EuiFlexItem grow={2}>
         <EuiFieldNumber
           fullWidth
-          compressed={true}
           isInvalid={!!errors}
           value={intervalNumber ?? ''}
           onChange={onIntervalNumberChange}
@@ -139,7 +138,6 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
       <EuiFlexItem grow={3}>
         <EuiSelect
           fullWidth
-          compressed={true}
           value={intervalUnit}
           options={getTimeOptions(intervalNumber ?? 2)}
           onChange={onIntervalUnitChange}

@@ -59,7 +59,6 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <EuiFieldNumber
           value={value ?? ''}
-          compressed={true}
           onChange={(e) => {
             const val = e.target.value.trim();
             if (val === '') {

@@ -94,7 +94,7 @@ export const StateTransitionFieldGroup: React.FC = () => {
       })}
     >
       <EuiButtonGroup
-        buttonSize="compressed"
+        buttonSize="s"
         legend={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.delayModeLegend', {
           defaultMessage: 'Alert delay mode',
         })}

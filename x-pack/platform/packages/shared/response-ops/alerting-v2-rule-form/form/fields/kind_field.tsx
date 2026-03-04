@@ -53,7 +53,7 @@ export const KindField: React.FC = () => {
               options={KIND_OPTIONS}
               idSelected={value}
               onChange={(id) => onChange(id)}
-              buttonSize="compressed"
+              buttonSize="m"
               color="primary"
               isFullWidth
               data-test-subj="kindField"

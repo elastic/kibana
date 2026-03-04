@@ -81,7 +81,6 @@ export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
               fullWidth
-              compressed={true}
               prepend={[LOOKBACK_WINDOW_TITLE_PREFIX]}
               isInvalid={!!errors}
               value={intervalNumber}
@@ -98,7 +97,6 @@ export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement
           <EuiFlexItem grow={3}>
             <EuiSelect
               fullWidth
-              compressed={true}
               value={intervalUnit}
               options={getTimeOptions(intervalNumber ?? 1)}
               onChange={onIntervalUnitChange}

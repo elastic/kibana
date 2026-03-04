@@ -75,7 +75,6 @@ export const TimeFieldSelect: React.FC = () => {
           >
             <EuiSelect
               fullWidth
-              compressed={true}
               options={timeFieldOptions}
               value={value ?? ''}
               onChange={handleChange}
