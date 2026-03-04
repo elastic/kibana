@@ -83,6 +83,19 @@
         "evals:endpoint"
       ],
       "serverConfigSet": "evals_endpoint"
+    },
+    {
+      "id": "entity-analytics",
+      "name": "Security Entity Analytics",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts",
+      "tags": [
+        "security",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:entity-analytics"
+      ],
+      "serverConfigSet": "evals_entity_analytics"
     }
   ]
 }

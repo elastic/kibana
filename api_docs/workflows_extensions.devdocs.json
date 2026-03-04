@@ -450,7 +450,7 @@
         "\nPublic-side plugin setup contract.\nExposes methods for other plugins to register public-side step and trigger definitions."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 15,
+      "lineNumber": 23,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -468,17 +468,11 @@
           ],
           "signature": [
             "<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = z.ZodType, Config extends z.ZodObject = z.ZodObject>(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "public",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-public.PublicStepDefinition",
-              "text": "PublicStepDefinition"
-            },
+            "PublicStepDefinitionOrLoader",
             "<Input, Output, Config>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 21,
+          "lineNumber": 28,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -486,24 +480,18 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-public.WorkflowsExtensionsPublicPluginSetup.registerStepDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
-                "- The public-side step definition"
+                "- The public-side step definition, or a function that returns a promise of the definition (e.g. for dynamic imports)"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "public",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-public.PublicStepDefinition",
-                  "text": "PublicStepDefinition"
-                },
+                "PublicStepDefinitionOrLoader",
                 "<Input, Output, Config>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 33,
+              "lineNumber": 40,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -535,7 +523,7 @@
             "<EventSchema>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 36,
+          "lineNumber": 43,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -560,7 +548,7 @@
                 "<EventSchema>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 45,
+              "lineNumber": 52,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -593,10 +581,11 @@
           "text": "PublicStepDefinition"
         },
         "<z.ZodType, z.ZodType, z.ZodObject>> & ",
-        "TriggerRegistryStartContract"
+        "TriggerRegistryStartContract",
+        " & { isReady(): Promise<void>; }"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 58,
+      "lineNumber": 65,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
