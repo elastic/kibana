@@ -9,7 +9,16 @@
 
 import type { z } from '@kbn/zod/v4';
 
-export type StepCategory = 'elasticsearch' | 'external' | 'ai' | 'kibana' | 'data' | 'flowControl';
+export enum StepCategory {
+  Elasticsearch = 'elasticsearch',
+  External = 'external',
+  Ai = 'ai',
+  Kibana = 'kibana',
+  Data = 'data',
+  FlowControl = 'flowControl',
+}
+
+export const StepCategories = Object.values(StepCategory) as StepCategory[];
 
 /**
  * Documentation information for a workflow step.

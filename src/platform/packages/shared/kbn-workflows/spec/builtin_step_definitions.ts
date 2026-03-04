@@ -9,12 +9,15 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  ConsoleStepInputSchema,
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
   WaitStepInputSchema,
+  WorkflowExecuteAsyncStepOutputSchema,
+  WorkflowExecuteStepInputSchema,
 } from './schema';
-import type { BaseStepDefinition } from './step_definition_types';
+import { type BaseStepDefinition, StepCategory } from './step_definition_types';
 
 const EmptyObjectSchema = z.object({});
 
@@ -28,11 +31,27 @@ export type BuiltInStepDefinition = BaseStepDefinition;
  */
 export const builtInStepDefinitions: BaseStepDefinition[] = [
   {
+    id: 'console',
+    label: 'Console',
+    description: 'Log a message for debugging and observability',
+    category: StepCategory.Kibana,
+    inputSchema: ConsoleStepInputSchema,
+    outputSchema: z.string(),
+    documentation: {
+      examples: [
+        `- name: log_payload
+  type: console
+  with:
+    message: "{{ steps.fetch_data.output | json }}"`,
+      ],
+    },
+  },
+  {
     id: 'if',
     label: 'If',
     description:
       'Conditional execution. Runs steps when condition is true, with optional else block for the false branch',
-    category: 'flowControl',
+    category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
     outputSchema: EmptyObjectSchema,
     configSchema: IfStepConfigSchema,
@@ -59,7 +78,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Loop (foreach)',
     description:
       'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}',
-    category: 'flowControl',
+    category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
     outputSchema: EmptyObjectSchema,
     configSchema: ForEachStepConfigSchema,
@@ -80,7 +99,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     id: 'wait',
     label: 'Wait',
     description: 'Pause execution for a specified duration',
-    category: 'flowControl',
+    category: StepCategory.FlowControl,
     inputSchema: WaitStepInputSchema,
     outputSchema: EmptyObjectSchema,
     documentation: {
@@ -96,7 +115,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     id: 'data.set',
     label: 'Set Variables',
     description: 'Set variables in the workflow context',
-    category: 'data',
+    category: StepCategory.Data,
     inputSchema: DataSetStepInputSchema,
     outputSchema: EmptyObjectSchema,
     documentation: {
@@ -106,6 +125,42 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   with:
     user_name: "{{ steps.get_user.output.body.name }}"
     alert_count: "{{ steps.search_alerts.output.hits.total.value }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.execute',
+    label: 'Execute Workflow',
+    description: 'Execute another workflow and wait for it to complete',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowExecuteStepInputSchema,
+    outputSchema: z.unknown(),
+    documentation: {
+      examples: [
+        `- name: run_child_workflow
+  type: workflow.execute
+  with:
+    workflow-id: "child_workflow"
+    inputs:
+      alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.executeAsync',
+    label: 'Execute Workflow (Async)',
+    description: 'Start another workflow and continue without waiting for completion',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowExecuteStepInputSchema,
+    outputSchema: WorkflowExecuteAsyncStepOutputSchema,
+    documentation: {
+      examples: [
+        `- name: start_child_workflow
+  type: workflow.executeAsync
+  with:
+    workflow-id: "child_workflow"
+    inputs:
+      alertId: "{{ workflow.event.id }}"`,
       ],
     },
   },

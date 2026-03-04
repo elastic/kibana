@@ -22,8 +22,6 @@ export type {
 export type { PublicStepDefinition } from './step_registry/types';
 export type { StepDocumentation } from '@kbn/workflows';
 
-export { ActionsMenuGroup } from './step_registry/types';
-
 export { createPublicStepDefinition } from './step_registry/types';
 
 export type {

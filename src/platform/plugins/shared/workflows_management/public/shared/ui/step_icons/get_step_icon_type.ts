@@ -38,6 +38,10 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'data.set':
       iconType = 'tableOfContents';
       break;
+    case 'workflow.execute':
+    case 'workflow.executeAsync':
+      iconType = 'link';
+      break;
 
     // flow control nodes
     case 'wait':

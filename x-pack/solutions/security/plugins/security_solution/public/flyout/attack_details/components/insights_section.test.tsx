@@ -57,6 +57,7 @@ const mockContextValue = {
   browserFields: {},
   dataFormattedForFieldBrowser: [],
   searchHit: {},
+  refetch: jest.fn().mockResolvedValue(undefined),
 };
 
 const renderWithEui = (ui: React.ReactElement) =>

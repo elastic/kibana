@@ -41,11 +41,7 @@ const getFinalWhereClause = (timeFilter?: string, queryFilter?: string) => {
  * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command
  * @param dataView
  */
-export function getInitialESQLQuery(
-  dataView: DataView,
-  removeLimit?: boolean,
-  query?: Query
-): string {
+export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
   const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
@@ -58,7 +54,5 @@ export function getInitialESQLQuery(
   const whereClause = getFinalWhereClause(filterByTimeParams, filterBySearchText);
   const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
 
-  return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}${
-    removeLimit ? '' : ' | LIMIT 10'
-  }`;
+  return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}`;
 }

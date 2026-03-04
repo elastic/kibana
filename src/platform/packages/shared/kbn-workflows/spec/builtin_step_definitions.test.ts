@@ -8,8 +8,17 @@
  */
 
 import { builtInStepDefinitions, getBuiltInStepDefinition } from './builtin_step_definitions';
+import { StepCategories, StepCategory } from './step_definition_types';
 
-const EXPECTED_BUILT_IN_IDS = ['if', 'foreach', 'wait', 'data.set'];
+const EXPECTED_BUILT_IN_IDS = [
+  'console',
+  'if',
+  'foreach',
+  'wait',
+  'data.set',
+  'workflow.execute',
+  'workflow.executeAsync',
+];
 
 describe('builtInStepDefinitions', () => {
   it('covers all expected built-in step types', () => {
@@ -26,9 +35,7 @@ describe('builtInStepDefinitions', () => {
   it.each(EXPECTED_BUILT_IN_IDS)('"%s" has a valid category', (id) => {
     const def = builtInStepDefinitions.find((d) => d.id === id);
     expect(def).toBeDefined();
-    expect(['elasticsearch', 'external', 'ai', 'kibana', 'data', 'flowControl']).toContain(
-      def!.category
-    );
+    expect(StepCategories).toContain(def!.category);
   });
 
   it.each(EXPECTED_BUILT_IN_IDS)('"%s" has an inputSchema with parse()', (id) => {
@@ -62,7 +69,14 @@ describe('getBuiltInStepDefinition', () => {
     const def = getBuiltInStepDefinition('data.set');
     expect(def).toBeDefined();
     expect(def!.id).toBe('data.set');
-    expect(def!.category).toBe('data');
+    expect(def!.category).toBe(StepCategory.Data);
+  });
+
+  it('returns the correct definition for workflow.executeAsync', () => {
+    const def = getBuiltInStepDefinition('workflow.executeAsync');
+    expect(def).toBeDefined();
+    expect(def!.id).toBe('workflow.executeAsync');
+    expect(def!.category).toBe(StepCategory.FlowControl);
   });
 
   it('returns undefined for an unknown id', () => {

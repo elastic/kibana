@@ -6,15 +6,15 @@
  */
 
 import { adHocRunStatus } from '../../../common/constants';
-import { calculateSchedule } from './calculate_schedule';
+import { calculateSchedule, MAX_SCHEDULE_ENTRIES } from './calculate_schedule';
 
 describe('calculateSchedule', () => {
   test('should calculate schedule using start and end time', () => {
-    expect(
-      calculateSchedule('1h', [
-        { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T13:00:00.000Z' },
-      ])
-    ).toEqual([
+    const { schedule, truncated } = calculateSchedule('1h', [
+      { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T13:00:00.000Z' },
+    ]);
+    expect(truncated).toBe(false);
+    expect(schedule).toEqual([
       {
         interval: '1h',
         status: adHocRunStatus.PENDING,
@@ -42,11 +42,11 @@ describe('calculateSchedule', () => {
       },
     ]);
 
-    expect(
-      calculateSchedule('24m', [
-        { start: '2023-11-16T08:42:45.751Z', end: '2023-11-16T10:54:23.000Z' },
-      ])
-    ).toEqual([
+    const result24m = calculateSchedule('24m', [
+      { start: '2023-11-16T08:42:45.751Z', end: '2023-11-16T10:54:23.000Z' },
+    ]);
+    expect(result24m.truncated).toBe(false);
+    expect(result24m.schedule).toEqual([
       {
         interval: '24m',
         status: adHocRunStatus.PENDING,
@@ -81,12 +81,12 @@ describe('calculateSchedule', () => {
   });
 
   test('should calculate schedule with multiple ranges', () => {
-    expect(
-      calculateSchedule('1h', [
-        { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T10:00:00.000Z' },
-        { start: '2023-11-16T12:00:00.000Z', end: '2023-11-16T14:00:00.000Z' },
-      ])
-    ).toEqual([
+    const { schedule, truncated } = calculateSchedule('1h', [
+      { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T10:00:00.000Z' },
+      { start: '2023-11-16T12:00:00.000Z', end: '2023-11-16T14:00:00.000Z' },
+    ]);
+    expect(truncated).toBe(false);
+    expect(schedule).toEqual([
       {
         interval: '1h',
         status: adHocRunStatus.PENDING,
@@ -111,11 +111,11 @@ describe('calculateSchedule', () => {
   });
 
   test('should calculate schedule when start and end are not multiple of interval', () => {
-    expect(
-      calculateSchedule('1h', [
-        { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T12:38:23.252Z' },
-      ])
-    ).toEqual([
+    const { schedule, truncated } = calculateSchedule('1h', [
+      { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T12:38:23.252Z' },
+    ]);
+    expect(truncated).toBe(false);
+    expect(schedule).toEqual([
       {
         interval: '1h',
         status: adHocRunStatus.PENDING,
@@ -144,14 +144,45 @@ describe('calculateSchedule', () => {
     ]);
   });
 
+  test('should truncate schedule at MAX_SCHEDULE_ENTRIES and set truncated flag', () => {
+    // 1-minute interval over 8 days = 11,520 entries > 10,000 cap
+    const { schedule, truncated } = calculateSchedule('1m', [
+      { start: '2023-11-16T00:00:00.000Z', end: '2023-11-24T00:00:00.000Z' },
+    ]);
+    expect(schedule).toHaveLength(MAX_SCHEDULE_ENTRIES);
+    expect(truncated).toBe(true);
+  });
+
+  test('should not set truncated when schedule exactly fills range', () => {
+    // 1-hour interval over 5 hours = exactly 5 entries, well under cap
+    const { schedule, truncated } = calculateSchedule('1h', [
+      { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T13:00:00.000Z' },
+    ]);
+    expect(schedule).toHaveLength(5);
+    expect(truncated).toBe(false);
+  });
+
+  test('should truncate across multiple ranges and set truncated flag', () => {
+    const halfPlus = Math.ceil(MAX_SCHEDULE_ENTRIES / 2) + 1;
+    const endMs1 = new Date('2023-11-16T00:00:00.000Z').valueOf() + halfPlus * 60_000;
+    const startMs2 = endMs1 + 3_600_000;
+    const endMs2 = startMs2 + halfPlus * 60_000;
+    const { schedule, truncated } = calculateSchedule('1m', [
+      { start: '2023-11-16T00:00:00.000Z', end: new Date(endMs1).toISOString() },
+      { start: new Date(startMs2).toISOString(), end: new Date(endMs2).toISOString() },
+    ]);
+    expect(schedule).toHaveLength(MAX_SCHEDULE_ENTRIES);
+    expect(truncated).toBe(true);
+  });
+
   test('should calculate schedule with multiple ranges with gaps', () => {
-    expect(
-      calculateSchedule('30m', [
-        { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T09:00:00.000Z' },
-        { start: '2023-11-16T10:00:00.000Z', end: '2023-11-16T11:00:00.000Z' },
-        { start: '2023-11-16T12:00:00.000Z', end: '2023-11-16T13:00:00.000Z' },
-      ])
-    ).toEqual([
+    const { schedule, truncated } = calculateSchedule('30m', [
+      { start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T09:00:00.000Z' },
+      { start: '2023-11-16T10:00:00.000Z', end: '2023-11-16T11:00:00.000Z' },
+      { start: '2023-11-16T12:00:00.000Z', end: '2023-11-16T13:00:00.000Z' },
+    ]);
+    expect(truncated).toBe(false);
+    expect(schedule).toEqual([
       // First range: 8:00-9:00
       {
         interval: '30m',
