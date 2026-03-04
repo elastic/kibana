@@ -46,7 +46,7 @@ export const createMockedInternalSkill = (
   description: 'A test skill',
   content: 'Skill body content',
   readonly: false,
-  basePath: 'skills/user',
+  basePath: '/skills',
   getRegistryTools: () => [],
   ...parts,
 });

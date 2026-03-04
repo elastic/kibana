@@ -217,7 +217,7 @@ describe('getSkillsInstructions', () => {
     it('does not distinguish between user-created and builtin skills', async () => {
       const filesystem = createMockFileStore();
       const userSkill = createSkillFileEntry(
-        '/skills/user/incident-triage/SKILL.md',
+        '/skills/incident-triage/SKILL.md',
         'incident-triage',
         'Triage security incidents'
       );

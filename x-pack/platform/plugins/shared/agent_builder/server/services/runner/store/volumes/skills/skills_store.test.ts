@@ -286,7 +286,7 @@ describe('SkillsStore', () => {
     ): InternalSkillDefinition => ({
       id: 'custom-skill-1',
       name: 'custom-skill',
-      basePath: 'skills/user',
+      basePath: '/skills',
       description: 'A persisted custom skill',
       content: 'Custom skill content',
       readonly: false,
@@ -302,7 +302,7 @@ describe('SkillsStore', () => {
 
       expect(store.has('custom-skill-1')).toBe(true);
       const volume = store.getVolume();
-      expect(volume.has('/skills/user/custom-skill/SKILL.md')).toBe(true);
+      expect(volume.has('/skills/custom-skill/SKILL.md')).toBe(true);
     });
 
     it('mounts persisted skills alongside builtin skills', async () => {
@@ -312,7 +312,7 @@ describe('SkillsStore', () => {
 
       const volume = store.getVolume();
       expect(volume.has('/skills/platform/builtin-skill/SKILL.md')).toBe(true);
-      expect(volume.has('/skills/user/custom-skill/SKILL.md')).toBe(true);
+      expect(volume.has('/skills/custom-skill/SKILL.md')).toBe(true);
     });
   });
 

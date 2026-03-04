@@ -39,11 +39,11 @@ describe('convertPersistedSkill', () => {
     expect(result.readonly).toBe(false);
   });
 
-  it('sets basePath to skills/custom for VFS mounting', () => {
+  it('set a default basepath', () => {
     const skill = createMockPersistedSkill();
     const result = convertPersistedSkill(skill);
 
-    expect(result.basePath).toBe('skills/user');
+    expect(result.basePath).toBe('/skills');
   });
 
   it('does not set getInlineTools', () => {
