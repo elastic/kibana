@@ -248,12 +248,20 @@ export class ResolutionClient {
    * inconsistent link/unlink decisions.
    */
   private throwIfTruncated(response: SearchResponse, context: string): void {
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0;
+    let total: number;
+    let isTruncated = false;
+
+    if (typeof response.hits.total === 'number') {
+      total = response.hits.total;
+    } else {
+      total = response.hits.total?.value ?? 0;
+      if (response.hits.total?.relation === 'gte') {
+        isTruncated = true;
+      }
+    }
+
     const returned = response.hits.hits.length;
-    if (total > returned) {
+    if (isTruncated || total > returned) {
       throw new ResolutionSearchTruncatedError(context, returned, total);
     }
   }

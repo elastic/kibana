@@ -43,14 +43,15 @@ const createSearchResponse = (docs: Array<Record<string, unknown>>) => ({
 
 const createTruncatedSearchResponse = (
   docs: Array<Record<string, unknown>>,
-  actualTotal: number
+  actualTotal: number,
+  relation: 'eq' | 'gte' = 'eq'
 ) => ({
   hits: {
     hits: docs.map((doc) => ({
       _id: `doc-${doc['entity.id']}`,
       _source: doc,
     })),
-    total: { value: actualTotal, relation: 'eq' as const },
+    total: { value: actualTotal, relation },
   },
 });
 
@@ -465,6 +466,20 @@ describe('ResolutionClient', () => {
       // search for group — returns 1 doc but total says 15000
       mockEsClient.search.mockResolvedValueOnce(
         createTruncatedSearchResponse([targetDoc], 15000) as never
+      );
+
+      await expect(client.getResolutionGroup('target-1')).rejects.toThrow(
+        ResolutionSearchTruncatedError
+      );
+    });
+
+    it('should throw ResolutionSearchTruncatedError when total relation is gte', async () => {
+      const targetDoc = createEntityDoc('target-1');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([targetDoc]) as never);
+      // total.value === returned but relation is 'gte' — actual total is higher
+      mockEsClient.search.mockResolvedValueOnce(
+        createTruncatedSearchResponse([targetDoc], 1, 'gte') as never
       );
 
       await expect(client.getResolutionGroup('target-1')).rejects.toThrow(
