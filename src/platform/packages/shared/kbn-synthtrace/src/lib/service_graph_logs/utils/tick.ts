@@ -147,7 +147,7 @@ function buildInfraDocs({
   const cachedMeta = metadataCache?.get(svc.name);
   const serviceErrorType = failingServiceErrors.get(svc.name);
   const k8sErrorType =
-    serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoffoff'
+    serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff'
       ? serviceErrorType
       : undefined;
 
@@ -353,7 +353,7 @@ export function collectInfraDocs({
         depFailingErrorType,
         timestamp,
         metadataCache,
-        effectiveSeed: resolveEffectiveSeed(seed, genState.infraIndex + i, timestamp),
+        effectiveSeed: resolveEffectiveSeed(seed, currentIndex + i, timestamp),
       })
     );
   }

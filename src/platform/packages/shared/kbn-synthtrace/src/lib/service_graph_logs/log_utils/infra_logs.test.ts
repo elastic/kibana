@@ -171,12 +171,12 @@ describe('generateHostSystemLog — correctness', () => {
     expect(errorDoc.message?.toLowerCase()).toMatch(/oom|memory/);
   });
 
-  it('emits warn + error docs with crash-loop-specific kubelet messages when errorType is k8s_crash_loop_backoffoff', () => {
+  it('emits warn + error docs with crash-loop-specific kubelet messages when errorType is k8s_crash_loop_backoff', () => {
     const docs = generateHostSystemLog({
       service: K8S_SERVICE,
       seed: SEED,
       timestamp: BASE_TS,
-      errorType: 'k8s_crash_loop_backoffoff',
+      errorType: 'k8s_crash_loop_backoff',
     });
     expect(docs).toHaveLength(2);
     const [warnDoc, errorDoc] = docs;
@@ -215,7 +215,7 @@ describe('isInfraErrorType', () => {
     ['gateway_timeout', false],
     ['bad_gateway', false],
     ['k8s_oom', true],
-    ['k8s_crash_loop_backoffoff', true],
+    ['k8s_crash_loop_backoff', true],
     ['message_queue_failure', true],
     ['cache_failure', true],
   ] as const)('isInfraErrorType(%s) === %s', (errorType, expected) => {

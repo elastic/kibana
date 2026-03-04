@@ -51,9 +51,9 @@ export interface InfraLogOptions extends ServicePhaseOptions, InfraFailState {
 export interface HostSystemLogOptions extends ServicePhaseOptions {
   /**
    * K8s-specific error type to emit for pod events when service is failing.
-   * Only k8s_oom and k8s_crash_loop_backoffoff produce host-level pod events.
+   * Only k8s_oom and k8s_crash_loop_backoff produce host-level pod events.
    */
-  errorType?: 'k8s_oom' | 'k8s_crash_loop_backoffoff';
+  errorType?: 'k8s_oom' | 'k8s_crash_loop_backoff';
 }
 
 /** Fixed probability for host/k8s system resource events when service is not failing. */
@@ -61,11 +61,11 @@ const HOST_NORMAL_RESOURCE_PROB = 0.005;
 
 /** Maps k8s InfraErrorType → kubernetes template condition key. */
 const K8S_ERROR_CONDITION: Record<
-  'k8s_oom' | 'k8s_crash_loop_backoffoff',
+  'k8s_oom' | 'k8s_crash_loop_backoff',
   'oom' | 'crash_loop_backoff'
 > = {
   k8s_oom: 'oom',
-  k8s_crash_loop_backoffoff: 'crash_loop_backoff',
+  k8s_crash_loop_backoff: 'crash_loop_backoff',
 };
 
 /** Extracts known placeholder keys from ECS metadata fields shared by infra log templates. */
