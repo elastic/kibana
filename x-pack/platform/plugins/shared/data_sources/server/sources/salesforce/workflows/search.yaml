@@ -13,7 +13,7 @@ inputs:
   - name: returning
     type: string
     required: true
-    description: "Object API names to search (comma-separated), e.g. Account,Contact,Opportunity"
+    description: "Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep results smaller. Use describe to discover names."
   - name: next_records_url
     type: string
     required: false

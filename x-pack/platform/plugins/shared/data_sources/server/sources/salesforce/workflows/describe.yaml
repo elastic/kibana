@@ -8,7 +8,8 @@ triggers:
 inputs:
   - name: sobject_name
     type: string
-    description: "Salesforce object API name (standard or custom), e.g. Account, Contact, or MyObject__c"
+    required: true
+    description: "SObject API name (e.g. Account, Contact, MyObject__c). Use before query/search to discover fields."
 steps:
   - name: describe
     type: salesforce.describe

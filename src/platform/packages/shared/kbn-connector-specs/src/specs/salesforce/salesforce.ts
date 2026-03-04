@@ -70,8 +70,12 @@ export const SalesforceConnector: ConnectorSpec = {
   actions: {
     query: {
       input: z.object({
-        soql: z.string(),
-        nextRecordsUrl: z.string().optional(),
+        soql: z
+          .string()
+          .describe(
+            'SOQL query. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl from response for more.'
+          ),
+        nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { soql: string; nextRecordsUrl?: string };
@@ -91,8 +95,14 @@ export const SalesforceConnector: ConnectorSpec = {
 
     get_record: {
       input: z.object({
-        sobjectName: z.string(),
-        recordId: z.string(),
+        sobjectName: z
+          .string()
+          .describe(
+            'SObject API name (e.g. Account, Contact). Must match the object that owns the record.'
+          ),
+        recordId: z
+          .string()
+          .describe('Record Id (15- or 18-char). Get from query, list_records, or search results.'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string; recordId: string };
@@ -110,9 +120,12 @@ export const SalesforceConnector: ConnectorSpec = {
 
     list_records: {
       input: z.object({
-        sobjectName: z.string(),
-        limit: z.number().default(50),
-        nextRecordsUrl: z.string().optional(),
+        sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
+        limit: z
+          .number()
+          .default(10)
+          .describe('Max records to return (1-2000). Prefer 10-20 to keep context small.'),
+        nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -127,7 +140,7 @@ export const SalesforceConnector: ConnectorSpec = {
           return response.data;
         }
         validateSobjectName(typedInput.sobjectName);
-        const limit = Math.min(typedInput.limit ?? 50, 2000);
+        const limit = Math.min(typedInput.limit ?? 10, 2000);
         const soql = `SELECT Id FROM ${typedInput.sobjectName.trim()} LIMIT ${limit}`;
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
@@ -139,9 +152,17 @@ export const SalesforceConnector: ConnectorSpec = {
 
     search: {
       input: z.object({
-        searchTerm: z.string(),
-        returning: z.string().describe('Object API names to search (comma-separated)'),
-        nextRecordsUrl: z.string().optional(),
+        searchTerm: z
+          .string()
+          .describe(
+            'Search phrase. Use specific terms to narrow results (e.g. account name, keyword).'
+          ),
+        returning: z
+          .string()
+          .describe(
+            'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down.'
+          ),
+        nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {

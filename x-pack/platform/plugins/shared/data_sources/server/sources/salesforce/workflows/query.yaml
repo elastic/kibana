@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.salesforce.query'
-description: 'Run a SOQL query against Salesforce. Make sure you know the correct salesforce object name. For large result sets, use nextRecordsUrl from the response to fetch the next page.'
+description: 'Run a SOQL query against Salesforce. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl for more.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -13,7 +13,7 @@ inputs:
   - name: next_records_url
     type: string
     required: false
-    description: "URL from previous response's nextRecordsUrl for pagination"
+    description: "Pagination URL from previous response's nextRecordsUrl"
 steps:
   - name: query
     type: salesforce.query

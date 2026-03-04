@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.salesforce.list_records'
-description: 'List records for a Salesforce sobject (e.g. Account, Contact). Use limit to cap results (default 50, max 2000). Use nextRecordsUrl from the response to fetch the next page.'
+description: 'List record IDs for a Salesforce sobject. Prefer limit 10-20; use nextRecordsUrl for more (max 2000).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -12,10 +12,12 @@ inputs:
   - name: limit
     type: number
     required: false
-    default: 50
+    default: 10
+    description: "Max records (default 10, max 2000). Prefer 10-20 to keep context small."
   - name: next_records_url
     type: string
     required: false
+    description: "Pagination URL from previous response's nextRecordsUrl"
 steps:
   - name: list-records
     type: salesforce.list_records

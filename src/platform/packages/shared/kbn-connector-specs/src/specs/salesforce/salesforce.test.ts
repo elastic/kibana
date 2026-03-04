@@ -181,7 +181,7 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
-        params: { q: 'SELECT Id FROM Account LIMIT 50' },
+        params: { q: 'SELECT Id FROM Account LIMIT 10' },
       });
       expect(result).toEqual(mockResponse.data);
     });
