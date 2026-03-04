@@ -226,7 +226,7 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.resetBrowserApiTools();
         }
       },
-      openConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      openAgentBuilderChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
       toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => {

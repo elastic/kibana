@@ -39,7 +39,7 @@ export function AgentBuilderNavControl() {
 
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
-        agentBuilder.openConversationFlyout();
+        agentBuilder.openAgentBuilderChat();
         aiAssistantManagementSelection.completeOpenChat();
       }
     });

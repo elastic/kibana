@@ -65,7 +65,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     setAgentBuilderChatConfig: jest.fn(),
     clearAgentBuilderChatConfig: jest.fn(),
     toggleConversationFlyout: jest.fn(),
-    openConversationFlyout: jest
+    openAgentBuilderChat: jest
       .fn()
       .mockImplementation((options: OpenConversationSidebarOptions) => {
         const mockSidebarRef: ConversationSidebarRef = {

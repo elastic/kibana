@@ -102,17 +102,15 @@ export interface AgentBuilderPluginStart {
    * @example
    * ```tsx
    * // Open a new conversation with close handler
-   * const { flyoutRef } = plugins.agentBuilder.openConversationFlyout({
+   * const { chatRef } = plugins.agentBuilder.openAgentBuilderChat({
    *   onClose: () => console.log('Sidebar closed')
    * });
    *
    * // Programmatically close the sidebar
-   * flyoutRef.close();
+   * chatRef.close();
    * ```
    */
-  openConversationFlyout: (
-    options?: OpenConversationSidebarOptions
-  ) => OpenConversationSidebarReturn;
+  openAgentBuilderChat: (options?: OpenConversationSidebarOptions) => OpenConversationSidebarReturn;
   /**
    * Toggles the conversation sidebar.
    *

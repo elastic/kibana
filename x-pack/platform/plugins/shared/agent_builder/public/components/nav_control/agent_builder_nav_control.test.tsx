@@ -41,7 +41,7 @@ describe('AgentBuilderNavControl', () => {
       services: {
         agentBuilder: {
           toggleConversationFlyout,
-          openConversationFlyout: jest.fn(),
+          openAgentBuilderChat: jest.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
@@ -69,7 +69,7 @@ describe('AgentBuilderNavControl', () => {
       services: {
         agentBuilder: {
           toggleConversationFlyout,
-          openConversationFlyout: jest.fn(),
+          openAgentBuilderChat: jest.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
@@ -91,7 +91,7 @@ describe('AgentBuilderNavControl', () => {
 
   it('opens the sidebar when openChat$ emits Agent', () => {
     const toggleConversationFlyout = jest.fn();
-    const openConversationFlyout = jest.fn();
+    const openAgentBuilderChat = jest.fn();
     const completeOpenChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
@@ -100,7 +100,7 @@ describe('AgentBuilderNavControl', () => {
       services: {
         agentBuilder: {
           toggleConversationFlyout,
-          openConversationFlyout,
+          openAgentBuilderChat,
         },
         aiAssistantManagementSelection: {
           openChat$,
@@ -119,7 +119,7 @@ describe('AgentBuilderNavControl', () => {
       openChat$.next(AIChatExperience.Agent);
     });
 
-    expect(openConversationFlyout).toHaveBeenCalledTimes(1);
+    expect(openAgentBuilderChat).toHaveBeenCalledTimes(1);
     expect(completeOpenChat).toHaveBeenCalledTimes(1);
   });
 });
