@@ -23,7 +23,7 @@ export const GraphGroupedNodePreviewPanelKey = 'graphGroupedNodePreviewPanel' as
  * Panel keys for preview panels used by the graph grouped node preview panel.
  * These must match the keys registered in the security solution flyout.
  */
-export const GenericEntityPanelKey = 'entity-panel' as const;
+export const GenericEntityPanelKey = 'generic-entity-panel' as const;
 export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as const;
 
 /**
@@ -31,23 +31,23 @@ export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as cons
  */
 export const GENERIC_ENTITY_PREVIEW_BANNER = {
   title: i18n.translate(`${i18nNamespaceKey}.entityPreviewBannerTitle`, {
-    defaultMessage: 'Entity preview',
+    defaultMessage: 'Preview entity details',
   }),
-  backgroundColor: 'primary',
-  textColor: 'default',
+  backgroundColor: 'warning',
+  textColor: 'warning',
 };
 
 export const ALERT_PREVIEW_BANNER = {
   title: i18n.translate(`${i18nNamespaceKey}.alertPreviewBannerTitle`, {
-    defaultMessage: 'Alert preview',
+    defaultMessage: 'Preview alert details',
   }),
-  backgroundColor: 'danger',
-  textColor: 'danger',
+  backgroundColor: 'warning',
+  textColor: 'warning',
 };
 
 export const EVENT_PREVIEW_BANNER = {
   title: i18n.translate(`${i18nNamespaceKey}.eventPreviewBannerTitle`, {
-    defaultMessage: 'Event preview',
+    defaultMessage: 'Preview event details',
   }),
   backgroundColor: 'warning',
   textColor: 'warning',
