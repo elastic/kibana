@@ -49,9 +49,8 @@ resolves which pipeline to use based on the provided identifier:
 
 - If the ID matches a known inference endpoint, the request is routed through the Elasticsearch Inference API.
 - Otherwise, it is routed through the Kibana stack connector pipeline.
-- If the connector pipeline returns a "not found" error, the system falls back to the inference endpoint pipeline.
 
-The `getConnectorList` API returns both stack connectors and inference endpoints in a unified list.
+The `getConnectorList` API returns both stack connectors with the `chat_completion` task type and inference endpoints in a unified list.
 Inference endpoints have `isInferenceEndpoint: true` set on the returned `InferenceConnector` object.
 
 The list of supported stack connector types:
