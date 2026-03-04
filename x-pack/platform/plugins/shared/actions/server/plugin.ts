@@ -188,15 +188,9 @@ export interface PluginStartContract {
   /**
    * Add a new dynamic InMemoryConnector to the inMemoryConnectors list if a connector with the id doesn't already exist.
    * @param connector to add to the inMemoryConnectors list
-   * @returns void
+   * @returns boolean indicating whether the connector was added or not
    */
-  registerDynamicConnector: (connector: InMemoryConnector) => void;
-  /**
-   * Remove connector with the given id from the inMemoryConnectors list if it exists.
-   * @param connectorId to remove from inMemoryConnectors list
-   * @returns
-   */
-  unregisterDynamicConnector: (connectorId: string) => void;
+  registerDynamicConnector: (connector: InMemoryConnector) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -717,8 +711,6 @@ export class ActionsPlugin
       },
       registerDynamicConnector: (connector: InMemoryConnector) =>
         this.registerDynamicConnector(connector),
-      unregisterDynamicConnector: (connectorId: string) =>
-        this.unregisterDynamicConnector(connectorId),
     };
   }
 
@@ -916,7 +908,7 @@ export class ActionsPlugin
     };
   };
 
-  private registerDynamicConnector = (connector: InMemoryConnector): void => {
+  private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
     if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
       this.inMemoryConnectors.push({
         ...connector,
@@ -924,17 +916,9 @@ export class ActionsPlugin
         isPreconfigured: true,
       });
       this.logger.info(`Registered dynamic connector with id ${connector.id}`);
+      return true;
     }
-  };
-
-  private unregisterDynamicConnector = (connectorId: string): void => {
-    const index = this.inMemoryConnectors.findIndex(
-      (c) => c.id === connectorId && c.isDynamic === true
-    );
-    if (index !== -1) {
-      this.inMemoryConnectors.splice(index, 1);
-      this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
-    }
+    return false;
   };
 
   public stop() {
