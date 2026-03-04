@@ -70,6 +70,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.cases',
           '.crowdstrike',
           '.microsoft_defender_endpoint',
+          '.mongodb',
           '.workflows',
           '.xsoar',
         ].sort()
