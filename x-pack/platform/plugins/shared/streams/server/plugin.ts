@@ -50,6 +50,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
+import { InsightService } from './lib/significant_events/insights/client/insight_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -113,6 +114,7 @@ export class StreamsPlugin
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
     const systemService = new SystemService(core, this.logger);
+    const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -147,6 +149,7 @@ export class StreamsPlugin
           }),
           featureService.getClient(),
           systemService.getClient(),
+          insightService.getInternalClient(),
           contentService.getClient(),
           queryService.getClient({
             soClient,
@@ -173,6 +176,7 @@ export class StreamsPlugin
         streamsClient,
         featureClient,
         systemClient,
+        insightClient,
         inferenceClient,
         contentClient,
         queryClient,
