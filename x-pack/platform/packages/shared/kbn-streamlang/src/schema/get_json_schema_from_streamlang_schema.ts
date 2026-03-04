@@ -1083,6 +1083,7 @@ function flattenConditionOneOf(schema: any): void {
 
   addFilterConditionSnippets(conditionDef);
 
+  const excludedProperties = new Set(['always', 'never']);
   const mergedProperties: Record<string, any> = {};
   const mergedSnippets: any[] = [];
 
@@ -1097,8 +1098,12 @@ function flattenConditionOneOf(schema: any): void {
       return;
     }
     if (node.properties) {
+      const keys = Object.keys(node.properties);
+      if (keys.length === 1 && excludedProperties.has(keys[0])) {
+        return;
+      }
       for (const [key, value] of Object.entries(node.properties)) {
-        if (!mergedProperties[key]) {
+        if (!mergedProperties[key] && !excludedProperties.has(key)) {
           mergedProperties[key] = value;
         }
       }
