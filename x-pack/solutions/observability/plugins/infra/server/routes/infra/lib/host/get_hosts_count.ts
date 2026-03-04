@@ -12,7 +12,7 @@ import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metri
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { assertQueryStructure } from '../utils';
 import { getDocumentsFilter } from '../helpers/query';
-import { getInfraHostNames } from './get_filtered_hosts';
+import { getFilteredHostNames } from './get_filtered_hosts';
 
 const HOSTS_TO_REMOVE_LIMIT = 10000;
 
@@ -35,7 +35,7 @@ export async function getHostsCount({
   });
 
   const [{ allHosts, availableHosts }, documentsFilter] = await Promise.all([
-    getInfraHostNames({
+    getFilteredHostNames({
       infraMetricsClient,
       query,
       from,

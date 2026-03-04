@@ -7,7 +7,7 @@
 
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
-import { getInfraHostNames } from './get_filtered_hosts';
+import { getFilteredHostNames } from './get_filtered_hosts';
 import type { GetHostParameters } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
@@ -105,7 +105,7 @@ const getHostNames = async ({
   assertQueryStructure(query);
 
   const [{ allHosts, availableHosts }, apmHosts] = await Promise.all([
-    getInfraHostNames({
+    getFilteredHostNames({
       infraMetricsClient,
       query,
       from,
