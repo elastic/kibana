@@ -34,25 +34,20 @@ const wrapIdx = (index: number): string => `[${index}]`;
  */
 export const flattenNav = (
   navTree: ChromeProjectNavigationNode[],
-  prefix: string[] = []
+  prefix: string[] = [],
+  acc: Record<string, ChromeProjectNavigationNode> = {}
 ): Record<string, ChromeProjectNavigationNode> => {
-  return navTree.reduce<Record<string, ChromeProjectNavigationNode>>((acc, node, idx) => {
-    const updatedPrefix = [...prefix, `${wrapIdx(idx)}`];
-    const nodePath = () => updatedPrefix.join('');
-
-    if (node.children && node.children.length > 0) {
-      const { children, ...rest } = node;
-      return {
-        ...acc,
-        [nodePath()]: rest,
-        ...flattenNav(children, updatedPrefix),
-      };
+  for (let idx = 0; idx < navTree.length; idx++) {
+    const node = navTree[idx];
+    const updatedPrefix = [...prefix, wrapIdx(idx)];
+    const path = updatedPrefix.join('');
+    const { children, ...rest } = node;
+    acc[path] = children?.length ? rest : node;
+    if (children?.length) {
+      flattenNav(children, updatedPrefix, acc);
     }
-
-    acc[nodePath()] = node;
-
-    return acc;
-  }, {});
+  }
+  return acc;
 };
 
 function truncateAt(str: string, divider: string): string {
@@ -61,13 +56,6 @@ function truncateAt(str: string, divider: string): string {
 }
 
 export const stripQueryParams = (url: string) => truncateAt(url, '?');
-
-function serializeDeeplinkUrl(url?: string) {
-  if (!url) {
-    return undefined;
-  }
-  return stripQueryParams(url);
-}
 
 /**
  * Extract the parent paths from a key
@@ -116,7 +104,8 @@ export const findActiveNodes = (
   prepend: (path: string) => string = (path) => path
 ): ChromeProjectNavigationNode[][] => {
   const activeNodes: ChromeProjectNavigationNode[][] = [];
-  const matches: string[][] = [];
+  let maxLength = 0;
+  const matchesByLength = new Map<number, string[]>();
 
   const activeNodeFromKey = (key: string): ChromeProjectNavigationNode => ({
     ...navTree[key],
@@ -132,26 +121,24 @@ export const findActiveNodes = (
       return;
     }
 
-    const nodePath = serializeDeeplinkUrl(node.deepLink?.url);
+    const nodePath = node.deepLink?.url ? stripQueryParams(node.deepLink.url) : undefined;
 
     if (nodePath) {
       const match = currentPathname.startsWith(nodePath);
 
       if (match) {
         const { length } = nodePath;
-        if (!matches[length]) {
-          matches[length] = [];
-        }
-        matches[length].push(key);
-        // If there are multiple node matches of the same URL path length, we want to order them by
-        // tree depth, so that the longest match (deepest node) comes first.
-        matches[length].sort((a, b) => b.length - a.length);
+        const bucket = matchesByLength.get(length) ?? [];
+        bucket.push(key);
+        bucket.sort((a, b) => b.length - a.length);
+        matchesByLength.set(length, bucket);
+        if (length > maxLength) maxLength = length;
       }
     }
   });
 
-  if (matches.length > 0) {
-    const longestMatch = matches[matches.length - 1];
+  const longestMatch = matchesByLength.get(maxLength);
+  if (longestMatch) {
     longestMatch.forEach((key) => {
       const keysWithParents = extractParentPaths(key, navTree);
       activeNodes.push(keysWithParents.map(activeNodeFromKey));
@@ -162,11 +149,7 @@ export const findActiveNodes = (
 };
 
 let uniqueId = 0;
-
-function generateUniqueNodeId() {
-  const id = `node${uniqueId++}`;
-  return id;
-}
+const generateUniqueNodeId = () => `node${uniqueId++}`;
 
 function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');
@@ -178,22 +161,6 @@ function getNavigationNodeId(
 ): string {
   const id = _id ?? link;
   return id ?? idGenerator();
-}
-
-function getNavigationNodeHref({
-  href,
-  deepLink,
-}: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
-  return deepLink?.url ?? href;
-}
-
-/**
- * We don't have currently a way to know if a user has access to a Cloud section.
- * TODO: This function will have to be revisited once we have an API from Cloud to know the user
- * permissions.
- */
-function hasUserAccessToCloudLink(): boolean {
-  return true;
 }
 
 function getNodeStatus(
@@ -220,7 +187,7 @@ function getNodeStatus(
       // Invalid cloudLinkId or link url has not been set in kibana.yml
       return 'remove';
     }
-    if (!hasUserAccessToCloudLink()) return 'remove';
+    // TODO: Add cloud link permission check once Cloud provides an API
   }
 
   return sideNavStatus ?? 'visible';
@@ -311,7 +278,7 @@ const initNavNode = <
   const navNode: ChromeProjectNavigationNode = {
     ...navNodeFromProps,
     id,
-    href: getNavigationNodeHref({ href, deepLink }),
+    href: deepLink?.url ?? href,
     path,
     title,
     deepLink,
