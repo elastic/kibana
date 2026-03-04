@@ -75,7 +75,7 @@ export function transformWorkpadOut(
 
           // migrate legacy embeddable expressions to generic embeddable expression
           switch (fn.function) {
-            case 'savedLens':
+            case 'savedLens': {
               const lensConfig = {
                 savedObjectId: fn.arguments.id[0] as string,
                 timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
@@ -89,7 +89,8 @@ export function transformWorkpadOut(
                 type: [EmbeddableTypes.lens],
               };
               break;
-            case 'savedVisualization':
+            }
+            case 'savedVisualization': {
               const visualizationConfig = {
                 savedObjectId: fn.arguments.id[0] as string,
                 vis:
@@ -108,7 +109,8 @@ export function transformWorkpadOut(
                 type: [EmbeddableTypes.visualization],
               };
               break;
-            case 'savedMap':
+            }
+            case 'savedMap': {
               // migrate legacy savedMap to embeddable expression
               const mapConfig = {
                 savedObjectId: fn.arguments.id[0] as string,
@@ -125,6 +127,7 @@ export function transformWorkpadOut(
                 type: [EmbeddableTypes.map],
               };
               break;
+            }
           }
 
           const embeddableConfig = decode(fn.arguments.config[0] as string);
