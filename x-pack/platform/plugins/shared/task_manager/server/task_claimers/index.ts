@@ -8,7 +8,7 @@
 import type { Subject } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import type { TaskStore } from '../task_store';
 import type { TaskClaim, TaskTiming } from '../task_events';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
