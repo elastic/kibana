@@ -16,7 +16,6 @@ import type {
   FailuresOrFn,
   InfraDependency,
   NoiseConfig,
-  ServiceErrorType,
   ServiceFailure,
   ServiceGraph,
   ServiceNode,
@@ -123,7 +122,7 @@ function buildInfraDocs({
   dep: InfraDependency;
   failingDeps: Set<string>;
   failingServiceErrors: Map<string, ErrorType>;
-  depFailingErrorType: ServiceErrorType | undefined;
+  depFailingErrorType: ErrorType | undefined;
   timestamp: number;
   metadataCache: MetadataCache | undefined;
   effectiveSeed: number;
@@ -334,9 +333,7 @@ export function collectInfraDocs({
 
   const rawDepErrorType = currentFailures?.infra?.[dep]?.errorType;
   const depFailingErrorType =
-    failingDeps.has(dep) && rawDepErrorType != null && !isInfraErrorType(rawDepErrorType)
-      ? (rawDepErrorType as ServiceErrorType)
-      : undefined;
+    failingDeps.has(dep) && rawDepErrorType != null ? rawDepErrorType : undefined;
 
   const result: Array<Partial<LogDocument>> = [];
   for (let i = 0; i < infraCount; i++) {

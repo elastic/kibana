@@ -287,7 +287,7 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
     return {
       generate: ({ range, clients: { logsEsClient } }) => {
         const { logger } = runOptions;
-        const baseRate = parsedBaseRate ?? 1;
+        const baseRate = parsedBaseRate;
         const from = runOptions.from as number;
         const baselineWindowMs = duration('1m') * baselineMinutes;
 

@@ -11,7 +11,7 @@ import type { LogDocument } from '@kbn/synthtrace-client';
 import type { InfraDependency, NoiseHealthState, ServiceNode } from '../types';
 import { mulberry32 } from '../placeholders';
 import { pickInfraMessage, pickNoiseMessage } from '../utils/templates';
-import { getOrBuildMetadata } from '../utils/metadata';
+import { buildMessageOverrides, getOrBuildMetadata } from '../utils/metadata';
 import {
   buildLogDoc,
   resolveLogLevel,
@@ -102,17 +102,18 @@ export function generateInfraNoiseLog({
       ? 'healthy'
       : INFRA_FAIL_CONDITION[category as Exclude<InfraCategory, 'kubernetes'>];
 
+  const metadata = cachedMetadata ?? getOrBuildMetadata(service, seed);
   const message = pickInfraMessage({
     category,
     condition,
     level,
     seed,
     tech: dep,
+    overrides: buildMessageOverrides(metadata),
     timestamp,
-    serviceName: dep,
+    serviceName: service.name,
   });
 
-  const metadata = cachedMetadata ?? getOrBuildMetadata(service, seed);
   return buildLogDoc({ service, level, message, metadata });
 }
 
