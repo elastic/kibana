@@ -238,7 +238,8 @@ export const FirecrawlConnector: ConnectorSpec = {
       input: GetCrawlStatusInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.get(`${FIRECRAWL_API_BASE}/v2/crawl/${input.id}`);
-        return response.data;
+        const data = response.data as Parameters<typeof slimCrawlResult>[0];
+        return slimCrawlResult(data);
       },
     },
   },

@@ -310,9 +310,23 @@ describe('FirecrawlConnector', () => {
   });
 
   describe('getCrawlStatus action', () => {
-    it('should get crawl status by id and return response data', async () => {
+    it('should get crawl status by id and return slimmed response', async () => {
       const crawlId = '550e8400-e29b-41d4-a716-446655440000';
-      const mockData = { status: 'completed', total: 10, completed: 10 };
+      const longMarkdown = 'x'.repeat(600);
+      const mockData = {
+        status: 'completed',
+        total: 2,
+        data: [
+          {
+            metadata: { sourceURL: 'https://example.com/a', title: 'Page A' },
+            markdown: longMarkdown,
+          },
+          {
+            metadata: { url: 'https://example.com/b', ogTitle: 'Page B' },
+            markdown: 'Short',
+          },
+        ],
+      };
       mockClient.get.mockResolvedValue({ data: mockData });
 
       const result = await FirecrawlConnector.actions.getCrawlStatus.handler(mockContext, {
@@ -320,7 +334,18 @@ describe('FirecrawlConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`https://api.firecrawl.dev/v2/crawl/${crawlId}`);
-      expect(result).toEqual(mockData);
+      expect(result).toEqual({
+        status: 'completed',
+        total: 2,
+        data: [
+          {
+            url: 'https://example.com/a',
+            title: 'Page A',
+            markdownSnippet: 'x'.repeat(500) + '...',
+          },
+          { url: 'https://example.com/b', title: 'Page B', markdownSnippet: 'Short' },
+        ],
+      });
     });
   });
 
