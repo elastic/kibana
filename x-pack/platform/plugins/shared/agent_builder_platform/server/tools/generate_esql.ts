@@ -24,6 +24,12 @@ const nlToEsqlToolSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
+  execute_query: z
+    .boolean()
+    .default(true)
+    .describe(
+      '(optional) If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.'
+    ),
 });
 
 export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
@@ -33,7 +39,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
     handler: async (
-      { query: nlQuery, index, context },
+      { query: nlQuery, index, context, execute_query: executeQuery = true },
       { esClient, modelProvider, logger, events }
     ) => {
       const model = await modelProvider.getDefaultModel();
@@ -42,6 +48,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         nlQuery,
         index,
         additionalContext: context,
+        executeQuery,
         model,
         esClient: esClient.asCurrentUser,
         logger,
