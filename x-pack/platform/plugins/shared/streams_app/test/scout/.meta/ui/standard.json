@@ -1,5 +1,5 @@
 {
-  "sha1": "e0593e1a8a240c8a051787cfc3673beebb73a9d1",
+  "sha1": "05fdfaecacef88351ce6ae474384b7117979d751",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -188,6 +188,20 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
         "line": 39,
         "column": 9
+      }
+    },
+    {
+      "id": "4d907c9d41dec8d-0cc75001f421266",
+      "title": "Stream systems - condition editor validity disables saving when syntax editor JSON is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/systems_condition_editor_validity.spec.ts",
+        "line": 54,
+        "column": 7
       }
     },
     {
@@ -383,6 +397,22 @@
       }
     },
     {
+      "id": "f86f3e79121acd3-8e2255657ecd48c",
+      "title": "Stream data mapping - schema editor - Wired Streams validates field names for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
+        "line": 194,
+        "column": 9
+      }
+    },
+    {
       "id": "8be2eb5bc283463-302be79bda1e5b6",
       "title": "Stream data processing - condition filtering and match rate should display condition match rate badge on WHERE blocks",
       "expectedStatus": "passed",
@@ -469,7 +499,7 @@
     {
       "id": "f13bd8d34bc433f-7338c587a1d041e",
       "title": "Stream data processing - creating steps should not show Technical Preview badge when AI suggestions are unavailable",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -478,14 +508,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 37,
+        "line": 40,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-31bdafa83ca1fdb",
       "title": "Stream data processing - creating steps should create a new processor successfully",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -494,14 +524,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 52,
+        "line": 55,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-abb5048118dbf04",
       "title": "Stream data processing - creating steps should create a new condition successfully",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -510,14 +540,30 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 63,
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "f13bd8d34bc433f-b3f6a32efeb45bd",
+      "title": "Stream data processing - creating steps should disable saving a condition when syntax JSON is invalid",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
+        "line": 74,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-a5b141c2898f5e2",
       "title": "Stream data processing - creating steps should be able to nest steps under conditions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -526,14 +572,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 71,
+        "line": 95,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-13ae90eaf5fd0ab",
       "title": "Stream data processing - creating steps should disable creating new processors while one is in progress",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -542,14 +588,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 93,
+        "line": 117,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-b9c9b422349c50d",
       "title": "Stream data processing - creating steps should disable saving the pipeline while one is in progress",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -558,14 +604,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 112,
+        "line": 136,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-8837f1c5d8dcc70",
       "title": "Stream data processing - creating steps should cancel creating a new processor",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -574,14 +620,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 135,
+        "line": 159,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-89b1f2fdc5f7ccc",
       "title": "Stream data processing - creating steps should show validation errors for invalid processors configuration",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -590,14 +636,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 151,
+        "line": 175,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-37a4257cf26d535",
       "title": "Stream data processing - creating steps should handle insufficient privileges gracefully",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -606,14 +652,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 171,
+        "line": 195,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-7936c6c181e0ef7",
       "title": "Stream data processing - creating steps should duplicate a processor",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -622,14 +668,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 187,
+        "line": 211,
         "column": 9
       }
     },
     {
       "id": "f13bd8d34bc433f-ccfaa69349d0567",
       "title": "Stream data processing - creating steps should duplicate a processor under a condition",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -638,7 +684,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 202,
+        "line": 226,
         "column": 9
       }
     },
@@ -848,6 +894,48 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/error_handling.spec.ts",
         "line": 72,
         "column": 9
+      }
+    },
+    {
+      "id": "e43132b17e2f545-6ababe767bea10f",
+      "title": "Stream data processing - grok highlighting should display grok highlighting when pattern extracts into the same field it reads from (message → message)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "e43132b17e2f545-d2ac0c1e0046f53",
+      "title": "Stream data processing - grok highlighting should display grok highlighting for additive patterns (non-overwriting)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "e43132b17e2f545-88845009dab2e2e",
+      "title": "Stream data processing - grok highlighting should use original field value for highlighting when pattern overwrites source field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/grok_highlighting.spec.ts",
+        "line": 85,
+        "column": 7
       }
     },
     {
@@ -1544,7 +1632,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 291,
+        "line": 293,
         "column": 9
       }
     },
@@ -1560,7 +1648,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 51,
+        "line": 118,
         "column": 9
       }
     },
@@ -1576,7 +1664,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 67,
+        "line": 134,
         "column": 9
       }
     },
@@ -1592,7 +1680,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 82,
+        "line": 149,
         "column": 9
       }
     },
@@ -1608,7 +1696,39 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 99,
+        "line": 166,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-0d15fda96bab415",
+      "title": "Stream data retention - custom retention periods should delete a downsampling step from a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 198,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-8c94049dc36ed87",
+      "title": "Stream data retention - custom retention periods should edit a downsampling step in a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 261,
         "column": 9
       }
     },
@@ -1900,7 +2020,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 91,
+        "line": 93,
         "column": 7
       }
     },
@@ -1914,7 +2034,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 109,
+        "line": 113,
         "column": 7
       }
     },
@@ -1928,7 +2048,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 131,
+        "line": 135,
         "column": 7
       }
     },
@@ -1942,7 +2062,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 207,
+        "line": 254,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-f14b4f88920cd93",
+      "title": "Stream data retention - ILM policy should edit a policy phase, add downsampling, and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 382,
         "column": 7
       }
     },
@@ -2452,7 +2586,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 66,
+        "line": 68,
         "column": 9
       }
     },
@@ -2468,7 +2602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 79,
+        "line": 81,
         "column": 9
       }
     },
@@ -2484,23 +2618,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 97,
-        "column": 9
-      }
-    },
-    {
-      "id": "92d7bc6cddf5121-615e268c0f49a9b",
-      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the server",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 129,
+        "line": 99,
         "column": 9
       }
     },
@@ -2516,7 +2634,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 151,
+        "line": 131,
         "column": 9
       }
     },
@@ -2532,7 +2650,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 165,
+        "line": 145,
         "column": 9
       }
     },
@@ -2548,7 +2666,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 178,
+        "line": 158,
         "column": 9
       }
     },
@@ -2564,7 +2682,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 203,
+        "line": 183,
         "column": 9
       }
     },
@@ -2580,7 +2698,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 228,
+        "line": 208,
         "column": 9
       }
     },
@@ -2601,6 +2719,22 @@
       }
     },
     {
+      "id": "8b3ac79cea06244-510f1d704fac63c",
+      "title": "Stream data routing - editing routing rules should disable update when syntax editor JSON is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
       "id": "8b3ac79cea06244-57a411e3e4bc68c",
       "title": "Stream data routing - editing routing rules should cancel editing routing rule",
       "expectedStatus": "passed",
@@ -2612,7 +2746,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 61,
+        "line": 84,
         "column": 9
       }
     },
@@ -2628,7 +2762,55 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 82,
+        "line": 105,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-e53492f854a942f",
+      "title": "Stream data routing - editing routing rules should disable Update button when syntax editor has empty condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 131,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-3ae21d6e715f603",
+      "title": "Stream data routing - editing routing rules should disable Update button when syntax editor has invalid JSON",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 153,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-ef063896abf455b",
+      "title": "Stream data routing - editing routing rules should disable Update button when no changes have been made",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 175,
         "column": 9
       }
     },
@@ -2644,7 +2826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 105,
+        "line": 199,
         "column": 9
       }
     },
@@ -2660,7 +2842,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 117,
+        "line": 211,
         "column": 9
       }
     },
@@ -2708,7 +2890,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
-        "line": 82,
+        "line": 90,
         "column": 9
       }
     },
@@ -2740,7 +2922,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 54,
+        "line": 62,
         "column": 9
       }
     },
@@ -2756,7 +2938,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 64,
+        "line": 80,
         "column": 9
       }
     },
@@ -2772,7 +2954,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 80,
+        "line": 100,
         "column": 9
       }
     },
@@ -2788,7 +2970,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 98,
+        "line": 118,
         "column": 9
       }
     },
@@ -2804,7 +2986,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 111,
+        "line": 135,
         "column": 9
       }
     },
@@ -3052,7 +3234,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 45,
+        "line": 47,
         "column": 9
       }
     },
@@ -3068,7 +3250,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 61,
+        "line": 63,
         "column": 9
       }
     },
@@ -3084,7 +3266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 77,
+        "line": 79,
         "column": 9
       }
     },
@@ -3100,13 +3282,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 105,
+        "line": 107,
         "column": 9
       }
     },
     {
-      "id": "214bf545ba8b394-58d7a1a4b45c3f1",
-      "title": "Enable Wired Streams - Success flow should enable wired streams and show logs stream in the UI",
+      "id": "214bf545ba8b394-bde4a25bf2ac4be",
+      "title": "Enable Wired Streams - Success flow should enable wired streams and show logs.otel and logs.ecs streams in the UI",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3116,13 +3298,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 52,
+        "line": 54,
         "column": 9
       }
     },
     {
-      "id": "214bf545ba8b394-0cd9ee750222906",
-      "title": "Enable Wired Streams - Success flow should show the root logs stream after enabling wired streams",
+      "id": "214bf545ba8b394-71ecd6caba85171",
+      "title": "Enable Wired Streams - Success flow should show the root logs.otel and logs.ecs streams after enabling wired streams",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3132,7 +3314,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 89,
+        "line": 98,
         "column": 9
       }
     },
@@ -3148,7 +3330,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 113,
+        "line": 122,
         "column": 9
       }
     },
