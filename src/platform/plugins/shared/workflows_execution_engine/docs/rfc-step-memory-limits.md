@@ -533,6 +533,16 @@ The PoC directly addresses the **critical path** items from the epic:
 
 ---
 
+## Enforcement, connector coverage, and observability
+
+See [step-size-limits-enforcement-and-observability.md](./step-size-limits-enforcement-and-observability.md) for:
+
+- How Layer 2 is enforced on new steps (single execution path via `BaseAtomicNodeImplementation.run()`).
+- How to track connector coverage (which connector types have Layer 1 vs Layer 2 only) and the `CONNECTOR_TYPES_WITH_LAYER_1` allowlist.
+- What logs and tags exist for `StepSizeLimitExceeded` and how to use them for dashboards and regression detection.
+
+---
+
 ## Known Limitations
 
 1. **Connector OOM protection is best-effort.** The post-hoc check catches the output after it's in memory. True streaming enforcement for connectors requires changes to the Kibana Actions framework (`actionsClient.execute()`).

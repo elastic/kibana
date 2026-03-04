@@ -69,10 +69,6 @@ export function parseByteSize(value: string | number): number {
 export function safeOutputSize(output: unknown): number {
   try {
     const json = JSON.stringify(output);
-    if (json === undefined) {
-      // JSON.stringify returns undefined for functions, symbols, etc.
-      return -1;
-    }
     return Buffer.byteLength(json, 'utf8');
   } catch {
     // Circular references, BigInt, or other non-serializable values
