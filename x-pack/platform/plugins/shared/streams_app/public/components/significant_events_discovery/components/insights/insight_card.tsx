@@ -98,13 +98,13 @@ export function InsightCard({ insight, index }: InsightCardProps) {
                   <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">{ev.streamName}</EuiBadge>
+                        <EuiBadge color="hollow">{ev.stream_name}</EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="xs">
                           {i18n.translate('xpack.streams.insights.evidenceDescription', {
                             defaultMessage: '{queryTitle} ({eventCount} events)',
-                            values: { queryTitle: ev.queryTitle, eventCount: ev.eventCount },
+                            values: { queryTitle: ev.query_title, eventCount: ev.event_count },
                           })}
                         </EuiText>
                       </EuiFlexItem>
