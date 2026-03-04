@@ -124,8 +124,19 @@ export function fetchEsql({
                 : 1;
             const expandedRows =
               effectiveMultiplier > 1
-                ? Array.from({ length: effectiveMultiplier }, () => rows).flat()
+                ? Array.from({ length: effectiveMultiplier }, () =>
+                    rows.map((row) => structuredClone(row))
+                  ).flat()
                 : rows;
+
+            if (effectiveMultiplier > 1) {
+              expandedRows.forEach((row, idx) => {
+                row['@nr'] = idx + 1;
+              });
+              if (esqlQueryColumns && !esqlQueryColumns.some((c) => c.id === '@nr')) {
+                esqlQueryColumns = [{ id: '@nr', name: '@nr', meta: { type: 'number' } }, ...esqlQueryColumns];
+              }
+            }
 
             finalData = expandedRows.map((row, idx) => {
               const record: DataTableRecord = {
