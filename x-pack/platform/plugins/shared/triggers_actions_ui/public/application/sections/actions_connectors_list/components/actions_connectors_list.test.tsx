@@ -31,6 +31,20 @@ jest.mock('../../../..', () => ({
     },
   }),
 }));
+
+jest.mock('@kbn/response-ops-oauth-hooks', () => ({
+  useConnectorOAuthConnect: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    cancelConnect: jest.fn(),
+    isConnecting: false,
+    isAwaitingCallback: false,
+  }),
+  useConnectorOAuthDisconnect: jest.fn().mockReturnValue({
+    disconnect: jest.fn(),
+    isDisconnecting: false,
+  }),
+  OAuthRedirectMode: { NewTab: 'new_tab' },
+}));
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -747,6 +761,253 @@ describe('actions_connectors_list', () => {
       expect(await screen.findAllByTestId('connectors-row')).toHaveLength(1);
       const runButtons = await screen.findAllByTestId('runConnector');
       expect(runButtons[0]).toBeDisabled();
+    });
+  });
+
+  describe('OAuth operations (authorize/disconnect buttons)', () => {
+    let useConnectorOAuthConnect: jest.Mock;
+    let useConnectorOAuthDisconnect: jest.Mock;
+    let useConnectorContext: jest.Mock;
+
+    beforeEach(async () => {
+      useConnectorOAuthConnect = jest.requireMock('@kbn/response-ops-oauth-hooks')
+        .useConnectorOAuthConnect as jest.Mock;
+      useConnectorOAuthDisconnect = jest.requireMock('@kbn/response-ops-oauth-hooks')
+        .useConnectorOAuthDisconnect as jest.Mock;
+      useConnectorContext = jest.requireMock('../../../..').useConnectorContext as jest.Mock;
+
+      useConnectorContext.mockReturnValue({
+        services: {
+          validateEmailAddresses: jest.fn(),
+          enabledEmailServices: ['*'],
+          authorizationCodeEnabled: true,
+        },
+      });
+
+      useConnectorOAuthConnect.mockReturnValue({
+        connect: jest.fn(),
+        cancelConnect: jest.fn(),
+        isConnecting: false,
+        isAwaitingCallback: false,
+      });
+
+      useConnectorOAuthDisconnect.mockReturnValue({
+        disconnect: jest.fn(),
+        isDisconnecting: false,
+      });
+
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: 'google-drive',
+          name: 'Google Drive',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          supportedFeatureIds: ['alerting'],
+          source: 'stack',
+        },
+      ]);
+
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+
+      actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockImplementation((id: string) => ({
+        id,
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> =>
+          Promise.resolve({ errors: {} }),
+        actionConnectorFields: null,
+        actionParamsFields: React.lazy(async () => ({ default: () => <></> })),
+        actionTypeTitle: 'Google Drive',
+        source: 'stack',
+      }));
+      useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: { delete: true, save: true, show: true },
+      };
+    });
+
+    it('shows Authorize button when currentUserConnectionStatus is not_connected', async () => {
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          currentUserConnectionStatus: 'not_connected',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(await screen.findByTestId('authorizeConnector')).toBeInTheDocument();
+      expect(screen.queryByTestId('disconnectConnector')).not.toBeInTheDocument();
+    });
+
+    it('shows Disconnect button when currentUserConnectionStatus is connected', async () => {
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          currentUserConnectionStatus: 'connected',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(await screen.findByTestId('disconnectConnector')).toBeInTheDocument();
+      expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
+    });
+
+    it('shows Cancel button when isAwaitingCallback is true (user in OAuth flow)', async () => {
+      useConnectorOAuthConnect.mockReturnValue({
+        connect: jest.fn(),
+        cancelConnect: jest.fn(),
+        isConnecting: false,
+        isAwaitingCallback: true,
+      });
+
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          currentUserConnectionStatus: 'not_connected',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(await screen.findByTestId('cancelAuthorizeConnector')).toBeInTheDocument();
+      expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
+    });
+
+    it('calls setActions with updated currentUserConnectionStatus to connected after successful authorization', async () => {
+      const setActions = jest.fn();
+      const user = userEvent.setup();
+
+      useConnectorOAuthConnect.mockImplementation(({ onSuccess }: { onSuccess: () => void }) => ({
+        connect: () => onSuccess(),
+        cancelConnect: jest.fn(),
+        isConnecting: false,
+        isAwaitingCallback: false,
+      }));
+
+      const initialActions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          currentUserConnectionStatus: 'not_connected',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={initialActions}
+            setActions={setActions}
+          />
+        </IntlProvider>
+      );
+
+      const authorizeButton = await screen.findByTestId('authorizeConnector');
+      await user.click(authorizeButton);
+
+      await waitFor(() => {
+        expect(setActions).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: 'oauth-connector',
+              currentUserConnectionStatus: 'connected',
+            }),
+          ])
+        );
+      });
+    });
+
+    it('does not show OAuth buttons for connectors without oauth_authorization_code authType', async () => {
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'regular-connector',
+          actionTypeId: 'google-drive',
+          name: 'Regular Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_client_credentials' },
+          currentUserConnectionStatus: 'not_applicable',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disconnectConnector')).not.toBeInTheDocument();
     });
   });
 });

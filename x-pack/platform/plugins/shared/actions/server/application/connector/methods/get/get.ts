@@ -96,6 +96,7 @@ export async function get({
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
+      currentUserConnectionStatus: 'not_applicable',
       ...(authMode !== undefined ? { authMode } : {}),
     };
   }

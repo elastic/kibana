@@ -31,6 +31,7 @@ export function connectorFromInMemoryConnector({
     isSystemAction: inMemoryConnector.isSystemAction,
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
+    currentUserConnectionStatus: 'not_applicable',
     ...(authMode !== undefined ? { authMode } : {}),
   };
 

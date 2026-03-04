@@ -1271,6 +1271,231 @@ describe('getAll()', () => {
   });
 });
 
+describe('getAll() with profileUid', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+  });
+
+  function buildActionsClientWithAuthCode(inMemoryConnectors = []) {
+    return new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      auditLogger,
+      inMemoryConnectors,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+      authorizationCodeEnabled: true,
+    });
+  }
+
+  test('does not call user token SO lookup when profileUid is not provided', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [],
+    });
+
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      { aggregations: {} }
+    );
+
+    actionsClient = buildActionsClientWithAuthCode();
+    await actionsClient.getAll();
+
+    const findCalls = unsecuredSavedObjectsClient.find.mock.calls;
+    const tokenLookupCall = findCalls.find((call) => call[0].type === 'user_connector_token');
+    expect(tokenLookupCall).toBeUndefined();
+  });
+
+  test('returns currentUserConnectionStatus "connected" for per-user connector whose id is in user tokens', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'token-1',
+            type: 'user_connector_token',
+            attributes: {
+              profileUid: 'test-profile-uid',
+              connectorId: 'connector-per-user',
+              credentialType: 'oauth',
+              credentials: {},
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'connector-per-user',
+            type: 'action',
+            attributes: {
+              name: 'Per-user connector',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {},
+              authMode: 'per-user',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      { aggregations: { 'connector-per-user': { doc_count: 1 } } }
+    );
+
+    actionsClient = buildActionsClientWithAuthCode();
+    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+
+    const connector = result.find((c) => c.id === 'connector-per-user');
+    expect(connector?.currentUserConnectionStatus).toBe('connected');
+  });
+
+  test('returns currentUserConnectionStatus "not_connected" for per-user connector whose id is NOT in user tokens', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 0,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'connector-per-user',
+            type: 'action',
+            attributes: {
+              name: 'Per-user connector',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {},
+              authMode: 'per-user',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      { aggregations: { 'connector-per-user': { doc_count: 0 } } }
+    );
+
+    actionsClient = buildActionsClientWithAuthCode();
+    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+
+    const connector = result.find((c) => c.id === 'connector-per-user');
+    expect(connector?.currentUserConnectionStatus).toBe('not_connected');
+  });
+
+  test('returns currentUserConnectionStatus "not_applicable" for shared connector even when profileUid is provided', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 0,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'connector-shared',
+            type: 'action',
+            attributes: {
+              name: 'Shared connector',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {},
+              authMode: 'shared',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      { aggregations: { 'connector-shared': { doc_count: 0 } } }
+    );
+
+    actionsClient = buildActionsClientWithAuthCode();
+    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+
+    const connector = result.find((c) => c.id === 'connector-shared');
+    expect(connector?.currentUserConnectionStatus).toBe('not_applicable');
+  });
+
+  test('returns currentUserConnectionStatus "not_applicable" for in-memory connectors', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 0,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [],
+      })
+      .mockResolvedValueOnce({
+        total: 0,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [],
+      });
+
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      { aggregations: { 'in-memory-connector': { doc_count: 0 } } }
+    );
+
+    actionsClient = buildActionsClientWithAuthCode([
+      createMockInMemoryConnector({
+        id: 'in-memory-connector',
+        actionTypeId: '.slack',
+        isPreconfigured: true,
+        name: 'In-memory connector',
+        authMode: 'per-user',
+      }),
+    ]);
+
+    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+
+    const connector = result.find((c) => c.id === 'in-memory-connector');
+    expect(connector?.currentUserConnectionStatus).toBe('not_applicable');
+  });
+});
+
 describe('getAllUnsecured()', () => {
   beforeEach(() => {
     jest.resetAllMocks();

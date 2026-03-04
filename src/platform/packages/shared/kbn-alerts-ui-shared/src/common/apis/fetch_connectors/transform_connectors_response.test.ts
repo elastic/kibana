@@ -24,6 +24,7 @@ describe('transformConnectorsResponse', () => {
         secrets: {},
         config: {},
         is_connector_type_deprecated: false,
+        current_user_connection_status: 'not_applicable' as const,
       },
       {
         id: 'test-connector-2',
@@ -37,6 +38,7 @@ describe('transformConnectorsResponse', () => {
         secrets: {},
         config: {},
         is_connector_type_deprecated: true,
+        current_user_connection_status: 'not_applicable' as const,
       },
     ]);
 
@@ -53,6 +55,7 @@ describe('transformConnectorsResponse', () => {
         referencedByCount: 0,
         secrets: {},
         isConnectorTypeDeprecated: false,
+        currentUserConnectionStatus: 'not_applicable',
       },
       {
         actionTypeId: 'test-2',
@@ -66,7 +69,38 @@ describe('transformConnectorsResponse', () => {
         referencedByCount: 0,
         secrets: {},
         isConnectorTypeDeprecated: true,
+        currentUserConnectionStatus: 'not_applicable',
       },
     ]);
+  });
+
+  test('should map current_user_connection_status enum values correctly', () => {
+    const result = transformConnectorResponse([
+      {
+        id: 'connector-connected',
+        name: 'Connected',
+        connector_type_id: '.google-drive',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_system_action: false,
+        referenced_by_count: 0,
+        is_connector_type_deprecated: false,
+        current_user_connection_status: 'connected' as const,
+      },
+      {
+        id: 'connector-not-connected',
+        name: 'Not connected',
+        connector_type_id: '.google-drive',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_system_action: false,
+        referenced_by_count: 0,
+        is_connector_type_deprecated: false,
+        current_user_connection_status: 'not_connected' as const,
+      },
+    ]);
+
+    expect(result[0].currentUserConnectionStatus).toBe('connected');
+    expect(result[1].currentUserConnectionStatus).toBe('not_connected');
   });
 });
