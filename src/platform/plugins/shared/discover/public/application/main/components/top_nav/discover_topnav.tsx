@@ -28,6 +28,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
+  selectTab,
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentDataView,
@@ -182,19 +183,19 @@ export const DiscoverTopNav = ({
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const setAppState = useCurrentTabAction(internalStateActions.setAppState);
 
-  const appState = useCurrentTabSelector((tab) => tab.appState);
   const updateSavedQueryId = useCallback(
     (newSavedQueryId: string | undefined) => {
       if (newSavedQueryId) {
         dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
       } else {
         // remove savedQueryId from state
+        const { appState } = selectTab(internalStateStore.getState(), currentTabId);
         const newState = { ...appState };
         delete newState.savedQuery;
         dispatch(setAppState({ appState: newState }));
       }
     },
-    [dispatch, setAppState, appState, updateAppState]
+    [dispatch, setAppState, internalStateStore, currentTabId, updateAppState]
   );
 
   const dataStateContainer = useCurrentTabDataStateContainer();
