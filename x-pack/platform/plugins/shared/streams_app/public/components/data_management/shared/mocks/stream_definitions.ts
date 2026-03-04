@@ -103,6 +103,7 @@ export const createMockWiredStreamDefinition = (
   dashboards: [],
   rules: [],
   queries: [],
+  view_name: '$.logs.wired-test',
   ...overrides,
 });
 

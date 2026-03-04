@@ -246,6 +246,7 @@ describe('utils', () => {
         },
       },
       effective_failure_store: { disabled: {}, from: 'parent' },
+      view_name: '$.wired-stream',
     });
 
     const createClassicDefinition = (): Streams.ClassicStream.GetResponse => ({

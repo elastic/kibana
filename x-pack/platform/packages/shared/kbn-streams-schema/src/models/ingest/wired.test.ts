@@ -133,6 +133,7 @@ describe('WiredStream', () => {
           from: 'logs',
         },
         ...emptyAssets,
+        view_name: '$.wired-stream',
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);

@@ -157,6 +157,7 @@ describe('Converter Helpers', () => {
           from: 'logs',
         },
         ...emptyAssets,
+        view_name: '$.wired-stream',
       };
 
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);

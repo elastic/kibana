@@ -101,6 +101,7 @@ const createWiredDefinition = (
   dashboards: [],
   queries: [],
   rules: [],
+  view_name: `$.${name}`,
 });
 
 describe('useFailureStoreConfig', () => {
