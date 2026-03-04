@@ -10,7 +10,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/esql-language",
     "@kbn/zod"
   ]
 }

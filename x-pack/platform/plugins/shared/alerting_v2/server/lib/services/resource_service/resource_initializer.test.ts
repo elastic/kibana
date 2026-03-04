@@ -20,8 +20,8 @@ describe('ResourceInitializer', () => {
   let mockLogger: jest.Mocked<Logger>;
 
   const resourceDefinition: ResourceDefinition = {
-    key: 'data_stream:.alerts-test',
-    dataStreamName: '.alerts-test',
+    key: 'data_stream:.alerting-test',
+    dataStreamName: '.alerting-test',
     version: 1,
     mappings: {
       dynamic: false,
@@ -30,7 +30,7 @@ describe('ResourceInitializer', () => {
       },
     },
     ilmPolicy: {
-      name: '.alerts-test-ilm-policy',
+      name: '.alerting-test-ilm-policy',
       policy: {
         _meta: { managed: true },
         phases: {
