@@ -51,10 +51,10 @@ jest.mock('../../hooks/use_fetch_notification_policy', () => ({
   useFetchNotificationPolicy: (...args: unknown[]) => mockUseFetchNotificationPolicy(...args),
 }));
 
-const mockUseLocation = jest.fn();
+const mockUseParams = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useLocation: () => mockUseLocation(),
+  useParams: () => mockUseParams(),
 }));
 
 const TEST_SUBJ = {
@@ -103,7 +103,7 @@ describe('NotificationPolicyFormPage', () => {
 
   describe('create mode', () => {
     beforeEach(() => {
-      mockUseLocation.mockReturnValue({ search: '', pathname: '/notification_policies/create' });
+      mockUseParams.mockReturnValue({});
     });
 
     it('renders create title and save button', () => {
@@ -153,10 +153,7 @@ describe('NotificationPolicyFormPage', () => {
 
   describe('edit mode', () => {
     beforeEach(() => {
-      mockUseLocation.mockReturnValue({
-        search: '?id=policy-1',
-        pathname: '/notification_policies/edit',
-      });
+      mockUseParams.mockReturnValue({ id: 'policy-1' });
     });
 
     it('renders edit title and update button when policy is loaded', () => {
