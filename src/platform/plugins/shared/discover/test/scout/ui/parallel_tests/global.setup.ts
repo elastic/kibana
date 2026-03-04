@@ -14,7 +14,16 @@ import { TRACES, simpleTrace } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
-  async ({ esClient, apmSynthtraceEsClient, apiServices, config, log }) => {
+  async ({ esClient, esArchiver, apmSynthtraceEsClient, apiServices, config, log }) => {
+    // Logstash data for flyout stability tests
+    log.debug(
+      '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+    );
+    log.debug('[setup:logstash] logstash_functional ES data ready');
+
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
