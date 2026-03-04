@@ -14,10 +14,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./es_errors'));
     loadTestFile(require.resolve('./existing_indices_route'));
     loadTestFile(require.resolve('./fields_for_wildcard_route'));
-    loadTestFile(require.resolve('./data_views_crud'));
     loadTestFile(require.resolve('./scripted_fields_crud'));
     loadTestFile(require.resolve('./fields_api'));
-    loadTestFile(require.resolve('./default_index_pattern'));
     loadTestFile(require.resolve('./runtime_fields_crud'));
     loadTestFile(require.resolve('./integration'));
     loadTestFile(require.resolve('./deprecations'));
