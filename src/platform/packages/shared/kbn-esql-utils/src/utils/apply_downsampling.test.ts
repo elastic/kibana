@@ -26,7 +26,7 @@ describe('applyDownsampling', () => {
     it('should not treat KEEP as an aggregation (KEEP is field selection, not STATS)', () => {
       const query = 'FROM logs* | KEEP host, @timestamp';
       const result = applyDownsampling(query, 500);
-      expect(result).toBe('FROM logs* | KEEP host, @timestamp\n| SAMPLE 0.5');
+      expect(result).toBe('FROM logs*\n| SAMPLE 0.5 | KEEP host, @timestamp');
     });
   });
 
@@ -40,7 +40,7 @@ describe('applyDownsampling', () => {
     it('should compute rate from explicit LIMIT in query', () => {
       const query = 'FROM logs* | LIMIT 10000';
       const result = applyDownsampling(query, 1000);
-      expect(result).toBe('FROM logs* | LIMIT 10000\n| SAMPLE 0.1');
+      expect(result).toBe('FROM logs*\n| SAMPLE 0.1 | LIMIT 10000');
     });
 
     it('should not append SAMPLE when rate >= 1 (maxDataPoints >= limit)', () => {
@@ -52,13 +52,13 @@ describe('applyDownsampling', () => {
     it('should clamp rate to minimum of 0.001', () => {
       const query = 'FROM logs* | LIMIT 10000000';
       const result = applyDownsampling(query, 1);
-      expect(result).toBe('FROM logs* | LIMIT 10000000\n| SAMPLE 0.001');
+      expect(result).toBe('FROM logs*\n| SAMPLE 0.001 | LIMIT 10000000');
     });
 
-    it('should handle queries with WHERE clauses', () => {
+    it('should insert SAMPLE right after the source command, before WHERE', () => {
       const query = 'FROM logs* | WHERE host == "server1"';
       const result = applyDownsampling(query, 100);
-      expect(result).toBe('FROM logs* | WHERE host == "server1"\n| SAMPLE 0.1');
+      expect(result).toBe('FROM logs*\n| SAMPLE 0.1 | WHERE host == "server1"');
     });
   });
 

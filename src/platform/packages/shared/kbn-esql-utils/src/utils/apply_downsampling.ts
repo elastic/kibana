@@ -19,8 +19,9 @@ const MAX_SAMPLE_RATE = 1.0;
  * UI data points (typically derived from chart pixel width).
  *
  * - Queries with STATS: prepends `SET approximation = true;`
- * - Queries without STATS: appends `| SAMPLE <rate>` where rate is
- *   derived from `maxDataPoints / currentLimit`
+ * - Queries without STATS: inserts `| SAMPLE <rate>` right after the
+ *   source command (FROM/TS) so that sampling is pushed down to the
+ *   storage layer for maximum performance
  *
  * Skips modification when:
  * - The query already contains SET approximation or a SAMPLE command
@@ -79,6 +80,12 @@ export const applyDownsampling = (query: string, maxDataPoints: number): string 
 
   if (rate >= MAX_SAMPLE_RATE) {
     return query;
+  }
+
+  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
+  if (sourceCommand) {
+    const insertPos = sourceCommand.location.max + 1;
+    return `${query.slice(0, insertPos)}\n| SAMPLE ${rate}${query.slice(insertPos)}`;
   }
 
   return `${query}\n| SAMPLE ${rate}`;
