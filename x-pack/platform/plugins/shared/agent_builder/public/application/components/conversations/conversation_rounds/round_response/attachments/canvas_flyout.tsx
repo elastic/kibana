@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
@@ -30,17 +31,31 @@ interface CanvasFlyoutProps {
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
-  const { canvasState, closeCanvas } = useCanvasContext();
+  const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
+  const { conversationActions } = useConversationContext();
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
       if (!conversationId || !canvasState) {
         return;
       }
-      return attachmentsService.updateOrigin(conversationId, canvasState.attachment.id, origin);
+      const result = await attachmentsService.updateOrigin(
+        conversationId,
+        canvasState.attachment.id,
+        origin
+      );
+      setCanvasAttachmentOrigin(origin);
+      conversationActions.invalidateConversation();
+      return result;
     },
-    [attachmentsService, conversationId, canvasState]
+    [
+      attachmentsService,
+      conversationId,
+      canvasState,
+      setCanvasAttachmentOrigin,
+      conversationActions,
+    ]
   );
 
   const uiDefinition = canvasState
