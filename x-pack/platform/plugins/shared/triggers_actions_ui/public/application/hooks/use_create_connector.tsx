@@ -14,7 +14,7 @@ import { useKibana } from '../../common/lib/kibana';
 type CreateConnectorSchema = Pick<
   ActionConnectorWithoutId,
   'actionTypeId' | 'name' | 'config' | 'secrets'
->;
+> & { id?: string };
 
 interface UseCreateConnectorReturnValue {
   isLoading: boolean;
@@ -38,7 +38,8 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
     abortCtrlRef.current = new AbortController();
 
     try {
-      const res = await createActionConnector({ http, connector });
+      const { id, ...connectorData } = connector;
+      const res = await createActionConnector({ http, connector: connectorData, id });
 
       if (isMounted.current) {
         setIsLoading(false);
@@ -62,17 +63,30 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
         setIsLoading(false);
 
         if (error.name !== 'AbortError') {
+          const isConflict = error.body?.statusCode === 409;
           toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
-              { defaultMessage: 'Unable to create a connector.' }
-            ),
-            toastMessage:
-              error.body?.message ??
-              i18n.translate(
-                'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
-                { defaultMessage: 'Check the Kibana logs for more information.' }
-              ),
+            title: isConflict
+              ? i18n.translate(
+                  'xpack.triggersActionsUI.sections.useCreateConnector.duplicateIdErrorTitle',
+                  { defaultMessage: 'Connector ID already exists' }
+                )
+              : i18n.translate(
+                  'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
+                  { defaultMessage: 'Unable to create a connector.' }
+                ),
+            toastMessage: isConflict
+              ? i18n.translate(
+                  'xpack.triggersActionsUI.sections.useCreateConnector.duplicateIdErrorMessage',
+                  {
+                    defaultMessage:
+                      'A connector with this ID already exists. Please choose a different ID.',
+                  }
+                )
+              : error.body?.message ??
+                i18n.translate(
+                  'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
+                  { defaultMessage: 'Check the Kibana logs for more information.' }
+                ),
           });
         }
       }
