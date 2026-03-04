@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { AgentVisibility } from '@kbn/agent-builder-common';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('Agent API', () => {
+  describe.only('Agent API', () => {
     const createdAgentIds: string[] = [];
 
     const mockAgent = {
@@ -110,6 +111,43 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .send(agentWithInvalidTools)
           .expect(400);
+      });
+
+      it('should default visibility to public and include created_by metadata', async () => {
+        const agentId = `visibility-default-agent-${Date.now()}`;
+        const response = await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+          })
+          .expect(200);
+
+        expect(response.body).to.have.property('visibility', AgentVisibility.Public);
+        expect(response.body).to.have.property('created_by');
+        expect(response.body.created_by).to.have.property('username');
+        expect(typeof response.body.created_by.username).to.be('string');
+
+        createdAgentIds.push(agentId);
+      });
+
+      it('should allow creating an agent with explicit private visibility', async () => {
+        const agentId = `visibility-private-agent-${Date.now()}`;
+        const response = await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+            visibility: AgentVisibility.Private,
+          })
+          .expect(200);
+
+        expect(response.body).to.have.property('id', agentId);
+        expect(response.body).to.have.property('visibility', AgentVisibility.Private);
+
+        createdAgentIds.push(agentId);
       });
     });
 
@@ -250,6 +288,17 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .send({ name: 'Updated name' })
           .expect(404);
+      });
+
+      it('should update visibility explicitly', async () => {
+        const response = await supertest
+          .put(`/api/agent_builder/agents/update-test-agent`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ visibility: AgentVisibility.Shared })
+          .expect(200);
+
+        expect(response.body).to.have.property('id', 'update-test-agent');
+        expect(response.body).to.have.property('visibility', AgentVisibility.Shared);
       });
     });
 
