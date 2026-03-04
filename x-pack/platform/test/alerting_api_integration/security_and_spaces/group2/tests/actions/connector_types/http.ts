@@ -351,7 +351,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
       expect(result.service_message).to.eql('[500] Internal Server Error');
     });
 
-    it('should not count as aborted when the request completes normally', async () => {
+    it('should not abort when the request completes normally', async () => {
       await fetch(`${httpSimulatorURL}?reset_aborted_count`);
 
       const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
@@ -391,6 +391,13 @@ export default function httpTest({ getService }: FtrProviderContext) {
 
       const elapsed = Date.now() - startTime;
       expect(elapsed).to.be.lessThan(5000);
+
+      // wait for the proxy server to close the connection
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(1);
     });
 
     it('sends both config and secret headers in the http request', async () => {
