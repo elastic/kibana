@@ -8,7 +8,6 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { getRouteConfig } from '../get_route_config';
 import {
   createRequestParamsSchema,
@@ -16,9 +15,12 @@ import {
   getCreateResponseBodySchema,
 } from './schemas';
 import { create } from './create';
+import { counterNames } from '../telemetry/increment_external_counter';
+import { getUnmappedPanelCountsFromDashboardState } from '../telemetry/unmapped_panel_counts';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerCreateRoute(
-  router: VersionedRouter<RequestHandlerContext>,
+  router: VersionedRouter<DashboardApiRequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -44,10 +46,22 @@ export function registerCreateRoute(
       }),
     },
     async (ctx, req, res) => {
+      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      dashboardApi.telemetry.incrementExternal(counterNames.external('create'));
       try {
         const result = await create(ctx, req.body, req.params, isDashboardAppRequest);
         return res.ok({ body: result });
       } catch (e) {
+        if (!isDashboardAppRequest) {
+          const { total, byType } = getUnmappedPanelCountsFromDashboardState(req.body);
+          if (total > 0) {
+            dashboardApi.telemetry.incrementExternalByType({
+              totalCounterName: counterNames.externalCreateRejectedUnmappedPanelsTotal(),
+              byTypeCounterName: counterNames.externalCreateRejectedUnmappedPanelsByType,
+              byType,
+            });
+          }
+        }
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
             body: {

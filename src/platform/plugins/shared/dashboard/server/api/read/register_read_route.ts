@@ -8,15 +8,16 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { stripUnmappedKeys } from '../scope_tooling';
+import { counterNames } from '../telemetry/increment_external_counter';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerReadRoute(
-  router: VersionedRouter<RequestHandlerContext>,
+  router: VersionedRouter<DashboardApiRequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -47,15 +48,34 @@ export function registerReadRoute(
       }),
     },
     async (ctx, req, res) => {
+      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      dashboardApi.telemetry.incrementExternal(counterNames.external('read'));
       try {
         const result = await read(ctx, req.params.id);
-        const { data, warnings } = !isDashboardAppRequest
+        const { data, warnings, droppedPanels } = !isDashboardAppRequest
           ? stripUnmappedKeys(result.data)
-          : { data: result.data, warnings: [] };
+          : { data: result.data, warnings: [], droppedPanels: { total: 0, byType: {} } };
+
+        if (!isDashboardAppRequest && droppedPanels.total > 0) {
+          dashboardApi.telemetry.incrementExternalByType({
+            totalCounterName: counterNames.externalReadStrippedPanelsTotal(),
+            byTypeCounterName: counterNames.externalReadStrippedPanelsByType,
+            byType: droppedPanels.byType,
+          });
+        }
         return res.ok({
           body: {
             ...result,
             data,
+            meta: {
+              ...result.meta,
+              ...(droppedPanels.total > 0 && {
+                dropped_panels: {
+                  total: droppedPanels.total,
+                  by_type: droppedPanels.byType,
+                },
+              }),
+            },
             ...(warnings?.length && { warnings }),
           },
         });

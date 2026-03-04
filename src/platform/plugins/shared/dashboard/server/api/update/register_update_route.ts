@@ -8,15 +8,17 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { counterNames } from '../telemetry/increment_external_counter';
+import { getUnmappedPanelCountsFromDashboardState } from '../telemetry/unmapped_panel_counts';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerUpdateRoute(
-  router: VersionedRouter<RequestHandlerContext>,
+  router: VersionedRouter<DashboardApiRequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -51,10 +53,23 @@ export function registerUpdateRoute(
       }),
     },
     async (ctx, req, res) => {
+      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      dashboardApi.telemetry.incrementExternal(counterNames.external('update'));
       try {
         const result = await update(ctx, req.params.id, req.body, isDashboardAppRequest);
         return res.ok({ body: result });
       } catch (e) {
+        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        if (!allowUnmappedKeys) {
+          const { total, byType } = getUnmappedPanelCountsFromDashboardState(req.body);
+          if (total > 0) {
+            dashboardApi.telemetry.incrementExternalByType({
+              totalCounterName: counterNames.externalUpdateRejectedUnmappedPanelsTotal(),
+              byTypeCounterName: counterNames.externalUpdateRejectedUnmappedPanelsByType,
+              byType,
+            });
+          }
+        }
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {

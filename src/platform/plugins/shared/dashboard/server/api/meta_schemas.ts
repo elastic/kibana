@@ -43,3 +43,12 @@ export const resolveMetaSchema = schema.object({
     schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
   ),
 });
+
+export const droppedPanelsMetaSchema = schema.object({
+  dropped_panels: schema.maybe(
+    schema.object({
+      total: schema.number(),
+      by_type: schema.recordOf(schema.string(), schema.number()),
+    })
+  ),
+});
