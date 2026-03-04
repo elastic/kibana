@@ -10,6 +10,7 @@ import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { get } from 'lodash';
 import { tags } from '@kbn/scout';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type {
@@ -90,9 +91,13 @@ function parseKeyValuePairs(evidence: string): Array<{ key: string; value: strin
   return pairs;
 }
 
-function getNestedValue(doc: Record<string, unknown>, path: string): unknown {
-  if (path in doc) {
-    return doc[path];
+function getNestedValue(doc: SearchHit<Record<string, unknown>>, path: string): unknown {
+  if (!doc.fields) {
+    return undefined;
+  }
+
+  if (path in doc.fields) {
+    return doc.fields[path];
   }
 
   return get(doc, path);
@@ -102,7 +107,7 @@ function getNestedValue(doc: Record<string, unknown>, path: string): unknown {
  * Recursively extracts all string values from a document object,
  * so direct-quote evidence can be matched against any field.
  */
-function getAllStringValues(doc: Record<string, unknown>): string[] {
+function getAllStringValues(doc: SearchHit<Record<string, unknown>>): string[] {
   const values: string[] = [];
 
   const walk = (obj: unknown) => {
@@ -119,7 +124,7 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
     }
   };
 
-  walk(doc);
+  walk(doc.fields);
   return values;
 }
 
@@ -131,7 +136,10 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
  * 2. Direct quote evidence: checks if the text appears as a substring in any
  *    string value across all document fields.
  */
-function isEvidenceGrounded(evidence: string, documents: Array<Record<string, unknown>>): boolean {
+function isEvidenceGrounded(
+  evidence: string,
+  documents: Array<SearchHit<Record<string, unknown>>>
+): boolean {
   // Direct quote: check against all string values in all documents
   const matchesStringValue = documents.some((doc) => {
     const allValues = getAllStringValues(doc);
@@ -351,16 +359,16 @@ evaluate.describe(
     async function runFeatureIdentificationExperiment(
       dataset: FeatureIdentificationEvaluationDataset,
       {
-        phoenixClient,
+        executorClient,
         inferenceClient,
         logger,
         evaluators,
       }: Pick<
         StreamsEvaluationWorkerFixtures,
-        'phoenixClient' | 'inferenceClient' | 'logger' | 'evaluators'
+        'executorClient' | 'inferenceClient' | 'logger' | 'evaluators'
       >
     ) {
-      await phoenixClient.runExperiment(
+      await executorClient.runExperiment(
         {
           dataset,
           concurrency: 1,
@@ -402,11 +410,11 @@ evaluate.describe(
       evaluate.describe(dataset.name, () => {
         evaluate(
           'feature identification',
-          async ({ evaluators, inferenceClient, logger, phoenixClient }) => {
+          async ({ evaluators, inferenceClient, logger, executorClient }) => {
             await runFeatureIdentificationExperiment(dataset, {
               inferenceClient,
               logger,
-              phoenixClient,
+              executorClient,
               evaluators,
             });
           }

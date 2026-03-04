@@ -28,11 +28,10 @@ export interface UserActivityActionDefinition {
  * @private
  */
 export const userActivityActions = {
-  dashboard_created: {
-    description:
-      '[THIS IS AN EXAMPLE AND WILL BE REMOVED LATER] User created a dashboard in Kibana.',
+  user_logged_in: {
+    description: 'User logged in to Kibana.',
     ownerTeam: '@elastic/kibana-core',
-    groupName: 'Dashboards',
+    groupName: 'Authentication',
     versionAddedAt: '9.4',
   },
 } as const satisfies Record<string, UserActivityActionDefinition>;
@@ -54,20 +53,7 @@ export interface RemovedUserActivityActionDefinition extends UserActivityActionD
  * Registry for actions that have been removed.
  * @private
  */
-export const removedUserActivityActions = {
-  rule_schedule_updated: {
-    description:
-      '[THIS IS AN EXAMPLE AND WILL BE REMOVED LATER] User updated an alerting rule schedule.',
-    ownerTeam: '@elastic/kibana-core',
-    groupName: 'Rules',
-    versionAddedAt: '9.0',
-    versionRemovedAt: '9.3',
-  },
-  dashboard_duplicated: {
-    description: '[THIS IS AN EXAMPLE AND WILL BE REMOVED LATER] User duplicated a dashboard.',
-    ownerTeam: '@elastic/kibana-core',
-    groupName: 'Dashboards',
-    versionAddedAt: '8.4',
-    versionRemovedAt: '8.10',
-  },
-} as const satisfies Record<string, RemovedUserActivityActionDefinition>;
+export const removedUserActivityActions = {} as const satisfies Record<
+  string,
+  RemovedUserActivityActionDefinition
+>;

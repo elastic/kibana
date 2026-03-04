@@ -11,7 +11,7 @@ import type { PublicTriggerDefinition } from './types';
 
 /**
  * Registry for public-side workflow trigger definitions.
- * Stores UI-related information (title, description, icon, eventSchema) for triggers.
+ * Stores UI-related information (title, description, icon, eventSchema, snippets) for triggers.
  */
 export class PublicTriggerRegistry {
   private readonly registry = new Map<string, PublicTriggerDefinition>();

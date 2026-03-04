@@ -46,6 +46,7 @@ const treemapSharedStateSchema = {
       {
         meta: {
           id: 'treemapLegend',
+          title: 'Legend',
           description: 'Configuration for the treemap chart legend appearance and behavior',
         },
       }
@@ -150,6 +151,7 @@ export const treemapStateSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'treemapNoESQL',
+      title: 'Treemap Chart (DSL)',
       description:
         'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -189,6 +191,7 @@ const treemapStateSchemaESQL = schema.object(
   {
     meta: {
       id: 'treemapESQL',
+      title: 'Treemap Chart (ES|QL)',
       description:
         'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
@@ -198,7 +201,8 @@ const treemapStateSchemaESQL = schema.object(
 
 export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
-    id: 'treemapChartSchema',
+    id: 'treemapChart',
+    title: 'Treemap Chart',
     description:
       'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

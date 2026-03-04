@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Runs API endpoint
+  version: "1"
+paths:
+  /internal/evals/runs:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationRuns
+      description: List evaluation runs with summary metadata
+      summary: List evaluation runs
+      tags:
+        - Evals API
+      parameters:
+        - name: suite_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by suite ID
+        - name: model_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by task model ID
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by git branch
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluationRunSummary'
+                  total:
+                    type: integer
+                required:
+                  - runs
+                  - total
+
+components:
+  schemas:
+    EvaluationRunSummary:
+      type: object
+      properties:
+        run_id:
+          type: string
+        timestamp:
+          type: string
+        suite_id:
+          type: string
+        task_model:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+        evaluator_model:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+        git_branch:
+          type: string
+          nullable: true
+        git_commit_sha:
+          type: string
+          nullable: true
+        total_repetitions:
+          type: integer
+        ci:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
+      required:
+        - run_id
+        - timestamp

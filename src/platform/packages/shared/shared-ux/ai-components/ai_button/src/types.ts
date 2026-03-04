@@ -16,13 +16,18 @@ export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 
 /** Allowed icon types for AI button components. */
 export type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
+type AiButtonTextSize = 'xs' | 's' | 'm';
 
 /** Props for the `AiButton` component. */
 export type AiButtonProps =
-  | (DistributiveOmit<React.ComponentProps<typeof EuiButton>, 'fill' | 'iconType' | 'disabled'> & {
+  | (DistributiveOmit<
+      React.ComponentProps<typeof EuiButton>,
+      'fill' | 'iconType' | 'disabled' | 'size'
+    > & {
       /** Selects text button vs icon-only button rendering. */
       iconOnly?: false;
       fill?: never;
+      size?: AiButtonTextSize;
       variant?: 'base' | 'accent';
       iconType?: AiButtonIconType;
     })

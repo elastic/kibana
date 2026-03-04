@@ -26,41 +26,38 @@ import type { SearchSLODefinitionItem } from '@kbn/slo-schema';
 import { SloDefinitionSelector } from './slo_definition_selector';
 import { SloInstanceSelector } from './slo_instance_selector';
 
-import type {
-  SingleSloCustomInput,
-  GroupSloCustomInput,
-  GroupFilters,
-  OverviewMode,
-} from './types';
 import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
+import type {
+  GroupFilters,
+  GroupOverviewCustomState,
+  OverviewMode,
+  SingleOverviewCustomState,
+} from '../../../../common/embeddables/overview/types';
 
 interface SloConfigurationProps {
-  initialInput?: GroupSloCustomInput;
-  onCreate: (props: SingleSloCustomInput | GroupSloCustomInput) => void;
+  initialInput?: GroupOverviewCustomState;
+  onCreate: (props: SingleOverviewCustomState | GroupOverviewCustomState) => void;
   onCancel: () => void;
 }
 
 interface SingleConfigurationProps {
-  onCreate: (props: SingleSloCustomInput) => void;
+  onCreate: (props: SingleOverviewCustomState) => void;
   onCancel: () => void;
-  overviewMode: OverviewMode;
 }
 
 interface GroupConfigurationProps {
-  onCreate: (props: GroupSloCustomInput) => void;
+  onCreate: (props: GroupOverviewCustomState) => void;
   onCancel: () => void;
-  overviewMode: OverviewMode;
-  initialInput?: GroupSloCustomInput;
+  initialInput?: GroupOverviewCustomState;
 }
 
-function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
+function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps) {
   const [selectedSloDefinition, setSelectedSloDefinition] = useState<
     SearchSLODefinitionItem | undefined
   >();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
   const [hasError, setHasError] = useState(false);
-  const showAllGroupByInstances = selectedInstanceId === ALL_VALUE;
 
   const hasGroupBy = selectedSloDefinition?.groupBy
     ? selectedSloDefinition.groupBy.length > 0 && !selectedSloDefinition.groupBy.includes(ALL_VALUE)
@@ -75,11 +72,10 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
     const remoteName: string | undefined = selectedSloDefinition?.remote?.remoteName;
 
     onCreate({
-      showAllGroupByInstances,
-      sloId: selectedSloDefinition.id,
-      sloInstanceId: selectedInstanceId ?? ALL_VALUE,
-      remoteName,
-      overviewMode,
+      slo_id: selectedSloDefinition.id,
+      slo_instance_id: hasGroupBy ? selectedInstanceId ?? ALL_VALUE : undefined,
+      remote_name: remoteName,
+      overview_mode: 'single',
     });
   };
 
@@ -143,23 +139,18 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
   );
 }
 
-function GroupSloConfiguration({
-  overviewMode,
-  onCreate,
-  onCancel,
-  initialInput,
-}: GroupConfigurationProps) {
+function GroupSloConfiguration({ onCreate, onCancel, initialInput }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: initialInput?.groupFilters?.groupBy ?? 'status',
-    filters: initialInput?.groupFilters?.filters ?? [],
-    kqlQuery: initialInput?.groupFilters?.kqlQuery ?? '',
-    groups: initialInput?.groupFilters?.groups ?? [],
+    group_by: initialInput?.group_filters?.group_by ?? 'status',
+    filters: initialInput?.group_filters?.filters ?? [],
+    kql_query: initialInput?.group_filters?.kql_query ?? '',
+    groups: initialInput?.group_filters?.groups ?? [],
   });
 
   const onConfirmClick = () =>
     onCreate({
-      groupFilters: selectedGroupFilters,
-      overviewMode,
+      group_filters: selectedGroupFilters,
+      overview_mode: 'groups',
     });
 
   return (
@@ -203,7 +194,7 @@ function GroupSloConfiguration({
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
   const [overviewMode, setOverviewMode] = useState<OverviewMode>(
-    initialInput?.overviewMode ?? 'single'
+    initialInput?.overview_mode ?? 'single'
   );
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'overviewConfigurationFlyout',
@@ -226,7 +217,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          {initialInput?.overviewMode === undefined && (
+          {initialInput?.overview_mode === undefined && (
             <EuiFlexItem>
               <OverviewModeSelector
                 value={overviewMode}
@@ -239,17 +230,12 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       </EuiFlyoutHeader>
       {overviewMode === 'groups' ? (
         <GroupSloConfiguration
-          initialInput={initialInput as GroupSloCustomInput}
-          overviewMode={overviewMode}
+          initialInput={initialInput as GroupOverviewCustomState}
           onCreate={onCreate}
           onCancel={onCancel}
         />
       ) : (
-        <SingleSloConfiguration
-          overviewMode={overviewMode}
-          onCreate={onCreate}
-          onCancel={onCancel}
-        />
+        <SingleSloConfiguration onCreate={onCreate} onCancel={onCancel} />
       )}
     </EuiFlyout>
   );
