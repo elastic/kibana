@@ -12,9 +12,10 @@ spaceTest.describe(
   'Timeline read-only',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await apiServices.timeline.deleteAll();
       await browserAuth.loginAsT1Analyst();
+      await pageObjects.timelinePage.navigateToTimelines();
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
@@ -26,7 +27,6 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { timelinePage } = pageObjects;
 
-        await timelinePage.navigateToTimelines();
         await timelinePage.open();
         await timelinePage.createNew();
 

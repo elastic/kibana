@@ -14,9 +14,10 @@ spaceTest.describe(
   'Timeline creation',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await apiServices.timeline.deleteAll();
       await browserAuth.loginAsPlatformEngineer();
+      await pageObjects.timelinePage.navigateToTimelines();
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
@@ -52,7 +53,6 @@ spaceTest.describe(
     spaceTest('should be able to create timeline', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
 
-      await timelinePage.navigateToTimelines();
       await timelinePage.open();
       await timelinePage.createNew();
 
@@ -64,7 +64,6 @@ spaceTest.describe(
     spaceTest('should show the different timeline states', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
 
-      await timelinePage.navigateToTimelines();
       await timelinePage.open();
 
       await spaceTest.step('Verify unsaved state on new timeline', async () => {
@@ -85,8 +84,6 @@ spaceTest.describe(
 
     spaceTest('should save timelines as new', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
-
-      await timelinePage.navigateToTimelines();
 
       await spaceTest.step('Verify no timelines exist initially', async () => {
         await expect(timelinePage.timelinesTable).toContainText(
