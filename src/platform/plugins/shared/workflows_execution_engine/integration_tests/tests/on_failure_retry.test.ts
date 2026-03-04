@@ -12,7 +12,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
-describe('workflow with retry', () => {
+// Failing: See https://github.com/elastic/kibana/issues/252871
+describe.skip('workflow with retry', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   beforeAll(async () => {

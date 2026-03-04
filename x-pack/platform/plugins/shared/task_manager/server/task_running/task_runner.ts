@@ -438,9 +438,15 @@ export class TaskManagerRunner implements TaskRunner {
       return processedResult;
     } catch (err) {
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
-      this.logger.error(`Task ${this} failed: ${err}`, {
+      const errorMessage =
+        err instanceof Error
+          ? String(err)
+          : typeof err === 'object' && err !== null
+          ? JSON.stringify(err)
+          : String(err);
+      this.logger.error(`Task ${this} failed: ${errorMessage}`, {
         tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
-        error: { stack_trace: err.stack },
+        error: { stack_trace: err instanceof Error ? err.stack : undefined },
       });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
