@@ -8,7 +8,9 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
+import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 
 import { EditForm } from './edit_form';
 
@@ -16,8 +18,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { getDefaultQuery } from '../../../helpers';
-import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 
 const mockConnectors: unknown[] = [
   {
@@ -37,12 +37,7 @@ jest.mock('react-router', () => ({
 }));
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../sourcerer/containers');
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({
-    isFetched: true,
-    data: mockConnectors,
-  })),
-}));
+jest.mock('../../../../../common/hooks/use_connectors');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
@@ -76,8 +71,7 @@ const renderComponent = async () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/255131
-describe.skip('EditForm', () => {
+describe('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
@@ -105,9 +99,9 @@ describe.skip('EditForm', () => {
       loading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 
-    (useLoadConnectors as jest.Mock).mockReturnValue({
-      isFetched: true,
-      data: mockConnectors,
+    (useConnectors as jest.Mock).mockReturnValue({
+      connectors: mockConnectors,
+      setCurrentConnector: jest.fn(),
     });
   });
 
