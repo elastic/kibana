@@ -452,11 +452,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -7281,6 +7283,30 @@
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               }
             ]
@@ -7479,7 +7505,15 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "Omit<LensRendererPrivateProps, \"hide_title\"> & { hidePanelTitles?: boolean | undefined; }"
+                  "Omit<LensRendererPrivateProps, \"hide_title\" | \"time_range\"> & { hidePanelTitles?: boolean | undefined; timeRange?: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  },
+                  " | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx",
                 "lineNumber": 53,
@@ -7899,7 +7933,39 @@
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/heatmap/dsl.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
@@ -8023,7 +8089,7 @@
         "label": "MetricVisualizationState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 33,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8036,7 +8102,7 @@
             "label": "layerId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8052,7 +8118,7 @@
               "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8068,7 +8134,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8084,7 +8150,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8100,7 +8166,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8116,7 +8182,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8132,7 +8198,7 @@
               "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8148,7 +8214,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8168,7 +8234,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -8194,7 +8260,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8217,7 +8283,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8234,7 +8300,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8250,7 +8316,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8266,7 +8332,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8286,7 +8352,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -8328,7 +8394,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8344,7 +8410,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8360,7 +8426,7 @@
               "\"right\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8383,7 +8449,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8396,11 +8462,10 @@
             "label": "titleWeight",
             "description": [],
             "signature": [
-              "MetricFontWeight",
-              " | undefined"
+              "TitleFontWeightString | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8416,7 +8481,7 @@
               "\"top\" | \"bottom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8432,7 +8497,7 @@
               "\"after\" | \"before\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8448,7 +8513,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8464,7 +8529,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8495,7 +8560,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8511,7 +8576,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8527,7 +8592,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8550,7 +8615,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8566,7 +8631,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8582,7 +8647,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8598,7 +8663,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8614,7 +8679,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8630,7 +8695,7 @@
               "\"value\" | \"background\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15314,11 +15379,13 @@
               "MakeOverridesSerializable",
               "<",
               "LegendValue",
-              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+              "LegendLayout",
+              " | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
             ],
@@ -16915,7 +16982,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/heatmap/types.ts",
-        "lineNumber": 85,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -17442,11 +17509,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -17539,7 +17608,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 71,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -17584,14 +17653,6 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.ViewMode",
             "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
           },
           " | undefined; query?: ",
           {
@@ -17641,11 +17702,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -17745,7 +17808,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -17836,7 +17899,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 491,
+        "lineNumber": 492,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -17883,14 +17946,6 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.ViewMode",
             "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
           },
           " | undefined; query?: ",
           {
@@ -17940,11 +17995,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -18798,7 +18855,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -18889,7 +18946,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 487,
+        "lineNumber": 488,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -18920,7 +18977,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 493,
+        "lineNumber": 494,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -19324,11 +19381,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -19421,7 +19480,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 111,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -19484,7 +19543,15 @@
         "label": "LensRendererProps",
         "description": [],
         "signature": [
-          "Omit<LensRendererPrivateProps, \"hide_title\"> & { hidePanelTitles?: boolean | undefined; }"
+          "Omit<LensRendererPrivateProps, \"hide_title\" | \"time_range\"> & { hidePanelTitles?: boolean | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "lineNumber": 335,
@@ -19518,14 +19585,6 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.ViewMode",
             "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
           },
           " | undefined; query?: ",
           {
@@ -19575,11 +19634,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -19663,7 +19724,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "<Record<string, unknown>> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -19706,7 +19767,7 @@
           " | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 339,
+        "lineNumber": 340,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -19771,7 +19832,7 @@
           "[]; visualizationType: string | null; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 75,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -19819,11 +19880,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -19929,15 +19992,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; id?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -20011,11 +20066,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -20121,15 +20178,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; id?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -22339,11 +22388,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; legendActionOnHover?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendLayout?: ",
+          "LegendLayout",
+          " | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
@@ -23288,7 +23339,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; hidePanelTitles?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 492,
+        "lineNumber": 493,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -24728,7 +24779,7 @@
       "label": "LensServerPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-      "lineNumber": 63,
+      "lineNumber": 64,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24747,7 +24798,7 @@
             "LensEmbeddableRegistryDefinition"
           ],
           "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-          "lineNumber": 64,
+          "lineNumber": 65,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24775,7 +24826,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-          "lineNumber": 68,
+          "lineNumber": 69,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24791,7 +24842,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-              "lineNumber": 72,
+              "lineNumber": 73,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -24815,7 +24866,7 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-              "lineNumber": 73,
+              "lineNumber": 74,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,

@@ -80,7 +80,7 @@ export const splitSizeAndUnits = (field: string): { size: string; unit: string }
   let size = '';
   let unit = '';
 
-  const result = /^(\d+)([a-zA-Z]+)$/.exec(field);
+  const result = /^(\d+(?:\.\d+)?)([a-zA-Z]+)$/.exec(field);
   if (result) {
     size = result[1];
     unit = result[2];

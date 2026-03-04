@@ -191,9 +191,9 @@ export const AfterField = ({
                 return (
                   <EuiFormRow
                     label={i18n.translate('xpack.streams.editDslStepsFlyout.afterLabel', {
-                      defaultMessage: 'Downsample after data stored',
+                      defaultMessage: 'Downsample data after',
                     })}
-                    helpText={isInvalid ? undefined : helpText}
+                    helpText={helpText}
                     isInvalid={isInvalid}
                     error={isInvalid ? errorMessage : null}
                   >
@@ -206,7 +206,7 @@ export const AfterField = ({
                           aria-label={i18n.translate(
                             'xpack.streams.editDslStepsFlyout.afterAriaLabel',
                             {
-                              defaultMessage: 'Downsample after value',
+                              defaultMessage: 'Downsample data after value',
                             }
                           )}
                           value={currentValue}
