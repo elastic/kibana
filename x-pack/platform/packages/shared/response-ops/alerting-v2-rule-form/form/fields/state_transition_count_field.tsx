@@ -12,6 +12,8 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
 
+const MAX_PENDING_COUNT = 1000;
+
 interface StateTransitionCountFieldProps {
   prependLabel?: string;
 }
@@ -32,12 +34,8 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       name="stateTransition.pendingCount"
       control={control}
       rules={{
-        min: {
-          value: 1,
-          message: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countMinError', {
-            defaultMessage: 'Must be at least 1.',
-          }),
-        },
+        min: 1,
+        max: MAX_PENDING_COUNT,
         validate: (value) => {
           if (value != null && !Number.isInteger(value)) {
             return i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countIntegerError', {
@@ -56,13 +54,14 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
               onChange(undefined);
             } else {
               const parsedValue = parsePositiveIntegerInput(e.target.value);
-              if (parsedValue != null) {
+              if (parsedValue != null && parsedValue <= MAX_PENDING_COUNT) {
                 onChange(parsedValue);
               }
             }
           }}
           onKeyDown={onKeyDown}
           min={1}
+          max={MAX_PENDING_COUNT}
           step={1}
           isInvalid={!!error}
           data-test-subj="stateTransitionCountInput"
