@@ -47,7 +47,14 @@ export {
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
-export { buildEsqlQuery } from './src/helpers/query';
+export {
+  buildMetadataOption,
+  ensureMetadata,
+  extractWhereExpression,
+  getFromSources,
+  normalizeEsqlQuery,
+  rewriteFromSources,
+} from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -95,13 +102,13 @@ export {
 } from './src/fields';
 
 export {
+  type EsqlQuery,
+  esqlQuerySchema,
   type StreamQuery,
-  type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
   streamQuerySchema,
-  streamQueryInputSchema,
 } from './src/queries';
 
 export {
