@@ -63,9 +63,7 @@ describe('SloErrorBudget', () => {
       refetch: jest.fn(),
     });
 
-    render(
-      <SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />
-    );
+    render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />);
 
     await waitFor(() => {
       expect(screen.getByText('My Test SLO')).toBeTruthy();
@@ -80,14 +78,10 @@ describe('SloErrorBudget', () => {
       refetch: jest.fn(),
     });
 
-    render(
-      <SloErrorBudget sloId="non-existent-id" sloInstanceId={ALL_VALUE} />
-    );
+    render(<SloErrorBudget sloId="non-existent-id" sloInstanceId={ALL_VALUE} />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Unable to find SLO/)
-      ).toBeTruthy();
+      expect(screen.getByText(/Unable to find SLO/)).toBeTruthy();
     });
   });
 
@@ -100,9 +94,7 @@ describe('SloErrorBudget', () => {
       refetch: jest.fn(),
     });
 
-    render(
-      <SloErrorBudget sloId="default-instance-slo" sloInstanceId={ALL_VALUE} />
-    );
+    render(<SloErrorBudget sloId="default-instance-slo" sloInstanceId={ALL_VALUE} />);
 
     await waitFor(() => {
       expect(screen.getByText('Default Instance SLO')).toBeTruthy();
@@ -128,9 +120,7 @@ describe('SloErrorBudget', () => {
       refetch: jest.fn(),
     });
 
-    render(
-      <SloErrorBudget sloId="grouped-slo" sloInstanceId="instance-abc" />
-    );
+    render(<SloErrorBudget sloId="grouped-slo" sloInstanceId="instance-abc" />);
 
     await waitFor(() => {
       expect(screen.getByText('Grouped SLO')).toBeTruthy();
@@ -151,9 +141,7 @@ describe('SloErrorBudget', () => {
       refetch: jest.fn(),
     });
 
-    render(
-      <SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />
-    );
+    render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />);
 
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });

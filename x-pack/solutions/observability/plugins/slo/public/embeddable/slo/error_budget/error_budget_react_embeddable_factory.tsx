@@ -19,13 +19,13 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
   SLO_ERROR_BUDGET_ID,
   SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
 } from '../../../../common/embeddables/error_budget/constants';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloErrorBudget } from './error_budget_burn_down';
 import type { ErrorBudgetApi, ErrorBudgetEmbeddableState } from './types';
 import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
