@@ -25,10 +25,11 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import type { WaitForInputStep, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
+import { ResumeExecutionButton } from './resume_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
@@ -57,6 +58,8 @@ export interface WorkflowExecutionPanelProps {
   selectedId: string | null;
   showBackButton?: boolean;
   onClose: () => void;
+  /** When true, opens the input modal immediately (driven by ?resume=true URL param) */
+  shouldAutoResume?: boolean;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -67,11 +70,29 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
+    shouldAutoResume = false,
   }) => {
     const styles = useMemoCss(componentStyles);
+
+    const showWaitForInputUI = execution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+
+    // Derive the message from the paused waitForInput step's config, if available.
+    const resumeMessage = useMemo<string | undefined>(() => {
+      if (!showWaitForInputUI || !execution || !definition) return undefined;
+      const pausedStep = execution.stepExecutions?.find(
+        (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
+      );
+      if (!pausedStep) return undefined;
+      const stepDef = definition.steps?.find(
+        (s): s is WaitForInputStep => s.type === 'waitForInput' && s.name === pausedStep.stepId
+      );
+      return stepDef?.with?.message;
+    }, [showWaitForInputUI, execution, definition]);
+
+    // WAITING_FOR_INPUT replaces the cancel button with the resume callout.
     const showCancelButton = useMemo<boolean>(
-      () => Boolean(execution && isCancelableStatus(execution.status)),
-      [execution]
+      () => Boolean(execution && !showWaitForInputUI && isCancelableStatus(execution.status)),
+      [execution, showWaitForInputUI]
     );
     const showDoneButton = useMemo<boolean>(
       () => Boolean(!showBackButton && execution && isTerminalStatus(execution.status)),
@@ -124,11 +145,17 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
           </EuiPanel>
         </EuiFlexItem>
 
-        {execution && (showCancelButton || showDoneButton) && (
+        {execution && (showWaitForInputUI || showCancelButton || showDoneButton) && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
             <EuiPanel paddingSize="m" hasShadow={false}>
-              {showCancelButton ? (
+              {showWaitForInputUI ? (
+                <ResumeExecutionButton
+                  executionId={execution.id}
+                  resumeMessage={resumeMessage}
+                  autoOpen={shouldAutoResume}
+                />
+              ) : showCancelButton ? (
                 <CancelExecutionButton
                   executionId={execution.id}
                   workflowId={execution.workflowId}

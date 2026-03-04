@@ -34,29 +34,40 @@ import {
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
+const RESUME_MODE_DEFAULT: ContextOverrideData = {
+  stepContext: {},
+  schema: z.object({}).catchall(z.unknown()),
+};
+
 export function TestStepModal({
   initialcontextOverride,
+  mode = 'test',
+  resumeMessage,
   onClose,
   onSubmit,
 }: {
-  initialcontextOverride: ContextOverrideData;
+  initialcontextOverride?: ContextOverrideData;
+  mode?: 'test' | 'resume';
+  resumeMessage?: string;
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {
   const styles = useMemoCss(componentStyles);
   useWorkflowsMonacoTheme();
+  const contextOverride =
+    mode === 'resume' ? RESUME_MODE_DEFAULT : initialcontextOverride ?? RESUME_MODE_DEFAULT;
   const [inputsJson, setInputsJson] = React.useState<string>(
-    JSON.stringify(initialcontextOverride.stepContext, null, 2)
+    JSON.stringify(contextOverride.stepContext, null, 2)
   );
   const [isJsonValid, setIsJsonValid] = React.useState<boolean>(true);
   const modalTitleId = useGeneratedHtmlId();
   const id = 'json-editor-schema';
 
   const jsonSchema = useMemo(() => {
-    return z.toJSONSchema(initialcontextOverride.schema, {
+    return z.toJSONSchema(contextOverride.schema, {
       target: 'draft-7',
     });
-  }, [initialcontextOverride.schema]);
+  }, [contextOverride.schema]);
 
   const schemaUri = useMemo(() => `inmemory://schemas/${id}`, [id]);
 
@@ -88,10 +99,10 @@ export function TestStepModal({
 
       // Optional: seed example if editor is empty
       if (!editor.getValue()?.trim()) {
-        editor.setValue(JSON.stringify(initialcontextOverride.stepContext, null, 2));
+        editor.setValue(JSON.stringify(contextOverride.stepContext, null, 2));
       }
     },
-    [initialcontextOverride.stepContext, jsonSchema, schemaUri]
+    [contextOverride.stepContext, jsonSchema, schemaUri]
   );
 
   useEffect(() => {
@@ -124,13 +135,31 @@ export function TestStepModal({
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
-              <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+              {mode === 'resume' ? (
+                <FormattedMessage
+                  id="workflows.testStepModal.resumeTitle"
+                  defaultMessage="Provide action"
+                />
+              ) : (
+                <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+              )}
             </EuiFlexItem>
             <EuiFlexItem css={styles.description}>
-              <FormattedMessage
-                id="workflows.testStepModal.description"
-                defaultMessage="Test run with current changes and provided payload. Will not be saved in history."
-              />
+              {mode === 'resume' ? (
+                <span>
+                  {resumeMessage ?? (
+                    <FormattedMessage
+                      id="workflows.testStepModal.resumeDescription"
+                      defaultMessage="Provide input to resume the workflow."
+                    />
+                  )}
+                </span>
+              ) : (
+                <FormattedMessage
+                  id="workflows.testStepModal.description"
+                  defaultMessage="Test run with current changes and provided payload. Will not be saved in history."
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
@@ -179,12 +208,16 @@ export function TestStepModal({
         <EuiButton
           onClick={handleSubmit}
           disabled={!isJsonValid}
-          color="success"
-          iconType="play"
+          color={mode === 'resume' ? 'warning' : 'success'}
+          iconType={mode === 'resume' ? 'check' : 'play'}
           size="s"
           data-test-subj="workflowSubmitStepRun"
         >
-          <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+          {mode === 'resume' ? (
+            <FormattedMessage id="workflows.testStepModal.resumeBtn" defaultMessage="Resume" />
+          ) : (
+            <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
