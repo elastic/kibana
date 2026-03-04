@@ -10,8 +10,8 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
+import tavilyIcon from './tavily.svg';
 
 export default (props: ConnectorIconProps) => {
-  // Placeholder icon: use built-in EUI icon until a custom one is added
-  return <EuiIcon type="globe" {...props} aria-hidden={true} />;
+  return <EuiIcon type={tavilyIcon} {...props} />;
 };
