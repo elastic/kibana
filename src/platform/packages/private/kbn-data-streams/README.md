@@ -20,6 +20,105 @@ Inspired by `@kbn/storage-adapter` and other data stream adapter-like implementa
 * Helpers for creating (search) runtime fields (incoming)
 * Test utilities (incoming)
 
+## API Reference
+
+The `DataStreamClient` provides a lightweight data-mapper pattern for CRUD operations against Elasticsearch data streams.
+
+### Supported Operations
+
+#### `create(options?)`
+
+Create one or more documents in the data stream. Each document can optionally include an `_id` property. Supports optional `space` parameter applied globally to all documents.
+
+```typescript
+// Single document
+const response = await client.create({
+  space: 'my-space', // optional, applied to all documents
+  documents: [
+    { _id: 'doc-123', '@timestamp': new Date().toISOString(), field: 'value' },
+  ],
+  refresh: true,
+});
+
+// Multiple documents
+const response = await client.create({
+  space: 'my-space', // optional, applied to all documents
+  documents: [
+    { _id: 'doc-1', '@timestamp': new Date().toISOString(), field: 'value1' },
+    { '@timestamp': new Date().toISOString(), field: 'value2' }, // auto-generated ID
+    { _id: 'doc-3', '@timestamp': new Date().toISOString(), field: 'value3' },
+  ],
+  refresh: true,
+});
+```
+
+#### `search(query, options?)`
+
+Search documents in the data stream. Supports optional `space` parameter for space-aware filtering.
+
+```typescript
+const response = await client.search({
+  space: 'my-space', // optional
+  query: { match_all: {} },
+  size: 10,
+});
+```
+
+#### `exists()`
+
+Check if the data stream exists.
+
+```typescript
+const exists = await client.exists();
+```
+
+### Unsupported Operations
+
+The following operations are **not** exposed in the API because they require knowledge of the underlying backing index names, which we keep as a private implementation detail:
+
+* **`get(id)`**: Use `search()` with an `ids` query instead (see example below)
+* **Bulk `update` operations**: Data streams are append-only; updates require targeting specific backing indices
+* **Bulk `delete` operations**: Deletes require specifying the backing index name
+
+#### Retrieving a Document by ID
+
+Since `get()` is not supported, use `search()` with an `ids` query to retrieve a document by ID:
+
+```typescript
+// Retrieve a single document by ID
+const response = await client.search({
+  space: 'my-space', // optional, required if document is space-bound
+  query: { ids: { values: ['document-id'] } },
+  size: 1,
+});
+
+if (response.hits.hits.length > 0) {
+  const document = response.hits.hits[0]._source;
+  // Use the document...
+} else {
+  // Document not found
+}
+```
+
+This approach works across all backing indices in the data stream, unlike Elasticsearch's `get()` API which requires a specific backing index name.
+
+## Space-aware behavior
+
+All CRUD operations (`create`, `search`) accept an optional `space` parameter:
+
+* **When provided**: Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered to that space. The system property `kibana.space_ids` is stripped from responses.
+* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents. IDs containing the `::` separator are rejected (reserved for system use).
+
+Data streams can contain both space-bound and space-agnostic documents. The package does not handle RBAC; higher-level repositories should wrap these APIs for access control.
+
+## Mapping Validation
+
+When registering a data stream, the following reserved keys are automatically validated and will cause an error if found in your mappings:
+
+* **`kibana`**: Reserved for system properties (e.g., `kibana.space_ids`)
+* **`_id`**: Reserved for document identifiers (cannot be defined in mappings)
+
+The `kibana.space_ids` mapping is automatically injected during registration. These validations occur via `registerDataStream()`. When the data stream version is incremented, mappings are applied to the write index.
 
 ## Mapping updates
 
@@ -40,26 +139,24 @@ Elasticsearch supports specifying runtime mappings at search time ([docs](https:
 
 Let's say I have written the following document:
 
-```
+```json
 POST my-data-stream/_doc
 {
   "@timestamp": "2099-05-06T16:21:15.000Z",
-  "message": """192.0.2.42 - - [06/May/2099:16:21:15 +0000] "GET /images/bg.jpg HTTP/1.0" 200 24736""",
+  "message": "192.0.2.42 - - [06/May/2099:16:21:15 +0000] GET /images/bg.jpg HTTP/1.0 200 24736",
 }
 ```
 
 But actually, I mapped `message` as a `keyword` field. With runtime mappings you can remap the field on the fly:
 
-```
+```json
 GET my-data-stream/_search
 {
   "runtime_mappings": {
     "messageV2": {
       "type": "text",
       "script": {
-        "source": """
-          emit(doc['message'].value);
-        """
+        "source": "emit(doc['message'].value);"
       }
     }
   },
@@ -72,22 +169,14 @@ GET my-data-stream/_search
 
 ...but what if you want to move and transform the value of a field in the database, almost like a migration. To a limited degree this is possible to do at read time too!
 
-```
+```json
 GET my-data-stream/_search
 {
   "runtime_mappings": {
     "messageV2": {
       "type": "text",
       "script": {
-        "source": """
-          if (params._source["messageV2"] != null) {
-            // return what we have in source if there is something
-            emit(params._source["messageV2"]);
-          } else  {
-            // return the original processed in some way
-            emit(doc['message'].value + " the original, but processed");
-          }
-        """
+        "source": "if (params._source[\"messageV2\"] != null) {\n  emit(params._source[\"messageV2\"]);\n} else {\n  emit(doc['message'].value + \" the original, but processed\");\n}"
       }
     }
   },

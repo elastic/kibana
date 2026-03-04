@@ -29,6 +29,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -319,6 +320,7 @@ export function registerTransactionDurationRuleType({
           [ALERT_EVALUATION_VALUE]: transactionDuration,
           [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
           [ALERT_REASON]: reason,
+          [ALERT_INDEX_PATTERN]: index,
           ...sourceFields,
           ...groupByFields,
         };

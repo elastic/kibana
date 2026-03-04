@@ -7,16 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLCommand } from '@elastic/esql/types';
 import { columnsAfter as columnsAfterStats } from '../stats/columns_after';
-import type { ESQLColumnData } from '../types';
+import type { ESQLColumnData, UnmappedFieldsStrategy } from '../types';
+import type { IAdditionalFields } from '../registry';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string
+  query: string,
+  additionalFields: IAdditionalFields,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy
 ) => {
-  const newColumns = columnsAfterStats(command, previousColumns, query);
+  const newColumns = columnsAfterStats(
+    command,
+    previousColumns,
+    query,
+    additionalFields,
+    unmappedFieldsStrategy
+  );
 
   return uniqBy([...newColumns, ...previousColumns], 'name');
 };

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { snakeCase } from 'lodash';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
@@ -23,7 +24,6 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type {
   AvgIndexPatternColumn,
   BaseIndexPatternColumn,
@@ -216,7 +216,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     toESQL: (column, columnId, _indexPattern, layer) => {
       if (column.timeShift) return;
       if (!typeToESQLFn[type]) return;
-      return `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`;
+      // Use columnId to make param name unique
+      const paramKey = `field_${snakeCase(columnId)}`;
+      return {
+        template: `${typeToESQLFn[type]}(??${paramKey})`,
+        params: { [paramKey]: column.sourceField },
+      };
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {

@@ -10,6 +10,25 @@ The `workflows_extensions` plugin serves as the home for workflow extension poin
 
 Future extension points (such as triggers) will also be registered through this plugin.
 
+## Important: Internal vs External Steps
+
+**⚠️ IMPORTANT CONVENTION**: The `workflows_extensions` plugin contains **internal, workflows-team owned** step implementations only. These are located in:
+- `server/steps/` - Internal server-side step handlers
+- `public/steps/` - Internal public-side step definitions
+
+**External teams should NOT implement custom steps inside the `workflows_extensions` plugin.** Instead, external teams must:
+
+1. **Create steps in their own plugin** - Steps should be implemented in a plugin owned and maintained by the team that will maintain the step
+2. **Register via plugin contract** - Use the `workflows_extensions` plugin contract to register steps from your external plugin, just like the example in `examples/workflows_extensions_example/README.md`
+
+This separation ensures:
+- Clear ownership boundaries
+- Proper maintenance responsibilities
+- Better code organization
+- Reduced coupling between teams
+
+See the [Contributing Custom Step Types](#contributing-custom-step-types) section below for the correct way to implement external steps.
+
 ### Step Type Registry Architecture
 
 The step type registry provides a clean separation between:
@@ -22,6 +41,8 @@ This separation ensures that:
 - Execution logic remains on the server
 - UI definition is available directly to client-side code without HTTP requests
 - Type safety is maintained between server and client registries via step type IDs
+
+**Async registration (public only):** The public step registry accepts either a definition or a **loader function** `() => Promise<PublicStepDefinition>`. Using a loader (e.g. `() => import('./my_step').then(m => m.myStepDefinition)`) allows step modules—and heavy dependencies like zod—to be loaded asynchronously, keeping them out of your plugin’s main bundle. The registry resolves loaders in the background; the workflows app awaits `workflowsExtensions.isReady()` before rendering so definitions are ready when needed.
 
 ## Architecture
 
@@ -61,9 +82,9 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
  * Step type ID for your custom step.
- * Must follow namespaced format: 'pluginName.stepName'
+ * Must follow namespaced format: '<namespace>.<action>' (kebab-case namespace, camelCase action)
  */
-export const MyStepTypeId = 'myPlugin.myCustomStep';
+export const MyStepTypeId = 'my-namespace.myCustomStep';
 
 /**
  * Input schema for the step.
@@ -254,12 +275,13 @@ export const myStepDefinition: PublicStepDefinition = {
 };
 ```
 
-### Custom Property Completion and Validation
+### Custom Property Selection
 
-Custom steps can provide property-level completion and validation handlers for both config properties (step-level, outside `with`) and input properties (inside `with`). This enables:
+Custom steps can provide property-level selection handlers for both config properties (step-level, outside `with`) and input properties (inside `with`). The selection interface provides a unified API for entity selection that handles:
 
-- **Autocomplete suggestions**: Dynamic options from external services (e.g., list of agents, connectors, proxies)
-- **Runtime validation with decorations**: Visual feedback in the editor showing connection status, errors, or success indicators
+- **Search**: Autocomplete suggestions when the user types
+- **Resolution**: Entity lookup when loading or pasting values
+- **Decoration**: Visual feedback and metadata display in the editor
 
 #### Property Handler Structure
 
@@ -275,22 +297,20 @@ export const myStepDefinition = createPublicStepDefinition({
     // Handlers for config properties (step-level, outside `with`)
     config: {
       'property.path': {
-        completion: {
-          /* ... */
-        },
-        validation: {
-          /* ... */
+        selection: {
+          search: async (input, context) => { /* ... */ },
+          resolve: async (value, context) => { /* ... */ },
+          getDetails: async (value, context, option) => { /* ... */ },
         },
       },
     },
     // Handlers for input properties (inside `with`)
     input: {
       property: {
-        completion: {
-          /* ... */
-        },
-        validation: {
-          /* ... */
+        selection: {
+          search: async (input, context) => { /* ... */ },
+          resolve: async (value, context) => { /* ... */ },
+          getDetails: async (value, context, option) => { /* ... */ },
         },
       },
     },
@@ -310,34 +330,119 @@ z.object({
 
 Use `'agent.id'` as the property key in `editorHandlers.config`.
 
-#### Implementing Completion
+#### Implementing Selection
 
-The `completion.getOptions` function provides autocomplete suggestions when the user edits the property value:
+The `selection` interface provides three functions that work together:
+
+**1. `search`** - Provides autocomplete options when the user types:
 
 ```typescript
 editorHandlers: {
   config: {
-    'agent.id': {
-      completion: {
-        getOptions: async (currentValue) => {
-          // Fetch options from external service
-          const agents = await agentService.list();
-
-          // Filter based on current input (optional)
-          const filtered = agents.filter((agent) =>
-            currentValue ? agent.id.includes(currentValue) : true
-          );
-
-          return filtered.map((agent) => ({
-            // Required: the value inserted into YAML
+    'agent-id': {
+      selection: {
+        search: async (input: string, context: SelectionContext) => {
+          const agents = await agentService.search(input);
+          return agents.map((agent) => ({
             value: agent.id,
-            // Required: displayed in completion popup
-            label: agent.id,
-            // Optional: brief detail shown inline
-            detail: agent.name,
-            // Optional: extended documentation in side panel
-            documentation: agent.description,
+            label: agent.name,
+            description: agent.description,
+            documentation: agent.documentation,
           }));
+        },
+        // ...
+      },
+    },
+  },
+},
+```
+
+**2. `resolve`** - Resolves an entity by its value (used on load, paste, etc.):
+
+```typescript
+resolve: async (value: string, context: SelectionContext) => {
+  const agent = await agentService.get(value);
+  if (!agent) {
+    return null;
+  }
+  return {
+    value: agent.id,
+    label: agent.name,
+    description: agent.description,
+  };
+},
+```
+
+**3. `getDetails`** - Provides detailed information for decoration and metadata:
+
+```typescript
+getDetails: async (value, context, option) => {
+  if (option) {
+    return {
+      message: `Successfully connected to ${option.label}`,
+      links: [
+        { text: 'Edit agent', path: `/app/agent-builder/agents/${option.value}` },
+        { text: 'Create agent', path: `/app/agent-builder/agents/new` },
+        { text: 'Manage agents', path: `/app/agent-builder/agents` },
+      ],
+    };
+  }
+  return {
+    message: `Agent ID "${value}" not found. Please select an existing agent or create a new one.`,
+    links: [
+      { text: 'Create agent', path: `/app/agent-builder/agents/new` },
+      { text: 'Manage agents', path: `/app/agent-builder/agents` },
+    ],
+  };
+},
+```
+
+#### Complete Example
+
+```typescript
+editorHandlers: {
+  config: {
+    'agent-id': {
+      selection: {
+        search: async (input: string, context: SelectionContext) => {
+          const agents = await agentService.search(input);
+          return agents.map((agent) => ({
+            value: agent.id,
+            label: agent.name,
+            description: agent.description,
+          }));
+        },
+        resolve: async (value: string, context: SelectionContext) => {
+          const agent = await agentService.get(value);
+          return agent
+            ? {
+                value: agent.id,
+                label: agent.name,
+                description: agent.description,
+              }
+            : null;
+        },
+        getDetails: async (
+          value: string,
+          context: SelectionContext,
+          option: SelectionOption | null
+        ) => {
+          if (option) {
+            return {
+              message: `✓ Agent connected: ${option.label}`,
+              links: [
+                { text: 'Edit agent', path: `/agents/${option.value}` },
+                { text: 'Manage agents', path: '/agents' },
+              ],
+            };
+          }
+          return {
+            message: `Agent "${value}" not found`,
+            links: [
+              { text: 'Create agent', path: '/agents/new' },
+              { text: 'Manage agents', path: '/agents' },
+            ],
+          };
         },
       },
     },
@@ -345,114 +450,56 @@ editorHandlers: {
 },
 ```
 
-The `PropertyCompletionOption` interface:
+#### Type Definitions
 
 ```typescript
-interface PropertyCompletionOption {
+interface SelectionOption {
   /** The value that will be stored in the YAML */
   value: string;
-  /** The label displayed in the completion popup */
+  /** The label displayed in the UI */
   label: string;
-  /** Brief detail shown inline in completion popup (optional) */
-  detail?: string;
+  /** Description shown in completion popup or tooltips (optional) */
+  description?: string;
   /** Extended documentation shown in side panel (optional) */
   documentation?: string;
 }
-```
 
-#### Implementing Validation
-
-The `validation.validate` function provides runtime validation with visual decorations in the editor:
-
-```typescript
-editorHandlers: {
-  config: {
-    'agent.id': {
-      validation: {
-        validate: async (value, context) => {
-          // Skip validation for null/undefined values
-          if (value === null) {
-            return { severity: null };
-          }
-
-          // Type checking
-          if (typeof value !== 'string') {
-            return { severity: 'error', message: 'Agent ID must be a string' };
-          }
-
-          try {
-            // Validate against external service
-            const agent = await agentService.get(value);
-
-            // Success: show green decoration
-            return {
-              severity: null,
-              afterMessage: '✓ Agent connected',
-            };
-          } catch (error) {
-            if (error?.response?.status === 404) {
-              // Error with helpful hover message (markdown supported)
-              return {
-                severity: 'error',
-                message: `Agent ${value} not found`,
-                hoverMessage: '[Open agents management](https://example.com/agents)',
-              };
-            }
-            // Warning for network/unknown errors
-            return {
-              severity: 'warning',
-              message: 'Cannot validate agent ID',
-            };
-          }
-        },
-      },
-    },
-  },
-},
-```
-
-The `PropertyValidationResult` interface:
-
-```typescript
-interface PropertyValidationResult {
-  /** null = valid (show success decoration), 'error'|'warning'|'info' = show error */
-  severity: 'error' | 'warning' | 'info' | null;
-  /** Error message for markers panel (only when severity is not null) */
-  message?: string;
-  /** Decoration text shown after the value (e.g., "✓ Connected") */
-  afterMessage?: string;
-  /** Hover tooltip (markdown supported) */
-  hoverMessage?: string;
+interface SelectionDetails {
+  /** Message to display (e.g., "✓ Agent connected" or "Agent not found") */
+  message: string;
+  /** Links to related actions (e.g., "Edit agent", "Create agent") */
+  links?: Array<{
+    /** Link text */
+    text: string;
+    /** Link path (relative or absolute URL) */
+    path: string;
+  }>;
 }
-```
 
-The `PropertyValidationContext` provides additional context:
-
-```typescript
-interface PropertyValidationContext {
-  /** The step type ID (e.g., "oneChat.runAgent") */
+interface SelectionContext {
+  /** The step type ID (e.g., "ai.runAgent", "one-chat.invoke") */
   stepType: string;
   /** The property scope ("config" or "input") */
   scope: 'config' | 'input';
-  /** The property key (e.g., "agent.id") */
+  /** The property key (e.g., "agent-id") */
   propertyKey: string;
 }
 ```
 
 #### Example Implementation
 
-For a complete working example of custom property completion and validation, see the `external_step` implementation in `examples/workflows_extensions_example`:
+For a complete working example, see the `external_step` implementation in `examples/workflows_extensions_example`:
 
 - Common definition: `examples/workflows_extensions_example/common/step_types/external_step.ts`
 - Public definition with `editorHandlers`: `examples/workflows_extensions_example/public/step_types/external_step.ts`
 
 #### Performance Considerations
 
-**Important**: The `validation.validate` function is called every time the YAML document changes. For validators that check external resources:
+The selection interface includes built-in caching for resolved entities to optimize performance:
 
-- Consider using a client-side caching solution (e.g., React Query) within your validator implementation
-- Handle cache invalidation when external data changes
-- Return early for null/undefined values to avoid unnecessary API calls
+- Resolved entities are cached for 30 seconds to avoid redundant API calls
+- The `resolve` function is only called when needed (on load, paste, or when validation is triggered), and if the value is valid against the schema.
+- The `search` function is called lazily when the user triggers autocomplete
 
 ### Step 4: Register in Plugin Setup
 
@@ -483,10 +530,11 @@ export class MyPlugin implements Plugin {
 
 **Public-side** (`public/plugin.ts`):
 
+Register the public step definition using either a **direct definition** or an **async loader**. Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin’s main bundle:
+
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { myStepDefinition } from './workflows/step_types/my_step';
 
 export interface MyPluginPublicSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -494,11 +542,19 @@ export interface MyPluginPublicSetupDeps {
 
 export class MyPlugin implements Plugin {
   public setup(_core: CoreSetup, plugins: MyPluginPublicSetupDeps) {
-    // Register public-side step definitions
-    plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+    // Recommended: register via async loader to keep step module + zod out of main bundle
+    plugins.workflowsExtensions.registerStepDefinition(() =>
+      import('./workflows/step_types/my_step').then((m) => m.myStepDefinition)
+    );
+
+    // Alternatively: sync registration (pulls step module into main bundle)
+    // import { myStepDefinition } from './workflows/step_types/my_step';
+    // plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
   }
 }
 ```
+
+Loaders are resolved in the background after setup. The workflows app waits for `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
 
 ### Step 5: Get Approval
 
@@ -524,27 +580,56 @@ function MyComponent() {
   const allSteps = workflowsExtensions.getAllStepDefinitions();
 
   // Get definition for a specific step
-  const stepDefinition = workflowsExtensions.getStepDefinition('myPlugin.myCustomStep');
+  const stepDefinition = workflowsExtensions.getStepDefinition('my-namespace.myCustomStep');
   if (stepDefinition) {
     console.log(stepDefinition.label); // "My Custom Step"
     console.log(stepDefinition.icon); // React component
   }
 
   // Check if a step is registered
-  if (workflowsExtensions.hasStepDefinition('myPlugin.myCustomStep')) {
+  if (workflowsExtensions.hasStepDefinition('my-namespace.myCustomStep')) {
     // Step is available
   }
 }
 ```
 
+**Waiting for async step definitions:** If your app mounts before step definitions are needed, you can await `workflowsExtensions.isReady()` before rendering. That ensures all step definitions registered via async loaders have resolved. The workflows app does this in its mount so the step registry is ready when the UI runs.
+
 ## Step Type Requirements
+
+### Workflow YAML Naming Conventions
+
+The following naming conventions apply to workflow YAML. They ensure consistency where the workflows team owns the schema, while allowing inherited formats from external contracts (OpenAPI, connectors, platform-owned APIs).
+
+| Area | Convention | Notes |
+|------|-------------|-------|
+| **Workflow Config keys** (root + step config outside `with`) | **kebab-case** for multi-word keys | Keys we own: `on-failure`, `connector-id`, `agent-id`, `timeout`, etc. |
+| **Step Input** (`with:` params) | **kebab-case** or **snake_case** recommended | Inherited formats from OpenAPI/connectors/platform contracts are allowed. |
+| **Step Type** (`type:` value) | `<namespace>.<action>` | **kebab-case** for namespace, **camelCase** for action. Inherited forms allowed. |
+
+**Examples:**
+
+```yaml
+# Config keys (we own) — kebab-case
+- name: send_notification
+  type: my-namespace.sendNotification    # namespace: kebab-case, action: camelCase
+  connector-id: slack         # kebab-case
+  on-failure: continue
+  with:
+    channel-id: '#alerts'             # kebab-case or snake_case for our params
+    message: Hello
+```
+
+**Inherited formats:** When step inputs come from external schemas (e.g., OpenAPI-generated params, connector specs), use the format defined by that contract. The conventions above apply to workflow-owned keys and to custom step params we define.
 
 ### Step Type IDs
 
 Step type IDs must follow a namespaced format to avoid conflicts:
 
-- ✅ Good: `"myPlugin.myStep"`, `"custom.feature.step"`
-- ❌ Bad: `"myStep"`, `"step"` (too generic)
+- Format: `<namespace>.<action>` — use **kebab-case** for the namespace, **camelCase** for the action
+- ✅ Good: `"my-namespace.sendNotification"`, `"custom-feature.processData"`
+- ⚠️ Allowed: Inherited forms from OpenAPI/connectors/platform-owned contracts
+- ❌ Bad: `"myStep"`, `"step"` (too generic, no namespace)
 
 ### Config vs Inputs: Mental Model
 
@@ -553,7 +638,7 @@ When designing a step, you need to decide which parameters should be **config** 
 **Config (step-level properties):**
 Use config to **control step behavior** - how/when/who the step executes:
 
-- Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
+- Execution context (e.g., `connector-id: 'slack'`, `agent-id: 'agent-123'`)
 - Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
 
 **Built-in step-level config examples:**
@@ -576,8 +661,8 @@ Use inputs for **what/where to process** - the step's payload:
 ```yaml
 # Config properties (step-level) - Control step behavior
 - name: send_notification
-  type: myPlugin.sendNotification
-  connector-id: slack-webhook # Config: which connector to use (controls behavior)
+  type: my-namespace.sendNotification
+  connector-id: slack # Config: which connector to use (controls behavior)
   mode: async # Config: execution mode (controls behavior)
   timeout: 10s # Config: time limit (controls behavior)
   # Inputs (with section) - What/Where to process
@@ -587,7 +672,7 @@ Use inputs for **what/where to process** - the step's payload:
     priority: high # Input: WHAT - processing parameter
 
 - name: process_data
-  type: myPlugin.processData
+  type: my-namespace.processData
   if: steps.previous.output.data.length > 10 # Config: by which condition to run this step (control behavior)
   agent-id: data-processor-1 # Config: which agent to use (controls behavior)
   strategy: parallel # Config: processing strategy (controls behavior)
@@ -776,7 +861,36 @@ The `context` parameter provides access to runtime services and step information
 - **`context.logger`**: Scoped logger (`debug`, `info`, `warn`, `error`)
 - **`context.abortSignal`**: AbortSignal for cancellation support
 - **`context.stepId`**: Current step instance identifier
-- **`context.stepType`**: Step type identifier (e.g., `'myPlugin.myCustomStep'`)
+- **`context.stepType`**: Step type identifier (e.g., `'my-namespace.myCustomStep'`)
+
+### Cancellation Cleanup (`onCancel`)
+
+Steps can provide an optional `onCancel` handler for explicit cancellation cleanup. This is useful for steps that hold external resources (e.g., spawned child operations, long-running connections) that need teardown when the workflow is cancelled.
+
+`onCancel` is called **after** the step's `abortSignal` fires and `run()` completes — it is never invoked in parallel with `run()`. Steps that complete normally (without cancellation) skip `onCancel` entirely.
+
+```typescript
+const myStepDefinition = createServerStepDefinition({
+  ...myStepCommonDefinition,
+  handler: async (context) => {
+    // Main step logic — observe context.abortSignal for cooperative cancellation
+    const result = await doWork(context.abortSignal);
+    return { output: { result } };
+  },
+  onCancel: async (context) => {
+    // Cleanup logic — called only when the workflow is cancelled
+    context.logger.info('Cancelling spawned operations');
+    await cancelSpawnedOperations(context);
+  },
+});
+```
+
+**Key points:**
+
+- `onCancel` receives the same `StepHandlerContext` as `handler`, so it has access to `input`, `config`, and all runtime services
+- Implementations must be **idempotent** — `onCancel` may be called more than once in edge cases
+- Errors thrown in `onCancel` are logged but do **not** disrupt the cancellation flow
+- Steps without `onCancel` are unaffected — no changes required for existing step implementations
 
 ### Public-Side Definition Requirements
 
@@ -835,7 +949,7 @@ When registering a new step, you must:
 1. **Run the test locally** to get the step ID and handler hash:
 
    ```bash
-   node scripts/scout.js run-tests --stateful \
+   node scripts/scout.js run-tests --arch stateful --domain classic \
      --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
    ```
 
@@ -844,7 +958,7 @@ When registering a new step, you must:
    ```typescript
    export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
      {
-       id: 'myPlugin.myCustomStep',
+       id: 'my-namespace.myCustomStep',
        handlerHash: 'abc123...', // SHA256 hash from test output
      },
    ];
@@ -868,10 +982,10 @@ To run the test locally:
 
 ```bash
 # Start servers and run tests
-node scripts/scout.js run-tests --stateful --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
+node scripts/scout.js run-tests --arch stateful --domain classic --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
 
 # Or start servers separately, then run tests
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 npx playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
 ```
 

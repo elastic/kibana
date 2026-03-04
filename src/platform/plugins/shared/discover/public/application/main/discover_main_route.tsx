@@ -10,8 +10,7 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { useEffect, useState } from 'react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -21,19 +20,20 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
   type DiscoverInternalState,
-  InternalStateProvider,
   internalStateActions,
+  InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
-import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
+import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
 import type { SingleTabViewProps } from './components/single_tab_view';
 import {
   BrandedLoadingIndicator,
-  SingleTabView,
-  NoDataPage,
   InitializationError,
+  NoDataPage,
+  SingleTabView,
+  SingleTabViewWithAppMenu,
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
@@ -104,6 +104,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
+  const tabsEnabled =
+    !services.embeddableEditor.isByValueEditor() &&
+    customizationContext.displayMode === 'standalone';
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -119,7 +122,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,
       };
+      const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 
+      dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
       dispatch(internalStateActions.setInitializationState(initializationState));
 
       return initializationState;
@@ -203,7 +208,10 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         ? `: ${persistedDiscoverSession.title}`
         : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-      setBreadcrumbs({ titleBreadcrumbText: persistedDiscoverSession?.title, services });
+      setBreadcrumbs({
+        titleBreadcrumbText: persistedDiscoverSession?.title,
+        services,
+      });
     }
   }, [
     chrome.docTitle,
@@ -244,30 +252,38 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }
 
   return (
-    <rootProfileState.AppWrapper>
-      <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        <DiscoverTopNavMenuProvider>
-          <>
-            <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
-              {persistedDiscoverSession?.title
-                ? i18n.translate('discover.pageTitleWithSavedSearch', {
-                    defaultMessage: 'Discover - {savedSearchTitle}',
-                    values: {
-                      savedSearchTitle: persistedDiscoverSession.title,
-                    },
-                  })
-                : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-                    defaultMessage: 'Discover - Session not yet saved',
-                  })}
-            </h1>
-            {customizationContext.displayMode !== 'embedded' ? (
+    <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
+      <DiscoverTopNavMenuProvider customizationContext={customizationContext}>
+        <>
+          <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
+            {persistedDiscoverSession?.title
+              ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                  defaultMessage: 'Discover - {savedSearchTitle}',
+                  values: {
+                    savedSearchTitle: persistedDiscoverSession.title,
+                  },
+                })
+              : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                  defaultMessage: 'Discover - Session not yet saved',
+                })}
+          </h1>
+          {
+            /**
+             * We need to account for three different display modes:
+             * - If tabs are enabled, show the tabs bar and the app menu.
+             * - If tabs are disabled and Discover is embedded, hide both the tabs bar and the app menu.
+             * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
+             */
+            tabsEnabled ? (
               <TabsView {...props} />
-            ) : (
+            ) : customizationContext.displayMode === 'embedded' ? (
               <SingleTabView {...props} />
-            )}
-          </>
-        </DiscoverTopNavMenuProvider>
-      </ChartPortalsRenderer>
-    </rootProfileState.AppWrapper>
+            ) : (
+              <SingleTabViewWithAppMenu {...props} />
+            )
+          }
+        </>
+      </DiscoverTopNavMenuProvider>
+    </ChartPortalsRenderer>
   );
 };

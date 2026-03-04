@@ -6,13 +6,19 @@
  */
 import { getFlattenedObject } from '@kbn/std';
 import type { SampleDocument } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import {
+  fieldDefinitionConfigSchema,
+  isDescendantOf,
+  Streams,
+  LOGS_ROOT_STREAM_NAME,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
-import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -200,8 +206,6 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     });
 
     const documentSamplesSearchBody = {
-      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
-      runtime_mappings: propertiesForSample,
       query: {
         bool: {
           filter: filterConditions,
@@ -213,12 +217,17 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
-    const sampleResults = await scopedClusterClient.asCurrentUser.search({
+    const sampleResults: SearchResponse<
+      unknown,
+      Record<string, AggregationsAggregate>
+    > = await scopedClusterClient.asCurrentUser.search({
       index: params.path.name,
+      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
+      runtime_mappings: propertiesForSample,
       ...documentSamplesSearchBody,
     });
 
-    if (sampleResults.hits.hits.length === 0) {
+    if (sampleResults?.hits.hits.length === 0) {
       return {
         status: 'unknown',
         simulationError: null,
@@ -248,7 +257,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
       return {
         _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-          ? LOGS_ROOT_STREAM_NAME
+          ? getRoot(params.path.name)
           : params.path.name,
         _id: hit._id,
         _source: sourceWithGeoPoints,
@@ -289,9 +298,125 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   },
 });
 
+export interface FieldConflict {
+  fieldName: string;
+  proposedType: string;
+  conflictingStreams: Array<{
+    streamName: string;
+    existingType: string;
+  }>;
+}
+
+export interface FieldsConflictsResponse {
+  conflicts: FieldConflict[];
+}
+
+export const schemaFieldsConflictsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/schema/fields_conflicts',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    body: z.object({
+      field_definitions: z.array(
+        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
+      ),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    // Get the stream definition to check if it's a wired stream
+    const streamDefinition = await streamsClient.getStream(params.path.name);
+
+    // Only check conflicts for wired streams - classic streams don't need this
+    if (!Streams.WiredStream.Definition.is(streamDefinition)) {
+      return { conflicts: [] };
+    }
+
+    const userFieldDefinitions = params.body.field_definitions.filter(
+      (field) => field.type !== 'system'
+    );
+
+    if (userFieldDefinitions.length === 0) {
+      return { conflicts: [] };
+    }
+
+    // Get the root stream name to limit conflict checking to the same tree
+    const rootStreamName = getRoot(params.path.name);
+
+    // Get all wired streams in the same tree (getDescendants already returns only wired streams)
+    const treeStreams = await streamsClient.getDescendants(rootStreamName);
+
+    // Build a map of fieldName -> [{streamName, type}] for all non-excluded streams
+    const fieldMap = new Map<string, Array<{ streamName: string; type: string }>>();
+
+    for (const stream of treeStreams) {
+      // Skip the current stream and its descendants
+      if (stream.name === params.path.name || isDescendantOf(params.path.name, stream.name)) {
+        continue;
+      }
+
+      const fields = stream.ingest.wired.fields;
+
+      for (const [fieldName, config] of Object.entries(fields)) {
+        // Skip system fields
+        if (config.type === 'system') {
+          continue;
+        }
+
+        const existing = fieldMap.get(fieldName) || [];
+        existing.push({ streamName: stream.name, type: config.type });
+        fieldMap.set(fieldName, existing);
+      }
+    }
+
+    // Find conflicts: proposed fields with same name but different type
+    const conflicts: FieldConflict[] = [];
+
+    for (const proposedField of userFieldDefinitions) {
+      const existingFields = fieldMap.get(proposedField.name);
+
+      if (!existingFields) {
+        continue;
+      }
+
+      const conflictingStreams = existingFields
+        .filter((existing) => existing.type !== proposedField.type)
+        .map((existing) => ({
+          streamName: existing.streamName,
+          existingType: existing.type,
+        }));
+
+      if (conflictingStreams.length > 0) {
+        conflicts.push({
+          fieldName: proposedField.name,
+          proposedType: proposedField.type,
+          conflictingStreams,
+        });
+      }
+    }
+
+    return { conflicts };
+  },
+});
+
 export const internalSchemaRoutes = {
   ...unmappedFieldsRoute,
   ...schemaFieldsSimulationRoute,
+  ...schemaFieldsConflictsRoute,
 };
 
 const DUMMY_PIPELINE_NAME = '__dummy_pipeline__';
@@ -336,13 +461,14 @@ async function simulateIngest(
   };
   const isWiredStream = Streams.WiredStream.Definition.is(streamDefinition);
 
-  let pipelineSubstitutions: Record<string, { processors: any[] }>;
+  let pipelineSubstitutions: Record<string, { processors: Array<Record<string, unknown>> }>;
   let simulatePath: string;
 
   if (isWiredStream) {
     // For wired streams: override root logs processing pipeline to reroute, then noop child stream processing
+    const rootStream = getRoot(dataStreamName);
     pipelineSubstitutions = {
-      [getProcessingPipelineName(LOGS_ROOT_STREAM_NAME)]: {
+      [getProcessingPipelineName(rootStream)]: {
         processors: [
           {
             reroute: {

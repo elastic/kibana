@@ -6,7 +6,26 @@ Object {
     Object {
       "set": Object {
         "field": "foo",
-        "if": "ctx._source.active == true",
+        "if": "
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+
+try {
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
+    _parentConditionMet = true;
+  }
+} catch (Exception e) {
+  // _parentConditionMet stays false on error
+}
+
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+ctx._source.active == true
+",
         "ignore_failure": true,
         "on_failure": Array [
           Object {
@@ -53,7 +72,26 @@ Object {
     Object {
       "set": Object {
         "field": "baz",
-        "if": "ctx._source.env == 'prod'",
+        "if": "
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+
+try {
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
+    _parentConditionMet = true;
+  }
+} catch (Exception e) {
+  // _parentConditionMet stays false on error
+}
+
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+ctx._source.env == 'prod'
+",
         "ignore_failure": true,
         "on_failure": Array [
           Object {
@@ -222,6 +260,74 @@ Object {
 exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variety of processor steps and where blocks 1`] = `
 Object {
   "processors": Array [
+    Object {
+      "network_direction": Object {
+        "destination_ip": "destination_ip",
+        "internal_networks": Array [
+          "private",
+        ],
+        "source_ip": "source_ip",
+      },
+    },
+    Object {
+      "script": Object {
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fields = [];
+boolean allPresent = true;
+
+if (ctx.containsKey('field1') && ctx['field1'] != null) {
+  fields.add(ctx['field1'].toString());
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field2') && ctx['field2'] != null) {
+  fields.add(ctx['field2'].toString());
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field3') && ctx['field3'] != null) {
+  fields.add(ctx['field3'].toString());
+} else {
+  allPresent = false;
+}
+
+if (false || allPresent) {
+  ctx['my_joined_field'] = fields.stream().collect(Collectors.joining(', '));
+}",
+        "tag": undefined,
+      },
+    },
+    Object {
+      "script": Object {
+        "description": undefined,
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fromValues = [];
+  boolean allFieldsPresent = true;
+
+  if (ctx.containsKey('first_name') && ctx['first_name'] != null) {
+  fromValues.add(ctx['first_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+fromValues.add(' ');if (ctx.containsKey('last_name') && ctx['last_name'] != null) {
+  fromValues.add(ctx['last_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+
+
+  if (allFieldsPresent || false) {
+    ctx['full_name'] = fromValues.stream().collect(Collectors.joining(''));
+  }",
+        "tag": undefined,
+      },
+    },
     Object {
       "uppercase": Object {
         "field": "message",

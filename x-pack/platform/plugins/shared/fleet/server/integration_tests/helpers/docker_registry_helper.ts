@@ -59,10 +59,15 @@ function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
 }
 
 export function useDockerRegistry() {
-  const logger = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
+  const logger = new ToolingLog(
+    {
+      level: 'info',
+      writeTo: process.stdout,
+    },
+    {
+      context: 'fleet-docker',
+    }
+  );
   const packageRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || '8081';
 
   if (!packageRegistryPort.match(/^[0-9]{4}/)) {
@@ -104,8 +109,12 @@ export function useDockerRegistry() {
   }
 
   async function pullDockerImage() {
-    logger.info(`[docker:${DOCKER_IMAGE}] pulling docker image "${DOCKER_IMAGE}"`);
-    await execa('docker', ['pull', DOCKER_IMAGE]);
+    if (await isImageAvailableLocally(DOCKER_IMAGE)) {
+      logger.info(`skipping pull of docker image "${DOCKER_IMAGE}"`);
+    } else {
+      logger.info(`pulling docker image "${DOCKER_IMAGE}"`);
+      await execa('docker', ['pull', DOCKER_IMAGE]);
+    }
   }
 
   async function cleanupDockerRegistryServer() {
@@ -130,4 +139,13 @@ export function useDockerRegistry() {
   });
 
   return `http://localhost:${packageRegistryPort}`;
+}
+
+async function isImageAvailableLocally(imageUrl: string) {
+  try {
+    const { stdout } = await execa('docker', ['images', '-q', imageUrl]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
 }

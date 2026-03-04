@@ -5,43 +5,90 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
+  EntityStoreCoreSetup,
   EntityStoreRequestHandlerContext,
-  EntityStoreStartPlugins,
 } from './types';
-import { AssetManager } from './domain/asst_manager';
+import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
+import { EngineDescriptorClient } from './domain/definitions/saved_objects';
+import { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
+import { LogsExtractionClient } from './domain/logs_extraction_client';
+import { CRUDClient } from './domain/crud_client';
+import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
+  coreSetup: EntityStoreCoreSetup;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
-}
-
-export async function getTaskManagerStart(
-  core: CoreSetup<EntityStoreStartPlugins, void>
-): Promise<TaskManagerStartContract> {
-  const [, startPlugins] = await core.getStartServices();
-
-  return startPlugins.taskManager;
+  request: KibanaRequest;
+  isServerless: boolean;
+  analytics: TelemetryReporter;
 }
 
 export async function createRequestHandlerContext({
   logger,
   context,
   coreSetup,
+  request,
+  isServerless,
+  analytics,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const taskManagerStart = await getTaskManagerStart(coreSetup);
+  const [, startPlugins] = await coreSetup.getStartServices();
+  const taskManagerStart = startPlugins.taskManager;
+  const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+
+  const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+    core.savedObjects.client,
+    core.elasticsearch.client.asInternalUser,
+    request
+  );
+
+  const engineDescriptorClient = new EngineDescriptorClient(
+    core.savedObjects.client,
+    namespace,
+    logger
+  );
+
+  const esClient = core.elasticsearch.client.asCurrentUser;
+  const crudClient = new CRUDClient({
+    logger,
+    esClient,
+    namespace,
+  });
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const logsExtractionClient = new LogsExtractionClient({
+    logger,
+    namespace,
+    esClient,
+    dataViewsService,
+    engineDescriptorClient,
+    ccsLogsExtractionClient,
+  });
 
   return {
     core,
     logger,
-    assetManager: new AssetManager(logger, taskManagerStart),
+    assetManager: new AssetManager({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      taskManager: taskManagerStart,
+      engineDescriptorClient,
+      namespace,
+      isServerless,
+      logsExtractionClient,
+      security: startPlugins.security,
+      analytics,
+    }),
+    crudClient,
+    ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    logsExtractionClient,
+    security: startPlugins.security,
+    namespace,
   };
 }

@@ -75,7 +75,7 @@ interface Params {
   errors: SavedObjectsClient['errors'];
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
-  typeRegistry?: ISavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 /**
@@ -313,7 +313,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     SecurityAction,
     { authzAction?: string; auditAction?: AuditAction }
   >;
-  private readonly typeRegistry: ISavedObjectTypeRegistry | undefined;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
 
   constructor({
@@ -765,7 +765,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const { authzActions } = this.translateActions(params.actions);
 
     const accessControlObjects = params.auditOptions?.objects?.filter(({ type }) =>
-      this.typeRegistry?.supportsAccessControl(type)
+      this.typeRegistry.supportsAccessControl(type)
     );
     const objectsRequiringPrivilegeCheck =
       this.accessControlService.getObjectsRequiringPrivilegeCheck({
@@ -1205,10 +1205,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeChangeAccessControlParams,
     action: SecurityAction
   ): Promise<AuthorizationResult<A>> {
-    if (!this.typeRegistry) {
-      throw new Error('Type registry is not defined');
-    }
-
     this.accessControlService.setUserForOperation(this.getCurrentUserFunc());
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
@@ -1217,7 +1213,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.assertObjectsArrayNotEmpty(objects, action);
 
     const objectsNotSupportingAccessControl = objects.every(
-      ({ type }) => !this.typeRegistry?.supportsAccessControl(type)
+      ({ type }) => !this.typeRegistry.supportsAccessControl(type)
     );
 
     if (objectsNotSupportingAccessControl) {
@@ -1270,11 +1266,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         objectsRequiringPrivilegeCheck,
         authorizationResult,
         currentSpace: namespaceString,
-        addAuditEventFn: (types: string[]) => {
-          const errMessage = `Unable to ${authzAction} for types ${types.join(', ')}`;
+        addAuditEventFn: (errMessage: string, types: string[]) => {
           const err = new Error(errMessage);
-          this.addAuditEvent({
+          this.auditHelper({
             action: auditAction!,
+            objects,
             error: err,
             unauthorizedTypes: types,
             unauthorizedSpaces: [...spacesToAuthorize],

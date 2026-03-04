@@ -9,12 +9,29 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { useGetAllIntegrations, useGetIntegrationById } from './common';
+import type { CreateIntegrationComponent } from './components/create_integration/types';
+import type { CreateIntegrationSideCardButtonComponent } from './components/create_integration_card_button/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AutomaticImportPluginSetup {}
+export interface AutomaticImportV2PluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AutomaticImportPluginStart {}
+export interface AutomaticImportV2PluginStart {
+  hooks: {
+    useGetIntegrationById: typeof useGetIntegrationById;
+    useGetAllIntegrations: typeof useGetAllIntegrations;
+  };
+  components: {
+    /**
+     * Component that allows the user to create an integration.
+     */
+    CreateIntegration: CreateIntegrationComponent;
+    /**
+     * Component that links the user to the create integration component.
+     */
+    CreateIntegrationSideCardButton: CreateIntegrationSideCardButtonComponent;
+  };
+}
 
 export interface AutomaticImportPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;

@@ -154,6 +154,9 @@ export const JobMessages: FC<JobMessagesProps> = ({
           initialPageSize: 25,
         }}
         data-test-subj={'mlAnalyticsDetailsJobMessagesTable'}
+        tableCaption={i18n.translate('xpack.ml.jobMessages.tableCaption', {
+          defaultMessage: 'Job messages',
+        })}
       />
     </>
   );

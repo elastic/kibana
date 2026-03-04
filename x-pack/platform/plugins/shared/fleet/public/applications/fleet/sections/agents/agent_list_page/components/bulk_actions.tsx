@@ -69,8 +69,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
-  const { cloud } = useStartServices();
-
+  const { reporting } = useStartServices();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
@@ -118,7 +117,27 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
 
-  const { generateReportingJobCSV } = useExportCSV();
+  const generateReportingJobCSV = useExportCSV();
+
+  const exportMenuItem: MenuItem = useMemo(
+    () => ({
+      id: 'export',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{ agentCount }}
+        />
+      ),
+      icon: 'exportAction',
+      disabled: !authz.fleet.generateAgentReports || !reporting,
+      onClick: () => {
+        setIsExportCSVModalOpen(true);
+      },
+      'data-test-subj': 'bulkAgentExportBtn',
+    }),
+    [agentCount, authz.fleet.generateAgentReports, reporting]
+  );
 
   const maintainanceItems: MenuItem[] = useMemo(() => {
     return [
@@ -154,31 +173,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         },
         'data-test-subj': 'agentBulkActionsRequestDiagnostics',
       },
+      exportMenuItem,
     ];
-  }, [agentCount, authz.fleet.allAgents, authz.fleet.readAgents, doesLicenseAllowMigration]);
-
-  // remove serverless check when https://github.com/elastic/kibana/issues/232193 is resolved
-  if (!cloud?.isServerlessEnabled) {
-    maintainanceItems.push({
-      id: 'export',
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.exportAgents"
-          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-          values={{ agentCount }}
-        />
-      ),
-      icon: 'exportAction',
-      disabled: !authz.fleet.readAgents,
-      onClick: () => {
-        setIsExportCSVModalOpen(true);
-      },
-      'data-test-subj': 'bulkAgentExportBtn',
-    });
-  }
+  }, [
+    agentCount,
+    authz.fleet.allAgents,
+    authz.fleet.readAgents,
+    doesLicenseAllowMigration,
+    exportMenuItem,
+  ]);
 
   // Build hierarchical menu items
   const menuItems: MenuItem[] = useMemo(() => {
+    const hasOpAMPAgents = Array.isArray(agents)
+      ? agents.some((agent) => agent.type === 'OPAMP')
+      : false;
+
+    if (hasOpAMPAgents) {
+      return [exportMenuItem];
+    }
+
     const items: MenuItem[] = [
       // Top-level items
       {
@@ -324,7 +338,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                   name: (
                     <FormattedMessage
                       id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
-                      defaultMessage="Remove root access for {agentCount, plural, one {# agent} other {# agents}}"
+                      defaultMessage="Remove root privilege for {agentCount, plural, one {# agent} other {# agents}}"
                       values={{ agentCount }}
                     />
                   ),
@@ -368,6 +382,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     maintainanceItems,
     agentPrivilegeLevelChangeEnabled,
     isTagAddVisible,
+    agents,
+    exportMenuItem,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(

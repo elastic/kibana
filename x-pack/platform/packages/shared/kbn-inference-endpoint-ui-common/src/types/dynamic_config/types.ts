@@ -63,6 +63,8 @@ export interface OverrideFieldsContentType {
   serverlessOnly?: boolean;
   hidden?: string[];
   additional?: FieldsConfiguration[];
+  /** Default values to apply to existing provider configuration fields (e.g., model_id default values) */
+  defaultValues?: Record<string, string | number | boolean | null>;
 }
 export type InternalOverrideFieldsType = {
   [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;

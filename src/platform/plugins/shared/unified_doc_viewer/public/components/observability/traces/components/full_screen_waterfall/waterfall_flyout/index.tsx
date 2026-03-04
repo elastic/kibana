@@ -17,13 +17,12 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
-  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
-import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
@@ -72,7 +71,6 @@ const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
 
 export interface Props {
   title: string;
-  flyoutId: string;
   onCloseFlyout: () => void;
   hit: DataTableRecord | null;
   loading: boolean;
@@ -80,36 +78,23 @@ export interface Props {
   children: React.ReactNode;
 }
 
-export function WaterfallFlyout({
-  onCloseFlyout,
-  dataView,
-  hit,
-  loading,
-  children,
-  title,
-  flyoutId,
-}: Props) {
+export function WaterfallFlyout({ onCloseFlyout, dataView, hit, loading, children, title }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
-  const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId();
+  const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
 
   return (
     <EuiFlyout
+      size="s"
       includeFixedHeadersInFocusTrap={false}
-      ownFocus={false}
-      // This is temporary fix until we migrate to the new flyout system to show the complete trace as main flyout instead of full screen
-      // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/observability-dev/issues/4980
-      css={css`
-        z-index: ${(euiTheme.levels.mask as number) + 1} !important;
-        margin-top: calc(-1 * ${layoutVar('header.height', '0px')});
-      `}
       onClose={onCloseFlyout}
-      aria-labelledby={flyoutId}
+      aria-labelledby={flyoutTitleId}
       id={flyoutId}
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>
-          <EuiTitle size="m">
-            <h2>{title}</h2>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{title}</h2>
           </EuiTitle>
         </EuiSkeletonTitle>
       </EuiFlyoutHeader>

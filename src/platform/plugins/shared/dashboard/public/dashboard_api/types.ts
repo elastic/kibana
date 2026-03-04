@@ -23,8 +23,6 @@ import type {
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-} from '@kbn/presentation-containers';
-import type {
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -34,6 +32,7 @@ import type {
   PublishesDataViews,
   PublishesDescription,
   PublishesEditablePauseFetch,
+  PublishesHideBorder,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -42,9 +41,9 @@ import type {
   PublishesWritableViewMode,
   PublishingSubject,
   ViewMode,
+  PublishesSearchSession,
+  PublishesReload,
 } from '@kbn/presentation-publishing';
-import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -100,6 +99,9 @@ export interface DashboardCreationOptions {
   /** Settings for unified search integration. */
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
+  /** Whether to render the control group above the dashboard viewport. */
+  useControlsIntegration?: boolean;
+
   /**
    * Validates a loaded saved object and determines whether it is valid.
    *
@@ -142,6 +144,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
+  PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &
@@ -174,6 +177,7 @@ export type DashboardApi = CanExpandPanels &
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
+    isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
+import { useCloudConnectedAppContext } from '../../../app_context';
 import type { CloudService, ServiceType } from '../../../../types';
 
 interface ServicesSectionProps {
@@ -30,6 +31,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   subscription,
   currentLicenseType,
 }) => {
+  const { autoEnablingEis } = useCloudConnectedAppContext();
   const {
     loadingService,
     disableModalService,
@@ -38,6 +40,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
+    handleRotateServiceApiKey,
   } = useServiceActions({ onServiceUpdate, services });
 
   // Check if there's an active subscription (active or trial)
@@ -72,7 +75,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             defaultMessage: 'Elastic Inference Service',
           })
         ),
-      isLoading: loadingService === 'eis',
+      onRotateApiKey: services.eis?.enabled ? () => handleRotateServiceApiKey('eis') : undefined,
+      isLoading: loadingService === 'eis' || autoEnablingEis,
       subscriptionRequired: services.eis?.subscription?.required,
       hasActiveSubscription,
       validLicenseTypes: services.eis?.support?.valid_license_types,
@@ -93,7 +97,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       region: services.auto_ops?.config?.region_id ?? undefined,
       description: i18n.translate('xpack.cloudConnect.services.autoOps.description', {
         defaultMessage:
-          'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
+          'Simplify cluster management with real-time issue detection, performance recommendations, and resource utilization insights.',
       }),
       learnMoreUrl: services.auto_ops?.metadata?.documentation_url,
       serviceUrl: services.auto_ops?.metadata?.service_url,

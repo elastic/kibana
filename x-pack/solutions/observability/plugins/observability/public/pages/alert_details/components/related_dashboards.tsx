@@ -59,7 +59,7 @@ export function RelatedDashboards({
   );
 
   return (
-    <div>
+    <div data-test-subj="alertRelatedDashboards">
       <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.linkedDashboards', {
           defaultMessage: 'Linked dashboards',

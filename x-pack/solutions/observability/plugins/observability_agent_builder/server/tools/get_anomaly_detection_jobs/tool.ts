@@ -10,11 +10,10 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -24,6 +23,8 @@ export const OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID =
   'observability.get_anomaly_detection_jobs';
 
 const DEFAULT_JOBS_LIMIT = 10;
+const DEFAULT_ANOMALY_RECORDS_LIMIT = 10;
+const DEFAULT_MIN_ANOMALY_SCORE = 50;
 const DEFAULT_TIME_RANGE = {
   start: 'now-24h',
   end: 'now',
@@ -39,21 +40,52 @@ export interface GetAnomalyDetectionJobsToolResult {
 }
 
 const getAnomalyDetectionJobsSchema = z.object({
+  group: z
+    .string()
+    .optional()
+    .describe('Filter jobs by ML job group name (e.g., "apm", "network").'),
   jobIds: z
     .array(z.string().min(1))
     .min(1)
     .max(20)
-    .describe(
-      'Optional list of ML job IDs to query. Leave empty to include all anomaly detection jobs in this space.'
-    )
-    .optional(),
-  limit: z
+    .optional()
+    .describe('Specific ML job IDs to query. Omit to include all jobs in this space.'),
+  jobsLimit: z
     .number()
     .int()
     .min(1)
     .max(25)
-    .describe(`Maximum number of jobs to return. Defaults to ${DEFAULT_JOBS_LIMIT}.`)
-    .optional(),
+    .default(DEFAULT_JOBS_LIMIT)
+    .describe('Maximum number of jobs to return.'),
+  anomalyRecordsLimit: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .default(DEFAULT_ANOMALY_RECORDS_LIMIT)
+    .describe(
+      'Maximum anomaly records to return per job. Set to 0 to skip anomaly records entirely.'
+    ),
+  minAnomalyScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .default(DEFAULT_MIN_ANOMALY_SCORE)
+    .describe(
+      'Minimum anomaly score threshold (0-100). Higher scores indicate more severe anomalies. Default is 50 to filter noise.'
+    ),
+  includeExplanation: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Include detailed anomaly score explanations. Disabled by default to reduce response size.'
+    ),
+  influencerFilter: z
+    .string()
+    .optional()
+    .describe(
+      'Filter anomalies by influencer fields using KQL syntax. Influencer fields are entity fields like service.name, host.name, kubernetes.pod.name, etc. Examples: \'service.name: "frontend"\', \'service.name: "frontend" AND host.name: "server-1"\', \'NOT host.name: "server-3"\'.'
+    ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -62,10 +94,7 @@ export function createGetAnomalyDetectionJobsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getAnomalyDetectionJobsSchema> {
@@ -93,8 +122,13 @@ When to use:
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
       const {
+        group,
         jobIds,
-        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
+        jobsLimit,
+        anomalyRecordsLimit,
+        minAnomalyScore,
+        includeExplanation,
+        influencerFilter,
         start: rangeStart,
         end: rangeEnd,
       } = toolParams;
@@ -108,8 +142,13 @@ When to use:
           mlClient,
           request,
           logger,
+          group,
           jobIds,
           jobsLimit,
+          anomalyRecordsLimit,
+          minAnomalyScore,
+          includeExplanation,
+          influencerFilter,
           rangeStart,
           rangeEnd,
         });

@@ -500,6 +500,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
             { ruleId: 'rule-2', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
           ],
+          truncatedRuleIds: [],
         });
 
         const result = await taskRunner.run();
@@ -531,6 +532,8 @@ describe('Gap Auto Fill Scheduler Task', () => {
           setupGaps: false,
           expectedProcessCalls: 0,
           expectMessage: 'Skipped execution: gap auto-fill capacity limit reached',
+          expectedStatus: 'skipped',
+          gapsStatus: [GapFillSchedulePerRuleStatus.SUCCESS, GapFillSchedulePerRuleStatus.SUCCESS],
         },
         {
           name: 'Stopped early: gap auto-fill capacity limit reached. ',
@@ -538,10 +541,28 @@ describe('Gap Auto Fill Scheduler Task', () => {
           setupGaps: true,
           expectedProcessCalls: 1,
           expectMessage: 'gap auto-fill capacity limit reached',
+          expectedStatus: 'success',
+          gapsStatus: [GapFillSchedulePerRuleStatus.SUCCESS, GapFillSchedulePerRuleStatus.SUCCESS],
+        },
+        {
+          name: 'Stopped early: gap auto-fill capacity limit reached. ',
+          capacity: 99,
+          setupGaps: true,
+          expectedProcessCalls: 1,
+          expectMessage: 'gap auto-fill capacity limit reached',
+          expectedStatus: 'error',
+          gapsStatus: [GapFillSchedulePerRuleStatus.SUCCESS, GapFillSchedulePerRuleStatus.ERROR],
         },
       ])(
         'capacity handling: $name',
-        async ({ capacity, setupGaps, expectedProcessCalls, expectMessage }) => {
+        async ({
+          capacity,
+          setupGaps,
+          expectedProcessCalls,
+          expectMessage,
+          expectedStatus,
+          gapsStatus,
+        }) => {
           // Set capacity sequence
           rulesClient.findBackfill.mockReset();
           rulesClient.findBackfill.mockResolvedValueOnce({
@@ -584,14 +605,15 @@ describe('Gap Auto Fill Scheduler Task', () => {
                 {
                   ruleId: 'rule-1',
                   processedGaps: 1,
-                  status: GapFillSchedulePerRuleStatus.SUCCESS,
+                  status: gapsStatus[0],
                 },
                 {
                   ruleId: 'rule-2',
                   processedGaps: 1,
-                  status: GapFillSchedulePerRuleStatus.SUCCESS,
+                  status: gapsStatus[1],
                 },
               ],
+              truncatedRuleIds: [],
             });
           }
 
@@ -600,7 +622,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(
             expectedProcessCalls
           );
-          expectFinalLog(expectedProcessCalls === 0 ? 'skipped' : 'success', expectMessage);
+          expectFinalLog(expectedStatus, expectMessage);
           if (expectedProcessCalls === 0) {
             expect(rulesClient.getRuleIdsWithGaps).not.toHaveBeenCalled();
           }
@@ -668,10 +690,10 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(result).toEqual({ state: {} });
           expect(logEventMock).toHaveBeenCalledWith(
             expect.objectContaining({
-              status: 'success',
+              status: 'skipped',
               results: [],
               message: expect.stringContaining(
-                'Gap Auto Fill Scheduler cancelled by timeout | Results: \nprocessed 0 gaps across 0 rules'
+                `Gap Auto Fill Scheduler cancelled by timeout | Results: Skipped execution: can't schedule gap fills for any enabled rule`
               ),
             })
           );
@@ -706,6 +728,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             results: [
               { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
             ],
+            truncatedRuleIds: [],
           });
 
           const result = await taskRunner.run();
@@ -757,6 +780,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
               error: 'Failed to schedule',
             },
           ],
+          truncatedRuleIds: [],
         });
 
         const result = await taskRunner.run();
@@ -809,6 +833,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
                 status: GapFillSchedulePerRuleStatus.SUCCESS,
               },
             ],
+            truncatedRuleIds: [],
           });
 
           const result = await taskRunner.run();
@@ -862,6 +887,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             results: [
               { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
             ],
+            truncatedRuleIds: [],
           });
 
           const result = await taskRunner.run();
@@ -1039,6 +1065,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
               status: GapFillSchedulePerRuleStatus.SUCCESS,
             },
           ],
+          truncatedRuleIds: [],
         })
         .mockResolvedValueOnce({
           processedGapsCount: 1,
@@ -1050,6 +1077,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
               status: GapFillSchedulePerRuleStatus.SUCCESS,
             },
           ],
+          truncatedRuleIds: [],
         });
 
       const result = await processRuleBatches({
@@ -1132,6 +1160,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             status: GapFillSchedulePerRuleStatus.SUCCESS,
           },
         ],
+        truncatedRuleIds: [],
       });
 
       const result = await processRuleBatches({
@@ -1255,6 +1284,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             status: GapFillSchedulePerRuleStatus.SUCCESS,
           },
         ],
+        truncatedRuleIds: [],
       });
 
       const result = await processGapsForRules({
@@ -1284,6 +1314,62 @@ describe('Gap Auto Fill Scheduler Task', () => {
         error: undefined,
       });
       expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it('decrements capacity before stopping on truncated rules', async () => {
+      const gap = buildGap(
+        'rule-1',
+        '2024-01-01T00:00:00.000Z',
+        '2024-01-01T00:59:59.000Z',
+        gapStatus.UNFILLED
+      );
+
+      mockedFindGaps.findGapsSearchAfter.mockResolvedValueOnce({
+        total: 1,
+        data: [gap],
+        searchAfter: undefined,
+        pitId: 'pit-1',
+      });
+
+      mockedProcessGapsBatch.processGapsBatch.mockResolvedValueOnce({
+        processedGapsCount: 1,
+        hasErrors: false,
+        results: [
+          {
+            ruleId: 'rule-1',
+            processedGaps: 1,
+            status: GapFillSchedulePerRuleStatus.SUCCESS,
+          },
+        ],
+        truncatedRuleIds: ['rule-1'],
+      });
+
+      const result = await processGapsForRules({
+        abortController,
+        aggregatedByRule: new Map(),
+        endISO,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 5,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 1,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        taskInstanceId: 'test-task',
+        toProcessRuleIds: ['rule-1'],
+        numRetries: mockSchedulerConfig.numRetries,
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.CAPACITY_EXHAUSTED);
+      expect(result.remainingBackfills).toBe(0);
+      expect(result.aggregatedByRule.get('rule-1')).toEqual({
+        ruleId: 'rule-1',
+        processedGaps: 1,
+        status: GapFillSchedulePerRuleStatus.SUCCESS,
+        error: undefined,
+      });
     });
 
     it('returns cancelled state when abort signal is set', async () => {

@@ -24,6 +24,10 @@ export const KUERY_FIELD_TO_SO_FIELD_MAP = Object.freeze({
   createdAt: 'created_at',
   updatedBy: 'updated_by',
   updatedAt: 'updated_at',
+  fileId: 'file_id',
+  fileName: 'file_name',
+  fileSize: 'file_size',
+  fileHash: 'file_hash_sha256',
 });
 
 interface ScriptsLibraryKqlFilterValidationResult {

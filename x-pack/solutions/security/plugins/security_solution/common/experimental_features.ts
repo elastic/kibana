@@ -47,7 +47,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Memory Dump response actions support for Elastic Defend.
    * Release: v9.3
    */
-  responseActionsEndpointMemoryDump: false,
+  responseActionsEndpointMemoryDump: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -97,40 +97,25 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
-   */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
    * Enables the storing of gaps in the event log
    */
   storeGapsInEventLogEnabled: true,
 
   /**
-   * Enables scheduling gap fills for rules
-   */
-  bulkFillRuleGapsEnabled: true,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: false,
-
-  /**
-   * Enables the rule's bulk action to manage alert suppression
-   */
-  bulkEditAlertSuppressionEnabled: true,
-
-  /**
-   * Enables the ability to use does not match condition for indicator match rules
-   */
-  doesNotMatchForIndicatorMatchRuleEnabled: true,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
+
+  /**
+   * Enables AI rule creation feature
+   */
+  aiRuleCreationEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -190,11 +175,11 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertsAlignment: false,
+  enableAlertsAndAttacksAlignment: false,
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -206,14 +191,40 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsWatchlistEnabled: false,
 
   /**
-   * Enables the Gap Auto Fill Scheduler feature.
+   * Enables the Trial Companion feature.
    */
-  gapAutoFillSchedulerEnabled: false,
+  trialCompanionEnabled: false,
+
   /**
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
-  linuxDnsEvents: false,
+  linuxDnsEvents: true,
+
+  /**
+   * Enables the Automatic Migration of Splunk dashboards in Security Solution
+   */
+  splunkV2DashboardsEnabled: true,
+
+  /**
+   * Enables Detection Engine Health UI
+   */
+  deHealthUIEnabled: false,
+
+  /**
+   * Enables Rule Health UI
+   */
+  ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

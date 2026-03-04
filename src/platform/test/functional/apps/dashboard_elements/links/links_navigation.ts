@@ -97,10 +97,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.isEnabled('dashboardLink--link004--error')).to.be(false);
       });
 
-      it('useCurrentFilters should pass filter pills and query', async () => {
+      it('useFilters should pass filter pills and query', async () => {
         /**
          * dashboard links002 has a saved filter and query bar.
-         * The link to dashboard links001 only has useCurrentFilters enabled
+         * The link to dashboard links001 only has useFilters enabled
          * so the link should pass the filters and query to dashboard links001
          * but should not override the date range.
          */
@@ -130,11 +130,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickDiscardChanges();
       });
 
-      it('useCurrentDateRange should pass date range', async () => {
+      it('useTimeRange should pass date range', async () => {
         /**
          * dashboard links001 has saved filters and a saved date range.
          * dashboard links002 has a different saved date range than links001.
-         * The link to dashboard links002 only has useCurrentDateRange enabled
+         * The link to dashboard links002 only has useTimeRange enabled
          * so the link should override the date range on dashboard links002
          * but should not pass its filters.
          */

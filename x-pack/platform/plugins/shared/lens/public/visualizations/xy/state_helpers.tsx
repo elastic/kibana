@@ -104,6 +104,10 @@ export const hasAreaSeries = (layers: XYLayerConfig[]) =>
 export const getBarSeriesLayers = (layers: XYLayerConfig[]): XYDataLayerConfig[] =>
   getDataLayers(layers).filter((layer) => BAR_SERIES.includes(layer.seriesType));
 
+export function isLineSeries(seriesType: SeriesType) {
+  return seriesType === 'line';
+}
+
 export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }
@@ -138,7 +142,7 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
-  if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
+  if (isDataLayer(layer) && (layer.splitAccessors ?? []).length > 0 && !layer.collapseFn) {
     return null;
   }
   return (
@@ -152,7 +156,7 @@ export const getColumnToLabelMap = (
 ) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
-    .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
+    .concat(isDataLayer(layer) && layer.splitAccessors ? layer.splitAccessors : [])
     .forEach((accessor) => {
       const operation = datasource?.getOperationForColumnId(accessor);
       if (operation?.label) {

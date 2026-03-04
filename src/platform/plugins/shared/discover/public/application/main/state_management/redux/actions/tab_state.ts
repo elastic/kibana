@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, isEqual } from 'lodash';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   type AggregateQuery,
   type Query,
@@ -26,6 +26,8 @@ import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
   type TabActionPayload,
+  transitionedFromEsqlToDataView,
+  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -36,6 +38,7 @@ import type {
   UpdateESQLQueryActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
+import { FetchStatus } from '../../../../types';
 
 type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
 
@@ -52,7 +55,7 @@ const mergeAppState = (
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
 export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
-  async function updateAppStateThunkFn(dispatch, getState) {
+  function updateAppStateThunkFn(dispatch, getState) {
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
@@ -99,7 +102,7 @@ const mergeGlobalState = (
  * Partially update the tab global state, merging with existing state and pushing to URL history
  */
 export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> = (payload) =>
-  async function updateGlobalStateThunkFn(dispatch, getState) {
+  function updateGlobalStateThunkFn(dispatch, getState) {
     const { mergedGlobalState, hasStateChanges } = mergeGlobalState(getState(), payload);
 
     if (hasStateChanges) {
@@ -107,6 +110,37 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
         internalStateSlice.actions.setGlobalState({
           tabId: payload.tabId,
           globalState: mergedGlobalState,
+        })
+      );
+    }
+  };
+
+type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
+
+const mergeAttributes = (
+  currentState: DiscoverInternalState,
+  { tabId, attributes }: AttributesPayload
+) => {
+  const currentAttributes = selectTab(currentState, tabId).attributes;
+  const mergedAttributes = { ...currentAttributes, ...attributes };
+  return {
+    mergedAttributes,
+    hasStateChanges: !isEqual(currentAttributes, mergedAttributes),
+  };
+};
+
+/**
+ * Partially update the tab attributes, merging with existing state
+ */
+export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayload]> = (payload) =>
+  function updateAttributesThunkFn(dispatch, getState) {
+    const { mergedAttributes, hasStateChanges } = mergeAttributes(getState(), payload);
+
+    if (hasStateChanges) {
+      dispatch(
+        internalStateSlice.actions.setAttributes({
+          tabId: payload.tabId,
+          attributes: mergedAttributes,
         })
       );
     }
@@ -157,7 +191,20 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
-  async function transitionFromESQLToDataViewThunkFn(dispatch) {
+  function transitionFromESQLToDataViewThunkFn(dispatch) {
+    // Reset the default profile state when transitioning to data view mode
+    dispatch(
+      internalStateSlice.actions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
+      })
+    );
+
     dispatch(
       updateAppState({
         tabId,
@@ -174,6 +221,8 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         },
       })
     );
+
+    dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
 
 const clearTimeFieldFromSort = (
@@ -194,12 +243,25 @@ const clearTimeFieldFromSort = (
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  async function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    // Reset the default profile state when transitioning to ES|QL mode
+    dispatch(
+      internalStateSlice.actions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
+      })
+    );
+
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const queryString = getInitialESQLQuery(dataView, filterQuery);
     const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     dispatch(
@@ -219,6 +281,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
 
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+
+    dispatch(transitionedFromDataViewToEsql({ tabId }));
   };
 
 /**
@@ -228,7 +292,7 @@ export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryAc
   tabId,
   queryOrUpdater,
 }) =>
-  async function updateESQLQueryThunkFn(dispatch, getState) {
+  function updateESQLQueryThunkFn(dispatch, getState) {
     addLog('updateESQLQuery');
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
@@ -257,7 +321,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     }>
   ]
 > = ({ tabId, payload, isUpdate }) =>
-  async function onQuerySubmitThunkFn(
+  function onQuerySubmitThunkFn(
     dispatch,
     getState,
     { searchSessionManager, runtimeStateManager, services }
@@ -284,5 +348,44 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('onQuerySubmit triggers data fetching');
       stateContainer$.getValue()?.dataState.fetch();
+    }
+  };
+
+/**
+ * Triggers fetching of new data from Elasticsearch
+ * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
+ */
+export const fetchData: InternalStateThunkActionCreator<
+  [TabActionPayload<{ initial?: boolean }>]
+> = ({ tabId, initial }) =>
+  function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
+    addLog('fetchData', { initial });
+    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
+      dataStateContainer?.fetch();
+    }
+  };
+
+/**
+ * Pause auto refresh interval if the data view is not time-based or is a rollup
+ */
+export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+      const currentState = getState();
+      const globalState = selectTab(currentState, tabId).globalState;
+      if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {
+        dispatch(
+          updateGlobalState({
+            tabId,
+            globalState: {
+              refreshInterval: { ...globalState.refreshInterval, pause: true },
+            },
+          })
+        );
+      }
     }
   };

@@ -21,6 +21,7 @@ import {
   isInputPackageDatasetUsedByMultiplePolicies,
 } from './input_type_packages';
 import { cleanupAssets } from './remove';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -110,8 +111,135 @@ describe('installAssetsForInputPackagePolicy', () => {
     ).rejects.toThrowError(PackageNotFoundError);
   });
 
+  it('should skip index template creation when existing data stream is owned by different package with force true', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: { name: 'filestream', version: '2.0.0' },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'other_package' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should skip index template creation when existing index template is owned by different package with force true', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: { name: 'filestream', version: '2.0.0' },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      name: 'logs-my_dataset',
+      _meta: { package: { name: 'other_package' } },
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should install templates when existing data stream has no _meta field', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: { name: 'filestream', version: '2.0.0' },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
   it('should install es index patterns for input package if package is installed', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
@@ -122,6 +250,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       assetsMap: new Map(),
       paths: [],
     } as any);
+
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
@@ -155,6 +284,390 @@ describe('installAssetsForInputPackagePolicy', () => {
         'test.tata': 'log-test.tata-*',
       }
     );
+  });
+
+  describe('with dynamic_signal_types', () => {
+    const OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES = {
+      type: 'input',
+      name: 'otel',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'otel',
+          type: 'logs',
+          input: 'otelcol',
+          dynamic_signal_types: true,
+        },
+      ],
+    };
+
+    const OTEL_PKG_INFO_NO_DYNAMIC_SIGNAL_TYPES = {
+      type: 'input',
+      name: 'otel',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'otel',
+          type: 'logs',
+          input: 'otelcol',
+          dynamic_signal_types: false,
+        },
+      ],
+    };
+
+    const OTEL_PKG_INFO_WITHOUT_FLAG = {
+      type: 'input',
+      name: 'otel',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'otel',
+          type: 'logs',
+          input: 'otelcol',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      jest.mocked(installIndexTemplatesAndPipelines).mockReset();
+      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+    });
+
+    it('should install index templates for all signal types when dynamic_signal_types is true', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'otel.test' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should be called 3 times (once for each signal type: logs, metrics, traces)
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
+
+      // Verify it was called for logs
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onlyForDataStreams: [
+            expect.objectContaining({
+              type: 'logs',
+              dataset: 'otel.test',
+            }),
+          ],
+        })
+      );
+
+      // Verify it was called for metrics
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onlyForDataStreams: [
+            expect.objectContaining({
+              type: 'metrics',
+              dataset: 'otel.test',
+            }),
+          ],
+        })
+      );
+
+      // Verify it was called for traces
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onlyForDataStreams: [
+            expect.objectContaining({
+              type: 'traces',
+              dataset: 'otel.test',
+            }),
+          ],
+        })
+      );
+    });
+
+    it('should install index template for single signal type when dynamic_signal_types is false', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_NO_DYNAMIC_SIGNAL_TYPES,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_NO_DYNAMIC_SIGNAL_TYPES as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'otel.test' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should only be called once for the single signal type
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+
+      // Verify it was called only for logs
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onlyForDataStreams: [
+            expect.objectContaining({
+              type: 'logs',
+              dataset: 'otel.test',
+            }),
+          ],
+        })
+      );
+    });
+
+    it('should install index template for single signal type when dynamic_signal_types is not defined (backward compatibility)', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_WITHOUT_FLAG,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_WITHOUT_FLAG as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'metrics' },
+                  vars: { 'data_stream.dataset': { value: 'otel.test' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should only be called once for the single signal type
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+
+      // Verify it was called only for metrics
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onlyForDataStreams: [
+            expect.objectContaining({
+              type: 'metrics',
+              dataset: 'otel.test',
+            }),
+          ],
+        })
+      );
+    });
+
+    it('should respect data_stream.type var when dynamic_signal_types is true', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: {
+                    'data_stream.dataset': { value: 'otel.custom' },
+                    'data_stream.type': { value: 'traces' },
+                  },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should still create all 3 templates with the custom dataset
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
+
+      const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
+      const datasets = calls.map((call) => call[0]?.onlyForDataStreams?.[0]).filter(Boolean);
+
+      expect(datasets).toEqual([
+        expect.objectContaining({ type: 'logs', dataset: 'otel.custom' }),
+        expect.objectContaining({ type: 'metrics', dataset: 'otel.custom' }),
+        expect.objectContaining({ type: 'traces', dataset: 'otel.custom' }),
+      ]);
+    });
+
+    it('should skip existing data streams for each signal type', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+
+      // Mock that logs data stream already exists (from same package)
+      jest
+        .mocked(dataStreamService)
+        .getMatchingDataStreams.mockImplementation(async (esClient, params) => {
+          if (params.type === 'logs') {
+            return [
+              {
+                name: 'logs-otel.test-default',
+                _meta: {
+                  package: {
+                    name: 'otel',
+                  },
+                },
+              },
+            ] as any;
+          }
+          return [];
+        });
+
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'otel.test' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should only be called 2 times (metrics and traces, logs skipped because it already exists)
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(2);
+
+      // Verify logs was skipped
+      const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
+      const types = calls.map((call) => call[0]?.onlyForDataStreams?.[0]?.type).filter(Boolean);
+      expect(types).not.toContain('logs');
+      expect(types).toContain('metrics');
+      expect(types).toContain('traces');
+    });
+
+    it('should install new asset structure when force is true and index template already exists (e.g. upgrade from integration 1.x to input 2.x)', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'filestream',
+          version: '2.0.0',
+        },
+        packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+
+      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      // Legacy index template from 1.x exists
+      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+        name: 'logs-filestream.generic',
+        _meta: { package: { name: 'filestream' } },
+      } as any);
+
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should install new component templates and ingest pipelines (not skip)
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+    });
   });
 });
 

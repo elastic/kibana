@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { type ComponentProps, useState, useCallback } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiShowFor,
   EuiSpacer,
   EuiButton,
+  EuiButtonIcon,
   EuiCard,
   EuiIcon,
   EuiModalHeader,
@@ -28,7 +30,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import {
@@ -107,12 +108,24 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     }
   }, [selectedType, applySelection]);
 
+  const AiAssistantHeaderButton: React.FC<
+    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
+  > = (props) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <EuiButton {...props} data-test-subj="aiAssistantHeaderButton" />
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiButtonIcon {...props} display="base" data-test-subj="aiAssistantHeaderButtonIcon" />
+      </EuiShowFor>
+    </>
+  );
+
   return (
     <>
-      <EuiButton
+      <AiAssistantHeaderButton
         iconType={AssistantIcon}
         onClick={() => setModalOpen(true)}
-        data-test-subj="aiAssistantHeaderButton"
         aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
           defaultMessage: 'Open the AI Assistant selector',
         })}
@@ -122,7 +135,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
           defaultMessage: 'AI Assistant',
         })}
-      </EuiButton>
+      </AiAssistantHeaderButton>
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>
@@ -253,7 +266,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<RobotIcon size="xxl" />}
+                    icon={<EuiIcon type="productAgent" size="xxl" />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!hasAgentBuilder}
                   />

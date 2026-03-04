@@ -1,6 +1,6 @@
 # SIGNUM
 
-Returns the sign of a given number. It outputs `-1` for negative numbers, `0` for `0`, and `1` for positive numbers.
+The SIGNUM function returns the sign of a given number. It outputs `-1` for negative numbers, `0` for zero, and `1` for positive numbers.
 
 ## Syntax
 
@@ -8,35 +8,15 @@ Returns the sign of a given number. It outputs `-1` for negative numbers, `0` fo
 
 ### Parameters
 
-#### `number`
+#### number
 
-Numeric expression. If `null`, the function returns `null`.
+Numeric expression. If the value is `null`, the function returns `null`.
 
 ## Examples
+
+Calculates the sign of the value in column `d` and stores the result in column `s`:
 
 ```esql
 ROW d = 100.0
 | EVAL s = SIGNUM(d)
 ```
-
-This example calculates the sign of the number `100.0`.
-
-
-## Notes
-
-If SORT is used right after a KEEP command, make sure it only uses column names in KEEP,
-or move the SORT before the KEEP, e.g.
-- not correct: KEEP date | SORT @timestamp,
-- correct: SORT @timestamp | KEEP date
-
-By default, the sorting order is ascending. You can specify an explicit sort order by using `ASC` for ascending or `DESC` for descending.
-
-If two rows have the same sort key, they are considered equal. You can provide additional sort expressions to act as tie breakers.
-
-When sorting on multivalued columns, the lowest value is used when sorting in ascending order and the highest value is used when sorting in descending order.
-
-By default, `null` values are treated as being larger than any other value. This means that with an ascending sort order, `null` values are sorted last, and with a descending sort order, `null` values are sorted first. You can change this by providing `NULLS FIRST` or `NULLS LAST`.
-
-## Limitations
-- **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
-- **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.

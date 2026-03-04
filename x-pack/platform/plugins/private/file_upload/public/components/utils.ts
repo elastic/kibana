@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { GeoFileImporter } from '../importer/geo/types';
 
 export function getPartialImportMessage(failedFeaturesCount: number, totalFeaturesCount?: number) {
   const outOfTotalMsg =
@@ -24,4 +25,10 @@ export function getPartialImportMessage(failedFeaturesCount: number, totalFeatur
       outOfTotalMsg,
     },
   });
+}
+
+export function hasSidecarFiles(
+  importer: GeoFileImporter | null | undefined
+): importer is GeoFileImporter & { getSidecarFiles(): File[] } {
+  return importer !== null && importer !== undefined && 'getSidecarFiles' in importer;
 }

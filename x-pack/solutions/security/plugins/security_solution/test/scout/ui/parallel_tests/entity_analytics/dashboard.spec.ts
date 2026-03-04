@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { expect, spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 // Failing: See https://github.com/elastic/kibana/issues/247203
 spaceTest.describe.skip(
   'Entity analytics dashboard page',
-  { tag: ['@ess', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
@@ -24,6 +25,7 @@ spaceTest.describe.skip(
     });
 
     spaceTest('enables risk score followed by the store', async ({ pageObjects, apiServices }) => {
+      spaceTest.setTimeout(180000);
       const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
       await spaceTest.step('Navigate to dashboard and verify initial state', async () => {
@@ -48,22 +50,27 @@ spaceTest.describe.skip(
       await spaceTest.step('Confirm enablement and verify success', async () => {
         await dashboardPage.confirmEntityStoreEnablement();
 
-        await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
+        await expect(dashboardPage.entityStoreEnablementModal).toBeHidden({ timeout: 10000 });
       });
 
       await spaceTest.step(
         'Verify risk engine and entity store are actually enabled via API',
         async () => {
-          const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
-
-          expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
-
           const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
-            'running'
+            'running',
+            120000
           );
           expect(entityStoreStatus.status).toBe('running');
+
+          const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
+          expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
         }
       );
+
+      await spaceTest.step('Verify UI reflects the enabled state', async () => {
+        await dashboardPage.navigate();
+        await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
+      });
     });
   }
 );

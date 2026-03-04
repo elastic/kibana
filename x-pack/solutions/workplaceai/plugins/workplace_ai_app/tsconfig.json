@@ -9,8 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -27,10 +26,9 @@
     "@kbn/actions-plugin",
     "@kbn/features-plugin",
     "@kbn/logging",
-    "@kbn/data-sources-registry-plugin",
+    "@kbn/data-catalog-plugin",
     "@kbn/react-query",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/deeplinks-data-connectors",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-workflows",
     "@kbn/agent-builder-common",
@@ -41,9 +39,13 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/elastic-assistant",
     "@kbn/ai-assistant-connector-selector-action",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/workflows-extensions",
+    "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/deeplinks-data-sources"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

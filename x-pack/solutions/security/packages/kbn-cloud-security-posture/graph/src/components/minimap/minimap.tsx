@@ -12,10 +12,11 @@ import {
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
+  GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
 } from '../test_ids';
 import type { NodeViewModel } from '../types';
-import { isEntityNode, isLabelNode, isStackNode } from '../utils';
+import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
 import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
@@ -74,6 +75,21 @@ const MiniMapNode = ({
         height={NODE_LABEL_HEIGHT}
         width={NODE_LABEL_WIDTH}
         fill={getEuiColor(data.color ?? 'primary')}
+      />
+    );
+  }
+
+  // For relationship nodes, render with the same dark background color as in the graph
+  if (isRelationshipNode(data)) {
+    return (
+      <rect
+        data-id={data.id}
+        data-test-subj={GRAPH_MINIMAP_RELATIONSHIP_NODE_ID}
+        x={x}
+        y={y}
+        height={NODE_LABEL_HEIGHT}
+        width={NODE_LABEL_WIDTH}
+        fill={euiTheme.colors.backgroundFilledText}
       />
     );
   }

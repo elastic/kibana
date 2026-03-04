@@ -27,6 +27,7 @@ export interface SiemMigrationFilters {
   searchTerm?: string;
   installed?: boolean;
   installable?: boolean;
+  isEligibleForTranslation?: boolean;
 }
 
 export type SiemMigrationVendor = OriginalRuleVendor | OriginalDashboardVendor;

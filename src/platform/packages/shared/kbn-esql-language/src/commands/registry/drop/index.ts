@@ -12,6 +12,7 @@ import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const dropCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -20,7 +21,7 @@ const dropCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const dropCommand = {
-  name: 'drop',
+  name: Commands.DROP,
   methods: dropCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.dropDoc', {

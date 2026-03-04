@@ -1,4 +1,4 @@
-Please give me a summary of the findings from these streams.
+Analyze these stream-level insights and generate system-level insights that show cross-stream correlations.
 
-`summaries`
-{{{summaries}}}
+`stream insights`
+{{{streamInsights}}}

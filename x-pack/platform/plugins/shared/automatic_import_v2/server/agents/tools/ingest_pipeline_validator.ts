@@ -12,6 +12,7 @@ import { ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
+import type { estypes } from '@elastic/elasticsearch';
 
 interface DocTemplate {
   _index: string;
@@ -181,14 +182,13 @@ export function ingestPipelineValidatorTool(
         const docs = samples.map((sample: string) => formatSample(sample));
 
         // Simulate the pipeline
-        let response;
+        let response: estypes.IngestSimulateResponse;
         try {
           // Cast to IngestPipeline to satisfy the Elasticsearch client types.
           // Shape is validated above by zod (processors/on_failure arrays, each with a type field).
           response = await esClient.ingest.simulate({
             docs,
-
-            pipeline: generatedPipelineObject as any,
+            pipeline: generatedPipelineObject as estypes.IngestPipeline,
           });
         } catch (simulateError) {
           const errorMessage = `Pipeline simulation failed: ${(simulateError as Error).message}`;
@@ -220,7 +220,7 @@ export function ingestPipelineValidatorTool(
 
         // Process simulation results
         const failedSamples: FailedSample[] = [];
-        const successfulDocuments: Array<Record<string, unknown>> = [];
+        const successfulDocuments: Array<estypes.IngestDocumentSimulation['doc']> = [];
         let successfulCount = 0;
 
         response.docs.forEach((doc, index) => {

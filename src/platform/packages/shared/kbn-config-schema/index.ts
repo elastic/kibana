@@ -153,6 +153,24 @@ function recordOf<K extends string, V>(
   return new RecordOfType(keyType, valueType, options);
 }
 
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M>;
 function oneOf<A, B, C, D, E, F, G, H, I, J, K, L>(
   types: [
     Type<A>,
@@ -683,6 +701,8 @@ import {
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_DISCRIMINATOR,
+  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
@@ -693,4 +713,6 @@ export const metaFields = Object.freeze({
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_DISCRIMINATOR,
+  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
 });

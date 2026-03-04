@@ -14,9 +14,35 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { SystemFlyoutService } from './system_flyout_service';
+import type { SystemFlyoutRef } from './system_flyout_ref';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlaySystemFlyoutStart } from '@kbn/core-overlays-browser';
 import React from 'react';
+
+interface FlyoutManagerEvent {
+  type: 'CLOSE_SESSION';
+  session: { mainFlyoutId: string; childFlyoutId: string | null };
+}
+
+const eventListeners = new Set<(event: FlyoutManagerEvent) => void>();
+const mockSubscribeToEvents = jest.fn((listener: (event: FlyoutManagerEvent) => void) => {
+  eventListeners.add(listener);
+  return () => {
+    eventListeners.delete(listener);
+  };
+});
+
+const emitEvent = (event: FlyoutManagerEvent) => {
+  eventListeners.forEach((listener) => listener(event));
+};
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    getFlyoutManagerStore: jest.fn(() => ({ subscribeToEvents: mockSubscribeToEvents })),
+  };
+});
 
 const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
 const i18nMock = i18nServiceMock.createStartContract();
@@ -26,6 +52,8 @@ const userProfileMock = userProfileServiceMock.createStart();
 beforeEach(() => {
   mockReactDomRender.mockClear();
   mockReactDomUnmount.mockClear();
+  mockSubscribeToEvents.mockClear();
+  eventListeners.clear();
 });
 
 afterEach(() => {
@@ -58,6 +86,26 @@ describe('SystemFlyoutService', () => {
   });
 
   describe('openSystemFlyout()', () => {
+    it('closes the flyout when a CLOSE_SESSION event removes its session', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, {
+        id: 'parent-flyout-demo',
+        session: 'start',
+      });
+
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: {
+          mainFlyoutId: 'parent-flyout-demo',
+          childFlyoutId: null,
+        },
+      });
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+    });
+
     it('renders a system flyout to the DOM', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       systemFlyouts.open(<div>System flyout content</div>);
@@ -77,15 +125,48 @@ describe('SystemFlyoutService', () => {
       expect(container.querySelector('[data-eui="EuiFlyout"]')).toBeTruthy();
     });
 
-    it('renders with custom title in flyoutMenuProps', () => {
+    it('renders with custom title at the top level', () => {
       systemFlyouts.open(<div>System flyout content</div>, {
-        title: 'Custom Title',
+        title: 'Top Level Title',
       });
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
-      // Verify render was called
-      const [renderedElement] = mockReactDomRender.mock.calls[0];
-      expect(renderedElement).toBeDefined();
+      // Verify the title was passed through
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Top Level Title');
+    });
+
+    it('renders flyoutMenuProps with custom properties', () => {
+      const expectedFlyoutMenuProps = {
+        title: 'Visible Title',
+        'data-test-subj': 'test-menu',
+        hideTitle: false,
+      };
+
+      systemFlyouts.open(<div>System flyout content</div>, {
+        flyoutMenuProps: expectedFlyoutMenuProps,
+      });
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      // Navigate to the actual EuiFlyout component to check its props
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      // The structure is: KibanaRenderContextProvider > EuiFlyout
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps).toEqual(expectedFlyoutMenuProps);
+    });
+
+    it('gives precedence to flyoutMenuProps.title over top-level title', () => {
+      systemFlyouts.open(<div>System flyout content</div>, {
+        title: 'Top Level Title',
+        flyoutMenuProps: { title: 'Menu Title', 'data-test-subj': 'test-menu' },
+      });
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      // Verify that flyoutMenuProps.title takes precedence
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Menu Title');
     });
 
     it('applies additional EuiFlyout options', () => {

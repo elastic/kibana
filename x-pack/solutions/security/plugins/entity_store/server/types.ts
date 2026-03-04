@@ -9,28 +9,52 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { AssetManager } from './domain/asst_manager';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
+import type { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
+import type { LogsExtractionClient } from './domain/logs_extraction_client';
+import type { CRUDClient } from './domain/crud_client';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
+  spaces: SpacesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface EntityStoreStartPlugins {
   taskManager: TaskManagerStartContract;
+  spaces: SpacesPluginStart;
+  dataViews: DataViewsPluginStart;
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   logger: Logger;
   assetManager: AssetManager;
+  crudClient: CRUDClient;
+  ccsLogsExtractionClient: CcsLogsExtractionClient;
   featureFlags: FeatureFlags;
+  logsExtractionClient: LogsExtractionClient;
+  security: SecurityPluginStart;
+  namespace: string;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
@@ -38,3 +62,17 @@ export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
+
+export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
+
+export type EntityStoreCRUDClient = CRUDClient;
+
+export interface EntityStoreStartContract {
+  createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+}
+
+export interface EntityStoreSetupContract {
+  registerEntityMaintainer: RegisterEntityMaintainer;
+}
+
+export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

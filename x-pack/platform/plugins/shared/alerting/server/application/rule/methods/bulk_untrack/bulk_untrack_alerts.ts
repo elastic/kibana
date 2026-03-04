@@ -46,17 +46,10 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
       getAlertIndicesAlias: context.getAlertIndicesAlias,
       getAllAuthorizedRuleTypesFindOperation:
         context.authorization.getAllAuthorizedRuleTypesFindOperation.bind(context.authorization),
-      ensureAuthorized: async ({
-        ruleTypeId,
-        consumer,
-      }: {
-        ruleTypeId: string;
-        consumer: string;
-      }) =>
-        await withSpan({ name: 'authorization.ensureAuthorized', type: 'alerts' }, () =>
-          context.authorization.ensureAuthorized({
-            ruleTypeId,
-            consumer,
+      bulkEnsureAuthorized: async ({ ruleTypeIdConsumersPairs }) =>
+        await withSpan({ name: 'authorization.bulkEnsureAuthorized', type: 'alerts' }, () =>
+          context.authorization.bulkEnsureAuthorized({
+            ruleTypeIdConsumersPairs,
             operation: WriteOperations.Update,
             entity: AlertingAuthorizationEntity.Alert,
           })

@@ -6,7 +6,7 @@
  */
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchComparator } from '.';
 
 const customQuery = {
@@ -16,7 +16,7 @@ const customQuery = {
 
 const dataViewMock = buildDataViewMock({
   name: 'first-data-view',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
 });
 
 describe('savedSearchComparator', () => {

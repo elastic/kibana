@@ -102,9 +102,9 @@ export const MDERunScriptParameters = z.object({
 export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
 export const RunScriptRouteRequestBody = BaseActionSchema.merge(
   z.object({
-    /** 
+    /**
       * One of the following set of parameters must be provided
- 
+
       */
     parameters: z.union([
       RawScriptParameters,

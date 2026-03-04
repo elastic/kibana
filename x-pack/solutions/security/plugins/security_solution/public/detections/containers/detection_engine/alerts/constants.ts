@@ -18,6 +18,8 @@ export const ALERTS_QUERY_NAMES = {
   BY_STATUS: `${APP_UI_ID} fetchAlerts byStatus`,
   CASES: `${APP_UI_ID} fetchAlerts cases`,
   COUNT: `${APP_UI_ID} fetchAlerts count`,
+  COUNT_ATTACKS_IDS: `${APP_UI_ID} fetchAlerts count attacks ids`,
+  COUNT_ATTACKS_DETAILS: `${APP_UI_ID} fetchAlerts count attacks details`,
   COUNT_AI_VALUE: `${APP_UI_ID} aiValue filtered`,
   COUNT_AI_VALUE_COMPARE: `${APP_UI_ID} aiValue filtered compare`,
   COUNT_AI_VALUE_TOTAL: `${APP_UI_ID} aiValue total`,
@@ -28,4 +30,5 @@ export const ALERTS_QUERY_NAMES = {
   TREE_MAP: `${APP_UI_ID} fetchAlerts treeMap`,
   VULNERABLE_HOSTS: `${APP_UI_ID} fetchAlerts vulnerableHosts`,
   VULNERABLE_USERS: `${APP_UI_ID} fetchAlerts vulnerableUsers`,
+  ATTACK_ENTITIES_COUNTS: `${APP_UI_ID} fetchAlerts attackEntitiesCounts`,
 } as const;

@@ -8,6 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/evals",
+    "@kbn/evals-phoenix-executor",
     "@kbn/object-utils",
     "@kbn/grok-heuristics",
     "@kbn/tooling-log",
@@ -23,6 +24,8 @@
     "@kbn/dev-cli-runner",
     "@kbn/core",
     "@kbn/dissect-heuristics",
-    "@kbn/sse-utils-client",
+    "@kbn/inference-common",
+    "@kbn/es-snapshot-loader",
+    "@kbn/es-errors"
   ]
 }

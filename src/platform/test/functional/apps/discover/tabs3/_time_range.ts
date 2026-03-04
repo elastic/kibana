@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.saveSearch(discoverSessionName);
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await discover.clickNewSearchButton();
       await discover.waitUntilTabIsLoaded();
@@ -101,58 +101,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
       await checkInitialTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
     });
 
     it('should save different time ranges when the switch is on', async () => {
       await discover.loadSavedSearch(discoverSessionName);
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await checkInitialTimeConfiguration();
 
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
       await checkInitialTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await timePicker.setAbsoluteRange(updatedTimeRange.start, updatedTimeRange.end);
       await discover.waitUntilTabIsLoaded();
       await timePicker.startAutoRefresh(30);
       await discover.waitUntilTabIsLoaded();
       await checkUpdatedTimeConfiguration();
-      // changing the time range shouldn't trigger the unsaved changes badge for a discover session with a disabled time range setting
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      // changing the time range shouldn't trigger the unsaved changes indicator for a discover session with a disabled time range setting
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       await checkInitialTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await discover.saveSearch(discoverSessionName, false, { storeTimeRange: true });
       await discover.waitUntilTabIsLoaded();
       await checkInitialTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
       await checkUpdatedTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
       await checkInitialTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       await checkInitialTimeConfiguration();
-      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await timePicker.setAbsoluteRange(updatedTimeRange.start, updatedTimeRange.end);
       await discover.waitUntilTabIsLoaded();
-      // changing the time range should trigger the unsaved changes badge for a discover session with an enabled time range setting
-      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
+      // changing the time range should trigger the unsaved changes indicator for a discover session with an enabled time range setting
+      expect(await discover.hasUnsavedChangesIndicator()).to.be(true);
     });
   });
 }

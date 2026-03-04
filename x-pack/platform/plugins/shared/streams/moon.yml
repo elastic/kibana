@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/lock-manager'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/core-http-server-utils'
   - '@kbn/core-analytics-server'
   - '@kbn/features-plugin'
   - '@kbn/server-route-repository-utils'
@@ -58,7 +57,6 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/ai-tools'
-  - '@kbn/logging-mocks'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'
@@ -77,6 +75,11 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/apm-utils'
   - '@kbn/alerting-types'
+  - '@kbn/core-http-common'
+  - '@kbn/scout'
+  - '@kbn/esql-language'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
@@ -90,6 +93,7 @@ fileGroups:
     - server/**/*
     - public/**/*
     - types/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:

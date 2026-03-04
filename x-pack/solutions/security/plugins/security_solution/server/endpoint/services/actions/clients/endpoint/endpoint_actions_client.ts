@@ -212,7 +212,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         const scriptDetails = await this.fetchScript(runscriptActionParams.scriptId);
         const scriptInfo = {
           file_id: scriptDetails.fileId,
-          file_hash: scriptDetails.fileHash,
+          file_sha256: scriptDetails.fileHash,
           file_name: scriptDetails.fileName,
           file_size: scriptDetails.fileSize,
           path_to_executable: scriptDetails.pathToExecutable,
@@ -567,10 +567,25 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       );
     }
 
+    let runscriptActionRequestParams = actionRequest;
+
+    // Apply default for `timeout` if not set on request payload
+    if (
+      !(runscriptActionRequestParams.parameters as EndpointRunScriptActionRequestParams).timeout
+    ) {
+      runscriptActionRequestParams = {
+        ...runscriptActionRequestParams,
+        parameters: {
+          ...runscriptActionRequestParams.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
     return this.handleResponseAction<
       RunScriptActionRequestBody,
       ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
-    >('runscript', actionRequest, options);
+    >('runscript', runscriptActionRequestParams, options);
   }
 
   async getCustomScripts({

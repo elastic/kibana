@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -18,14 +18,14 @@ import { AiFlowWaitingForGeneration } from './waiting_for_generation';
 interface Props {
   isGenerating: boolean;
   isBeingCanceled: boolean;
-  generatedQueries: StreamQueryKql[];
-  onEditQuery: (query: StreamQueryKql) => void;
+  isSchedulingGenerationTask: boolean;
+  generatedQueries: StreamQuery[];
+  onEditQuery: (query: StreamQuery) => void;
   stopGeneration: () => void;
   definition: Streams.all.Definition;
   isSubmitting: boolean;
-  setQueries: (queries: StreamQueryKql[]) => void;
+  setQueries: (queries: StreamQuery[]) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Omit<System, 'description'>[];
   dataViews: DataView[];
   taskStatus?: string;
   taskError?: string;
@@ -34,6 +34,7 @@ interface Props {
 export function GeneratedFlowForm({
   isGenerating,
   isBeingCanceled,
+  isSchedulingGenerationTask,
   generatedQueries,
   onEditQuery,
   stopGeneration,
@@ -41,15 +42,14 @@ export function GeneratedFlowForm({
   definition,
   setCanSave,
   isSubmitting,
-  features,
   dataViews,
   taskStatus,
   taskError,
 }: Props) {
-  const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+  const [selectedQueries, setSelectedQueries] = useState<StreamQuery[]>([]);
   const [isEditingQueries, setIsEditingQueries] = useState(false);
 
-  const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
+  const onSelectionChange = (selectedItems: StreamQuery[]) => {
     setSelectedQueries(selectedItems);
     setQueries(selectedItems);
   };
@@ -87,29 +87,15 @@ export function GeneratedFlowForm({
     );
   }
 
-  if (!isGenerating && generatedQueries.length === 0) {
-    return <AiFlowEmptyState />;
-  }
-
-  if (isGenerating && generatedQueries.length === 0) {
-    return (
+  if (generatedQueries.length === 0) {
+    return isGenerating ? (
       <AiFlowWaitingForGeneration
         stopGeneration={stopGeneration}
         isBeingCanceled={isBeingCanceled}
+        isSchedulingGenerationTask={isSchedulingGenerationTask}
       />
-    );
-  }
-
-  if (!isGenerating && generatedQueries.length === 0) {
-    return <AiFlowEmptyState />;
-  }
-
-  if (isGenerating && generatedQueries.length === 0) {
-    return (
-      <AiFlowWaitingForGeneration
-        stopGeneration={stopGeneration}
-        isBeingCanceled={isBeingCanceled}
-      />
+    ) : (
+      <AiFlowEmptyState />
     );
   }
 
@@ -123,7 +109,6 @@ export function GeneratedFlowForm({
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        features={features}
         dataViews={dataViews}
       />
       {isGenerating && (
@@ -131,6 +116,7 @@ export function GeneratedFlowForm({
           stopGeneration={stopGeneration}
           hasInitialResults={true}
           isBeingCanceled={isBeingCanceled}
+          isSchedulingGenerationTask={isSchedulingGenerationTask}
         />
       )}
     </>

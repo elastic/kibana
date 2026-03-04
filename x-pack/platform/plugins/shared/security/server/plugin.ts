@@ -13,6 +13,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ISavedObjectTypeRegistry,
   KibanaRequest,
   Logger,
   Plugin,
@@ -183,6 +184,8 @@ export class SecurityPlugin
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
+  private elasticsearchUrl?: string;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -212,7 +215,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -242,6 +245,10 @@ export class SecurityPlugin
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
     );
+
+    if (cloud?.cloudId) {
+      this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
+    }
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
@@ -292,13 +299,27 @@ export class SecurityPlugin
     this.fipsServiceSetup = this.fipsService.setup({ config, license });
     this.fipsServiceSetup.validateLicenseForFips();
 
+    let getTypeRegistrySync: (() => ISavedObjectTypeRegistry) | undefined;
+    void core.getStartServices().then(([coreStart]) => {
+      getTypeRegistrySync = () => coreStart.savedObjects.getTypeRegistry();
+    });
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       getCurrentUser,
-      getTypeRegistry: () =>
-        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
+      getTypeRegistry: () => {
+        /**
+         * The setup spaces client just registers the callback during setup using `registerClientWrapper` but doesn't invoke it.
+         * When `createSpacesClient` is run during `start`, startServices is guaranteed to be passed in
+         * and we can use the type registry from there.
+         */
+        if (!getTypeRegistrySync) {
+          throw new Error('Type registry is not available');
+        }
+        return getTypeRegistrySync();
+      },
     });
 
     setupSavedObjects({
@@ -313,6 +334,7 @@ export class SecurityPlugin
     core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+        getSession: this.getSession,
         audit: this.auditSetup,
         config,
       })
@@ -410,7 +432,7 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       session,
       uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam)
+        ? new UiamService(this.logger.get('uiam'), config.uiam, this.elasticsearchUrl)
         : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
@@ -492,5 +514,34 @@ export class SecurityPlugin
       packageInfo: this.initializerContext.env.packageInfo,
       docLinks: core.docLinks,
     });
+  }
+
+  private decodeElasticsearchUrlFromCloudId(cloudId: string): string | undefined {
+    this.logger.debug(`CloudId: ${cloudId}`);
+
+    const id = cloudId.split(':').pop();
+    if (!id) {
+      return undefined;
+    }
+
+    try {
+      const decoded = Buffer.from(id, 'base64').toString('utf8');
+      const parts = decoded.split('$');
+      if (parts.length < 2) {
+        return undefined;
+      }
+
+      const [hostWithPort, esIdWithPort] = parts;
+      const [host, defaultPort = '443'] = hostWithPort.split(':');
+      const [esId, esPort = defaultPort] = esIdWithPort.split(':');
+
+      const esHost = esId ? `${esId}.${host}` : host;
+      const endpoint = `https://${esHost}:${esPort}`;
+      this.logger.debug(`Endpoint: ${endpoint}`);
+      return endpoint;
+    } catch {
+      this.logger.debug(`Failed to decode cloud.id: ${cloudId}`);
+      return undefined;
+    }
   }
 }

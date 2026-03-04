@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServicesItemsItem } from '../../data_registry/data_registry_types';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
-import { parseDatemath } from '../../utils/time';
+import { parseDatemath, toMilliseconds } from '../../utils/time';
 
 interface ServiceFromIndex {
   serviceName: string;
@@ -32,7 +32,7 @@ async function getServicesFromLogsAndMetricsIndices({
   metricsIndices,
   start,
   end,
-  environment,
+  kqlFilter,
   logger,
 }: {
   esClient: IScopedClusterClient;
@@ -40,7 +40,7 @@ async function getServicesFromLogsAndMetricsIndices({
   metricsIndices: string[];
   start: number;
   end: number;
-  environment?: string;
+  kqlFilter?: string;
   logger: Logger;
 }): Promise<ServiceFromIndex[]> {
   const allIndices = [...logsIndices, ...metricsIndices];
@@ -60,7 +60,7 @@ async function getServicesFromLogsAndMetricsIndices({
           filter: [
             { range: { '@timestamp': { gte: start, lte: end } } },
             { exists: { field: 'service.name' } },
-            ...(environment ? [{ term: { 'service.environment': environment } }] : []),
+            ...kqlQuery(kqlFilter),
           ],
         },
       },
@@ -128,13 +128,10 @@ export async function getToolHandler({
   logger,
   start,
   end,
-  environment,
   healthStatus,
+  kqlFilter,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
@@ -142,8 +139,8 @@ export async function getToolHandler({
   logger: Logger;
   start: string;
   end: string;
-  environment?: string;
   healthStatus?: string[];
+  kqlFilter?: string;
 }): Promise<{
   services: ServicesItemsItem[];
   maxCountExceeded: boolean;
@@ -160,7 +157,7 @@ export async function getToolHandler({
   const [apmResponse, logsAndMetricsServices] = await Promise.all([
     dataRegistry.getData('servicesItems', {
       request,
-      environment,
+      kuery: kqlFilter,
       start,
       end,
     }),
@@ -170,7 +167,7 @@ export async function getToolHandler({
       metricsIndices,
       start: startMs,
       end: endMs,
-      environment,
+      kqlFilter,
       logger,
     }),
   ]);
@@ -186,7 +183,7 @@ export async function getToolHandler({
     return [
       {
         ...service,
-        latency: service.latency ? service.latency / 1000 : undefined,
+        latency: toMilliseconds(service.latency ?? null),
       },
     ];
   });

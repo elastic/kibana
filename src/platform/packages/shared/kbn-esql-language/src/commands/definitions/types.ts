@@ -9,8 +9,9 @@
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLNumericLiteralType } from '../../types';
+import type { ESQLNumericLiteralType } from '@elastic/esql/types';
 import type { Location } from '../registry/types';
+import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
 /**
  * This is the list of all data types that are supported in ES|QL.
@@ -198,6 +199,61 @@ export interface FunctionFilterPredicates {
   allowed?: string[];
 }
 
+// PromQL Function Definition Types
+
+export enum PromQLFunctionDefinitionTypes {
+  WITHIN_SERIES = 'within_series',
+  ACROSS_SERIES = 'across_series',
+  VALUE_TRANSFORMATION = 'value_transformation',
+  VECTOR_CONVERSION = 'vector_conversion',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  LABEL_MATCHING_OPERATOR = 'label_matching_operator',
+  SCALAR_CONVERSION = 'scalar_conversion',
+}
+
+export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
+
+export interface PromQLFunctionParameter {
+  name: string;
+  type: PromQLFunctionParamType;
+  optional: boolean;
+  description?: string;
+}
+
+export interface PromQLSignature {
+  params: PromQLFunctionParameter[];
+  returnType: PromQLFunctionParamType;
+  minParams?: number;
+}
+
+export interface PromQLFunctionDefinition {
+  type: PromQLFunctionDefinitionTypes;
+  name: string;
+  operator?: string;
+  description: string;
+  preview?: boolean;
+  ignoreAsSuggestion?: boolean;
+  signatures: PromQLSignature[];
+  locationsAvailable: Location[];
+  examples?: string[];
+}
+
+export interface PromQLESFunctionDefinition {
+  type: string;
+  name: string;
+  operator?: string;
+  description: string;
+  signatures: Array<{
+    params: PromQLFunctionParameter[];
+    variadic: boolean;
+    returnType: PromQLFunctionParamType;
+  }>;
+  examples: string[];
+  preview: boolean;
+  snapshot_only: boolean;
+}
+
 export interface Literals {
   name: string;
   description: string;
@@ -237,6 +293,10 @@ export interface ValidationErrors {
     };
   };
   unknownColumn: {
+    message: string;
+    type: { name: string | number };
+  };
+  unmappedColumnWarning: {
     message: string;
     type: { name: string | number };
   };
@@ -308,6 +368,36 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; availableFields: string };
   };
+  promqlInvalidParam: {
+    message: string;
+    type: {
+      reason: string;
+    };
+  };
+  promqlMutuallyExclusiveParams: {
+    message: string;
+    type: { param1: string; param2: string };
+  };
+  promqlMissingQuery: {
+    message: string;
+    type: {};
+  };
+  promqlUnknownFunction: {
+    message: string;
+    type: { fn: string };
+  };
+  promqlWrongNumberArgs: {
+    message: string;
+    type: { fn: string; expected: string; actual: number };
+  };
+  promqlGroupingNotAllowed: {
+    message: string;
+    type: { fn: string };
+  };
+  promqlNoMatchingSignature: {
+    message: string;
+    type: { fn: string; required: string };
+  };
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
@@ -374,6 +464,26 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  invalidSettingValue: {
+    message: string;
+    type: { value: string; setting: string };
+  };
+  unknownMapParameterName: {
+    message: string;
+    type: { paramName: string };
+  };
+  invalidMapParameterValueType: {
+    message: string;
+    type: { paramName: string; expectedType: string; actualType: string };
+  };
+  mmrQueryVectorWrongType: {
+    message: string;
+    type: { type: string };
+  };
+  mmrOnFieldWrongType: {
+    message: string;
+    type: { type: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
@@ -414,3 +524,5 @@ export function supportsArithmeticOperations(type: string): boolean {
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
 
 export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;
+
+export type InlineCastingType = keyof typeof inlineCastsMapping;

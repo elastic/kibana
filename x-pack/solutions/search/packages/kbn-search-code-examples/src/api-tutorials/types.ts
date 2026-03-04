@@ -14,4 +14,5 @@ export interface ConsoleTutorial {
   timeSeriesDataStreams: string;
   hybridSearch: string;
   vectorSearch: string;
+  agentBuilder: string;
 }

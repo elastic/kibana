@@ -8,7 +8,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+
+const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 
 export const osTypeBasedOnAgentType = (data?: Ecs) => {
   if (data?.agent?.type?.includes('endpoint')) {

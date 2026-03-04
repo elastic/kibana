@@ -8,10 +8,13 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
+import { panelBwc } from './panel_bwc';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -35,9 +38,14 @@ export function transformPanelsOut(
     const panelReferences = getPanelReferences(containerReferences ?? [], panel);
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences)
-      );
+      if (!sectionsMap[sectionId]) {
+        logger?.warn(`Panel references non-existent section "${sectionId}", treating as top-level`);
+        topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
+      } else {
+        sectionsMap[sectionId].panels.push(
+          transformPanelProperties(panel, panelReferences, containerReferences)
+        );
+      }
     } else {
       topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
     }
@@ -45,61 +53,42 @@ export function transformPanelsOut(
   return [...topLevelPanels, ...Object.values(sectionsMap)];
 }
 
+const defaultTransform = (
+  config: SavedDashboardPanel['embeddableConfig']
+): SavedDashboardPanel['embeddableConfig'] => {
+  const transformsFlow = flow(transformTitlesOut, transformTimeRangeOut);
+  return transformsFlow(config);
+};
+
 function transformPanelProperties(
-  {
-    embeddableConfig,
-    gridData,
-    id,
-    panelIndex,
-    panelRefName,
-    title,
-    type,
-    version,
-  }: SavedDashboardPanel,
-  panelReferences?: SavedObjectReference[],
+  storedPanel: SavedDashboardPanel,
+  storedPanelReferences?: SavedObjectReference[],
   containerReferences?: SavedObjectReference[]
 ) {
+  const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
+  const { embeddableConfig, gridData, panelIndex, type, version } = panel;
+
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  const matchingReference =
-    panelRefName && panelReferences
-      ? panelReferences.find((reference) => reference.name === panelRefName)
-      : undefined;
-
-  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
-  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
-  const panelType = matchingReference ? matchingReference.type : type;
-
-  const transforms = embeddableService?.getTransforms(panelType);
-
-  const config = {
-    ...embeddableConfig,
-    // <8.19 savedObjectId and title stored as siblings to embeddableConfig
-    ...(savedObjectId !== undefined && { savedObjectId }),
-    ...(title !== undefined && { title }),
-  };
+  const transforms = embeddableService?.getTransforms(type);
 
   let transformedPanelConfig;
   try {
-    if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(
-        config,
-        panelReferences,
-        containerReferences
-      );
-    }
+    transformedPanelConfig =
+      transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+      defaultTransform(embeddableConfig);
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(
-      `Unable to transform "${panelType}" embeddable state on read. Error: ${transformOutError.message}`
+      `Unable to transform "${type}" embeddable state on read. Error: ${transformOutError.message}`
     );
   }
 
   return {
     grid: restOfGrid,
-    config: transformedPanelConfig ? transformedPanelConfig : config,
+    config: transformedPanelConfig ? transformedPanelConfig : embeddableConfig,
     uid: panelIndex,
-    type: panelType,
+    type,
     ...(version && { version }),
   };
 }

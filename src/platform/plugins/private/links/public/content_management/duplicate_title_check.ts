@@ -48,7 +48,9 @@ export const checkForDuplicateTitle = async ({
       { onlyTitle: true }
     );
 
-    const existing = hits.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+    const existing = hits.find(
+      (obj) => obj.attributes.title?.toLowerCase() === title.toLowerCase()
+    );
 
     if (!existing || existing.id === id) {
       return true;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ManualIngestPipelineProcessor } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
@@ -13,7 +14,7 @@ import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should process basic manual ingest pipeline with set processor',
@@ -49,9 +50,9 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('status', 'processed');
-        expect(source).toHaveProperty('message', 'test message');
-        expect(source).toHaveProperty('existing_field', 'existing_value');
+        expect(source?.status).toBe('processed');
+        expect(source?.message).toBe('test message');
+        expect(source?.existing_field).toBe('existing_value');
       }
     );
 
@@ -95,10 +96,10 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('processor_type', 'manual');
-        expect(source).toHaveProperty('renamed_field', 'test_value');
-        expect(source).not.toHaveProperty('original_name'); // Should be renamed
-        expect(source).toHaveProperty('message', 'test message');
+        expect(source?.processor_type).toBe('manual');
+        expect(source?.renamed_field).toBe('test_value');
+        expect(source?.original_name).toBeUndefined(); // Should be renamed
+        expect(source?.message).toBe('test message');
       }
     );
 
@@ -144,8 +145,8 @@ apiTest.describe(
         const processedDoc = ingestedDocs.find((doc) => doc.message === 'should be processed');
         const skippedDoc = ingestedDocs.find((doc) => doc.message === 'should NOT be processed');
 
-        expect(processedDoc).toHaveProperty('status', 'processed_with_condition');
-        expect(skippedDoc).not.toHaveProperty('status'); // Should not be processed
+        expect(processedDoc?.status).toBe('processed_with_condition');
+        expect(skippedDoc?.status).toBeUndefined(); // Should not be processed
       }
     );
 
@@ -181,8 +182,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('tagged_field', 'tagged_value');
-      expect(source).toHaveProperty('message', 'test message with tag');
+      expect(source?.tagged_field).toBe('tagged_value');
+      expect(source?.message).toBe('test message with tag');
     });
 
     apiTest(
@@ -224,11 +225,110 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('client_ip', '192.168.1.1');
-        expect(source).toHaveProperty('method', 'GET');
-        expect(source).toHaveProperty('path', '/api/users');
-        expect(source).toHaveProperty('parsed_by', 'manual_grok');
-        expect(source).toHaveProperty('message', '192.168.1.1 GET /api/users');
+        expect(source?.client_ip).toBe('192.168.1.1');
+        expect(source?.method).toBe('GET');
+        expect(source?.path).toBe('/api/users');
+        expect(source?.parsed_by).toBe('manual_grok');
+        expect(source?.message).toBe('192.168.1.1 GET /api/users');
+      }
+    );
+
+    apiTest(
+      'should combine parent where condition with nested processor if condition',
+      async ({ testBed }) => {
+        const indexName = 'stream-e2e-test-manual-combined-conditions';
+
+        // Both conditions should be applied (AND logic)
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'manual_ingest_pipeline',
+              // Parent 'where' condition: only process documents where status is 'active'
+              where: { field: 'status', eq: 'active' },
+              processors: [
+                {
+                  set: {
+                    field: 'processed',
+                    value: 'both_conditions_met',
+                    // Nested 'if' condition: only process if priority is high
+                    if: "ctx.priority == 'high'",
+                  },
+                },
+              ],
+            } as ManualIngestPipelineProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
+          // Should be processed: status=active AND priority=high
+          { message: 'doc1', status: 'active', priority: 'high' },
+          // Should NOT be processed: status=active but priority=low (fails nested if)
+          { message: 'doc2', status: 'active', priority: 'low' },
+          // Should NOT be processed: status=inactive (fails parent where)
+          { message: 'doc3', status: 'inactive', priority: 'high' },
+          // Should NOT be processed: neither condition met
+          { message: 'doc4', status: 'inactive', priority: 'low' },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocsOrdered(indexName);
+        expect(ingestedDocs).toHaveLength(4);
+
+        const doc1 = ingestedDocs.find((doc) => doc.message === 'doc1');
+        const doc2 = ingestedDocs.find((doc) => doc.message === 'doc2');
+        const doc3 = ingestedDocs.find((doc) => doc.message === 'doc3');
+        const doc4 = ingestedDocs.find((doc) => doc.message === 'doc4');
+
+        // Only doc1 should have the 'processed' field set
+        expect(doc1?.processed).toBe('both_conditions_met');
+        expect(doc2?.processed).toBeUndefined();
+        expect(doc3?.processed).toBeUndefined();
+        expect(doc4?.processed).toBeUndefined();
+      }
+    );
+
+    apiTest(
+      'should preserve nested if condition when manual_ingest_pipeline has no where clause',
+      async ({ testBed }) => {
+        const indexName = 'stream-e2e-test-manual-nested-if-only';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'manual_ingest_pipeline',
+              // No parent 'where' condition
+              processors: [
+                {
+                  set: {
+                    field: 'processed',
+                    value: 'nested_if_only',
+                    // Only nested 'if' condition
+                    if: 'ctx.should_process == true',
+                  },
+                },
+              ],
+            } as ManualIngestPipelineProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
+          { message: 'should process', should_process: true },
+          { message: 'should not process', should_process: false },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocsOrdered(indexName);
+        expect(ingestedDocs).toHaveLength(2);
+
+        const processedDoc = ingestedDocs.find((doc) => doc.message === 'should process');
+        const skippedDoc = ingestedDocs.find((doc) => doc.message === 'should not process');
+
+        expect(processedDoc?.processed).toBe('nested_if_only');
+        expect(skippedDoc?.processed).toBeUndefined();
       }
     );
   }

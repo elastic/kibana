@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('managed data view', function describeIndexTests() {
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickEditIndexButton();
 
         await PageObjects.settings.expectDisabledDataViewEditor();
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
       });
 
       it('field editor is disabled', async function () {
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickAddField();
 
         await PageObjects.settings.expectDisabledFieldEditor();
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
       });
     });
   });

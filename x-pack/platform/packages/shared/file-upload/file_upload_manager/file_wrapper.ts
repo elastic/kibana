@@ -8,8 +8,8 @@
 import { BehaviorSubject } from 'rxjs';
 import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 import {
+  FileUploadTelemetryService,
   isAbortError,
-  type FileUploadTelemetryService,
   type FindFileStructureResponse,
   type FormattedOverrides,
   type ImportFailure,
@@ -112,7 +112,7 @@ export class FileWrapper {
     private fileUploadTelemetryService: FileUploadTelemetryService,
     private uploadSessionId: string
   ) {
-    this.fileId = Math.random().toString(36).substring(2, 15);
+    this.fileId = FileUploadTelemetryService.generateId();
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
     this.analyzedFile$.next({
       ...this.analyzedFile$.getValue(),
@@ -587,7 +587,7 @@ export class FileWrapper {
         upload_session_id: this.uploadSessionId,
         file_id: this.fileId,
         file_type: analysisResults.results.format,
-        file_extension: this.file.name.split('.').pop() ?? 'unknown',
+        file_extension: FileUploadTelemetryService.getFileExtension(this.file.name),
         file_size_bytes: this.file.size ?? 0,
         num_lines_analyzed: analysisResults.results.num_lines_analyzed,
         num_messages_analyzed: analysisResults.results.num_messages_analyzed,
@@ -605,7 +605,7 @@ export class FileWrapper {
         upload_session_id: this.uploadSessionId,
         file_id: this.fileId,
         file_type: 'unknown',
-        file_extension: this.file.name.split('.').pop() ?? 'unknown',
+        file_extension: FileUploadTelemetryService.getFileExtension(this.file.name),
         file_size_bytes: this.file.size ?? 0,
         num_lines_analyzed: 0,
         num_messages_analyzed: 0,
@@ -638,6 +638,7 @@ export class FileWrapper {
       upload_success: resp?.success === true,
       upload_cancelled: importStatus === STATUS.ABORTED,
       upload_time_ms: uploadTimeMs,
+      file_extension: FileUploadTelemetryService.getFileExtension(this.file.name),
     });
   }
 }

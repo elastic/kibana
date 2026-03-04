@@ -37,6 +37,32 @@ export const ConfigRecordSchema = schema.recordOf(
   }
 );
 
+export const VarGroupSelectionsSchema = schema.maybe(
+  schema.recordOf(schema.string(), schema.string(), {
+    meta: {
+      description:
+        'Variable group selections. Maps var_group name to the selected option name within that group.',
+    },
+  })
+);
+
+export const DeprecationInfoSchema = schema.object({
+  description: schema.string(),
+  since: schema.string(),
+  replaced_by: schema.maybe(
+    schema.recordOf(
+      schema.oneOf([
+        schema.literal('package'),
+        schema.literal('policyTemplate'),
+        schema.literal('input'),
+        schema.literal('dataStream'),
+        schema.literal('variable'),
+      ]),
+      schema.string()
+    )
+  ),
+});
+
 const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
@@ -60,8 +86,10 @@ const PackagePolicyStreamsSchema = {
     ),
   }),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
+  deprecated: schema.maybe(DeprecationInfoSchema),
 };
 
 export const PackagePolicyInputsSchema = {
@@ -73,6 +101,7 @@ export const PackagePolicyInputsSchema = {
   vars: schema.maybe(ConfigRecordSchema),
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
+  deprecated: schema.maybe(DeprecationInfoSchema),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
@@ -169,6 +198,7 @@ export const PackagePolicyBaseSchema = {
 
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema), { maxSize: 1000 }),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   overrides: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -321,6 +351,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
           },
         })
       ),
+      deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
       streams: schema.maybe(
         schema.recordOf(
@@ -334,6 +365,8 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
               })
             ),
             vars: schema.maybe(SimplifiedVarsSchema),
+            var_group_selections: VarGroupSelectionsSchema,
+            deprecated: schema.maybe(DeprecationInfoSchema),
           }),
           {
             meta: {
@@ -394,6 +427,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   inputs: SimplifiedPackagePolicyInputsSchema,
   supports_agentless: schema.maybe(
     schema.nullable(

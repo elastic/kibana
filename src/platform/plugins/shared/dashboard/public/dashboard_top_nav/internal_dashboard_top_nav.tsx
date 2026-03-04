@@ -21,7 +21,6 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlsRenderer, type PublishesControlsLayout } from '@kbn/controls-renderer';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
@@ -33,7 +32,6 @@ import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/publ
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { BehaviorSubject } from 'rxjs';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -59,8 +57,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { arePinnedPanelLayoutsEqual } from '../dashboard_api/layout_manager/are_layouts_equal';
-import type { DashboardLayout } from '../dashboard_api/layout_manager';
+import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -246,6 +243,20 @@ export function InternalDashboardTopNav({
     };
   }, [onAppLeave, hasUnsavedChanges, viewMode]);
 
+  // Browser refresh/close with unsaved changes - only native confirmation, no custom message
+  useEffect(() => {
+    if (viewMode !== 'edit' || !hasUnsavedChanges) return;
+
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [hasUnsavedChanges, viewMode]);
+
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || isChromeVisible) && !fullScreenMode;
@@ -308,8 +319,6 @@ export function InternalDashboardTopNav({
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
-        iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
-        iconOnClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
       } as TopNavMenuBadgeProps;
 
       allBadges.push({
@@ -370,42 +379,6 @@ export function InternalDashboardTopNav({
     []
   );
 
-  /**
-   * `ControlsRenderer` expects `controls` rather than `pinnedPanels` when rendering its layout; so,
-   * we should map this to the expected key and keep them in sync
-   */
-  const dashboardWithControlsApi = useMemo(() => {
-    const controlLayout: PublishesControlsLayout['layout$'] = new BehaviorSubject({
-      controls: dashboardApi.layout$.getValue().pinnedPanels, // only controls can be pinned at the moment, so no need to filter
-    });
-    return { ...dashboardApi, layout$: controlLayout };
-  }, [dashboardApi]);
-
-  useEffect(() => {
-    const syncControlsWithPinnedPanels = dashboardWithControlsApi.layout$.subscribe(
-      ({ controls }) => {
-        const currentLayout = dashboardApi.layout$.getValue();
-        if (
-          !arePinnedPanelLayoutsEqual({ pinnedPanels: controls } as DashboardLayout, currentLayout)
-        ) {
-          dashboardApi.layout$.next({ ...currentLayout, pinnedPanels: controls });
-        }
-      }
-    );
-    const syncPinnedPanelsWithControls = dashboardApi.layout$.subscribe((layout) => {
-      const { controls: currentControls } = dashboardWithControlsApi.layout$.getValue();
-      if (!deepEqual(currentControls, layout.pinnedPanels)) {
-        dashboardWithControlsApi.layout$.next({
-          controls: layout.pinnedPanels,
-        });
-      }
-    });
-    return () => {
-      syncControlsWithPinnedPanels.unsubscribe();
-      syncPinnedPanelsWithControls.unsubscribe();
-    };
-  }, [dashboardWithControlsApi, dashboardApi.layout$]);
-
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -456,7 +429,7 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      {viewMode !== 'print' ? <ControlsRenderer parentApi={dashboardWithControlsApi} /> : null}
+      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

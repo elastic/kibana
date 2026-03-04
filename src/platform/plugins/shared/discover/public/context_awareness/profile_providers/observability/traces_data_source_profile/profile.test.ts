@@ -77,6 +77,36 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MATCH);
   });
 
+  it('should NOT match when ES|QL query is transformational', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | STATS count()' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is invalid', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | WHERE' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is missing', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: undefined,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   it('should NOT match when the index is not for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
@@ -106,28 +136,5 @@ describe('tracesDataSourceProfileProvider', () => {
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);
-  });
-
-  describe('getColumnsConfiguration', () => {
-    it('should return custom configuration for the "_source" column', () => {
-      const getColumnsConfiguration =
-        tracesDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
-          context: {
-            category: DataSourceCategory.Traces,
-          },
-        });
-
-      const columnConfiguration = getColumnsConfiguration?.();
-      expect(columnConfiguration).toBeDefined();
-      expect(columnConfiguration).toHaveProperty('_source');
-
-      const config = columnConfiguration!._source({
-        column: { id: '_source', displayAsText: 'Summary' },
-        headerRowHeight: 1,
-      });
-
-      expect(config).toBeDefined();
-      expect(config).toHaveProperty('display');
-    });
   });
 });

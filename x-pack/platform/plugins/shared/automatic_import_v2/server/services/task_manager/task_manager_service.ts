@@ -14,10 +14,12 @@ import type {
   RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
 import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportV2PluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
 
@@ -28,6 +30,10 @@ export interface DataStreamTaskParams extends DataStreamParams {
    * Inference connector ID to use when the background task runs.
    */
   connectorId: string;
+  /**
+   * Optional LangSmith tracing options to propagate to the agent invocation.
+   */
+  langSmithOptions?: LangSmithOptions;
 }
 
 export interface DataStreamParams {
@@ -174,7 +180,8 @@ export class TaskManagerService {
     );
 
     const { id: taskId, params } = taskInstance;
-    const { integrationId, dataStreamId, connectorId } = params as DataStreamTaskParams;
+    const { integrationId, dataStreamId, connectorId, langSmithOptions } =
+      params as DataStreamTaskParams;
 
     this.logger.debug(
       `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
@@ -208,24 +215,26 @@ export class TaskManagerService {
         integrationId,
         dataStreamId,
         esClient,
-        model
+        model,
+        langSmithOptions
       );
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      // Extract and convert the pipeline to JSON string
-      const pipelineString = JSON.stringify(result.current_pipeline || {});
+      const pipelineObject = (result.current_pipeline || {}) as Pipeline;
+      const pipelineGenerationResultsObjects = result.pipeline_generation_results;
 
-      // Extract docs from pipeline_generation_results and convert to string array
-      const pipelineGenerationResults = (result.pipeline_generation_results?.docs || []).map(
-        (doc) => JSON.stringify(doc)
+      this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
+      this.logger.debug(
+        `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
 
       // Update the data stream saved object with pipeline and task status
       await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId,
         dataStreamId,
-        ingestPipeline: pipelineString,
+        ingestPipeline: pipelineObject,
+        pipelineDocs: pipelineGenerationResultsObjects,
         status: TASK_STATUSES.completed,
       });
 
@@ -236,8 +245,8 @@ export class TaskManagerService {
         state: {
           task_status: TASK_STATUSES.completed,
           result: {
-            ingest_pipeline: pipelineString,
-            pipeline_generation_results: pipelineGenerationResults,
+            ingest_pipeline: pipelineObject,
+            pipeline_generation_results: pipelineGenerationResultsObjects,
           },
         },
       };

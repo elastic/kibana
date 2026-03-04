@@ -29,10 +29,12 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  ENABLE_DE_HEALTH_UI_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
@@ -40,7 +42,7 @@ import {
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
@@ -49,6 +51,7 @@ import {
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
+  DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -226,13 +229,37 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
-      value: true,
+      value: false,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
+    ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
+      [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
+        name: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentLabel',
+          {
+            defaultMessage: 'Enable alerts and attacks alignment',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentDescription',
+          {
+            defaultMessage:
+              'Enabling this setting will reveal a new Attacks page under the Detections navigation item. Similarly, the Alerts page will be part of the Detections navigation item.',
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Security Asset Inventory',
@@ -314,6 +341,26 @@ export const initUiSettings = (
       }),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.deHealthUIEnabled && {
+      [ENABLE_DE_HEALTH_UI_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.deHealthUIEnabledLabel', {
+          defaultMessage: 'Enable Detection Engine Health UI',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.deHealthUIEnabledDescription',
+          {
+            defaultMessage: `Enable the Detection Engine Health UI within Security Solution. When enabled, you can access the new Detection Engine Health page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
@@ -468,31 +515,30 @@ export const initUiSettings = (
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],
     },
+    [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionLabel',
+        {
+          defaultMessage: 'Include data stream namespaces in rule execution',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
+        {
+          defaultMessage:
+            'When configured, only events from the specified data stream namespaces are searched during rule execution. Provide an array of namespace strings, e.g. "namespace1","namespace2"',
+        }
+      ),
+      type: 'array',
+      schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
+      value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
+      category: [APP_ID],
+      requiresPageReload: false,
+      solutionViews: ['classic', 'security'],
+    },
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
-          [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
-              {
-                defaultMessage: 'Extended rule execution logging',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
-              {
-                defaultMessage:
-                  '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            value: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            solutionViews: ['classic', 'security'],
-          },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
               'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
@@ -517,7 +563,7 @@ export const initUiSettings = (
               schema.literal(LogLevelSetting.debug),
               schema.literal(LogLevelSetting.trace),
             ]),
-            value: LogLevelSetting.error,
+            value: LogLevelSetting.info,
             options: [
               LogLevelSetting.off,
               LogLevelSetting.error,

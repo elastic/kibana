@@ -8,8 +8,14 @@
  */
 
 import type { LineCounter } from 'yaml';
-import { isBuiltInStepProperty, isBuiltInStepType, type StepPropertyHandler } from '@kbn/workflows';
+import {
+  isBuiltInStepProperty,
+  isBuiltInStepType,
+  type SelectionContext,
+  type StepPropertyHandler,
+} from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
+import { getValueFromValueNode } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { CustomPropertyItem } from '../model/types';
 
 export function collectAllCustomPropertyItems(
@@ -36,14 +42,17 @@ export function collectAllCustomPropertyItems(
           prop.valueNode.range
         ) {
           const scope = prop.path.length > 0 && prop.path[0] === 'with' ? 'input' : 'config';
-          // if the property is in the with block, we need to remove the with prefix from the key
-          // e.g. with.message -> message
           const key = scope === 'config' ? propKey : propKey.split('.').slice(1).join('.');
           const propertyHandler = getPropertyHandler(step.stepType, scope, key);
-          if (propertyHandler && propertyHandler.validation?.validate) {
+          if (propertyHandler && propertyHandler.selection) {
             const [startOffset, endOffset] = prop.valueNode.range;
             const startPos = lineCounter.linePos(startOffset);
             const endPos = lineCounter.linePos(endOffset);
+            const context: SelectionContext = {
+              stepType: step.stepType,
+              scope,
+              propertyKey: key,
+            };
             customPropertyItems.push({
               id: `${step.stepId}-${key}-${startPos.line}-${startPos.col}-${endPos.line}-${endPos.col}`,
               startLineNumber: startPos.line,
@@ -54,8 +63,9 @@ export function collectAllCustomPropertyItems(
               scope,
               stepType: step.stepType,
               propertyKey: key,
-              propertyValue: prop.valueNode.value,
-              validator: propertyHandler.validation?.validate,
+              propertyValue: getValueFromValueNode(prop.valueNode),
+              selectionHandler: propertyHandler.selection,
+              context,
               yamlPath: prop.path,
               key: prop.keyNode.value,
             });

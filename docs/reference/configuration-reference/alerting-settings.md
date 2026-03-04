@@ -1,5 +1,5 @@
 ---
-navigation_title: "Alerting and action settings"
+navigation_title: 'Alerting and action settings'
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html
 applies_to:
@@ -10,7 +10,6 @@ applies_to:
 
 # Alerting and action settings in {{kib}} [alert-action-settings-kb]
 
-
 Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
 
 1. [Set up {{kib}} to work with {{stack}} {{security-features}}](docs-content://deploy-manage/security/secure-your-cluster-deployment.md).
@@ -18,34 +17,33 @@ Alerting and actions are enabled by default in {{kib}}, but require you to confi
 3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`](#general-alert-action-settings).
 
 :::{note}
-If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on Elastic Cloud Hosted')
 :::
 
 ## General settings [general-alert-action-settings]
 
 `xpack.encryptedSavedObjects.encryptionKey`
-:    A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they’re stored in Elasticsearch. Third party credentials — such as the username and password used to connect to an SMTP service — are an example of encrypted properties.
+:   A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they’re stored in Elasticsearch. Third party credentials — such as the username and password used to connect to an SMTP service — are an example of encrypted properties.
 
-     Kibana offers a [CLI tool](/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
+    Kibana offers a [CLI tool](/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
 
-     If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn’t the same on all instances of Kibana.
+    If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn’t the same on all instances of Kibana.
 
-     Although the key can be specified in clear text in `kibana.yml`, it’s recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
+    Although the key can be specified in clear text in `kibana.yml`, it’s recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
 
-     Data type: `string`
-
+    Data type: `string`
 
 ## Action settings [action-settings]
 
-`xpack.actions.allowedHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+`xpack.actions.allowedHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 
     Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 
     Data type: `string`
 
-`xpack.actions.customHostSettings` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A list of custom host settings to override existing global settings.
+`xpack.actions.customHostSettings` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   A list of custom host settings to override existing global settings.
 
     Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
 
@@ -58,25 +56,30 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 
     ```yaml
     xpack.actions.customHostSettings:
-      - url: smtp://mail.example.com:465
-        ssl:
-          verificationMode: 'full'
-          certificateAuthoritiesFiles: [ 'one.crt' ]
-          certificateAuthoritiesData: |
-              -----BEGIN CERTIFICATE-----
-              MIIDTD...
-              CwUAMD...
-              ... multiple lines of certificate data ...
-              -----END CERTIFICATE-----
-        smtp:
-          requireTLS: true
-      - url: <EXAMPLE_WEBHOOK_URL>
-        ssl:
-          verificationMode: 'none'
+        - url: smtp://mail.example.com:465
+          ssl:
+            verificationMode: 'full'
+            certificateAuthoritiesFiles: [ 'one.crt' ]
+            certificateAuthoritiesData: |
+                -----BEGIN CERTIFICATE-----
+                MIIDTD...
+                CwUAMD...
+                ... multiple lines of certificate data ...
+                -----END CERTIFICATE-----
+                -----BEGIN CERTIFICATE-----
+                MIIDTD...
+                CwUAMD...
+                ... multiple lines of certificate data ...
+                -----END CERTIFICATE-----
+            smtp:
+              requireTLS: true
+        - url: <EXAMPLE_WEBHOOK_URL>
+          ssl:
+            verificationMode: 'none'
     ```
 
-`xpack.actions.customHostSettings[n].url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A URL associated with this custom host setting.  Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the port is not provided, 443 is used for `https` and 25 is used for `smtp`.  The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
+`xpack.actions.customHostSettings[n].url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   A URL associated with this custom host setting. Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`. If the port is not provided, 443 is used for `https` and 25 is used for `smtp`. The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
 
     Entries with `https` URLs can use the `ssl` options, and entries with `smtp` URLs can use both the `ssl` and `smtp` options.
 
@@ -84,24 +87,22 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 
     Data type: `string`
 
-
-`xpack.actions.customHostSettings[n].smtp.ignoreTLS` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A boolean value indicating that TLS must not be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+`xpack.actions.customHostSettings[n].smtp.ignoreTLS` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   A boolean value indicating that TLS must not be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
     Data type: `bool`
     Default: `false`
 
-
-`xpack.actions.customHostSettings[n].smtp.requireTLS` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+`xpack.actions.customHostSettings[n].smtp.requireTLS` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+: A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
     Data type: `bool`
     Default: `false`
 
 $$$action-config-custom-host-verification-mode$$$
 
-`xpack.actions.customHostSettings[n].ssl.verificationMode` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode). Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
+`xpack.actions.customHostSettings[n].ssl.verificationMode` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode). Overrides the general `xpack.actions.ssl.verificationMode` configuration for requests made for this hostname/port.
 
     Data type: `enum`
 
@@ -118,15 +119,15 @@ $$$action-config-custom-host-verification-mode$$$
 
     Data type: `string`
 
-`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   The contents of one or more PEM-encoded certificate files in multiline format. This configuration can be used for environments where the files cannot be made available.
 
     Data type: `string`
 
 $$$action-config-email-domain-allowlist$$$
 
-`xpack.actions.email.domain_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
+`xpack.actions.email.domain_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
 
     ::::{warning}
     This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
@@ -134,8 +135,8 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
-`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2`
-:    A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}') {applies_to}`stack: ga 9.2`
+:   A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
 
     ::::{warning}
     This setting cannot be used with `xpack.actions.email.domain_allowlist`.
@@ -151,39 +152,39 @@ $$$action-config-email-domain-allowlist$$$
 
     Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
 
-`xpack.actions.email.maximum_body_length` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
-:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+`xpack.actions.email.maximum_body_length` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}') {applies_to}`stack: ga 9.3`
+:   The maximum length of an email body in bytes. Values longer than this length will be truncated. The default is 25MB, the maximum is 25MB.
 
-`xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
-:    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+`xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}') {applies_to}`stack: ga 9.1`
+:   The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
     ::::{warning}
-    This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
+    This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting.
     ::::
 
     Data type: `string`
     Default: `email-smtp.us-east-1.amazonaws.com`
 
-`xpack.actions.email.services.ses.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+`xpack.actions.email.services.ses.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}') {applies_to}`stack: ga 9.1`
 :   The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
     Data type: `int`
     Default: `465`
 
-`xpack.actions.email.services.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+`xpack.actions.email.services.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}') {applies_to}`stack: ga 9.1`
 :   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
 
     Data type: `string`
     Default: `["*"]`
 
-`xpack.actions.enableFooterInEmail` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.enableFooterInEmail` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions.
 
     Data type: `bool`
     Default: `true`
 
-`xpack.actions.enabledActionTypes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+`xpack.actions.enabledActionTypes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, `.servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, `.gen-ai`, `.bedrock`, `.gemini`, `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 
     Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function.
 
@@ -212,7 +213,7 @@ $$$action-config-email-domain-allowlist$$$
     Data type: `string`
     Default: `https://graph.microsoft.com/.default`
 
-`xpack.actions.proxyUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.proxyUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 
     Proxies may be used to proxy http or https requests through a proxy using the http or https protocol.  Kibana only uses proxies in "CONNECT" mode (sometimes referred to as "tunneling" TCP mode, compared to HTTP mode).  That is, Kibana will always make requests through a proxy using the HTTP `CONNECT` method.
@@ -229,7 +230,7 @@ $$$action-config-email-domain-allowlist$$$
     curl --verbose --proxytunnel --proxy http://localhost:8080 <EXAMPLE_URL>
     ```
 
-`xpack.actions.proxyBypassHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.proxyBypassHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.
 
     By default, all hosts will use the proxy, but if an action’s hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
@@ -242,9 +243,9 @@ $$$action-config-email-domain-allowlist$$$
     xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
     ```
 
-    If applicable, include the subdomain in the hostname
+    If applicable, include the subdomain in the hostname.
 
-`xpack.actions.proxyOnlyHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.proxyOnlyHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.
 
     By default, no hosts will use the proxy, but if an action’s hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
@@ -257,10 +258,9 @@ $$$action-config-email-domain-allowlist$$$
     xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
     ```
 
-    If applicable, include the subdomain in the hostname
+    If applicable, include the subdomain in the hostname.
 
-
-`xpack.actions.proxyHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.proxyHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies HTTP headers for the proxy, if using a proxy for actions.
 
     Data type: `string`
@@ -268,8 +268,8 @@ $$$action-config-email-domain-allowlist$$$
 
 $$$action-config-proxy-verification-mode$$$
 
-`xpack.actions.ssl.proxyVerificationMode` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server.
+`xpack.actions.ssl.proxyVerificationMode` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server.
 
     Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 
@@ -287,7 +287,7 @@ $$$action-config-proxy-verification-mode$$$
 
 $$$action-config-verification-mode$$$
 
-`xpack.actions.ssl.verificationMode` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.ssl.verificationMode` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Controls the verification for the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 
     [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationMode)
@@ -304,18 +304,18 @@ $$$action-config-verification-mode$$$
 
     Default: `full`
 
-`xpack.actions.maxResponseContentLength` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.maxResponseContentLength` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the max number of bytes of the http response for requests to external resources.
 
     Data type: `int`
     Default: `1000000 (1MB)`
 
-`xpack.actions.responseTimeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.responseTimeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the time allowed for requests to external resources. Requests that take longer are canceled. The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`). For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
     Data type: `string`
 
-`xpack.actions.run.maxAttempts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.run.maxAttempts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the maximum number of times an action can be attempted to run.
 
     Data type: `int`
@@ -324,7 +324,7 @@ $$$action-config-verification-mode$$$
 
     * `minimum 1 and maximum 10`
 
-`xpack.actions.run.connectorTypeOverrides` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.run.connectorTypeOverrides` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Overrides the configs under `xpack.actions.run` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
 
     Data type: `string`
@@ -339,9 +339,8 @@ $$$action-config-verification-mode$$$
               maxAttempts: 5
     ```
 
-`xpack.actions.queued.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specifies the maximum number of actions that can be queued.
-    It is available in {{ecloud}} 8.11.0 and later versions.
+`xpack.actions.queued.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   Specifies the maximum number of actions that can be queued. It is available in {{ecloud}} 8.11.0 and later versions.
 
     Data type: `int`
     Default: `1000000`
@@ -361,8 +360,8 @@ xpack.actions.preconfigured:
 
 For more examples, go to [Preconfigured connectors](/reference/connectors-kibana/pre-configured-connectors.md).
 
-`xpack.actions.preconfiguredAlertHistoryEsIndex` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Enables a preconfigured alert history Elasticsearch [Index](/reference/connectors-kibana/index-action-type.md) connector.
+`xpack.actions.preconfiguredAlertHistoryEsIndex` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+: Enables a preconfigured alert history Elasticsearch [Index](/reference/connectors-kibana/index-action-type.md) connector.
 
     Data type: `bool`
     Default: `false`
@@ -480,7 +479,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod`
-:   For a [{{webhook-cm}} connector](/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to create a case in the third-party system
+:   For a [{{webhook-cm}} connector](/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to create a case in the third-party system.
 
     Data type: `string`
 
@@ -514,7 +513,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
        * {applies_to}`stack: ga 9.2+` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
        * {applies_to}`stack: ga =9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
        * {applies_to}`stack: ga =9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. 
+    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models.
        * {applies_to}`serverless: ga` Defaults to `gemini-2.5-pro`.
        * {applies_to}`stack: ga 9.1+` Defaults to `gemini-2.5-pro`.
        * {applies_to}`stack: ga =9.0` Defaults to `gemini-1.5-pro-002`.
@@ -563,7 +562,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.config.index`
-:   For an [index connector](/reference/connectors-kibana/index-action-type.md), specifies the Elasticsearch index.
+: For an [index connector](/reference/connectors-kibana/index-action-type.md), specifies the Elasticsearch index.
 
     Data type: `string`
 
@@ -704,7 +703,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue`
-:   For a [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the user identifier. It is required when required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+:   For a [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the user identifier. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
 
     Data type: `string`
 
@@ -744,7 +743,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.secrets.accessKey`
-:   For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), specifies the AWS access key for authentication.
+: For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), specifies the AWS access key for authentication.
 
     Data type: `string`
 
@@ -754,8 +753,9 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson`
-:   For an [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), specifies the GCP service account credentials JSON file for authentication.
+:   A credentials secret that varies by connector:
 
+    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), specifies the GCP service account credentials JSON file for authentication.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), specifies the OpenAI or Azure OpenAI API key for authentication.
     * For an [{{opsgenie}} connector](/reference/connectors-kibana/opsgenie-action-type.md), specifies the {{opsgenie}} API authentication key for HTTP basic authentication.
 
@@ -795,7 +795,6 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     * For a [Tines connector](/reference/connectors-kibana/tines-action-type.md), specifies the email used to sign in to Tines.
 
     Data type: `string`
-
 
 `xpack.actions.preconfigured.<connector-id>.secrets.password`
 :   A password secret that varies by connector:
@@ -838,7 +837,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 `xpack.actions.preconfigured.<connector-id>.secrets.token`
 :   A token secret that varies by connector:
 
-    * For a [D3 Security conector](/reference/connectors-kibana/d3security-action-type.md), specifies the D3 Security token.
+    * For a [D3 Security connector](/reference/connectors-kibana/d3security-action-type.md), specifies the D3 Security token.
     * For a [Slack connector](/reference/connectors-kibana/slack-action-type.md), specifies the Slack bot user OAuth token.
     * For a [Tines connector](/reference/connectors-kibana/tines-action-type.md), specifies the Tines API token.
     * For a [Torq connector](/reference/connectors-kibana/torq-action-type.md), specifies the secret of the webhook authentication header.
@@ -853,11 +852,10 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     Data type: `string`
 
-
 `xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl`
 :   A URL that varies by connector:
 
-    * For a [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md), specifies the URL of the incoming webhook.
+    * For a [Microsoft Teams connector](/reference/connectors-kibana/teams-action-type.md), specifies the URL of the incoming webhook.
     * For a [Slack connector](/reference/connectors-kibana/slack-action-type.md), specifies the Slack webhook URL.
 
     ::::{note}
@@ -879,7 +877,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
 ## Alerting settings [alert-settings]
 
-`xpack.alerting.cancelAlertsOnRuleTimeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.cancelAlertsOnRuleTimeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies whether to skip writing alerts and scheduling actions if rule processing was cancelled due to a timeout. This setting can be overridden by individual rule types.
 
     Data type: `bool`
@@ -889,41 +887,46 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   Specifies the maximum number of rules to run per minute.
 
     Data type: `int`
-    Default: `10000`
+    Default: `32000`
 
-`xpack.alerting.rules.minimumScheduleInterval.value` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+    :::{note}
+    :applies_to: serverless:
+    In Serverless, the maximum number of rules to run per minute is set to `400` and can't be configured.
+    :::
+
+`xpack.alerting.rules.minimumScheduleInterval.value` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as a number and a time unit (`s`, `m`, `h`, or `d`). For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`.
 
     Data type: `string`
     Default: `1m`
 
-`xpack.alerting.rules.minimumScheduleInterval.enforce` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.rules.minimumScheduleInterval.enforce` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the behavior when a new or changed rule has a schedule interval less than the value defined in `xpack.alerting.rules.minimumScheduleInterval.value`. If `false`, rules with schedules less than the interval will be created but warnings will be logged. If `true`, rules with schedules less than the interval cannot be created.
 
     Data type: `bool`
     Default: `false`
 
-`xpack.alerting.rules.run.actions.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.rules.run.actions.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the maximum number of actions that a rule can generate each time detection checks run.
 
     Data type: `int`
 
-`xpack.alerting.rules.run.alerts.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.rules.run.alerts.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the maximum number of alerts that a rule can generate each time detection checks run.
 
     ::::{warning}
-    The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload, however setting a value higher than the default (`1000`) is not recommended or supported. Doing so could strain system resources and lead to performance issues, delays in alert processing, and potential disruptions during high alert activity periods.
+    The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload. While it is technically possible to increase this value above 1000, doing so is not recommended and not supported. Increasing this limit can significantly affect {{kib}} and {{es}} performance and memory usage. Carefully evaluate the impact on your deployment before making this change.
     ::::
 
     Data type: `int`
     Default: `1000`
 
-`xpack.alerting.rules.run.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.rules.run.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies the default timeout for tasks associated with all types of rules. The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`). For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
     Data type: `string`
 
-`xpack.alerting.rules.run.ruleTypeOverrides` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.rules.run.ruleTypeOverrides` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
 
     Data type: `string`
@@ -938,7 +941,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
               timeout: '15m'
     ```
 
-`xpack.alerting.rules.run.actions.connectorTypeOverrides` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.alerting.rules.run.actions.connectorTypeOverrides` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Overrides the configs under `xpack.alerting.rules.run.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
 
     Data type: `string`

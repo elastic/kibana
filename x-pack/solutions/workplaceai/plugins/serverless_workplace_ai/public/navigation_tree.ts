@@ -7,8 +7,7 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { DATA_CONNECTORS_SHORT_TITLE } from '@kbn/data-connectors-plugin/common';
-import agentsIcon from './assets/robot.svg';
+import { DATA_SOURCES_SHORT_TITLE } from '@kbn/data-sources-plugin/common';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
   return {
@@ -20,12 +19,12 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         breadcrumbStatus: 'hidden',
       },
       {
-        icon: agentsIcon, // Temp svg until we have icon in EUI
+        icon: 'productAgent',
         link: 'agent_builder',
       },
       {
-        link: 'data_connectors',
-        title: DATA_CONNECTORS_SHORT_TITLE,
+        link: 'data_sources',
+        title: DATA_SOURCES_SHORT_TITLE,
         icon: 'plugs',
         badgeType: 'techPreview',
       },
@@ -34,12 +33,14 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       },
       {
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
       },
       {
         link: 'discover',
+        icon: 'productDiscover',
       },
     ],
     footer: [
@@ -125,14 +126,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
           },
         ],
-      },
-      {
-        id: 'cloudLinkUserAndRoles',
-        cloudLink: 'userAndRoles',
-      },
-      {
-        id: 'cloudLinkBilling',
-        cloudLink: 'billingAndSub',
       },
     ],
   };

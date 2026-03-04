@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BehaviorSubject,
   Subject,
@@ -88,6 +88,7 @@ export const ControlGroupRenderer = ({
 
   const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
   const layoutApi = useLayoutApi(initialState, childrenApi, lastSavedState$Ref);
+  const [controls, setControls] = useState(layoutApi?.layout$.getValue().controls);
 
   /** Props management */
   const searchApi = useSearchApi({
@@ -109,6 +110,7 @@ export const ControlGroupRenderer = ({
       ...searchApi,
       ...propsApi,
       reload$,
+      panelIsPinned: () => true,
       getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
@@ -125,6 +127,7 @@ export const ControlGroupRenderer = ({
     ])
       .pipe(
         map(([currentChildState, currentLayout]) => {
+          setControls(currentLayout.controls);
           const combinedState: ControlPanelsState = {};
           Object.keys(currentLayout.controls).forEach((id) => {
             combinedState[id] = {
@@ -162,6 +165,7 @@ export const ControlGroupRenderer = ({
       esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
       appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
       appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
+      getControls: parentApi.layout$.getValue().controls ?? {},
       reload: () => {
         parentApi.reload$.next();
       },
@@ -209,7 +213,13 @@ export const ControlGroupRenderer = ({
   }, [parentApi, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
-  return !parentApi ? null : (
-    <ControlsRenderer parentApi={parentApi as ControlsRendererParentApi} />
+  return !parentApi || !controls ? null : (
+    <ControlsRenderer
+      parentApi={parentApi as ControlsRendererParentApi}
+      controls={{ controls }}
+      onControlsChanged={(newControls) => {
+        parentApi.layout$.next(newControls);
+      }}
+    />
   );
 };

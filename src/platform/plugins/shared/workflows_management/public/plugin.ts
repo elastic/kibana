@@ -20,6 +20,8 @@ import {
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -43,15 +45,20 @@ export class WorkflowsPlugin
     >
 {
   private appUpdater$: Subject<AppUpdater>;
+  private telemetryService: TelemetryService;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
+    this.telemetryService = new TelemetryService();
   }
 
   public setup(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
     plugins: WorkflowsPublicPluginSetupDependencies
   ): WorkflowsPublicPluginSetup {
+    // Initialize telemetry service
+    this.telemetryService.setup({ analytics: core.analytics });
+
     // Check if workflows UI is enabled
     const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
 
@@ -84,6 +91,7 @@ export class WorkflowsPlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
+
         return renderApp(services, params);
       },
     });
@@ -95,8 +103,9 @@ export class WorkflowsPlugin
     _core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
-    // Initialize StepSchemas singleton with workflowExtensions
+    // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions);
 
     // License check to set app status
     plugins.licensing.license$.subscribe((license) => {
@@ -121,8 +130,16 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      workflowsManagement: { telemetry: this.telemetryService.getClient() },
     };
 
-    return { ...coreStart, ...depsStart, ...additionalServices };
+    // Make sure the workflows extensions registries are ready before using the services
+    await depsStart.workflowsExtensions.isReady();
+
+    return {
+      ...coreStart,
+      ...depsStart,
+      ...additionalServices,
+    };
   }
 }

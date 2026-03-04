@@ -127,7 +127,7 @@ const createInstallButtonColumn = (
 });
 
 export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
     state: { loadingRules, isRefetching, isUpgradingSecurityPackages, isInstallingAllRules },

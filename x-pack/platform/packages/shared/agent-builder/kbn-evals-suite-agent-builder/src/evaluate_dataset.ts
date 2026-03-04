@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import {
   createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
-  type KibanaPhoenixClient,
+  type EvalsExecutorClient,
+  type Example,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
   selectEvaluators,
@@ -17,10 +17,9 @@ import {
   createSpanLatencyEvaluator,
   createRagEvaluators,
   type GroundTruth,
-  type RetrievedDoc,
+  type ExperimentTask,
+  type TaskOutput,
 } from '@kbn/evals';
-import type { ExperimentTask } from '@kbn/evals/src/types';
-import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -33,6 +32,7 @@ import {
   getToolCallSteps,
 } from '@kbn/evals';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
+import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -114,26 +114,7 @@ function configureExperiment({
   const ragEvaluators = createRagEvaluators({
     k: 10,
     relevanceThreshold: 1,
-    extractRetrievedDocs: (output: TaskOutput) => {
-      const steps =
-        (
-          output as {
-            steps?: Array<{
-              type: string;
-              tool_id?: string;
-              results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
-            }>;
-          }
-        )?.steps ?? [];
-      return steps
-        .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
-        .flatMap((step) => step.results ?? [])
-        .map((result) => ({
-          index: result.data?.reference?.index,
-          id: result.data?.reference?.id,
-        }))
-        .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
-    },
+    extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   });
@@ -215,13 +196,13 @@ function configureExperiment({
 
 export function createEvaluateDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -248,7 +229,7 @@ export function createEvaluateDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task,
@@ -260,13 +241,13 @@ export function createEvaluateDataset({
 
 export function createEvaluateExternalDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -279,7 +260,7 @@ export function createEvaluateExternalDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset: {
           name: datasetName,

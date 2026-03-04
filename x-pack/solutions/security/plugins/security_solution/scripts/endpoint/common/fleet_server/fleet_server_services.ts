@@ -291,8 +291,8 @@ const startFleetServerWithDocker = async ({
       const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
       let containerId = '';
 
-      if (isLocalhost(esURL.hostname)) {
-        esURL.hostname = localhostRealIp;
+      if (isLocalhost(esURL.hostname) || esURL.hostname === localhostRealIp) {
+        esURL.hostname = 'host.docker.internal';
       }
 
       if (isServerless) {

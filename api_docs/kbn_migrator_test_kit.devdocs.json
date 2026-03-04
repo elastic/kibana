@@ -22,7 +22,7 @@
           "(logFilePath?: string) => Promise<void>"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 442,
+        "lineNumber": 460,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +38,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 442,
+            "lineNumber": 460,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -63,7 +63,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 347,
+        "lineNumber": 365,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -79,7 +79,7 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 348,
+            "lineNumber": 366,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -96,7 +96,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 349,
+            "lineNumber": 367,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -119,7 +119,7 @@
           ", index?: string | string[]) => Promise<Record<string, number>>"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 362,
+        "lineNumber": 380,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -135,7 +135,7 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 363,
+            "lineNumber": 381,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -152,7 +152,7 @@
               "string | string[]"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 364,
+            "lineNumber": 382,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -221,7 +221,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 118,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -237,7 +237,7 @@
               "GetEsClientParams"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 118,
+            "lineNumber": 129,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -255,7 +255,7 @@
         "label": "getKibanaMigratorTestKit",
         "description": [],
         "signature": [
-          "({ settings, kibanaIndex, defaultIndexTypesMap, hashToVersionMap, kibanaVersion, kibanaBranch, types, removedTypes, logFilePath, nodeRoles, clientWrapperFactory, }?: ",
+          "({ settings, kibanaIndex, defaultIndexTypesMap, hashToVersionMap, kibanaVersion, kibanaBranch, types, removedTypes, logFilePath, nodeRoles, clientWrapperFactory, encryptionExtensionFactory, }?: ",
           {
             "pluginId": "@kbn/migrator-test-kit",
             "scope": "server",
@@ -274,7 +274,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 135,
+        "lineNumber": 146,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -284,7 +284,7 @@
             "id": "def-server.getKibanaMigratorTestKit.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  settings = {},\n  kibanaIndex = defaultKibanaIndex,\n  defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default\n  hashToVersionMap = {}, // allows testing the md5 => modelVersion transition\n  kibanaVersion = currentVersion,\n  kibanaBranch = currentBranch,\n  types = [],\n  removedTypes = [],\n  logFilePath = defaultLogFilePath,\n  nodeRoles = defaultNodeRoles,\n  clientWrapperFactory,\n}",
+            "label": "{\n  settings = {},\n  kibanaIndex = defaultKibanaIndex,\n  defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default\n  hashToVersionMap = {}, // allows testing the md5 => modelVersion transition\n  kibanaVersion = currentVersion,\n  kibanaBranch = currentBranch,\n  types = [],\n  removedTypes = [],\n  logFilePath = defaultLogFilePath,\n  nodeRoles = defaultNodeRoles,\n  clientWrapperFactory,\n  encryptionExtensionFactory,\n}",
             "description": [],
             "signature": [
               {
@@ -296,7 +296,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 135,
+            "lineNumber": 146,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -317,7 +317,7 @@
           "(logFilePath?: string) => Promise<string>"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 437,
+        "lineNumber": 455,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -333,7 +333,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 437,
+            "lineNumber": 455,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -356,7 +356,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 93,
+        "lineNumber": 104,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -369,7 +369,7 @@
             "label": "{\n  esVersion,\n  basePath,\n  dataArchive,\n  timeout = 60000,\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 98,
+            "lineNumber": 109,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -385,7 +385,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-                "lineNumber": 99,
+                "lineNumber": 110,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -401,7 +401,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-                "lineNumber": 100,
+                "lineNumber": 111,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -417,7 +417,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-                "lineNumber": 101,
+                "lineNumber": 112,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -433,7 +433,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-                "lineNumber": 102,
+                "lineNumber": 113,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -454,7 +454,7 @@
         "label": "KibanaMigratorTestKit",
         "description": [],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 85,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -547,7 +547,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -580,25 +580,25 @@
               " | undefined): Promise<",
               "BulkResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -951,27 +951,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
-              ">; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
-              ", unknown>>; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -1110,6 +1110,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -1456,7 +1458,7 @@
               "; }"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 86,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1472,7 +1474,7 @@
               "IKibanaMigrator"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 87,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1490,7 +1492,7 @@
               "[]>"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 88,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1508,7 +1510,7 @@
               "ISavedObjectTypeRegistry"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 89,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1524,7 +1526,7 @@
               "ISavedObjectsRepository"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 90,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1540,7 +1542,7 @@
         "label": "KibanaMigratorTestKitParams",
         "description": [],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 71,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1556,7 +1558,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 72,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1572,7 +1574,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 73,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1588,7 +1590,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 74,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1605,7 +1607,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 75,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1621,7 +1623,7 @@
               "Record<string, any> | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 76,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1638,7 +1640,7 @@
               "<any>[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 77,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1654,7 +1656,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 78,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1671,7 +1673,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 79,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1687,7 +1689,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 80,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1703,7 +1705,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 81,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1726,10 +1728,50 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-            "lineNumber": 82,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/migrator-test-kit",
+            "id": "def-server.KibanaMigratorTestKitParams.encryptionExtensionFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "encryptionExtensionFactory",
+            "description": [],
+            "signature": [
+              "((typeRegistry: ",
+              "ISavedObjectTypeRegistry",
+              ") => ",
+              "ISavedObjectsEncryptionExtension",
+              ") | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/migrator-test-kit",
+                "id": "def-server.KibanaMigratorTestKitParams.encryptionExtensionFactory.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "typeRegistry",
+                "description": [],
+                "signature": [
+                  "ISavedObjectTypeRegistry"
+                ],
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
+                "lineNumber": 92,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1745,7 +1787,7 @@
         "label": "currentVersion",
         "description": [],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 58,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1762,7 +1804,7 @@
           "\".kibana_migrator\""
         ],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 61,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1776,7 +1818,7 @@
         "label": "defaultKibanaTaskIndex",
         "description": [],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 62,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1790,7 +1832,7 @@
         "label": "defaultLogFilePath",
         "description": [],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 54,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1843,7 +1885,7 @@
         "label": "nextMinor",
         "description": [],
         "path": "src/platform/packages/private/kbn-migrator-test-kit/src/kibana_migrator_test_kit.ts",
-        "lineNumber": 59,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

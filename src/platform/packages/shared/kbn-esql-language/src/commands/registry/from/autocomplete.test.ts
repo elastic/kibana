@@ -9,11 +9,14 @@
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { METADATA_FIELDS } from '../options/metadata';
-import { getRecommendedQueriesTemplates } from '../options/recommended_queries';
+import {
+  getRecommendedQueriesTemplates,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -70,6 +73,29 @@ describe('FROM Autocomplete', () => {
     );
   });
   describe('... <sources> ...', () => {
+    test('suggests Browse data sources in empty source slots when enabled', async () => {
+      mockCallbacks = {
+        ...mockCallbacks,
+        canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
+      };
+
+      const suggest = async (query: string) => {
+        const correctedQuery = correctQuerySyntax(query);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
+        const cursorPosition = query.length;
+        const { command } = findAstPosition(root, cursorPosition);
+
+        return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
+      };
+
+      const initialSlotLabels = (await suggest('FROM /')).map((s) => s.label);
+      expect(initialSlotLabels).toContain('Browse data sources');
+
+      const afterCommaLabels = (await suggest('FROM index, /')).map((s) => s.label);
+      expect(afterCommaLabels).toContain('Browse data sources');
+    });
+
     test('suggests visible indices on space', async () => {
       await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions('FROM /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
@@ -130,6 +156,35 @@ describe('FROM Autocomplete', () => {
         mockCallbacks
       );
       await fromExpectSuggestions('from *,/', expectedSuggestions, mockCallbacks);
+    });
+
+    test('suggests views from context.views alongside sources', async () => {
+      const contextWithViews = {
+        ...mockContext,
+        views: [
+          { name: 'my_saved_view', query: 'FROM logs | LIMIT 10' },
+          { name: 'my-view', query: 'FROM metrics' },
+        ],
+      };
+      const expectedFromSources = visibleIndices;
+      const expectedFromViews = ['my_saved_view', 'my-view'];
+      await fromExpectSuggestions(
+        'from ',
+        [...expectedFromSources, ...expectedFromViews, '(FROM $0)'],
+        mockCallbacks,
+        contextWithViews
+      );
+      // View names appear when typing (fragment "my_")
+      const getSuggestions = async (query: string) => {
+        const correctedQuery = correctQuerySyntax(query);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+        const cursorPosition = query.length;
+        const { command } = findAstPosition(root, cursorPosition);
+        return autocomplete(query, command!, mockCallbacks, contextWithViews, cursorPosition);
+      };
+      const suggestions = (await getSuggestions('FROM my_')).map((s) => s.text);
+      expect(suggestions).toContain('my_saved_view');
+      expect(suggestions).toContain('my-view');
     });
   });
 
@@ -268,6 +323,77 @@ describe('FROM Autocomplete', () => {
         contextWithSubquery,
         offset
       );
+    });
+  });
+
+  describe('standalone (isStandalone) queries', () => {
+    const standaloneExtensions = {
+      recommendedQueries: [
+        {
+          name: 'Search all metrics',
+          query: 'TS metrics-*',
+          description: 'Searches all available metrics',
+          isStandalone: true,
+        },
+        {
+          name: 'Logs Count by Host',
+          query: 'from logs* | STATS count(*) by host',
+        },
+      ],
+      recommendedFields: [],
+    };
+
+    const contextWithStandalone = {
+      ...mockContext,
+      editorExtensions: standaloneExtensions,
+    };
+
+    const extensionSuggestions = getRecommendedQueriesTemplatesFromExtensions(
+      standaloneExtensions.recommendedQueries
+    );
+
+    test('standalone suggestion appears after space alongside other suggestions', async () => {
+      const recommendedQueries = getRecommendedQueriesTemplates({
+        fromCommand: '',
+        timeField: '@timestamp',
+        categorizationField: 'keywordField',
+      });
+      const expected = [
+        'METADATA ',
+        ',',
+        '| ',
+        ...recommendedQueries.map((query) => query.queryString),
+        ...extensionSuggestions.map((s) => s.text),
+      ].sort();
+
+      await fromExpectSuggestions('from index ', expected, mockCallbacks, contextWithStandalone);
+    });
+
+    test('standalone suggestion has empty text, no rangeToReplace, and a command with queryText', async () => {
+      const standaloneSuggestion = extensionSuggestions.find(
+        (s) => s.label === 'Search all metrics'
+      );
+
+      expect(standaloneSuggestion).toBeDefined();
+      expect(standaloneSuggestion!.text).toBe('');
+      expect(standaloneSuggestion!.rangeToReplace).toBeUndefined();
+      expect(standaloneSuggestion!.command).toEqual({
+        id: 'esql.recommendedQuery.accept',
+        title: 'Accept recommended query',
+        arguments: [
+          {
+            queryLabel: 'Search all metrics',
+            queryText: 'TS metrics-*',
+          },
+        ],
+      });
+    });
+
+    test('non-standalone extension suggestions have non-empty text', async () => {
+      const regularSuggestion = extensionSuggestions.find((s) => s.label === 'Logs Count by Host');
+
+      expect(regularSuggestion).toBeDefined();
+      expect(regularSuggestion!.text).not.toBe('');
     });
   });
 });

@@ -25,12 +25,13 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import { createSupertestErrorLogger } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
@@ -43,10 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  // Failing: See https://github.com/elastic/kibana/issues/246207
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     let t1AnalystSupertest: TestAgent;
@@ -177,6 +177,13 @@ export default function ({ getService }: FtrProviderContext) {
       if (endpointExceptionData) {
         await endpointExceptionData.cleanup();
       }
+    });
+
+    after(async () => {
+      const promises = ALL_ENDPOINT_ARTIFACT_LIST_IDS.map((listId) =>
+        endpointArtifactTestResources.deleteList(listId)
+      );
+      await Promise.all(promises);
     });
 
     describe(`and using Import API`, function () {
@@ -387,29 +394,31 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has endpoint exception access but no global artifact access', () => {
+    describe('and user has endpoint exception access but no global artifact access', () => {
       let noGlobalArtifactSupertest: TestAgent;
 
       before(async () => {
-        const loadedRole = await rolesUsersProvider.loader.create({
+        const role: CustomRole = {
           name: 'no_global_artifact_role',
-          kibana: [
-            {
-              base: [],
-              feature: {
-                [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+          privileges: {
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+                },
+                spaces: ['*'],
               },
-              spaces: ['*'],
-            },
-          ],
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-        });
+            ],
+            elasticsearch: { cluster: [], indices: [] },
+          },
+        };
 
-        noGlobalArtifactSupertest = await utils.createSuperTest(loadedRole.username);
+        noGlobalArtifactSupertest = await utils.createSuperTestWithCustomRole(role);
       });
 
       after(async () => {
-        await rolesUsersProvider.loader.delete('no_global_artifact_role');
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointExceptionApiCall of endpointExceptionCalls) {
@@ -468,11 +477,17 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has authorization to read endpoint exceptions', function () {
+    describe('and user has authorization to read endpoint exceptions', function () {
       let hunterSupertest: TestAgent;
 
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
+      });
+      after(async () => {
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointExceptionApiCall of [...endpointExceptionCalls, ...needsWritePrivilege]) {

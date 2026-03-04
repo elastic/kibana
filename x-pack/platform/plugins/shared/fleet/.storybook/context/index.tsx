@@ -129,6 +129,7 @@ export const StorybookContext: React.FC<{
           allAgentPolicies: true,
           addAgents: true,
           addFleetServers: true,
+          generateAgentReports: true,
         },
         integrations: {
           all: true,

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunctionExpression, within } from '@elastic/esql';
 import { getExpressionType, getFunctionDefinition } from '../..';
-import { isFunctionExpression } from '../../../../../ast/is';
-import { within } from '../../../../../ast/location';
+import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
 import { isExpressionComplete } from '../../expressions';
@@ -18,11 +18,8 @@ import { dispatchPartialOperators } from './operators/partial/dispatcher';
 import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
 import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
-import {
-  DOUBLE_QUOTED_STRING_REGEX,
-  getCommandMapExpressionSuggestions,
-  isInsideMapExpression,
-} from '../map_expression';
+import type { MapParameters } from '../map_expression';
+import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type {
   ExpressionComputedMetadata,
@@ -31,7 +28,8 @@ import type {
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
-import { isNullCheckOperator } from './utils';
+import { getKqlSuggestionsIfApplicable, isNullCheckOperator } from './utils';
+import { isInsideMapExpression, parseMapParams } from '../../maps';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -44,6 +42,15 @@ export async function suggestForExpression(
 ): Promise<SuggestForExpressionResult> {
   const baseCtx = buildContext(params);
   const computed = computeDerivedState(baseCtx);
+
+  const kqlSuggestions = await getKqlSuggestionsIfApplicable(baseCtx);
+
+  if (kqlSuggestions !== null) {
+    return {
+      suggestions: kqlSuggestions,
+      computed,
+    };
+  }
 
   const mapSuggestions = getMapExpressionSuggestions(baseCtx.innerText);
 
@@ -146,7 +153,11 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
 function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata {
   const { expressionRoot, innerText, cursorPosition, context } = ctx;
   const position: ExpressionPosition = getPosition(innerText, expressionRoot);
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const isComplete = isExpressionComplete(expressionType, innerText);
   const insideFunction =
     (expressionRoot &&
@@ -209,11 +220,21 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
     return null;
   }
 
-  const availableParameters = SignatureAnalyzer.parseMapParams(mapParamsStr);
-  if (Object.keys(availableParameters).length === 0) {
+  const parsedParameters = parseMapParams(mapParamsStr);
+  if (Object.keys(parsedParameters).length === 0) {
     return null;
   }
 
+  const availableParameters = Object.entries(parsedParameters).reduce<MapParameters>(
+    (acc, [paramName, paramDef]) => {
+      acc[paramName] = {
+        ...paramDef,
+        suggestions: paramDef.values.map((value) => buildMapValueCompleteItem(value)),
+      };
+      return acc;
+    },
+    {}
+  );
   const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters, true);
   return suggestions.length > 0 ? suggestions : [];
 }

@@ -32,7 +32,7 @@ export interface EmbeddableConversationProps {
    * - 'search' - Conversations started from search interface
    * - 'observability' - Conversations in observability context
    *
-   * Combined with agentId to restore the correct conversation when the flyout reopens.
+   * Combined with agentId to restore the correct conversation when the sidebar reopens.
    * @default 'default'
    */
   sessionTag?: string;
@@ -91,17 +91,21 @@ export interface EmbeddableConversationProps {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
 }
 
-export interface EmbeddableConversationFlyoutProps {
+export interface EmbeddableConversationSidebarProps {
   onClose: () => void;
   ariaLabelledBy: string;
   /**
-   * Callback to register a function that will receive prop updates.
-   * Used internally to update flyout props without recreating it.
+   * Callback to register sidebar control methods.
+   * Used internally to update sidebar props and clear browser API tools.
    * @internal
    */
-  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
+  onRegisterCallbacks?: (callbacks: {
+    updateProps: (props: EmbeddableConversationProps) => void;
+    resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
+  }) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
   EmbeddableConversationProps &
-  EmbeddableConversationFlyoutProps;
+  EmbeddableConversationSidebarProps;

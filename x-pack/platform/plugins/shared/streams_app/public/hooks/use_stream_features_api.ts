@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
-import type { Streams, System } from '@kbn/streams-schema';
-import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
-import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/systems/route';
+import type { Streams } from '@kbn/streams-schema';
+import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
 import { useKibana } from './use_kibana';
-import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
+import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
-  getSystemIdentificationStatus: () => Promise<SystemIdentificationTaskResult>;
-  scheduleSystemIdentificationTask: (connectorId: string) => Promise<void>;
-  cancelSystemIdentificationTask: () => Promise<void>;
-  acknowledgeSystemIdentificationTask: () => Promise<void>;
-  addSystemsToStream: (systems: System[]) => Promise<StorageClientBulkResponse>;
-  removeSystemsFromStream: (systems: Pick<System, 'name'>[]) => Promise<StorageClientBulkResponse>;
-  upsertSystem: (system: System) => Promise<void>;
+  getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
+  scheduleFeaturesIdentificationTask: (connectorId: string) => Promise<void>;
+  cancelFeaturesIdentificationTask: () => Promise<void>;
+  deleteFeature: (uuid: string) => Promise<void>;
+  deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -29,120 +27,66 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         streams: { streamsRepositoryClient },
       },
     },
-    services: { telemetryClient },
   } = useKibana();
 
   const { signal } = useAbortController();
 
-  return {
-    getSystemIdentificationStatus: async () => {
-      return await streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems/_status', {
-        signal,
-        params: {
-          path: { name: definition.name },
-        },
-      });
-    },
-    scheduleSystemIdentificationTask: async (connectorId: string) => {
-      const now = Date.now();
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
-        signal,
-        params: {
-          path: { name: definition.name },
-          body: {
-            action: 'schedule',
-            to: new Date(now).toISOString(),
-            from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-            connectorId,
-          },
-        },
-      });
-    },
-    cancelSystemIdentificationTask: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
-        signal,
-        params: {
-          path: { name: definition.name },
-          body: {
-            action: 'cancel',
-          },
-        },
-      });
-    },
-    acknowledgeSystemIdentificationTask: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
-        signal,
-        params: {
-          path: { name: definition.name },
-          body: {
-            action: 'acknowledge',
-          },
-        },
-      });
-    },
-    addSystemsToStream: async (systems: System[]) => {
-      const response = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/systems/_bulk',
-        {
+  return useMemo(
+    () => ({
+      getFeaturesIdentificationStatus: async () => {
+        return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features/_status', {
           signal,
           params: {
-            path: {
-              name: definition.name,
-            },
-            body: {
-              operations: systems.map((system) => ({
-                index: { system },
-              })),
-            },
+            path: { name: definition.name },
           },
-        }
-      );
-
-      telemetryClient.trackFeaturesSaved({
-        count: systems.length,
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-      });
-
-      return response;
-    },
-    removeSystemsFromStream: async (systems: Pick<System, 'name'>[]) => {
-      const response = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/systems/_bulk',
-        {
+        });
+      },
+      scheduleFeaturesIdentificationTask: async (connectorId: string) => {
+        const { from, to } = getLast24HoursTimeRange();
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
           signal,
           params: {
-            path: {
-              name: definition.name,
-            },
+            path: { name: definition.name },
             body: {
-              operations: systems.map((system) => ({
-                delete: { system: { name: system.name } },
-              })),
+              action: 'schedule',
+              to,
+              from,
+              connector_id: connectorId,
             },
           },
-        }
-      );
-
-      telemetryClient.trackFeaturesDeleted({
-        count: systems.length,
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-      });
-
-      return response;
-    },
-    upsertSystem: async (system: System) => {
-      await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-            systemName: system.name,
+        });
+      },
+      cancelFeaturesIdentificationTask: async () => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_task', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              action: 'cancel',
+            },
           },
-          body: system,
-        },
-      });
-    },
-  };
+        });
+      },
+      deleteFeature: async (uuid: string) => {
+        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+          signal,
+          params: {
+            path: { name: definition.name, uuid },
+          },
+        });
+      },
+      deleteFeaturesInBulk: async (uuids: string[]) => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              operations: uuids.map((id) => ({ delete: { id } })),
+            },
+          },
+        });
+      },
+    }),
+    [streamsRepositoryClient, signal, definition.name]
+  );
 }

@@ -19,12 +19,12 @@ import { z } from '@kbn/zod';
 export type EndpointFileInfoRequestParams = z.infer<typeof EndpointFileInfoRequestParams>;
 export const EndpointFileInfoRequestParams = z.object({
   action_id: z.string(),
-  /** 
+  /**
       * The file identifier is constructed in one of two ways:
 - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
 `{file_id}` = `{action_id}.{agent_id}`
 - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
- 
+
       */
   file_id: z.string(),
 });

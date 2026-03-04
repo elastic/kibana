@@ -5,45 +5,32 @@
  * 2.0.
  */
 import React from 'react';
-import { isEqual } from 'lodash';
-import type { TimeRange } from '@kbn/es-query';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_streams_app_bar';
 import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
 export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
 
-// If the absolute time stays the same
-function needsRefresh(left: TimeRange, right: TimeRange) {
-  const forceNow = new Date();
-  const leftAbsolute = getAbsoluteTimeRange(left, { forceNow });
-  const rightAbsolute = getAbsoluteTimeRange(right, { forceNow });
-
-  return isEqual(leftAbsolute, rightAbsolute);
-}
-
 export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
-  const { timeState, setTime, refresh } = useTimefilter();
-
-  function refreshOrSetTime(next: TimeRange) {
-    if (needsRefresh(timeState.timeRange, next)) {
-      refresh();
-    } else {
-      setTime(next);
-    }
-  }
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
 
   return (
     <UncontrolledStreamsAppSearchBar
       onQuerySubmit={({ dateRange, query }, isUpdate) => {
         if (dateRange) {
-          refreshOrSetTime(dateRange);
+          updateTimeRange(dateRange);
+        }
+        if (!isUpdate) {
+          refresh();
         }
         onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}
-      dateRangeFrom={timeState.timeRange.from}
-      dateRangeTo={timeState.timeRange.to}
+      dateRangeFrom={rangeFrom}
+      dateRangeTo={rangeTo}
       {...props}
     />
   );

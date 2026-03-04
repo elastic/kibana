@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
-import { isAssignment, isColumn } from '../../../ast/is';
-import type { ICommandCallbacks } from '../types';
-import { Location } from '../types';
+import { isAssignment, isColumn, within } from '@elastic/esql';
 import type {
   ESQLCommandOption,
   ESQLColumn,
@@ -19,7 +16,10 @@ import type {
   ESQLSingleAstItem,
   ESQLAstAllCommands,
   ESQLAstQueryExpression,
-} from '../../../types';
+} from '@elastic/esql/types';
+import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
+import type { ICommandCallbacks } from '../types';
+import { Location } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
   pipeCompleteItem,
@@ -41,7 +41,6 @@ import { FunctionDefinitionTypes } from '../../definitions/types';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode, findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
-import { within } from '../../../ast/location';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
 
@@ -80,7 +79,7 @@ export async function autocomplete(
       let location: Location;
 
       if (isInBy) {
-        location = Location.EVAL;
+        location = Location.STATS_BY;
       } else if (isTimeseriesSource && isAggFunctionUsedAlready(command, command.args.length - 1)) {
         location = Location.STATS_TIMESERIES;
       } else {
@@ -400,9 +399,11 @@ function buildCustomFilteringContext(
   }
 
   const statsSpecificFunctionsToIgnore: string[] = [];
-  statsSpecificFunctionsToIgnore.push(
-    ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
-  );
+  if (basicContext.functionDefinition?.type === 'grouping') {
+    statsSpecificFunctionsToIgnore.push(
+      ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+    );
+  }
 
   const finalCommandArgIndex = command.args.length - 1;
   const isInBy = isNodeWithinByClause(foundFunction, command);

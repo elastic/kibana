@@ -14,10 +14,12 @@ export const fetchLogDocumentById = async (
     id,
     data,
     logSourcesService,
+    index,
   }: {
     id: string;
     data: DataPublicPluginStart;
     logSourcesService: LogSourcesService;
+    index?: string;
   },
   signal: AbortSignal
 ): Promise<
@@ -27,16 +29,19 @@ export const fetchLogDocumentById = async (
     }
   | undefined
 > => {
-  const logSources = await logSourcesService.getLogSources();
-  const indexPattern = logSources
-    .map((source: { indexPattern: string }) => source.indexPattern)
-    .join(',');
+  const queryIndex =
+    index ??
+    (await logSourcesService
+      .getLogSources()
+      .then((logSources) =>
+        logSources.map((source: { indexPattern: string }) => source.indexPattern).join(',')
+      ));
 
   const result = await lastValueFrom(
     data.search.search(
       {
         params: {
-          index: indexPattern,
+          index: queryIndex,
           size: 1,
           body: {
             timeout: '20s',
@@ -46,11 +51,7 @@ export const fetchLogDocumentById = async (
                 include_unmapped: true,
               },
             ],
-            query: {
-              term: {
-                _id: id,
-              },
-            },
+            query: { term: { _id: id } },
           },
         },
       },

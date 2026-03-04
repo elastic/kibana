@@ -5,67 +5,73 @@
  * 2.0.
  */
 
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { compact, uniqBy } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type BaseFeature, type Streams, baseFeatureSchema } from '@kbn/streams-schema';
+import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifyFeaturesPrompt } from './prompt';
+import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
-  stream: Streams.all.Definition;
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
+  streamName: string;
+  sampleDocuments: Array<SearchHit<Record<string, any>>>;
   inferenceClient: BoundInferenceClient;
-  prompt: string;
+  systemPrompt: string;
   logger: Logger;
   signal: AbortSignal;
 }
 
 export async function identifyFeatures({
-  stream,
-  prompt,
+  streamName,
+  sampleDocuments,
+  systemPrompt,
   inferenceClient,
   logger,
-  start,
-  end,
-  esClient,
   signal,
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  logger.debug(`Identifying features for stream ${stream.name}`);
+  logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
 
-  const { hits: sampleDocuments } = await getSampleDocuments({
-    esClient,
-    index: stream.name,
-    start,
-    end,
-    size: 20,
-  });
+  const formattedDocuments = compact(
+    sampleDocuments.map((hit) =>
+      formatRawDocument({
+        hit,
+        shouldNotTruncate(key: string) {
+          return key.includes('tags');
+        },
+      })
+    )
+  );
 
   const response = await withSpan('invoke_prompt', () =>
     inferenceClient.prompt({
-      input: {
-        sample_documents: JSON.stringify(sampleDocuments),
-      },
-      prompt: createIdentifyFeaturesPrompt({ systemPrompt: prompt }),
-      finalToolChoice: {
-        function: 'finalize_features',
-      },
+      input: { sample_documents: JSON.stringify(formattedDocuments) },
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
+      finalToolChoice: { function: 'finalize_features' },
       abortSignal: signal,
     })
   );
 
-  const features = response.toolCalls
-    .flatMap((toolCall) => toolCall.function.arguments.features)
-    .filter((feature) => {
-      const result = baseFeatureSchema.safeParse(feature);
-      return result.success;
-    });
+  const features = uniqBy(
+    response.toolCalls
+      .flatMap((toolCall) => toolCall.function.arguments.features)
+      .map((feature) => ({ ...feature, stream_name: streamName }))
+      .filter((feature) => {
+        const result = baseFeatureSchema.safeParse(feature);
+        if (!result.success) {
+          return false;
+        }
+
+        // ensure that the feature has at least one stable identifying property
+        return Object.keys(feature.properties).length > 0;
+      }),
+    (feature) => feature.id
+  );
 
   return {
     features,

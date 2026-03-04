@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 /**
  * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
  * get the pinned panel schema from a pinned panel registry **independent** from controls
  */
 import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
@@ -49,18 +50,8 @@ export const panelGridSchema = schema.object({
   }),
 });
 
-export function getPanelSchema() {
-  return schema.object({
-    config: schema.oneOf([
-      ...((embeddableService ? embeddableService.getEmbeddableSchemas() : []) as [ObjectType<{}>]),
-      schema.object(
-        {},
-        {
-          unknowns: 'allow',
-        }
-      ),
-    ]) as ObjectType<{}>,
-    type: schema.string({ meta: { description: 'The embeddable type' } }),
+export function getPanelSchema(isDashboardAppRequest: boolean) {
+  const basePanelProps = {
     grid: panelGridSchema,
     /**
      * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
@@ -81,14 +72,58 @@ export function getPanelSchema() {
         },
       })
     ),
-  });
+  };
+
+  // looser route validation for dashboard application requests
+  // TODO remove when all embeddables register schemas
+  if (isDashboardAppRequest) {
+    return schema.object({
+      ...basePanelProps,
+      type: schema.string(),
+      config: schema.object(
+        {},
+        {
+          unknowns: 'allow',
+        }
+      ),
+    });
+  }
+
+  const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+  const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
+    schema.object(
+      {
+        ...basePanelProps,
+        type: schema.literal(type),
+        config: configSchema,
+      },
+      {
+        meta: {
+          id: `kbn-dashboard-panel-${type}`,
+        },
+      }
+    )
+  );
+
+  return schema.discriminatedUnion(
+    'type',
+    panelSchemas as [
+      ObjectType<{
+        grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
+        uid: Type<string | undefined>;
+        version: Type<string | undefined>;
+        type: Type<string>;
+        config: ObjectType<{}>;
+      }>
+    ]
+  );
 }
 
 const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
 });
 
-export function getSectionSchema() {
+export function getSectionSchema(isDashboardAppRequest: boolean) {
   return schema.object({
     title: schema.string({
       meta: { description: 'The title of the section.' },
@@ -100,7 +135,7 @@ export function getSectionSchema() {
       })
     ),
     grid: sectionGridSchema,
-    panels: schema.arrayOf(getPanelSchema(), {
+    panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
       meta: { description: 'The panels that belong to the section.' },
       defaultValue: [],
     }),
@@ -123,6 +158,12 @@ export const optionsSchema = schema.object({
     schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles,
       meta: { description: 'Hide the panel titles in the dashboard.' },
+    })
+  ),
+  hide_panel_borders: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders,
+      meta: { description: 'Hide the panel borders in the dashboard.' },
     })
   ),
   use_margins: schema.maybe(
@@ -162,16 +203,22 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema() {
+export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object({
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: schema.maybe(optionsSchema),
     panels: schema.maybe(
-      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
-        defaultValue: [],
-      })
+      schema.arrayOf(
+        schema.oneOf([
+          getPanelSchema(isDashboardAppRequest),
+          getSectionSchema(isDashboardAppRequest),
+        ]),
+        {
+          defaultValue: [],
+        }
+      )
     ),
     project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),

@@ -38,8 +38,13 @@ export async function collectStats(
   options: CliOptions
 ): Promise<AllPluginStats> {
   const { plugins, pathsByPlugin } = setupResult;
-  const { pluginApiMap, missingApiItems, referencedDeprecations, adoptionTrackedAPIs } =
-    apiMapResult;
+  const {
+    pluginApiMap,
+    missingApiItems,
+    referencedDeprecations,
+    adoptionTrackedAPIs,
+    unnamedExports,
+  } = apiMapResult;
 
   const allPluginStats: AllPluginStats = {};
 
@@ -61,12 +66,12 @@ export async function collectStats(
     allPluginStats[id] = {
       ...(await countEslintDisableLines(paths)),
       ...(await countEnzymeImports(paths)),
-      ...collectApiStatsForPlugin(
-        pluginApi,
+      ...collectApiStatsForPlugin(pluginApi, {
         missingApiItems,
         referencedDeprecations,
-        adoptionTrackedAPIs
-      ),
+        adoptionTrackedAPIs,
+        unnamedExports,
+      }),
       owner: plugin.manifest.owner,
       description: plugin.manifest.description,
       isPlugin: plugin.isPlugin,

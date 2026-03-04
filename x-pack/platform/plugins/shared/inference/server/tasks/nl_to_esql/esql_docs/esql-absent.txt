@@ -1,0 +1,38 @@
+# ABSENT
+
+The ABSENT function returns true if the input expression yields no non-null values within the current aggregation context; otherwise, it returns false.
+
+## Syntax
+
+`ABSENT(field)`
+
+### Parameters
+
+#### field
+
+Expression that outputs values to be checked for absence.
+
+## Examples
+
+Determines whether the `languages` field is missing for employee number 10020.
+
+```esql
+FROM employees
+| WHERE emp_no == 10020
+| STATS is_absent = ABSENT(languages)
+```
+
+Checks if the `salary` field is absent within each group of employees sharing the same language.
+
+```esql
+FROM employees
+| STATS is_absent = ABSENT(salary) BY languages
+```
+
+Returns 1 if the `languages` field is absent and 0 if it is present for employee number 10020.
+
+```esql
+FROM employees
+| WHERE emp_no == 10020
+| STATS is_absent = TO_INTEGER(ABSENT(languages))
+```
