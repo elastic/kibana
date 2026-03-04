@@ -61,6 +61,7 @@ export const UrlSynchronizer = () => {
       if (value) {
         dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
       } else {
+        // No URL state: dispatching with only the id clears left/right/preview in the reducer.
         dispatch(urlChangedAction({ id: urlKey }));
       }
     });
