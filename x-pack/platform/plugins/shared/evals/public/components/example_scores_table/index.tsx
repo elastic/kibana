@@ -7,21 +7,24 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
   EuiButtonGroup,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { EvaluationRunDatasetExample } from '@kbn/evals-common';
+import { css } from '@emotion/css';
+import type { EvaluationRunDatasetExample, EvaluationScoreDocument } from '@kbn/evals-common';
 import * as i18n from './translations';
 
 const EXAMPLE_ID_VISIBLE_LENGTH = 16;
-const TRACE_ID_VISIBLE_LENGTH = 12;
 
 const truncate = (value: string, maxLength: number) =>
   value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
@@ -29,14 +32,93 @@ const truncate = (value: string, maxLength: number) =>
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
 
-interface EvaluatorScoreBadge {
-  key: string;
-  label: string;
-}
+const hasNonEmptyMetadata = (
+  metadata: Record<string, unknown> | null | undefined
+): metadata is Record<string, unknown> => metadata != null && Object.keys(metadata).length > 0;
+
+const accordionButtonCss = css`
+  padding: 2px 0;
+`;
+
+const EvaluatorScoreAccordion: React.FC<{
+  score: EvaluationScoreDocument;
+  exampleId: string;
+  onTraceClick: (traceId: string) => void;
+}> = ({ score, exampleId, onTraceClick }) => {
+  const { evaluator } = score;
+  const accordionId = [exampleId, evaluator.name, score.task.repetition_index].join('-');
+
+  const hasExplanation = evaluator.explanation != null && evaluator.explanation.length > 0;
+  const hasMetadata = hasNonEmptyMetadata(evaluator.metadata);
+  const hasTraceId = evaluator.trace_id != null && evaluator.trace_id.length > 0;
+  const hasDetails = hasExplanation || hasMetadata || hasTraceId;
+
+  const buttonContent = (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <strong>{evaluator.name}:</strong> {formatScore(evaluator.score)}
+        </EuiText>
+      </EuiFlexItem>
+      {evaluator.label && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{evaluator.label}</EuiBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+
+  if (!hasDetails) {
+    return <div className={accordionButtonCss}>{buttonContent}</div>;
+  }
+
+  return (
+    <EuiAccordion
+      id={`evaluator-${accordionId}`}
+      buttonContent={buttonContent}
+      buttonClassName={accordionButtonCss}
+      paddingSize="xs"
+      arrowDisplay="left"
+      aria-label={i18n.getEvaluatorAccordionAriaLabel(evaluator.name)}
+    >
+      <div>
+        {hasExplanation && (
+          <>
+            <EuiText size="xs" color="subdued">
+              <strong>{i18n.EVALUATOR_EXPLANATION}</strong>
+            </EuiText>
+            <EuiText size="xs">{evaluator.explanation}</EuiText>
+            <EuiSpacer size="xs" />
+          </>
+        )}
+        {hasMetadata && (
+          <>
+            <EuiText size="xs" color="subdued">
+              <strong>{i18n.EVALUATOR_METADATA}</strong>
+            </EuiText>
+            <EuiCodeBlock overflowHeight={100} language="json" paddingSize="s" fontSize="s">
+              {JSON.stringify(evaluator.metadata, null, 2)}
+            </EuiCodeBlock>
+            <EuiSpacer size="xs" />
+          </>
+        )}
+        {hasTraceId && (
+          <EuiButtonEmpty
+            size="xs"
+            iconType="apmTrace"
+            onClick={() => onTraceClick(evaluator.trace_id!)}
+            aria-label={i18n.getEvaluatorViewTraceAriaLabel(evaluator.name)}
+          >
+            {i18n.EVALUATOR_VIEW_TRACE}
+          </EuiButtonEmpty>
+        )}
+      </div>
+    </EuiAccordion>
+  );
+};
 
 interface ExampleScoreRow {
   exampleId: string;
-  exampleIndex: number | null;
   repetitionIndices: number[];
   scoresByRepetition: Record<number, EvaluationRunDatasetExample['scores']>;
 }
@@ -54,14 +136,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
   const rows = useMemo<ExampleScoreRow[]>(() => {
     return [...examples]
-      .sort((a, b) => {
-        const leftIndex = a.example_index ?? Number.MAX_SAFE_INTEGER;
-        const rightIndex = b.example_index ?? Number.MAX_SAFE_INTEGER;
-        if (leftIndex !== rightIndex) {
-          return leftIndex - rightIndex;
-        }
-        return a.example_id.localeCompare(b.example_id);
-      })
+      .sort((a, b) => a.example_id.localeCompare(b.example_id))
       .map((example) => {
         const scoreDocuments = [...example.scores].sort((a, b) => {
           const repetitionDelta = a.task.repetition_index - b.task.repetition_index;
@@ -73,10 +148,10 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
         const scoresByRepetition = scoreDocuments.reduce<
           Record<number, EvaluationRunDatasetExample['scores']>
-        >((acc, score) => {
-          const repetitionIndex = score.task.repetition_index;
+        >((acc, scoreDoc) => {
+          const repetitionIndex = scoreDoc.task.repetition_index;
           const existingScores = acc[repetitionIndex] ?? [];
-          existingScores.push(score);
+          existingScores.push(scoreDoc);
           acc[repetitionIndex] = existingScores;
           return acc;
         }, {});
@@ -87,7 +162,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
         return {
           exampleId: example.example_id,
-          exampleIndex: example.example_index,
           repetitionIndices,
           scoresByRepetition,
         };
@@ -113,23 +187,11 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     return row.scoresByRepetition[selectedRepetitionIndex] ?? [];
   };
 
-  const getEvaluatorScoreBadges = (row: ExampleScoreRow): EvaluatorScoreBadge[] =>
-    getScoresForSelectedRepetition(row).map((score) => ({
-      key: [
-        row.exampleId,
-        score.evaluator.name,
-        score.task.repetition_index,
-        score.task.trace_id ?? 'no_trace',
-        score['@timestamp'],
-      ].join(':'),
-      label: `${score.evaluator.name}: ${formatScore(score.evaluator.score)}`,
-    }));
-
   const getSelectedTraceIds = (row: ExampleScoreRow): string[] =>
     Array.from(
       new Set(
         getScoresForSelectedRepetition(row)
-          .map((score) => score.task.trace_id)
+          .map((scoreDoc) => scoreDoc.task.trace_id)
           .filter((value): value is string => Boolean(value))
       )
     );
@@ -151,14 +213,16 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     );
   };
 
+  const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
+    [
+      exampleId,
+      scoreDoc.evaluator.name,
+      scoreDoc.task.repetition_index,
+      scoreDoc.task.trace_id ?? 'no_trace',
+      scoreDoc['@timestamp'],
+    ].join(':');
+
   const columns: Array<EuiBasicTableColumn<ExampleScoreRow>> = [
-    {
-      field: 'exampleIndex',
-      name: i18n.COLUMN_EXAMPLE_NUMBER,
-      width: '120px',
-      render: (exampleIndex: number | null) =>
-        exampleIndex == null ? '-' : String(exampleIndex + 1),
-    },
     {
       field: 'exampleId',
       name: i18n.COLUMN_EXAMPLE_ID,
@@ -218,19 +282,23 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_EVALUATOR_SCORES,
+      width: '300px',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
-        const evaluatorScoreBadges = getEvaluatorScoreBadges(row);
-        return evaluatorScoreBadges.length > 0 ? (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {evaluatorScoreBadges.map((evaluatorScoreBadge) => (
-              <EuiFlexItem key={evaluatorScoreBadge.key} grow={false}>
-                <EuiBadge color="hollow">{evaluatorScoreBadge.label}</EuiBadge>
-              </EuiFlexItem>
+        const scores = getScoresForSelectedRepetition(row);
+        return scores.length > 0 ? (
+          <div>
+            {scores.map((scoreDoc) => (
+              <EvaluatorScoreAccordion
+                key={getScoreKey(scoreDoc, row.exampleId)}
+                score={scoreDoc}
+                exampleId={row.exampleId}
+                onTraceClick={onTraceClick}
+              />
             ))}
-          </EuiFlexGroup>
+          </div>
         ) : (
           <EuiText color="subdued" size="s">
             {i18n.NO_EVALUATOR_SCORES}
@@ -250,14 +318,12 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             {traceIds.map((traceId) => (
               <EuiFlexItem key={traceId} grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
+                <EuiButtonIcon
+                  size="s"
                   iconType="apmTrace"
                   onClick={() => onTraceClick(traceId)}
                   aria-label={i18n.getTraceButtonAriaLabel(traceId)}
-                >
-                  {truncate(traceId, TRACE_ID_VISIBLE_LENGTH)}
-                </EuiButtonEmpty>
+                />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

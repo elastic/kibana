@@ -15,6 +15,10 @@ const buildScore = ({
   traceId,
   evaluatorName,
   evaluatorScore,
+  evaluatorLabel,
+  evaluatorExplanation,
+  evaluatorMetadata,
+  evaluatorTraceId,
   repetitionIndex,
   exampleInput,
   taskOutput,
@@ -23,6 +27,10 @@ const buildScore = ({
   traceId?: string | null;
   evaluatorName: string;
   evaluatorScore?: number | null;
+  evaluatorLabel?: string | null;
+  evaluatorExplanation?: string | null;
+  evaluatorMetadata?: Record<string, unknown> | null;
+  evaluatorTraceId?: string | null;
   repetitionIndex: number;
   exampleInput?: Record<string, unknown> | null;
   taskOutput?: Record<string, unknown> | null;
@@ -50,6 +58,10 @@ const buildScore = ({
   evaluator: {
     name: evaluatorName,
     score: evaluatorScore,
+    label: evaluatorLabel,
+    explanation: evaluatorExplanation,
+    metadata: evaluatorMetadata,
+    trace_id: evaluatorTraceId,
     model: {
       id: 'evaluator-model-1',
     },
@@ -92,13 +104,13 @@ describe('ExampleScoresTable', () => {
 
     render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
-    expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'R1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'R2' })).toBeInTheDocument();
     expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
     expect(screen.getByText(/"completion": "output-r1"/)).toBeInTheDocument();
-    expect(screen.getByText('Criteria: 0.95')).toBeInTheDocument();
+    expect(screen.getByText('Criteria:')).toBeInTheDocument();
+    expect(screen.getByText('0.95')).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -108,7 +120,7 @@ describe('ExampleScoresTable', () => {
     expect(onTraceClick).toHaveBeenCalledWith('6d8639157ac4141c0000000000000001');
 
     fireEvent.click(screen.getByRole('button', { name: 'R2' }));
-    expect(screen.getByText('Criteria: 0.10')).toBeInTheDocument();
+    expect(screen.getByText('0.10')).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -141,5 +153,119 @@ describe('ExampleScoresTable', () => {
 
     expect(screen.getByText('R1')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'R1' })).not.toBeInTheDocument();
+  });
+
+  it('renders evaluator label as a badge when present', () => {
+    const examples: EvaluationRunDatasetExample[] = [
+      {
+        example_id: 'example-with-label',
+        example_index: 0,
+        scores: [
+          buildScore({
+            timestamp: '2026-03-02T12:00:00.000Z',
+            evaluatorName: 'Factuality',
+            evaluatorScore: 0.8,
+            evaluatorLabel: 'ACCURATE',
+            repetitionIndex: 0,
+          }),
+        ],
+      },
+    ];
+
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+
+    expect(screen.getByText('Factuality:')).toBeInTheDocument();
+    expect(screen.getByText('0.80')).toBeInTheDocument();
+    expect(screen.getByText('ACCURATE')).toBeInTheDocument();
+  });
+
+  it('shows explanation and metadata when accordion is expanded', () => {
+    const examples: EvaluationRunDatasetExample[] = [
+      {
+        example_id: 'example-with-details',
+        example_index: 0,
+        scores: [
+          buildScore({
+            timestamp: '2026-03-02T12:00:00.000Z',
+            evaluatorName: 'Relevance',
+            evaluatorScore: 0.9,
+            evaluatorExplanation: 'The response is highly relevant.',
+            evaluatorMetadata: { reason: 'matches topic' },
+            repetitionIndex: 0,
+          }),
+        ],
+      },
+    ];
+
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+
+    expect(screen.getByText('Relevance:')).toBeInTheDocument();
+    expect(screen.getByText('0.90')).toBeInTheDocument();
+
+    const accordion = screen.getByLabelText('Toggle details for evaluator Relevance');
+    const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
+    fireEvent.click(accordionButton);
+
+    expect(screen.getByText('Explanation')).toBeInTheDocument();
+    expect(screen.getByText('The response is highly relevant.')).toBeInTheDocument();
+    expect(screen.getByText('Metadata')).toBeInTheDocument();
+    expect(screen.getByText(/"reason": "matches topic"/)).toBeInTheDocument();
+  });
+
+  it('shows evaluator trace button when evaluator trace_id is present', () => {
+    const onTraceClick = jest.fn();
+    const examples: EvaluationRunDatasetExample[] = [
+      {
+        example_id: 'example-with-eval-trace',
+        example_index: 0,
+        scores: [
+          buildScore({
+            timestamp: '2026-03-02T12:00:00.000Z',
+            evaluatorName: 'Criteria',
+            evaluatorScore: 0.7,
+            evaluatorTraceId: 'eval-trace-abc123',
+            repetitionIndex: 0,
+          }),
+        ],
+      },
+    ];
+
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
+
+    const accordion = screen.getByLabelText('Toggle details for evaluator Criteria');
+    const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
+    fireEvent.click(accordionButton);
+
+    const viewTraceButton = screen.getByRole('button', {
+      name: 'View trace for evaluator Criteria',
+    });
+    fireEvent.click(viewTraceButton);
+
+    expect(onTraceClick).toHaveBeenCalledWith('eval-trace-abc123');
+  });
+
+  it('does not render accordion when no details are available', () => {
+    const examples: EvaluationRunDatasetExample[] = [
+      {
+        example_id: 'example-no-details',
+        example_index: 0,
+        scores: [
+          buildScore({
+            timestamp: '2026-03-02T12:00:00.000Z',
+            evaluatorName: 'SimpleScore',
+            evaluatorScore: 1.0,
+            repetitionIndex: 0,
+          }),
+        ],
+      },
+    ];
+
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+
+    expect(screen.getByText('SimpleScore:')).toBeInTheDocument();
+    expect(screen.getByText('1.00')).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('Toggle details for evaluator SimpleScore')
+    ).not.toBeInTheDocument();
   });
 });

@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COLUMN_EXAMPLE_NUMBER = i18n.translate(
-  'xpack.evals.exampleScoresTable.columnExampleNumber',
-  {
-    defaultMessage: 'Example #',
-  }
-);
-
 export const COLUMN_EXAMPLE_ID = i18n.translate('xpack.evals.exampleScoresTable.columnExampleId', {
   defaultMessage: 'Example ID',
 });
@@ -82,4 +75,37 @@ export const getRepetitionButtonGroupLegend = (exampleId: string) =>
   i18n.translate('xpack.evals.exampleScoresTable.repetitionButtonGroupLegend', {
     defaultMessage: 'Select repetition for example {exampleId}',
     values: { exampleId },
+  });
+
+export const EVALUATOR_EXPLANATION = i18n.translate(
+  'xpack.evals.exampleScoresTable.evaluatorExplanation',
+  {
+    defaultMessage: 'Explanation',
+  }
+);
+
+export const EVALUATOR_METADATA = i18n.translate(
+  'xpack.evals.exampleScoresTable.evaluatorMetadata',
+  {
+    defaultMessage: 'Metadata',
+  }
+);
+
+export const EVALUATOR_VIEW_TRACE = i18n.translate(
+  'xpack.evals.exampleScoresTable.evaluatorViewTrace',
+  {
+    defaultMessage: 'View trace',
+  }
+);
+
+export const getEvaluatorViewTraceAriaLabel = (evaluatorName: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.evaluatorViewTraceAriaLabel', {
+    defaultMessage: 'View trace for evaluator {evaluatorName}',
+    values: { evaluatorName },
+  });
+
+export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.evaluatorAccordionAriaLabel', {
+    defaultMessage: 'Toggle details for evaluator {evaluatorName}',
+    values: { evaluatorName },
   });
