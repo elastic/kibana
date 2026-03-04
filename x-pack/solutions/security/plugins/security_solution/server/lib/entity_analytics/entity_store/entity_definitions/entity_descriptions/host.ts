@@ -12,7 +12,7 @@ import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './commo
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
 
-const HOST_ENTITY_TYPE = 'host';
+const HOST_ENTITY_TYPE = 'Host';
 export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
   version: HOST_DEFINITION_VERSION,

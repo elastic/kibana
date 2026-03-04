@@ -6,13 +6,15 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
+import { euid } from '@kbn/entity-store/common';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
 export const buildHostDetailsQuery = ({
+  hostName,
+  entityIdentifiers,
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
@@ -21,7 +23,13 @@ export const buildHostDetailsQuery = ({
     ...cloudFieldsMap,
   });
 
-  const filter: QueryDslQueryContainer[] = [
+  const entityFilters =
+    entityIdentifiers && Object.keys(entityIdentifiers).length > 0
+      ? euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers)
+      : { term: { 'host.name': hostName } };
+
+  const filter = [
+    ...(entityFilters ? [entityFilters] : []),
     {
       range: {
         '@timestamp': {

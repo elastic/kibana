@@ -18,6 +18,7 @@ import { EntityTypeToIdentifierField } from '../../../../../../common/entity_ana
 import {
   getHostEntityIdentifiersFromTimelineData,
   getUserEntityIdentifiersFromTimelineData,
+  getServiceEntityIdentifiersFromTimelineData,
 } from './entity_identifiers_utils';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
@@ -163,6 +164,9 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.service) {
+    const serviceEntityIdentifiers = data
+      ? getServiceEntityIdentifiersFromTimelineData(data)
+      : undefined;
     return (
       <ServiceName
         Component={Component}
@@ -171,6 +175,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityIdentifiers={serviceEntityIdentifiers}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {

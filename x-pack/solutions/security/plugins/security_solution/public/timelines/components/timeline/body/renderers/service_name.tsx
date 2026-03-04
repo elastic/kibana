@@ -16,6 +16,7 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import type { EntityIdentifiers } from './entity_identifiers_utils';
 
 interface Props {
   contextId: string;
@@ -24,6 +25,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityIdentifiers?: EntityIdentifiers | null;
 }
 
 const ServiceNameComponent: React.FC<Props> = ({
@@ -33,6 +35,7 @@ const ServiceNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  entityIdentifiers,
 }) => {
   const eventContext = useContext(StatefulEventContext);
   const serviceName = `${value}`;
@@ -59,14 +62,14 @@ const ServiceNameComponent: React.FC<Props> = ({
         right: {
           id: ServicePanelKey,
           params: {
-            entityIdentifiers: { 'service.name': serviceName },
+            entityIdentifiers,
             contextID: contextId,
             scopeId: timelineID,
           },
         },
       });
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, serviceName]
+    [contextId, entityIdentifiers, eventContext, isInTimelineContext, onClick, openFlyout]
   );
 
   const content = useMemo(
@@ -78,6 +81,7 @@ const ServiceNameComponent: React.FC<Props> = ({
         onClick={isInTimelineContext || !isInSecurityApp ? openServiceDetailsSidePanel : undefined}
         title={title}
         entityType={EntityType.service}
+        entityIdentifiers={entityIdentifiers ?? undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">
           {serviceName}
@@ -92,6 +96,7 @@ const ServiceNameComponent: React.FC<Props> = ({
       Component,
       title,
       isInSecurityApp,
+      entityIdentifiers,
     ]
   );
 

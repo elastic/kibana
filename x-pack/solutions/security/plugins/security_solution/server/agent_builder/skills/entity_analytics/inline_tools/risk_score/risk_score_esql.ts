@@ -8,8 +8,8 @@
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { type ToolHandlerContext, type ToolHandlerResult } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { euid } from '@kbn/entity-store/common';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import { euid } from '../../../../../../../entity_store/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import {
   EntityTypeToLevelField,

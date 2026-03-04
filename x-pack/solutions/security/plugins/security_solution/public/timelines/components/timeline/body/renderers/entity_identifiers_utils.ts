@@ -124,3 +124,11 @@ export const getHostEntityIdentifiersFromTimelineData = (
 
   return Object.keys(identifiers).length > 0 ? identifiers : null;
 };
+
+export const getServiceEntityIdentifiersFromTimelineData = (
+  data: TimelineNonEcsData[]
+): EntityIdentifiers | null => {
+  const identifiers: EntityIdentifiers = {};
+
+  return Object.keys(identifiers).length > 0 ? identifiers : null;
+};
