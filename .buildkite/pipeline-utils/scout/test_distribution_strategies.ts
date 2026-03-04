@@ -101,8 +101,8 @@ async function distributeScoutTestsOnLanes() {
         env: laneEnv,
         retry: {
           automatic: [
-            { exit_status: '10', limit: 1 },
-            { exit_status: '*', limit: 3 },
+            { exit_status: '-1', limit: 3 },
+            { exit_status: '*', limit: 1 },
           ],
         },
       });
