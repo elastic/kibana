@@ -42,7 +42,7 @@ export const onSaveDiscoverSession = async ({
   onClose,
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
-  if (services.embeddableEditor.isByValueEditor()) {
+  if (services.embeddableEditor.isByValueEditor() && onSaveCb) {
     const savedSearch = await selectTabSavedSearch({
       tabId: state.getCurrentTab().id,
       getState: state.internalState.getState,
@@ -53,7 +53,7 @@ export const onSaveDiscoverSession = async ({
     const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
     const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
-    onSaveCb?.({ ...attributes, references });
+    onSaveCb({ ...attributes, references });
   } else {
     const internalState = state.internalState.getState();
     const persistedDiscoverSession = internalState.persistedDiscoverSession;
@@ -129,6 +129,7 @@ export const onSaveDiscoverSession = async ({
         if (onSaveCb) {
           onSaveCb();
         } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
+          services.embeddableEditor.clearEditorState();
           services.locator.navigate({
             savedSearchId: response.discoverSession.id,
             ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
@@ -144,9 +145,7 @@ export const onSaveDiscoverSession = async ({
         isTimeBased={isTimeBased}
         services={services}
         title={persistedDiscoverSession?.title ?? ''}
-        showCopyOnSave={
-          !services.embeddableEditor.isEmbeddedEditor() && !!persistedDiscoverSession?.id
-        }
+        showCopyOnSave={!!persistedDiscoverSession?.id}
         initialCopyOnSave={initialCopyOnSave}
         description={persistedDiscoverSession?.description}
         timeRestore={timeRestore}

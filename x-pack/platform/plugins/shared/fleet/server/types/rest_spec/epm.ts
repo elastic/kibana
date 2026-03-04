@@ -11,6 +11,7 @@ import {
   DeprecationInfoSchema,
   ExperimentalDataStreamFeaturesSchema,
 } from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -338,6 +339,7 @@ export const GetInputsResponseSchema = schema.oneOf([
       }),
       { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 
