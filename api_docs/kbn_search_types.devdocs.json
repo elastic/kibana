@@ -1113,9 +1113,7 @@
           "\nSame as `ISearchOptions`, but contains only serializable fields, which can\nbe sent over the network."
         ],
         "signature": [
-          "{ executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; projectRouting?: ",
+          "{ projectRouting?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1123,7 +1121,9 @@
             "section": "def-common.ProjectRouting",
             "text": "ProjectRouting"
           },
-          "; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | symbol | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
+          "; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | symbol | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "lineNumber": 135,

@@ -12,8 +12,8 @@ import { removedUserActivityActions, userActivityActions } from './user_activity
 // These counts are intentional guards to keep the registries tidy.
 // If you remove an action id, move it to `removedUserActivityActions` (don't delete it),
 // then update these numbers.
-const EXPECTED_TOTAL_COUNT = 3; // active + removed
-const EXPECTED_REMOVED_COUNT = 2; // removed only
+const EXPECTED_TOTAL_COUNT = 1; // active + removed
+const EXPECTED_REMOVED_COUNT = 0; // removed only
 
 describe('userActivityActions registry', () => {
   it('keeps the total number of action ids stable', () => {

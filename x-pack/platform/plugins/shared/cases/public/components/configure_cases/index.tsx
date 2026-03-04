@@ -32,6 +32,7 @@ import type {
   ActionConnector,
   ObservableTypeConfiguration,
 } from '../../../common/types/domain';
+import { getNoneConnector } from '../../../common/utils/connectors';
 import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -39,7 +40,7 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import type { ClosureType } from '../../containers/configure/types';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
+import { normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
 import { getConnectorById, addOrReplaceField } from '../utils';
 import { HeaderPage } from '../header_page';

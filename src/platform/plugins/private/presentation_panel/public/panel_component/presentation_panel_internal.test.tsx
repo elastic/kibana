@@ -25,6 +25,7 @@ import type {
   PresentationPanelInternalProps,
 } from './types';
 import { EuiThemeProvider } from '@elastic/eui';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 describe('Presentation panel', () => {
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
@@ -102,7 +103,7 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('superTest'),
       };
       await renderPresentationPanel({ api });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, {
         embeddable: api,
       });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {

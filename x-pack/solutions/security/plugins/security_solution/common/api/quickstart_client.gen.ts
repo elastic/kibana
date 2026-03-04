@@ -724,6 +724,12 @@ If asset criticality records already exist for the specified entities, those rec
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Creates an index for Elastic Security alerts. Calling this API is not
+required for the detection engine to function properly. You can create
+rules and alerts without calling this API.
+
+    */
   async createAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateAlertsIndex`);
     return this.kbnClient

@@ -1,15 +1,20 @@
-# Lens Scout tests
+# How to run Lens Scout tests
 
-This directory contains Scout tests for the Lens plugin.
 
-## Running the tests
+Run the server
 
-### Run server
-```
+```bash
 node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
-### Run tests
-```
+Then you can run the tests in another terminal
+
+```bash
 npx playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/  --ui
+```
+
+You can run the parallel tests in another terminal
+
+```bash
+npx playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/parallel.playwright.config.ts
 ```

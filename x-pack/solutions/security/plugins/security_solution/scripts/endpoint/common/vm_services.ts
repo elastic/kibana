@@ -230,23 +230,6 @@ ${chalk.red('NOTE:')} ${chalk.bold(
   return '';
 };
 
-interface CreateVagrantVmOptions extends BaseVmCreateOptions {
-  type: SupportedVmManager & 'vagrant';
-
-  name: string;
-  /**
-   * The downloaded agent information. The Agent file will be uploaded to the Vagrant VM and
-   * made available under the default login home directory (`~/agent-filename`)
-   */
-  agentDownload: DownloadedAgentInfo;
-  /**
-   * The path to the Vagrantfile to use to provision the VM. Defaults to Vagrantfile under:
-   * `x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile`
-   */
-  vagrantFile?: string;
-  log?: ToolingLog;
-}
-
 const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
   const isVboxKernelLoaded = async (): Promise<boolean> => {
     try {
@@ -270,7 +253,7 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
     return;
   }
 
-  const loadModules = async (): Promise<boolean> => {
+  const tryLoadModules = async (): Promise<boolean> => {
     for (const cmd of [
       'sudo modprobe vboxdrv',
       'sudo /sbin/vboxconfig',
@@ -295,7 +278,7 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
       await execa.command('sudo apt-get install -y --no-install-recommends virtualbox-7.1', {
         stdio: 'pipe',
       });
-      return (await loadModules()) && (await isVboxKernelLoaded());
+      return (await tryLoadModules()) && (await isVboxKernelLoaded());
     } catch {
       log.debug('virtualbox-7.1 package not available or install failed');
       return false;
@@ -304,13 +287,14 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
 
   log.warning('VirtualBox kernel module not loaded, attempting recovery...');
 
-  if (await loadModules()) {
+  if (await tryLoadModules()) {
     return;
   }
 
   log.warning('Kernel module build failed, upgrading to VirtualBox 7.1...');
 
   if (await upgradeToVbox71()) {
+    log.info('VirtualBox 7.1 upgrade successful');
     return;
   }
 
@@ -334,6 +318,23 @@ const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
     `VirtualBox kernel module could not be loaded.\nDiagnostics:\n${diagnostics.join('\n')}`
   );
 };
+
+interface CreateVagrantVmOptions extends BaseVmCreateOptions {
+  type: SupportedVmManager & 'vagrant';
+
+  name: string;
+  /**
+   * The downloaded agent information. The Agent file will be uploaded to the Vagrant VM and
+   * made available under the default login home directory (`~/agent-filename`)
+   */
+  agentDownload: DownloadedAgentInfo;
+  /**
+   * The path to the Vagrantfile to use to provision the VM. Defaults to Vagrantfile under:
+   * `x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile`
+   */
+  vagrantFile?: string;
+  log?: ToolingLog;
+}
 
 /**
  * Creates a new VM using `vagrant`
