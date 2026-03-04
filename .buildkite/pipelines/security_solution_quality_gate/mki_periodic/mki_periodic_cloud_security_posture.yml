@@ -1,0 +1,34 @@
+steps:
+  - group: "Cypress MKI - CSP"
+    key: cypress_test_CSP
+    steps:
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:cloud_security_posture
+        label: "Cypress MKI - CSP"
+        key: test_CSP
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-cloud-security-posture"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+
+  - group: "Cypress MKI - Asset Inventory"
+    key: cypress_test_asset_inventory
+    steps:
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:asset_inventory
+        label: "Cypress MKI - Asset Inventory"
+        key: test_asset_inventory
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-cloud-security-posture"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
