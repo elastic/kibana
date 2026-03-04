@@ -190,11 +190,15 @@ export const ManageIntegrationsTable: React.FC<{
             asResponse: true,
           }
         );
+        const contentDisposition = response.response?.headers?.get('content-disposition') ?? '';
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        const filename = filenameMatch?.[1] ?? `${integrationId}.zip`;
+
         const blob = response.body as unknown as Blob;
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${integrationId}.zip`;
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -94,7 +94,7 @@ const createManifest = (
 ): IntegrationManifest => {
   const name = integration.integration_id;
   const title = integration.metadata?.title ?? name;
-  const version = integration.metadata?.version ?? '0.0.0';
+  const version = integration.metadata?.version || '1.0.0';
   const description = integration.metadata?.description ?? '';
 
   const policyTemplates =
