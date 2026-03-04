@@ -25,10 +25,17 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discover
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
+import { AttackAiAssistantButton } from './attack_ai_assistant_button';
 
 jest.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => ({
   InvestigateInTimelineButton: jest.fn(({ children }) => (
     <div data-test-subj="mock-investigate-in-timeline-button">{children}</div>
+  )),
+}));
+
+jest.mock('./attack_ai_assistant_button', () => ({
+  AttackAiAssistantButton: jest.fn(() => (
+    <div data-test-subj="mock-attack-ai-assistant-button">{'AttackAiAssistantButton'}</div>
   )),
 }));
 
@@ -174,5 +181,18 @@ describe('SummaryTab', () => {
     expect(screen.getByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(TIMELINE_ICON_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders AttackAiAssistantButton with correct props', () => {
+    renderSummaryTab();
+
+    expect(screen.getByTestId('mock-attack-ai-assistant-button')).toBeInTheDocument();
+    expect(AttackAiAssistantButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attack: mockAttack,
+        pathway: 'attacks_page_group_summary',
+      }),
+      {}
+    );
   });
 });

@@ -2097,6 +2097,9 @@ Object {
           "minLength": 1,
           "type": "string",
         },
+        "apiKeyHeaderValue": Object {
+          "type": "string",
+        },
         "authType": Object {
           "enum": Array [
             "none",
