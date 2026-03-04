@@ -12,7 +12,15 @@ import { css } from '@emotion/react';
 
 export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boolean) => {
   return {
-    group: css`
+    filterBarWrapperCollaped: css`
+      margin-bottom: -${euiTheme.size.s};
+    `,
+    filterBarWrapperExpanded: css`
+      & .euiButtonIcon {
+        margin-top: ${euiTheme.size.s};
+      }
+    `,
+    filterPillGroup: css`
       gap: ${euiTheme.size.xs};
       max-height: calc(${euiTheme.size.base} * 10);
       overflow-y: auto;
@@ -20,10 +28,6 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
       &:not(:empty) {
         margin-top: ${afterQueryBar ? euiTheme.size.s : 0};
       }
-    `,
-    /** Pills group without margin - for use when nested in collapsible wrapper */
-    groupWithoutMargin: css`
-      gap: ${euiTheme.size.xs};
     `,
     /** Scrollable container for filter pills when expanded */
     pillsScrollContainer: css`

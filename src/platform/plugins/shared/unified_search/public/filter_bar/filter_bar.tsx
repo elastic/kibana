@@ -76,7 +76,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   const filterPills = (
     <EuiFlexGroup
-      css={isExpandable ? styles.groupWithoutMargin : styles.group}
+      css={styles.filterPillGroup}
       ref={groupRef}
       wrap={true}
       responsive={false}
@@ -119,7 +119,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   return (
     <EuiFlexGroup
-      css={[styles.group, css({ marginTop: props.afterQueryBar ? euiTheme.size.s : 0 })]}
+      css={!isExpanded ? styles.filterBarWrapperCollaped : styles.filterBarWrapperExpanded}
       alignItems={isExpanded ? 'flexStart' : 'center'}
       gutterSize="xs"
       wrap={isExpanded}
@@ -132,12 +132,12 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            css={isExpanded ? css({ marginTop: euiTheme.size.xs }) : null}
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             aria-label={isExpanded ? collapseLabel : expandLabel}
             onClick={onToggleExpand}
             aria-expanded={isExpanded}
             aria-controls={expandablePillsId}
+            iconSize="s"
           />
         </EuiToolTip>
       </EuiFlexItem>
