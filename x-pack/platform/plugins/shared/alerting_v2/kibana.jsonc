@@ -16,7 +16,8 @@
       "data",
       "dataViews",
       "esql",
-      "security"
+      "security",
+      "encryptedSavedObjects"
     ],
     "optionalPlugins": ["management"],
     "extraPublicDirs": []

@@ -54,6 +54,8 @@
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
     "@kbn/std",
+    "@kbn/core-security-server",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/eval-kql"
   ],
   "exclude": ["target/**/*"]
