@@ -27,8 +27,6 @@ export const EvaluationRunSummary = z.object({
   evaluator_model: Model.optional(),
   git_branch: z.string().nullable().optional(),
   git_commit_sha: z.string().nullable().optional(),
-  dataset_id: z.string().nullable().optional(),
-  dataset_name: z.string().nullable().optional(),
   total_repetitions: z.number().int().optional(),
   ci: BuildkiteMetadata.optional(),
 });
@@ -47,10 +45,6 @@ export const GetEvaluationRunsRequestQuery = z.object({
    * Filter by git branch
    */
   branch: z.string().optional(),
-  /**
-   * Filter by dataset ID
-   */
-  dataset_id: z.string().optional(),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
 });

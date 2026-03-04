@@ -18,8 +18,6 @@ interface RunsListingFilterOptions {
   suiteId?: string;
   modelId?: string;
   branch?: string;
-  datasetId?: string;
-  datasetName?: string;
 }
 
 interface RunsListingPaginationOptions {
@@ -36,8 +34,6 @@ interface RunBucket {
   doc_count: number;
   latest_timestamp?: { value_as_string?: string };
   suite_id?: TermsBucket;
-  dataset_id?: TermsBucket;
-  dataset_name?: TermsBucket;
   task_model_id?: TermsBucket;
   task_model_family?: TermsBucket;
   task_model_provider?: TermsBucket;
@@ -60,8 +56,6 @@ export interface RunsListingResult {
     run_id: string;
     timestamp: string | undefined;
     suite_id: string | undefined;
-    dataset_id: string | null;
-    dataset_name: string | null;
     task_model: { id: string; family: string | undefined; provider: string | undefined };
     evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
     git_branch: string | null;
@@ -177,13 +171,6 @@ export const buildRunsListingFilterQuery = (
   if (options?.branch) {
     filters.push({ term: { 'run_metadata.git_branch': options.branch } });
   }
-  if (options?.datasetId) {
-    filters.push({ term: { 'example.dataset.id': options.datasetId } });
-  }
-  if (options?.datasetName) {
-    filters.push({ term: { 'example.dataset.name': options.datasetName } });
-  }
-
   return filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
 };
 
@@ -209,8 +196,6 @@ export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPagina
     aggs: {
       latest_timestamp: { max: { field: '@timestamp' } },
       suite_id: { terms: { field: 'suite.id', size: 1 } },
-      dataset_id: { terms: { field: 'example.dataset.id', size: 1 } },
-      dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
       task_model_family: { terms: { field: 'task.model.family', size: 1 } },
       task_model_provider: { terms: { field: 'task.model.provider', size: 1 } },
@@ -254,8 +239,6 @@ export const parseRunsListingResponse = (
       run_id: bucket.key,
       timestamp: bucket.latest_timestamp?.value_as_string,
       suite_id: firstBucket(bucket.suite_id),
-      dataset_id: firstBucket(bucket.dataset_id) ?? null,
-      dataset_name: firstBucket(bucket.dataset_name) ?? null,
       task_model: {
         id: buildModelDisplayId(firstBucket(bucket.task_model_id), taskFamily, taskProvider),
         family: taskFamily,

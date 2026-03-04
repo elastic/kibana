@@ -44,7 +44,6 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
             suite_id: suiteId,
             model_id: modelId,
             branch,
-            dataset_id: datasetId,
             page,
             per_page: perPage,
           } = request.query;
@@ -55,7 +54,7 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
           const aggResponse = await esClient.search({
             index: EVALUATIONS_INDEX_PATTERN,
             size: 0,
-            query: buildRunsListingFilterQuery({ suiteId, modelId, branch, datasetId }),
+            query: buildRunsListingFilterQuery({ suiteId, modelId, branch }),
             aggs: buildRunsListingAggregation(pagination),
           });
 
