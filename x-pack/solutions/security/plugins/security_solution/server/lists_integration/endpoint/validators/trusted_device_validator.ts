@@ -57,13 +57,14 @@ const TrustedDeviceEntrySchema = schema.object({
         validate: (value: string) =>
           value.trim().length > 0 ? undefined : TRUSTED_DEVICE_EMPTY_VALUE_ERROR,
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 250 }
     ),
   ]),
 });
 
 const TrustedDeviceEntriesSchema = schema.arrayOf(TrustedDeviceEntrySchema, {
   minSize: 1,
+  maxSize: 250,
   validate(
     entries: Array<{ field: string; type: string; operator: string; value: string | string[] }>
   ) {

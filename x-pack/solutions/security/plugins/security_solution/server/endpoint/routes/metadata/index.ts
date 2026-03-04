@@ -38,7 +38,8 @@ export const endpointFilters = schema.object({
         schema.literal(HostStatus.UPDATING.toString()),
         schema.literal(HostStatus.UNHEALTHY.toString()),
         schema.literal(HostStatus.INACTIVE.toString()),
-      ])
+      ]),
+      { maxSize: 20 }
     )
   ),
 });

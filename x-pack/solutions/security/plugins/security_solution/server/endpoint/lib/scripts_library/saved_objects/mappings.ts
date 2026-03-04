@@ -14,7 +14,7 @@ import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../constants';
 const ScriptsLibraryAttributesSchemaV1 = schema.object({
   id: schema.string(),
   name: schema.string(),
-  platform: schema.arrayOf(schema.string()),
+  platform: schema.arrayOf(schema.string(), { maxSize: 10 }),
   file_id: schema.string(),
   file_name: schema.string(),
   file_size: schema.number(),
@@ -24,7 +24,7 @@ const ScriptsLibraryAttributesSchemaV1 = schema.object({
   instructions: schema.maybe(schema.string()),
   example: schema.maybe(schema.string()),
   path_to_executable: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
   created_by: schema.string(),
   created_at: schema.string(),
   updated_by: schema.string(),

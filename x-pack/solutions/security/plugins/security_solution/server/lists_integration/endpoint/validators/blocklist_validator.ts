@@ -66,7 +66,7 @@ const CommonEntrySchema = {
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 250 }
     ),
     schema.conditional(
       schema.siblingRef('field'),
@@ -76,14 +76,14 @@ const CommonEntrySchema = {
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 250 }
       ),
       schema.arrayOf(
         schema.string({
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 250 }
       )
     )
   ),
@@ -101,12 +101,12 @@ const WindowsSignerEntrySchema = schema.object({
         schema.siblingRef('type'),
         schema.literal('match'),
         schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }))
+        schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 250 })
       ),
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
     }),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 250 }
   ),
 });
 
@@ -155,6 +155,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
 // Validate there is only one entry when signer or path and the allowed entries for hashes
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: BlocklistConditionEntry[]) {
     if (allowedHashes.includes(entries[0].field)) {
       return hashEntriesValidation(entries);
