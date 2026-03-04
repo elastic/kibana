@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataConcatStepDefinition, MAX_ARRAYS, MAX_CONCAT_ITEMS } from './data_concat_step';
+import { dataConcatStepDefinition, MAX_CONCAT_ITEMS } from './data_concat_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
 describe('dataConcatStepDefinition', () => {
@@ -273,15 +273,6 @@ describe('dataConcatStepDefinition', () => {
 
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('not an array');
-    });
-
-    it('should return error when too many input arrays', async () => {
-      const arrays = Array.from({ length: MAX_ARRAYS + 1 }, () => [1]);
-      const context = createMockContext({ arrays });
-      const result = await dataConcatStepDefinition.handler(context);
-
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain(`Maximum allowed is ${MAX_ARRAYS}`);
     });
 
     it('should return error when concatenated result exceeds max items', async () => {

@@ -7,22 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { stableStringify } from '@kbn/std';
 import { dataConcatStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
 export const MAX_CONCAT_ITEMS = 100_000;
-export const MAX_ARRAYS = 50;
-const MAX_FLATTEN_DEPTH = 10;
 const ABORT_CHECK_INTERVAL = 1000;
 
 function deduplicateKey(item: unknown): string {
-  if (item === null) return 'null';
   if (item === undefined) return 'undefined';
-  const t = typeof item;
-  if (t === 'string' || t === 'number' || t === 'boolean') {
-    return `${t}:${item}`;
+  return stableStringify(item);
+}
+
+function* flattenIterator(arr: unknown[], depth: number): Generator<unknown> {
+  for (const item of arr) {
+    if (depth > 0 && Array.isArray(item)) {
+      yield* flattenIterator(item, depth - 1);
+    } else {
+      yield item;
+    }
   }
-  return JSON.stringify(item);
 }
 
 function resolveToArray(rendered: unknown, index: number): unknown[] {
@@ -57,7 +61,7 @@ function concatSinglePass(
 
   for (let i = 0; i < rawArrays.length; i++) {
     const resolved = resolveToArray(renderFn(rawArrays[i]), i);
-    const items = flattenDepth > 0 ? resolved.flat(flattenDepth) : resolved;
+    const items = flattenDepth > 0 ? flattenIterator(resolved, flattenDepth) : resolved;
 
     for (const item of items) {
       if (totalCount % ABORT_CHECK_INTERVAL === 0 && abortSignal?.aborted) {
@@ -97,17 +101,9 @@ export const dataConcatStepDefinition = createServerStepDefinition({
         return { error: new Error('"arrays" must be a non-empty array of arrays') };
       }
 
-      if (rawArrays.length > MAX_ARRAYS) {
-        return {
-          error: new Error(
-            `Too many input arrays (${rawArrays.length}). Maximum allowed is ${MAX_ARRAYS}.`
-          ),
-        };
-      }
-
       const flattenDepth = flatten
         ? typeof flatten === 'number'
-          ? Math.min(flatten, MAX_FLATTEN_DEPTH)
+          ? flatten
           : 1
         : 0;
 
