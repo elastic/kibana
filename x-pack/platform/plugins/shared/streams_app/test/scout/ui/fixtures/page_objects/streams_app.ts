@@ -229,16 +229,17 @@ export class StreamsApp {
       throw new Error(`Missing href for Discover action button of stream ${streamName}`);
     }
 
-    // Wired streams should use the ES|QL view ($.streamname), not the raw glob pattern
-    const viewFragment = encodeURIComponent(`FROM $.${streamName}`);
-    const rawFragment = encodeURIComponent(`FROM ${streamName}, ${streamName}.*`);
+    // Wired streams should use the ES|QL view ($.streamname), not the raw pattern.
+    const decodedHref = decodeURIComponent(href);
+    const viewFragment = `FROM $.${streamName}`;
+    const rawFragment = `FROM ${streamName}, ${streamName}.*`;
 
-    if (href.includes(rawFragment)) {
+    if (decodedHref.includes(rawFragment)) {
       throw new Error(
         `Discover link for wired stream ${streamName} still uses raw glob pattern. Expected view reference ($.${streamName}).`
       );
     }
-    if (!href.includes(viewFragment)) {
+    if (!decodedHref.includes(viewFragment)) {
       throw new Error(
         `Discover link for wired stream ${streamName} does not contain expected view fragment. href=${href} expected=FROM $.${streamName}`
       );
