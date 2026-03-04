@@ -82,7 +82,7 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
           aria-label={MORE_ACTIONS_BUTTON_LABEL}
           color="text"
           data-test-subj={MORE_ACTIONS_TEST_ID}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
           size="s"
         />

@@ -54,7 +54,7 @@ const GenericLinkButtonComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   title?: string;
   iconType?: string;
-}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'expand' }) => {
+}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'maximize' }) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}

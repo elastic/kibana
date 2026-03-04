@@ -118,7 +118,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
             <EuiButtonIcon
               color="primary"
               size="xs"
-              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               aria-label={EXPAND_CARD_BUTTON_LABEL(title)}
               aria-expanded={isExpanded}
             />

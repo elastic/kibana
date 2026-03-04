@@ -18,7 +18,7 @@ import { FilterOut } from '../utils/filter';
 import { type Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { FILTER_OUT_TITLE, FILTER_OUT_ANNOUNCEMENT } from './translations';
 
-const ICON_TYPE = 'minusInCircle';
+const ICON_TYPE = 'minusCircle';
 
 export interface FilterOutProps {
   /**
@@ -132,7 +132,7 @@ export const FilterOutContextMenu: FC<FilterOutContextMenuProps> = ({
   return (
     <EuiContextMenuItem
       key="filterOut"
-      icon="minusInCircle"
+      icon="minusCircle"
       size="s"
       onClick={() => {
         filterFn();

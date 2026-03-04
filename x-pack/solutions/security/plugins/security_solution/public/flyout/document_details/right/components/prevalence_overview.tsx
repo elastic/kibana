@@ -115,7 +115,7 @@ export const PrevalenceOverview: FC = () => {
           />
         ),
         link,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
         headerContent: (
           <EuiToolTip
             content={

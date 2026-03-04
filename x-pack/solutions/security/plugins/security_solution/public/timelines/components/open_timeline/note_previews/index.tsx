@@ -88,7 +88,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       color="text"
-      iconType="arrowRight"
+      iconType="chevronSingleRight"
       onClick={handleClick}
     />
   );

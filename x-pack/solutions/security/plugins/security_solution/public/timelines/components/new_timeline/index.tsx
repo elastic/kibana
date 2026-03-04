@@ -50,7 +50,7 @@ export const NewTimelineButton = React.memo<NewTimelineButtonProps>(({ type }) =
 
   return (
     <EuiButton
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj={dataTestSubj}
       onClick={handleCreateNewTimeline}
       fill

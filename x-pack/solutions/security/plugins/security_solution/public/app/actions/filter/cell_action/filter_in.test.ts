@@ -61,7 +61,7 @@ describe('createFilterInCellActionFactory', () => {
   });
 
   it('should return icon type', () => {
-    expect(filterInAction.getIconType(context)).toEqual('plusInCircle');
+    expect(filterInAction.getIconType(context)).toEqual('plusCircle');
   });
 
   describe('isCompatible', () => {

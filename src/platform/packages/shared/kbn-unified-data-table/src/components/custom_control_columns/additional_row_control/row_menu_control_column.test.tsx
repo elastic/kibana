@@ -58,7 +58,7 @@ describe('getRowMenuControlColumn', () => {
 
     await userEvent.click(menuButton);
 
-    expect(screen.getByTestId('exampleRowControl-visBarVerticalStacked')).toBeInTheDocument();
+    expect(screen.getByTestId('exampleRowControl-chartBarVerticalStack')).toBeInTheDocument();
     expect(screen.getByTestId('exampleRowControl-heart')).toBeInTheDocument();
 
     const button = screen.getByTestId('unifiedDataTable_rowMenu_test_row_menu_control');
