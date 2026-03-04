@@ -118,11 +118,37 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   if (!isExpandable) {
     return filterPills;
   }
+
+  /**
+   * Use nested plural to display
+   * - "X filters applied" if all filters are applied
+   * - "X filters disabled" if all filters are disabled
+   * - "X filters applied, Y disabled" if only some filters are disabled
+   */
   const filtersAppliedLabel = i18n.translate(
     'unifiedSearch.filter.filterBar.filtersAppliedAccordionButton',
     {
-      defaultMessage:
-        '{appliedFilterCount, plural, =0 {{disabledFilterCount, plural, zero {0 filters applied} other {# filters disabled}}} one {# filter applied{disabledFilterCount, plural, =0 {} other {, # disabled}}} other {# filters applied{disabledFilterCount, plural, =0 {} other {, # disabled}}}}',
+      defaultMessage: `
+        {appliedFilterCount, plural, 
+          =0 {
+            {disabledFilterCount, plural, 
+              zero {0 filters applied} 
+              other {# filters disabled}
+            }
+          } 
+          one {# filter applied{
+            disabledFilterCount, plural, 
+              =0 {} 
+              other {, # disabled}
+            }
+          } 
+          other {# filters applied{
+            disabledFilterCount, plural, 
+              =0 {} 
+              other {, # disabled}
+            }
+          }
+        }`,
       values: { appliedFilterCount, disabledFilterCount },
     }
   );
