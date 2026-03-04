@@ -18,3 +18,9 @@ export interface ResourceDefinition {
     policy: IlmPolicy;
   };
 }
+
+export interface EsqlViewDefinition {
+  key: string;
+  name: string;
+  query: string;
+}
