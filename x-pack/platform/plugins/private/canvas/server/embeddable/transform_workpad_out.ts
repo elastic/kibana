@@ -46,94 +46,92 @@ export function transformWorkpadOut(
   workpad: WorkpadAttributes,
   references: SavedObjectReference[] = []
 ): WorkpadAttributes {
-  try {
-    const pages = workpad.pages.map((page) => {
-      const elements = page.elements.map((element) => {
-        if (!embeddableFunctions.some((fn) => element.expression.includes(fn))) {
-          return element;
+  const pages = workpad.pages.map((page) => {
+    const elements = page.elements.map((element) => {
+      if (!embeddableFunctions.some((fn) => element.expression.includes(fn))) {
+        return element;
+      }
+
+      // remove element ID prefix from references for the current element
+      const referencesForElement = references
+        .filter(({ name }) => name.startsWith(`${element.id}:`))
+        .map((reference) => ({
+          ...reference,
+          name: reference.name.slice(`${element.id}:`.length),
+        }));
+
+      // use expressions service to inject references for by-reference embeddables using Canvas defined references
+      const ast =
+        referencesForElement.length > 0 &&
+        referencesForElement.some((ref) => embeddableFunctions.some((fn) => ref.name.includes(fn)))
+          ? expressionsService.inject(fromExpression(element.expression), referencesForElement)
+          : fromExpression(element.expression);
+
+      ast.chain = ast.chain.map((fn) => {
+        if (!embeddableFunctions.includes(fn.function)) return fn;
+
+        // migrate legacy embeddable expressions to generic embeddable expression
+        switch (fn.function) {
+          case 'savedLens': {
+            const lensConfig = {
+              savedObjectId: fn.arguments.id[0] as string,
+              timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
+              title:
+                fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
+              // skipping the palette argument because it's too complex to parse without the interpreter
+            };
+            fn.function = 'embeddable';
+            fn.arguments = {
+              config: [encode(lensConfig)],
+              type: [EmbeddableTypes.lens],
+            };
+            break;
+          }
+          case 'savedVisualization': {
+            const visualizationConfig = {
+              savedObjectId: fn.arguments.id[0] as string,
+              vis:
+                fn.arguments.hideLegend?.[0] === true
+                  ? { legendOpen: !fn.arguments.hideLegend?.[0] }
+                  : undefined,
+              timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
+              title:
+                fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
+              // skipping the colors argument because it's too complex to parse without evaluating the expression
+            };
+            // migrate legacy savedVisualization to embeddable expression
+            fn.function = 'embeddable';
+            fn.arguments = {
+              config: [encode(visualizationConfig)],
+              type: [EmbeddableTypes.visualization],
+            };
+            break;
+          }
+          case 'savedMap': {
+            // migrate legacy savedMap to embeddable expression
+            const mapConfig = {
+              savedObjectId: fn.arguments.id[0] as string,
+              timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
+              title:
+                fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
+              hiddenLayers:
+                fn.arguments.hideLayer?.length > 0 ? (fn.arguments.hideLayer as string[]) : [],
+              mapCenter: extractMapCenterFromAst(fn.arguments.center?.[0] as Ast),
+            };
+            fn.function = 'embeddable';
+            fn.arguments = {
+              config: [encode(mapConfig)],
+              type: [EmbeddableTypes.map],
+            };
+            break;
+          }
         }
 
-        // remove element ID prefix from references for the current element
-        const referencesForElement = references
-          .filter(({ name }) => name.startsWith(`${element.id}:`))
-          .map((reference) => ({
-            ...reference,
-            name: reference.name.slice(`${element.id}:`.length),
-          }));
+        const embeddableConfig = decode(fn.arguments.config[0] as string);
+        const embeddableType = fn.arguments.type[0] as string;
+        const transforms = embeddableService.getTransforms(embeddableType);
 
-        // use expressions service to inject references for by-reference embeddables using Canvas defined references
-        const ast =
-          referencesForElement.length > 0 &&
-          referencesForElement.some((ref) =>
-            embeddableFunctions.some((fn) => ref.name.includes(fn))
-          )
-            ? expressionsService.inject(fromExpression(element.expression), referencesForElement)
-            : fromExpression(element.expression);
-
-        ast.chain = ast.chain.map((fn) => {
-          if (!embeddableFunctions.includes(fn.function)) return fn;
-
-          // migrate legacy embeddable expressions to generic embeddable expression
-          switch (fn.function) {
-            case 'savedLens': {
-              const lensConfig = {
-                savedObjectId: fn.arguments.id[0] as string,
-                timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
-                title:
-                  fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
-                // skipping the palette argument because it's too complex to parse without the interpreter
-              };
-              fn.function = 'embeddable';
-              fn.arguments = {
-                config: [encode(lensConfig)],
-                type: [EmbeddableTypes.lens],
-              };
-              break;
-            }
-            case 'savedVisualization': {
-              const visualizationConfig = {
-                savedObjectId: fn.arguments.id[0] as string,
-                vis:
-                  fn.arguments.hideLegend?.[0] === true
-                    ? { legendOpen: !fn.arguments.hideLegend?.[0] }
-                    : undefined,
-                timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
-                title:
-                  fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
-                // skipping the colors argument because it's too complex to parse without evaluating the expression
-              };
-              // migrate legacy savedVisualization to embeddable expression
-              fn.function = 'embeddable';
-              fn.arguments = {
-                config: [encode(visualizationConfig)],
-                type: [EmbeddableTypes.visualization],
-              };
-              break;
-            }
-            case 'savedMap': {
-              // migrate legacy savedMap to embeddable expression
-              const mapConfig = {
-                savedObjectId: fn.arguments.id[0] as string,
-                timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
-                title:
-                  fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
-                hiddenLayers:
-                  fn.arguments.hideLayer?.length > 0 ? (fn.arguments.hideLayer as string[]) : [],
-                mapCenter: extractMapCenterFromAst(fn.arguments.center?.[0] as Ast),
-              };
-              fn.function = 'embeddable';
-              fn.arguments = {
-                config: [encode(mapConfig)],
-                type: [EmbeddableTypes.map],
-              };
-              break;
-            }
-          }
-
-          const embeddableConfig = decode(fn.arguments.config[0] as string);
-          const embeddableType = fn.arguments.type[0] as string;
-          const transforms = embeddableService.getTransforms(embeddableType);
-
+        try {
           // For legacy embeddable expressions if the embeddable config already has a savedObjectId,
           // transforms haven't been applied, so we need to transform in before we can transform out.
           // This should only execute once per legacy embeddable element because stored embeddables should
@@ -157,17 +155,18 @@ export function transformWorkpadOut(
             );
             fn.arguments.config[0] = encode(transformedConfig);
           }
-          return fn;
-        });
-        return { ...element, expression: toExpression(ast, { type: 'expression' }) };
+        } catch (error) {
+          logger.warn(
+            `Error transforming workpad out: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+        return fn;
       });
-      return { ...page, elements };
+      return { ...element, expression: toExpression(ast, { type: 'expression' }) };
     });
-    return { ...workpad, pages };
-  } catch (error) {
-    logger.error(
-      `Error transforming workpad out: ${error instanceof Error ? error.message : String(error)}`
-    );
-    throw error;
-  }
+    return { ...page, elements };
+  });
+  return { ...workpad, pages };
 }
