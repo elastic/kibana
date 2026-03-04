@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { StatusError } from './status_error';
+require('@kbn/babel-register').install();
 
-export class SystemNotFoundError extends StatusError {
-  constructor(message: string) {
-    super(message, 404);
-    this.name = 'SystemNotFoundError';
-  }
+const { getStringifiedConnectorsFromConfig } = require('./load_connectors_from_env');
+
+const connectors = getStringifiedConnectorsFromConfig();
+if (connectors) {
+  process.stdout.write(connectors);
 }
