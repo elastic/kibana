@@ -23,6 +23,10 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
+import {
+  resolveMatchingWorkflowSubscriptions,
+  type ResolveMatchingWorkflowSubscriptionsParams,
+} from './event_driven/resolve_workflow_subscriptions';
 import { createTriggerEventHandler } from './event_driven/trigger_event_handler';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
@@ -166,10 +170,19 @@ export class WorkflowsPlugin
       throw new Error('Spaces service not initialized');
     }
 
+    if (!this.api) {
+      throw new Error('Workflows management API not initialized');
+    }
+    const api = this.api;
+    const resolveMatchingWorkflowSubscriptionsFn = (
+      params: ResolveMatchingWorkflowSubscriptionsParams
+    ) => resolveMatchingWorkflowSubscriptions(params, { api, logger: this.logger });
+
     const triggerEventHandler = createTriggerEventHandler({
       api: this.api,
       logger: this.logger,
       getTriggerEventsClient: () => this.triggerEventsClient,
+      resolveMatchingWorkflowSubscriptions: resolveMatchingWorkflowSubscriptionsFn,
     });
 
     plugins.workflowsExtensions.registerTriggerEventHandler(triggerEventHandler);

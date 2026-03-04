@@ -44,19 +44,18 @@ describe('createTriggerEventHandler', () => {
     const triggerId = 'cases.updated';
     const spaceId = 'default';
     const payload = { caseId: 'case-123', status: 'open' as const };
+    const eventContext = { ...payload, timestamp, spaceId };
 
     const runWorkflow = jest.fn().mockResolvedValue(undefined);
-    const getWorkflowsSubscribedToTrigger = jest
+    const resolveMatchingWorkflowSubscriptions = jest
       .fn()
       .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
 
     const handler = createTriggerEventHandler({
-      api: {
-        getWorkflowsSubscribedToTrigger,
-        runWorkflow,
-      } as any,
+      api: { runWorkflow } as any,
       logger: mockLogger,
       getTriggerEventsClient: () => null,
+      resolveMatchingWorkflowSubscriptions,
     });
 
     await handler({
@@ -67,7 +66,12 @@ describe('createTriggerEventHandler', () => {
       request: mockRequest,
     });
 
-    expect(getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith(triggerId, spaceId);
+    expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledTimes(1);
+    expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledWith({
+      triggerId,
+      spaceId,
+      eventContext,
+    });
     expect(runWorkflow).toHaveBeenCalledTimes(1);
 
     const [workflowArg, spaceIdArg, inputsArg, requestArg, triggerIdArg] =
@@ -88,15 +92,13 @@ describe('createTriggerEventHandler', () => {
 
   it('should not call runWorkflow when no workflows are subscribed', async () => {
     const runWorkflow = jest.fn();
-    const getWorkflowsSubscribedToTrigger = jest.fn().mockResolvedValue([]);
+    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([]);
 
     const handler = createTriggerEventHandler({
-      api: {
-        getWorkflowsSubscribedToTrigger,
-        runWorkflow,
-      } as any,
+      api: { runWorkflow } as any,
       logger: mockLogger,
       getTriggerEventsClient: () => null,
+      resolveMatchingWorkflowSubscriptions,
     });
 
     await handler({
@@ -107,6 +109,14 @@ describe('createTriggerEventHandler', () => {
       request: mockRequest,
     });
 
+    expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledWith({
+      triggerId: 'cases.updated',
+      spaceId: 'default',
+      eventContext: expect.objectContaining({
+        timestamp: '2025-01-01T12:00:00.000Z',
+        spaceId: 'default',
+      }),
+    });
     expect(runWorkflow).not.toHaveBeenCalled();
   });
 });
