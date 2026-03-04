@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const stringOrNumberOrBoolean = z
   .union([z.string(), z.number(), z.boolean()])

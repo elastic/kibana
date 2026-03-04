@@ -24,7 +24,7 @@ import {
   ConfigSchema,
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,

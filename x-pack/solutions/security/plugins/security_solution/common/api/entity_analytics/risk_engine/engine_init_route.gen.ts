@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type InitRiskEngineResult = z.infer<typeof InitRiskEngineResult>;
 export const InitRiskEngineResult = z.object({

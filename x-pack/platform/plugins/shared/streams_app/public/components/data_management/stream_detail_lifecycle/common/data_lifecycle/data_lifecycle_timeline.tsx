@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -14,6 +14,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { PhaseName } from '@kbn/streams-schema';
 import type { LifecyclePhase } from './lifecycle_types';
 import type { TimelineSegment } from './data_lifecycle_segments';
 
@@ -22,20 +23,30 @@ export const DataLifecycleTimeline = ({
   isRetentionInfinite,
   timelineSegments,
   gridTemplateColumns,
+  invalidPhases,
+  invalidStepIndices,
 }: {
   phases: LifecyclePhase[];
   isRetentionInfinite: boolean;
   timelineSegments?: TimelineSegment[];
   gridTemplateColumns: string;
+  invalidPhases?: PhaseName[];
+  invalidStepIndices?: number[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const segments: TimelineSegment[] =
-    timelineSegments ??
-    phases.map((phase) => ({
-      grow: phase.grow,
-      leftValue: phase.min_age,
-      isDelete: phase.isDelete,
-    }));
+  const segments = useMemo<TimelineSegment[]>(
+    () =>
+      timelineSegments ??
+      phases.map((phase) => ({
+        grow: phase.grow,
+        leftValue: phase.min_age,
+        isDelete: phase.isDelete,
+      })),
+    [phases, timelineSegments]
+  );
+
+  const invalidPhasesSet = new Set<string>(invalidPhases ?? []);
+  const invalidStepIndicesSet = new Set<number>(invalidStepIndices ?? []);
 
   return (
     <EuiPanel
@@ -62,6 +73,12 @@ export const DataLifecycleTimeline = ({
             const isFirstPhase = index === 0;
             const isLastPhase = index === segments.length - 1;
             const showInfinite = isRetentionInfinite && isLastPhase;
+            const isPhaseAligned = phases.length === segments.length;
+            const phaseNameAtIndex = isPhaseAligned ? phases[index]?.name : undefined;
+            const isInvalidPhasePoint =
+              phaseNameAtIndex !== undefined && invalidPhasesSet.has(phaseNameAtIndex);
+            const isInvalidStepPoint =
+              segment.stepIndex !== undefined && invalidStepIndicesSet.has(segment.stepIndex);
 
             return (
               <EuiFlexItem key={index} grow={segment.grow} css={{ flexBasis: 0, minWidth: 0 }}>
@@ -70,6 +87,7 @@ export const DataLifecycleTimeline = ({
                   leftValue={segment.leftValue}
                   showInfinite={showInfinite}
                   isFirstPhase={isFirstPhase}
+                  isInvalidPoint={isInvalidPhasePoint || isInvalidStepPoint}
                 />
               </EuiFlexItem>
             );
@@ -85,11 +103,13 @@ const DataLifecyclePhaseTimeline = ({
   leftValue,
   showInfinite,
   isFirstPhase,
+  isInvalidPoint,
 }: {
   phase: TimelineSegment;
   leftValue?: string;
   showInfinite?: boolean;
   isFirstPhase?: boolean;
+  isInvalidPoint?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isDeletePhase = phase.isDelete;
@@ -122,9 +142,11 @@ const DataLifecyclePhaseTimeline = ({
             hasBorder={false}
             hasShadow={false}
             css={{ transform: 'translateX(-50%)' }}
-            data-test-subj={`dataLifecycleTimeline-value-${leftValue}`}
+            data-test-subj={`dataLifecycleTimeline-value-${leftValue}${
+              isInvalidPoint ? '-invalid' : ''
+            }`}
           >
-            <EuiText textAlign="center" size="xs" color="subdued">
+            <EuiText textAlign="center" size="xs" color={isInvalidPoint ? 'danger' : 'subdued'}>
               {leftValue}
             </EuiText>
           </EuiPanel>

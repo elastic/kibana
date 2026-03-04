@@ -6,7 +6,7 @@
  */
 
 import type { RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export interface EsqlRuleInstanceState extends RuleTypeState {
   previousOriginalDocumentIds?: string[];
