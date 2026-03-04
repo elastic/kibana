@@ -7,3 +7,4 @@
 
 export { NotificationPolicyFormFlyout } from '../form_flyout/notification_policy_form_flyout';
 export { toFormState, toCreatePayload, toUpdatePayload } from './form_utils';
+export { useNotificationPolicyForm } from './use_notification_policy_form';

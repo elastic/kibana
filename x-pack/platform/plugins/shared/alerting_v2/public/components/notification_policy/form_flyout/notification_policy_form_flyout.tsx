@@ -22,14 +22,14 @@ import type {
   UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { DEFAULT_FORM_STATE } from '../form/constants';
-import { toCreatePayload, toFormState, toUpdatePayload } from '../form/form_utils';
+import React from 'react';
+import { FormProvider } from 'react-hook-form';
 import { NotificationPolicyForm } from '../form/notification_policy_form';
-import type { NotificationPolicyFormState } from '../form/types';
+import { useNotificationPolicyForm } from '../form/use_notification_policy_form';
 
 const FLYOUT_TITLE_ID = 'notificationPolicyFlyoutTitle';
+
+const noop = () => {};
 
 interface NotificationPolicyFormFlyoutProps {
   onClose: () => void;
@@ -46,25 +46,14 @@ export const NotificationPolicyFormFlyout = ({
   isLoading = false,
   initialValues,
 }: NotificationPolicyFormFlyoutProps) => {
-  const isEditMode = !!initialValues;
+  const onSubmitCreate = (data: CreateNotificationPolicyData) => onSave?.(data);
+  const onSubmitUpdate = (id: string, data: UpdateNotificationPolicyBody) => onUpdate?.(id, data);
 
-  const defaultValues = useMemo(
-    () => (initialValues ? toFormState(initialValues) : DEFAULT_FORM_STATE),
-    [initialValues]
-  );
-
-  const methods = useForm<NotificationPolicyFormState>({
-    mode: 'onBlur',
-    defaultValues,
+  const { methods, isEditMode, handleSubmit } = useNotificationPolicyForm({
+    initialValues,
+    onSubmitCreate: onSave ? onSubmitCreate : noop,
+    onSubmitUpdate: onUpdate ? onSubmitUpdate : noop,
   });
-
-  const onSubmitValid = (values: NotificationPolicyFormState) => {
-    if (isEditMode && onUpdate && initialValues.version) {
-      onUpdate(initialValues.id, toUpdatePayload(values, initialValues.version));
-    } else if (!isEditMode && onSave) {
-      onSave(toCreatePayload(values));
-    }
-  };
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="m" ownFocus>
@@ -103,7 +92,7 @@ export const NotificationPolicyFormFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              onClick={methods.handleSubmit(onSubmitValid)}
+              onClick={handleSubmit}
               isLoading={isLoading}
               disabled={!methods.formState.isValid}
               data-test-subj="submitButton"

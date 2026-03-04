@@ -15,20 +15,18 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateNotificationPolicyData,
+  NotificationPolicyResponse,
+  UpdateNotificationPolicyBody,
+} from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import React, { useCallback } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import {
-  toCreatePayload,
-  toFormState,
-  toUpdatePayload,
-} from '../../components/notification_policy/form';
-import { DEFAULT_FORM_STATE } from '../../components/notification_policy/form/constants';
 import { NotificationPolicyForm } from '../../components/notification_policy/form/notification_policy_form';
-import type { NotificationPolicyFormState } from '../../components/notification_policy/form/types';
+import { useNotificationPolicyForm } from '../../components/notification_policy/form/use_notification_policy_form';
 import { paths } from '../../constants';
 import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useFetchNotificationPolicy } from '../../hooks/use_fetch_notification_policy';
@@ -49,9 +47,9 @@ export const NotificationPolicyFormPage = () => {
   const isEditMode = !!policyId;
   const isReady = !isEditMode || !!existingPolicy;
 
-  const navigateToList = () => {
+  const navigateToList = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.notificationPolicyList));
-  };
+  }, [navigateToUrl, basePath]);
 
   if (isEditMode && isFetchingPolicy) {
     return (
@@ -108,7 +106,6 @@ export const NotificationPolicyFormPage = () => {
 
   return (
     <NotificationPolicyFormPageContent
-      isEditMode={isEditMode}
       initialPolicy={existingPolicy}
       onCancel={navigateToList}
       onSuccess={navigateToList}
@@ -117,12 +114,10 @@ export const NotificationPolicyFormPage = () => {
 };
 
 const NotificationPolicyFormPageContent = ({
-  isEditMode,
   initialPolicy,
   onCancel,
   onSuccess,
 }: {
-  isEditMode: boolean;
   initialPolicy?: NotificationPolicyResponse;
   onCancel: () => void;
   onSuccess: () => void;
@@ -130,21 +125,15 @@ const NotificationPolicyFormPageContent = ({
   const { mutate: createPolicy, isLoading: isCreating } = useCreateNotificationPolicy();
   const { mutate: updatePolicy, isLoading: isUpdating } = useUpdateNotificationPolicy();
 
-  const methods = useForm<NotificationPolicyFormState>({
-    mode: 'onBlur',
-    defaultValues: isEditMode && initialPolicy ? toFormState(initialPolicy) : DEFAULT_FORM_STATE,
-  });
+  const onSubmitCreate = (data: CreateNotificationPolicyData) => createPolicy(data, { onSuccess });
+  const onSubmitUpdate = (id: string, data: UpdateNotificationPolicyBody) =>
+    updatePolicy({ id, data }, { onSuccess });
 
-  const onSubmitValid = (values: NotificationPolicyFormState) => {
-    if (isEditMode && initialPolicy?.version) {
-      updatePolicy(
-        { id: initialPolicy.id, data: toUpdatePayload(values, initialPolicy.version) },
-        { onSuccess }
-      );
-    } else {
-      createPolicy(toCreatePayload(values), { onSuccess });
-    }
-  };
+  const { methods, isEditMode, handleSubmit } = useNotificationPolicyForm({
+    initialValues: initialPolicy,
+    onSubmitCreate,
+    onSubmitUpdate,
+  });
 
   const isLoading = isCreating || isUpdating;
 
@@ -167,41 +156,43 @@ const NotificationPolicyFormPageContent = ({
         data-test-subj="pageTitle"
       />
       <EuiSpacer size="m" />
-      <FormProvider {...methods}>
-        <NotificationPolicyForm />
-      </FormProvider>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={methods.handleSubmit(onSubmitValid)}
-            isLoading={isLoading}
-            disabled={!methods.formState.isValid}
-            data-test-subj="submitButton"
-          >
-            {isEditMode ? (
+      <div style={{ maxWidth: 750 }}>
+        <FormProvider {...methods}>
+          <NotificationPolicyForm />
+        </FormProvider>
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={handleSubmit}
+              isLoading={isLoading}
+              disabled={!methods.formState.isValid}
+              data-test-subj="submitButton"
+            >
+              {isEditMode ? (
+                <FormattedMessage
+                  id="xpack.alertingV2.notificationPolicy.formPage.update"
+                  defaultMessage="Update"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.alertingV2.notificationPolicy.formPage.save"
+                  defaultMessage="Save"
+                />
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.formPage.update"
-                defaultMessage="Update"
+                id="xpack.alertingV2.notificationPolicy.formPage.cancel"
+                defaultMessage="Cancel"
               />
-            ) : (
-              <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.formPage.save"
-                defaultMessage="Save"
-              />
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.formPage.cancel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </>
   );
 };
