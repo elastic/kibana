@@ -15,6 +15,7 @@ import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
   createAgentNotFoundError,
   createBadRequestError,
+  isAgentNotFoundError,
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -149,8 +150,11 @@ class AgentClientImpl implements AgentClient {
     try {
       await this.getDocumentWithAccess({ agentId, access: 'read' });
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      if (isAgentNotFoundError(error)) {
+        return false;
+      }
+      throw error;
     }
   }
 
@@ -181,7 +185,9 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
     }
 
-    if (await this.exists(profile.id)) {
+    // Intentionally skipping access checks.
+    // We don't support duplicated agent ids in the same space.
+    if ((await this._get(profile.id)) !== undefined) {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
 
@@ -253,11 +259,6 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
-  private async exists(agentId: string): Promise<boolean> {
-    const document = await this._get(agentId);
-    return !!document;
-  }
-
   private canChangeVisibility(document: Document): boolean {
     return this.isSuperuser || isOwner({ document, user: this.user });
   }
@@ -302,6 +303,10 @@ class AgentClientImpl implements AgentClient {
     return document;
   }
 
+  /**
+   * Get the document for the given agent id.
+   * It doesn't check for access. Please use {@link getDocumentWithAccess} instead.
+   */
   private async _get(agentId: string): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
