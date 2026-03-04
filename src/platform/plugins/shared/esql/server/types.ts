@@ -6,14 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ESQLExtensionsRegistry } from './extensions_registry';
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { EsqlServerPluginSetup } from './types';
+export interface EsqlServerPluginSetup {
+  getExtensionsRegistry: () => ESQLExtensionsRegistry;
+}
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { EsqlServerPlugin } = await import('./plugin');
-  return new EsqlServerPlugin(initContext);
-};
-
-export type { EsqlServerPluginSetup as PluginSetup };
-export { buildServerESQLCallbacks } from './services/build_server_esql_callbacks';
+export interface EsqlServerPluginStart {
+  inference: InferenceServerStart;
+  actions: ActionsPluginStart;
+}
