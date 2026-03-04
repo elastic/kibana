@@ -14,7 +14,7 @@
  *   version: 2026-02-10
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type AnonymizationEntityClass = z.infer<typeof AnonymizationEntityClass>;
 export const AnonymizationEntityClass = z.enum([
@@ -120,6 +120,9 @@ export const AnonymizationProfile = z.object({
   targetType: AnonymizationTargetType,
   targetId: z.string(),
   rules: AnonymizationProfileRules,
+  /**
+   * Derived per-space salt key identifier (`salt-${namespace}`) used by profile APIs (not an encrypted saved object document id).
+   */
   saltId: z.string(),
   namespace: z.string(),
   createdAt: z.string().datetime(),

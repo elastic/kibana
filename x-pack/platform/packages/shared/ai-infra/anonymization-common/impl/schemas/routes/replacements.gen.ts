@@ -14,7 +14,7 @@
  *   version: 2026-02-10
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import {
   ReplacementsSetResponse,
