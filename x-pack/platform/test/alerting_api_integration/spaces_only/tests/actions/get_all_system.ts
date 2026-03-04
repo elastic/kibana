@@ -67,6 +67,16 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_connector_type_deprecated: false,
         },
         {
+          id: 'system-connector-.http-system',
+          name: 'HTTP',
+          connector_type_id: '.http-system',
+          is_preconfigured: false,
+          is_deprecated: false,
+          referenced_by_count: 0,
+          is_system_action: true,
+          is_connector_type_deprecated: false,
+        },
+        {
           id: createdConnector.id,
           is_preconfigured: false,
           is_deprecated: false,
@@ -270,6 +280,16 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: true,
           name: 'Cases',
           referenced_by_count: 0,
+          is_connector_type_deprecated: false,
+        },
+        {
+          id: 'system-connector-.http-system',
+          name: 'HTTP',
+          connector_type_id: '.http-system',
+          is_preconfigured: false,
+          is_deprecated: false,
+          referenced_by_count: 0,
+          is_system_action: true,
           is_connector_type_deprecated: false,
         },
         {

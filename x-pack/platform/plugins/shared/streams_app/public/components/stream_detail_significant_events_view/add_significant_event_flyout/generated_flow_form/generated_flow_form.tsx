@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -19,14 +19,13 @@ interface Props {
   isGenerating: boolean;
   isBeingCanceled: boolean;
   isSchedulingGenerationTask: boolean;
-  generatedQueries: StreamQueryKql[];
-  onEditQuery: (query: StreamQueryKql) => void;
+  generatedQueries: StreamQuery[];
+  onEditQuery: (query: StreamQuery) => void;
   stopGeneration: () => void;
   definition: Streams.all.Definition;
   isSubmitting: boolean;
-  setQueries: (queries: StreamQueryKql[]) => void;
+  setQueries: (queries: StreamQuery[]) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: Omit<System, 'description'>[];
   dataViews: DataView[];
   taskStatus?: string;
   taskError?: string;
@@ -43,15 +42,14 @@ export function GeneratedFlowForm({
   definition,
   setCanSave,
   isSubmitting,
-  systems,
   dataViews,
   taskStatus,
   taskError,
 }: Props) {
-  const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+  const [selectedQueries, setSelectedQueries] = useState<StreamQuery[]>([]);
   const [isEditingQueries, setIsEditingQueries] = useState(false);
 
-  const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
+  const onSelectionChange = (selectedItems: StreamQuery[]) => {
     setSelectedQueries(selectedItems);
     setQueries(selectedItems);
   };
@@ -111,7 +109,6 @@ export function GeneratedFlowForm({
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        systems={systems}
         dataViews={dataViews}
       />
       {isGenerating && (

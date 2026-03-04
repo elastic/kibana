@@ -14,3 +14,5 @@ export {
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
 } from './constants';
+
+export type { ConnectorInfo } from './types';

@@ -68,7 +68,6 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
-import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
@@ -170,8 +169,7 @@ function DiscoverDocumentsComponent({
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
     useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
-  const isEmptyDataResult =
-    isEsqlMode || !documentState.result || documentState.result.length === 0;
+  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
@@ -449,17 +447,8 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => (
-      <>
-        <SelectedVSAvailableCallout
-          esqlQueryColumns={documentState.esqlQueryColumns}
-          // If `_source` is in the columns, we should exclude it from the callout
-          selectedColumns={currentColumns.filter((col) => col !== '_source')}
-        />
-        <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
-      </>
-    ),
-    [currentColumns, documentState.esqlQueryColumns, documentState.interceptedWarnings]
+    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
+    [documentState.interceptedWarnings]
   );
 
   const loadingIndicator = useMemo(
@@ -550,8 +539,11 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
+    <EuiFlexItem
+      data-test-subj="discoverDocumentsTable"
+      aria-labelledby="documentsAriaLabel"
+      css={styles.container}
+    >
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />

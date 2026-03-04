@@ -7,7 +7,11 @@
 
 import moment from 'moment';
 import type { Observable } from 'rxjs';
-import type { ChatCompletionEvent, InferenceClient } from '@kbn/inference-common';
+import type {
+  ChatCompletionEvent,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
@@ -28,6 +32,7 @@ export interface GetLogAiInsightsParams {
   id: string;
   inferenceClient: InferenceClient;
   connectorId: string;
+  connector: InferenceConnector;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -41,6 +46,7 @@ export async function getLogAiInsights({
   esClient,
   inferenceClient,
   connectorId,
+  connector,
   request,
   logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
@@ -73,7 +79,7 @@ export async function getLogAiInsights({
     request,
   });
 
-  return createAiInsightResult(context, events$);
+  return createAiInsightResult(context, connector, events$);
 }
 
 async function fetchLogContext({

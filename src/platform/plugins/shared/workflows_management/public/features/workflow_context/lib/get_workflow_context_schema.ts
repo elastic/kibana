@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
   AlertEventPropsSchema,
   BaseEventSchema,
   DynamicWorkflowContextSchema,
+  isTriggerType,
 } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { inferZodType } from '../../../../common/lib/zod';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
 export type WorkflowDefinitionForContext =
@@ -29,10 +30,42 @@ export type WorkflowDefinitionForContext =
         | Array<{ name: string; type: string; [key: string]: unknown }>;
     });
 
+function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return schema instanceof z.ZodObject;
+}
+
+/**
+ * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
+ * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
+ * Uses shape spread instead of deprecated Zod v4 .merge().
+ */
+function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
+  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
+  let eventSchema: z.ZodType = hasAlertTrigger
+    ? z.object({
+        ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
+        ...(AlertEventPropsSchema as z.ZodObject<z.ZodRawShape>).shape,
+      })
+    : BaseEventSchema;
+  for (const trigger of triggers) {
+    const type = trigger?.type;
+    if (typeof type === 'string' && !isTriggerType(type)) {
+      const def = triggerSchemas.getTriggerDefinition(type);
+      if (def?.eventSchema && isZodObject(eventSchema) && isZodObject(def.eventSchema)) {
+        eventSchema = z.object({
+          ...eventSchema.shape,
+          ...def.eventSchema.shape,
+        });
+      }
+    }
+  }
+  return eventSchema.optional();
+}
+
 export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
-) {
+): typeof DynamicWorkflowContextSchema {
   // If inputs is undefined, try to extract it from the YAML document
   let inputs = definition.inputs;
   if (inputs === undefined && yamlDocument) {
@@ -50,55 +83,17 @@ export function getWorkflowContextSchema(
   // This handles both array (legacy) and object (new) formats
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+  const inputsSchema = buildInputsZodValidator(normalizedInputs);
 
-  // Build the inputs object from the normalized JSON Schema structure
-  const inputsObject: Record<string, z.ZodType> = {};
-
-  if (normalizedInputs?.properties) {
-    for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
-      // Skip null/undefined schemas (can happen when YAML is partially parsed)
-      if (propertySchema && typeof propertySchema === 'object') {
-        const jsonSchema = propertySchema as JSONSchema7;
-
-        // Convert JSON Schema to Zod schema
-        // Note: convertJsonSchemaToZod already handles defaults and optional for nested properties
-        // We only need to apply defaults/optional at the top level here
-        let valueSchema: z.ZodType = convertJsonSchemaToZod(jsonSchema);
-
-        // Check if this property is required at the top level
-        const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
-
-        // Apply default value if present (default() automatically makes the field optional)
-        if (jsonSchema.default !== undefined) {
-          valueSchema = valueSchema.default(jsonSchema.default);
-        } else if (!isRequired) {
-          // Only apply optional if no default and not required
-          // (default() already makes it optional, so we don't need both)
-          valueSchema = valueSchema.optional();
-        }
-
-        inputsObject[propertyName] = valueSchema;
-      }
-    }
-  }
-
-  // Build event schema dynamically based on defined triggers.
-  // Only include alert-specific properties (alerts, rule, params) when an alert trigger is present.
-  // spaceId is always included via BaseEventSchema.
-  const triggers = definition.triggers ?? [];
-  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
-  const eventSchema = hasAlertTrigger
-    ? BaseEventSchema.merge(AlertEventPropsSchema).optional()
-    : BaseEventSchema.optional();
+  const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
   // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
   // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
-  // The merge() method requires both schemas to have the same base structure
+  // The merge() method requires both schemas to have the same base structure.
+  // Cast to typeof DynamicWorkflowContextSchema because inputsSchema is ZodType<Record<string, unknown>>
+  // (from buildInputsZodValidator) while the base schema expects ZodObject; runtime shape is compatible.
   return DynamicWorkflowContextSchema.extend({
-    // transform inputs properties to an object
-    // with the property name as the key and the Zod schema as the value
-    // Always create an object, even if empty, to ensure proper schema structure
-    inputs: Object.keys(inputsObject).length > 0 ? z.object(inputsObject) : z.object({}),
+    inputs: inputsSchema,
     // transform an object of consts to an object
     // with the const name as the key and inferred type as the value
     consts: z.object({
@@ -111,5 +106,5 @@ export function getWorkflowContextSchema(
     }),
     // event schema is dynamic based on triggers
     event: eventSchema,
-  });
+  }) as typeof DynamicWorkflowContextSchema;
 }

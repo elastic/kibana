@@ -28,12 +28,12 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     expect(processors).toHaveLength(2);
     expect(processors[0]).toHaveProperty('set');
-    expect(processors[0].set?.tag).toBe('cond-1');
-    expect(processors[0].set?.field).toBe('_streams_condition_noop');
-    expect(typeof processors[0].set?.if).toBe('string');
+    expect(processors[0]!.set?.tag).toBe('cond-1');
+    expect(processors[0]!.set?.field).toBe('_streams_condition_noop');
+    expect(typeof processors[0]!.set?.if).toBe('string');
     expect(processors[1]).toHaveProperty('remove');
-    expect(processors[1].remove?.tag).toBe('cond-1:noop-cleanup');
-    expect(processors[1].remove?.field).toBe('_streams_condition_noop');
+    expect(processors[1]!.remove?.tag).toBe('cond-1:noop-cleanup');
+    expect(processors[1]!.remove?.field).toBe('_streams_condition_noop');
   });
 
   it('injects condition no-op before its descendants and keeps descendant processor tags', () => {
@@ -60,11 +60,11 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     const processors = buildSimulationProcessorsWithConditionNoops(dsl);
 
     expect(processors).toHaveLength(3);
-    expect(processors[0].set?.tag).toBe('cond-1');
-    expect(processors[1].remove?.tag).toBe('cond-1:noop-cleanup');
-    expect(processors[1].remove?.field).toBe('_streams_condition_noop');
-    expect(processors[2].set?.tag).toBe('proc-1');
-    expect(typeof processors[2].set?.if).toBe('string');
+    expect(processors[0]!.set?.tag).toBe('cond-1');
+    expect(processors[1]!.remove?.tag).toBe('cond-1:noop-cleanup');
+    expect(processors[1]!.remove?.field).toBe('_streams_condition_noop');
+    expect(processors[2]!.set?.tag).toBe('proc-1');
+    expect(typeof processors[2]!.set?.if).toBe('string');
   });
 
   it('composes nested condition no-ops with parent conditions', () => {
@@ -100,15 +100,15 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     const processors = buildSimulationProcessorsWithConditionNoops(dsl);
 
     expect(processors).toHaveLength(5);
-    expect(processors[0].set?.tag).toBe('cond-parent');
-    expect(processors[1].remove?.tag).toBe('cond-parent:noop-cleanup');
-    expect(processors[1].remove?.field).toBe('_streams_condition_noop');
-    expect(processors[2].set?.tag).toBe('cond-child');
-    expect(processors[3].remove?.tag).toBe('cond-child:noop-cleanup');
-    expect(processors[3].remove?.field).toBe('_streams_condition_noop');
-    expect(processors[4].set?.tag).toBe('proc-1');
+    expect(processors[0]!.set?.tag).toBe('cond-parent');
+    expect(processors[1]!.remove?.tag).toBe('cond-parent:noop-cleanup');
+    expect(processors[1]!.remove?.field).toBe('_streams_condition_noop');
+    expect(processors[2]!.set?.tag).toBe('cond-child');
+    expect(processors[3]!.remove?.tag).toBe('cond-child:noop-cleanup');
+    expect(processors[3]!.remove?.field).toBe('_streams_condition_noop');
+    expect(processors[4]!.set?.tag).toBe('proc-1');
 
-    const childSetIf = processors[2].set?.if;
+    const childSetIf = processors[2]!.set?.if;
     expect(childSetIf).toBe(conditionToPainless({ and: [parentCondition, childCondition] }));
   });
 });

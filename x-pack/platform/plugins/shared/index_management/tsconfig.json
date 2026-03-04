@@ -72,7 +72,7 @@
     "@kbn/test-eui-helpers",
     "@kbn/core-elasticsearch-server",
     "@kbn/cloud",
-    "@kbn/search-index-documents"
+    "@kbn/search-index-documents",
   ],
   "exclude": ["target/**/*"]
 }

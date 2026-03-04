@@ -141,7 +141,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
+              "\"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
             ],
             "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
             "lineNumber": 22,
@@ -481,7 +481,7 @@
         "label": "ErrorConversion",
         "description": [],
         "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
-        "lineNumber": 18,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -497,7 +497,7 @@
               "RegExp"
             ],
             "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
-            "lineNumber": 19,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -515,7 +515,7 @@
               ") => string"
             ],
             "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -531,7 +531,7 @@
                   "LogRecord"
                 ],
                 "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
-                "lineNumber": 20,
+                "lineNumber": 19,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,

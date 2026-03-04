@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/sse-utils-server'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/server-route-repository-client'
+  - '@kbn/core-analytics-browser'
   - '@kbn/apm-types'
   - '@kbn/slo-schema'
   - '@kbn/apm-types-shared'

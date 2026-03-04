@@ -119,8 +119,9 @@ export const transformHitToAlert = ({
 
     if (removedSourceFields.length) {
       ruleExecutionLogger?.debug(
-        'Following fields were removed from alert source as ECS non-compliant:',
-        JSON.stringify(removedSourceFields)
+        `Following fields were removed from alert source as ECS non-compliant: ${JSON.stringify(
+          removedSourceFields
+        )}`
       );
     }
 

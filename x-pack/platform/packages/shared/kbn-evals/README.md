@@ -97,40 +97,74 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 
 ## Running the suite
 
-### Evals CLI (recommended)
+### Quick start (recommended)
 
-Use the evals CLI to discover and run suites with consistent, shareable commands:
+The fastest way to go from zero to running evals locally:
 
 ```bash
-# List eval suites from cached metadata (fast)
-node scripts/evals list
+# 1. Set up connectors (one-time, interactive wizard)
+node scripts/evals init
 
-# Refresh suite discovery (slower, scans configs)
-node scripts/evals list --refresh
-
-# Run a suite (EVALUATION_CONNECTOR_ID is required)
-node scripts/evals run --suite obs-ai-assistant --evaluation-connector-id bedrock-claude
-
-# Check local prerequisites and common setup hints
-node scripts/evals doctor
+# 2. Start everything and run a suite (one command, one terminal)
+node scripts/evals start --suite agent-builder
 ```
+
+`evals init` walks you through EIS (Cloud Connected Mode) connector discovery or validates existing connectors in `kibana.dev.yml`. It outputs an `export KIBANA_TESTING_AI_CONNECTORS="..."` command to paste into your shell.
+
+`evals start` orchestrates the full stack in one terminal:
+1. Starts the EDOT collector (Docker) for trace capture -- exports traces to your local ES from `kibana.dev.yml`
+2. Starts Scout (ES + Kibana with `evals_tracing` config)
+3. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
+4. Runs the Playwright eval suite with `TRACING_ES_URL` pointing to your local ES
+
+EDOT and Scout run as **persistent background daemons** -- they stay alive between eval runs for faster iteration. Use `node scripts/evals stop` to shut them down when you're done.
+
+Both commands prompt interactively when flags are omitted (suite, connector, model). Pass `--skip-server` to skip EDOT/Scout startup if you already have them running.
+
+#### Filtering tests with `--grep`
+
+To run only specific tests within a suite (useful for fast iteration):
+
+```bash
+node scripts/evals start --suite agent-builder --grep "product documentation"
+node scripts/evals run --suite agent-builder --grep "analytical queries"
+```
+
+This passes Playwright's `--grep` filter, matching test names against the pattern.
+
+#### Flag aliases
+
+For convenience, `start` and `run` support shorter aliases:
+
+- `--model` is an alias for `--project` (which connector/model to evaluate)
+- `--judge` is an alias for `--evaluation-connector-id` (which connector judges the results)
+
+```bash
+node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
+```
+
+### Evals CLI commands
+
+```bash
+node scripts/evals init                  # Set up connectors (EIS or validate existing)
+node scripts/evals start [--suite <id>]  # Start stack + run an eval suite
+node scripts/evals stop                  # Stop background EDOT + Scout daemons
+node scripts/evals logs [--service <n>]  # Tail logs from background services
+node scripts/evals scout                 # Start Scout with evals config (standalone)
+node scripts/evals run [--suite <id>]    # Run an eval suite (stack must be running)
+node scripts/evals list [--refresh]      # List eval suites
+node scripts/evals doctor                # Check prerequisites, offer auto-fixes
+node scripts/evals compare <a> <b>       # Compare two eval runs
+node scripts/evals env                   # List environment variables
+node scripts/evals ci-map [--json]       # Output CI label mapping
+```
+
+See [CLI.md](./CLI.md) for the full command reference with all flags and examples.
 
 The CLI uses suite metadata from:
 
 ```
 x-pack/platform/packages/shared/kbn-evals/evals.suites.json
-```
-
-You can also render a CI label mapping (from suite metadata, useful for PR labels and automation):
-
-```bash
-node scripts/evals ci-map --json
-```
-
-To see all supported environment variables:
-
-```bash
-node scripts/evals env
 ```
 
 ### CI labels
@@ -139,6 +173,74 @@ Eval suites can be triggered in PR CI by adding GitHub labels:
 
 - `evals:<suite-id>` (or the explicit `ciLabels` value from `evals.suites.json`)
 - `evals:all` to run **all** eval suites
+
+### CI labels: model selection + judge override
+
+Evals support optional PR labels for selecting which connector projects to run and (separately) which connector should be used for LLM-as-a-judge evaluators:
+
+- **Model selection**:
+  - `models:all` to opt into **all** available connector projects (LiteLLM + EIS)
+  - `models:<model-group>` to select one or more model groups
+    - LiteLLM model groups typically look like `llm-gateway/<model>`
+    - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
+- **Judge override**:
+  - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
+    This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
+
+#### CI ops: create/update model + judge labels
+
+The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
+
+Update **all** model + judge labels (LiteLLM + EIS) using default discovery sources:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
+```
+
+If you need to run only a subset:
+
+```bash
+# EIS model labels (models:eis/<modelId>)
+./scripts/create_models_labels.sh --repo elastic/kibana --from-eis-models-json
+
+# EIS judge labels (models:judge:eis/<modelId>)
+./scripts/create_models_labels.sh --repo elastic/kibana --judge-from-eis-models-json
+
+# LiteLLM model labels (models:<model-group>)
+./scripts/create_models_labels.sh --repo elastic/kibana --from-litellm-vault-config
+
+# LiteLLM judge labels (models:judge:<model-group>)
+./scripts/create_models_labels.sh --repo elastic/kibana --judge-from-litellm-vault-config
+```
+
+Create/update a specific judge override label:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana \
+  --judge litellm-llm-gateway-gpt-4o
+```
+
+### CI telemetry: tagging EIS traffic
+
+When running evals against **EIS-backed models**, `@kbn/evals` can tag inference requests with:
+
+- **Header**: `X-Elastic-Product-Use-Case`
+- **Value**: `<pluginId>`
+
+This value is sent via `metadata.connectorTelemetry.pluginId` on inference API calls and is forwarded to the ES `_inference` request.
+
+By default, `@kbn/evals` sets this to `kbn_evals`.
+
+To override (rare), set:
+
+- **pluginId**: `KBN_EVALS_TELEMETRY_PLUGIN_ID`
+
+Example:
+
+```bash
+EVAL_SUITE_ID=agent-builder ...
+# -> X-Elastic-Product-Use-Case: kbn_evals
+```
 
 ### CI ops: sharing a Vault update command
 
@@ -159,6 +261,63 @@ node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
 Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
 
 The Vault config supports an optional `tracingExporters` array that configures OTel trace exporters for the eval Playwright worker process in CI. This is exported as the `TRACING_EXPORTERS` environment variable. See `config.example.json` for the full schema and [Configuring Trace Exporters via Environment Variable](#configuring-trace-exporters-via-environment-variable) for usage details.
+
+To sync your local `config.json` from Vault (requires Vault auth):
+
+```bash
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod
+```
+
+### Local dev: EIS (CCM)
+
+To run eval suites against **EIS-backed models** locally, you need:
+
+- **EIS connectors** in `KIBANA_TESTING_AI_CONNECTORS` (so `@kbn/evals` can build Playwright projects)
+- **CCM enabled** on your test Elasticsearch cluster (so EIS inference endpoints exist)
+
+**Recommended flow** -- use the interactive CLI:
+
+```bash
+# 1) Set up connectors (automates Vault, model discovery, connector generation)
+node scripts/evals init
+
+# 2) Export the KIBANA_TESTING_AI_CONNECTORS value printed by init
+
+# 3) Start everything and run a suite
+node scripts/evals start --suite <suite-id>
+```
+
+`evals start` handles EDOT, Scout, and EIS CCM enablement automatically.
+
+<details>
+<summary>Manual flow (if you prefer full control)</summary>
+
+```bash
+# 1) Provide the CCM API key (used to enable CCM on your test ES cluster)
+# (requires Vault auth)
+export KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+
+# 2) Discover available EIS models (writes target/eis_models.json)
+node scripts/discover_eis_models.js
+
+# 3) Generate EIS connector payload for @kbn/evals (base64 JSON)
+export KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
+
+# 4) Pick a connector id to use for judge + project (example prints the first 30 ids)
+node -e "const o=JSON.parse(Buffer.from(process.env.KIBANA_TESTING_AI_CONNECTORS,'base64').toString('utf8'));console.log(Object.keys(o).slice(0,30).join('\\n'))"
+export EVALUATION_CONNECTOR_ID="eis-<model>"
+
+# 5) Start Scout (the evals config sets auto-preconfigure EIS connectors in Kibana from KIBANA_TESTING_AI_CONNECTORS)
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+
+# 6) Enable CCM on the *Scout* ES cluster and wait for EIS endpoints
+node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/enable_eis_ccm.js
+
+# 7) Run an eval suite against a single EIS connector project
+node scripts/evals run --suite <suite-id> --project "$EVALUATION_CONNECTOR_ID"
+```
+
+</details>
 
 ### Local dev: LiteLLM (SSO)
 
@@ -183,7 +342,7 @@ EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite agent-buil
 
 #### Local flow (trace capture)
 
-If you want local traces available for trace-based evaluators, run EDOT locally and start Scout using the built-in tracing config:
+`evals start` handles this automatically. If you prefer to manage services manually:
 
 ```bash
 node scripts/edot_collector.js

@@ -6,11 +6,12 @@
  */
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
-  systemSchema,
+  TaskStatus,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
@@ -27,6 +28,20 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
+
+/**
+ * Guards against stale task results from a previous Kibana version that stored
+ * queries with `kql`/`feature` but without the now-required `esql.query` field.
+ * Returns a failed status instead of letting the malformed payload reach the client.
+ */
+const sanitizeTaskResult = (
+  result: SignificantEventsQueriesGenerationTaskResult
+): SignificantEventsQueriesGenerationTaskResult => {
+  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+    return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
+  }
+  return result;
+};
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
@@ -50,19 +65,20 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
 
-    return taskClient.getStatus<
+    const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
+
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -79,13 +95,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      sampleDocsSize: z
-        .number()
-        .optional()
-        .describe(
-          'Number of sample documents to use for generation from the current data of stream'
-        ),
-      systems: z.array(systemSchema).optional().describe('Optional array of systems'),
     }),
   }),
   options: {
@@ -111,9 +120,9 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
+    await streamsClient.getStream(name);
     const { body } = params;
     const taskId = getSignificantEventsQueriesGenerationTaskId(name);
 
@@ -134,8 +143,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
-                  systems: body.systems,
-                  sampleDocsSize: body.sampleDocsSize,
                   streamName: name,
                 };
               })(),
@@ -144,7 +151,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<
+    const result = await handleTaskAction<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >({
@@ -152,6 +159,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       taskId,
       ...actionParams,
     });
+
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -169,6 +178,7 @@ const readAllSignificantEventsRoute = createServerRoute({
           z.array(z.string()).optional()
         )
         .describe('Stream names to filter significant events'),
+      ruleBacked: BooleanFromString.optional().describe('Filter by rule-backed status'),
     }),
   }),
   options: {
@@ -193,7 +203,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, query, streamNames, ruleBacked } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -202,6 +212,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        filters: { ruleBacked },
       },
       { queryClient, scopedClusterClient }
     );

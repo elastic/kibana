@@ -7,7 +7,11 @@
 
 import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
-import type { UnknownAttachment, AttachmentVersion } from '@kbn/agent-builder-common/attachments';
+import type {
+  UnknownAttachment,
+  AttachmentVersion,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
   PRIMARY = 'primary',
@@ -25,6 +29,16 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
 }
 
 /**
+ * Callbacks available to canvas content renderers.
+ */
+export interface CanvasRenderCallbacks {
+  /** Register action buttons to display in the canvas header */
+  registerActionButtons: (buttons: ActionButton[]) => void;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+}
+
+/**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
 export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -32,10 +46,12 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   attachment: TAttachment;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
+  /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
+  isCanvas: boolean;
   /** Function to update the attachment's origin reference */
-  updateOrigin: (originId: string) => Promise<void>;
-  /** Callback to open the attachment in canvas mode (expanded flyout view) */
-  openCanvas: () => void;
+  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
+  openCanvas?: () => void;
 }
 
 /**
@@ -78,8 +94,15 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
+   *
+   * The `callbacks` object provides:
+   * - `registerActionButtons`: dynamically register action buttons in the canvas header
+   * - `updateOrigin`: link by-value attachments to persistent storage after saving
    */
-  renderCanvasContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderCanvasContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    callbacks: CanvasRenderCallbacks
+  ) => ReactNode;
   /**
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.

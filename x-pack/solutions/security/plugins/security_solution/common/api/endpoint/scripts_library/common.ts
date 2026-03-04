@@ -36,8 +36,10 @@ export const ScriptPathToExecutableSchema = schema.string({
   validate: validateNonEmptyString,
 });
 
-export const ScriptTagsSchema = schema.arrayOf(
-  // @ts-expect-error TS2769: No overload matches this call. (due to now `oneOf()` type is defined)
-  schema.oneOf(Object.keys(SCRIPT_TAGS).map((osType) => schema.literal(osType))),
-  { minSize: 1, maxSize: Object.keys(SCRIPT_TAGS).length, validate: validateNoDuplicateValues }
-);
+export const getScriptsTagSchema = (type: 'patch' | 'post') =>
+  // @ts-expect-error TS2769: No overload matches this call. (due to how `oneOf()` type is defined)
+  schema.arrayOf(schema.oneOf(Object.keys(SCRIPT_TAGS).map((osType) => schema.literal(osType))), {
+    minSize: type === 'patch' ? 0 : 1,
+    maxSize: Object.keys(SCRIPT_TAGS).length,
+    validate: validateNoDuplicateValues,
+  });
