@@ -20,7 +20,8 @@
     "@kbn/agent-builder-genai-utils",
     "@kbn/dashboard-markdown",
     "@kbn/management-settings-ids",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }
