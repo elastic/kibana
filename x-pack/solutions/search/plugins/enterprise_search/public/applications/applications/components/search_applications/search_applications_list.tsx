@@ -56,6 +56,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
   return (
     <EuiToolTip
       position="top"
+      disableScreenReaderOutput
       title={
         <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -84,6 +85,13 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
         data-test-subj="enterprise-search-search-applications-creation-button"
         data-telemetry-id="entSearchApplications-list-createSearchApplication"
         isDisabled={disabled}
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.list.createSearchApplicationButton.ariaLabel',
+          {
+            defaultMessage:
+              'Create. Beta: This functionality may be changed or removed completely in a future release.',
+          }
+        )}
         onClick={() => KibanaLogic.values.navigateToUrl(SEARCH_APPLICATION_CREATION_PATH)}
       >
         {i18n.translate(
