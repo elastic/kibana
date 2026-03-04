@@ -6,7 +6,7 @@
  */
 
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { AgentType } from '@kbn/agent-builder-common';
+import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart, AgentRegistry } from '../services/agents';
 import type { InternalAgentDefinition } from '../services/agents/agent_registry';
 
@@ -35,7 +35,7 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     configuration: {
       tools: [],
     },
-    visibility: 'public',
+    visibility: AgentVisibility.Public,
     created_by: { username: 'test-user' },
     readonly: false,
     ...parts,
@@ -53,7 +53,7 @@ export const createMockedInternalAgent = (
     configuration: {
       tools: [],
     },
-    visibility: 'public',
+    visibility: AgentVisibility.Public,
     created_by: { username: 'test-user' },
     readonly: false,
     isAvailable: jest.fn() as any,

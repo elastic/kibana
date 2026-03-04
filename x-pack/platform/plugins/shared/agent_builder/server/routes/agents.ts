@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
+import { AgentVisibility } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -175,9 +176,9 @@ export function registerAgentRoutes({
               ),
               visibility: schema.maybe(
                 schema.oneOf([
-                  schema.literal('public'),
-                  schema.literal('shared'),
-                  schema.literal('private'),
+                  schema.literal(AgentVisibility.Public),
+                  schema.literal(AgentVisibility.Shared),
+                  schema.literal(AgentVisibility.Private),
                 ])
               ),
               configuration: schema.object(
@@ -313,9 +314,9 @@ export function registerAgentRoutes({
               ),
               visibility: schema.maybe(
                 schema.oneOf([
-                  schema.literal('public'),
-                  schema.literal('shared'),
-                  schema.literal('private'),
+                  schema.literal(AgentVisibility.Public),
+                  schema.literal(AgentVisibility.Shared),
+                  schema.literal(AgentVisibility.Private),
                 ])
               ),
               configuration: schema.maybe(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentType } from '@kbn/agent-builder-common';
+import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
@@ -27,7 +27,7 @@ describe('fromEs', () => {
         labels: ['foo', 'bar'],
         avatar_color: 'blue',
         avatar_symbol: 'star',
-        visibility: 'shared',
+        visibility: AgentVisibility.Shared,
         created_by_id: 'user-id-1',
         created_by_name: 'test-user',
         config: {
@@ -61,7 +61,7 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      visibility: 'shared',
+      visibility: AgentVisibility.Shared,
       created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
@@ -93,7 +93,7 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      visibility: 'shared',
+      visibility: AgentVisibility.Shared,
       created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
@@ -170,7 +170,7 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
-      visibility: 'public',
+      visibility: AgentVisibility.Public,
       created_by_id: 'user-id',
       created_by_name: 'test-user',
       created_at: expect.any(String),
@@ -208,7 +208,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
-      visibility: 'public',
+      visibility: AgentVisibility.Public,
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -247,7 +247,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
-      visibility: 'public',
+      visibility: AgentVisibility.Public,
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -277,7 +277,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
-      visibility: 'public',
+      visibility: AgentVisibility.Public,
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -316,7 +316,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
-      visibility: 'public',
+      visibility: AgentVisibility.Public,
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,

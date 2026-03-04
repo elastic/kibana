@@ -29,11 +29,17 @@ import type {
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { AgentsUsingToolsResult, PersistedAgentDefinition } from '../types';
-import type { AgentProfileStorage } from './storage';
+import type { AgentProfileStorage, AgentProperties } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
-import { validateToolSelection } from './utils';
+import { validateToolSelection } from '../utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
+import {
+  buildVisibilityReadFilter,
+  hasReadAccess,
+  validateVisibilityUpdateAccess,
+  hasWriteAccess,
+} from '../utils/access_control';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -45,6 +51,8 @@ export interface AgentClient {
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
 }
+
+type StoredDocument = Omit<Document, '_source'> & { _source: AgentProperties };
 
 export const createClient = async ({
   space,
@@ -212,8 +220,16 @@ class AgentClientImpl implements AgentClient {
     profileUpdate: AgentUpdateRequest
   ): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
+    const source = document._source;
 
-    if (this.isVisibilityChange(document, profileUpdate) && !this.canChangeVisibility(document)) {
+    if (
+      !validateVisibilityUpdateAccess({
+        source,
+        update: profileUpdate,
+        user: this.user,
+        isSuperuser: this.isSuperuser,
+      })
+    ) {
       throw createAgentNotFoundError({ agentId });
     }
 
@@ -223,7 +239,7 @@ class AgentClientImpl implements AgentClient {
 
     const updatedConversation = updateRequestToEs({
       agentId,
-      currentProps: document._source!,
+      currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
     });
@@ -259,39 +275,27 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
-  private canChangeVisibility(document: Document): boolean {
-    return this.isSuperuser || isOwner({ document, user: this.user });
-  }
-
-  private isVisibilityChange(document: Document, update: AgentUpdateRequest): boolean {
-    if (update.visibility === undefined) {
-      return false;
-    }
-
-    return update.visibility !== (document._source?.visibility ?? 'public');
-  }
-
   private async getDocumentWithAccess({
     agentId,
     access,
   }: {
     agentId: string;
     access: 'read' | 'write';
-  }): Promise<Document> {
+  }): Promise<StoredDocument> {
     const document = await this._get(agentId);
-    if (!document) {
+    if (!document || !document._source) {
       throw createAgentNotFoundError({ agentId });
     }
 
     const hasRequestedAccess =
       access === 'read'
         ? hasReadAccess({
-            document,
+            source: document._source,
             user: this.user,
             isSuperuser: this.isSuperuser,
           })
         : hasWriteAccess({
-            document,
+            source: document._source,
             user: this.user,
             isSuperuser: this.isSuperuser,
           });
@@ -300,7 +304,7 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
-    return document;
+    return document as StoredDocument;
   }
 
   /**
@@ -334,88 +338,3 @@ class AgentClientImpl implements AgentClient {
     }
   }
 }
-
-const hasReadAccess = ({
-  document,
-  user,
-  isSuperuser,
-}: {
-  document: Pick<Document, '_source'>;
-  user: UserIdAndName;
-  isSuperuser: boolean;
-}) => {
-  if (isSuperuser) {
-    return true;
-  }
-
-  const visibility = document._source?.visibility ?? 'public';
-  if (visibility !== 'private') {
-    return true;
-  }
-
-  return isOwner({ document, user });
-};
-
-const hasWriteAccess = ({
-  document,
-  user,
-  isSuperuser,
-}: {
-  document: Pick<Document, '_source'>;
-  user: UserIdAndName;
-  isSuperuser: boolean;
-}) => {
-  if (isSuperuser) {
-    return true;
-  }
-
-  const visibility = document._source?.visibility ?? 'public';
-  if (visibility === 'public') {
-    return true;
-  }
-
-  return isOwner({ document, user });
-};
-
-const isOwner = ({
-  document,
-  user,
-}: {
-  document: Pick<Document, '_source'>;
-  user: UserIdAndName;
-}) => {
-  const source = document._source;
-  if (!source) {
-    return false;
-  }
-
-  if (user.id !== undefined && source.created_by_id === user.id) {
-    return true;
-  }
-
-  return source.created_by_name === user.username;
-};
-
-const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => {
-  const shouldClauses: Array<Record<string, unknown>> = [
-    {
-      bool: {
-        must_not: {
-          term: { visibility: 'private' },
-        },
-      },
-    },
-    { term: { created_by_name: user.username } },
-  ];
-
-  if (user.id !== undefined) {
-    shouldClauses.push({ term: { created_by_id: user.id } });
-  }
-
-  return {
-    bool: {
-      should: shouldClauses,
-      minimum_should_match: 1,
-    },
-  };
-};

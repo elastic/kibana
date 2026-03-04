@@ -6,7 +6,7 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AgentType } from '@kbn/agent-builder-common';
+import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
@@ -33,7 +33,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     labels: document._source.labels,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
-    visibility: document._source.visibility ?? 'public',
+    visibility: document._source.visibility ?? AgentVisibility.Public,
     created_by: {
       id: document._source.created_by_id,
       username: document._source.created_by_name ?? 'unknown',
@@ -66,7 +66,7 @@ export const createRequestToEs = ({
     labels: profile.labels,
     avatar_color: profile.avatar_color,
     avatar_symbol: profile.avatar_symbol,
-    visibility: profile.visibility ?? 'public',
+    visibility: profile.visibility ?? AgentVisibility.Public,
     created_by_id: user.id,
     created_by_name: user.username,
     config: {

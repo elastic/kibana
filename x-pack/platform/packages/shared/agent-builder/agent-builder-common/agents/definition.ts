@@ -16,7 +16,11 @@ export enum AgentType {
   chat = 'chat',
 }
 
-export type AgentVisibility = 'private' | 'public' | 'shared';
+export enum AgentVisibility {
+  Private = 'private',
+  Public = 'public',
+  Shared = 'shared',
+}
 
 /**
  * ID of the agentBuilder default conversational agent
