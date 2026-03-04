@@ -1,6 +1,8 @@
 # For more configuration options see the configuration guide for Kibana in
 # https://www.elastic.co/guide/index.html
 
+server.oas.enabled: true
+
 # =================== System: Kibana Server ===================
 # Kibana is served by a back end server. This setting specifies the port to use.
 #server.port: 5601
