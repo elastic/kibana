@@ -18,23 +18,23 @@ import {
   UPDATED_INDEX_PATTERN,
   UPDATED_MAPPING_TEXT_FIELD_NAME,
   completeStep,
-  kibanaVersion,
   renderTemplateEdit,
-  setupTemplateEditEnvironment,
 } from './__jest__/template_edit.helpers';
+import {
+  kibanaVersion,
+  setupEnvironment,
+} from '../../../../__jest__/client_integration/helpers/setup_environment';
 
 jest.mock('@kbn/code-editor');
 
 describe('<TemplateEdit />', () => {
-  let httpSetup: ReturnType<typeof setupTemplateEditEnvironment>['httpSetup'];
-  let httpRequestsMockHelpers: ReturnType<
-    typeof setupTemplateEditEnvironment
-  >['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
-    const env = setupTemplateEditEnvironment();
+    const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);

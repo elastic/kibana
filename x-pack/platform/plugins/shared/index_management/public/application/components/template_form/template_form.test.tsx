@@ -13,7 +13,7 @@ import * as fixtures from '../../../../test/fixtures';
 import { serializeAsESLifecycle } from '../../../../common/lib';
 import type { WizardContent } from './template_form';
 import { TemplateForm } from './template_form';
-import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { setupEnvironment } from '../../../../__jest__/client_integration/helpers/setup_environment';
 
 jest.mock('@kbn/code-editor');
 
@@ -54,6 +54,8 @@ describe('<TemplateForm />', () => {
   });
 
   test('keeps data stream configuration when saving', async () => {
+    const { httpSetup } = setupEnvironment();
+
     const onSave = jest.fn();
     const clearSaveError = jest.fn();
 
