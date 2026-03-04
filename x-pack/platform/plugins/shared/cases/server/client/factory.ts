@@ -174,6 +174,7 @@ export class CasesClientFactory {
       savedObjectsSerializer,
       fileService,
       usageCounter: this.options.usageCounter,
+      config: this.options.config,
     });
   }
 
@@ -204,6 +205,7 @@ export class CasesClientFactory {
       log: this.logger,
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+      config: this.options.config,
     });
 
     const templatesService = new TemplatesService({

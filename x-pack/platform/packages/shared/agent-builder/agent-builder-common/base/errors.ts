@@ -17,6 +17,7 @@ export enum AgentBuilderErrorCode {
   internalError = 'internalError',
   badRequest = 'badRequest',
   toolNotFound = 'toolNotFound',
+  skillNotFound = 'skillNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
   agentExecutionError = 'agentExecutionError',
@@ -120,6 +121,34 @@ export const createToolNotFoundError = ({
     AgentBuilderErrorCode.toolNotFound,
     customMessage ?? `Tool ${toolId} not found`,
     { ...meta, toolId, statusCode: 404 }
+  );
+};
+
+/**
+ * Error thrown when trying to retrieve a skill not present or available in the current context.
+ */
+export type AgentBuilderSkillNotFoundError = AgentBuilderError<AgentBuilderErrorCode.skillNotFound>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderSkillNotFoundError}
+ */
+export const isSkillNotFoundError = (err: unknown): err is AgentBuilderSkillNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.skillNotFound;
+};
+
+export const createSkillNotFoundError = ({
+  skillId,
+  customMessage,
+  meta = {},
+}: {
+  skillId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderSkillNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.skillNotFound,
+    customMessage ?? `Skill ${skillId} not found`,
+    { ...meta, skillId, statusCode: 404 }
   );
 };
 
@@ -324,6 +353,7 @@ export const AgentBuilderErrorUtils = {
   isAgentBuilderError,
   isInternalError,
   isToolNotFoundError,
+  isSkillNotFoundError,
   isAgentNotFoundError,
   isConversationNotFoundError,
   isWorkflowAbortedError,
@@ -332,6 +362,7 @@ export const AgentBuilderErrorUtils = {
   isContextLengthExceededAgentError,
   createInternalError,
   createToolNotFoundError,
+  createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
   createWorkflowAbortedError,

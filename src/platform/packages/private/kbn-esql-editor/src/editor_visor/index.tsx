@@ -166,6 +166,7 @@ export function QuickSearchVisor({
       responsive={false}
       css={styles.visorContainer}
       data-test-subj="ESQLEditor-quick-search-visor"
+      {...(!isVisible && { inert: '' })}
     >
       <EuiFlexItem grow={false} css={styles.visorWrapper}>
         <EuiFlexGroup

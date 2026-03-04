@@ -13,31 +13,37 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import { LEGACY_RULE_BACKED_FALLBACK, type QueryLink } from '../../../common/queries';
-import type { QueryClient } from '../streams/assets/query/query_client';
-import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
+import type { QueryLink } from '../../../common/queries';
+import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { streamNames?: string[]; from: Date; to: Date; bucketSize: string; query?: string },
+  params: {
+    streamNames?: string[];
+    from: Date;
+    to: Date;
+    bucketSize: string;
+    query?: string;
+    filters?: QueryLinkFilters;
+  },
   dependencies: {
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query } = params;
+  const { streamNames = [], from, to, bucketSize, query, filters } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query)
-    : await queryClient.getQueryLinks(streamNames);
+    ? await queryClient.findQueries(streamNames, query, filters)
+    : await queryClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
+  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => queryLink.rule_id);
   const ruleIds = Object.keys(queryLinkByRuleId);
 
   const response = await scopedClusterClient.asCurrentUser
@@ -113,7 +119,6 @@ export async function readSignificantEventsFromAlertsIndices(
               },
             },
             change_points: {
-              // @ts-expect-error
               change_point: {
                 buckets_path: 'occurrences>_count',
               },
@@ -144,7 +149,7 @@ export async function readSignificantEventsFromAlertsIndices(
             stationary: { p_value: 0, change_point: 0 },
           },
         },
-        rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
+        rule_backed: queryLink.rule_backed,
       })),
       aggregated_occurrences: [],
     };
@@ -170,7 +175,7 @@ export async function readSignificantEventsFromAlertsIndices(
             count: occurrence.doc_count,
           }))
         : [],
-      rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
+      rule_backed: queryLink.rule_backed,
       change_points: changePoints,
     };
   });
@@ -187,7 +192,7 @@ export async function readSignificantEventsFromAlertsIndices(
           stationary: { p_value: 0, change_point: 0 },
         },
       },
-      rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
+      rule_backed: queryLink.rule_backed,
     }));
 
   return {
@@ -196,14 +201,4 @@ export async function readSignificantEventsFromAlertsIndices(
   };
 }
 
-const toStreamQuery = (queryLink: QueryLink): StreamQuery => {
-  return {
-    id: queryLink.query.id,
-    title: queryLink.query.title,
-    kql: queryLink.query.kql,
-    feature: queryLink.query.feature,
-    severity_score: queryLink.query.severity_score,
-    evidence: queryLink.query.evidence,
-    esql: queryLink.query.esql,
-  };
-};
+const toStreamQuery = (queryLink: QueryLink): StreamQuery => queryLink.query;

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -15,7 +15,7 @@ import type { AttachmentToolsOptions } from './types';
 
 const attachmentUpdateSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to update'),
-  data: z.unknown().describe('New data/content for the attachment'),
+  data: z.record(z.any()).describe('New data/content for the attachment as a JSON object'),
   description: z.string().optional().describe('Optional new description for the attachment'),
 });
 
@@ -27,7 +27,7 @@ export const createAttachmentUpdateTool = ({
   attachmentManager,
   attachmentsService,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentUpdateSchema> => ({
-  id: platformCoreTools.attachmentUpdate,
+  id: attachmentTools.update,
   type: ToolType.builtin,
   description:
     'Update the content of an existing attachment. This creates a new version if the content changed. Use this to modify data you previously stored.',

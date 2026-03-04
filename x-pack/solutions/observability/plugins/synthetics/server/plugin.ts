@@ -16,7 +16,6 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
 import type {
   SyntheticsPluginsSetupDependencies,
@@ -34,9 +33,11 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
-import { getTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
-import { getTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
+import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
+import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
+import { getStatsOverviewEmbeddableSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -111,11 +112,17 @@ export class Plugin implements PluginType {
     );
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
+
+    // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
-      getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
-        transformIn: getTransformIn(drilldownTransforms.transformIn),
-        transformOut: getTransformOut(drilldownTransforms.transformOut),
-      }),
+      getTransforms: getStatsTransforms,
+      getSchema: getStatsOverviewEmbeddableSchema,
+    });
+
+    // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
+    plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
+      getTransforms: getMonitorsTransforms,
+      getSchema: () => syntheticsMonitorsEmbeddableSchema,
     });
 
     return {};
