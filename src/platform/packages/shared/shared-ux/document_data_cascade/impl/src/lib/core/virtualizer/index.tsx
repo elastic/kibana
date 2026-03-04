@@ -7,18 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type CSSProperties, Fragment, useCallback, useRef, useMemo } from 'react';
+import React, {
+  type CSSProperties,
+  Fragment,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 import { type Row } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
+import {
+  createChildVirtualizerController,
+  type ChildVirtualizerController,
+} from './child_virtualizer_controller';
 
 type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
-export type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
+type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
+
+export type { ChildVirtualizerController, UseVirtualizerReturnType };
 
 export interface CascadeVirtualizerProps<G extends GroupNode>
   extends Pick<
     UseVirtualizerOptions,
-    'getScrollElement' | 'overscan' | 'initialOffset' | 'initialRect'
+    | 'getScrollElement'
+    | 'overscan'
+    | 'initialOffset'
+    | 'initialRect'
+    | 'scrollMargin'
+    | 'observeElementOffset'
+    | 'observeElementRect'
   > {
   rows: Row<G>[];
   /**
@@ -27,11 +47,18 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
    */
   enableStickyGroupHeader: boolean;
   estimatedRowHeight?: number;
+  initialAnchorItemIndex?: number;
+  /**
+   * When true (default), creates a {@link ChildVirtualizerController}
+   * that child virtualizers can connect to. Set to false when this
+   * virtualizer is itself a child managed by a controller.
+   */
+  isRoot?: boolean;
   /**
    * Called whenever the virtualizer updates (scroll, range, size, etc.).
    * Used to conduit values into external state (e.g. public API store).
    */
-  onStateChange?: (instance: UseVirtualizerReturnType) => void;
+  onStateChange?: (instance: UseVirtualizerReturnType, didRestoreScrollPosition: boolean) => void;
 }
 
 export interface UseVirtualizedRowScrollStateStoreOptions {
@@ -119,21 +146,20 @@ export interface CascadeVirtualizerReturnValue
     | 'scrollOffset'
     | 'scrollElement'
     | 'range'
+    | 'measurementsCache'
+    | 'calculateRange'
   > {
   virtualizedRowComputedTranslateValue: Map<number, number>;
-  virtualizedRowsSizeCache: Map<number, number>;
-  scrollToVirtualizedIndex: UseVirtualizerReturnType['scrollToIndex'];
+  virtualizedRowsSizeCache: Map<string, number>;
+  scrollToVirtualizedIndex: (
+    offset: number,
+    options: {
+      adjustments?: number;
+      behavior?: Exclude<ScrollBehavior, 'instant'>;
+    }
+  ) => void;
   scrollToLastVirtualizedRow: () => void;
-  /**
-   * Registers a row by its index from propagation changes in its row size to the parent virtualizer.
-   * This is only required to be invoked for nested virtualizers to prevent jank caused by nested virtualizers size
-   * changes that propagate further into the parent virtualizer,in turn causing the parent virtualizer to need to remeasure itself.
-   */
-  preventRowSizeChangePropagation: (rowIndex: number) => () => void;
-  /**
-   * Checks if the row at the given index has opted to prevent size change propagation to the parent virtualizer.
-   */
-  sizeChangePropagationPrevented: (rowIndex: number) => boolean;
+  childController: ChildVirtualizerController | null;
 }
 
 export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
@@ -170,6 +196,84 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
   );
 };
 
+/**
+ * @internal
+ * Anchors the scroll position of the virtualizer to the given item index on initial render.
+ */
+export const useAnchorVirtualizerToItemIndex = (
+  virtualizer: UseVirtualizerReturnType,
+  itemIndex: number,
+  restoredScrollOffsetRef?: React.MutableRefObject<boolean>
+) => {
+  const internalRef = useRef<boolean>(false);
+  const resolvedRef = restoredScrollOffsetRef ?? internalRef;
+
+  const restoreScrollOffset = useCallback(() => {
+    if (!Boolean(itemIndex)) return;
+    if (resolvedRef.current) return;
+    if (!virtualizer) return;
+
+    if (itemIndex > 0) {
+      // Re-calculate the measurementsCache
+      // so that the adjustment positions we set are correct.
+      virtualizer.calculateRange();
+    }
+
+    const offsetItemCache = virtualizer.measurementsCache[itemIndex];
+    if (!offsetItemCache) return;
+
+    // measurementsCache[N].start already includes scrollMargin (tanstack adds
+    // paddingStart + scrollMargin to the first item, and chains from there),
+    // so it is the absolute position within the shared scroll container.
+    const targetOffset = offsetItemCache.start;
+    const scrollOffset = virtualizer.scrollOffset!;
+    const adjustments = targetOffset - scrollOffset;
+
+    virtualizer.options.scrollToFn(scrollOffset, { behavior: undefined, adjustments }, virtualizer);
+
+    // Set the scrollOffset within this render,
+    // to display the current range of items.
+    virtualizer.scrollOffset = targetOffset;
+    resolvedRef.current = true;
+  }, [itemIndex, resolvedRef, virtualizer]);
+
+  useLayoutEffect(() => {
+    restoreScrollOffset();
+  }, [restoreScrollOffset]);
+};
+
+/**
+ * @internal
+ * Defers overscan to zero on the initial render frame to reduce DOM node count
+ * and layout thrashing during mount. After the browser paints, the configured
+ * overscan is applied directly to the virtualizer options without triggering
+ * a React re-render.
+ *
+ * @returns An object with `initialOverscan` for the first render and an
+ * `applyDeferredOverscan` callback to invoke once the virtualizer is created.
+ */
+const useDeferredOverscan = (overscan: number | undefined, skip: boolean) => {
+  const overscanAppliedRef = useRef(skip);
+  const resolvedOverscan = overscan ?? 1;
+  const initialOverscan = overscanAppliedRef.current ? resolvedOverscan : 0;
+
+  const applyDeferredOverscan = useCallback(
+    (virtualizerInstance: UseVirtualizerReturnType) => {
+      if (overscanAppliedRef.current) return;
+
+      const rafId = requestAnimationFrame(() => {
+        overscanAppliedRef.current = true;
+        virtualizerInstance.options.overscan = resolvedOverscan;
+      });
+
+      return () => cancelAnimationFrame(rafId);
+    },
+    [resolvedOverscan]
+  );
+
+  return { initialOverscan, applyDeferredOverscan };
+};
+
 export const useCascadeVirtualizer = <G extends GroupNode>({
   overscan,
   enableStickyGroupHeader,
@@ -179,8 +283,15 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   onStateChange,
   initialOffset,
   initialRect,
+  scrollMargin,
+  initialAnchorItemIndex,
+  isRoot = true,
+  observeElementOffset,
+  observeElementRect,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
-  const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
+  const hasRestoredScrollPositionRef = useRef(false);
+  const virtualizedRowsSizeCacheRef = useRef<Map<string, number>>(new Map());
+  const { initialOverscan, applyDeferredOverscan } = useDeferredOverscan(overscan, !isRoot);
 
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
     rows,
@@ -192,68 +303,94 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
    */
   const virtualizedRowComputedTranslateValueRef = useRef(new Map<number, number>());
 
-  /**
-   * Tracks rows that don't want to propagate changes in their row size to the parent virtualizer by their indices.
-   */
-  const rowSizeChangePropagationPreventedRef = useRef<Set<number>>(new Set());
+  const virtualizerReturnValueRef = useRef<CascadeVirtualizerReturnValue | undefined>(undefined);
+  const childControllerRef = useRef<ChildVirtualizerController | null>(null);
 
-  const sizeChangePropagationPrevented = useCallback((rowIndex: number) => {
-    return rowSizeChangePropagationPreventedRef.current.has(rowIndex);
-  }, []);
+  if (isRoot && !childControllerRef.current) {
+    childControllerRef.current = createChildVirtualizerController({
+      getRootVirtualizer: () => virtualizerReturnValueRef.current,
+    });
+  }
+
+  const childController = isRoot ? childControllerRef.current : null;
+
+  const getItemKey = useCallback((index: number) => rows[index]?.id ?? String(index), [rows]);
 
   const virtualizerOptions = useMemo<UseVirtualizerOptions>(
     () => ({
       count: rows.length,
       estimateSize: () => estimatedRowHeight,
+      getItemKey,
       getScrollElement,
-      overscan,
+      overscan: initialOverscan,
       rangeExtractor,
       initialOffset,
+      scrollMargin,
       initialRect,
+      ...(observeElementOffset ? { observeElementOffset } : {}),
+      ...(observeElementRect ? { observeElementRect } : {}),
       onChange: (rowVirtualizerInstance) => {
         // @ts-expect-error -- the itemsSizeCache property does exist,
         // but it not included in the type definition because it is marked as a private property,
         // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
         virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
-        // propagate virtualizer state changes
-        onStateChange?.(rowVirtualizerInstance);
+
+        onStateChange?.(rowVirtualizerInstance, hasRestoredScrollPositionRef.current);
       },
     }),
     [
-      estimatedRowHeight,
-      getScrollElement,
-      initialOffset,
-      initialRect,
-      overscan,
-      rangeExtractor,
       rows.length,
+      estimatedRowHeight,
+      getItemKey,
+      getScrollElement,
+      initialOverscan,
+      rangeExtractor,
+      initialOffset,
+      scrollMargin,
+      initialRect,
       onStateChange,
+      observeElementOffset,
+      observeElementRect,
     ]
   );
 
   const virtualizerImpl = useVirtualizer(virtualizerOptions);
 
-  /**
-   * We don't want to adjust scroll position for rows
-   * that don't want to propagate size changes to the parent virtualizer.
-   */
+  useEffect(() => {
+    return applyDeferredOverscan(virtualizerImpl);
+  }, [applyDeferredOverscan, virtualizerImpl]);
+
+  useAnchorVirtualizerToItemIndex(
+    virtualizerImpl,
+    initialAnchorItemIndex ?? 0,
+    hasRestoredScrollPositionRef
+  );
+
+  useEffect(() => {
+    if (!childController || childController.isRootStable) return;
+
+    // Root is stable when scroll position has been restored, or when
+    // there was no anchor to restore to (itemIndex 0 / undefined).
+    const needsRestore = Boolean(initialAnchorItemIndex);
+    if (!needsRestore || hasRestoredScrollPositionRef.current) {
+      childController.markRootStable();
+    }
+  });
+
+  useEffect(
+    () => () => {
+      childController?.destroy();
+    },
+    [childController]
+  );
+
   virtualizerImpl.shouldAdjustScrollPositionOnItemSizeChange = (item) => {
-    return !sizeChangePropagationPrevented(item.index);
+    // Only adjust for items before the viewport. This ensures
+    // items after the viewport don't accumulate adjustments (prevents overshoot)
+    return item.start < (virtualizerImpl.scrollOffset ?? 0);
   };
 
-  /**
-   * Register a row as not wanting to propagate size changes to the parent virtualizer.
-   * Returns an unregister function.
-   */
-  const preventRowSizeChangePropagation = useCallback((rowIndex: number) => {
-    rowSizeChangePropagationPreventedRef.current.add(rowIndex);
-    return () => {
-      // remove the row from prevention set and measure the row again
-      rowSizeChangePropagationPreventedRef.current.delete(rowIndex);
-    };
-  }, []);
-
-  return useMemo(
+  const returnValue = useMemo(
     () => ({
       get scrollOffset() {
         return virtualizerImpl.scrollOffset;
@@ -264,7 +401,13 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       getTotalSize: virtualizerImpl.getTotalSize.bind(virtualizerImpl),
       getVirtualItems: virtualizerImpl.getVirtualItems.bind(virtualizerImpl),
       measureElement: virtualizerImpl.measureElement.bind(virtualizerImpl),
-      scrollToVirtualizedIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
+      scrollToVirtualizedIndex: ((offset, options = {}) => {
+        return virtualizerImpl.options.scrollToFn(offset, options, virtualizerImpl);
+      }) satisfies CascadeVirtualizerReturnValue['scrollToVirtualizedIndex'],
+      get measurementsCache() {
+        return virtualizerImpl.measurementsCache;
+      },
+      calculateRange: virtualizerImpl.calculateRange.bind(virtualizerImpl),
       get isScrolling() {
         return virtualizerImpl.isScrolling;
       },
@@ -280,36 +423,18 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       get virtualizedRowsSizeCache() {
         return virtualizedRowsSizeCacheRef.current;
       },
-      preventRowSizeChangePropagation,
-      sizeChangePropagationPrevented,
+      get scrollRect() {
+        return virtualizerImpl.scrollRect;
+      },
+      childController,
     }),
-    [virtualizerImpl, rows.length, preventRowSizeChangePropagation, sizeChangePropagationPrevented]
+    [virtualizerImpl, rows.length, childController]
   );
-};
 
-export const useVirtualizedRowScrollState = ({
-  getVirtualizer,
-  rowIndex,
-}: UseVirtualizedRowScrollStateStoreOptions) => {
-  const virtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
+  // the assignment here is to ensure that the virtualizer instance is accessible to the child controller
+  virtualizerReturnValueRef.current = returnValue;
 
-  const getScrollMargin = useCallback(() => {
-    const sizeCache = virtualizer.virtualizedRowsSizeCache;
-    let margin = 0;
-    for (let i = 0; i < rowIndex; i++) {
-      margin += sizeCache.get(i) ?? 0;
-    }
-    return margin;
-  }, [virtualizer, rowIndex]);
-  const getScrollOffset = useCallback(() => virtualizer.scrollOffset ?? 0, [virtualizer]);
-
-  return useMemo(
-    () => ({
-      getScrollMargin,
-      getScrollOffset,
-    }),
-    [getScrollMargin, getScrollOffset]
-  );
+  return returnValue;
 };
 
 /**
@@ -318,16 +443,33 @@ export const useVirtualizedRowScrollState = ({
  * have higher z-index values. This prevents visual glitches during row expansion where
  * unmeasured rows below might briefly appear over the expanding row
  * because of their transform value has yet to update.
+ *
+ * Style objects are cached by translateY+zIndex to avoid allocating new objects
+ * for rows whose position hasn't changed between renders.
  */
+const rowStyleCache = new Map<string, CSSProperties>();
+
 export const getGridRowPositioningStyle = (
   renderIndex: number,
   virtualizedRowComputedTranslateValueMap: Map<number, number>,
   visibleRowCount: number
 ): CSSProperties => {
-  return {
-    transform: `translateY(${virtualizedRowComputedTranslateValueMap.get(renderIndex) ?? 0}px)`,
-    zIndex: visibleRowCount - renderIndex,
-  };
+  const translateY = virtualizedRowComputedTranslateValueMap.get(renderIndex) ?? 0;
+  const zIndex = visibleRowCount - renderIndex;
+  const cacheKey = `${translateY}:${zIndex}`;
+
+  let style = rowStyleCache.get(cacheKey);
+  if (!style) {
+    style = { transform: `translateY(${translateY}px)`, zIndex };
+    rowStyleCache.set(cacheKey, style);
+
+    if (rowStyleCache.size > 500) {
+      const firstKey = rowStyleCache.keys().next().value!;
+      rowStyleCache.delete(firstKey);
+    }
+  }
+
+  return style;
 };
 
 export function VirtualizedCascadeRowList<G extends GroupNode>({
