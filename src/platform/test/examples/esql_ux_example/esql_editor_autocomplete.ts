@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('ES|QL Editor autocomplete', function () {
     beforeEach(async () => {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await esql.setEsqlEditorQuery('');
     });
 
@@ -89,8 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
-      await testSubjects.click('ESQLEditor-toggleWordWrap');
+      await browser.pressKeys(browser.keys.ESCAPE);
       await waitForSuggestionWidget(false);
+
+      await testSubjects.click('ESQLEditor-toggleWordWrap');
 
       await esql.focusEditor();
       await waitForSuggestionWidget(true);
