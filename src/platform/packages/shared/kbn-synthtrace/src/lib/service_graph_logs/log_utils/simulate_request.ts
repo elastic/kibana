@@ -256,7 +256,9 @@ export function simulateRequest({
             service: serviceNode,
             level: 'warn',
             message: pickWarnMessage({
-              errorType: directFailConf.errorType,
+              errorType: isInfraErrorType(directFailConf.errorType)
+                ? 'internal_error'
+                : directFailConf.errorType,
               seed: svcSeed,
               tickSeed: svcTickSeed,
               runtime: serviceNode.runtime,

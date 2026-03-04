@@ -165,6 +165,11 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
     return result as ScenarioBuildResult<TServiceGraph>;
   };
 
+  /**
+   * Merges multiple scenario phases into one. For all spike and failure lookups,
+   * earlier entries in `list` take precedence over later ones ("first match wins").
+   * Pass phases in order of decreasing specificity (most specific first).
+   */
   const phases = (
     list: Array<ScenarioBuildResult<TServiceGraph>>
   ): ScenarioBuildResult<TServiceGraph> => {

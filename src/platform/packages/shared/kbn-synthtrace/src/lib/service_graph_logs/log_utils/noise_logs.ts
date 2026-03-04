@@ -27,7 +27,7 @@ const DEFAULT_GHOST_MENTION_RATE = 0.05;
 
 export interface NoiseDocsOptions extends ServiceGraphOptions {
   count: number;
-  /** When true, noise docs reflect a degraded state (warn/error instead of info). */
+  /** When true, service noise docs reflect a degraded state (warn instead of info; error is capped to warn). */
   degraded?: boolean;
   ghostMentions?: Array<{ message: string; serviceName?: string; rate?: number }>;
 }
@@ -129,7 +129,6 @@ export function generateNoiseDocs({
   const rng = mulberry32(seed);
 
   // Combined pool: service nodes + one entry per unique infra dep (first owning service wins).
-
   const infraEmitters = new Map<InfraDependency, ServiceNode>();
   for (const node of serviceGraph.services) {
     for (const dep of node.infraDeps) {
