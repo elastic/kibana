@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type ComponentProps, useCallback, useEffect } from 'react';
-import { EuiButton, EuiButtonIcon, EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import { EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -71,23 +72,6 @@ export function AgentBuilderNavControl() {
     </div>
   );
 
-  const AgentBuilderButton: React.FC<
-    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
-  > = (props) => (
-    <>
-      <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiButton {...props} data-test-subj="AgentBuilderNavControlButton" />
-      </EuiShowFor>
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiButtonIcon
-          {...props}
-          display="base"
-          data-test-subj="AgentBuilderNavControlButtonIcon"
-        />
-      </EuiShowFor>
-    </>
-  );
-
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
@@ -97,11 +81,6 @@ export function AgentBuilderNavControl() {
           onClick={() => {
             toggleSidebar();
           }}
-          color="primary"
-          size="s"
-          fullWidth={false}
-          minWidth={0}
-          iconType="productAgent"
         >
           <FormattedMessage
             id="xpack.agentBuilder.navControl.linkLabel"
@@ -112,6 +91,39 @@ export function AgentBuilderNavControl() {
     </>
   );
 }
+
+const AgentBuilderButton = ({
+  children,
+  ...rest
+}: React.PropsWithChildren<{
+  'aria-label': string;
+  onClick: () => void;
+}>) => (
+  <>
+    <EuiShowFor sizes={['m', 'l', 'xl']}>
+      <AiButton
+        {...rest}
+        iconType="productAgent"
+        variant="base"
+        size="s"
+        data-test-subj="AgentBuilderNavControlButton"
+      >
+        {children}
+      </AiButton>
+    </EuiShowFor>
+    <EuiShowFor sizes={['xs', 's']}>
+      <AiButton
+        iconOnly
+        iconType="productAgent"
+        onClick={rest.onClick}
+        aria-label={rest['aria-label']}
+        size="s"
+        variant="base"
+        data-test-subj="AgentBuilderNavControlButtonIcon"
+      />
+    </EuiShowFor>
+  </>
+);
 
 const buttonLabel = i18n.translate(
   'xpack.agentBuilder.navControl.openTheAgentBuilderSidebarLabel',
