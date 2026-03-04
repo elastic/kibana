@@ -13,10 +13,7 @@ import type { ErrorBudgetEmbeddableState } from '../../../../server/lib/embeddab
 import { transformErrorBudgetOut } from './transform_error_budget_out';
 
 export const getTransformOut = (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-  const transformOut = (
-    storedState: ErrorBudgetEmbeddableState,
-    panelReferences?: Reference[]
-  ) => {
+  const transformOut = (storedState: ErrorBudgetEmbeddableState, panelReferences?: Reference[]) => {
     const transformsFlow = flow(
       transformErrorBudgetOut,
       transformTitlesOut<ErrorBudgetEmbeddableState>,

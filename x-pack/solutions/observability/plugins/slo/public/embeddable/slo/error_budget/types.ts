@@ -11,7 +11,10 @@ import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@k
 import { type CoreStart } from '@kbn/core/public';
 import type { ErrorBudgetEmbeddableState } from '../../../../common/embeddables/error_budget/types';
 
-export type { ErrorBudgetCustomState, ErrorBudgetEmbeddableState } from '../../../../common/embeddables/error_budget/types';
+export type {
+  ErrorBudgetCustomState,
+  ErrorBudgetEmbeddableState,
+} from '../../../../common/embeddables/error_budget/types';
 
 export interface ErrorBudgetCustomInput {
   sloId: string | undefined;

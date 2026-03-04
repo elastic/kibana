@@ -25,9 +25,7 @@ const ErrorBudgetCustomSchema = schema.object({
   ),
 });
 
-export const getErrorBudgetEmbeddableSchema = (
-  getDrilldownsSchema: GetDrilldownsSchemaFnType
-) => {
+export const getErrorBudgetEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return schema.object(
     {
       ...ErrorBudgetCustomSchema.getPropSchemas(),
