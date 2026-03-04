@@ -176,14 +176,19 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
     return error.timestamp(timestamp).serialize()[0];
   };
 
-  // 2 errors on transaction, 1 error on DB span
+  // 2 errors on "Process order item" span (which also has span links), 1 error on DB span
   const errorEvents: ApmFields[] = [
-    createError(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR, 'DatabaseError', transactionId, from + 100),
+    createError(
+      RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR,
+      'DatabaseError',
+      correlationIds.processOrderSpanId,
+      from + 320
+    ),
     createError(
       RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR,
       'ValidationError',
-      transactionId,
-      from + 200
+      correlationIds.processOrderSpanId,
+      from + 330
     ),
     createError(
       RICH_TRACE.ERRORS.DB_SPAN_TIMEOUT,
