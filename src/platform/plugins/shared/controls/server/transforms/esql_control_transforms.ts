@@ -8,15 +8,17 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type {
-  LegacyStoredESQLControlExplicitInput,
-  OptionsListESQLControlState,
+import {
+  type LegacyStoredESQLControlExplicitInput,
+  type OptionsListESQLControlState,
+  optionsListESQLControlSchema,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {
+    getSchema: () => optionsListESQLControlSchema,
     getTransforms: () => ({
       transformOut: <
         StoredStateType extends Partial<

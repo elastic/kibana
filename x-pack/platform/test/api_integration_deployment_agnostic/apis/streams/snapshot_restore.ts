@@ -173,10 +173,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'slow-requests',
               title: 'Slow Requests',
-              kql: { query: 'attributes.response_time_ms > 100' },
               esql: {
                 query:
-                  'FROM logs.web-app,logs.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
+                  'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
               },
             },
           ],
@@ -345,8 +344,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Verify significant event query survived the restore
         expect(restoredWebAppDefinition.queries).to.have.length(1);
         expect(restoredWebAppDefinition.queries[0].title).to.eql('Slow Requests');
-        expect(restoredWebAppDefinition.queries[0].kql.query).to.eql(
-          'attributes.response_time_ms > 100'
+        expect(restoredWebAppDefinition.queries[0].esql.query).to.eql(
+          'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled

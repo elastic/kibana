@@ -24,6 +24,7 @@
       "_profiling/status"
     ],
     "documentation": "https://www.elastic.co/guide/en/observability/current/universal-profiling.html",
+    "documentation_serverless": "https://www.elastic.co/guide/en/observability/current/universal-profiling.html",
     "availability": {
       "stack": false,
       "serverless": false

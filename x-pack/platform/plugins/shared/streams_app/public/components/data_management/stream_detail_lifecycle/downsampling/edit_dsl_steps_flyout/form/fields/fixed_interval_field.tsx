@@ -140,12 +140,37 @@ export const FixedIntervalField = ({
               unit: currentUnit,
             });
 
-            const helpText =
-              upperBoundMs === undefined
-                ? i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBound', {
-                    defaultMessage: 'Must be larger than {min} based on current configuration.',
-                    values: { min },
-                  })
+            const showMultipleOfPreviousStep = stepIndex > 0 && lowerBoundMs > 0;
+            const helpText = (() => {
+              if (upperBoundMs === undefined) {
+                return showMultipleOfPreviousStep
+                  ? i18n.translate(
+                      'xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBoundMultiple',
+                      {
+                        defaultMessage:
+                          'Must be larger than {min} and a multiple of {multipleOf} based on current configuration.',
+                        values: { min, multipleOf: min },
+                      }
+                    )
+                  : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBound', {
+                      defaultMessage: 'Must be larger than {min} based on current configuration.',
+                      values: { min },
+                    });
+              }
+
+              return showMultipleOfPreviousStep
+                ? i18n.translate(
+                    'xpack.streams.editDslStepsFlyout.fixedIntervalHelpRangeMultiple',
+                    {
+                      defaultMessage:
+                        'Must be larger than {min}, smaller than {max}, and a multiple of {multipleOf} based on current configuration.',
+                      values: {
+                        min,
+                        max,
+                        multipleOf: min,
+                      },
+                    }
+                  )
                 : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRange', {
                     defaultMessage:
                       'Must be larger than {min} and smaller than {max} based on current configuration.',
@@ -154,13 +179,14 @@ export const FixedIntervalField = ({
                       max,
                     },
                   });
+            })();
 
             return (
               <EuiFormRow
                 label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalLabel', {
                   defaultMessage: 'Downsample interval',
                 })}
-                helpText={isInvalid ? undefined : helpText}
+                helpText={helpText}
                 isInvalid={isInvalid}
                 error={isInvalid ? errorMessage : null}
               >
