@@ -382,6 +382,50 @@ describe('validateCustomProperties', () => {
     expect(validationResults).toHaveLength(0);
   });
 
+  it('should skip selection validation for Liquid template values and not call resolve or getDetails', async () => {
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
+
+    const mockConnector = {
+      type: '6a',
+      configSchema: z.object({ prop: z.string() }),
+    };
+    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['6a', mockConnector as any]]));
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
+
+    const customPropertyItems: CustomPropertyItem[] = [
+      {
+        id: '6a',
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 1,
+        yamlPath: ['6a'],
+        key: 'prop',
+        selectionHandler,
+        context: {
+          stepType: '6a',
+          scope: 'config',
+          propertyKey: 'prop',
+        },
+        propertyValue: '{{ inputs.something }}',
+        propertyKey: 'prop',
+        stepType: '6a',
+        scope: 'config',
+        type: 'custom-property',
+      },
+    ];
+
+    const validationResults = await validateCustomProperties(customPropertyItems);
+
+    expect(selectionHandler.resolve).not.toHaveBeenCalled();
+    expect(selectionHandler.getDetails).not.toHaveBeenCalled();
+    expect(validationResults).toHaveLength(0);
+  });
+
   it('should skip validation when connector is not found', async () => {
     const selectionHandler = {
       search: jest.fn(),
