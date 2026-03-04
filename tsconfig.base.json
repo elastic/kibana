@@ -164,6 +164,8 @@
       "@kbn/banners-plugin/*": ["x-pack/platform/plugins/private/banners/*"],
       "@kbn/bench": ["src/platform/packages/shared/kbn-bench"],
       "@kbn/bench/*": ["src/platform/packages/shared/kbn-bench/*"],
+      "@kbn/breadcrumbs-utils": ["src/platform/packages/shared/kbn-breadcrumbs-utils"],
+      "@kbn/breadcrumbs-utils/*": ["src/platform/packages/shared/kbn-breadcrumbs-utils/*"],
       "@kbn/cache-cli": ["src/platform/packages/shared/kbn-cache-cli"],
       "@kbn/cache-cli/*": ["src/platform/packages/shared/kbn-cache-cli/*"],
       "@kbn/calculate-auto": ["src/platform/packages/shared/kbn-calculate-auto"],

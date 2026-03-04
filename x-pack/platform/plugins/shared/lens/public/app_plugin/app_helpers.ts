@@ -19,7 +19,7 @@ import type {
   LensAppLocatorParams,
   LensDocument,
 } from '@kbn/lens-common';
-import { getOriginatingAppBreadcrumbs } from '@kbn/embeddable-plugin/public';
+import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';

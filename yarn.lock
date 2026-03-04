@@ -4797,6 +4797,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/breadcrumbs-utils@link:src/platform/packages/shared/kbn-breadcrumbs-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""
@@ -16552,6 +16556,8 @@ balanced-match@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-4.0.2.tgz#241591ea634702bef9c482696f2469406e16d233"
   integrity sha512-x0K50QvKQ97fdEz2kPehIerj+YTeptKF9hyYkKf6egnwmMWAkADiO0QCzSp0R5xN8FTZgYaBfSaue46Ej62nMg==
+  dependencies:
+    jackspeak "^4.2.3"
 
 bare-events@^2.0.0, bare-events@^2.2.0:
   version "2.2.1"

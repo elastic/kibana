@@ -15,10 +15,17 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardListingPageProps } from './dashboard_listing_page';
 import { DashboardListingPage } from './dashboard_listing_page';
+import { coreServices } from '../../services/kibana_services';
 
+const mockUseParams = jest.fn().mockReturnValue({});
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({}),
+  useParams: () => mockUseParams(),
+}));
+
+const mockGetListingTabs = jest.fn().mockReturnValue([]);
+jest.mock('../hooks/dashboard_mount_context', () => ({
+  useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
 }));
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
@@ -114,5 +121,37 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
       id: 'you_found_me',
       useReplace: true,
     });
+  });
+});
+
+test('sets only "Dashboards" breadcrumb on default tab', async () => {
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Dashboards' }], {
+      project: { value: [] },
+    });
+  });
+});
+
+test('sets "Dashboards > Tab Title" breadcrumbs on active tab', async () => {
+  mockUseParams.mockReturnValue({ activeTab: 'visualizations' });
+  mockGetListingTabs.mockReturnValue([
+    { id: 'visualizations', title: 'Visualizations', getTableList: jest.fn() },
+  ]);
+
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.setBreadcrumbs).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          text: 'Dashboards',
+          'data-test-subj': 'dashboardListingBreadcrumb-visualizations',
+        }),
+        { text: 'Visualizations' },
+      ],
+      { project: { value: [{ text: 'Visualizations' }] } }
+    );
   });
 });

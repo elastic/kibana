@@ -14,7 +14,7 @@ export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/typ
 
 export { useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
-export { EmbeddableStateTransfer, getOriginatingAppBreadcrumbs } from './state_transfer';
+export { EmbeddableStateTransfer } from './state_transfer';
 export {
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,

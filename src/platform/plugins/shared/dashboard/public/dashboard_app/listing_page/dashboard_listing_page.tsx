@@ -67,7 +67,7 @@ export const DashboardListingPage = ({
         [
           {
             ...dashboardCrumb,
-            'data-test-subj': 'dashboardListingBreadcrumb',
+            'data-test-subj': `dashboardListingBreadcrumb-${activeTabParam}`,
             onClick: () =>
               coreServices.application.navigateToUrl(
                 coreServices.application.getUrlForApp('dashboards', {
@@ -88,7 +88,7 @@ export const DashboardListingPage = ({
       // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
       serverlessService.setBreadcrumbs(activeTabTitle ? [{ text: activeTabTitle }] : []);
     }
-  }, [activeTabTitle]);
+  }, [activeTabTitle, activeTabParam]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services

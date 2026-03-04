@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EmbeddableStateTransfer } from './embeddable_state_transfer';
-export type { EmbeddableEditorState, EmbeddablePackageState } from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-breadcrumbs-utils'],
+};
