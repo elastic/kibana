@@ -274,6 +274,9 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
+    if (savedObjectId && !persistedDoc) {
+      return;
+    }
     const isByValueMode = getIsByValueMode();
     const currentDocTitle = getCurrentTitle(persistedDoc, isByValueMode, initialContext);
     setBreadcrumbsTitle(
@@ -290,6 +293,7 @@ export function App({
       }
     );
   }, [
+    savedObjectId,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,

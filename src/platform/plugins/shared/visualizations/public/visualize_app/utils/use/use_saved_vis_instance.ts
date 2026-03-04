@@ -109,8 +109,10 @@ export const useSavedVisInstance = (
 
         const originatingAppName = originatingApp
           ? stateTransferService.getAppNameFromId(originatingApp)
-          : undefined;
-        const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
+          : stateTransferService.getAppNameFromId(VisualizeConstants.APP_ID);
+        const redirectToOrigin = originatingApp
+          ? () => navigateToApp(originatingApp)
+          : () => history.push(VisualizeConstants.LANDING_PAGE_PATH);
 
         if (savedVis.id) {
           const breadcrumbs = getEditBreadcrumbs(
