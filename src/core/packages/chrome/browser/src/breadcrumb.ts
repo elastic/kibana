@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppDeepLinkId } from './project_navigation';
 
 /** @public */
@@ -22,19 +23,22 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
 
 /**
  * @example
- * Append a lazy-loaded element next to the breadcrumbs (recommended):
+ * Append a React element next to the breadcrumbs (recommended):
  * ```tsx
- * import { dynamic } from '@kbn/shared-ux-utility';
- *
- * const LazyBadge = dynamic(() => import('./my_badge'));
- *
- * chrome.setBreadcrumbsAppendExtension({ content: <LazyBadge />, order: 10 });
+ * chrome.setBreadcrumbsAppendExtension({ content: <MyBadge />, order: 10 });
  * ```
  *
  * @public
  */
 export interface ChromeBreadcrumbsAppendExtension {
-  content: ChromeExtensionContent<HTMLDivElement>;
+  /**
+   * The extension content as a React node.
+   */
+  content?: ReactNode;
+  /**
+   * @deprecated Use {@link ChromeBreadcrumbsAppendExtension.content} instead.
+   */
+  mount?: MountPoint<HTMLDivElement>;
   /** The order in which the extension should be appended to the breadcrumbs. Default is 50 */
   order?: number;
 }

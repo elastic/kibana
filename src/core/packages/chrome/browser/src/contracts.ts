@@ -149,7 +149,7 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Render a React element next to the last breadcrumb.
+   * Render an element next to the last breadcrumb.
    *
    * @example
    * ```tsx
@@ -226,7 +226,8 @@ export interface ChromeStart {
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
   /**
-   * Override the current set of custom help content
+   * Override the current set of custom help content.
+   * Prefer {@link ChromeHelpExtension.reactContent} over the legacy `content` callback.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
@@ -245,15 +246,6 @@ export interface ChromeStart {
    * Set the banner that will appear on top of the chrome header.
    *
    * @remarks Using `undefined` when invoking this API will remove the banner.
-   *
-   * @example
-   * ```tsx
-   * import { dynamic } from '@kbn/shared-ux-utility';
-   *
-   * const LazyBanner = dynamic(() => import('./my_banner'));
-   *
-   * chrome.setHeaderBanner({ content: <LazyBanner /> });
-   * ```
    */
   setHeaderBanner(headerBanner?: ChromeUserBanner): void;
 

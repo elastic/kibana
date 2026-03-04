@@ -21,12 +21,37 @@ describe('HeaderNavControls', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders a ReactNode-based nav control', () => {
+  it('renders a ReactNode via the content field', () => {
     const navControls$ = new BehaviorSubject<readonly ChromeNavControl[]>([
-      { mount: <span data-test-subj="react-control">React Control</span> },
+      { content: <span data-test-subj="react-control">React Control</span> },
     ]);
     render(<HeaderNavControls navControls$={navControls$} />);
     expect(screen.getByTestId('react-control')).toHaveTextContent('React Control');
+  });
+
+  it('renders a MountPoint via the deprecated mount field', () => {
+    const mountFn = jest.fn((el: HTMLElement) => {
+      el.innerHTML = '<span data-test-subj="mount-control">Mounted</span>';
+      return () => {
+        el.innerHTML = '';
+      };
+    });
+    const navControls$ = new BehaviorSubject<readonly ChromeNavControl[]>([{ mount: mountFn }]);
+    render(<HeaderNavControls navControls$={navControls$} />);
+    expect(screen.getByTestId('mount-control')).toHaveTextContent('Mounted');
+  });
+
+  it('prefers content over mount when both are provided', () => {
+    const mountFn = jest.fn((_el: HTMLElement) => jest.fn() as () => void);
+    const navControls$ = new BehaviorSubject<readonly ChromeNavControl[]>([
+      {
+        content: <span data-test-subj="content-wins">From content</span>,
+        mount: mountFn,
+      },
+    ]);
+    render(<HeaderNavControls navControls$={navControls$} />);
+    expect(screen.getByTestId('content-wins')).toBeInTheDocument();
+    expect(mountFn).not.toHaveBeenCalled();
   });
 
   it('renders a MountPoint-based nav control by calling the mount function with a DOM element', () => {
@@ -47,12 +72,12 @@ describe('HeaderNavControls', () => {
     expect(unmountSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('renders mixed ReactNode and MountPoint controls in the same list', () => {
+  it('renders mixed content and MountPoint controls in the same list', () => {
     const mountSpy = jest.fn((_el: HTMLElement) => jest.fn() as () => void);
     const navControls$ = new BehaviorSubject<readonly ChromeNavControl[]>([
-      { mount: <span data-test-subj="react-control">React</span> },
+      { content: <span data-test-subj="react-control">React</span> },
       { mount: mountSpy },
-      { mount: <span data-test-subj="react-control-2">React 2</span> },
+      { content: <span data-test-subj="react-control-2">React 2</span> },
     ]);
     render(<HeaderNavControls navControls$={navControls$} />);
     expect(screen.getByTestId('react-control')).toBeInTheDocument();

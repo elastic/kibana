@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { IconType, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
-import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeBadge {
@@ -27,19 +27,22 @@ export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
 
 /**
  * @example
- * Set a banner using a lazy-loaded component (recommended):
+ * Set a banner using a React node (recommended):
  * ```tsx
- * import { dynamic } from '@kbn/shared-ux-utility';
- *
- * const LazyBanner = dynamic(() => import('./my_banner'));
- *
- * chrome.setHeaderBanner({ content: <LazyBanner /> });
+ * chrome.setHeaderBanner({ content: <MyBanner /> });
  * ```
  *
  * @public
  */
 export interface ChromeUserBanner {
-  content: ChromeExtensionContent<HTMLDivElement>;
+  /**
+   * The banner content as a React node.
+   */
+  content?: ReactNode;
+  /**
+   * @deprecated Use {@link ChromeUserBanner.content} instead.
+   */
+  mount?: MountPoint<HTMLDivElement>;
 }
 
 /** @public */
