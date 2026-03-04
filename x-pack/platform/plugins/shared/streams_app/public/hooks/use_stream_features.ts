@@ -24,6 +24,9 @@ export const useStreamFeatures = (definition: Streams.all.Definition, deps: unkn
         path: {
           name: streamName,
         },
+        query: {
+          include_deleted: true,
+        },
       },
       signal: querySignal ?? null,
     });
@@ -35,13 +38,23 @@ export const useStreamFeatures = (definition: Streams.all.Definition, deps: unkn
     onError: showFetchErrorToast,
   });
 
-  const features: Feature[] = useMemo(
-    () => (data?.features ?? []).filter((feature) => !isComputedFeature(feature)),
-    [data?.features]
-  );
+  const { features, deletedFeatures } = useMemo(() => {
+    const active: Feature[] = [];
+    const deleted: Feature[] = [];
+    for (const feature of data?.features ?? []) {
+      if (isComputedFeature(feature)) continue;
+      if (feature.deleted_at) {
+        deleted.push(feature);
+      } else {
+        active.push(feature);
+      }
+    }
+    return { features: active, deletedFeatures: deleted };
+  }, [data?.features]);
 
   return {
     features,
+    deletedFeatures,
     featuresLoading: isLoading,
     refreshFeatures: refetch,
     error,

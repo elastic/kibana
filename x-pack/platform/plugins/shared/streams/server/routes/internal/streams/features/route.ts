@@ -119,6 +119,7 @@ export const listFeaturesRoute = createServerRoute({
     query: z.optional(
       z.object({
         type: z.string().optional(),
+        include_deleted: z.coerce.boolean().optional(),
       })
     ),
   }),
@@ -137,6 +138,7 @@ export const listFeaturesRoute = createServerRoute({
 
     const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
+      includeDeleted: params.query?.include_deleted,
     });
 
     return {
@@ -180,7 +182,7 @@ export const bulkFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Bulk changes to features',
-    description: 'Add or delete features in bulk for a given stream',
+    description: 'Add, delete, or restore features in bulk for a given stream',
   },
   security: {
     authz: {
@@ -199,6 +201,11 @@ export const bulkFeaturesRoute = createServerRoute({
           }),
           z.object({
             delete: z.object({
+              id: z.string(),
+            }),
+          }),
+          z.object({
+            restore: z.object({
               id: z.string(),
             }),
           }),
