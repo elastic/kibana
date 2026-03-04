@@ -88,7 +88,7 @@ export class DynamicConnectorsPoller {
   }
 
   private fetchInferenceEndpoints() {
-    return Rx.from(this.client.inference.get({ inference_id: '_all' }));
+    return Rx.from(this.client.inference.get());
   }
 
   private handleInferenceEndpointsResponse(

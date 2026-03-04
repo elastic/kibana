@@ -63,7 +63,7 @@ describe('DynamicConnectorsPoller', () => {
 
       advance(testInitialAdvance); // advance past initial delay
       await wait();
-      expect(mockClient.inference.get).toHaveBeenCalledWith({ inference_id: '_all' });
+      expect(mockClient.inference.get).toHaveBeenCalledWith();
     })
   );
 

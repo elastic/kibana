@@ -35,9 +35,9 @@ export function findEndpointsWithoutConnectors(
         typeof connector.config.inferenceId === 'string'
     )
     .map((connector) => connector.config.inferenceId as string);
-  return endpoints.filter((endpoint) => {
-    return existingConnectorInferenceIds.includes(endpoint.inference_id) === false;
-  });
+  return endpoints.filter(
+    (endpoint) => !existingConnectorInferenceIds.includes(endpoint.inference_id)
+  );
 }
 
 export function connectorFromEndpoint(endpoint: InferenceInferenceEndpointInfo): InMemoryConnector {
