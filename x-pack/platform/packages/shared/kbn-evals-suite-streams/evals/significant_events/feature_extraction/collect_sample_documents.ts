@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { MANAGED_STREAM_SEARCH_PATTERN, type FeatureExtractionScenario } from '../datasets';
 
 const SAMPLE_DOCS_TARGET_UNIQUE_APPS = 8;
-const SAMPLE_DOCS_MAX = 150;
+const SAMPLE_DOCS_MAX = 60;
 const SAMPLE_DOCS_PAGE_SIZE = 50;
 const REQUIRED_APP_SAMPLE_SIZE = 10;
 
