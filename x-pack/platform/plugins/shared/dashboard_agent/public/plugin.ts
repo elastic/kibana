@@ -34,15 +34,12 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    core: CoreStart,
+    _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         attachments: plugins.agentBuilder.attachments,
-        chat$: plugins.agentBuilder.events.chat$,
-        share: plugins.share,
-        core,
       });
     });
 
