@@ -51,7 +51,7 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   const { presets = [], delimiter } = options ?? {};
 
   // (1) Preset label match
-  // TODO move this out of the parse function and into the context?
+  // TODO move this out of the parse function?
   const preset = matchPreset(trimmed, presets);
   if (preset) {
     return buildRange(text, preset.start, preset.end, compiled.absoluteFormats, true);
@@ -89,8 +89,6 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   }
   return buildRange(text, dateString, 'now', compiled.absoluteFormats, false);
 }
-
-// --- Helpers ---
 
 function buildDelimiterPattern(delimiter: string): RegExp | null {
   const trimmedDelimiter = delimiter.trim();
