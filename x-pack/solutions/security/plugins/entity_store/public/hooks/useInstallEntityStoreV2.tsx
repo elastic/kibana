@@ -34,6 +34,12 @@ const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
+const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+  body: JSON.stringify({}),
+  query: { apiVersion: '2' },
+};
+
 /**
  * Hook to install Entity Store V2. Should be called from the root Security Solution app component.
  * @param services - Kibana services required to install Entity Store V2
@@ -51,9 +57,10 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
-        if (isEntityStoreInstalled(statusResponse.status)) return;
-
-        await services.http.post(installAllEntitiesRequest);
+        if (!isEntityStoreInstalled(statusResponse.status)) {
+          await services.http.post(installAllEntitiesRequest);
+        }
+        await services.http.post(initEntityMaintainersRequest);
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);

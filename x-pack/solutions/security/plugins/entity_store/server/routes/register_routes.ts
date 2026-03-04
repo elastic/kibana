@@ -15,6 +15,7 @@ import {
   registerStartMaintainer,
   registerStopMaintainer,
   registerGetMaintainers,
+  registerInitMaintainers,
   registerForceCcsExtractToUpdates,
   registerCRUDUpsert,
   registerCRUDUpsertBulk,
@@ -36,4 +37,5 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerStartMaintainer(router);
   registerStopMaintainer(router);
   registerGetMaintainers(router);
+  registerInitMaintainers(router);
 }

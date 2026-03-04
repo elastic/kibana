@@ -139,36 +139,74 @@ describe('EntityMaintainersClient', () => {
     });
   });
 
-  describe('startAll', () => {
-    it('should schedule all registered tasks', async () => {
-      const entries: EntityMaintainerTaskEntry[] = [
-        { id: 'm1', interval: '5m' },
-        { id: 'm2', interval: '1h' },
-      ];
-      entityMaintainersRegistry.getAll.mockReturnValue(entries);
-      const client = createClient();
+  describe('init', () => {
+    it('should schedule only maintainers without an existing task', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([
+        { id: 'm1', interval: '5m', description: 'M1' },
+        { id: 'm2', interval: '1h', description: 'M2' },
+      ]);
+      const taskManager = {
+        get: jest.fn().mockImplementation((taskId: string) => {
+          if (taskId === 'm1:default') {
+            return Promise.reject(new Error('Not found'));
+          }
+          return Promise.resolve({
+            state: {
+              metadata: { runs: 0 },
+              state: {},
+              taskStatus: EntityMaintainerTaskStatus.STARTED,
+            },
+          });
+        }),
+      };
+      mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(true);
+      const client = createClient({ taskManager: taskManager as any });
       const request = createMockRequest();
 
-      await client.startAll(request);
+      await client.init(request);
 
-      expect(scheduleEntityMaintainerTask).toHaveBeenCalledTimes(2);
+      expect(scheduleEntityMaintainerTask).toHaveBeenCalledTimes(1);
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'm1', interval: '5m' })
-      );
-      expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'm2', interval: '1h' })
+        expect.objectContaining({ id: 'm1', interval: '5m', namespace: 'default', request })
       );
     });
 
-    it('should propagate error when any schedule fails', async () => {
-      entityMaintainersRegistry.getAll.mockReturnValue([{ id: 'm1', interval: '5m' }]);
+    it('should not schedule when all maintainers already have tasks', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([
+        { id: 'm1', interval: '5m', description: 'M1' },
+      ]);
+      const taskManager = {
+        get: jest.fn().mockResolvedValue({
+          state: {
+            metadata: { runs: 1 },
+            state: {},
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+          },
+        }),
+      };
+      const client = createClient({ taskManager: taskManager as any });
+      const request = createMockRequest();
+
+      await client.init(request);
+
+      expect(scheduleEntityMaintainerTask).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error when scheduleEntityMaintainerTask rejects', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([
+        { id: 'm1', interval: '5m', description: 'M1' },
+      ]);
+      const taskManager = {
+        get: jest.fn().mockRejectedValue(new Error('Not found')),
+      };
+      mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(true);
       (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(
         new Error('schedule failed')
       );
-      const client = createClient();
+      const client = createClient({ taskManager: taskManager as any });
       const request = createMockRequest();
 
-      await expect(client.startAll(request)).rejects.toThrow('schedule failed');
+      await expect(client.init(request)).rejects.toThrow('schedule failed');
     });
   });
 

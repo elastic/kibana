@@ -50,7 +50,7 @@ export async function scheduleEntityMaintainerTask({
       id: getTaskId(id, namespace),
       taskType: getTaskType(id),
       schedule: { interval },
-      state: { namespace, taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+      state: { namespace, taskStatus: EntityMaintainerTaskStatus.STARTED },
       params: {},
     },
     { request }

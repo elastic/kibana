@@ -70,12 +70,17 @@ export class EntityMaintainersClient {
     }
   }
 
-  public async startAll(request: KibanaRequest): Promise<void> {
-    this.logger.debug('Starting entity maintainer tasks');
+  /**
+   * Schedules only maintainers that do not yet have a task document (taskSnapshot undefined).
+   * Uses getMaintainers() to determine which registry entries already have tasks.
+   */
+  public async init(request: KibanaRequest): Promise<void> {
+    this.logger.debug('Initializing entity maintainer tasks');
     try {
-      const tasks = entityMaintainersRegistry.getAll();
+      const maintainers = await this.getMaintainers();
+      const toSchedule = maintainers.filter((m) => m.taskSnapshot === undefined);
       await Promise.all(
-        tasks.map(async ({ id, interval }) => {
+        toSchedule.map(async ({ id, interval }) => {
           await scheduleEntityMaintainerTask({
             logger: this.logger,
             taskManager: this.taskManager,
@@ -87,7 +92,7 @@ export class EntityMaintainersClient {
         })
       );
     } catch (error) {
-      this.logger.error('Failed to start entity maintainer tasks', { error });
+      this.logger.error('Failed to initialize entity maintainer tasks', { error });
       throw error;
     }
   }

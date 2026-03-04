@@ -18,3 +18,4 @@ export { registerStart } from './start';
 export { registerStartMaintainer } from './entity_maintainers/start';
 export { registerStopMaintainer } from './entity_maintainers/stop';
 export { registerGetMaintainers } from './entity_maintainers/get_maintainers';
+export { registerInitMaintainers } from './entity_maintainers/init';

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BodySchema } from './validator';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { getMissingPrivileges } from '../utils/get_missing_privileges';
 
-export function registerInstall(router: EntityStorePluginRouter) {
+export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.INSTALL,
+      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -27,19 +25,15 @@ export function registerInstall(router: EntityStorePluginRouter) {
     .addVersion(
       {
         version: API_VERSIONS.internal.v2,
-        validate: {
-          request: {
-            body: buildRouteValidationWithZod(BodySchema),
-          },
-        },
+        validate: false,
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
-        const { entityTypes, logExtraction: params } = req.body;
-        logger.debug('Install api called');
+        const { logger, assetManager, entityMaintainersClient } = entityStoreCtx;
 
-        const privileges = await assetManager.getPrivileges(req, params?.additionalIndexPatterns);
+        logger.debug('Entity maintainers init API called');
+
+        const privileges = await assetManager.getPrivileges(req);
         if (!privileges.hasAllRequested) {
           return res.forbidden({
             body: {
@@ -48,17 +42,10 @@ export function registerInstall(router: EntityStorePluginRouter) {
             },
           });
         }
-        const { engines } = await assetManager.getStatus();
-        const installedTypes = new Set(engines.map((e) => e.type));
-        const toInstall = entityTypes.filter((type) => !installedTypes.has(type));
 
-        if (!toInstall.length) {
-          return res.ok({ body: { ok: true } });
-        }
+        await entityMaintainersClient.init(req);
 
-        await assetManager.init(req, toInstall, params);
-
-        return res.created({ body: { ok: true } });
+        return res.ok({ body: { ok: true } });
       })
     );
 }
