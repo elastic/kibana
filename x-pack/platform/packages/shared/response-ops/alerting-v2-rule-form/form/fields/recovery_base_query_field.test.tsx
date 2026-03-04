@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { AggregateQuery } from '@kbn/es-query';
-import { RecoveryQueryField } from './recovery_query_field';
+import { RecoveryBaseQueryField } from './recovery_base_query_field';
 import { createFormWrapper, createTestQueryClient, defaultTestFormValues } from '../../test_utils';
 import { RuleFormServicesProvider } from '../contexts';
 import { createMockServices } from '../../test_utils';
@@ -79,7 +79,7 @@ const { useRecoveryQueryValidation } = jest.requireMock(
   useRecoveryQueryValidation: jest.Mock;
 };
 
-describe('RecoveryQueryField', () => {
+describe('RecoveryBaseQueryField', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useRecoveryQueryValidation.mockReturnValue({
@@ -93,17 +93,17 @@ describe('RecoveryQueryField', () => {
   });
 
   it('renders the recovery condition label', () => {
-    render(<RecoveryQueryField />, {
+    render(<RecoveryBaseQueryField />, {
       wrapper: createFormWrapper({
         recoveryPolicy: { type: 'query' },
       }),
     });
 
-    expect(screen.getByText('Recovery condition')).toBeInTheDocument();
+    expect(screen.getByText('Recovery query')).toBeInTheDocument();
   });
 
   it('renders the ES|QL editor', () => {
-    render(<RecoveryQueryField />, {
+    render(<RecoveryBaseQueryField />, {
       wrapper: createFormWrapper({
         recoveryPolicy: { type: 'query' },
       }),
@@ -113,7 +113,7 @@ describe('RecoveryQueryField', () => {
   });
 
   it('seeds recovery query with evaluation query on mount when empty', () => {
-    render(<RecoveryQueryField />, {
+    render(<RecoveryBaseQueryField />, {
       wrapper: createFormWrapper({
         evaluation: { query: { base: 'FROM logs-* | STATS count = COUNT(*)' } },
         recoveryPolicy: { type: 'query' },
@@ -125,7 +125,7 @@ describe('RecoveryQueryField', () => {
   });
 
   it('does not overwrite existing recovery query on mount', () => {
-    render(<RecoveryQueryField />, {
+    render(<RecoveryBaseQueryField />, {
       wrapper: createFormWrapper({
         evaluation: { query: { base: 'FROM logs-* | STATS count = COUNT(*)' } },
         recoveryPolicy: {
@@ -141,7 +141,7 @@ describe('RecoveryQueryField', () => {
 
   it('updates value when user types', async () => {
     const user = userEvent.setup();
-    render(<RecoveryQueryField />, {
+    render(<RecoveryBaseQueryField />, {
       wrapper: createFormWrapper({
         recoveryPolicy: { type: 'query' },
       }),
@@ -164,7 +164,7 @@ describe('RecoveryQueryField', () => {
       recoveryColumns: [{ name: 'count', type: 'long' }],
     });
 
-    render(<RecoveryQueryField />, {
+    render(<RecoveryBaseQueryField />, {
       wrapper: createFormWrapper({
         recoveryPolicy: {
           type: 'query',
@@ -207,7 +207,7 @@ describe('RecoveryQueryField', () => {
     };
 
     const user = userEvent.setup();
-    render(<RecoveryQueryField />, { wrapper: WrapperWithSubmit });
+    render(<RecoveryBaseQueryField />, { wrapper: WrapperWithSubmit });
 
     const submitButton = screen.getByText('Submit');
     await user.click(submitButton);
@@ -218,6 +218,109 @@ describe('RecoveryQueryField', () => {
       );
       expect(errors.length).toBeGreaterThan(0);
     });
+  });
+
+  it('shows additionalValidation error when parent validation fails', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+    const additionalValidation = jest.fn((value: string | undefined) =>
+      value === 'FROM logs-* | STATS count = COUNT(*)'
+        ? 'Recovery query must differ from the evaluation query. The same query would never recover.'
+        : true
+    );
+
+    const WrapperWithSubmit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          recoveryPolicy: {
+            type: 'query',
+            query: { base: 'FROM logs-* | STATS count = COUNT(*)' },
+          },
+        },
+        mode: 'onSubmit',
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormServicesProvider services={services}>
+              {children}
+              <button type="button" onClick={form.handleSubmit(() => {})}>
+                Submit
+              </button>
+            </RuleFormServicesProvider>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<RecoveryBaseQueryField additionalValidation={additionalValidation} />, {
+      wrapper: WrapperWithSubmit,
+    });
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      const errors = screen.getAllByText(
+        'Recovery query must differ from the evaluation query. The same query would never recover.'
+      );
+      expect(errors.length).toBeGreaterThan(0);
+    });
+
+    expect(additionalValidation).toHaveBeenCalledWith('FROM logs-* | STATS count = COUNT(*)');
+  });
+
+  it('does not show additionalValidation error when parent validation passes', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+    const additionalValidation = jest.fn(() => true as const);
+
+    const WrapperWithSubmit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          recoveryPolicy: {
+            type: 'query',
+            query: { base: 'FROM metrics-* | WHERE status == "ok"' },
+          },
+        },
+        mode: 'onSubmit',
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormServicesProvider services={services}>
+              {children}
+              <button type="button" onClick={form.handleSubmit(() => {})}>
+                Submit
+              </button>
+            </RuleFormServicesProvider>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<RecoveryBaseQueryField additionalValidation={additionalValidation} />, {
+      wrapper: WrapperWithSubmit,
+    });
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(additionalValidation).toHaveBeenCalled();
+    });
+
+    expect(
+      screen.queryByText(
+        'Recovery query must differ from the evaluation query. The same query would never recover.'
+      )
+    ).not.toBeInTheDocument();
   });
 
   it('shows validation error for invalid ES|QL query syntax', async () => {
@@ -248,7 +351,7 @@ describe('RecoveryQueryField', () => {
     };
 
     const user = userEvent.setup();
-    render(<RecoveryQueryField />, { wrapper: WrapperWithSubmit });
+    render(<RecoveryBaseQueryField />, { wrapper: WrapperWithSubmit });
 
     const submitButton = screen.getByText('Submit');
     await user.click(submitButton);

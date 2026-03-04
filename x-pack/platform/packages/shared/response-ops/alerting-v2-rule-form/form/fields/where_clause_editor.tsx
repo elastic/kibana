@@ -23,7 +23,7 @@ const EDITOR_PREFIX = '| WHERE ';
 // Stored prefix in form value (without pipe for cleaner data)
 const STORED_PREFIX = 'WHERE ';
 
-type WhereClauseFieldPath = 'evaluation.query.condition';
+type WhereClauseFieldPath = 'evaluation.query.condition' | 'recoveryPolicy.query.condition';
 
 export interface WhereClauseEditorProps {
   name: WhereClauseFieldPath;

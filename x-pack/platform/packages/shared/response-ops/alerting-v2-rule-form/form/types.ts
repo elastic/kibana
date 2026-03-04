@@ -38,6 +38,7 @@ export interface RecoveryPolicy {
   type: RecoveryPolicyType;
   query?: {
     base?: string;
+    condition?: string;
   };
 }
 

@@ -229,4 +229,133 @@ describe('useCreateRule', () => {
       });
     });
   });
+
+  it('maps recovery_policy with condition-only mode using evaluation base query', async () => {
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
+    const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Recovery Rule' } });
+
+    const { result } = renderHook(() => useCreateRule({ http, notifications, onSuccess }), {
+      wrapper: createQueryClientWrapper(),
+    });
+
+    const formData: FormValues = {
+      kind: 'alert',
+      metadata: { name: 'Recovery Rule', enabled: true },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM logs | STATS count() BY host',
+          condition: 'WHERE count > 100',
+        },
+      },
+      recoveryPolicy: {
+        type: 'query',
+        query: {
+          condition: 'WHERE count <= 50',
+        },
+      },
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const payload = JSON.parse(
+        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+      );
+      expect(payload.recovery_policy).toEqual({
+        type: 'query',
+        query: {
+          base: 'FROM logs | STATS count() BY host',
+          condition: 'WHERE count <= 50',
+        },
+      });
+    });
+  });
+
+  it('maps recovery_policy with full base query when no condition is set', async () => {
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
+    const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-790', metadata: { name: 'Full Recovery Rule' } });
+
+    const { result } = renderHook(() => useCreateRule({ http, notifications, onSuccess }), {
+      wrapper: createQueryClientWrapper(),
+    });
+
+    const formData: FormValues = {
+      kind: 'alert',
+      metadata: { name: 'Full Recovery Rule', enabled: true },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM logs | STATS count() BY host',
+        },
+      },
+      recoveryPolicy: {
+        type: 'query',
+        query: {
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 10',
+        },
+      },
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const payload = JSON.parse(
+        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+      );
+      expect(payload.recovery_policy).toEqual({
+        type: 'query',
+        query: {
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 10',
+        },
+      });
+    });
+  });
+
+  it('omits recovery_policy query when type is no_breach', async () => {
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
+    const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-791', metadata: { name: 'No Breach Rule' } });
+
+    const { result } = renderHook(() => useCreateRule({ http, notifications, onSuccess }), {
+      wrapper: createQueryClientWrapper(),
+    });
+
+    const formData: FormValues = {
+      kind: 'alert',
+      metadata: { name: 'No Breach Rule', enabled: true },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: { base: 'FROM logs | STATS count() BY host' },
+      },
+      recoveryPolicy: { type: 'no_breach' },
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const payload = JSON.parse(
+        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+      );
+      expect(payload.recovery_policy).toEqual({ type: 'no_breach' });
+      expect(payload.recovery_policy.query).toBeUndefined();
+    });
+  });
 });
