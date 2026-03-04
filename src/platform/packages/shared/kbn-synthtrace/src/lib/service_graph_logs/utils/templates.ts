@@ -92,7 +92,8 @@ function resolveMessagePool(
 
   if (TECH_KEYED_ERROR_TYPES.has(errorType as ServiceErrorType)) {
     const techKeyed = pool as Record<string, Record<Runtime, ConditionPool>>;
-    const techPool = (sourceDep ? techKeyed[sourceDep] : undefined) ?? Object.values(techKeyed)[0];
+    const techPool =
+      (sourceDep ? techKeyed[sourceDep] : undefined) ?? techKeyed[Object.keys(techKeyed).sort()[0]];
     return (techPool?.[rt] ?? techPool?.go)?.[level] ?? [];
   }
 

@@ -42,6 +42,8 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
 
   const tickSpreadMs = config.tickSpreadMs ?? config.tickIntervalMs;
 
+  const metadataSeed = seed ?? Date.now();
+
   const ctx: GeneratorContext = {
     serviceGraph,
     entryService,
@@ -49,7 +51,7 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
     volume,
     noise,
     seed,
-    metadataCache: buildMetadataCache(serviceGraph, seed),
+    metadataCache: buildMetadataCache(serviceGraph, metadataSeed),
     allDeps: serviceGraph.services.flatMap((svc) => svc.infraDeps.map((dep) => ({ svc, dep }))),
     tickSpreadMs,
     cycleMs,

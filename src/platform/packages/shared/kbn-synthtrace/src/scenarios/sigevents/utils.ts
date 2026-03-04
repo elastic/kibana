@@ -21,7 +21,6 @@ import type {
   FailuresOrFn,
   NoiseConfig,
 } from '../../lib/service_graph_logs/types';
-
 import { sigEvents } from '../../lib/service_graph_logs';
 import { withClient } from '../../lib/utils/with_client';
 /** Parsed `--scenarioOpts` keys for sigevents scenarios. */
