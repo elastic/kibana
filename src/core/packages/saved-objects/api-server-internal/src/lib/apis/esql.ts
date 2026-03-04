@@ -31,16 +31,25 @@ const EMPTY_ESQL_RESPONSE: SavedObjectsEsqlResponse = {
   values: [],
 };
 
+const SOURCE_COMMAND_PATTERN = /^\s*(FROM|ROW|SHOW|METRICS)\b/i;
+
 export async function performEsql(
   { options, rawClient }: PerformEsqlParams,
-  { registry, allowedTypes, extensions = {} }: ApiExecutionContext
+  { registry, helpers, allowedTypes, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsEsqlResponse> {
   const { securityExtension, spacesExtension } = extensions;
-  const { namespaces: requestedNamespaces, type, ...esqlOptions } = options;
+  const { namespaces: requestedNamespaces, type, pipeline, metadata, ...esqlOptions } = options;
 
   if (requestedNamespaces.length === 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'options.namespaces cannot be an empty array'
+    );
+  }
+
+  if (SOURCE_COMMAND_PATTERN.test(pipeline)) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'options.pipeline must not start with a source command (FROM, ROW, SHOW, METRICS). ' +
+        'The FROM clause is auto-generated from the type parameter.'
     );
   }
 
@@ -92,8 +101,17 @@ export async function performEsql(
 
   const filter = mergeUserFilterWithNamespacesBool(esqlOptions.filter, namespacesBoolFilter);
 
+  // Build the full ES|QL query: FROM <indices> [METADATA ...] <pipeline>
+  const indices = helpers.common.getIndicesForTypes(types);
+  let fromClause = `FROM ${indices.join(', ')}`;
+  if (metadata && metadata.length > 0) {
+    fromClause += ` METADATA ${metadata.join(', ')}`;
+  }
+  const query = `${fromClause} ${pipeline}`;
+
   const result = await rawClient.esql.query({
     ...esqlOptions,
+    query,
     filter,
   });
 

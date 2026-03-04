@@ -65,7 +65,7 @@ describe('esql', () => {
     options = {
       type: 'index-pattern',
       namespaces: ['foo-namespace'],
-      query: 'FROM .kibana | LIMIT 10',
+      pipeline: '| LIMIT 10',
     };
 
     const serializer = createSpySerializer(registry);
@@ -116,7 +116,43 @@ describe('esql', () => {
     const [[request]] = client.esql.query.mock.calls;
     expect(request.filter).toBeDefined();
     expect(request.filter).toHaveProperty('bool.must');
-    expect(request.query).toBe('FROM .kibana | LIMIT 10');
+  });
+
+  it('should auto-generate FROM clause from type and append pipeline', async () => {
+    await repository.esql(options);
+
+    expect(client.esql.query).toHaveBeenCalledTimes(1);
+    const [[request]] = client.esql.query.mock.calls;
+    // FROM clause is auto-generated from getIndicesForTypes, pipeline is appended
+    expect(request.query).toMatch(/^FROM .+ \| LIMIT 10$/);
+  });
+
+  it('should include METADATA fields in FROM clause when specified', async () => {
+    await repository.esql({ ...options, metadata: ['_id', '_source'] });
+
+    expect(client.esql.query).toHaveBeenCalledTimes(1);
+    const [[request]] = client.esql.query.mock.calls;
+    expect(request.query).toMatch(/^FROM .+ METADATA _id, _source \| LIMIT 10$/);
+  });
+
+  it('should throw if pipeline starts with a source command', async () => {
+    await expect(
+      repository.esql({ ...options, pipeline: 'FROM .kibana | LIMIT 10' })
+    ).rejects.toThrowError('options.pipeline must not start with a source command');
+
+    await expect(repository.esql({ ...options, pipeline: 'ROW x = 1' })).rejects.toThrowError(
+      'options.pipeline must not start with a source command'
+    );
+
+    await expect(repository.esql({ ...options, pipeline: 'SHOW INFO' })).rejects.toThrowError(
+      'options.pipeline must not start with a source command'
+    );
+
+    await expect(repository.esql({ ...options, pipeline: 'METRICS index' })).rejects.toThrowError(
+      'options.pipeline must not start with a source command'
+    );
+
+    expect(client.esql.query).not.toHaveBeenCalled();
   });
 
   it('should merge user-provided filter with namespace filter', async () => {
@@ -131,7 +167,7 @@ describe('esql', () => {
     expect(must[1]).toEqual(userFilter);
   });
 
-  it('should pass through esql options like query and params', async () => {
+  it('should pass through esql options like params', async () => {
     await repository.esql({
       ...options,
       params: ['test'],
@@ -139,7 +175,7 @@ describe('esql', () => {
 
     expect(client.esql.query).toHaveBeenCalledTimes(1);
     const [[request]] = client.esql.query.mock.calls;
-    expect(request.query).toBe('FROM .kibana | LIMIT 10');
+    expect(request.query).toMatch(/^FROM .+ \| LIMIT 10$/);
     expect(request.params).toEqual(['test']);
   });
 

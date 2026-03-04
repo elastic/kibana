@@ -12,29 +12,54 @@ import type { estypes } from '@elastic/elasticsearch';
 /**
  * Options for the saved objects ES|QL query operation.
  *
- * This interface extends the Elasticsearch `EsqlQueryRequest` type, omitting index-related
- * fields that are controlled server-side, and adding saved-object-specific options.
+ * This interface extends the Elasticsearch `EsqlQueryRequest` type, omitting fields that are
+ * controlled server-side (`query`, `format`, `columnar`, `delimiter`), and adding saved-object-specific
+ * options. The `FROM` clause is auto-generated from the `type` parameter via index resolution,
+ * and security filters (namespace + type) are injected via the `filter` parameter.
+ *
+ * Consumers write only the ES|QL processing pipeline (everything after `FROM`).
  *
  * @remarks
  * **Security Warning:** The ES|QL query method provides low-level access to saved object data.
  * While the method injects namespace and type filters to enforce space-level security,
- * care must be taken when constructing queries:
+ * care must be taken when constructing pipelines with user input:
  *
- * - The index is controlled server-side and cannot be overridden via the `FROM` clause.
- * - Use the `esql` tagged template from `@kbn/esql-language` or ES|QL params (`?` placeholders)
- *   to prevent injection attacks when interpolating user input into queries.
+ * - Use the `esql` tagged template from `@kbn/esql-language` with named param syntax
+ *   (`${{ name: value }}`) to prevent injection attacks.
  * - Encrypted saved object attributes are stripped (replaced with `null`) in the response
  *   because AAD cannot be reliably reconstructed from tabular data.
  *
  * @public
  */
 export interface SavedObjectsEsqlOptions
-  extends Omit<estypes.EsqlQueryRequest, 'format' | 'columnar' | 'delimiter'> {
-  /** The type or types of saved objects to query. */
+  extends Omit<estypes.EsqlQueryRequest, 'format' | 'columnar' | 'delimiter' | 'query'> {
+  /** The type or types of saved objects to query. Used for index resolution and security filtering. */
   type: string | string[];
 
   /** The namespaces to query within. */
   namespaces: string[];
+
+  /**
+   * The ES|QL processing pipeline (everything after the `FROM` clause).
+   * The `FROM` clause is auto-generated from the `type` parameter.
+   *
+   * @example
+   * ```
+   * pipeline: '| KEEP dashboard.title | SORT dashboard.title | LIMIT 100'
+   * ```
+   */
+  pipeline: string;
+
+  /**
+   * Optional METADATA fields to include on the auto-generated `FROM` clause.
+   *
+   * @example
+   * ```
+   * metadata: ['_id', '_source']
+   * // generates: FROM .kibana METADATA _id, _source
+   * ```
+   */
+  metadata?: string[];
 }
 
 /**

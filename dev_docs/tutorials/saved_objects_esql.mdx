@@ -23,7 +23,11 @@ Use `esql` when you need ES|QL-specific features like `STATS`, `EVAL`, `ENRICH`,
   While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Carefully consider how you would like to use this method in your plugin to unlock value for users.
 </DocCallOut>
 
-## Basic usage
+## The `pipeline` concept
+
+Like `search` and `find`, you specify saved object **types** as a dedicated parameter — you never need to know or write index names. The `esql` method resolves the correct Elasticsearch indices from the `type` parameter and auto-generates the `FROM` clause. Security filters (namespace + type restriction) are injected via the `filter` parameter, so you don't need `WHERE type ==` either.
+
+You write only the ES|QL **processing pipeline** — everything after `FROM`:
 
 ```ts
 import { isResponseError } from '@kbn/es-errors';
@@ -37,9 +41,7 @@ async (ctx, req, res) => {
     const result = await savedObjectsClient.esql({
       type: [MY_TYPE],
       namespaces: ['default'],
-      query: `FROM .kibana
-        | WHERE type == "${MY_TYPE}"
-        | KEEP ${MY_TYPE}.title, ${MY_TYPE}.description
+      pipeline: `| KEEP ${MY_TYPE}.title, ${MY_TYPE}.description
         | SORT ${MY_TYPE}.title
         | LIMIT 100`,
     });
@@ -53,36 +55,46 @@ async (ctx, req, res) => {
 }
 ```
 
+To include METADATA fields on the auto-generated FROM clause, use the `metadata` option:
+
+```ts
+const result = await savedObjectsClient.esql({
+  type: [MY_TYPE],
+  namespaces: ['default'],
+  metadata: ['_id', '_source'],
+  // generates: FROM .kibana METADATA _id, _source | WHERE ...
+  pipeline: '| WHERE my-type.title LIKE "test*" | LIMIT 100',
+});
+```
+
 See the full example in the Kibana repository at `examples/saved_objects`.
 
-## Safe query construction with `esql` tagged template
+## Safe pipeline construction with `esql` tagged template
 
-When interpolating user input into ES|QL queries, **never** use string concatenation. Instead, use the `esql` tagged template from `@kbn/esql-language` with the **named param syntax**.
+When interpolating user input into ES|QL pipelines, **never** use string concatenation. Instead, use the `esql` tagged template from `@kbn/esql-language` with the **named param syntax**.
 
 ### Named param syntax `${{ name: value }}` (recommended for user input)
 
 The `esql` tagged template from `@kbn/esql-language` provides safe query construction. When you use the `${{ name: value }}` shorthand, it creates a `?name` placeholder in the query and stores the value separately in a params bag. This is true parameterization — code and data are separated at the protocol level, preventing injection attacks.
 
-Use `.print()` to extract the query string and `.getParams()` to extract the named params:
+Use `.print()` to extract the pipeline string and `.getParams()` to extract the named params:
 
 ```ts
 import { esql } from '@kbn/esql-language';
 
 const userInput = req.body.searchTerm;
 
-const query = esql`
-  FROM .kibana
-  | WHERE type == "my-type"
+const pipeline = esql`
   | WHERE my-type.title LIKE ${{ searchTerm: userInput }}
   | LIMIT 100
 `;
 
-const params = query.getParams();
+const params = pipeline.getParams();
 
 const result = await savedObjectsClient.esql({
   type: ['my-type'],
   namespaces: ['default'],
-  query: query.print(),
+  pipeline: pipeline.print(),
   // Convert named params to the format expected by the ES client.
   // Named params are supported by ES at runtime, but the ES client TypeScript types
   // only define positional params — cast through unknown to bridge the type gap.
@@ -92,7 +104,7 @@ const result = await savedObjectsClient.esql({
 });
 ```
 
-The query sent to Elasticsearch will be `FROM .kibana | WHERE type == "my-type" | WHERE my-type.title LIKE ?searchTerm | LIMIT 100` — with `searchTerm` as a separate parameter, never interpolated into the query string.
+The pipeline sent to Elasticsearch will be `| WHERE my-type.title LIKE ?searchTerm | LIMIT 100` — with `searchTerm` as a separate parameter, never interpolated into the pipeline string.
 
 <DocCallOut title="Avoid the plain ${value} syntax for user input">
   The composer also supports a plain `${value}` syntax (without the double braces), but this **inlines** the value directly into the query string as an escaped literal (e.g., `"O\"Brien"`). While the escaping provides some protection, it is NOT true parameterization. Use `${{ name: value }}` for any untrusted input. The plain `${value}` syntax is acceptable for developer-controlled constants like column names.
@@ -106,24 +118,24 @@ ES|QL also supports positional `?` placeholders natively. Params are plain value
 const result = await savedObjectsClient.esql({
   type: ['my-type'],
   namespaces: ['default'],
-  query: 'FROM .kibana | WHERE my-type.title LIKE ? | LIMIT 100',
+  pipeline: '| WHERE my-type.title LIKE ? | LIMIT 100',
   params: [userInput],
 });
 ```
 
 ## Security model
 
-### Index is NOT controlled server-side
+### Index resolution from types
 
-Unlike the `search` method (which passes an explicit `index` parameter), ES|QL does not support an explicit index parameter. The data source is specified in the `FROM` clause of your query string. Security is enforced via the `filter` parameter, which injects namespace and type restrictions — not by controlling which index is accessed.
+Like `search` (which passes `index: getIndicesForTypes(types)` internally), the `esql` method resolves the correct Elasticsearch indices from the `type` parameter and auto-generates the `FROM` clause. You never need to know the index name — it is an implementation detail handled by the saved objects system.
 
 ### Space and type filtering
 
-When you call `esql()`, namespace (space) and type filters are automatically injected into the `filter` parameter of the ES|QL request. This works the same way as the `search` method:
+When you call `esql()`, namespace (space) and type filters are automatically injected into the `filter` parameter of the ES|QL request. The filter restricts results to the specified types and namespaces, so you don't need `WHERE type == "..."` in your pipeline. This works the same way as the `search` method:
 
 1. `spacesExtension.getSearchableNamespaces()` resolves which namespaces the user can access
 2. `securityExtension.authorizeFind()` checks RBAC permissions
-3. A namespace bool filter is constructed and merged with any user-provided `filter`
+3. A namespace bool filter (including type restriction) is constructed and merged with any user-provided `filter`
 
 If the user is not authorized to access any of the requested namespaces or types, an empty response is returned.
 
@@ -165,3 +177,4 @@ The `esql` method returns the raw ES|QL response with `columns` and `values`:
 - You want structured `SavedObject` instances with `id`, `attributes`, `references` - use `find` instead
 - You need Elasticsearch Query DSL features like runtime mappings or aggregation trees - use `search` instead
 - Simple filtering and pagination - use `find` instead
+- You need ES|QL source commands like `ROW`, `SHOW`, or `METRICS` - use the raw Elasticsearch client directly

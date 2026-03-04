@@ -36,33 +36,32 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
         const savedObjectsClient = core.savedObjects.client;
         await setupData(savedObjectsClient);
         try {
-          // Use the `esql` tagged template from `@kbn/esql-language` for safe query
+          // Use the `esql` tagged template from `@kbn/esql-language` for safe pipeline
           // construction. The ${{ name: value }} syntax creates named ?param placeholders,
           // separating code from data at the protocol level (preventing injection attacks).
           //
-          // The `type` and `namespaces` options control which saved objects are accessible.
-          // Security filters (namespace and type) are injected into the `filter` parameter
-          // automatically — you don't need to filter by namespace in your query.
-          const query = esql`FROM .kibana
-            | WHERE type == ${{ typeA: TYPE_A }} OR type == ${{ typeB: TYPE_B }}
-            | KEEP type, ${TYPE_A}.myField, ${TYPE_B}.anotherField
+          // The `type` parameter controls index resolution (FROM clause is auto-generated)
+          // and security filtering (type + namespace restrictions are injected via the
+          // `filter` parameter). You don't need FROM or WHERE type == in your pipeline.
+          const pipeline = esql`| KEEP type, ${TYPE_A}.myField, ${TYPE_B}.anotherField
             | SORT type
             | LIMIT 100`;
 
-          // Extract query string and named params separately.
+          // Extract pipeline string and named params separately.
           // The ES client TypeScript types don't include the named param record format,
           // but Elasticsearch supports named params at runtime.
-          const params = query.getParams();
+          const params = pipeline.getParams();
           const result = await savedObjectsClient.esql({
             type: [TYPE_A, TYPE_B],
             namespaces: ['default'],
-            query: query.print(),
-            // Named params are supported by ES at runtime but the ES client TypeScript
-            // types only define positional params (EsqlESQLParam = FieldValue | FieldValue[]).
-            // Cast through unknown to bridge the type gap.
-            params: Object.entries(params).map(([k, v]) => ({
-              [k]: v,
-            })) as unknown as estypes.EsqlESQLParam[],
+            pipeline: pipeline.print(),
+            ...(Object.keys(params).length > 0
+              ? {
+                  params: Object.entries(params).map(([k, v]) => ({
+                    [k]: v,
+                  })) as unknown as estypes.EsqlESQLParam[],
+                }
+              : {}),
           });
           return res.ok({
             body: {
