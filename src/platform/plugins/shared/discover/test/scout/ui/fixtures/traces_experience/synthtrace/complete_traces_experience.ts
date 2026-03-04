@@ -39,7 +39,7 @@ import type {
 import { apm, log, timerange } from '@kbn/synthtrace-client';
 import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from '../constants';
 
-const FRONTEND_SERVICE = 'synth-traces-frontend';
+const FRONTEND_SERVICE = RICH_TRACE.SERVICE_NAME;
 const BACKEND_SERVICE = 'synth-traces-backend';
 const ENVIRONMENT = 'production';
 

@@ -8,9 +8,8 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, simpleTrace, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
+import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -36,11 +35,6 @@ globalSetupHook(
       from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
       to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
     };
-
-    const simpleTraceData: SynthtraceGenerator<ApmFields> = simpleTrace(timeRange);
-
-    await apmSynthtraceEsClient.index(simpleTraceData);
-    log.debug('[setup:traces] Simple APM trace data indexed');
 
     const { apmData, correlationIds } = richTrace(timeRange);
 
