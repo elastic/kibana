@@ -64,7 +64,6 @@ export interface Props {
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const themeContext = useEuiTheme();
   const styles = filterBarStyles(themeContext, props.afterQueryBar);
-  const { euiTheme } = themeContext;
 
   const groupRef = useRef<HTMLDivElement>(null);
 
