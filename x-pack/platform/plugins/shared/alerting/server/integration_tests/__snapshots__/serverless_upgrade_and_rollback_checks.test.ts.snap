@@ -5868,6 +5868,22 @@ Object {
       "properties": Object {},
       "type": "object",
     },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
   },
   "allOf": Array [
     Object {
@@ -6165,7 +6181,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -6175,28 +6190,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -6595,13 +6597,29 @@ Object {
       "type": "object",
     },
     "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
       "enum": Array [
         "kuery",
         "lucene",
       ],
       "type": "string",
     },
-    "__schema5": Object {
+    "__schema6": Object {
       "items": Object {},
       "type": "array",
     },
@@ -6902,7 +6920,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -6912,28 +6929,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -7249,7 +7253,7 @@ Object {
           "type": "string",
         },
         "filters": Object {
-          "$ref": "#/$defs/__schema5",
+          "$ref": "#/$defs/__schema6",
         },
         "index": Object {
           "items": Object {
@@ -7263,7 +7267,7 @@ Object {
           "type": "integer",
         },
         "language": Object {
-          "$ref": "#/$defs/__schema4",
+          "$ref": "#/$defs/__schema5",
         },
         "query": Object {
           "type": "string",
@@ -7272,7 +7276,7 @@ Object {
           "type": "string",
         },
         "threatFilters": Object {
-          "$ref": "#/$defs/__schema5",
+          "$ref": "#/$defs/__schema6",
         },
         "threatIndex": Object {
           "items": Object {
@@ -7284,7 +7288,7 @@ Object {
           "type": "string",
         },
         "threatLanguage": Object {
-          "$ref": "#/$defs/__schema4",
+          "$ref": "#/$defs/__schema5",
         },
         "threatMapping": Object {
           "items": Object {
@@ -7390,6 +7394,22 @@ Object {
         "type": "object",
       },
       "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
       "type": "object",
     },
   },
@@ -7689,7 +7709,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -7699,28 +7718,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -8100,6 +8106,22 @@ Object {
       "properties": Object {},
       "type": "object",
     },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
   },
   "allOf": Array [
     Object {
@@ -8397,7 +8419,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -8407,28 +8428,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -8830,6 +8838,9 @@ Object {
       "type": "integer",
     },
     "__schema10": Object {
+      "type": "string",
+    },
+    "__schema11": Object {
       "properties": Object {
         "duration": Object {
           "properties": Object {
@@ -8909,27 +8920,40 @@ Object {
       "type": "object",
     },
     "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
       "enum": Array [
         "kuery",
         "lucene",
       ],
       "type": "string",
     },
-    "__schema5": Object {
+    "__schema6": Object {
       "items": Object {
         "type": "string",
       },
       "type": "array",
     },
-    "__schema6": Object {
-      "type": "string",
-    },
     "__schema7": Object {
-      "items": Object {},
-      "type": "array",
+      "type": "string",
     },
     "__schema8": Object {
-      "type": "string",
+      "items": Object {},
+      "type": "array",
     },
     "__schema9": Object {
       "type": "string",
@@ -9231,7 +9255,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -9241,28 +9264,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -9527,25 +9537,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
-            },
-            "language": Object {
-              "$ref": "#/$defs/__schema4",
-            },
-            "query": Object {
               "$ref": "#/$defs/__schema6",
             },
+            "language": Object {
+              "$ref": "#/$defs/__schema5",
+            },
+            "query": Object {
+              "$ref": "#/$defs/__schema7",
+            },
             "savedId": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "query",
@@ -9562,25 +9572,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
-            },
-            "language": Object {
-              "$ref": "#/$defs/__schema4",
-            },
-            "query": Object {
               "$ref": "#/$defs/__schema6",
             },
+            "language": Object {
+              "$ref": "#/$defs/__schema5",
+            },
+            "query": Object {
+              "$ref": "#/$defs/__schema7",
+            },
             "savedId": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "saved_query",
@@ -9613,6 +9623,9 @@ Object {
       "type": "integer",
     },
     "__schema10": Object {
+      "type": "string",
+    },
+    "__schema11": Object {
       "properties": Object {
         "duration": Object {
           "properties": Object {
@@ -9692,27 +9705,40 @@ Object {
       "type": "object",
     },
     "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
       "enum": Array [
         "kuery",
         "lucene",
       ],
       "type": "string",
     },
-    "__schema5": Object {
+    "__schema6": Object {
       "items": Object {
         "type": "string",
       },
       "type": "array",
     },
-    "__schema6": Object {
-      "type": "string",
-    },
     "__schema7": Object {
-      "items": Object {},
-      "type": "array",
+      "type": "string",
     },
     "__schema8": Object {
-      "type": "string",
+      "items": Object {},
+      "type": "array",
     },
     "__schema9": Object {
       "type": "string",
@@ -10014,7 +10040,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -10024,28 +10049,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -10310,25 +10322,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
-            },
-            "language": Object {
-              "$ref": "#/$defs/__schema4",
-            },
-            "query": Object {
               "$ref": "#/$defs/__schema6",
             },
+            "language": Object {
+              "$ref": "#/$defs/__schema5",
+            },
+            "query": Object {
+              "$ref": "#/$defs/__schema7",
+            },
             "savedId": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "query",
@@ -10345,25 +10357,25 @@ Object {
         Object {
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/$defs/__schema10",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/$defs/__schema9",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/$defs/__schema7",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/$defs/__schema5",
-            },
-            "language": Object {
-              "$ref": "#/$defs/__schema4",
-            },
-            "query": Object {
               "$ref": "#/$defs/__schema6",
             },
+            "language": Object {
+              "$ref": "#/$defs/__schema5",
+            },
+            "query": Object {
+              "$ref": "#/$defs/__schema7",
+            },
             "savedId": Object {
-              "$ref": "#/$defs/__schema8",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "saved_query",
@@ -10429,6 +10441,22 @@ Object {
       "properties": Object {},
       "type": "object",
     },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
   },
   "allOf": Array [
     Object {
@@ -10726,7 +10754,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -10736,28 +10763,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
