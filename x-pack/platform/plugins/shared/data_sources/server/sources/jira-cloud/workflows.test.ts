@@ -68,6 +68,14 @@ describe('jira cloud workflows', () => {
             actionId,
             data: { values: [{ id: '1', key: 'PROJ', name: 'Test Project' }], total: 1 },
           };
+        case 'searchUsers':
+          return {
+            status: 'ok',
+            actionId,
+            data: [
+              { accountId: 'abc-123', displayName: 'Jane Doe', emailAddress: 'jane@example.com' },
+            ],
+          };
         default:
           throw new Error(`Unexpected Jira subAction: ${subAction}`);
       }
@@ -163,6 +171,45 @@ describe('jira cloud workflows', () => {
           params: expect.objectContaining({
             subAction: 'getProjects',
             subActionParams: expect.objectContaining({ query: 'backend', maxResults: 10 }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('search_users workflow', () => {
+    it('forwards user search parameters to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: loadWorkflow('search_users.yaml'),
+        inputs: { query: 'jane', maxResults: 25 },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('search-users')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'searchUsers',
+            subActionParams: expect.objectContaining({ query: 'jane', maxResults: 25 }),
+          }),
+        })
+      );
+    });
+
+    it('forwards accountId when searching by specific user', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: loadWorkflow('search_users.yaml'),
+        inputs: { accountId: 'abc-123-def' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'searchUsers',
+            subActionParams: expect.objectContaining({ accountId: 'abc-123-def' }),
           }),
         })
       );

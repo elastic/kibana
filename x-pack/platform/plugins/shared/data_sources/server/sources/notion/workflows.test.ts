@@ -59,6 +59,16 @@ describe('notion workflows', () => {
             actionId,
             data: { results: [{ id: 'row-1' }, { id: 'row-2' }], has_more: false },
           };
+        case 'getDataSource':
+          return {
+            status: 'ok',
+            actionId,
+            data: {
+              id: subActionParams.dataSourceId,
+              title: [{ plain_text: 'Project Tracker' }],
+              properties: { Status: { type: 'select' }, Name: { type: 'title' } },
+            },
+          };
         default:
           throw new Error(`Unexpected Notion subAction: ${subAction}`);
       }
@@ -133,6 +143,27 @@ describe('notion workflows', () => {
           params: expect.objectContaining({
             subAction: 'queryDataSource',
             subActionParams: expect.objectContaining({ dataSourceId: 'db-456', pageSize: 5 }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('get_data_source workflow', () => {
+    it('forwards data source ID to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: loadWorkflow('get_data_source.yaml'),
+        inputs: { data_source_id: 'ds-789' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('get-data-source')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'getDataSource',
+            subActionParams: expect.objectContaining({ dataSourceId: 'ds-789' }),
           }),
         })
       );

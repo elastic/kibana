@@ -150,12 +150,32 @@ describe('google drive workflows', () => {
 
       expect(simulateCalls).toHaveLength(2);
 
+      const extractedFileNames = simulateCalls.map(
+        ([req]: [{ body: { docs: Array<{ _source: { data: string; filename: string } }> } }]) =>
+          req.body.docs[0]._source.filename
+      );
+      expect(extractedFileNames).toContain('alpha.pdf');
+      expect(extractedFileNames).toContain('beta.pdf');
+
       simulateCalls.forEach(([req]: [{ body: { docs: Array<{ _source: { data: string; filename: string } }> } }]) => {
         const doc = req.body.docs[0];
-        expect(doc._source.data).toBeDefined();
-        expect(doc._source.data.length).toBeGreaterThan(0);
-        expect(doc._source.filename).toMatch(/\.pdf$/);
+        const fileId = doc._source.filename.replace('.pdf', '');
+        const expectedBase64 = Buffer.from(`content-of-${fileId}`).toString('base64');
+        expect(doc._source.data).toBe(expectedBase64);
       });
+    });
+
+    it('rerank=false stores all results without reranking', async () => {
+      const fileIds = ['x1', 'x2'];
+      await fixture.runWorkflow({
+        workflowYaml: loadWorkflow('download.yaml'),
+        inputs: { fileIds, rerank: false },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('store_all')).toHaveLength(1);
+      expect(getStepExecutions('do_rerank')).toHaveLength(0);
+      expect(getStepExecutions('store_reranked')).toHaveLength(0);
     });
 
     it('rerank=true triggers the rerank branch', async () => {
