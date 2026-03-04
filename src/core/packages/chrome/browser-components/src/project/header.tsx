@@ -164,10 +164,10 @@ export const ProjectHeader = () => {
     application,
     docLinks,
     customBranding$,
-    breadcrumbs$,
     breadcrumbsAppendExtensions$,
     helpMenu,
     navControls,
+    projectNavigation,
   } = useChromeComponentsDeps();
 
   const { euiTheme } = useEuiTheme();
@@ -189,7 +189,7 @@ export const ProjectHeader = () => {
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <EuiHeaderSectionItem>
                 <HeaderPageAnnouncer
-                  breadcrumbs$={breadcrumbs$}
+                  breadcrumbs$={projectNavigation.breadcrumbs$}
                   customBranding$={customBranding$}
                 />
                 <Logo logoCss={logoCss} />
@@ -207,7 +207,7 @@ export const ProjectHeader = () => {
                 <BreadcrumbsWithExtensionsWrapper
                   breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
                 >
-                  <Breadcrumbs breadcrumbs$={breadcrumbs$} />
+                  <Breadcrumbs breadcrumbs$={projectNavigation.breadcrumbs$} />
                 </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
