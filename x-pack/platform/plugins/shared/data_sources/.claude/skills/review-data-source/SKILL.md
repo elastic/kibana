@@ -56,7 +56,12 @@ validation against the vendor API.
 - **Optional params**: For optional inputs with a default, name the default in the description. For enum-like or
   constrained options, list allowed values or use a **choice** type in the workflow with **options** so the AI and UI 
   get valid options.
-- Short commented-out field lines inside `data.map` are fine; avoid long commented blocks. 
+- **Output field limiting**: If a tool returns many fields (e.g. full API records with dozens of properties), use a
+  `data.map` step after the connector call to select only the fields relevant to the agent. This keeps context
+  window usage low and responses focused. Commonly excluded: internal IDs, audit timestamps, UI-only flags, raw
+  body blobs. Fields that might be useful in specific scenarios can be left as commented-out lines inside the
+  `fields:` spec for easy re-enablement. See the Zendesk `search.yaml` workflow for the canonical pattern.
+- Short commented-out field lines inside `data.map` are fine; avoid long commented blocks.
 - Workflows that are AI tools have the right tag (e.g. `agent-builder-tool`).
 - Connector reference uses the repo's template variable (e.g. `<%= stackConnectorId %>`); inputs use the correct
   syntax (e.g. `${{ inputs.query }}`).
