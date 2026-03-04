@@ -46,10 +46,6 @@ export interface GeneratorContext {
   cycleOriginMs?: number;
 }
 
-export interface GeneratorState {
-  infraIndex: number;
-}
-
 export interface TickState {
   currentFailures: FailureMap | undefined;
   failingDeps: Set<string>;
@@ -285,13 +281,11 @@ export function collectVolumeSkewDocs({
 
 export function collectInfraDocs({
   ctx,
-  genState,
   tickState,
   index,
   timestamp,
 }: {
   ctx: GeneratorContext;
-  genState: GeneratorState;
   tickState: TickState;
   index: number;
   timestamp: number;
@@ -306,9 +300,7 @@ export function collectInfraDocs({
     const svcErr = failingServiceErrors.get(svc.name);
     return failingDeps.has(dep) || (svcErr !== undefined && isInfraErrorType(svcErr));
   });
-  const currentIndex = genState.infraIndex;
-  const { svc, dep } = selectInfraPair(allDeps, priorityPairs, currentIndex);
-  genState.infraIndex++;
+  const { svc, dep } = selectInfraPair(allDeps, priorityPairs, index);
 
   const depCfg = volume?.[dep];
   if (!resolveChannelEvery(depCfg?.every, index)) {
@@ -317,9 +309,7 @@ export function collectInfraDocs({
 
   const spikeMultiplier = resolveSpikes(depCfg?.spikes, timestamp, ctx, svc.name);
   const baseRate = depCfg?.rate ?? 1;
-  const rng = mulberry32(
-    serviceStableSeed(resolveEffectiveSeed(seed, currentIndex, timestamp), dep)
-  );
+  const rng = mulberry32(serviceStableSeed(resolveEffectiveSeed(seed, index, timestamp), dep));
   const infraCount = probabilisticCount(baseRate * spikeMultiplier, rng);
   if (infraCount === 0) {
     return [];
@@ -340,7 +330,7 @@ export function collectInfraDocs({
         depFailingErrorType,
         timestamp,
         metadataCache,
-        effectiveSeed: resolveEffectiveSeed(seed, currentIndex + i, timestamp),
+        effectiveSeed: resolveEffectiveSeed(seed, index + i, timestamp),
       })
     );
   }

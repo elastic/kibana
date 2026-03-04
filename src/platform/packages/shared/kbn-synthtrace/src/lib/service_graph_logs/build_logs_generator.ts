@@ -11,7 +11,6 @@ import type { LogsGeneratorConfig, LogsManifest, ServiceGraph, ServiceNamesOf } 
 import { buildMetadataCache } from './utils/metadata';
 import {
   type GeneratorContext,
-  type GeneratorState,
   collectInfraDocs,
   collectNoiseDocs,
   collectServiceDocs,
@@ -57,7 +56,6 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
     cycleOriginMs,
   };
 
-  const genState: GeneratorState = { infraIndex: 0 };
   let nextTickAt = -Infinity;
 
   const manifest: LogsManifest = {
@@ -74,7 +72,7 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
     const docs = [
       ...collectServiceDocs({ ctx, tickState, index, timestamp }),
       ...collectVolumeSkewDocs({ ctx, index, timestamp }),
-      ...collectInfraDocs({ ctx, genState, tickState, index, timestamp }),
+      ...collectInfraDocs({ ctx, tickState, index, timestamp }),
       ...collectNoiseDocs({ ctx, tickState, index, timestamp }),
     ];
 

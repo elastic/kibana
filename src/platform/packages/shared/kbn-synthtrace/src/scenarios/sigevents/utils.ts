@@ -15,14 +15,13 @@ import type {
   ServiceGraph,
   ServiceNamesOf,
   ServiceDependenciesOf,
-} from '../../lib/service_graph_logs/types';
-import type {
   ChannelEntry,
   ChannelVolume,
   FailureMap,
   FailuresOrFn,
   NoiseConfig,
 } from '../../lib/service_graph_logs/types';
+
 import { sigEvents } from '../../lib/service_graph_logs';
 import { withClient } from '../../lib/utils/with_client';
 /** Parsed `--scenarioOpts` keys for sigevents scenarios. */
