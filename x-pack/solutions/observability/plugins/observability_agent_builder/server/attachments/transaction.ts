@@ -121,7 +121,7 @@ export function createTransactionAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability APM transaction attachment. The service name, environment, transaction name, transaction type and time range are provided - use the ${GET_TRANSACTION_DETAILS_TOOL_ID} tool to fetch the full transaction details.`
+        `An Observability APM transaction attachment. The service name, transaction name, transaction type and time range are provided - use the ${GET_TRANSACTION_DETAILS_TOOL_ID} tool to fetch the full transaction details.`
       ),
   };
 }
