@@ -250,6 +250,152 @@ steps:
     expect(results).toEqual([]);
   });
 
+  // --- Peter's real-world scenarios ---
+
+  it('should error for bare "== " with no field (Peter: "== ")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "== "
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].severity).toBe('error');
+    expect(results[0].message).toContain('==');
+  });
+
+  it('should error for bare "== 1" with no field (Peter: "== 1")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "== 1"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].severity).toBe('error');
+    expect(results[0].message).toContain('==');
+  });
+
+  it("should error for bare \"== '1'\" with no field (Peter: \"== '1'\")", () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "== '1'"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].severity).toBe('error');
+    expect(results[0].message).toContain('==');
+  });
+
+  it('should error for "<> \'\'" diamond operator (Peter: "<> \'\'")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "<> ''"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].severity).toBe('error');
+  });
+
+  it('should error for field == value with dotted array path (Peter: "steps.rdw_check.data[0].kenteken == foreach.item")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "steps.rdw_check.data[0].kenteken == foreach.item"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].message).toContain('==');
+  });
+
+  it('should error for field == with template (Peter: "steps.rdw_check.data[0].kenteken == {{ foreach.item }}")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "steps.rdw_check.data[0].kenteken == {{ foreach.item }}"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].message).toContain('==');
+  });
+
+  it('should accept valid KQL with template value (Peter: "steps.rdw_check.data[0].kenteken : {{ foreach.item }}")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "steps.rdw_check.data[0].kenteken : {{ foreach.item }}"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toEqual([]);
+  });
+
+  it('should accept valid KQL with literal value (Peter: "steps.outcome.message : foreach.item")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: "steps.outcome.message : foreach.item"
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toEqual([]);
+  });
+
+  it('should accept valid KQL with template value (Peter: "steps.outcome.message : {{foreach.item}}")', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: 'steps.outcome.message : "{{foreach.item}}"'
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toEqual([]);
+  });
+
   it('should include KQL examples in the hover message', () => {
     const yaml = `name: test
 steps:

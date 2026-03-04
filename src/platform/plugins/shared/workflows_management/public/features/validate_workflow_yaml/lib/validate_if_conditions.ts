@@ -51,12 +51,13 @@ function stripQuotedContents(condition: string): string {
 /**
  * Detects common invalid operators that KQL doesn't support but users commonly try.
  * KQL treats these as free-text searches rather than throwing errors, so we must
- * detect them explicitly.
+ * detect them explicitly. Runs on content with quoted strings stripped so operators
+ * inside values like `field: "a==b"` don't trigger false positives.
  */
 function detectInvalidOperator(condition: string): OperatorDetectionResult | null {
   const unquoted = stripQuotedContents(condition);
 
-  if (/\S+\s*==\s*\S+/.test(unquoted)) {
+  if (/==/.test(unquoted)) {
     const message = i18n.translate('workflows.validateIfConditions.invalidEqualityOperator', {
       defaultMessage:
         'Invalid condition syntax: "==" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
@@ -64,7 +65,7 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
     return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
   }
 
-  if (/\S+\s*!=\s*\S+/.test(unquoted)) {
+  if (/!=/.test(unquoted)) {
     const message = i18n.translate('workflows.validateIfConditions.invalidInequalityOperator', {
       defaultMessage:
         'Invalid condition syntax: "!=" is not a valid KQL operator. Use "NOT field: value" for inequality.',
@@ -72,7 +73,7 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
     return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
   }
 
-  if (/\S+\s*(?<![<>!:])=(?!=)\s*\S+/.test(unquoted) && !unquoted.includes(':')) {
+  if (/(?<![<>!:])=/.test(unquoted) && !unquoted.includes(':')) {
     const message = i18n.translate('workflows.validateIfConditions.invalidAssignmentOperator', {
       defaultMessage:
         'Invalid condition syntax: "=" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
@@ -106,15 +107,18 @@ function validateCondition(item: IfConditionItem): YamlValidationResult | null {
     return null;
   }
 
-  if (containsTemplate(item.condition)) {
-    return null;
-  }
-
   const trimmed = item.condition.trim();
 
+  // Operator detection runs before the template skip because ==, !=, and =
+  // are never valid KQL operators regardless of whether the value is a template.
   const operatorError = detectInvalidOperator(trimmed);
   if (operatorError) {
     return makeResult(item, operatorError.message, operatorError.hoverMessage);
+  }
+
+  // Templates can't be parsed by the KQL parser, so skip the fallback validation.
+  if (containsTemplate(item.condition)) {
+    return null;
   }
 
   try {
