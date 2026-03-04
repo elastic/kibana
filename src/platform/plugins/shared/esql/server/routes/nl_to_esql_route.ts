@@ -124,7 +124,7 @@ export const registerNLtoESQLRoute = (
       validate: {
         body: schema.object({
           query: schema.string(),
-          sources: schema.maybe(schema.arrayOf(schema.string())),
+          sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
         }),
       },
       security: {
