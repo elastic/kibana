@@ -190,6 +190,11 @@ function isEvidenceGrounded(evidence: string, documents: Array<Record<string, un
  * Checks that every evidence string in every feature is grounded in the input
  * documents — either as a `field.path=value` snippet matching a document field,
  * or as a direct quote appearing in any string value.
+ *
+ * When features include `evidence_doc_ids`, additionally validates that:
+ * 1. All referenced `_id`s exist in the input documents.
+ * 2. Evidence strings are grounded in the specific referenced docs, not just
+ *    any input document.
  */
 const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
@@ -200,14 +205,26 @@ const evidenceGroundingEvaluator = {
       ? (input.sample_documents as Array<Record<string, unknown>>)
       : [];
 
+    const docsById = new Map<string, Record<string, unknown>>();
     const documents = rawDocs.map((doc) => {
+      const id = doc._id as string | undefined;
       const source = doc._source as Record<string, unknown> | undefined;
-      return source ?? doc;
+      const resolved = source ?? doc;
+      if (id) {
+        docsById.set(id, resolved);
+      }
+      return resolved;
     });
 
     let totalEvidence = 0;
     let groundedEvidence = 0;
     const ungroundedItems: string[] = [];
+
+    let totalDocIds = 0;
+    let validDocIds = 0;
+    let totalRefEvidence = 0;
+    let groundedRefEvidence = 0;
+    const docIdIssues: string[] = [];
 
     for (const feature of features) {
       const evidenceList = feature.evidence ?? [];
@@ -217,6 +234,34 @@ const evidenceGroundingEvaluator = {
           groundedEvidence++;
         } else {
           ungroundedItems.push(`Feature "${feature.id}": "${evidence}"`);
+        }
+      }
+
+      const docIds = feature.evidence_doc_ids ?? [];
+      if (docIds.length > 0) {
+        const refDocs: Array<Record<string, unknown>> = [];
+        for (const docId of docIds) {
+          totalDocIds++;
+          const doc = docsById.get(docId);
+          if (doc) {
+            validDocIds++;
+            refDocs.push(doc);
+          } else {
+            docIdIssues.push(`Feature "${feature.id}": unknown doc ID "${docId}"`);
+          }
+        }
+
+        if (refDocs.length > 0) {
+          for (const evidence of evidenceList) {
+            totalRefEvidence++;
+            if (isEvidenceGrounded(evidence, refDocs)) {
+              groundedRefEvidence++;
+            } else {
+              docIdIssues.push(
+                `Feature "${feature.id}": evidence not in referenced docs: "${evidence}"`
+              );
+            }
+          }
         }
       }
     }
@@ -231,18 +276,33 @@ const evidenceGroundingEvaluator = {
       };
     }
 
-    const score = groundedEvidence / totalEvidence;
+    const groundingScore = groundedEvidence / totalEvidence;
+    const docIdScore =
+      totalDocIds > 0
+        ? (validDocIds / totalDocIds +
+            (totalRefEvidence > 0 ? groundedRefEvidence / totalRefEvidence : 1)) /
+          2
+        : 1;
+    const score = totalDocIds > 0 ? (groundingScore + docIdScore) / 2 : groundingScore;
+
+    const allIssues = [...ungroundedItems, ...docIdIssues];
     return {
       score,
       explanation:
-        ungroundedItems.length > 0
-          ? `${
-              ungroundedItems.length
-            }/${totalEvidence} evidence strings not grounded: ${ungroundedItems
-              .slice(0, 3)
-              .join('; ')}`
-          : `All ${totalEvidence} evidence strings are grounded in input documents`,
-      details: { totalEvidence, groundedEvidence, ungroundedItems },
+        allIssues.length > 0
+          ? `${allIssues.slice(0, 5).join('; ')}`
+          : `All ${totalEvidence} evidence strings are grounded` +
+            (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
+      details: {
+        totalEvidence,
+        groundedEvidence,
+        ungroundedItems,
+        totalDocIds,
+        validDocIds,
+        totalRefEvidence,
+        groundedRefEvidence,
+        docIdIssues,
+      },
     };
   },
 };
