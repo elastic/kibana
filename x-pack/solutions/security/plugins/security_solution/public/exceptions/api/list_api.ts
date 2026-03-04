@@ -52,6 +52,11 @@ export const getListById = async ({ id, http }: FetchListById) => {
     throw new Error(error);
   }
 };
+/**
+ * Fetch all rules that have the given listId in their exceptions_list field
+ * @param listId - The id of the list to fetch rules for
+ * @returns An array of rules that have the given listId in their exceptions_list field
+ */
 export const getListRules = async ({
   id,
   listId,
