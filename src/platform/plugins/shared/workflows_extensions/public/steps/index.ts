@@ -41,4 +41,5 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   );
   stepRegistry.register(() =>
     import('./data/data_parse_json_step').then((m) => m.dataParseJsonStepDefinition)
+  );
 };

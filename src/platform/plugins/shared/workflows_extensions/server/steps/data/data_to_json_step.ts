@@ -26,8 +26,10 @@ export const dataToJsonStepDefinition = createServerStepDefinition({
       return { output: jsonString };
     } catch (error) {
       if (error instanceof TypeError) {
+        const isCircular = error.message.toLowerCase().includes('circular');
+        const hint = isCircular ? ' (circular reference)' : '';
         return {
-          error: new Error(`Cannot stringify source: ${error.message} (circular reference?)`),
+          error: new Error(`Cannot stringify source: ${error.message}${hint}`),
         };
       }
       return {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -30,6 +32,45 @@ export const dataParseJsonStepCommonDefinition: CommonStepDefinition<
   DataParseJsonStepConfigSchema
 > = {
   id: DataParseJsonStepTypeId,
+  category: StepCategory.Data,
+  label: i18n.translate('workflowsExtensions.dataParseJsonStep.label', {
+    defaultMessage: 'Parse JSON',
+  }),
+  description: i18n.translate('workflowsExtensions.dataParseJsonStep.description', {
+    defaultMessage: 'Parse a JSON string into a structured object or array',
+  }),
+  documentation: {
+    details: `# Parse JSON
+
+Parse a JSON string into a structured object or array for use in downstream steps.
+
+## Basic Usage
+
+\`\`\`yaml
+- name: parse-response
+  type: data.parse_json
+  source: "\${{ steps.http_request.output.body }}"
+\`\`\`
+
+## Behavior
+
+- If the source is already a structured type (object, array, number, boolean), it is returned as-is.
+- If the source is a valid JSON string, it is parsed and returned.
+- If the source is an invalid JSON string, the step returns an error with the parse location.
+
+## Configuration
+
+- **source** (required): The JSON string to parse. Can be a template expression.
+
+## Output
+
+Returns the parsed value — an object, array, string, number, boolean, or null.
+
+## Size Limits
+
+Inputs larger than 10 MB are rejected to prevent excessive memory usage.
+`,
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
