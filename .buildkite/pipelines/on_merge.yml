@@ -125,8 +125,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-4
-      diskType: hyperdisk-balanced
+      machineType: n2d-highmem-4
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
