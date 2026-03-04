@@ -25,7 +25,11 @@ export const performGet = async <T>(
   { type, id, options }: PerformGetParams,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
-  const { common: commonHelper, migration: migrationHelper, validation: validationHelper } = helpers;
+  const {
+    common: commonHelper,
+    migration: migrationHelper,
+    validation: validationHelper,
+  } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
