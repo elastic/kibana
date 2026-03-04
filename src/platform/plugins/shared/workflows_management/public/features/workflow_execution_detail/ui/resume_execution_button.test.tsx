@@ -25,7 +25,6 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 // Capture the onSubmit callback exposed by TestStepModal so tests can trigger it.
 let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
-let capturedOnClose: (() => void) | undefined;
 
 jest.mock('../../run_workflow/ui/test_step_modal', () => ({
   TestStepModal: ({
@@ -38,7 +37,6 @@ jest.mock('../../run_workflow/ui/test_step_modal', () => ({
     resumeMessage?: string;
   }) => {
     capturedOnSubmit = onSubmit;
-    capturedOnClose = onClose;
     return (
       <div data-test-subj="test-step-modal">
         <span data-test-subj="modal-resume-message">{resumeMessage ?? ''}</span>
@@ -64,7 +62,6 @@ describe('ResumeExecutionButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnSubmit = undefined;
-    capturedOnClose = undefined;
     mockHttpPost.mockResolvedValue({});
     useKibana.mockReturnValue({
       services: {

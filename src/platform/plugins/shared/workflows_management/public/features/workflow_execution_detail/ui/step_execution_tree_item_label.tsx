@@ -12,6 +12,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, euiFontSize, EuiText } from '@elas
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
