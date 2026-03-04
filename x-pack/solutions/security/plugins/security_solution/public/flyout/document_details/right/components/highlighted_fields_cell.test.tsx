@@ -76,7 +76,8 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
-        hostName: 'test host',
+        contextID: SCOPE_ID,
+        entityIdentifiers: { 'host.name': 'test host' },
         scopeId: SCOPE_ID,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -91,7 +92,8 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
-        userName: 'test user',
+        contextID: SCOPE_ID,
+        entityIdentifiers: { 'user.name': 'test user' },
         scopeId: SCOPE_ID,
         banner: USER_PREVIEW_BANNER,
       },

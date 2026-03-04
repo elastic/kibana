@@ -176,7 +176,8 @@ describe('PrevalenceDetails', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
-        hostName: 'test host',
+        contextID: panelContextValue.scopeId,
+        entityIdentifiers: { 'host.name': 'test host' },
         scopeId: panelContextValue.scopeId,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -186,7 +187,8 @@ describe('PrevalenceDetails', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
-        userName: 'test user',
+        contextID: panelContextValue.scopeId,
+        entityIdentifiers: { 'user.name': 'test user' },
         scopeId: panelContextValue.scopeId,
         banner: USER_PREVIEW_BANNER,
       },

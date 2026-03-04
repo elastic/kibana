@@ -31,6 +31,7 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const userName = 'user';
+const entityIdentifiers = { 'user.name': userName };
 const domain = 'n54bg2lfc7';
 const lastSeen = '2022-04-08T18:35:45.064Z';
 const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
@@ -95,7 +96,7 @@ const renderUserEntityOverview = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <UserEntityOverview userName={userName} />
+        <UserEntityOverview entityIdentifiers={entityIdentifiers} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -160,7 +161,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
+            <UserEntityOverview entityIdentifiers={entityIdentifiers} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -175,7 +176,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
+            <UserEntityOverview entityIdentifiers={entityIdentifiers} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -190,7 +191,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
+            <UserEntityOverview entityIdentifiers={entityIdentifiers} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -199,7 +200,8 @@ describe('<UserEntityOverview />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: UserPreviewPanelKey,
         params: {
-          userName,
+          contextID: mockContextValue.scopeId,
+          entityIdentifiers,
           scopeId: mockContextValue.scopeId,
           banner: USER_PREVIEW_BANNER,
         },

@@ -34,7 +34,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 const mockProps = {
-  hostName: 'testHost',
+  entityIdentifiers: { 'host.name': 'testHost' },
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
   hasMisconfigurationFindings: false,
@@ -67,7 +67,7 @@ describe('useNavigateToHostDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: HostDetailsPanelKey,
       params: {
-        name: mockProps.hostName,
+        entityIdentifiers: mockProps.entityIdentifiers,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },
@@ -92,13 +92,13 @@ describe('useNavigateToHostDetails', () => {
         params: {
           contextID: mockProps.contextID,
           scopeId: mockProps.scopeId,
-          hostName: mockProps.hostName,
+          entityIdentifiers: mockProps.entityIdentifiers,
         },
       },
       left: {
         id: HostDetailsPanelKey,
         params: {
-          name: mockProps.hostName,
+          entityIdentifiers: mockProps.entityIdentifiers,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,
           path: { tab, subTab },

@@ -31,13 +31,17 @@ describe('getHostFlyoutPanelProps', () => {
   describe('getHostFlyoutPanelProps', () => {
     it('returns the correct FlyoutPanelProps', () => {
       const contextId = 'contextId';
-      const hostName = 'foo';
+      const entityIdentifiers = { 'host.name': 'foo' };
 
-      const result = getHostFlyoutPanelProps({ contextId, hostName });
+      const result = getHostFlyoutPanelProps({ contextId, entityIdentifiers });
 
       expect(result).toEqual({
         id: 'host-panel',
-        params: { contextID: contextId, hostName, scopeId: 'alerts-page' },
+        params: {
+          contextID: contextId,
+          entityIdentifiers,
+          scopeId: 'alerts-page',
+        },
       });
     });
   });

@@ -16,7 +16,7 @@ const defaultLastSeen = {
 };
 
 const mockProps = {
-  hostName: 'test',
+  entityIdentifiers: { 'host.name': 'test' },
   scopeId: 'test-scope-id',
   lastSeen: defaultLastSeen,
 };

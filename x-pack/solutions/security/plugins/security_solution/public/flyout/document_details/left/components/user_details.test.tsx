@@ -122,7 +122,7 @@ const mockAlertData = {
 const timestamp = '2022-07-25T08:20:18.966Z';
 
 const defaultProps = {
-  userName: 'test user',
+  entityIdentifiers: { 'user.name': 'test user' },
   timestamp,
   scopeId: 'scopeId',
 };
@@ -193,7 +193,7 @@ describe('<UserDetails />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
-        userName: defaultProps.userName,
+        entityIdentifiers: defaultProps.entityIdentifiers,
         scopeId: defaultProps.scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -235,8 +235,7 @@ describe('<UserDetails />', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
-        userName: 'test user',
-        indexNames: ['index'],
+        entityIdentifiers: defaultProps.entityIdentifiers,
         skip: false,
       });
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
@@ -251,7 +250,6 @@ describe('<UserDetails />', () => {
       const { queryAllByRole } = renderUserDetails(mockContextValue);
       expect(queryAllByRole('columnheader').length).toBe(3);
       expect(queryAllByRole('row')[1].textContent).toContain('test host');
-      expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
       expect(queryAllByRole('row')[1].textContent).toContain('Low');
     });
 
@@ -281,20 +279,24 @@ describe('<UserDetails />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: HostPreviewPanelKey,
         params: {
-          hostName: 'test host',
+          contextID: defaultProps.scopeId,
+          entityIdentifiers: { 'host.name': 'test host' },
           scopeId: defaultProps.scopeId,
           banner: HOST_PREVIEW_BANNER,
         },
       });
 
       getAllByTestId(USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID)[0].click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: NetworkPreviewPanelKey,
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenNthCalledWith(2, {
+        id: UserPreviewPanelKey,
         params: {
-          ip: '100.XXX.XXX',
-          flowTarget: 'source',
+          contextID: defaultProps.scopeId,
+          entityIdentifiers: {
+            ...defaultProps.entityIdentifiers,
+            'host.ip': '100.XXX.XXX',
+          },
           scopeId: defaultProps.scopeId,
-          banner: NETWORK_PREVIEW_BANNER,
+          banner: USER_PREVIEW_BANNER,
         },
       });
     });

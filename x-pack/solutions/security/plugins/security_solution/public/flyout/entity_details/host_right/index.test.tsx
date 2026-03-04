@@ -23,7 +23,7 @@ import type { HostPanelProps } from '.';
 import { HostPanel } from '.';
 
 const mockProps: HostPanelProps = {
-  hostName: 'test',
+  entityIdentifiers: { 'host.name': 'test' },
   contextID: 'test-host -panel',
   scopeId: 'test-scope-id',
   isPreviewMode: false,

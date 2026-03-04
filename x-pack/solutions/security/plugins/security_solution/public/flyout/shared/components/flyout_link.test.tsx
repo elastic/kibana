@@ -115,7 +115,8 @@ describe('<FlyoutLink />', () => {
         right: {
           id: HostPanelKey,
           params: {
-            hostName: 'host',
+            contextID: 'scopeId',
+            entityIdentifiers: { 'host.name': 'host' },
             scopeId: 'scopeId',
           },
         },
@@ -130,7 +131,8 @@ describe('<FlyoutLink />', () => {
         right: {
           id: UserPanelKey,
           params: {
-            userName: 'user',
+            contextID: 'scopeId',
+            entityIdentifiers: { 'user.name': 'user' },
             scopeId: 'scopeId',
           },
         },

@@ -78,14 +78,14 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     lastOpen: Date.now(),
     panel: {
       id: HostPanelKey,
-      params: { hostName: 'host name' },
+      params: { entityIdentifiers: { 'host.name': 'host name' } },
     },
   },
   user: {
     lastOpen: Date.now(),
     panel: {
       id: UserPanelKey,
-      params: { userName: 'user name' },
+      params: { entityIdentifiers: { 'user.name': 'user name' } },
     },
   },
   network: {

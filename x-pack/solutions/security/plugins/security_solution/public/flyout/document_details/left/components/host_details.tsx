@@ -279,7 +279,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           <EuiText grow={false} size="xs">
             <CellActions field={USER_NAME_FIELD_NAME} value={user}>
               <PreviewLink
-                entityIdentifiers={entityIdentifiers}
+                entityIdentifiers={{ [USER_NAME_FIELD_NAME]: user }}
                 scopeId={scopeId}
                 data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
               />

@@ -37,13 +37,15 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const renderPreviewLink = (field: string, value: string, dataTestSuj?: string) =>
+const renderPreviewLink = (
+  entityIdentifiers: Record<string, string>,
+  dataTestSubj?: string
+) =>
   render(
     <TestProviders>
       <PreviewLink
-        field={field}
-        value={value}
-        data-test-subj={dataTestSuj}
+        entityIdentifiers={entityIdentifiers}
+        data-test-subj={dataTestSubj}
         scopeId={'scopeId'}
         ruleId={'ruleId'}
       />
@@ -55,15 +57,15 @@ describe('<PreviewLink />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
-  it('should not render a link if field does not have preview', () => {
-    const { queryByTestId } = renderPreviewLink('field', 'value');
+  it('should not render a link if entityIdentifiers do not have preview', () => {
+    const { queryByTestId } = renderPreviewLink({ 'field': 'value' });
     expect(queryByTestId(FLYOUT_PREVIEW_LINK_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render children without link if field does not have preview', () => {
+  it('should render children without link if entityIdentifiers do not have preview', () => {
     const { queryByTestId, getByTestId } = render(
       <TestProviders>
-        <PreviewLink field={'field'} value={'value'} scopeId={'scopeId'}>
+        <PreviewLink entityIdentifiers={{ 'field': 'value' }} scopeId={'scopeId'}>
           <div data-test-subj="children">{'children'}</div>
         </PreviewLink>
       </TestProviders>
@@ -74,13 +76,17 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open host preview', () => {
-    const { getByTestId } = renderPreviewLink('host.name', 'host', 'host-link');
+    const { getByTestId } = renderPreviewLink(
+      { 'host.name': 'host' },
+      'host-link'
+    );
     getByTestId('host-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
-        hostName: 'host',
+        contextID: 'scopeId',
+        entityIdentifiers: { 'host.name': 'host' },
         scopeId: 'scopeId',
         banner: HOST_PREVIEW_BANNER,
       },
@@ -88,13 +94,17 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open user preview', () => {
-    const { getByTestId } = renderPreviewLink('user.name', 'user', 'user-link');
+    const { getByTestId } = renderPreviewLink(
+      { 'user.name': 'user' },
+      'user-link'
+    );
     getByTestId('user-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
-        userName: 'user',
+        contextID: 'scopeId',
+        entityIdentifiers: { 'user.name': 'user' },
         scopeId: 'scopeId',
         banner: USER_PREVIEW_BANNER,
       },
@@ -102,7 +112,10 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open network preview', () => {
-    const { getByTestId } = renderPreviewLink('source.ip', '100:XXX:XXX', 'ip-link');
+    const { getByTestId } = renderPreviewLink(
+      { 'source.ip': '100:XXX:XXX' },
+      'ip-link'
+    );
     getByTestId('ip-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -117,7 +130,10 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open rule preview', () => {
-    const { getByTestId } = renderPreviewLink('kibana.alert.rule.name', 'ruleId', 'rule-link');
+    const { getByTestId } = renderPreviewLink(
+      { 'kibana.alert.rule.name': 'ruleId' },
+      'rule-link'
+    );
     getByTestId('rule-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -134,8 +150,7 @@ describe('<PreviewLink />', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <PreviewLink
-          field={'kibana.alert.rule.name'}
-          value={'rule'}
+          entityIdentifiers={{ 'kibana.alert.rule.name': 'rule' }}
           data-test-subj={'rule-link'}
           scopeId={'scopeId'}
         />
@@ -148,8 +163,7 @@ describe('<PreviewLink />', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <PreviewLink
-          field={'kibana.alert.rule.name'}
-          value={'rule'}
+          entityIdentifiers={{ 'kibana.alert.rule.name': 'rule' }}
           data-test-subj={'rule-link'}
           scopeId={TableId.rulePreview}
         />
