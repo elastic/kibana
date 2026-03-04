@@ -21,7 +21,7 @@ import type { IntlShape } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import type { ReactNode } from 'react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { i18n } from '@kbn/i18n';
@@ -69,6 +69,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
 
   const filterCount = props.filters?.length ?? 0;
+  const disabledFilterCount = useMemo(
+    () => props.filters?.filter(({ meta: { disabled } }) => disabled).length ?? 0,
+    [props.filters]
+  );
+  const appliedFilterCount = useMemo(
+    () => filterCount - disabledFilterCount,
+    [disabledFilterCount, filterCount]
+  );
+
   const isExpandable = filterCount > 1;
   const expandTooltipRef = useRef<EuiToolTip>(null);
   const [isExpanded, setIsExpanded] = useUrlState('filterBarExpanded', true);
@@ -112,8 +121,9 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const filtersAppliedLabel = i18n.translate(
     'unifiedSearch.filter.filterBar.filtersAppliedAccordionButton',
     {
-      defaultMessage: '{count} filters applied',
-      values: { count: filterCount },
+      defaultMessage:
+        '{appliedFilterCount, plural, =0 {{disabledFilterCount, plural, zero {0 filters applied} other {# filters disabled}}} one {# filter applied{disabledFilterCount, plural, =0 {} other {, # disabled}}} other {# filters applied{disabledFilterCount, plural, =0 {} other {, # disabled}}}}',
+      values: { appliedFilterCount, disabledFilterCount },
     }
   );
 
