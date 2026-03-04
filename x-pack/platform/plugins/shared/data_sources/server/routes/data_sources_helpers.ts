@@ -53,8 +53,8 @@ function slugify(input: string): string {
     .toLowerCase()
     .normalize('NFD') // split accented characters
     .replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
-    .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+    .replace(/[^a-z0-9_]+/g, '-') // replace non-alphanumerics with -
+    .replace(/^[-_]+|[-_]+$/g, ''); // trim leading/trailing -
 }
 
 /**

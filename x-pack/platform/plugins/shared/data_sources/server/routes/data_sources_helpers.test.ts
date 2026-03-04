@@ -244,6 +244,62 @@ tags:
     );
   });
 
+  it('should preserve underscores in slugified workflow names and tool IDs', async () => {
+    const actionTypeId = '.notion';
+    const mockStackConnector = { id: 'ksc-1', actionTypeId };
+    const mockWorkflow = { id: 'workflow-1', name: 'Test Workflow' };
+    const mockTool = createMockedTool({ id: 'tool-1' });
+    const mockSavedObject = {
+      id: 'connector-1',
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'Notion_Source',
+        type: 'test_type',
+        workflowIds: ['workflow-1'],
+        toolIds: ['tool-1'],
+        kscIds: ['ksc-1'],
+      },
+    };
+    const mockDataSource = {
+      stackConnectors: [{ type: actionTypeId, config: {} }],
+      workflows: { directory: '/path/to/workflows' },
+    } as Partial<DataSource>;
+
+    mockLoadWorkflows.mockResolvedValue([
+      {
+        content: `name: sources.notion.search
+description: Search Notion content
+tags:
+  - agent-builder-tool`,
+        shouldGenerateABTool: true,
+      },
+    ]);
+
+    mockActionsClient.create.mockResolvedValue(mockStackConnector);
+    mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
+    mockToolRegistry.create.mockResolvedValue(mockTool);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
+
+    await createDataSourceAndRelatedResources({
+      name: 'Notion_Source',
+      type: 'test_type',
+      credentials: 'secret-token-123',
+      savedObjectsClient: mockSavedObjectsClient,
+      request: mockRequest,
+      logger: mockLogger,
+      workflowManagement: mockWorkflowManagement as any,
+      actions: mockActions as any,
+      dataSource: mockDataSource as any,
+      agentBuilder: mockAgentBuilder as any,
+    });
+
+    const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
+    expect(createdYaml).toContain('name: notion_source.source.test_type.search');
+    expect(mockToolRegistry.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'test_type.notion_source.search' })
+    );
+  });
+
   it('should create connector without tools when shouldGenerateABTool is false', async () => {
     const actionTypeId = '.notion';
     const mockStackConnector = { id: 'ksc-1', actionTypeId };
