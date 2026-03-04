@@ -40,6 +40,7 @@ export function StepExecutionTreeItemLabel({
   const styles = useMemoCss(componentStyles);
   // Trigger pseudo-steps are not real steps, they are used to display the trigger context
   const isTriggerPseudoStep = stepId === 'trigger';
+  const isOverviewPseudoStep = stepId === 'Overview';
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
 
@@ -68,7 +69,7 @@ export function StepExecutionTreeItemLabel({
           </>
         )}
       </EuiFlexItem>
-      {status === ExecutionStatus.WAITING_FOR_INPUT && (
+      {status === ExecutionStatus.WAITING_FOR_INPUT && !isOverviewPseudoStep && (
         <EuiFlexItem grow={false}>
           <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
             {actionRequiredLabel}

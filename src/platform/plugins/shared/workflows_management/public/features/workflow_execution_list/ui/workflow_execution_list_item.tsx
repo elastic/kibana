@@ -10,6 +10,7 @@
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
   EuiAvatar,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -129,6 +130,15 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.metadataContainer}>
             <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {status === ExecutionStatus.WAITING_FOR_INPUT && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+                    {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                      defaultMessage: 'Action is required',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               {isTestRun && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
