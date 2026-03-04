@@ -9,7 +9,7 @@ applies_to:
 
 # Tavily connector [tavily-action-type]
 
-The Tavily connector uses the [Tavily API](https://docs.tavily.com) to search the web for current information and extract content from web pages. It connects via Tavily's hosted MCP server.
+The Tavily connector uses the [Tavily API](https://docs.tavily.com) to search the web for current information and extract content from web pages. It connects using Tavily's hosted MCP server.
 
 ## Create connectors in {{kib}} [define-tavily-ui]
 
