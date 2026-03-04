@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_discovery_tool';
 
@@ -47,12 +48,12 @@ describe('pciScopeDiscoveryTool', () => {
 
   describe('handler', () => {
     it('classifies indices by field and name hints', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as jest.Mock).mockResolvedValue([
+      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
         { index: 'packetbeat-network-*' },
         { index: 'custom-auth-*' },
       ]);
 
-      (mockEsClient.asCurrentUser.fieldCaps as jest.Mock)
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock)
         .mockResolvedValueOnce({
           fields: {
             'event.category': {},
@@ -68,10 +69,10 @@ describe('pciScopeDiscoveryTool', () => {
           },
         });
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { scopeType: 'all' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
@@ -79,19 +80,19 @@ describe('pciScopeDiscoveryTool', () => {
     });
 
     it('filters by requested scope type', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as jest.Mock).mockResolvedValue([
+      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
         { index: 'packetbeat-network-*' },
         { index: 'custom-auth-*' },
       ]);
 
-      (mockEsClient.asCurrentUser.fieldCaps as jest.Mock)
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock)
         .mockResolvedValueOnce({ fields: { 'source.ip': {}, 'destination.ip': {} } })
         .mockResolvedValueOnce({ fields: { 'user.name': {}, 'event.outcome': {} } });
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { scopeType: 'network' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       const data = result.results[0].data as {
         matchedIndices: number;

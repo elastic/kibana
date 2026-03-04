@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import {
   pciComplianceReportTool,
@@ -48,10 +49,10 @@ describe('pciComplianceReportTool', () => {
 
   describe('handler', () => {
     it('returns error on invalid requirement identifiers', async () => {
-      const result = await tool.handler(
-        { requirements: ['1', 'does-not-exist'] },
+      const result = (await tool.handler(
+        { requirements: ['1', 'does-not-exist'], format: 'summary', includeRecommendations: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
@@ -62,10 +63,10 @@ describe('pciComplianceReportTool', () => {
         values: [[10]],
       });
 
-      const result = await tool.handler(
-        { requirements: ['1', '8'], format: 'executive' },
+      const result = (await tool.handler(
+        { requirements: ['1', '8'], format: 'executive', includeRecommendations: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(2);
       expect(result.results[0].type).toBe(ToolResultType.other);
@@ -80,10 +81,10 @@ describe('pciComplianceReportTool', () => {
         values: [[0]],
       });
 
-      const result = await tool.handler(
-        { requirements: ['1', '2', '3'], format: 'summary' },
+      const result = (await tool.handler(
+        { requirements: ['1', '2', '3'], format: 'summary', includeRecommendations: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       const payload = result.results[0].data as { overallStatus: string; overallScore: number };
       expect(payload.overallStatus).toBe('RED');

@@ -19,9 +19,10 @@ describe('createPciComplianceAgent', () => {
       logger
     );
 
+    const configuration = agent.configuration as { tools: Array<{ tool_ids: string[] }> };
     expect(agent.id).toBe(PCI_COMPLIANCE_AGENT_ID);
     expect(agent.name).toBe('PCI Compliance Agent');
-    expect(agent.configuration.tools[0].tool_ids).toEqual(PCI_COMPLIANCE_AGENT_TOOL_IDS);
+    expect(configuration.tools[0].tool_ids).toEqual(PCI_COMPLIANCE_AGENT_TOOL_IDS);
     expect(agent.labels).toEqual(expect.arrayContaining(['security', 'compliance']));
   });
 });

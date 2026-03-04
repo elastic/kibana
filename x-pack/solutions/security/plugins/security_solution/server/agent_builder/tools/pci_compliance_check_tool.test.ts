@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { pciComplianceCheckTool, PCI_COMPLIANCE_CHECK_TOOL_ID } from './pci_compliance_check_tool';
 
@@ -42,10 +43,10 @@ describe('pciComplianceCheckTool', () => {
 
   describe('handler', () => {
     it('returns error for invalid requirement', async () => {
-      const result = await tool.handler(
-        { requirement: '99' },
+      const result = (await tool.handler(
+        { requirement: '99', includeEvidence: false },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
@@ -56,10 +57,10 @@ describe('pciComplianceCheckTool', () => {
         values: [[5]],
       });
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { requirement: '8', includeEvidence: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
@@ -73,10 +74,10 @@ describe('pciComplianceCheckTool', () => {
         values: [[0]],
       });
 
-      const result = await tool.handler(
-        { requirement: 'all' },
+      const result = (await tool.handler(
+        { requirement: 'all', includeEvidence: false },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(12);
       const payload = result.results[0].data as { overallStatus: string };
