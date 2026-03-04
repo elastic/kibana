@@ -54,7 +54,7 @@ export function SloErrorBudget({
   const sloHistoricalSummary = historicalSummaries.find(
     (historicalSummary) =>
       historicalSummary.sloId === sloId &&
-      historicalSummary.instanceId === (sloInstanceId ?? ALL_VALUE)
+      historicalSummary.instanceId === (sloInstanceId)
   );
 
   const errorBudgetBurnDownData = formatHistoricalData(

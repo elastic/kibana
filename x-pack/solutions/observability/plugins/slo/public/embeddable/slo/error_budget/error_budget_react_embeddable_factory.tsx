@@ -25,6 +25,7 @@ import {
   SLO_ERROR_BUDGET_ID,
   SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
 } from '../../../../common/embeddables/error_budget/constants';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloErrorBudget } from './error_budget_burn_down';
 import type { ErrorBudgetApi, ErrorBudgetEmbeddableState } from './types';
 import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
@@ -58,7 +59,7 @@ export const getErrorBudgetEmbeddableFactory = ({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomState>(initialState, {
         slo_id: '',
-        slo_instance_id: undefined,
+        slo_instance_id: ALL_VALUE,
       });
       const reload$ = new Subject<boolean>();
 

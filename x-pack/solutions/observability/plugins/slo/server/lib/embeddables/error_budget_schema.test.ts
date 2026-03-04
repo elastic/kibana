@@ -29,7 +29,7 @@ describe('error budget schema validation', () => {
     });
   });
 
-  it('should validate with minimal required fields', () => {
+  it('should validate with minimal required fields and apply slo_instance_id default', () => {
     const minimalState = {
       slo_id: 'test-slo-id',
     };
@@ -38,6 +38,7 @@ describe('error budget schema validation', () => {
     const result = errorBudgetSchema.validate(minimalState);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
+      slo_instance_id: '*',
     });
   });
 
@@ -79,12 +80,12 @@ describe('error budget schema validation', () => {
     expect(() => errorBudgetSchema.validate(invalidState)).toThrow(/slo_id/);
   });
 
-  it('should allow omitting optional slo_instance_id', () => {
+  it('should default slo_instance_id to * when omitted', () => {
     const state = {
       slo_id: 'test-slo-id',
     };
 
     const result = errorBudgetSchema.validate(state);
-    expect(result.slo_instance_id).toBeUndefined();
+    expect(result.slo_instance_id).toBe('*');
   });
 });

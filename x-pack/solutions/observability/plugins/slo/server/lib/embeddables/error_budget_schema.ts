@@ -8,6 +8,7 @@
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS } from '../../../common/embeddables/error_budget/constants';
 
@@ -15,14 +16,13 @@ const ErrorBudgetCustomSchema = schema.object({
   slo_id: schema.string({
     meta: { description: 'The ID of the SLO to display the error budget for' },
   }),
-  slo_instance_id: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show.',
-      },
-    })
-  ),
+  slo_instance_id: schema.string({
+    defaultValue: ALL_VALUE,
+    meta: {
+      description:
+        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+    },
+  }),
 });
 
 export const getErrorBudgetEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
