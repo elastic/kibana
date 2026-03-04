@@ -32,8 +32,8 @@ describe('Dashboard services API', () => {
       const serializedState = api.serializeState();
       // * attributes are sent back
       expect(serializedState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
-      // * savedObjectId is undefined for by-value panels
-      expect(serializedState).toHaveProperty('savedObjectId', undefined);
+      // * ref_id is undefined for by-value panels
+      expect(serializedState).toHaveProperty('ref_id', undefined);
     });
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
