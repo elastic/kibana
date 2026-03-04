@@ -57,7 +57,9 @@ function buildColorProps(
   if (palette) {
     return {
       apply_color_to: applyColorTo,
-      color: fromColorByValueLensStateToAPI(palette),
+      color: palette.params
+        ? fromColorByValueLensStateToAPI(palette)
+        : fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };
   }
 
@@ -161,6 +163,7 @@ export function convertDatatableColumnsToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: DatatableVisualizationState
 ): DatatableColumnsNoESQLAndMapping | DatatableColumnsESQLAndMapping {
+  console.log('convertDatatableColumnsToAPI', { layer, visualization });
   const { columns } = visualization;
   if (columns.length === 0) {
     throw new Error('Datatable must have at least one column');
