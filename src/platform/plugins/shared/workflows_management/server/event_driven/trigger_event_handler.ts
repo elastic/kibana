@@ -37,10 +37,10 @@ export function createTriggerEventHandler({
   resolveMatchingWorkflowSubscriptions,
 }: CreateTriggerEventHandlerParams): (params: TriggerEventHandlerParams) => Promise<void> {
   return async (params: TriggerEventHandlerParams): Promise<void> => {
-    const { timestamp, triggerId, payload, request } = params;
-    const spaceId = params.spaceId ?? 'default';
+    const { timestamp, triggerId, payload, request, spaceId } = params;
 
     const eventContext = { ...payload, timestamp, spaceId };
+    const workflows = await resolveMatchingWorkflowSubscriptions({
     const workflows = await resolveMatchingWorkflowSubscriptions({
       triggerId,
       spaceId,
