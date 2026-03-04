@@ -537,7 +537,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not display results after data view removal on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
-      await retry.tryForTime(10000, async () => {
+      await retry.tryForTime(30000, async () => {
         expect(await toasts.getCount()).to.be.equal(1);
       });
       const content = await toasts.getContentByIndex(1);

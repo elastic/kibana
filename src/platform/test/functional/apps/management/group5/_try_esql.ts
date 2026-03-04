@@ -11,15 +11,21 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const PageObjects = getPageObjects(['settings', 'common', 'discover']);
 
   describe('No Data Views: Try ES|QL', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.savedObjects.cleanStandardList();
+      const response = await supertest.get('/api/data_views').set('kbn-xsrf', 'true').expect(200);
+      for (const dv of response.body.data_view || []) {
+        await supertest
+          .delete(`/api/data_views/data_view/${dv.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      }
     });
 
     it('navigates to Discover and presents an ES|QL query', async () => {
