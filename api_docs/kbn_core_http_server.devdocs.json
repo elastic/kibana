@@ -3509,6 +3509,10 @@
                 "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
               {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_npre_value.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/internal/get_active_space.ts"
               },
@@ -3865,6 +3869,14 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
+              },
+              {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
@@ -3999,6 +4011,10 @@
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts"
+              },
+              {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -4215,14 +4231,6 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
-              },
-              {
-                "plugin": "workflowsExtensions",
-                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
-              },
-              {
-                "plugin": "workflowsExtensions",
-                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -4443,10 +4451,6 @@
               {
                 "plugin": "customBranding",
                 "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -5027,6 +5031,14 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/functions.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_npre_value.test.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_npre_value.test.ts"
               },
               {
                 "plugin": "cps",
@@ -6561,6 +6573,10 @@
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/copy_to_space.ts"
               },
@@ -7121,6 +7137,10 @@
                 "path": "x-pack/platform/plugins/private/graph/server/routes/explore.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/index/register_retry_route.ts"
               },
@@ -7449,10 +7469,6 @@
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/hidden_saved_object_routes.ts"
               },
@@ -7555,6 +7571,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8065,10 +8085,6 @@
                 "path": "src/platform/plugins/shared/content_management/server/plugin.test.ts"
               },
               {
-                "plugin": "cps",
-                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
-              },
-              {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/preview_scripted_field.ts"
               },
@@ -8147,6 +8163,10 @@
               {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/server_integration/plugins/status_plugin_a/server/plugin.ts"
+              },
+              {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
               {
                 "plugin": "mockIdpPlugin",
@@ -8523,6 +8543,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9453,6 +9477,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "logstash",
                 "path": "x-pack/platform/plugins/private/logstash/server/routes/pipeline/save.ts"
               },
@@ -9575,10 +9603,6 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_license_route.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -10337,6 +10361,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_delete_route.ts"
               },
@@ -10403,10 +10431,6 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/database/delete.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -14033,6 +14057,10 @@
                 "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
               {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/lifecycle/auth.ts"
               },
@@ -16546,6 +16574,26 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/register_read_route.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_runs.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_run.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_run_scores.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/traces/get_trace.ts"
+              },
+              {
                 "plugin": "inferenceEndpoint",
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
@@ -16564,6 +16612,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/find_live_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_history_users_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -16711,15 +16763,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/get_script.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/download_script.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/list_scripts.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16798,24 +16854,20 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/status.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16832,6 +16884,22 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/tags/read_tags/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/get_script.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/download_script.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/list_scripts.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17124,22 +17192,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/status.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route.ts"
               },
               {
                 "plugin": "cloudDefend",
@@ -17550,6 +17602,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
@@ -17599,6 +17655,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
+              },
+              {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/update/register_update_route.ts"
               },
               {
                 "plugin": "inferenceEndpoint",
@@ -17670,6 +17730,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
               },
               {
@@ -17719,10 +17783,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/routes/data_generator/register_data_generator_routes.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
               },
               {
                 "plugin": "entityStore",
@@ -18484,6 +18544,14 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/alerting.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/search/register_search_route.ts"
+              },
+              {
                 "plugin": "inferenceEndpoint",
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
@@ -18593,11 +18661,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/create_script.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -18689,19 +18765,43 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/import_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/revert_prebuilt_rule/revert_prebuilt_rule_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18725,6 +18825,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/create_index_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/create_script.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/routes/nba_routes.ts"
               },
               {
@@ -18734,10 +18842,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/create_index_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18789,15 +18893,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/import_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18806,10 +18902,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19044,30 +19136,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/revert_prebuilt_rule/revert_prebuilt_rule_route.ts"
-              },
-              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
               },
@@ -19090,6 +19158,10 @@
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
               },
               {
                 "plugin": "entityStore",
@@ -19284,11 +19356,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/update_script.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/update_script.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19510,6 +19582,10 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/delete/register_delete_route.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/delete_saved_query_route.ts"
               },
@@ -19558,10 +19634,6 @@
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/list/delete_list_route.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/delete_script.ts"
-              },
-              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/delete_route.ts"
               },
@@ -19580,6 +19652,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/delete_script.ts"
               },
               {
                 "plugin": "securitySolution",

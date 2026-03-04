@@ -15,7 +15,7 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
 } from '@kbn/core-chrome-browser';
-import { HeaderBreadcrumbsBadges } from '../ui/header/header_breadcrumbs_badges';
+import { HeaderBreadcrumbsBadges } from '@kbn/core-chrome-browser-components';
 import { createArrayState, type ArrayState } from './state_helpers';
 
 interface BreadcrumbsState {

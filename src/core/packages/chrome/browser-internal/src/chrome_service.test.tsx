@@ -9,6 +9,7 @@
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
@@ -422,6 +423,9 @@ describe('start', () => {
 
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
+
+      chrome.setChromeStyle('project');
+      chrome.project.initNavigation('es', Rx.of({ body: [] }));
 
       chrome.project.setCloudUrls({
         deploymentUrl: 'my-deployment-url.com',

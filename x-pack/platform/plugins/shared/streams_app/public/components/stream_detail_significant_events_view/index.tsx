@@ -8,13 +8,9 @@ import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { compact, isEqual } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
-  SELECTED_SYSTEMS_URL_PARAM,
-} from '../../constants';
+import React, { useMemo, useState } from 'react';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -23,7 +19,6 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
-import { useStreamSystems } from '../stream_detail_systems/stream_systems/hooks/use_stream_systems';
 import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
 import type { Flow } from './add_significant_event_flyout/types';
 import { EmptyState } from './empty_state';
@@ -51,46 +46,22 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return niceTimeFormatter([startMs, endMs]);
   }, [startMs, endMs]);
 
-  const { systems, refreshSystems, systemsLoading } = useStreamSystems(definition.stream.name);
   const [query, setQuery] = useState<string>('');
+  // Only show rule-backed queries in the stream detail view; the discovery page shows all queries.
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
     query,
+    ruleBacked: true,
   });
 
   const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && systems.length > 0) {
-      setIsEditFlyoutOpen(true);
-
-      // Parse selected systems from URL parameters
-      const selectedSystemsParam = urlParams.get(SELECTED_SYSTEMS_URL_PARAM);
-
-      if (selectedSystemsParam) {
-        const selectedSystemNames = selectedSystemsParam.split(',').filter((name) => name.trim());
-        setSelectedSystems(systems.filter((system) => selectedSystemNames.includes(system.name)));
-      }
-
-      // Clean up the URL parameters after opening the flyout
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM);
-      newUrl.searchParams.delete(SELECTED_SYSTEMS_URL_PARAM);
-      window.history.replaceState({}, '', newUrl.toString());
-    }
-  }, [systems]);
-
-  if (
-    !significantEventsFetchState.data &&
-    (systemsLoading || significantEventsFetchState.isLoading)
-  ) {
+  if (!significantEventsFetchState.data && significantEventsFetchState.isLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
@@ -103,10 +74,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
-      selectedSystems={selectedSystems}
-      setSelectedSystems={setSelectedSystems}
-      systems={systems}
-      refreshSystems={refreshSystems}
       generateOnMount={generateOnMount}
       aiFeatures={aiFeatures}
     />
@@ -122,11 +89,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return (
       <>
         <EmptyState
-          systems={systems}
-          selectedSystems={selectedSystems}
-          onSystemsChange={setSelectedSystems}
-          definition={definition.stream}
-          refreshSystems={refreshSystems}
           onManualEntryClick={() => {
             setQueryToEdit(undefined);
             setInitialFlow('manual');
@@ -180,7 +142,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 size="s"
                 color="primary"
                 onClick={() => {
-                  setSelectedSystems([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
@@ -251,7 +212,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(selectedSystems.length > 0)}
+      {editFlyout(false)}
     </>
   );
 }
