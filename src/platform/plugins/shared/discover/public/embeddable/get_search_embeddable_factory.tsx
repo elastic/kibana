@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { Subscription } from 'rxjs';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -19,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import {
-  apiPublishesChildren,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -302,32 +300,6 @@ export const getSearchEmbeddableFactory = ({
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
-      let hasPanelBeenRegisteredInParent = false;
-      let hasBeenCleanedUp = false;
-      let parentChildrenSubscription: Subscription | undefined;
-
-      const cleanupEmbeddableResources = () => {
-        if (hasBeenCleanedUp) return;
-
-        hasBeenCleanedUp = true;
-        drilldownsManager.cleanup();
-        searchEmbeddable.cleanup();
-        unsubscribeFromFetch();
-        parentChildrenSubscription?.unsubscribe();
-      };
-
-      if (apiPublishesChildren(parentApi)) {
-        parentChildrenSubscription = parentApi.children$.subscribe((children) => {
-          if (children[uuid]) {
-            hasPanelBeenRegisteredInParent = true;
-            return;
-          }
-          if (hasPanelBeenRegisteredInParent) {
-            cleanupEmbeddableResources();
-          }
-        });
-      }
-
       return {
         api,
         Component: () => {
@@ -346,6 +318,14 @@ export const getSearchEmbeddableFactory = ({
             selectedTabId$,
             inlineEditingApi.inlineEditDirty$
           );
+
+          useEffect(() => {
+            return () => {
+              drilldownsManager.cleanup();
+              searchEmbeddable.cleanup();
+              unsubscribeFromFetch();
+            };
+          }, []);
 
           const selectedTabIdForDisplay = isInlineEditing
             ? draftSelectedTabId ?? selectedTabId
