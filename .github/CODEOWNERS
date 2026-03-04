@@ -133,6 +133,7 @@ src/core/packages/capabilities/server-mocks @elastic/kibana-core
 src/core/packages/chrome/app-menu/core-chrome-app-menu @elastic/appex-sharedux
 src/core/packages/chrome/app-menu/core-chrome-app-menu-components @elastic/appex-sharedux
 src/core/packages/chrome/browser @elastic/appex-sharedux
+src/core/packages/chrome/browser-components @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
@@ -1982,8 +1983,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
-/src/cli/keystore/ @elastic/kibana-operations
-/src/cli/serve/ @elastic/kibana-operations
+/src/cli/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /.github/copilot-instructions.md @elastic/kibana-operations
@@ -1993,7 +1993,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
 /.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
-/.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
@@ -2464,6 +2463,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
 
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
