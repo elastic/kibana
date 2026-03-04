@@ -1,3 +1,6 @@
+# API Service Template
+
+```typescript
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -40,7 +43,6 @@ export const getTODOApiService = ({
 
     deleteAll: async () => {
       await measurePerformanceAsync(log, 'security.todo.deleteAll', async () => {
-        // TODO: implement bulk delete or list-then-delete
         await kbnClient.request({
           method: 'DELETE',
           path: `${basePath}${TODO_API_URL}`,
@@ -50,8 +52,12 @@ export const getTODOApiService = ({
     },
   };
 };
+```
 
-// After creating the API service:
-// 1. Export from kbn-scout-security/src/playwright/fixtures/worker/apis/index.ts
-// 2. Add to SecurityApiServicesFixture in kbn-scout-security/src/playwright/fixtures/types.ts
-// 3. Wire into parallel_run_fixtures.ts and single_thread_fixtures.ts
+## Wiring
+
+After creating the API service:
+
+1. Export from `kbn-scout-security/src/playwright/fixtures/worker/apis/index.ts`
+2. Add to `SecurityApiServicesFixture` in `kbn-scout-security/src/playwright/fixtures/types.ts`
+3. Wire into `parallel_run_fixtures.ts` and `single_thread_fixtures.ts`

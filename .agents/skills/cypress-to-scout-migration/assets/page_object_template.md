@@ -1,3 +1,6 @@
+# Page Object Template
+
+```typescript
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -20,9 +23,12 @@ export class TODOPageNamePage {
     await this.page.gotoApp(PAGE_URL);
   }
 }
+```
 
-// After creating the page object:
-// 1. Add it to SecurityPageObjects interface in
-//    kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts
-// 2. Register it with createLazyPageObject in extendPageObjects()
-// 3. Import and export from the index file
+## Wiring
+
+After creating the page object:
+
+1. Add it to `SecurityPageObjects` interface in `kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts`
+2. Register it with `createLazyPageObject` in `extendPageObjects()`
+3. Import and export from the index file

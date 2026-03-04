@@ -144,7 +144,7 @@ bash scripts/scaffold_scout_spec.sh --name <spec_name> --domain <domain_path> \
   --plugin-test-dir <plugin>/test/scout/ui --type parallel
 ```
 
-Use `assets/page_object_template.ts` and `assets/api_service_template.ts` as starting points for new page objects or API services.
+Use `assets/page_object_template.md` and `assets/api_service_template.md` as starting points for new page objects or API services.
 
 ### Step 3: Map Cypress patterns to Scout `[medium freedom]`
 
