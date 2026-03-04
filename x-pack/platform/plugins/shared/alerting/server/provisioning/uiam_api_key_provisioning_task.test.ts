@@ -183,7 +183,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(ensureScheduled).toHaveBeenCalledWith({
         id: API_KEY_PROVISIONING_TASK_ID,
         taskType: API_KEY_PROVISIONING_TASK_TYPE,
-        schedule: { interval: '1m' },
+        schedule: { interval: '1h' },
         state: emptyState,
         params: {},
       });
