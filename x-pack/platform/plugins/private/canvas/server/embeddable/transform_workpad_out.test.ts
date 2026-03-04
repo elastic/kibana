@@ -13,6 +13,7 @@ import { embeddableService, expressionsService, logger } from '../kibana_service
 
 import { transformWorkpadOut } from './transform_workpad_out';
 import { makeWorkpad, getDecodedConfig, getExpressionFunctionName } from './fixtures';
+import type { AstFunction } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
 
 jest.mock('../kibana_services', () => ({
@@ -37,7 +38,7 @@ jest.mock('../kibana_services', () => ({
     inject: jest.fn().mockImplementation((ast, references) => {
       return {
         ...ast,
-        chain: ast.chain.map((fn) => {
+        chain: ast.chain.map((fn: AstFunction) => {
           if (fn.function === 'savedLens') {
             return { ...fn, arguments: { ...fn.arguments, id: references[0].id } };
           }
