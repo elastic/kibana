@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql, type EsqlRequest } from '@kbn/esql-language';
+import { esql, type EsqlRequest } from '@elastic/esql';
 import {
   ALERT_ACTIONS_BACKING_INDEX,
   ALERT_ACTIONS_DATA_STREAM,

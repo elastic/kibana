@@ -21,7 +21,9 @@ interface OtelDemoHandle {
 export function deployOtelDemo(log: ToolingLog): OtelDemoHandle {
   log.info('Deploying OTel Demo (will stream in background)...');
 
-  const child = execa('node', [otelDemoScript], {
+  // Force the demo to write logs into the `logs` data stream (not the default `logs.otel`)
+  // so it matches `logs` stream and dataset conventions.
+  const child = execa('node', [otelDemoScript, '--logs-index', 'logs'], {
     stdio: ['ignore', 'pipe', 'pipe'],
     reject: false,
     env: { ...process.env, FORCE_COLOR: '0' },

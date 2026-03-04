@@ -12,7 +12,6 @@ export type InsightImpactLevel = 'critical' | 'high' | 'medium' | 'low';
 interface InsightEvidence {
   streamName: string;
   queryTitle: string;
-  featureName?: string;
   eventCount: number;
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql, type ComposerQuery } from '@kbn/esql-language';
+import { esql, type ComposerQuery } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 
 interface GetActiveAlertGroupHashesQueryParams {

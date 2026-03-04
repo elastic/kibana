@@ -244,7 +244,7 @@ const ItemList = () => {
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content Management/Content List/Toolbar',
+  title: 'Content List/Components/Toolbar',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
