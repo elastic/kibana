@@ -73,7 +73,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/cloud",
     "@kbn/search-index-documents",
-    "@kbn/react-kibana-context-root",
   ],
   "exclude": ["target/**/*"]
 }
