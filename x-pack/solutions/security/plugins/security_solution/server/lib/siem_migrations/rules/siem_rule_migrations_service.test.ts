@@ -10,10 +10,8 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  SiemRuleMigrationsService,
-  type SiemRuleMigrationsCreateClientParams,
-} from './siem_rule_migrations_service';
+import type { SiemRuleMigrationsCreateClientParams } from './siem_rule_migrations_service';
+import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
 import {
   MockRuleMigrationsDataService,
@@ -21,7 +19,7 @@ import {
   mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
-import { waitFor } from '@testing-library/dom';
+import { retry } from 'async';
 import type { SiemRuleMigrationsClientDependencies } from './types';
 
 jest.mock('./data/rule_migrations_data_service');
@@ -63,7 +61,7 @@ describe('SiemRuleMigrationsService', () => {
       mockSetup.mockRejectedValueOnce(error);
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
-      await waitFor(() => {
+      await retry(async (): Promise<void> => {
         expect(logger.error).toHaveBeenCalledWith('Error installing data service.', error);
       });
     });
