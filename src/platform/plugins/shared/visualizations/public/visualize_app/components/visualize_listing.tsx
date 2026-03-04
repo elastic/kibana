@@ -82,6 +82,7 @@ const useTableListViewProps = (
       application,
       history,
       savedObjectsTagging,
+      stateTransferService,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
@@ -105,13 +106,16 @@ const useTableListViewProps = (
 
       const { editApp, editUrl } = editor;
       if (editApp) {
-        application.navigateToApp(editApp, { path: editUrl });
+        await stateTransferService.navigateToEditor(editApp, {
+          path: editUrl,
+          state: { originatingApp: VisualizeConstants.APP_ID },
+        });
         return;
       }
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [history, stateTransferService]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -327,10 +331,15 @@ export const VisualizeListing = () => {
   });
   useUnmount(() => closeNewVisModal.current());
 
-  const getVisualizeListItemLink = useMemo(
-    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
-    [application, kbnUrlStateStorage]
-  );
+  const getVisualizeListItemLink = useMemo(() => {
+    const linkFn = getVisualizeListItemLinkFn(application, kbnUrlStateStorage);
+    return (item: VisualizeUserContent) => {
+      if (item.editor && 'editApp' in item.editor && item.editor.editApp) {
+        return undefined;
+      }
+      return linkFn(item);
+    };
+  }, [application, kbnUrlStateStorage]);
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);

@@ -127,6 +127,9 @@ export const getPreloadedState = ({
   const isDashboardListingOrigin =
     embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
     Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
+  const isVisualizeListingOrigin =
+    embeddableEditorIncomingState?.originatingApp === 'visualize' &&
+    !embeddableEditorIncomingState?.originatingPath;
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
@@ -141,7 +144,9 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      (embeddableEditorIncomingState?.originatingApp && !isDashboardListingOrigin) ??
+      (embeddableEditorIncomingState?.originatingApp &&
+        !isDashboardListingOrigin &&
+        !isVisualizeListingOrigin) ??
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
