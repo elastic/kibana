@@ -10,6 +10,14 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import {
+  ScrapeInputSchema,
+  SearchInputSchema,
+  MapInputSchema,
+  CrawlInputSchema,
+  CrawlAndWaitInputSchema,
+  GetCrawlStatusInputSchema,
+} from './types';
 
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
@@ -97,21 +105,7 @@ export const FirecrawlConnector: ConnectorSpec = {
             'Scrape a single URL and extract content (for example, markdown). Markdown is truncated to maxMarkdownLength (default 100000 chars) to avoid context overflow; only set a lower value if a previous scrape returned truncated output and you need to fit within a smaller context.',
         }
       ),
-      input: z.object({
-        url: z.string().url().describe('The URL to scrape'),
-        onlyMainContent: z.boolean().optional().default(true),
-        waitFor: z.number().int().min(0).optional().default(0),
-        maxMarkdownLength: z
-          .number()
-          .int()
-          .min(1000)
-          .max(500_000)
-          .optional()
-          .default(100_000)
-          .describe(
-            'Maximum characters of markdown to return. Default 100000; max 500000 to avoid context overflow. Only set a lower value if you already got truncated output and need to fit within a smaller context.'
-          ),
-      }),
+      input: ScrapeInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
           url: input.url,
@@ -146,10 +140,7 @@ export const FirecrawlConnector: ConnectorSpec = {
           defaultMessage: 'Search the web and get full page content from results',
         }
       ),
-      input: z.object({
-        query: z.string().min(1).describe('Search query'),
-        limit: z.number().int().min(1).max(100).optional().default(5),
-      }),
+      input: SearchInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/search`, {
           query: input.query,
@@ -164,12 +155,7 @@ export const FirecrawlConnector: ConnectorSpec = {
       description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.map.description', {
         defaultMessage: 'Map a website to discover indexed URLs',
       }),
-      input: z.object({
-        url: z.string().url().describe('Base URL to map'),
-        search: z.string().optional(),
-        limit: z.number().int().min(1).max(100_000).optional().default(5000),
-        includeSubdomains: z.boolean().optional().default(true),
-      }),
+      input: MapInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/map`, {
           url: input.url,
@@ -186,12 +172,7 @@ export const FirecrawlConnector: ConnectorSpec = {
       description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.crawl.description', {
         defaultMessage: 'Start an asynchronous crawl of a website; returns a job ID',
       }),
-      input: z.object({
-        url: z.string().url().describe('Base URL to start crawling from'),
-        limit: z.number().int().min(1).max(100).optional().default(20),
-        maxDiscoveryDepth: z.number().int().min(0).optional(),
-        allowExternalLinks: z.boolean().optional().default(false),
-      }),
+      input: CrawlInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, {
           url: input.url,
@@ -212,14 +193,7 @@ export const FirecrawlConnector: ConnectorSpec = {
             'Start a crawl of a website and poll until complete or failed; returns final status and results',
         }
       ),
-      input: z.object({
-        url: z.string().url().describe('Base URL to start crawling from'),
-        limit: z.number().int().min(1).max(100).optional().default(20),
-        maxDiscoveryDepth: z.number().int().min(0).optional(),
-        allowExternalLinks: z.boolean().optional().default(false),
-        pollIntervalMs: z.number().int().min(1000).max(60_000).optional().default(3000),
-        maxWaitMs: z.number().int().min(5000).max(3_600_000).optional().default(1_800_000),
-      }),
+      input: CrawlAndWaitInputSchema,
       handler: async (ctx, input) => {
         const startResponse = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, {
           url: input.url,
@@ -261,9 +235,7 @@ export const FirecrawlConnector: ConnectorSpec = {
         'core.kibanaConnectorSpecs.firecrawl.actions.getCrawlStatus.description',
         { defaultMessage: 'Get the status and results of a crawl job' }
       ),
-      input: z.object({
-        id: z.string().uuid().describe('Crawl job ID (UUID) from the crawl action'),
-      }),
+      input: GetCrawlStatusInputSchema,
       handler: async (ctx, input) => {
         const response = await ctx.client.get(`${FIRECRAWL_API_BASE}/v2/crawl/${input.id}`);
         return response.data;
