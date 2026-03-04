@@ -48,7 +48,7 @@ Scout does NOT currently run on MKI. If a Cypress test has a `@serverless` tag, 
 | Aspect | Cypress | Scout |
 |--------|---------|-------|
 | Environment setup | Cypress creates the environment automatically | You must create the environment first |
-| Server start | Automatic | `node scripts/scout.js start-server --stateful` in a separate terminal |
+| Server start | Automatic | `node scripts/scout.js start-server --arch stateful --domain classic` in a separate terminal |
 | Running tests | Open Cypress UI or `cypress run` | `node scripts/scout.js run-tests --stateful --testFiles <path>` |
 
 ## Test Labels/Tags
