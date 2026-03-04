@@ -118,6 +118,36 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'Service Overview - Transactions table "Open in Discover" opens traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM service overview', async () => {
+          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/overview`, {
+            params: APM_TIME_RANGE,
+          });
+        });
+
+        await spaceTest.step('open row actions menu on first transaction', async () => {
+          await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
+          // eslint-disable-next-line playwright/no-nth-methods
+          await page.testSubj.locator('apmManagedTableActionsCellButton').nth(0).click();
+        });
+
+        await spaceTest.step('click Open in Discover in actions menu', async () => {
+          await page.testSubj
+            .locator('apmManagedTableActionsMenuItem-transactionsTable-openInDiscover')
+            .click();
+        });
+
+        await spaceTest.step('verify Discover traces experience columns', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+        });
+      }
+    );
+
+    spaceTest(
       'Transactions - Latency chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transactions page', async () => {
@@ -176,6 +206,36 @@ spaceTest.describe(
             await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
           }
         );
+
+        await spaceTest.step('verify Discover traces experience columns', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+        });
+      }
+    );
+
+    spaceTest(
+      'Transactions - Transactions table "Open in Discover" opens traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM transactions page', async () => {
+          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions`, {
+            params: APM_TIME_RANGE,
+          });
+        });
+
+        await spaceTest.step('open row actions menu on first transaction', async () => {
+          await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
+          // eslint-disable-next-line playwright/no-nth-methods
+          await page.testSubj.locator('apmManagedTableActionsCellButton').nth(0).click();
+        });
+
+        await spaceTest.step('click Open in Discover in actions menu', async () => {
+          await page.testSubj
+            .locator('apmManagedTableActionsMenuItem-transactionsTable-openInDiscover')
+            .click();
+        });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
           await pageObjects.discover.waitForDocTableRendered();
