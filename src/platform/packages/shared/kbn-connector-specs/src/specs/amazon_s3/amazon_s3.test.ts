@@ -279,6 +279,8 @@ describe('AmazonS3', () => {
           storageClass: 'STANDARD_IA',
         },
       ],
+      isTruncated: false,
+      nextContinuationToken: undefined,
     });
   });
 
@@ -311,24 +313,12 @@ describe('AmazonS3', () => {
 
     const result = await AmazonS3.actions.listBucketObjects.handler(mockContext, {
       bucket: 'my-bucket',
+      maxKeys: 1,
     });
 
-    expect(mockS3Send).toHaveBeenCalledTimes(2);
-    const firstCommand = mockS3Send.mock.calls[0][0] as ListObjectsV2Command;
-    const secondCommand = mockS3Send.mock.calls[1][0] as ListObjectsV2Command;
-    expect(firstCommand.input).toEqual({
-      Bucket: 'my-bucket',
-      ContinuationToken: undefined,
-      Prefix: undefined,
-    });
-    expect(secondCommand.input).toEqual({
-      Bucket: 'my-bucket',
-      ContinuationToken: 'next-token',
-      Prefix: undefined,
-    });
     expect(result).toEqual({
       bucket: 'my-bucket',
-      objectCount: 2,
+      objectCount: 1,
       objects: [
         {
           key: 'file-1.txt',
@@ -336,6 +326,21 @@ describe('AmazonS3', () => {
           lastModified: '2025-01-05T00:00:00.000Z',
           storageClass: 'STANDARD',
         },
+      ],
+      isTruncated: true,
+      nextContinuationToken: 'next-token',
+    });
+
+    const secondResult = await AmazonS3.actions.listBucketObjects.handler(mockContext, {
+      bucket: 'my-bucket',
+      maxKeys: 1,
+      continuationToken: result.nextContinuationToken,
+    });
+
+    expect(secondResult).toEqual({
+      bucket: 'my-bucket',
+      objectCount: 1,
+      objects: [
         {
           key: 'file-2.txt',
           size: 256,
@@ -343,6 +348,25 @@ describe('AmazonS3', () => {
           storageClass: 'STANDARD_IA',
         },
       ],
+      isTruncated: false,
+      nextContinuationToken: undefined,
+    });
+
+    expect(mockS3Send).toHaveBeenCalledTimes(2);
+    const firstCommand = mockS3Send.mock.calls[0][0] as ListObjectsV2Command;
+    const secondCommand = mockS3Send.mock.calls[1][0] as ListObjectsV2Command;
+
+    expect(firstCommand.input).toEqual({
+      Bucket: 'my-bucket',
+      ContinuationToken: undefined,
+      MaxKeys: 1,
+      Prefix: undefined,
+    });
+    expect(secondCommand.input).toEqual({
+      Bucket: 'my-bucket',
+      ContinuationToken: 'next-token',
+      MaxKeys: 1,
+      Prefix: undefined,
     });
   });
 
@@ -383,6 +407,8 @@ describe('AmazonS3', () => {
           storageClass: 'STANDARD',
         },
       ],
+      isTruncated: false,
+      nextContinuationToken: undefined,
     });
   });
 
