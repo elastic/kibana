@@ -58,7 +58,8 @@ const mockComponentDeps = {
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    componentDeps: mockComponentDeps as unknown as DeeplyMockedKeys<InternalChromeStart>['componentDeps'],
+    componentDeps:
+      mockComponentDeps as unknown as DeeplyMockedKeys<InternalChromeStart>['componentDeps'],
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({

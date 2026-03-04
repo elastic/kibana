@@ -28,9 +28,9 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ChromeApplicationContext } from '../context';
 import type { AppCategory } from '@kbn/core-application-common';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import type { ChromeApplicationContext } from '../context';
 import {
   createEuiListItem,
   createRecentNavLink,

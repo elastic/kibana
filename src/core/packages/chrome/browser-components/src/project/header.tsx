@@ -188,7 +188,10 @@ export const ProjectHeader = () => {
           <EuiHeader position={'static'} className="header__firstBar" css={topBarStyles}>
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <EuiHeaderSectionItem>
-                <HeaderPageAnnouncer breadcrumbs$={breadcrumbs$} customBranding$={customBranding$} />
+                <HeaderPageAnnouncer
+                  breadcrumbs$={breadcrumbs$}
+                  customBranding$={customBranding$}
+                />
                 <Logo logoCss={logoCss} />
               </EuiHeaderSectionItem>
 

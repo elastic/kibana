@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { ChromeApplicationContext } from '../context';
 import type {
   ChromeHelpExtension,
   ChromeGlobalHelpExtensionMenuLink,
@@ -35,6 +34,7 @@ import type {
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { css } from '@emotion/react';
+import type { ChromeApplicationContext } from '../context';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
