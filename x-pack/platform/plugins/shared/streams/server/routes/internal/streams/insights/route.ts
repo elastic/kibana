@@ -6,9 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { TaskResult } from '@kbn/streams-schema';
+import type { InsightImpactLevel, TaskResult } from '@kbn/streams-schema';
 import {
   insightCoreSchema,
+  insightImpactLevelSchema,
   insightMetaSchema,
   insightSchema,
   type Insight,
@@ -141,7 +142,7 @@ const listInsightsRoute = createServerRoute({
   params: z.object({
     query: z.object({
       impact: z
-        .union([z.string(), z.array(z.string())])
+        .union([insightImpactLevelSchema, z.array(insightImpactLevelSchema)])
         .optional()
         .describe('Filter by impact level(s). Can be a single value or comma-separated values.'),
     }),
@@ -155,12 +156,12 @@ const listInsightsRoute = createServerRoute({
     const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const filters: { impact?: string[] } = {};
+    const filters: { impact?: InsightImpactLevel[] } = {};
     if (params.query.impact) {
       // Support both array and comma-separated string
       filters.impact = Array.isArray(params.query.impact)
         ? params.query.impact
-        : params.query.impact.split(',');
+        : (params.query.impact.split(',') as InsightImpactLevel[]);
     }
 
     return insightClient.list(filters);

@@ -15,17 +15,16 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
   function createTestInsight(overrides: Partial<Insight> = {}): Insight {
     return {
       id: uuidv4(),
-      generatedAt: new Date().toISOString(),
+      generated_at: new Date().toISOString(),
       title: 'Test Insight',
       description: 'This is a test insight for integration testing',
       impact: 'medium',
-      impactLevel: getImpactLevel('medium'),
+      impact_level: getImpactLevel('medium'),
       evidence: [
         {
-          streamName: 'logs',
-          queryTitle: 'Test Query',
-          featureName: 'test-feature',
-          eventCount: 100,
+          stream_name: 'logs',
+          query_title: 'Test Query',
+          event_count: 100,
         },
       ],
       recommendations: ['Consider investigating further', 'Review the related logs'],
@@ -218,7 +217,7 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
       id: insightId,
       title: 'Updated Title',
       impact: 'critical',
-      impactLevel: getImpactLevel('critical'),
+      impact_level: getImpactLevel('critical'),
     });
     const updateResponse = await apiClient.put(`internal/streams/_insights/${insightId}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },

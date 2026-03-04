@@ -65,7 +65,7 @@ export async function generateInsights({
   );
 
   const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
-    (acc, result) => sumTokens(acc, result.tokensUsed),
+    (acc, result) => sumTokens(acc, result.tokens_used),
     { prompt: 0, completion: 0, total: 0 }
   );
 
@@ -73,7 +73,7 @@ export async function generateInsights({
   if (streamInsightsWithData.length === 0) {
     return {
       insights: [],
-      tokensUsed,
+      tokens_used: tokensUsed,
     };
   }
 
@@ -90,7 +90,7 @@ export async function generateInsights({
 
     return {
       insights,
-      tokensUsed: sumTokens(tokensUsed, response.tokens),
+      tokens_used: sumTokens(tokensUsed, response.tokens),
     };
   } catch (error) {
     if (
@@ -102,7 +102,7 @@ export async function generateInsights({
       );
       return {
         insights: [],
-        tokensUsed,
+        tokens_used: tokensUsed,
       };
     }
 
@@ -142,7 +142,7 @@ async function generateStreamInsights({
   if (queryDataList.length === 0) {
     return {
       insights: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      tokens_used: { prompt: 0, completion: 0, total: 0 },
     };
   }
 
@@ -160,7 +160,7 @@ async function generateStreamInsights({
 
     return {
       insights,
-      tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
+      tokens_used: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
     };
   } catch (error) {
     if (
@@ -172,7 +172,7 @@ async function generateStreamInsights({
       );
       return {
         insights: [],
-        tokensUsed: { prompt: 0, completion: 0, total: 0 },
+        tokens_used: { prompt: 0, completion: 0, total: 0 },
       };
     }
 

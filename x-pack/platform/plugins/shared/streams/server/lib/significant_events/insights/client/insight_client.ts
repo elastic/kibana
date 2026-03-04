@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import { isNotFoundError } from '@kbn/es-errors';
-import type { Insight } from '@kbn/streams-schema';
+import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
 import { StatusError } from '../../../streams/errors/status_error';
@@ -62,7 +62,9 @@ export class InsightClient {
   /**
    * List all insights with optional filters
    */
-  async list(filters?: { impact?: string[] }): Promise<{ insights: Insight[]; total: number }> {
+  async list(filters?: {
+    impact?: InsightImpactLevel[];
+  }): Promise<{ insights: Insight[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [];
 
     if (filters?.impact?.length) {

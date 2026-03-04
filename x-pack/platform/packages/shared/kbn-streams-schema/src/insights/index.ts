@@ -29,9 +29,9 @@ export function getImpactLevel(impact: InsightImpactLevel): InsightImpactLevelNu
 
 /** Evidence item supporting an insight (stream, query, event count). */
 export const insightEvidenceSchema = z.object({
-  streamName: z.string(),
-  queryTitle: z.string(),
-  eventCount: z.number(),
+  stream_name: z.string(),
+  query_title: z.string(),
+  event_count: z.number().int().nonnegative(),
 });
 export type InsightEvidence = z.infer<typeof insightEvidenceSchema>;
 
@@ -63,9 +63,9 @@ export type InsightCore = z.infer<typeof insightCoreSchema>;
  */
 export const insightMetaSchema = z.object({
   id: z.string(),
-  generatedAt: z.string().datetime(),
-  impactLevel: insightImpactLevelNumericSchema,
-  userEvaluation: insightUserEvaluationSchema.optional(),
+  generated_at: z.string().datetime(),
+  impact_level: insightImpactLevelNumericSchema,
+  user_evaluation: insightUserEvaluationSchema.optional(),
 });
 export type InsightMeta = z.infer<typeof insightMetaSchema>;
 
@@ -81,5 +81,5 @@ export type SaveInsightBody = Omit<Insight, 'id'>;
 
 export interface GenerateInsightsResult {
   insights: InsightCore[];
-  tokensUsed: ChatCompletionTokenCount;
+  tokens_used: ChatCompletionTokenCount;
 }

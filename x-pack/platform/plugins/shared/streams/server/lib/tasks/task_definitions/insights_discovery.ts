@@ -71,17 +71,20 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
-                  input_tokens_used: result.tokensUsed?.prompt ?? 0,
-                  output_tokens_used: result.tokensUsed?.completion ?? 0,
-                  cached_tokens_used: result.tokensUsed?.cached ?? 0,
+                  input_tokens_used: result.tokens_used?.prompt ?? 0,
+                  output_tokens_used: result.tokens_used?.completion ?? 0,
+                  cached_tokens_used: result.tokens_used?.cached ?? 0,
                 });
 
-                const insights = result.insights.map((insight) => ({
-                  ...insight,
-                  id: uuidv4(),
-                  generatedAt: new Date().toISOString(),
-                  impactLevel: getImpactLevel(insight.impact),
-                }));
+                const insights = result.insights.map(
+                  (insight) =>
+                    ({
+                      ...insight,
+                      id: uuidv4(),
+                      generated_at: new Date().toISOString(),
+                      impact_level: getImpactLevel(insight.impact),
+                    } satisfies Insight)
+                );
 
                 if (result.insights.length > 0) {
                   try {
@@ -102,7 +105,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>(
                   _task,
                   { connectorId, streamNames },
-                  { insights, tokensUsed: result.tokensUsed }
+                  { insights, tokensUsed: result.tokens_used }
                 );
               } catch (error) {
                 // Get connector info for error enrichment

@@ -44,16 +44,16 @@ describe('InsightClient', () => {
     title: 'Test Insight',
     description: 'This is a test insight',
     impact: 'high',
-    impactLevel: 1,
+    impact_level: 1,
     evidence: [
       {
-        streamName: 'logs',
-        queryTitle: 'Error rate spike',
-        eventCount: 100,
+        stream_name: 'logs',
+        query_title: 'Error rate spike',
+        event_count: 100,
       },
     ],
     recommendations: ['Check the logs', 'Restart the service'],
-    generatedAt: defaultGeneratedAt,
+    generated_at: defaultGeneratedAt,
     ...overrides,
   });
 

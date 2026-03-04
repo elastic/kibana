@@ -6,7 +6,7 @@
  */
 
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { InsightImpactLevel, RoutingStatus, Streams } from '@kbn/streams-schema';
 import { getImpactLevel, type Insight } from '@kbn/streams-schema';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
@@ -56,7 +56,9 @@ export interface StreamsTestApiService {
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
   // Insights API
-  listInsights: (filters?: { impact?: string }) => Promise<{ insights: Insight[]; total: number }>;
+  listInsights: (filters?: {
+    impact?: InsightImpactLevel[];
+  }) => Promise<{ insights: Insight[]; total: number }>;
   getInsight: (id: string) => Promise<{ insight: Insight }>;
   saveInsight: (id: string, input: Insight) => Promise<{ insight: Insight }>;
   deleteInsight: (id: string) => Promise<{ acknowledged: boolean }>;
@@ -249,10 +251,10 @@ export function getStreamsTestApiService({
     },
 
     // Insights API methods
-    async listInsights(filters?: { impact?: string }) {
+    async listInsights(filters?: { impact?: InsightImpactLevel[] }) {
       return measurePerformanceAsync(log, 'streamsTestApi.listInsights', async () => {
         const query = new URLSearchParams();
-        if (filters?.impact) query.set('impact', filters.impact);
+        if (filters?.impact?.length) query.set('impact', filters.impact.join(','));
         const queryString = query.toString();
         const path = `/internal/streams/_insights${queryString ? `?${queryString}` : ''}`;
         const response = await kbnClient.request({
@@ -278,8 +280,8 @@ export function getStreamsTestApiService({
         const body: Insight = {
           ...input,
           id,
-          generatedAt: input.generatedAt ?? new Date().toISOString(),
-          impactLevel: input.impactLevel ?? getImpactLevel(input.impact),
+          generated_at: input.generated_at ?? new Date().toISOString(),
+          impact_level: input.impact_level ?? getImpactLevel(input.impact),
         };
         const response = await kbnClient.request({
           method: 'PUT',
