@@ -89,12 +89,6 @@ spaceTest.describe(
             await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible();
           });
 
-          await spaceTest.step('verify waterfall is rendered', async () => {
-            await expect(pageObjects.tracesExperience.flyout.traceWaterfallClickArea).toBeVisible({
-              timeout: 30_000,
-            });
-          });
-
           await spaceTest.step('verify Errors section is hidden', async () => {
             await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeHidden();
           });

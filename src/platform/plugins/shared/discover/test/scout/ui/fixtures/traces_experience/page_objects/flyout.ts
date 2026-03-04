@@ -14,8 +14,6 @@ export interface TracesFlyout {
   readonly aboutSection: Locator;
   readonly similarSpansSection: Locator;
   readonly traceSummarySection: Locator;
-  readonly traceWaterfallClickArea: Locator;
-  readonly traceWaterfallFullScreenButton: Locator;
   readonly errorsSection: Locator;
   readonly logsSection: Locator;
   readonly spanLinksSection: Locator;
@@ -27,12 +25,6 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     aboutSection: page.testSubj.locator('UnifiedDocViewerTableGrid'),
     similarSpansSection: page.testSubj.locator('docViewerSimilarSpansSection'),
     traceSummarySection: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
-    traceWaterfallClickArea: page.testSubj.locator(
-      'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
-    ),
-    traceWaterfallFullScreenButton: page.testSubj.locator(
-      'unifiedDocViewerObservabilityTracesTraceFullScreenButton'
-    ),
     errorsSection: page.testSubj.locator('unifiedDocViewerErrorsAccordion'),
     logsSection: page.testSubj.locator('unifiedDocViewerLogsSection'),
     spanLinksSection: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
