@@ -6,12 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { getRemovedPanels, upsertMarkdownPanel, type VisualizationFailure } from './utils';
 
