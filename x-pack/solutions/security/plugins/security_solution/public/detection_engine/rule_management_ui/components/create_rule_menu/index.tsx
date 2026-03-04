@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -124,7 +123,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
           style={{ padding: `${m} ${xl}` }}
           onClick={handleAiRuleCreation}
           data-test-subj="ai-rule-creation"
-          icon={<RobotIcon size="m" />}
+          icon="productAgent"
         >
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation"
