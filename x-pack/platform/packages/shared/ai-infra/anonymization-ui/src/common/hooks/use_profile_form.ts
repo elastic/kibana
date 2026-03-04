@@ -228,9 +228,10 @@ export const useProfileForm = ({
     []
   );
   const reset = useCallback(() => {
+    clearSubmitError();
     setValues(initialValues);
     setValidationErrors({});
-  }, [initialValues]);
+  }, [clearSubmitError, initialValues]);
 
   return useMemo(
     () => ({

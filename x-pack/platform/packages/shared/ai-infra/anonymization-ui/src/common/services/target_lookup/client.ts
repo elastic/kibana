@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { getHttpStatusCode } from '../http_error_utils';
 
 const TARGET_LOOKUP_API_VERSION = '1';
 
@@ -45,14 +46,7 @@ interface TargetLookupHttpService {
   fetch: HttpSetup['fetch'];
 }
 
-const isNotFoundError = (error: unknown): boolean =>
-  Boolean(
-    error &&
-      typeof error === 'object' &&
-      'statusCode' in error &&
-      typeof (error as { statusCode?: unknown }).statusCode === 'number' &&
-      (error as { statusCode: number }).statusCode === 404
-  );
+const isNotFoundError = (error: unknown): boolean => getHttpStatusCode(error) === 404;
 
 export const createTargetLookupClient = ({
   fetch,

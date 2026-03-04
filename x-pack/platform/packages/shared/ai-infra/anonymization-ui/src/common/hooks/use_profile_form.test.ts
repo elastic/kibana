@@ -420,6 +420,43 @@ describe('useProfileForm', () => {
     expect(result.current.submitError?.message).toBe('invalid profile response payload');
   });
 
+  it('clears mutation error state on reset', () => {
+    let createError: unknown = new Error('invalid profile response payload');
+    const createReset = jest.fn(() => {
+      createError = null;
+    });
+    const updateReset = jest.fn();
+
+    jest.mocked(useCreateProfile).mockImplementation(() =>
+      createUseCreateProfileMutationMock({
+        error: createError,
+        reset: createReset,
+      })
+    );
+    jest.mocked(useUpdateProfile).mockImplementation(() =>
+      createUseUpdateProfileMutationMock({
+        reset: updateReset,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useProfileForm({
+        client,
+        context: { spaceId: 'default' },
+      })
+    );
+
+    expect(result.current.submitError?.message).toBe('invalid profile response payload');
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(createReset).toHaveBeenCalled();
+    expect(updateReset).toHaveBeenCalled();
+    expect(result.current.submitError).toBeUndefined();
+  });
+
   it('hydrates form values when initialProfile arrives after mount', async () => {
     jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
     jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
