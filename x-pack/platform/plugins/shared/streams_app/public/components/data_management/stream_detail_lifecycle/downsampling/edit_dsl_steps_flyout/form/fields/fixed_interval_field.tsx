@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type ArrayItem,
   getFieldValidityAndErrorMessage,
+  type FieldHook,
   UseField,
   useFormContext,
   useFormData,
@@ -39,6 +40,153 @@ const FIXED_INTERVAL_FIELDS_TO_VALIDATE_ON_CHANGE = Array.from(
   { length: MAX_DOWNSAMPLE_STEPS },
   (_, i) => `_meta.downsampleSteps[${i}].fixedIntervalValue`
 );
+
+const FixedIntervalFieldControl = ({
+  stepIndex,
+  dataTestSubj,
+  timeUnitOptions,
+  valueField,
+  unitField,
+}: {
+  stepIndex: number;
+  dataTestSubj: string;
+  timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  valueField: FieldHook<string>;
+  unitField: FieldHook<PreservedTimeUnit>;
+}) => {
+  const form = useFormContext();
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
+  const committedValue = String(valueField.value ?? '');
+  const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
+
+  const isEditingRef = useRef(false);
+  const [draftValue, setDraftValue] = useState<string>(committedValue);
+
+  useEffect(() => {
+    if (isEditingRef.current) return;
+    setDraftValue(committedValue);
+  }, [committedValue]);
+
+  const getFixedIntervalMsAt = (index: number): number | undefined => {
+    const value = String(
+      form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalValue`]?.value ?? ''
+    ).trim();
+    const unit = String(
+      form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalUnit`]?.value ?? 'd'
+    ) as PreservedTimeUnit;
+    if (value === '') return;
+    const ms = toMilliseconds(value, unit);
+    return Number.isFinite(ms) && ms > 0 ? ms : undefined;
+  };
+
+  const lowerBoundMs = stepIndex > 0 ? getFixedIntervalMsAt(stepIndex - 1) ?? 0 : 0;
+  const upperBoundMs =
+    stepIndex < MAX_DOWNSAMPLE_STEPS - 1 ? getFixedIntervalMsAt(stepIndex + 1) : undefined;
+  const { min, max } = getBoundsHelpTextValues({
+    lowerBoundMs,
+    upperBoundMs,
+    unit: currentUnit,
+  });
+
+  const showMultipleOfPreviousStep = stepIndex > 0 && lowerBoundMs > 0;
+  const helpText = (() => {
+    if (upperBoundMs === undefined) {
+      return showMultipleOfPreviousStep
+        ? i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBoundMultiple', {
+            defaultMessage:
+              'Must be larger than {min} and a multiple of {multipleOf} based on current configuration.',
+            values: { min, multipleOf: min },
+          })
+        : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBound', {
+            defaultMessage: 'Must be larger than {min} based on current configuration.',
+            values: { min },
+          });
+    }
+
+    return showMultipleOfPreviousStep
+      ? i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRangeMultiple', {
+          defaultMessage:
+            'Must be larger than {min}, smaller than {max}, and a multiple of {multipleOf} based on current configuration.',
+          values: {
+            min,
+            max,
+            multipleOf: min,
+          },
+        })
+      : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRange', {
+          defaultMessage:
+            'Must be larger than {min} and smaller than {max} based on current configuration.',
+          values: {
+            min,
+            max,
+          },
+        });
+  })();
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalLabel', {
+        defaultMessage: 'Downsample interval',
+      })}
+      helpText={helpText}
+      isInvalid={isInvalid}
+      error={isInvalid ? errorMessage : null}
+    >
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem>
+          <EuiFieldNumber
+            compressed
+            fullWidth
+            min={1}
+            aria-label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalAriaLabel', {
+              defaultMessage: 'Downsample interval value',
+            })}
+            value={draftValue}
+            isInvalid={isInvalid}
+            data-test-subj={`${dataTestSubj}FixedIntervalValue`}
+            onChange={(e) => {
+              isEditingRef.current = true;
+              const nextValue = e.target.value;
+              setDraftValue(nextValue);
+            }}
+            onBlur={() => {
+              isEditingRef.current = false;
+              const nextValue = draftValue.trim();
+              if (nextValue === '') {
+                setDraftValue(committedValue);
+                return;
+              }
+
+              // Commit only on blur.
+              if (nextValue !== committedValue.trim()) {
+                valueField.setValue(nextValue);
+              }
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSelect
+            compressed
+            fullWidth
+            aria-label={i18n.translate(
+              'xpack.streams.editDslStepsFlyout.fixedIntervalUnitAriaLabel',
+              {
+                defaultMessage: 'Fixed interval unit',
+              }
+            )}
+            options={getUnitSelectOptions(timeUnitOptions, currentUnit)}
+            value={currentUnit}
+            data-test-subj={`${dataTestSubj}FixedIntervalUnit`}
+            onChange={(e) => {
+              const nextUnit = e.target.value as PreservedTimeUnit;
+              unitField.setValue(nextUnit);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
 
 export const FixedIntervalField = ({
   item,
@@ -112,120 +260,15 @@ export const FixedIntervalField = ({
           readDefaultValueOnForm={!item.isNew}
           config={fixedIntervalUnitConfig}
         >
-          {(unitField) => {
-            const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
-            const currentValue = String(valueField.value ?? '');
-            const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
-
-            const getFixedIntervalMsAt = (index: number): number | undefined => {
-              const value = String(
-                form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalValue`]?.value ?? ''
-              ).trim();
-              const unit = String(
-                form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalUnit`]?.value ?? 'd'
-              ) as PreservedTimeUnit;
-              if (value === '') return;
-              const ms = toMilliseconds(value, unit);
-              return Number.isFinite(ms) && ms > 0 ? ms : undefined;
-            };
-
-            const lowerBoundMs = stepIndex > 0 ? getFixedIntervalMsAt(stepIndex - 1) ?? 0 : 0;
-            const upperBoundMs =
-              stepIndex < MAX_DOWNSAMPLE_STEPS - 1
-                ? getFixedIntervalMsAt(stepIndex + 1)
-                : undefined;
-            const { min, max } = getBoundsHelpTextValues({
-              lowerBoundMs,
-              upperBoundMs,
-              unit: currentUnit,
-            });
-
-            const showMultipleOfPreviousStep = stepIndex > 0 && lowerBoundMs > 0;
-            const helpText = (() => {
-              if (upperBoundMs === undefined) {
-                return showMultipleOfPreviousStep
-                  ? i18n.translate(
-                      'xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBoundMultiple',
-                      {
-                        defaultMessage:
-                          'Must be larger than {min} and a multiple of {multipleOf} based on current configuration.',
-                        values: { min, multipleOf: min },
-                      }
-                    )
-                  : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBound', {
-                      defaultMessage: 'Must be larger than {min} based on current configuration.',
-                      values: { min },
-                    });
-              }
-
-              return showMultipleOfPreviousStep
-                ? i18n.translate(
-                    'xpack.streams.editDslStepsFlyout.fixedIntervalHelpRangeMultiple',
-                    {
-                      defaultMessage:
-                        'Must be larger than {min}, smaller than {max}, and a multiple of {multipleOf} based on current configuration.',
-                      values: {
-                        min,
-                        max,
-                        multipleOf: min,
-                      },
-                    }
-                  )
-                : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRange', {
-                    defaultMessage:
-                      'Must be larger than {min} and smaller than {max} based on current configuration.',
-                    values: {
-                      min,
-                      max,
-                    },
-                  });
-            })();
-
-            return (
-              <EuiFormRow
-                label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalLabel', {
-                  defaultMessage: 'Downsample interval',
-                })}
-                helpText={helpText}
-                isInvalid={isInvalid}
-                error={isInvalid ? errorMessage : null}
-              >
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  <EuiFlexItem>
-                    <EuiFieldNumber
-                      compressed
-                      fullWidth
-                      min={1}
-                      aria-label={i18n.translate(
-                        'xpack.streams.editDslStepsFlyout.fixedIntervalAriaLabel',
-                        {
-                          defaultMessage: 'Downsample interval value',
-                        }
-                      )}
-                      value={currentValue}
-                      isInvalid={isInvalid}
-                      data-test-subj={`${dataTestSubj}FixedIntervalValue`}
-                      onChange={(e) => valueField.onChange(e)}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiSelect
-                      compressed
-                      fullWidth
-                      aria-label={i18n.translate(
-                        'xpack.streams.editDslStepsFlyout.fixedIntervalUnitAriaLabel',
-                        { defaultMessage: 'Fixed interval unit' }
-                      )}
-                      options={getUnitSelectOptions(timeUnitOptions, currentUnit)}
-                      value={currentUnit}
-                      data-test-subj={`${dataTestSubj}FixedIntervalUnit`}
-                      onChange={(e) => unitField.setValue(e.target.value as PreservedTimeUnit)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            );
-          }}
+          {(unitField) => (
+            <FixedIntervalFieldControl
+              stepIndex={stepIndex}
+              dataTestSubj={dataTestSubj}
+              timeUnitOptions={timeUnitOptions}
+              valueField={valueField as FieldHook<string>}
+              unitField={unitField as FieldHook<PreservedTimeUnit>}
+            />
+          )}
         </UseField>
       )}
     </UseField>
