@@ -52,15 +52,21 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
-        if (space.id !== 'default') return;
-
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
-        if (!isEntityStoreInstalled(statusResponse.status)) {
-          await services.http.post(installAllEntitiesRequest);
+        const installed = isEntityStoreInstalled(statusResponse.status);
+        // Entity store already installed → init entity maintainers only (any space).
+        if (installed) {
+          await services.http.post(initEntityMaintainersRequest);
+          return;
         }
-        await services.http.post(initEntityMaintainersRequest);
+        // Entity store not installed and default space → install entity store, then init entity maintainers.
+        if (space.id === 'default') {
+          await services.http.post(installAllEntitiesRequest);
+          await services.http.post(initEntityMaintainersRequest);
+        }
+        // Entity store not installed and non-default space → do nothing.
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);

@@ -314,6 +314,28 @@ apiTest.describe(
           expect(initNoOp.body).toMatchObject({ ok: true });
         }
       );
+
+      apiTest(
+        'Should return 400 when entity store is not installed',
+        async ({ apiClient }) => {
+          await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+            headers: defaultHeaders,
+            responseType: 'json',
+            body: {},
+          });
+
+          const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+            headers: defaultHeaders,
+            responseType: 'json',
+            body: {},
+          });
+
+          expect(initResponse.statusCode).toBe(400);
+          expect(initResponse.body.message).toBe(
+            'Entity store is not installed. Install the entity store first, then initialize entity maintainers.'
+          );
+        }
+      );
     });
   }
 );
