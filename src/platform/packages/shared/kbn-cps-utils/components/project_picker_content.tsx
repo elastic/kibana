@@ -11,30 +11,28 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiPopoverTitle,
   EuiButtonGroup,
+  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLoadingSpinner,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { ProjectsData } from '../types';
-import { PROJECT_ROUTING } from '../constants';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
-import { useFetchProjects } from './use_fetch_projects';
+import type { UseFetchProjectsResult } from './use_fetch_projects';
 
 export interface ProjectPickerContentProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  fetchProjects: () => Promise<ProjectsData | null>;
+  projects: UseFetchProjectsResult;
   isReadonly?: boolean;
-  settingsComponent?: React.ReactNode;
 }
 
 const projectPickerOptions = [
@@ -53,56 +51,47 @@ const projectPickerOptions = [
 export const ProjectPickerContent = ({
   projectRouting,
   onProjectRoutingChange,
-  fetchProjects,
+  projects,
   isReadonly = false,
-  settingsComponent,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
-  const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
+  const { originProject, linkedProjects, isLoading, error } = projects;
 
-  // Don't render if we don't have the required data yet
-  if (!originProject || !linkedProjects) {
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" css={styles.loadingContainer}>
+        <EuiLoadingSpinner size="m" />
+      </EuiFlexGroup>
+    );
+  }
+
+  if (error) {
+    return (
+      <EuiCallOut
+        size="s"
+        color="danger"
+        title={strings.getProjectPickerFetchError()}
+        css={styles.errorCallout}
+      />
+    );
+  }
+
+  if (!originProject) {
     return null;
   }
 
-  const projectsList =
-    projectRouting === PROJECT_ROUTING.ORIGIN
-      ? [originProject]
-      : [originProject, ...linkedProjects];
+  const projectsList = [originProject, ...linkedProjects];
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      <EuiFlexItem grow={false}>
-        <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        {isReadonly && (
-          <EuiCallOut
-            size="s"
-            css={styles.callout}
-            title={strings.getProjectPickerReadonlyCallout()}
-            iconType="info"
-          />
-        )}
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           isFullWidth
           legend={strings.getProjectPickerButtonAriaLabel()}
           idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
           options={projectPickerOptions}
-          onChange={(value: string) => {
-            // TODO: add telemetry for project scope change?
-            onProjectRoutingChange(
-              value === PROJECT_ROUTING.ORIGIN ? PROJECT_ROUTING.ORIGIN : PROJECT_ROUTING.ALL
-            );
+          onChange={(optionId: string) => {
+            onProjectRoutingChange(optionId);
           }}
           css={styles.buttonGroup}
           buttonSize="compressed"
@@ -117,8 +106,7 @@ export const ProjectPickerContent = ({
               id="cpsUtils.projectPicker.numberOfProjectsDescription"
               defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
               values={{
-                numberOfProjects:
-                  projectRouting === PROJECT_ROUTING.ORIGIN ? 1 : linkedProjects.length + 1,
+                numberOfProjects: projectsList.length,
               }}
             />
           </h6>
@@ -141,6 +129,14 @@ export const ProjectPickerContent = ({
 };
 
 const projectPickerContentStyles = {
+  loadingContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xl,
+    }),
+  errorCallout: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: euiTheme.size.m,
+    }),
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: euiTheme.base * 25,
@@ -148,7 +144,7 @@ const projectPickerContentStyles = {
     }),
   buttonGroup: ({ euiTheme }: UseEuiTheme) =>
     css({
-      margin: euiTheme.size.s,
+      margin: euiTheme.size.m,
     }),
   projectCountHeader: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -162,9 +158,5 @@ const projectPickerContentStyles = {
   listContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
-  callout: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
     }),
 };

@@ -12,9 +12,7 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema() {
-  return schema.object({
-    data: getDashboardStateSchema(),
-  });
+  return getDashboardStateSchema();
 }
 
 export function getUpdateResponseBodySchema() {

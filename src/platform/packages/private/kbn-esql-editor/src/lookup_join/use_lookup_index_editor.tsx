@@ -280,7 +280,7 @@ export const useLookupIndexCommand = (
       canEditIndex = true,
       triggerSource = 'esql_autocomplete'
     ) => {
-      await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
+      await uiActions.executeTriggerActions('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID', {
         indexName,
         doesIndexExist,
         canEditIndex,

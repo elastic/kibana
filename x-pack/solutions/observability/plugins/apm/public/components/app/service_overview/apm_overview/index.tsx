@@ -17,6 +17,7 @@ import {
   isServerlessAgentName,
 } from '../../../../../common/agent_name';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useServiceSloContext } from '../../../../context/service_slo/use_service_slo_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -47,7 +48,7 @@ export function ApmOverview() {
   const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
   const {
     query,
-    query: { kuery, environment, rangeFrom, rangeTo, transactionType },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -82,6 +83,8 @@ export function ApmOverview() {
   const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
+  const { hasSlos } = useServiceSloContext();
+
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
     false
@@ -96,7 +99,7 @@ export function ApmOverview() {
 
   return (
     <>
-      {!sloCalloutDismissed && (
+      {!sloCalloutDismissed && !hasSlos && (
         <>
           <SloCallout
             dismissCallout={() => {
@@ -104,7 +107,6 @@ export function ApmOverview() {
             }}
             serviceName={serviceName}
             environment={environment}
-            transactionType={transactionType}
           />
           <EuiSpacer />
         </>

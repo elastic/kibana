@@ -9,7 +9,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';

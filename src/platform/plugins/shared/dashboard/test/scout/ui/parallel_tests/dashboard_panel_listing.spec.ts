@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
@@ -24,7 +24,13 @@ const DASHBOARD_PANEL_TYPE_COUNT = 18;
 
 spaceTest.describe(
   'Dashboard panel listing',
-  { tag: ['@ess', '@svlSearch', '@svlSecurity'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.security.complete,
+    ],
+  },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();

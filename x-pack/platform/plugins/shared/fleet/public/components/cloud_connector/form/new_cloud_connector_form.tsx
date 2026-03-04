@@ -14,18 +14,17 @@ import { GCPCloudConnectorForm } from '../gcp_cloud_connector/gcp_cloud_connecto
 import { AWS_PROVIDER, AZURE_PROVIDER } from '../constants';
 
 export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
-  input,
   newPolicy,
   packageInfo,
   updatePolicy,
   isEditPage = false,
   cloud,
   cloudProvider,
-  templateName,
   credentials,
   setCredentials,
   hasInvalidRequiredVars,
   accountType,
+  iacTemplateUrl,
 }) => {
   // Default to AWS if no cloudProvider is specified
   const provider = cloudProvider || AWS_PROVIDER;
@@ -34,8 +33,6 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
     case AWS_PROVIDER:
       return (
         <AWSCloudConnectorForm
-          templateName={templateName || ''}
-          input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
@@ -46,13 +43,12 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           credentials={credentials}
           setCredentials={setCredentials}
           accountType={accountType}
+          iacTemplateUrl={iacTemplateUrl}
         />
       );
     case AZURE_PROVIDER:
       return (
         <AzureCloudConnectorForm
-          templateName={templateName || ''}
-          input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
@@ -62,13 +58,12 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           credentials={credentials}
           setCredentials={setCredentials}
           accountType={accountType}
+          iacTemplateUrl={iacTemplateUrl}
         />
       );
     case 'gcp':
       return (
         <GCPCloudConnectorForm
-          templateName={templateName || ''}
-          input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
@@ -79,6 +74,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           credentials={credentials}
           setCredentials={setCredentials}
           accountType={accountType}
+          iacTemplateUrl={iacTemplateUrl}
         />
       );
     default:

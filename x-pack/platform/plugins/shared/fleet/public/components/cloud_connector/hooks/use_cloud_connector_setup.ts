@@ -101,7 +101,6 @@ export const getAccountTypeFromInputs = (
 
   const accountTypeValue = extractVarValue(vars[accountTypeVarName]);
 
-  // Return the account type if it's a valid AccountType value
   if (accountTypeValue === SINGLE_ACCOUNT || accountTypeValue === ORGANIZATION_ACCOUNT) {
     return accountTypeValue;
   }
@@ -195,10 +194,8 @@ export const useCloudConnectorSetup = (
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
-      if (newPolicy.cloud_connector_id) {
-        return { cloudConnectorId: newPolicy.cloud_connector_id };
-      }
-      return {};
+      // In edit mode, if the policy has a cloud_connector_id, initialize with it
+      return newPolicy.cloud_connector_id ? { cloudConnectorId: newPolicy.cloud_connector_id } : {};
     });
 
   // Extract account type from inputs

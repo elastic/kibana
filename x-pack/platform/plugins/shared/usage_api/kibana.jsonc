@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/usage-api-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "usageApi",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "usageApi"
+    ]
+  }
+}

@@ -7,6 +7,7 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
+import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
@@ -19,7 +20,7 @@ const bodySchema = z.object({
 export function registerUninstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity-store/uninstall',
+      path: ENTITY_STORE_ROUTES.UNINSTALL,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -37,15 +38,16 @@ export function registerUninstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res) => {
         const { logger, assetManager } = await ctx.entityStore;
-        logger.debug(`uninstalling entities: [${req.body.entityTypes.join(', ')}]`);
+        const { entityTypes } = req.body;
+        logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
 
-        await Promise.all(req.body.entityTypes.map((type) => assetManager.uninstall(type)));
+        const { engines } = await assetManager.getStatus();
+        const installedTypes = new Set(engines.map((e) => e.type));
+        const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
 
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
+        await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
+
+        return res.ok({ body: { ok: true } });
       })
     );
 }

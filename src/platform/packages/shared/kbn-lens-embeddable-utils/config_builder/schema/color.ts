@@ -13,6 +13,25 @@ import { serializedValueSchema } from './serializedValue';
 
 const colorByValueBase = schema.object({
   type: schema.literal('dynamic'), // Specifies that the color assignment is dynamic (by value). Possible value: 'dynamic'
+  /**
+   * Controls the open/closed nature of the first and last color ranges.
+   * Possible values:
+   * - 'above': Last range extends to infinity
+   * - 'below': First range extends to negative infinity
+   * - 'all': Both first and last ranges are open-ended
+   * - 'none': All ranges are closed
+   */
+  continuity: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('above'),
+        schema.literal('below'),
+        schema.literal('all'),
+        schema.literal('none'),
+      ],
+      { meta: { description: 'Controls the open/closed nature of the color ranges' } }
+    )
+  ),
 
   /**
    * Array of color steps defining the mapping from values to colors.
@@ -94,7 +113,7 @@ const colorByValueBase = schema.object({
 
 export const colorByValueAbsolute = colorByValueBase.extends(
   { range: schema.literal('absolute') },
-  { meta: { id: 'colorByValueAbsolute' } }
+  { meta: { id: 'colorByValueAbsolute', title: 'Color By Value (Absolute)' } }
 );
 
 export const colorByValueSchema = schema.oneOf(
@@ -126,10 +145,10 @@ export const colorByValueSchema = schema.oneOf(
          */
         range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
       },
-      { meta: { id: 'colorByValueRelative' } }
+      { meta: { id: 'colorByValueRelative', title: 'Color By Value (Relative)' } }
     ),
   ],
-  { meta: { id: 'colorByValue' } }
+  { meta: { id: 'colorByValue', title: 'Color By Value' } }
 );
 
 export const staticColorSchema = schema.object(
@@ -140,7 +159,7 @@ export const staticColorSchema = schema.object(
      */
     color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
   },
-  { meta: { id: 'staticColor' } }
+  { meta: { id: 'staticColor', title: 'Static Color' } }
 );
 
 const colorFromPaletteSchema = schema.object(
@@ -149,7 +168,7 @@ const colorFromPaletteSchema = schema.object(
     index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
     palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
   },
-  { meta: { id: 'colorFromPalette' } }
+  { meta: { id: 'colorFromPalette', title: 'Color From Palette' } }
 );
 
 const colorCodeSchema = schema.object(
@@ -157,7 +176,7 @@ const colorCodeSchema = schema.object(
     type: schema.literal('colorCode'),
     value: schema.string({ meta: { description: 'The static color value to use.' } }),
   },
-  { meta: { id: 'colorCode' } }
+  { meta: { id: 'colorCode', title: 'Color Code' } }
 );
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
@@ -177,7 +196,7 @@ const categoricalColorMappingSchema = schema.object(
     ),
     unassignedColor: schema.maybe(colorCodeSchema),
   },
-  { meta: { id: 'categoricalColorMapping' } }
+  { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );
 
 const gradientColorMappingSchema = schema.object(
@@ -197,7 +216,7 @@ const gradientColorMappingSchema = schema.object(
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
     unassignedColor: schema.maybe(colorCodeSchema),
   },
-  { meta: { id: 'gradientColorMapping' } }
+  { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
 
 export const colorMappingSchema = schema.oneOf(
@@ -211,7 +230,7 @@ export const colorMappingSchema = schema.oneOf(
      */
     gradientColorMappingSchema,
   ],
-  { meta: { id: 'colorMapping' } }
+  { meta: { id: 'colorMapping', title: 'Color Mapping' } }
 );
 
 export const allColoringTypeSchema = schema.oneOf([

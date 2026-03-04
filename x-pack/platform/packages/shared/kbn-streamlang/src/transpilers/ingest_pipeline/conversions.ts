@@ -49,6 +49,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       }
     }
 
+    // manual_ingest_pipeline handles its own condition compilation because it needs to
+    // combine the parent 'where' condition with nested processor 'if' conditions
+    if (action === 'manual_ingest_pipeline') {
+      return processManualIngestPipelineProcessors(
+        processorWithRenames as Parameters<typeof processManualIngestPipelineProcessors>[0],
+        transpilationOptions
+      );
+    }
+
     const processorWithCompiledConditions =
       'if' in processorWithRenames && processorWithRenames.if
         ? {
@@ -56,15 +65,6 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
             if: conditionToPainless(processorWithRenames.if),
           }
         : processorWithRenames;
-
-    if (action === 'manual_ingest_pipeline') {
-      return processManualIngestPipelineProcessors(
-        processorWithCompiledConditions as Parameters<
-          typeof processManualIngestPipelineProcessors
-        >[0],
-        transpilationOptions
-      );
-    }
 
     if (action === 'remove_by_prefix') {
       return processRemoveByPrefixProcessor(

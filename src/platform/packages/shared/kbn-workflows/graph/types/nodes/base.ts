@@ -11,7 +11,6 @@ import { z } from '@kbn/zod/v4';
 import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
-  HttpStepSchema,
   KibanaStepSchema,
   WaitStepSchema,
 } from '../../../spec/schema';
@@ -43,13 +42,6 @@ export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   configuration: DataSetStepSchema,
 });
 export type DataSetGraphNode = z.infer<typeof DataSetGraphNodeSchema>;
-
-export const HttpGraphNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('http'),
-  configuration: HttpStepSchema,
-});
-export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
 
 export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

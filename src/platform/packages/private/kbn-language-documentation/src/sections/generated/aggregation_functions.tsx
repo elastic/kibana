@@ -393,14 +393,24 @@ export const functions = {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
       preview: true,
-      license: undefined,
+      license: {
+        licenses: [
+          {
+            name: 'platinum',
+            isSignatureSpecific: true,
+            paramsWithLicense: ['cartesian_shape', 'geo_shape'],
+          },
+        ],
+        hasMultipleLicenses: false,
+      },
       description: {
         markdownContent: i18n.translate(
           'languageDocumentation.documentationESQL.st_centroid_agg.markdown',
           {
             defaultMessage: `
   ### ST CENTROID AGG
-  Calculate the spatial centroid over a field with spatial point geometry type.
+  Calculate the spatial centroid over a field with spatial geometry type.
+  Supports \`geo_point\` and \`cartesian_point\`, as well as \`geo_shape\` and \`cartesian_shape\`.
 
   \`\`\`esql
   FROM airports

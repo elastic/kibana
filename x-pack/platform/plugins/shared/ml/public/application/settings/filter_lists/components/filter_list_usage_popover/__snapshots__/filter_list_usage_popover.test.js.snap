@@ -14,7 +14,7 @@ exports[`FilterListUsagePopover renders the popover for 1 job 1`] = `
         class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
       >
         <span
-          class="eui-textTruncate euiButtonEmpty__text"
+          class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
         >
           1 job
         </span>
@@ -38,7 +38,7 @@ exports[`FilterListUsagePopover renders the popover for 2 detectors 1`] = `
         class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
       >
         <span
-          class="eui-textTruncate euiButtonEmpty__text"
+          class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
         >
           3 detectors
         </span>

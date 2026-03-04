@@ -39,6 +39,7 @@ const mosaicStateSharedSchema = {
       {
         meta: {
           id: 'mosaicLegend',
+          title: 'Legend',
           description: 'Legend configuration for mosaic chart appearance and behavior',
         },
       }
@@ -141,6 +142,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'mosaicNoESQL',
+      title: 'Mosaic Chart (DSL)',
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -195,6 +197,7 @@ const mosaicStateSchemaESQL = schema.object(
   {
     meta: {
       id: 'mosaicESQL',
+      title: 'Mosaic Chart (ES|QL)',
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
@@ -204,7 +207,8 @@ const mosaicStateSchemaESQL = schema.object(
 
 export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
-    id: 'mosaicChartSchema',
+    id: 'mosaicChart',
+    title: 'Mosaic Chart',
     description:
       'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

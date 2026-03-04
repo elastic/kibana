@@ -7,11 +7,11 @@
 
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
-import type { StreamQuery } from '../queries';
+import type { StreamQueryInput } from '../queries';
 
 export const buildEsqlQuery = (
   indices: string[],
-  query: StreamQuery,
+  input: Pick<StreamQueryInput, 'kql' | 'feature'>,
   includeMetadata: boolean = false
 ): string => {
   const fromCommand = Builder.command({
@@ -37,11 +37,11 @@ export const buildEsqlQuery = (
   });
 
   const kqlQuery = Builder.expression.func.call('KQL', [
-    Builder.expression.literal.string(query.kql.query),
+    Builder.expression.literal.string(input.kql.query),
   ]);
 
-  const whereCondition = query.feature?.filter
-    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
+  const whereCondition = input.feature?.filter
+    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(input.feature.filter)])
     : kqlQuery;
 
   const whereCommand = Builder.command({

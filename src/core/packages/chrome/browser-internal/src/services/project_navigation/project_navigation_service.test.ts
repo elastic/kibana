@@ -11,7 +11,6 @@ import { createMemoryHistory } from 'history';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
@@ -51,8 +50,6 @@ const getNavLinksService = (ids: Readonly<string[]> = []) => {
     has: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn().mockReturnValue(navLinks),
-    enableForcedAppSwitcherNavigation: jest.fn(),
-    getForceAppSwitcherNavigation$: jest.fn(),
   };
   return navLinksMock;
 };
@@ -89,7 +86,6 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
-    featureFlags: coreFeatureFlagsMock.createStart(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   });
 

@@ -20,6 +20,7 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -29,6 +30,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
   dependencies?: ContextDependencies;
+  telemetryClient?: WorkflowExecutionTelemetryClient;
 }
 
 /**
@@ -60,6 +62,8 @@ export class WorkflowExecutionRuntimeManager {
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
+  private telemetryClient?: WorkflowExecutionTelemetryClient;
+  private telemetryReported: boolean = false;
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
@@ -72,6 +76,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
+    this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
   }
 
   public get workflowExecution() {
@@ -429,6 +434,9 @@ export class WorkflowExecutionRuntimeManager {
           );
         }
       }
+
+      // Report telemetry for terminal status (only once)
+      this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -453,5 +461,33 @@ export class WorkflowExecutionRuntimeManager {
         tags: ['workflow', 'execution', 'complete'],
       }
     );
+  }
+
+  /**
+   * Reports telemetry for workflow execution when it reaches a terminal status.
+   * Only reports once per execution to avoid duplicate events.
+   */
+  private reportTelemetryIfTerminal(
+    workflowExecution: EsWorkflowExecution,
+    workflowExecutionUpdate: Partial<EsWorkflowExecution>
+  ): void {
+    const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
+    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
+      return;
+    }
+
+    this.telemetryReported = true;
+    const stepExecutions = this.workflowExecutionState.getAllStepExecutions();
+    const finalWorkflowExecution = {
+      ...workflowExecution,
+      ...workflowExecutionUpdate,
+      status: finalStatus,
+    } as EsWorkflowExecution;
+
+    this.telemetryClient.reportWorkflowExecutionTerminated({
+      workflowExecution: finalWorkflowExecution,
+      stepExecutions,
+      finalStatus,
+    });
   }
 }

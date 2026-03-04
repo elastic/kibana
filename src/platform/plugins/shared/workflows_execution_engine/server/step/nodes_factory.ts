@@ -20,7 +20,6 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  HttpGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
@@ -35,7 +34,6 @@ import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
-import { HttpStepImpl } from './http_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
@@ -62,7 +60,6 @@ import {
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { ConnectorExecutor } from '../connector_executor';
-import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -74,7 +71,6 @@ export class NodesFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies
@@ -155,6 +151,7 @@ export class NodesFactory {
     return this.createGenericStepNode(stepExecutionRuntime);
   }
 
+  // eslint-disable-next-line complexity
   private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
@@ -263,26 +260,12 @@ export class NodesFactory {
           stepLogger
         );
       case 'atomic':
-        // Default atomic step (connector-based)
-        // eslint-disable-next-line no-console
-        console.log(
-          '[NodesFactory] Creating AtomicStepImpl for node.type=atomic, stepType:',
-          node.stepType
-        );
         return new AtomicStepImpl(
           node as AtomicGraphNode,
           stepExecutionRuntime,
           this.connectorExecutor,
           this.workflowRuntime,
           stepLogger
-        );
-      case 'http':
-        return new HttpStepImpl(
-          node as HttpGraphNode,
-          stepExecutionRuntime,
-          stepLogger,
-          this.urlValidator,
-          this.workflowRuntime
         );
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);

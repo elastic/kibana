@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Review anys usage in this file.
+// any inside visitWithSpecificContext could be cleaned by getting rid of that method.
+// anys inside visitCommand are more tricky, cleaning it implies taking out the AnyToVoid wrapper.
+
 import * as contexts from './contexts';
 import type {
   ESQLAstChangePointCommand,
@@ -213,6 +217,10 @@ export class GlobalVisitorContext<
       case 'fuse': {
         if (!this.methods.visitFuseCommand) break;
         return this.visitFuseCommand(parent, commandNode, input as any);
+      }
+      case 'mmr': {
+        if (!this.methods.visitMmrCommand) break;
+        return this.visitMmrCommand(parent, commandNode, input as any);
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
@@ -472,6 +480,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitFuseCommand'> {
     const context = new contexts.FuseCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitFuseCommand', context, input);
+  }
+
+  public visitMmrCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitMmrCommand'>
+  ): types.VisitorOutput<Methods, 'visitMmrCommand'> {
+    const context = new contexts.MmrCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitMmrCommand', context, input);
   }
 
   // #endregion

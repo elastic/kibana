@@ -14,18 +14,21 @@ import {
   GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
   GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars, ORGANIZATION_ACCOUNT } from '../../../../common';
-import { type CloudConnectorFormProps } from '../types';
+import {
+  extractRawCredentialVars,
+  getCredentialKeyFromVarName,
+  writeCredentials,
+} from '../../../../common/services/cloud_connectors';
+import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 
 import {
-  updatePolicyWithGcpCloudConnectorCredentials,
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
   isGcpCredentials,
-  getElasticResourceId,
-  type GcpCloudConnectorFieldNames,
+  getDeploymentIdFromUrl,
+  getKibanaComponentId,
 } from '../utils';
-import { GCP_CLOUD_CONNECTOR_FIELD_NAMES, GCP_PROVIDER } from '../constants';
+import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -33,45 +36,54 @@ import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { getGcpCloudConnectorsCredentialsFormOptions } from './gcp_cloud_connector_options';
 import { GoogleCloudShellCloudCredentialsGuide } from './gcp_cloud_shell_guide';
 
+const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
+  if (!cloud) return undefined;
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    return cloud.serverless.projectId;
+  }
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    return kibanaComponentId;
+  }
+
+  return undefined;
+};
+
 export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
-  input,
   newPolicy,
   packageInfo,
   cloud,
   updatePolicy,
   hasInvalidRequiredVars = false,
-  templateName,
   credentials,
   setCredentials,
-  accountType,
+  accountType = ORGANIZATION_ACCOUNT,
+  iacTemplateUrl,
 }) => {
-  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
-
-  const cloudConnectorRemoteRoleTemplate =
-    cloud && templateName
-      ? getCloudConnectorRemoteRoleTemplate({
-          input,
-          cloud,
-          packageInfo,
-          templateName,
-          provider: GCP_PROVIDER,
-        })
-      : undefined;
+  const cloudConnectorRemoteRoleTemplate = cloud
+    ? getCloudConnectorRemoteRoleTemplate({
+        cloud,
+        accountType,
+        iacTemplateUrl,
+      })
+    : undefined;
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
 
-  // Update inputVars with current credentials using utility function or inputVars if no credentials are provided
   const updatedInputVars = credentials
     ? updateInputVarsWithCredentials(inputVars, credentials)
     : inputVars;
 
   const fields = getGcpCloudConnectorsCredentialsFormOptions(updatedInputVars);
 
-  // Get the Elastic Resource ID from cloud setup
-  const elasticResourceId = getElasticResourceId(cloud);
+  const elasticResourceId = getElasticStackId(cloud);
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
-  // Generate command text based on organization type
   const commandText = isOrganization
     ? `gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> ELASTIC_RESOURCE_ID=${
         elasticResourceId || '<ELASTIC_RESOURCE_ID>'
@@ -134,32 +146,21 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            // Update local credentials state if available
-            if (credentials && isGcpCredentials(credentials) && setCredentials) {
-              const updatedCredentials = { ...credentials };
-              if (
-                key === GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT ||
-                key === GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT
-              ) {
-                updatedCredentials.serviceAccount = value;
-              } else if (
-                key === GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE ||
-                key === GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE
-              ) {
-                updatedCredentials.audience = value;
-              } else if (
-                key === GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID
-              ) {
-                updatedCredentials.gcp_credentials_cloud_connector_id = value;
-              }
-              setCredentials(updatedCredentials);
-            } else {
-              // Fallback to old method
-              updatePolicy({
-                updatedPolicy: updatePolicyWithGcpCloudConnectorCredentials(newPolicy, input, {
-                  [key]: value,
-                } as Record<GcpCloudConnectorFieldNames, string | undefined>),
-              });
+            const credentialKey = getCredentialKeyFromVarName('gcp', key);
+
+            if (credentials && isGcpCredentials(credentials) && setCredentials && credentialKey) {
+              setCredentials({ ...credentials, [credentialKey]: value });
+              return;
+            }
+
+            if (credentialKey) {
+              const updatedPolicy = writeCredentials(
+                newPolicy,
+                { [credentialKey]: value },
+                'gcp',
+                packageInfo
+              );
+              updatePolicy({ updatedPolicy });
             }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}

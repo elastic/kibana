@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { InlineCastingType } from '../../..';
 import type { WalkerAstNode } from '../../../../ast';
 import { isLiteral, walk } from '../../../../ast';
 import type { ESQLInlineCast, ESQLMessage } from '../../../../types';
@@ -46,7 +47,7 @@ export function validateInlineCasts(
  * value:intt -> Error
  */
 function checkUnknownCastingType(node: ESQLInlineCast) {
-  const castFunction = getFunctionForInlineCast(node.castType);
+  const castFunction = getFunctionForInlineCast(node.castType as InlineCastingType);
   if (!castFunction) {
     return errors.unknownCastingType(node.castType, node.location);
   }
@@ -60,7 +61,7 @@ function checkUnknownCastingType(node: ESQLInlineCast) {
  * true::date -> Error
  */
 function checkInvalidCastValue(node: ESQLInlineCast, context: ICommandContext) {
-  const castFunction = getFunctionForInlineCast(node.castType);
+  const castFunction = getFunctionForInlineCast(node.castType as InlineCastingType);
   if (!castFunction) {
     return;
   }

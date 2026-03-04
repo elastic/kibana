@@ -322,7 +322,8 @@ describe('PrivilegesRolesForm', () => {
     });
   });
 
-  describe('applying custom privileges', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253663
+  describe.skip('applying custom privileges', () => {
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));

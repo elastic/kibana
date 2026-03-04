@@ -8,13 +8,7 @@
 import gte from 'semver/functions/gte';
 import { i18n } from '@kbn/i18n';
 
-import type {
-  NewPackagePolicy,
-  NewPackagePolicyInput,
-  NewPackagePolicyInputStream,
-  PackageInfo,
-  PackagePolicyConfigRecord,
-} from '../../../common';
+import type { PackageInfo, PackagePolicyConfigRecord } from '../../../common';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
@@ -27,30 +21,22 @@ import type {
   AzureCloudConnectorCredentials,
   GcpCloudConnectorCredentials,
   CloudConnectorCredentials,
-  CloudProviders,
-  CloudSetupForCloudConnector,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
   GCP_CLOUD_CONNECTOR_FIELD_NAMES,
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
-  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
-  CLOUD_SHELL_URL_CLOUD_CONNECTORS,
-  CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
   GCP_PROVIDER,
-  SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
-  AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
-  AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
-  GCP_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
 } from './constants';
@@ -187,7 +173,6 @@ export const getKibanaComponentId = (cloudId: string | undefined): string | unde
 
     return kibanaComponentId || undefined;
   } catch (error) {
-    // Return undefined if cloudId is malformed or cannot be decoded
     return undefined;
   }
 };
@@ -212,273 +197,32 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
-const getAccountTypeFromInput = (
-  input: NewPackagePolicyInput,
-  provider: CloudProviders
-): string | undefined => {
-  switch (provider) {
-    case AWS_PROVIDER:
-      return input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT;
-    case AZURE_PROVIDER:
-      return (
-        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT
-      );
-    case GCP_PROVIDER:
-      return input?.streams?.[0]?.vars?.[GCP_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT;
-  }
-  return undefined;
-};
-
-const getTemplateFieldNameByProvider = (provider: CloudProviders): string | undefined => {
-  switch (provider) {
-    case AWS_PROVIDER:
-      return CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS;
-    case AZURE_PROVIDER:
-      return ARM_TEMPLATE_URL_CLOUD_CONNECTORS;
-    case GCP_PROVIDER:
-      return CLOUD_SHELL_URL_CLOUD_CONNECTORS;
-    default:
-      return undefined;
-  }
-};
-
-/**
- * Helper function to get the Elastic Resource ID from cloud setup
- * @param cloud - Cloud setup configuration
- * @returns Elastic Resource ID or undefined
- */
-export const getElasticResourceId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
-  if (!cloud) return undefined;
-
-  // For serverless, use the project ID
-  if (cloud.isServerlessEnabled && cloud.serverless?.projectId) {
-    return cloud.serverless.projectId;
-  }
-
-  // For cloud deployments, use the Kibana component ID
-  if (cloud.isCloudEnabled) {
-    const deploymentId = getDeploymentIdFromUrl(cloud.deploymentUrl);
-    const kibanaComponentId = getKibanaComponentId(cloud.cloudId);
-    if (deploymentId && kibanaComponentId) {
-      return kibanaComponentId;
-    }
-  }
-
-  return undefined;
-};
-
 export const getCloudConnectorRemoteRoleTemplate = ({
-  input,
   cloud,
-  packageInfo,
-  templateName,
-  provider,
+  accountType,
+  iacTemplateUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  const elasticResourceId = getElasticResourceId(cloud);
-  const accountType = getAccountTypeFromInput(input, provider);
-  const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
+  let elasticResourceId: string | undefined;
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
 
-  if (!elasticResourceId || !templateUrlFieldName || !accountType) return undefined;
-
-  return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
-};
-
-/**
- * Helper function to update policy inputs with new variables
- * @param policy - The package policy to update
- * @param updatedVars - The updated variables to apply
- * @returns Updated policy with new input variables
- */
-const updatePolicyInputsWithVars = (
-  policy: NewPackagePolicy,
-  updatedVars: PackagePolicyConfigRecord
-): NewPackagePolicy => {
-  // Create a deep copy to avoid circular references
-  const updatedPolicy: NewPackagePolicy = {
-    ...policy,
-    inputs: policy.inputs
-      .map((input: NewPackagePolicyInput) => {
-        if (input.enabled && input.streams[0]?.enabled) {
-          return {
-            ...input,
-            streams: input.streams.map((stream: NewPackagePolicyInputStream) => {
-              if (stream.enabled) {
-                return {
-                  ...stream,
-                  vars: { ...updatedVars }, // Create a shallow copy instead of referencing directly
-                };
-              }
-              return { ...stream }; // Return a copy of the original stream if not enabled
-            }),
-          };
-        }
-        return { ...input }; // Return a copy of the original input if not enabled
-      })
-      .filter(Boolean), // Filter out undefined values
-  };
-
-  return updatedPolicy;
-};
-
-/**
- * Update AWS cloud connector credentials in package policy
- */
-export const updatePolicyWithAwsCloudConnectorCredentials = (
-  packagePolicy: NewPackagePolicy,
-  input: NewPackagePolicyInput,
-  inputCredentials: Partial<Record<AwsCloudConnectorFieldNames, string | undefined>>
-): NewPackagePolicy => {
-  if (!inputCredentials) return packagePolicy;
-
-  const updatedPolicy = { ...packagePolicy };
-
-  if (!updatedPolicy.inputs) {
-    updatedPolicy.inputs = [];
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
   }
 
-  if (!input.streams[0].vars) return updatedPolicy;
-
-  const updatedVars = { ...input.streams[0].vars };
-
-  // Update role_arn if it exists in inputCredentials
-  if (inputCredentials.role_arn) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value = inputCredentials.role_arn;
-  }
-  // Update external_id if it exists in inputCredentials
-  if (inputCredentials.external_id) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value = inputCredentials.external_id;
-  }
-  // Update aws.role_arn if it exists in inputCredentials
-  if (inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
-      inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
-  }
-  // Update aws.credentials.external_id if it exists in inputCredentials
-  if (inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
-    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
-      inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
   }
 
-  return updatePolicyInputsWithVars(updatedPolicy, updatedVars);
-};
+  if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
 
-/**
- * Updates input variables with Aazure credentials
- * @param inputVars - The original input variables
- * @param inputCredentials - The Azure credentials to apply
- * @returns Updated input variables with Azure credentials applied
- */
-export const updatePolicyWithAzureCloudConnectorCredentials = (
-  packagePolicy: NewPackagePolicy,
-  input: NewPackagePolicyInput,
-  inputCredentials: Partial<Record<AzureCloudConnectorFieldNames, string | undefined>>
-): NewPackagePolicy => {
-  if (!inputCredentials) return packagePolicy;
-
-  const updatedPolicy = { ...packagePolicy };
-
-  if (!updatedPolicy.inputs || !updatedPolicy.inputs[0]) {
-    return updatedPolicy;
-  }
-
-  if (!input.streams || !input.streams[0].vars) return updatedPolicy;
-
-  const updatedVars = { ...input.streams[0].vars };
-
-  // Update tenant_id if it exists in inputCredentials
-  if (inputCredentials.tenant_id) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value = inputCredentials.tenant_id;
-  }
-
-  // Update client_id if it exists in inputCredentials
-  if (inputCredentials.client_id) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value = inputCredentials.client_id;
-  }
-
-  // Update azure.credentials.tenant_id if exists in inputCredentials
-  if (inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID].value =
-      inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID];
-  }
-
-  // Update azure.credentials.client_id if exists in inputCredentials
-  if (inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID].value =
-      inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID];
-  }
-
-  // Update azure_credentials_cloud_connector_id if exists in inputCredentials
-  if (inputCredentials.azure_credentials_cloud_connector_id) {
-    updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID].value =
-      inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID];
-  }
-
-  return updatePolicyInputsWithVars(updatedPolicy, updatedVars);
-};
-
-/**
- * Updates input variables with GCP credentials
- * @param packagePolicy - The package policy to update
- * @param input - The input containing the streams to update
- * @param inputCredentials - The GCP credentials to apply
- * @returns Updated package policy with GCP credentials applied
- */
-export const updatePolicyWithGcpCloudConnectorCredentials = (
-  packagePolicy: NewPackagePolicy,
-  input: NewPackagePolicyInput,
-  inputCredentials: Partial<Record<GcpCloudConnectorFieldNames, string | undefined>>
-): NewPackagePolicy => {
-  if (!inputCredentials) return packagePolicy;
-
-  const updatedPolicy = { ...packagePolicy };
-
-  if (!updatedPolicy.inputs || !updatedPolicy.inputs[0]) {
-    return updatedPolicy;
-  }
-
-  if (!input.streams || !input.streams[0].vars) return updatedPolicy;
-
-  const updatedVars = { ...input.streams[0].vars };
-
-  // Update service_account if it exists in inputCredentials
-  if (inputCredentials.service_account) {
-    updatedVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT].value =
-      inputCredentials.service_account;
-  }
-
-  // Update audience if it exists in inputCredentials
-  if (inputCredentials.audience) {
-    updatedVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE].value = inputCredentials.audience;
-  }
-
-  // Update gcp.service_account if exists in inputCredentials
-  if (inputCredentials[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT]) {
-    updatedVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT].value =
-      inputCredentials[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT];
-  }
-
-  // Update gcp.audience if exists in inputCredentials
-  if (inputCredentials[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE]) {
-    updatedVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE].value =
-      inputCredentials[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE];
-  }
-
-  // Update gcp_credentials_cloud_connector_id if exists in inputCredentials
-  if (inputCredentials.gcp_credentials_cloud_connector_id) {
-    updatedVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID].value =
-      inputCredentials[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID];
-  }
-
-  return updatePolicyInputsWithVars(updatedPolicy, updatedVars);
+  return iacTemplateUrl
+    .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+    .replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 /**
  * Updates input variables with AWS credentials
- * @param inputVars - The original input variables
- * @param inputCredentials - The AWS credentials to apply
- * @returns Updated input variables with AWS credentials applied
  */
 export const updateInputVarsWithAwsCredentials = (
   inputVars: PackagePolicyConfigRecord | undefined,
@@ -486,10 +230,8 @@ export const updateInputVarsWithAwsCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
-  // Use spread operator - it works fine as long as we don't mutate nested objects
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
-  // Update role_arn fields - always create new objects instead of mutating
   if (inputCredentials?.roleArn !== undefined) {
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn = {
@@ -504,7 +246,6 @@ export const updateInputVarsWithAwsCredentials = (
       };
     }
   } else {
-    // Clear role_arn fields when roleArn is undefined
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn = { value: undefined };
     }
@@ -513,7 +254,6 @@ export const updateInputVarsWithAwsCredentials = (
     }
   }
 
-  // Update external_id fields
   if (inputCredentials?.externalId !== undefined) {
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: inputCredentials.externalId };
@@ -524,7 +264,6 @@ export const updateInputVarsWithAwsCredentials = (
       };
     }
   } else {
-    // Clear external_id fields when externalId is undefined
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: undefined };
     }
@@ -538,9 +277,6 @@ export const updateInputVarsWithAwsCredentials = (
 
 /**
  * Updates input variables with Azure credentials
- * @param inputVars - The original input variables
- * @param credentials - The Azure credentials to apply
- * @returns Updated input variables with Azure credentials applied
  */
 export const updateInputVarsWithAzureCredentials = (
   inputVars: PackagePolicyConfigRecord | undefined,
@@ -548,19 +284,15 @@ export const updateInputVarsWithAzureCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
-  // Use spread operator but ensure we create new objects for nested properties
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
-  // Update Azure-specific fields - always create new objects instead of mutating
   if (credentials?.tenantId !== undefined) {
-    // Update tenant_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID],
         value: credentials.tenantId,
       };
     }
-    // Update azure.credentials.tenant_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID],
@@ -568,7 +300,6 @@ export const updateInputVarsWithAzureCredentials = (
       };
     }
   } else {
-    // Clear tenant_id field when tenantId is undefined - clear BOTH possible field variations
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = { value: undefined };
     }
@@ -578,14 +309,12 @@ export const updateInputVarsWithAzureCredentials = (
   }
 
   if (credentials?.clientId !== undefined) {
-    // Update client_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID],
         value: credentials.clientId,
       };
     }
-    // Update azure.credentials.client_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID],
@@ -593,7 +322,6 @@ export const updateInputVarsWithAzureCredentials = (
       };
     }
   } else {
-    // Clear client_id field when clientId is undefined - clear BOTH possible field variations
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = { value: undefined };
     }
@@ -614,7 +342,6 @@ export const updateInputVarsWithAzureCredentials = (
       };
     }
   } else {
-    // Clear azure_credentials_cloud_connector_id field when azure_credentials_cloud_connector_id is undefined
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
         value: undefined,
@@ -627,9 +354,6 @@ export const updateInputVarsWithAzureCredentials = (
 
 /**
  * Updates input variables with GCP credentials
- * @param inputVars - The original input variables
- * @param credentials - The GCP credentials to apply
- * @returns Updated input variables with GCP credentials applied
  */
 export const updateInputVarsWithGcpCredentials = (
   inputVars: PackagePolicyConfigRecord | undefined,
@@ -639,16 +363,13 @@ export const updateInputVarsWithGcpCredentials = (
 
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
-  // Update GCP-specific fields
   if (credentials?.serviceAccount !== undefined) {
-    // Update service_account if it exists
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT] = {
         ...updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT],
         value: credentials.serviceAccount,
       };
     }
-    // Update gcp.service_account if it exists
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT] = {
         ...updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT],
@@ -656,7 +377,6 @@ export const updateInputVarsWithGcpCredentials = (
       };
     }
   } else {
-    // Clear service_account field when serviceAccount is undefined
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT] = { value: undefined };
     }
@@ -666,14 +386,12 @@ export const updateInputVarsWithGcpCredentials = (
   }
 
   if (credentials?.audience !== undefined) {
-    // Update audience if it exists
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE] = {
         ...updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE],
         value: credentials.audience,
       };
     }
-    // Update gcp.audience if it exists
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE] = {
         ...updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE],
@@ -681,7 +399,6 @@ export const updateInputVarsWithGcpCredentials = (
       };
     }
   } else {
-    // Clear audience field when audience is undefined
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE] = { value: undefined };
     }
@@ -702,7 +419,6 @@ export const updateInputVarsWithGcpCredentials = (
       };
     }
   } else {
-    // Clear gcp_credentials_cloud_connector_id field when gcp_credentials_cloud_connector_id is undefined
     if (updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
       updatedInputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
         value: undefined,
@@ -715,9 +431,6 @@ export const updateInputVarsWithGcpCredentials = (
 
 /**
  * Updates input variables with current credentials
- * @param inputVars - The original input variables
- * @param credentials - The current credentials to apply
- * @returns Updated input variables with credentials applied
  */
 export const updateInputVarsWithCredentials = (
   inputVars: PackagePolicyConfigRecord | undefined,
@@ -725,27 +438,35 @@ export const updateInputVarsWithCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
+  let updatedVars: PackagePolicyConfigRecord | undefined;
+
   // If credentials is undefined, clear all credential fields (AWS, Azure, and GCP)
   if (!credentials) {
-    let clearedVars = updateInputVarsWithAwsCredentials(inputVars, undefined);
-    clearedVars = updateInputVarsWithAzureCredentials(clearedVars, undefined);
-    clearedVars = updateInputVarsWithGcpCredentials(clearedVars, undefined);
-    return clearedVars;
+    updatedVars = updateInputVarsWithAwsCredentials(inputVars, undefined);
+    updatedVars = updateInputVarsWithAzureCredentials(updatedVars, undefined);
+    updatedVars = updateInputVarsWithGcpCredentials(updatedVars, undefined);
+  } else if (isAwsCredentials(credentials)) {
+    updatedVars = updateInputVarsWithAwsCredentials(inputVars, credentials);
+  } else if (isAzureCredentials(credentials)) {
+    updatedVars = updateInputVarsWithAzureCredentials(inputVars, credentials);
+  } else if (isGcpCredentials(credentials)) {
+    updatedVars = updateInputVarsWithGcpCredentials(inputVars, credentials);
+  } else {
+    updatedVars = inputVars;
   }
 
-  if (isAwsCredentials(credentials)) {
-    return updateInputVarsWithAwsCredentials(inputVars, credentials);
+  // Set supports_cloud_connectors flag if the var exists in the record.
+  if (updatedVars && SUPPORTS_CLOUD_CONNECTORS_VAR_NAME in updatedVars) {
+    updatedVars = {
+      ...updatedVars,
+      [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]: {
+        ...updatedVars[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME],
+        value: !!credentials,
+      },
+    };
   }
 
-  if (isAzureCredentials(credentials)) {
-    return updateInputVarsWithAzureCredentials(inputVars, credentials);
-  }
-
-  if (isGcpCredentials(credentials)) {
-    return updateInputVarsWithGcpCredentials(inputVars, credentials);
-  }
-
-  return inputVars;
+  return updatedVars;
 };
 
 export const isCloudConnectorReusableEnabled = (
@@ -759,6 +480,10 @@ export const isCloudConnectorReusableEnabled = (
     }
     if (templateName === 'asset_inventory') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
+    }
+
+    if (templateName === 'aws') {
+      return true;
     }
   } else if (provider === AZURE_PROVIDER) {
     if (templateName === 'cspm') {
@@ -775,15 +500,19 @@ export const isCloudConnectorReusableEnabled = (
       return gte(packageInfoVersion, CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
   }
+
   return false;
 };
 
 /**
  * Find a variable definition from package info
- * It navigates through nested arrays within the packageInfo object to locate the variable definition associated with the provided key.
- * If found, it returns the variable definition object; otherwise, it returns undefined.
  */
 export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
+  const packageLevelVar = packageInfo?.vars?.find((v) => v?.name === key);
+  if (packageLevelVar) {
+    return packageLevelVar;
+  }
+
   return packageInfo?.data_streams
     ?.filter((datastreams) => datastreams !== undefined)
     .map((ds) => ds.streams)

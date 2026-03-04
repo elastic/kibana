@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -203,6 +204,9 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -267,27 +271,18 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
-              const bulkActionOutcome = await initPromisePool({
-                concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-                items: rules,
-                executor: async (rule) => {
-                  // during dry run return early for delete, as no validations needed for this action
-                  if (isDryRun) {
-                    return null;
-                  }
+              // during dry run return early for delete, as no validations needed for this action
+              if (isDryRun) {
+                // Populate `deleted` so the summary reflects the correct count of affected rules
+                deleted = rules;
+                break;
+              }
 
-                  await detectionRulesClient.deleteRule({
-                    ruleId: rule.id,
-                  });
+              const ruleIds = rules.map((rule) => rule.id);
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
 
-                  return null;
-                },
-                abortSignal: abortController.signal,
-              });
-              errors.push(...bulkActionOutcome.errors);
-              deleted = bulkActionOutcome.results
-                .map(({ item }) => item)
-                .filter((rule): rule is RuleAlertType => rule !== null);
+              errors.push(...bulkDeleteResult.errors);
+              deleted = bulkDeleteResult.rules;
               break;
             }
             case BulkActionTypeEnum.duplicate: {
@@ -296,6 +291,14 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkDuplicateRule({ mlAuthz, rule });
+
+                  await validateRuleResponseActions({
+                    endpointAuthz,
+                    endpointService,
+                    rulePayload: {},
+                    spaceId,
+                    existingRule: rule,
+                  });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {

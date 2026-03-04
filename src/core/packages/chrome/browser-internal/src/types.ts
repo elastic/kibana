@@ -24,8 +24,7 @@ import type {
 import type { Observable } from 'rxjs';
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface InternalChromeSetup extends ChromeSetup {}
+export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -98,13 +97,6 @@ export interface InternalChromeStart extends ChromeStart {
   getSidebarComponent(): JSX.Element;
 
   /**
-   * Used only by the rendering service to retrieve the set of classNames
-   * that will be set on the body element.
-   * @internal
-   */
-  getBodyClasses$(): Observable<string[]>;
-
-  /**
    * Used only by the rendering service to render the global footer UI (devbar)
    * @internal
    */
@@ -128,12 +120,6 @@ export interface InternalChromeStart extends ChromeStart {
      * @param cloudUrls
      */
     setCloudUrls(cloudUrls: CloudURLs): void;
-
-    /**
-     * Sets the feedback URL parameters.
-     * @param feedbackUrlParams
-     */
-    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
 
     /**
      * Sets the Kibana name - project name for serverless, deployment name for ECH.

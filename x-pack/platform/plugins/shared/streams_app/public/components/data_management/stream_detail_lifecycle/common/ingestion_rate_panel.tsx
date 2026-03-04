@@ -27,10 +27,10 @@ export function IngestionRatePanel({
       hasBorder
       paddingSize="m"
       grow={false}
-      css={{ height: '100%', minHeight: '256px' }}
+      css={{ height: '100%', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
       data-test-subj="ingestionRatePanel"
     >
-      <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+      <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -59,9 +59,7 @@ export function IngestionRatePanel({
           </EuiPanel>
         </EuiFlexItem>
 
-        <EuiFlexItem grow css={{ minHeight: '200px' }}>
-          {children}
-        </EuiFlexItem>
+        <EuiFlexItem grow>{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

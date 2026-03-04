@@ -13,6 +13,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { ReplaySubject } from 'rxjs';
 import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
@@ -31,6 +32,7 @@ jest.mock('@kbn/core-theme-browser-internal', () => {
 });
 
 describe('handleSystemColorModeChange', () => {
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
   const originalMatchMedia = window.matchMedia;
 
   afterAll(() => {
@@ -47,6 +49,7 @@ describe('handleSystemColorModeChange', () => {
     const http = httpServiceMock.createStartContract();
     const uiSettings = uiSettingsServiceMock.createStartContract();
     const stop$ = new ReplaySubject<void>(1);
+    const logger = loggerMock.create();
 
     return {
       coreStart,
@@ -54,6 +57,7 @@ describe('handleSystemColorModeChange', () => {
       http,
       uiSettings,
       stop$,
+      logger,
     };
   };
 
@@ -96,30 +100,31 @@ describe('handleSystemColorModeChange', () => {
 
   describe('doHandle guard', () => {
     it('does not handle if the system color mode is not supported', () => {
+      const { logger } = getDeps();
       const { addEventListenerMock } = mockMatchMedia();
       expect(addEventListenerMock).not.toHaveBeenCalled();
       mockbrowsersSupportsSystemTheme.mockReturnValue(false);
 
-      handleSystemColorModeChange({} as any);
+      handleSystemColorModeChange({ logger } as any);
 
       expect(addEventListenerMock).not.toHaveBeenCalled();
     });
 
     it('does not handle on unauthenticated routes', () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const { addEventListenerMock } = mockMatchMedia();
       expect(addEventListenerMock).not.toHaveBeenCalled();
 
       mockbrowsersSupportsSystemTheme.mockReturnValue(true);
       http.anonymousPaths.isAnonymous.mockReturnValue(true);
 
-      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
 
       expect(addEventListenerMock).not.toHaveBeenCalled();
     });
 
     it('does not handle if user profile darkmode is not "system"', () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const { addEventListenerMock } = mockMatchMedia();
       expect(addEventListenerMock).not.toHaveBeenCalled();
 
@@ -133,13 +138,13 @@ describe('handleSystemColorModeChange', () => {
         },
       } as any);
 
-      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
 
       expect(addEventListenerMock).not.toHaveBeenCalled();
     });
 
     it('does not handle if user profile darkmode is "space_default" but the uiSettings darkmode is not "system"', () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const { addEventListenerMock } = mockMatchMedia();
       expect(addEventListenerMock).not.toHaveBeenCalled();
 
@@ -161,13 +166,13 @@ describe('handleSystemColorModeChange', () => {
         return 'foo';
       });
 
-      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
 
       expect(addEventListenerMock).not.toHaveBeenCalled();
     });
 
     it('does handle if user profile darkmode is "system"', async () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const { addEventListenerMock } = mockMatchMedia(false);
       expect(addEventListenerMock).not.toHaveBeenCalled();
 
@@ -175,13 +180,14 @@ describe('handleSystemColorModeChange', () => {
       http.anonymousPaths.isAnonymous.mockReturnValue(false);
       coreStart.userProfile.getCurrent.mockResolvedValue(mockUserProfileResponse('system'));
 
-      await handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
+      await flushPromises();
 
       expect(addEventListenerMock).toHaveBeenCalled();
     });
 
     it('does handle if user profile darkmode is "space_default" and uiSetting darkmode is "system"', async () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const { addEventListenerMock } = mockMatchMedia(false);
       expect(addEventListenerMock).not.toHaveBeenCalled();
 
@@ -190,15 +196,39 @@ describe('handleSystemColorModeChange', () => {
       coreStart.userProfile.getCurrent.mockResolvedValue(mockUserProfileResponse('space_default'));
       mockUiSettingsDarkMode(uiSettings, 'system');
 
-      await handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
+      await flushPromises();
 
       expect(addEventListenerMock).toHaveBeenCalled();
+    });
+
+    it('handles async errors internally', async () => {
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
+      const { addEventListenerMock } = mockMatchMedia();
+      mockbrowsersSupportsSystemTheme.mockReturnValue(true);
+      http.anonymousPaths.isAnonymous.mockReturnValue(false);
+      coreStart.userProfile.getCurrent.mockRejectedValue(new Error('boom'));
+
+      expect(() =>
+        handleSystemColorModeChange({
+          coreStart,
+          getNotifications,
+          http,
+          uiSettings,
+          stop$,
+          logger,
+        })
+      ).not.toThrow();
+
+      await flushPromises();
+      expect(addEventListenerMock).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(new Error('boom'));
     });
   });
 
   describe('onDarkModeChange()', () => {
     it('does show a toast when the system color mode changes', async () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const currentDarkMode = false; // The system is currently in light mode
       const addEventListenerMock = jest
         .fn()
@@ -220,12 +250,13 @@ describe('handleSystemColorModeChange', () => {
       http.anonymousPaths.isAnonymous.mockReturnValue(false);
       coreStart.userProfile.getCurrent.mockResolvedValue(mockUserProfileResponse('system'));
 
-      await handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
+      await flushPromises();
       expect(addEventListenerMock).toHaveBeenCalled();
     });
 
     it('does **not** show a toast when the system color mode changes to the current darkmode value', async () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const currentDarkMode = true; // The system is currently in dark mode
       const addEventListenerMock = jest
         .fn()
@@ -241,12 +272,13 @@ describe('handleSystemColorModeChange', () => {
       http.anonymousPaths.isAnonymous.mockReturnValue(false);
       coreStart.userProfile.getCurrent.mockResolvedValue(mockUserProfileResponse('system'));
 
-      await handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
+      await flushPromises();
       expect(addEventListenerMock).toHaveBeenCalled();
     });
 
     it('stops listening to changes on stop$ change', async () => {
-      const { coreStart, getNotifications, http, uiSettings, stop$ } = getDeps();
+      const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const currentDarkMode = false; // The system is currently in light mode
       const { addEventListenerMock, removeEventListenerMock } = mockMatchMedia(currentDarkMode);
 
@@ -254,7 +286,8 @@ describe('handleSystemColorModeChange', () => {
       http.anonymousPaths.isAnonymous.mockReturnValue(false);
       coreStart.userProfile.getCurrent.mockResolvedValue(mockUserProfileResponse('system'));
 
-      await handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$ });
+      handleSystemColorModeChange({ coreStart, getNotifications, http, uiSettings, stop$, logger });
+      await flushPromises();
       expect(addEventListenerMock).toHaveBeenCalled();
       expect(removeEventListenerMock).not.toHaveBeenCalled();
 

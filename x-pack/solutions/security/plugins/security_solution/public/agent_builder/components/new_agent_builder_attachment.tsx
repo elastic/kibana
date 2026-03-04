@@ -9,7 +9,6 @@ import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
-import { agentBuilderIconType } from '@kbn/agent-builder-plugin/public';
 import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
 import { useReportAddToChat } from '../hooks/use_report_add_to_chat';
 import * as i18n from './translations';
@@ -82,7 +81,11 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={agentBuilderIconType} color={color === 'primary' ? 'default' : color} />
+          <EuiIcon
+            type="productAgent"
+            color={color === 'primary' ? 'default' : color}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{i18n.ADD_TO_CHAT}</EuiFlexItem>
       </EuiFlexGroup>

@@ -137,7 +137,6 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/apm-sources-access-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/object-utils'
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
@@ -155,6 +154,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
+  - '@kbn/esql-language'
 tags:
   - plugin
   - prod

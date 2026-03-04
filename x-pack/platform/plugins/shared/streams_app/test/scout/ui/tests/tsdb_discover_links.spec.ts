@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EsClient } from '@kbn/scout';
+import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
@@ -108,7 +108,7 @@ async function cleanupTsdbResources(esClient: EsClient, templateName: string, st
 
 test.describe(
   'TSDB-aware Discover links - Streams list view',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, logsSynthtraceEsClient }) => {
       // Create TSDB stream

@@ -107,7 +107,7 @@ export class BasicPrettyPrinter {
       : node.type === 'command'
       ? BasicPrettyPrinter.command(node, opts)
       : node.type === 'header-command'
-      ? BasicPrettyPrinter.command(node as any, opts)
+      ? BasicPrettyPrinter.command(node as unknown as ESQLAstCommand, opts)
       : BasicPrettyPrinter.expression(node, opts);
   };
 
@@ -264,7 +264,7 @@ export class BasicPrettyPrinter {
     return sign ? `${sign}${expression}` : expression;
   }
 
-  protected readonly visitor: Visitor<any> = new Visitor()
+  protected readonly visitor: Visitor = new Visitor()
     .on('visitExpression', (ctx) => {
       if (ctx.node.type === 'unknown') {
         return this.decorateWithComments(ctx.node, ctx.node.text || '<UNKNOWN>');
@@ -628,7 +628,7 @@ export class BasicPrettyPrinter {
       }
 
       return text;
-    });
+    }) as unknown as Visitor;
 
   public print(query: ESQLAstQueryExpression) {
     return this.visitor.visitQuery(query, undefined);

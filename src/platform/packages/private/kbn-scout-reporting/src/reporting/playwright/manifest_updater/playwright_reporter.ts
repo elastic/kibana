@@ -65,7 +65,6 @@ export class ScoutManifestUpdater implements Reporter {
       this.scoutConfig.manifest.path,
       JSON.stringify(
         {
-          lastModified: new Date().toISOString(),
           sha1: await getGitSHA1ForPath(path.dirname(this.scoutConfig.path)),
           tests: this.scoutConfig.manifest.tests,
         },

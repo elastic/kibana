@@ -27,6 +27,7 @@ import {
   privilegeMonitoringType,
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
+import { watchlistConfigType } from './lib/entity_analytics/watchlists/management/saved_object/watchlist_config_type';
 import {
   PrivilegeMonitoringApiKeyEncryptionParams,
   PrivilegeMonitoringApiKeyType,
@@ -51,6 +52,7 @@ const types = [
   riskEngineConfigurationType,
   entityEngineDescriptorType,
   privilegeMonitoringType,
+  watchlistConfigType,
   PrivilegeMonitoringApiKeyType,
   monitoringEntitySourceType,
   protectionUpdatesNoteType,

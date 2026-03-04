@@ -6,7 +6,7 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import { streamQueryInputSchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
@@ -96,13 +96,13 @@ const upsertQueryRoute = createServerRoute({
     } = params;
     await assertEnterpriseLicense(licensing);
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
     await assertFeatureNotChanged({
       queryClient,
       streamName,
       queries: [{ id: queryId, feature: body.feature }],
     });
-    await queryClient.upsert(streamName, {
+    await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
       feature: body.feature,
@@ -150,14 +150,14 @@ const deleteQueryRoute = createServerRoute({
       path: { queryId, name: streamName },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
 
     const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
 
-    await queryClient.delete(streamName, queryId);
+    await queryClient.delete(definition, queryId);
 
     logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
@@ -190,7 +190,7 @@ const bulkQueriesRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
-            index: streamQuerySchema,
+            index: streamQueryInputSchema,
           }),
           z.object({
             delete: z.object({ id: z.string() }),
@@ -213,14 +213,14 @@ const bulkQueriesRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
 
     const indexOperations = operations.flatMap((op) =>
       'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
     );
     await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
 
-    await queryClient.bulk(streamName, operations);
+    await queryClient.bulk(definition, operations);
 
     logger
       .get('significant_events')

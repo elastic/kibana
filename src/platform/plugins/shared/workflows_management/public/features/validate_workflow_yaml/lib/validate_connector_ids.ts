@@ -13,6 +13,10 @@ import {
   getActionTypeDisplayNameFromStepType,
   getActionTypeIdFromStepType,
 } from '../../../shared/lib/action_type_utils';
+import {
+  getConnectorTypesFromStepType,
+  isCreateConnectorEnabledForStepType,
+} from '../../../shared/lib/connectors_utils';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import {
   getCreateConnectorHoverCommandLink,
@@ -61,32 +65,35 @@ export function validateConnectorIds(
   );
 
   for (const connectorIdItem of notReferenceConnectorIds) {
-    const connectorType = dynamicConnectorTypes[connectorIdItem.connectorType];
+    const stepType = connectorIdItem.connectorType;
+
+    const connectorType = dynamicConnectorTypes[stepType];
     const displayName =
-      connectorType?.displayName ??
-      getActionTypeDisplayNameFromStepType(connectorIdItem.connectorType);
-    const instances = getConnectorInstancesForType(
-      connectorIdItem.connectorType,
-      dynamicConnectorTypes
-    );
+      connectorType?.displayName ?? getActionTypeDisplayNameFromStepType(stepType);
+    const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
 
     const instance = instances.find((ins) => ins.id === connectorIdItem.key);
-
-    const actionType = getActionTypeIdFromStepType(connectorIdItem.connectorType);
     // Create insert position at the start of the connector-id value
     const insertPosition = {
       lineNumber: connectorIdItem.startLineNumber,
       column: connectorIdItem.startColumn,
     };
-    const createConnectorLink = getCreateConnectorHoverCommandLink({
-      text: TRANSLATIONS.createConnector,
-      connectorType: actionType,
-      insertPosition,
-    });
 
     const manageConnectorLink = `[${TRANSLATIONS.manageConnector}](${connectorsManagementUrl})`;
 
     if (!instance) {
+      const actions: string[] = [];
+      if (isCreateConnectorEnabledForStepType(stepType)) {
+        const resolvedConnectorType = getConnectorTypesFromStepType(stepType)[0];
+        const createConnectorLink = getCreateConnectorHoverCommandLink({
+          text: TRANSLATIONS.createConnector,
+          connectorType: getActionTypeIdFromStepType(resolvedConnectorType),
+          insertPosition,
+        });
+        actions.push(createConnectorLink);
+      }
+      actions.push(manageConnectorLink);
+
       const errorResult: YamlValidationResult = {
         id: connectorIdItem.id,
         severity: 'error',
@@ -101,15 +108,28 @@ export function validateConnectorIds(
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
         beforeMessage: null,
-        hoverMessage: `${createConnectorLink} | ${manageConnectorLink}`,
+        hoverMessage: actions.join(' | '),
       };
       results.push(errorResult);
     } else {
-      const editConnectorLink = getEditConnectorHoverCommandLink({
-        text: TRANSLATIONS.editConnector,
-        connectorType: actionType,
-        connectorId: instance.id,
-      });
+      const actions: string[] = [];
+      actions.push(
+        getEditConnectorHoverCommandLink({
+          text: TRANSLATIONS.editConnector,
+          connectorType: instance.connectorType,
+          connectorId: instance.id,
+        })
+      );
+      if (isCreateConnectorEnabledForStepType(stepType)) {
+        actions.push(
+          getCreateConnectorHoverCommandLink({
+            text: TRANSLATIONS.createConnector,
+            connectorType: instance.connectorType,
+            insertPosition,
+          })
+        );
+      }
+      actions.push(manageConnectorLink);
 
       const connectedMessage = i18n.translate(
         'workflows.validateConnectorIds.connectorFoundMessage',
@@ -119,7 +139,7 @@ export function validateConnectorIds(
         }
       );
       const uuidMessage = `Connector uuid: <code>${instance.id}</code>`;
-      const actionsMessage = `${editConnectorLink} | ${createConnectorLink} | ${manageConnectorLink}`;
+      const actionsMessage = actions.join(' | ');
 
       const validResult: YamlValidationResult = {
         id: connectorIdItem.id,

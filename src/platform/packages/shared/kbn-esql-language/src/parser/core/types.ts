@@ -65,7 +65,7 @@ export interface ParsedFormattingLineBreakDecoration {
 }
 
 type Functions<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+  [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? K : never;
 };
 type GrammarRule = keyof Functions<InstanceType<typeof esql_parser.default>>;
 type CstToAstConversion = keyof Functions<CstToAstConverter>;

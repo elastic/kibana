@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
-import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
+import type { SidebarAppId, SidebarAppStatus } from '@kbn/core-chrome-sidebar';
 
 /** Global sidebar state API */
 export interface UseSidebarApi {
@@ -56,6 +56,8 @@ export interface UseSidebarAppApi<TState = undefined, TActions = undefined> {
   state: TState;
   /** Bound actions to modify state. Undefined for stateless apps. */
   actions: TActions;
+  /** Current app status (reactive) */
+  status: SidebarAppStatus;
   /** Open sidebar to this app */
   open: () => void;
   /** Close sidebar */
@@ -70,6 +72,7 @@ export function useSidebarApp<TState = undefined, TActions = undefined>(
   const appApi = sidebar.getApp<TState, TActions>(appId);
 
   const state = useObservable(appApi.getState$(), appApi.getState());
+  const status = useObservable(appApi.getStatus$(), appApi.getStatus());
 
   const open = useCallback(() => appApi.open(), [appApi]);
   const close = useCallback(() => appApi.close(), [appApi]);
@@ -78,9 +81,10 @@ export function useSidebarApp<TState = undefined, TActions = undefined>(
     () => ({
       state,
       actions: appApi.actions,
+      status,
       open,
       close,
     }),
-    [state, appApi.actions, open, close]
+    [state, appApi.actions, status, open, close]
   );
 }

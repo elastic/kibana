@@ -66,18 +66,18 @@ export interface NormalizedAwsCredentials {
 export interface NormalizedAzureCredentials {
   tenantId?: string | { id: string; isSecretRef: boolean };
   clientId?: string | { id: string; isSecretRef: boolean };
-  azureCredentialsCloudConnectorId?: string;
+  azure_credentials_cloud_connector_id?: string;
 }
 
 /**
  * Normalized GCP credentials extracted from package policy
  * service_account and audience are non-secret text fields;
- * only gcpCredentialsCloudConnectorId is a secret reference.
+ * only gcp_credentials_cloud_connector_id is a secret reference.
  */
 export interface NormalizedGcpCredentials {
   serviceAccount?: string;
   audience?: string;
-  gcpCredentialsCloudConnectorId?: string | { id: string; isSecretRef: boolean };
+  gcp_credentials_cloud_connector_id?: string | { id: string; isSecretRef: boolean };
 }
 
 /**

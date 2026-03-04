@@ -36,6 +36,7 @@ export interface WorkflowExecutionListProps {
   onExecutionClick: (executionId: string) => void;
   selectedId: string | null;
   setPaginationObserver: (ref: HTMLDivElement | null) => void;
+  showExecutor?: boolean;
 }
 
 // TODO: use custom table? add pagination and search
@@ -52,6 +53,7 @@ export const WorkflowExecutionList = ({
   onExecutionClick,
   selectedId,
   setPaginationObserver,
+  showExecutor = false,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
@@ -98,7 +100,7 @@ export const WorkflowExecutionList = ({
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         css={styles.container}
-        icon={<EuiIcon type="error" size="l" />}
+        icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -115,7 +117,7 @@ export const WorkflowExecutionList = ({
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         css={styles.container}
-        icon={<EuiIcon type="play" size="l" />}
+        icon={<EuiIcon type="play" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -150,6 +152,7 @@ export const WorkflowExecutionList = ({
                   duration={execution.duration}
                   executedBy={execution.executedBy}
                   triggeredBy={execution.triggeredBy}
+                  showExecutor={showExecutor}
                   selected={execution.id === selectedId}
                   onClick={() => onExecutionClick(execution.id)}
                 />
@@ -183,6 +186,7 @@ export const WorkflowExecutionList = ({
       gutterSize="s"
       justifyContent="flexStart"
       css={styles.container}
+      data-test-subj="workflowExecutionList"
     >
       <header>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -201,6 +205,7 @@ export const WorkflowExecutionList = ({
               filters={filters}
               onFiltersChange={onFiltersChange}
               availableExecutedByOptions={availableExecutedByOptions}
+              showExecutor={showExecutor}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

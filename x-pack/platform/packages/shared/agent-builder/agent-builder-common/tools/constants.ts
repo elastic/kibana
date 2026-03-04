@@ -30,13 +30,15 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
-  // Attachment tools
-  attachmentRead: platformCoreTool('attachment_read'),
-  attachmentUpdate: platformCoreTool('attachment_update'),
-  attachmentAdd: platformCoreTool('attachment_add'),
-  attachmentList: platformCoreTool('attachment_list'),
-  attachmentDiff: platformCoreTool('attachment_diff'),
 } as const;
+
+export const attachmentTools = {
+  read: `${internalNamespaces.attachments}.read`,
+  update: `${internalNamespaces.attachments}.update`,
+  add: `${internalNamespaces.attachments}.add`,
+  list: `${internalNamespaces.attachments}.list`,
+  diff: `${internalNamespaces.attachments}.diff`,
+};
 
 export const filestoreTools = {
   read: `${internalNamespaces.filestore}.read`,
@@ -44,6 +46,15 @@ export const filestoreTools = {
   grep: `${internalNamespaces.filestore}.grep`,
   glob: `${internalNamespaces.filestore}.glob`,
 };
+
+export const isAttachmentTool = (toolName: string) =>
+  Object.values(attachmentTools).includes(toolName);
+
+export const isFilestoreTool = (toolName: string) =>
+  Object.values(filestoreTools).includes(toolName);
+
+export const isInternalTool = (toolName: string) =>
+  isAttachmentTool(toolName) || isFilestoreTool(toolName);
 
 /**
  * List of tool types which can be created / edited by a user.

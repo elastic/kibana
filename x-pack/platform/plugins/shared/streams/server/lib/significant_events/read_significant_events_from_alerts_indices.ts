@@ -5,39 +5,45 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { StreamQueryKql, SignificantEventsGetResponse } from '@kbn/streams-schema';
+import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { QueryClient } from '../streams/assets/query/query_client';
-import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
-import { SecurityError } from '../streams/errors/security_error';
 import type { QueryLink } from '../../../common/queries';
+import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
+import { parseError } from '../streams/errors/parse_error';
+import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { streamNames?: string[]; from: Date; to: Date; bucketSize: string; query?: string },
+  params: {
+    streamNames?: string[];
+    from: Date;
+    to: Date;
+    bucketSize: string;
+    query?: string;
+    filters?: QueryLinkFilters;
+  },
   dependencies: {
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query } = params;
+  const { streamNames = [], from, to, bucketSize, query, filters } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query)
-    : await queryClient.getQueryLinks(streamNames);
+    ? await queryClient.findQueries(streamNames, query, filters)
+    : await queryClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
+  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => queryLink.rule_id);
   const ruleIds = Object.keys(queryLinkByRuleId);
 
   const response = await scopedClusterClient.asCurrentUser
@@ -113,7 +119,6 @@ export async function readSignificantEventsFromAlertsIndices(
               },
             },
             change_points: {
-              // @ts-expect-error
               change_point: {
                 buckets_path: 'occurrences>_count',
               },
@@ -123,10 +128,10 @@ export async function readSignificantEventsFromAlertsIndices(
       },
     })
     .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      const { type, message } = parseError(err);
+      if (type === 'security_exception') {
         throw new SecurityError(
-          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          `Cannot read significant events, insufficient privileges: ${message}`,
           { cause: err }
         );
       }
@@ -136,7 +141,7 @@ export async function readSignificantEventsFromAlertsIndices(
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
     return {
       significant_events: queryLinks.map((queryLink) => ({
-        ...toStreamQueryKql(queryLink),
+        ...toStreamQuery(queryLink),
         stream_name: queryLink.stream_name,
         occurrences: [],
         change_points: {
@@ -144,6 +149,7 @@ export async function readSignificantEventsFromAlertsIndices(
             stationary: { p_value: 0, change_point: 0 },
           },
         },
+        rule_backed: queryLink.rule_backed,
       })),
       aggregated_occurrences: [],
     };
@@ -161,7 +167,7 @@ export async function readSignificantEventsFromAlertsIndices(
     const changePoints = get(bucket, 'change_points') ?? {};
 
     return {
-      ...toStreamQueryKql(queryLink),
+      ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
@@ -169,6 +175,7 @@ export async function readSignificantEventsFromAlertsIndices(
             count: occurrence.doc_count,
           }))
         : [],
+      rule_backed: queryLink.rule_backed,
       change_points: changePoints,
     };
   });
@@ -177,7 +184,7 @@ export async function readSignificantEventsFromAlertsIndices(
   const notFoundSignificantEvents = queryLinks
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
-      ...toStreamQueryKql(queryLink),
+      ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
       occurrences: [],
       change_points: {
@@ -185,6 +192,7 @@ export async function readSignificantEventsFromAlertsIndices(
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      rule_backed: queryLink.rule_backed,
     }));
 
   return {
@@ -193,7 +201,7 @@ export async function readSignificantEventsFromAlertsIndices(
   };
 }
 
-const toStreamQueryKql = (queryLink: QueryLink): StreamQueryKql => {
+const toStreamQuery = (queryLink: QueryLink): StreamQuery => {
   return {
     id: queryLink.query.id,
     title: queryLink.query.title,
@@ -201,5 +209,6 @@ const toStreamQueryKql = (queryLink: QueryLink): StreamQueryKql => {
     feature: queryLink.query.feature,
     severity_score: queryLink.query.severity_score,
     evidence: queryLink.query.evidence,
+    esql: queryLink.query.esql,
   };
 };

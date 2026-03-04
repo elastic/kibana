@@ -26,8 +26,8 @@ export const pageObjectsFixture = scoutPageFixture.extend<
   },
   { config: ScoutTestConfig }
 >({
-  pageObjects: async ({ page, log, config }, use) => {
-    const corePageObjects = createCorePageObjects({ page, config, log });
+  pageObjects: async ({ page, log, config, kbnUrl }, use) => {
+    const corePageObjects = createCorePageObjects({ page, config, log, kbnUrl });
     log.serviceLoaded('pageObjects');
     await use(corePageObjects);
   },

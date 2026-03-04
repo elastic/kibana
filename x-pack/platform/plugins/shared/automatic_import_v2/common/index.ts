@@ -26,6 +26,8 @@ export {
   UploadSamplesToDataStreamRequestParams,
   UploadSamplesToDataStreamResponse,
   DeleteDataStreamRequestParams,
+  ReanalyzeDataStreamRequestParams,
+  ReanalyzeDataStreamRequestBody,
 } from './model/api/data_streams/data_stream.gen';
 
 export type {

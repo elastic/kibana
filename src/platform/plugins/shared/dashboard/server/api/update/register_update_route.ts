@@ -51,7 +51,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       try {
         const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
-        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body);
 
         const result = await update(ctx, req.params.id, req.body);
         return res.ok({ body: result });
@@ -59,7 +59,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.params.id} was not found.`,
+              message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
         }

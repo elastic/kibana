@@ -8,34 +8,56 @@
  */
 
 import { useEffect, useState } from 'react';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject, ProjectsData } from '../types';
 
+export interface UseFetchProjectsResult {
+  originProject: CPSProject | null;
+  linkedProjects: CPSProject[];
+  isLoading: boolean;
+  error: Error | null;
+}
+
 /**
- * Hook for fetching projects data from CPSManager
+ * Hook for fetching projects data from CPSManager.
+ * Returns loading/error states alongside the fetched data.
  */
-export const useFetchProjects = (fetchProjects: () => Promise<ProjectsData | null>) => {
+export const useFetchProjects = (
+  fetchProjects: (routing?: ProjectRouting) => Promise<ProjectsData | null>,
+  routing?: ProjectRouting
+): UseFetchProjectsResult => {
   const [originProject, setOriginProject] = useState<CPSProject | null>(null);
   const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let isMounted = true;
+    setIsLoading(true);
+    setError(null);
 
-    fetchProjects()
+    fetchProjects(routing)
       .then((projectsData) => {
-        if (isMounted && projectsData) {
-          setOriginProject(projectsData.origin);
-          setLinkedProjects(projectsData.linkedProjects);
+        if (isMounted) {
+          setOriginProject(projectsData?.origin ?? null);
+          setLinkedProjects(projectsData?.linkedProjects ?? []);
         }
       })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch projects:', error);
+      .catch((err) => {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [fetchProjects]);
+  }, [fetchProjects, routing]);
 
-  return { originProject, linkedProjects };
+  return { originProject, linkedProjects, isLoading, error };
 };

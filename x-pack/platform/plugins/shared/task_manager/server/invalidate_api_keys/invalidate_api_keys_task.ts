@@ -10,7 +10,9 @@ import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type {
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
+  InvalidateUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskScheduling } from '../task_scheduling';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
@@ -24,6 +26,11 @@ const TASK_TYPE = `task_manager:${TASK_ID}`;
 export type ApiKeyInvalidationFn = (
   params: InvalidateAPIKeysParams
 ) => Promise<InvalidateAPIKeyResult | null> | undefined;
+
+export type UiamApiKeyInvalidationFn = (
+  request: KibanaRequest,
+  params: InvalidateUiamAPIKeyParams
+) => Promise<InvalidateAPIKeyResult | null>;
 
 export async function scheduleInvalidateApiKeyTask(
   logger: Logger,

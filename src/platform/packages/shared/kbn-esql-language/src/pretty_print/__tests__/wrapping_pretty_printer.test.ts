@@ -281,6 +281,22 @@ FROM index
     });
   });
 
+  describe('MMR', () => {
+    test('with query vector', () => {
+      const { text } = reprint(
+        'FROM a | MMR [0.5,0.4,0.3,0.2]::dense_vector ON genre LIMIT 10 WITH {"lambda": 0.5}'
+      );
+
+      expect(text).toBe(
+        `FROM a
+  | MMR ([0.5, 0.4, 0.3, 0.2])::DENSE_VECTOR
+        ON genre
+        LIMIT 10
+        WITH {"lambda": 0.5}`
+      );
+    });
+  });
+
   describe('FORK', () => {
     test('basic fork with simple subqueries', () => {
       const { text } = reprint('FROM index | FORK ( KEEP a ) ( KEEP b )');

@@ -6,10 +6,11 @@
  */
 
 export { getEuidFromObject } from './memory';
-export { getEuidPainlessEvaluation } from './painless';
-export { getEuidDslFilterBasedOnDocument } from './dsl';
+export { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
+export { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } from './dsl';
 export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument,
 } from './esql';
+export { getEuidSourceFields, type IdentitySourceFields } from './identity_fields';
