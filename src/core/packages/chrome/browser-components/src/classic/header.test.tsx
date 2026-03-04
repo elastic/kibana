@@ -107,13 +107,13 @@ describe('Header', () => {
     act(() =>
       breadcrumbsAppendExtensions$.next([
         {
-          content: (root: HTMLDivElement) => {
+          mount: (root: HTMLDivElement) => {
             root.innerHTML = '<div class="my-extension1">__render__</div>';
             return () => (root.innerHTML = '');
           },
         },
         {
-          content: (root: HTMLDivElement) => {
+          mount: (root: HTMLDivElement) => {
             root.innerHTML = '<div class="my-extension2">__render__</div>';
             return () => (root.innerHTML = '');
           },

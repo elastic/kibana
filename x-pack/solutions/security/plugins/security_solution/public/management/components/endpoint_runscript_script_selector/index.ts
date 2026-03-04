@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const ROOT_PATH = '/';
-export const SEARCH_INFERENCE_ENDPOINTS_PATH = `${ROOT_PATH}inference_endpoints`;
+export * from './endpoint_runscript_script_selector';
