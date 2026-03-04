@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
@@ -124,11 +124,31 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases, data_stream_options: dataStreamOptions } = {},
+    template: {
+      settings,
+      mappings: initialMappings,
+      aliases,
+      data_stream_options: dataStreamOptions,
+    } = {},
     composedOf,
     _kbnMeta,
     ...logistics
   } = indexTemplate;
+
+  const mappings = useMemo(() => {
+    if (initialMappings && initialMappings._source && 'mode' in initialMappings._source) {
+      const { mode, ...otherSource } = initialMappings._source;
+      const newMappings = {
+        ...initialMappings,
+        _source: Object.keys(otherSource).length > 0 ? otherSource : undefined,
+      };
+      if (newMappings._source === undefined) {
+        delete newMappings._source;
+      }
+      return Object.keys(newMappings).length > 0 ? newMappings : undefined;
+    }
+    return initialMappings;
+  }, [initialMappings]);
 
   const wizardDefaultValue: WizardContent = {
     logistics,
