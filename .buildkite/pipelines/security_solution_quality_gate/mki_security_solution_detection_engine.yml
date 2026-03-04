@@ -11,6 +11,8 @@ steps:
     timeout_in_minutes: 300
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: "*"
           limit: 1
 

@@ -8,6 +8,10 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
     env:
       # Docker is available on these agents
       DOCKER_REQUIRED: 'true'

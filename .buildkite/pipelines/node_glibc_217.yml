@@ -27,6 +27,8 @@ steps:
     timeout_in_minutes: 60
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -82,7 +84,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Explore - Security Solution Cypress Tests'
@@ -99,7 +101,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
@@ -116,7 +118,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
@@ -133,7 +135,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
     label: 'Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
@@ -150,7 +152,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
     label: 'Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
@@ -167,7 +169,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
     label: 'Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
@@ -184,7 +186,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
     label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
@@ -201,7 +203,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
@@ -218,7 +220,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
@@ -235,7 +237,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
@@ -252,7 +254,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
@@ -269,7 +271,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
@@ -286,7 +288,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
@@ -303,7 +305,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
@@ -320,7 +322,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
@@ -337,7 +339,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
@@ -354,7 +356,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
@@ -371,7 +373,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     label: 'AI Assistant - Security Solution Cypress Tests'
@@ -388,7 +390,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
@@ -405,7 +407,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     label: 'Explore - Security Solution Cypress Tests'
@@ -422,7 +424,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
@@ -439,7 +441,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
@@ -456,7 +458,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
@@ -473,7 +475,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
@@ -484,6 +486,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       diskSizeGb: 105
+      preemptible: true
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -491,7 +494,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
@@ -502,6 +505,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       diskSizeGb: 105
+      preemptible: true
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -509,7 +513,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - wait: ~
     continue_on_failure: true

@@ -12,6 +12,10 @@ steps:
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 70
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'

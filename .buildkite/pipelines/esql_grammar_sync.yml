@@ -8,6 +8,10 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
   - command: .buildkite/scripts/steps/esql_generate_function_metadata.sh
     label: Generate Function Metadata
     timeout_in_minutes: 15
@@ -17,3 +21,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

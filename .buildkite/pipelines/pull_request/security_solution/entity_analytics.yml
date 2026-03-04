@@ -12,7 +12,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
@@ -27,4 +27,4 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3

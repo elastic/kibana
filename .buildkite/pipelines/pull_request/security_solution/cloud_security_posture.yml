@@ -12,7 +12,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh
     label: 'Cloud Security Posture Cypress Tests on Serverless'
@@ -27,4 +27,4 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
