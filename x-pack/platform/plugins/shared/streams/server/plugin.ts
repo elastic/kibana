@@ -46,6 +46,7 @@ import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
+import { InsightService } from './lib/significant_events/insights/client/insight_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -108,6 +109,7 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
+    const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -121,12 +123,14 @@ export class StreamsPlugin
         [coreStart, pluginsStart],
         attachmentClient,
         featureClient,
+        insightClient,
         contentClient,
         queryClient,
       ] = await Promise.all([
         core.getStartServices(),
         attachmentService.getClientWithRequest({ request }),
         featureService.getClientWithRequest({ request }),
+        insightService.getInternalClient(),
         contentService.getClient(),
         queryService.getClientWithRequest({ request }),
       ]);
@@ -159,6 +163,7 @@ export class StreamsPlugin
         attachmentClient,
         streamsClient,
         featureClient,
+        insightClient,
         inferenceClient,
         contentClient,
         queryClient,
