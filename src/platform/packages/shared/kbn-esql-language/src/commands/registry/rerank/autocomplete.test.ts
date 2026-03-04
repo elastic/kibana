@@ -230,21 +230,7 @@ describe('RERANK Autocomplete', () => {
     test('suggests continuations after field with more trailing spaces', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' }) + ' ';
 
-      await expectRerankSuggestions(query, [
-        ...NEXT_ACTIONS,
-        ...getFunctionSignaturesByReturnType(
-          Location.RERANK,
-          'any',
-          {
-            operators: true,
-            excludeOperatorGroups: [],
-            skipAssign: true,
-            agg: false,
-            scalar: false,
-          },
-          ['keyword']
-        ),
-      ]);
+      await expectRerankSuggestions(query, NEXT_ACTIONS);
     });
   });
 
@@ -457,19 +443,14 @@ describe('RERANK Autocomplete', () => {
   describe('Partial completions and prefixes', () => {
     test.each([
       {
-        name: 'IS NULL operators',
-        partial: 'IS N',
-        expected: OPERATOR_SUGGESTIONS.EXISTENCE,
-      },
-      {
         name: 'LIKE operator',
         partial: 'LI',
-        expected: addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]]),
+        notExpected: addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]]),
       },
       {
         name: 'IN and IS operators',
         partial: 'I',
-        expected: [
+        notExpected: [
           addPlaceholder([OPERATOR_SUGGESTIONS.SET[0]])[0],
           ...OPERATOR_SUGGESTIONS.EXISTENCE,
         ],
@@ -477,21 +458,24 @@ describe('RERANK Autocomplete', () => {
       {
         name: 'NOT operators',
         partial: 'NO',
-        expected: [
+        notExpected: [
           addPlaceholder([OPERATOR_SUGGESTIONS.SET[1]])[0],
           addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[1]])[0],
           addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[3]])[0],
         ],
       },
-    ])('completes partial $name', async ({ partial, expected }) => {
-      const query = buildRerankQuery({
-        query: '"search query"',
-        onClause: `textField = keywordField ${partial}`,
-      });
+    ])(
+      'does not complete partial $name (strict text/keyword context)',
+      async ({ partial, notExpected }) => {
+        const query = buildRerankQuery({
+          query: '"search query"',
+          onClause: `textField = keywordField ${partial}`,
+        });
 
-      await expectRerankSuggestions(query, {
-        contains: expected,
-      });
-    });
+        await expectRerankSuggestions(query, {
+          notContains: notExpected,
+        });
+      }
+    );
   });
 });

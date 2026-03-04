@@ -71,6 +71,13 @@ const rules: Rule[] = [
         const isBooleanContext =
           preferredTypes.includes('boolean') || preferredTypes.includes('any');
 
+        if (!isBooleanContext && preferredTypes.length > 0) {
+          return {
+            shouldSuggest: false,
+            reason: 'Strict type context - no operators for text/keyword (all produce boolean)',
+          };
+        }
+
         const stringOperators = [
           ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),
           ...patternMatchOperators.map(({ name }) => name),
