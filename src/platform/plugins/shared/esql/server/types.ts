@@ -6,11 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ESQLExtensionsRegistry } from './extensions_registry';
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+export interface EsqlServerPluginSetup {
+  getExtensionsRegistry: () => ESQLExtensionsRegistry;
+}
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('index_pattern_crud', () => {
-    loadTestFile(require.resolve('./update_data_view'));
-  });
+export interface EsqlServerPluginStart {
+  inference: InferenceServerStart;
+  actions: ActionsPluginStart;
 }
