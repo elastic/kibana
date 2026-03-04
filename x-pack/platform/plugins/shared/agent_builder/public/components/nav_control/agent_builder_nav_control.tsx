@@ -29,7 +29,7 @@ export function AgentBuilderNavControl() {
   const { show: hasShowPrivilege } = useUiPrivileges();
 
   const toggleSidebar = useCallback(() => {
-    agentBuilder.toggleConversationFlyout();
+    agentBuilder.toggleAgentBuilderChat();
   }, [agentBuilder]);
 
   useEffect(() => {

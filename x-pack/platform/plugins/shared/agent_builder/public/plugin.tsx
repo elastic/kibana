@@ -229,7 +229,7 @@ export class AgentBuilderPlugin
       openAgentBuilderChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
-      toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      toggleAgentBuilderChat: (options?: OpenConversationSidebarOptions) => {
         if (this.activeSidebarRef) {
           const sidebarRef = this.activeSidebarRef;
           // Be defensive: clear local references immediately in case the sidebar doesn't

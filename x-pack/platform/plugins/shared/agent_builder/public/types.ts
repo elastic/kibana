@@ -116,7 +116,7 @@ export interface AgentBuilderPluginStart {
    *
    * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
-  toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
+  toggleAgentBuilderChat: (options?: OpenConversationSidebarOptions) => void;
   setAgentBuilderChatConfig: (config: EmbeddableConversationProps) => void;
   clearAgentBuilderChatConfig: () => void;
   /**
