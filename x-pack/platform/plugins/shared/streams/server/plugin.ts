@@ -20,7 +20,7 @@ import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { Streams } from '@kbn/streams-schema';
+import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
@@ -51,6 +51,8 @@ import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
+import { baseFields } from './lib/streams/component_templates/logs_layer';
+import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -273,49 +275,60 @@ export class StreamsPlugin
     }
 
     if (this.config.preconfigured.enabled) {
-      void core.getStartServices().then(async ([coreStart]) => {
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const soClient = coreStart.savedObjects.getUnsafeInternalClient();
-        // Since the RulesClient cannot be unscoped, we provide a stub client that
-        // will throw an error if rules or queries exist in the stream definition.
-        // This is a limitation of the config-based streams for now.
-        const rulesClient = {
-          bulkGetRules() {
-            throw new Error('Not implemented');
-          },
-          create() {
-            throw new Error('Not implemented');
-          },
-          update() {
-            throw new Error('Not implemented');
-          },
-        } as unknown as RulesClient;
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+          // Since the RulesClient cannot be unscoped, we provide a stub client that
+          // will throw an error if rules or queries exist in the stream definition.
+          // This is a limitation of the config-based streams for now.
+          const rulesClient = {
+            bulkGetRules() {
+              throw new Error('Not implemented');
+            },
+            create() {
+              throw new Error('Not implemented');
+            },
+            update() {
+              throw new Error('Not implemented');
+            },
+          } as unknown as RulesClient;
 
-        const [attachmentClient, featureClient, systemClient, queryClient] = await Promise.all([
-          attachmentService.getClient({ soClient, rulesClient }),
-          featureService.getClient(),
-          systemService.getClient(),
-          queryService.getClient({ soClient, rulesClient }),
-        ]);
+          const [attachmentClient, featureClient, systemClient, queryClient] = await Promise.all([
+            attachmentService.getClient({ soClient, rulesClient }),
+            featureService.getClient(),
+            systemService.getClient(),
+            queryService.getClient({ soClient, rulesClient }),
+          ]);
 
-        const streamsClient = await streamsService.getClient({
-          attachmentClient,
-          queryClient,
-          systemClient,
-          featureClient,
-          esClient,
-          esClientAsInternalUser: esClient,
+          const streamsClient = await streamsService.getClient({
+            attachmentClient,
+            queryClient,
+            systemClient,
+            featureClient,
+            esClient,
+            esClientAsInternalUser: esClient,
+          });
+
+          await streamsClient.enableStreams();
+
+          await streamsClient.bulkUpsert(
+            this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => {
+              if (ROOT_STREAM_NAMES.includes(name)) {
+                definition.stream.ingest.wired.fields =
+                  name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields;
+              }
+              return {
+                name,
+                request: Streams.all.UpsertRequest.parse(definition),
+              };
+            })
+          );
+        })
+        .catch((error) => {
+          this.logger.error(`Error preconfiguring streams: ${error}`);
         });
-
-        await streamsClient.enableStreams();
-
-        await streamsClient.bulkUpsert(
-          this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
-            name,
-            request: Streams.all.UpsertRequest.parse(definition),
-          }))
-        );
-      });
     }
 
     return {};
