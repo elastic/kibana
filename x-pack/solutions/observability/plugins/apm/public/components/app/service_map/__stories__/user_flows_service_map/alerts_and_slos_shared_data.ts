@@ -8,6 +8,8 @@
 import type { Node } from '@xyflow/react';
 import type { Edge } from '@xyflow/react';
 import { MarkerType } from '@xyflow/react';
+import type { NodeTypes } from '@xyflow/react';
+import type { EdgeTypes } from '@xyflow/react';
 import {
   DEFAULT_EDGE_COLOR,
   DEFAULT_EDGE_STROKE_WIDTH,
@@ -18,8 +20,6 @@ import { DependencyNode } from '../../dependency_node';
 import { ServiceMapEdge as ServiceMapEdgeComponent } from '../../service_map_edge';
 import { ServiceMapEdgeWithLabel } from './service_map_edge_with_label';
 import { ServiceNodeWithAlertAndSloBadges } from './service_node_with_alert_and_slo_badges';
-import type { NodeTypes } from '@xyflow/react';
-import type { EdgeTypes } from '@xyflow/react';
 
 const DANGER_COLOR = '#BD271E';
 
@@ -42,9 +42,19 @@ export const MOCK_ALERTS_BY_SERVICE: Record<
 > = {
   'payment-service': [
     { id: '1', title: 'High error rate', severity: 'critical', time: '2024-01-15T10:32:00Z' },
-    { id: '2', title: 'Latency threshold exceeded', severity: 'warning', time: '2024-01-15T10:28:00Z' },
+    {
+      id: '2',
+      title: 'Latency threshold exceeded',
+      severity: 'warning',
+      time: '2024-01-15T10:28:00Z',
+    },
     { id: '3', title: 'Connection timeouts', severity: 'critical', time: '2024-01-15T10:25:00Z' },
-    { id: '4', title: 'Database pool exhausted', severity: 'critical', time: '2024-01-15T10:20:00Z' },
+    {
+      id: '4',
+      title: 'Database pool exhausted',
+      severity: 'critical',
+      time: '2024-01-15T10:20:00Z',
+    },
     { id: '5', title: 'Elevated 5xx rate', severity: 'warning', time: '2024-01-15T10:15:00Z' },
   ],
   'order-service': [
@@ -53,7 +63,12 @@ export const MOCK_ALERTS_BY_SERVICE: Record<
     { id: '8', title: 'Slow queries', severity: 'warning', time: '2024-01-15T10:26:00Z' },
   ],
   'inventory-service': [
-    { id: '9', title: 'DB connection failures', severity: 'critical', time: '2024-01-15T10:29:00Z' },
+    {
+      id: '9',
+      title: 'DB connection failures',
+      severity: 'critical',
+      time: '2024-01-15T10:29:00Z',
+    },
     { id: '10', title: 'Cache miss spike', severity: 'warning', time: '2024-01-15T10:27:00Z' },
   ],
   'api-gateway': [
@@ -91,7 +106,11 @@ export const MOCK_FAILED_REQUESTS: Record<
     { time: '2024-01-15T10:28:33Z', errorMessage: 'Timeout after 5000ms', requestId: 'req-b2' },
   ],
   'inventory-service~postgresql': [
-    { time: '2024-01-15T10:29:55Z', errorMessage: 'Connection pool exhausted', requestId: 'req-c1' },
+    {
+      time: '2024-01-15T10:29:55Z',
+      errorMessage: 'Connection pool exhausted',
+      requestId: 'req-c1',
+    },
     { time: '2024-01-15T10:27:00Z', errorMessage: 'Deadlock detected', requestId: 'req-c2' },
   ],
 };
@@ -342,19 +361,97 @@ export const BASE_NODES: Node[] = [
 ];
 
 export const BASE_EDGES: Edge[] = [
-  { id: 'payment-service~order-service', source: 'payment-service', target: 'order-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'order-service~inventory-service', source: 'order-service', target: 'inventory-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'inventory-service~postgresql', source: 'inventory-service', target: 'postgresql', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'payment-service~user-service', source: 'payment-service', target: 'user-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'payment-service~api-gateway', source: 'payment-service', target: 'api-gateway', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'api-gateway~frontend-app', source: 'api-gateway', target: 'frontend-app', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'api-gateway~auth-service', source: 'api-gateway', target: 'auth-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'user-service~recommendation-service', source: 'user-service', target: 'recommendation-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'user-service~redis', source: 'user-service', target: 'redis', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'frontend-app~search-service', source: 'frontend-app', target: 'search-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'search-service~elasticsearch', source: 'search-service', target: 'elasticsearch', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'order-service~notification-service', source: 'order-service', target: 'notification-service', data: {}, ...createDefaultEdgeStyle() },
-  { id: 'inventory-service~analytics-service', source: 'inventory-service', target: 'analytics-service', data: {}, ...createDefaultEdgeStyle() },
+  {
+    id: 'payment-service~order-service',
+    source: 'payment-service',
+    target: 'order-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'order-service~inventory-service',
+    source: 'order-service',
+    target: 'inventory-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'inventory-service~postgresql',
+    source: 'inventory-service',
+    target: 'postgresql',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'payment-service~user-service',
+    source: 'payment-service',
+    target: 'user-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'payment-service~api-gateway',
+    source: 'payment-service',
+    target: 'api-gateway',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'api-gateway~frontend-app',
+    source: 'api-gateway',
+    target: 'frontend-app',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'api-gateway~auth-service',
+    source: 'api-gateway',
+    target: 'auth-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'user-service~recommendation-service',
+    source: 'user-service',
+    target: 'recommendation-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'user-service~redis',
+    source: 'user-service',
+    target: 'redis',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'frontend-app~search-service',
+    source: 'frontend-app',
+    target: 'search-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'search-service~elasticsearch',
+    source: 'search-service',
+    target: 'elasticsearch',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'order-service~notification-service',
+    source: 'order-service',
+    target: 'notification-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'inventory-service~analytics-service',
+    source: 'inventory-service',
+    target: 'analytics-service',
+    data: {},
+    ...createDefaultEdgeStyle(),
+  },
 ];
 
 export const NODE_IDS_WITH_ALERTS = new Set(

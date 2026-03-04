@@ -7,15 +7,12 @@
 
 import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import type { NodeTypes } from '@xyflow/react';
-import type { EdgeTypes } from '@xyflow/react';
 import {
   ReactFlow,
   ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
-  MarkerType,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -36,16 +33,11 @@ import type { Node } from '@xyflow/react';
 import type { Edge } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { ServiceNode } from '../../service_node';
-import { DependencyNode } from '../../dependency_node';
-import { ServiceMapEdge as ServiceMapEdgeComponent } from '../../service_map_edge';
 import { applyDagreLayout } from '../../layout';
 import { NODE_WIDTH, NODE_HEIGHT } from '../../constants';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../../common/service_map';
 import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 import { MapPopover } from '../../popover';
-import { ServiceMapEdgeWithLabel } from './service_map_edge_with_label';
-import { ServiceNodeWithAlertAndSloBadges } from './service_node_with_alert_and_slo_badges';
 import {
   BASE_NODES,
   BASE_EDGES,
