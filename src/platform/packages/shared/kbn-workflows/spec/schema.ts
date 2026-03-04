@@ -58,14 +58,26 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop', 'queue']);
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
-export const ConcurrencySettingsSchema = z.object({
+const BaseConcurrencySettingsSchema = z.object({
   key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
-  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
   max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
 });
+
+export const ConcurrencySettingsSchema = z.union([
+  BaseConcurrencySettingsSchema.extend({
+    strategy: z.literal('queue'),
+    maxQueueSize: z.number().int().min(1), // Required only for queue strategy
+  }).strict(),
+  BaseConcurrencySettingsSchema.extend({
+    strategy: z.literal('drop').optional(),
+  }).strict(),
+  BaseConcurrencySettingsSchema.extend({
+    strategy: z.literal('cancel-in-progress').optional(),
+  }).strict(),
+]);
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({
@@ -425,6 +437,24 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+// Base schema shared by both workflow.execute and workflow.executeAsync
+const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
+  with: z.object({
+    'workflow-id': z.string().min(1),
+    inputs: z.record(z.string(), z.unknown()).optional(),
+  }),
+});
+
+export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.execute'),
+});
+export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
+
+export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.executeAsync'),
+});
+export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -495,6 +525,8 @@ const StepSchema = z.lazy(() =>
     KibanaStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
+    WorkflowExecuteStepSchema,
+    WorkflowExecuteAsyncStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -507,6 +539,8 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WorkflowExecuteStepSchema.shape.type.value,
+  WorkflowExecuteAsyncStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -702,6 +736,13 @@ export const WorkflowContextSchema = z.object({
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
+  parent: z
+    .object({
+      workflowId: z.string(),
+      executionId: z.string(),
+      depth: z.number().optional(),
+    })
+    .optional(),
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 

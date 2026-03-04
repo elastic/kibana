@@ -194,6 +194,25 @@ describe('ConcurrencySettingsSchema', () => {
       });
     });
 
+    it('should accept queue strategy with maxQueueSize', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        maxQueueSize: 10,
+      });
+      expect(result.success).toBe(true);
+      if (result.success && result.data.strategy === 'queue') {
+        expect(result.data.strategy).toBe('queue');
+        expect(result.data.maxQueueSize).toBe(10);
+      }
+    });
+
+    it('should reject queue strategy without maxQueueSize', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('should reject invalid strategy values', () => {
       const result = ConcurrencySettingsSchema.safeParse({
         strategy: 'invalid-strategy',
@@ -258,6 +277,57 @@ describe('ConcurrencySettingsSchema', () => {
       if (result.success) {
         expect(result.data.max).toBeUndefined();
       }
+    });
+  });
+
+  describe('maxQueueSize', () => {
+    it('should accept valid positive integer values', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        maxQueueSize: 5,
+      });
+      expect(result.success).toBe(true);
+      if (result.success && result.data.strategy === 'queue') {
+        expect(result.data.maxQueueSize).toBe(5);
+      }
+    });
+
+    it('should reject values less than 1', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        maxQueueSize: 0,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject non-integer values', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'queue',
+        maxQueueSize: 1.5,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should not be required for non-queue strategies', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'drop',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject maxQueueSize for non-queue strategies', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        strategy: 'drop',
+        maxQueueSize: 10,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject maxQueueSize when strategy is omitted', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        maxQueueSize: 10,
+      });
+      expect(result.success).toBe(false);
     });
   });
 
@@ -332,7 +402,7 @@ describe('WorkflowSettingsSchema', () => {
     it('should accept all valid strategy values', () => {
       expect(CollisionStrategySchema.safeParse('cancel-in-progress').success).toBe(true);
       expect(CollisionStrategySchema.safeParse('drop').success).toBe(true);
-      expect(CollisionStrategySchema.safeParse('queue').success).toBe(false);
+      expect(CollisionStrategySchema.safeParse('queue').success).toBe(true);
     });
 
     it('should reject invalid strategy values', () => {
@@ -343,7 +413,7 @@ describe('WorkflowSettingsSchema', () => {
 
     it('should export CollisionStrategy type that matches valid values', () => {
       // Verify the type can be used and matches the schema values
-      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop'];
+      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop', 'queue'];
       validStrategies.forEach((strategy) => {
         const result = CollisionStrategySchema.safeParse(strategy);
         expect(result.success).toBe(true);

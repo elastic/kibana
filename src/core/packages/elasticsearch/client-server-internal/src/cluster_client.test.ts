@@ -12,14 +12,16 @@ import {
   createTransportMock,
   createInternalErrorHandlerMock,
 } from './cluster_client.test.mocks';
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, TransportRequestParams } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
+import { getRequestHandlerFactory } from './cps_request_handler_factory';
 import { ClusterClient } from './cluster_client';
+import type { OnRequestHandler } from './create_transport';
 import {
   DEFAULT_HEADERS,
   ES_SECONDARY_AUTH_HEADER,
@@ -66,11 +68,30 @@ describe('ClusterClient', () => {
   let client: ElasticsearchClient;
 
   const mockTransport = { mockTransport: true };
-  const mockOnRequestHandler = jest.fn();
-  let mockOnRequestHandlerFactory: jest.Mock;
+  const mockOnRequestHandlerFactory = jest.fn();
+
+  // Synthetic ES search params used to exercise the onRequest CPS hook.
+  const makeSearchParams = (): TransportRequestParams => ({
+    method: 'GET',
+    path: '/_search',
+    meta: { name: 'search', acceptedParams: ['project_routing'] },
+    body: {},
+  });
+
+  // Helper: capture the onRequest handler injected into createTransport for the
+  // first call, so behavioral tests can invoke it directly with synthetic params.
+  const captureTransportOnRequest = (): { get: () => OnRequestHandler } => {
+    const ref = { get: () => undefined as unknown as OnRequestHandler };
+    createTransportMock.mockImplementation(({ onRequest }: { onRequest: OnRequestHandler }) => {
+      ref.get = () => onRequest;
+      return mockTransport;
+    });
+    return ref;
+  };
 
   beforeEach(() => {
-    mockOnRequestHandlerFactory = jest.fn().mockReturnValue(mockOnRequestHandler);
+    // Call through to the real factory so routing-specific handlers are produced correctly.
+    mockOnRequestHandlerFactory.mockImplementation(getRequestHandlerFactory(true));
     logger = loggingSystemMock.createLogger();
     internalClient = createClient();
     scopedClient = createClient();
@@ -116,7 +137,7 @@ describe('ClusterClient', () => {
       kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
-      onRequest: mockOnRequestHandler,
+      onRequest: expect.any(Function),
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
@@ -125,7 +146,7 @@ describe('ClusterClient', () => {
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
-      onRequest: mockOnRequestHandler,
+      onRequest: expect.any(Function),
     });
   });
 
@@ -142,6 +163,28 @@ describe('ClusterClient', () => {
       });
 
       expect(clusterClient.asInternalUser).toBe(internalClient);
+    });
+
+    describe('CPS routing', () => {
+      it('injects origin-only routing into project_routing', () => {
+        new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        // asInternalUser is created via configureClient (not createTransport), so capture
+        // the onRequest handler from the configureClientMock call arguments.
+        const onRequest: OnRequestHandler = configureClientMock.mock.calls[0][1].onRequest;
+        const params = makeSearchParams();
+        onRequest({} as never, params, {});
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
+      });
     });
   });
 
@@ -228,7 +271,7 @@ describe('ClusterClient', () => {
         scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
-        onRequest: mockOnRequestHandler,
+        onRequest: expect.any(Function),
       });
     });
 
@@ -256,7 +299,7 @@ describe('ClusterClient', () => {
         scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
-        onRequest: mockOnRequestHandler,
+        onRequest: expect.any(Function),
       });
 
       const { getUnauthorizedErrorHandler: getHandler } = createTransportMock.mock.calls[0][0];
@@ -273,99 +316,81 @@ describe('ClusterClient', () => {
       });
     });
 
-    it('calls onRequestHandlerFactory with null request for asInternalUser', () => {
-      new ClusterClient({
-        config: createConfig(),
-        logger,
-        type: 'custom-type',
-        authHeaders,
-        agentFactoryProvider,
-        kibanaVersion,
-        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+    describe('CPS routing', () => {
+      it("injects the space NPRE when projectRouting is 'space'", () => {
+        // asScoped().asCurrentUser goes through createTransport, so capture onRequest from there.
+        const onRequest = captureTransportOnRequest();
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+        client = clusterClient.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
+
+        const params = makeSearchParams();
+        onRequest.get()({} as never, params, {});
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe(
+          'kibana_space_my-space_default'
+        );
       });
 
-      // Factory called once; the same handler is shared by asInternalUser and rootScopedClient
-      expect(mockOnRequestHandlerFactory).toHaveBeenCalledTimes(1);
-      expect(mockOnRequestHandlerFactory).toHaveBeenCalledWith({
-        projectRouting: 'origin-only',
+      it("injects '_alias:_origin' when projectRouting is 'origin-only'", () => {
+        const onRequest = captureTransportOnRequest();
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        const request = httpServerMock.createKibanaRequest();
+        client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+
+        const params = makeSearchParams();
+        onRequest.get()({} as never, params, {});
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
-    });
 
-    it('calls onRequestHandlerFactory with the scoped request and opts when asScoped is accessed', () => {
-      const getExecutionContext = jest.fn();
-      const clusterClient = new ClusterClient({
-        config: createConfig(),
-        logger,
-        type: 'custom-type',
-        authHeaders,
-        getExecutionContext,
-        agentFactoryProvider,
-        kibanaVersion,
-        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      it("injects '_alias:*' when projectRouting is 'all'", () => {
+        const onRequest = captureTransportOnRequest();
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        const request = httpServerMock.createKibanaRequest();
+        client = clusterClient.asScoped(request, { projectRouting: 'all' }).asCurrentUser;
+
+        const params = makeSearchParams();
+        onRequest.get()({} as never, params, {});
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
       });
-      const request = httpServerMock.createKibanaRequest();
-      const opts = { projectRouting: 'space' as const };
 
-      mockOnRequestHandlerFactory.mockClear();
-
-      const scopedClusterClient = clusterClient.asScoped(request, opts);
-      client = scopedClusterClient.asCurrentUser;
-
-      expect(mockOnRequestHandlerFactory).toHaveBeenCalledTimes(1);
-      // When projectRouting is 'space', the request itself becomes the projectRouting value.
-      expect(mockOnRequestHandlerFactory).toHaveBeenCalledWith({ projectRouting: request });
-      expect(createTransportMock).toHaveBeenCalledWith(
-        expect.objectContaining({ onRequest: mockOnRequestHandler })
-      );
-    });
-
-    it('passes the handler produced by the factory to `createTransport`', () => {
-      const getExecutionContext = jest.fn();
-      const clusterClient = new ClusterClient({
-        config: createConfig(),
-        logger,
-        type: 'custom-type',
-        authHeaders,
-        getExecutionContext,
-        agentFactoryProvider,
-        kibanaVersion,
-        onRequestHandlerFactory: mockOnRequestHandlerFactory,
-      });
-      const request = httpServerMock.createKibanaRequest();
-
-      const scopedClusterClient = clusterClient.asScoped(request);
-      client = scopedClusterClient.asCurrentUser;
-
-      expect(createTransportMock).toHaveBeenCalledTimes(1);
-      expect(createTransportMock).toHaveBeenCalledWith({
-        scoped: true,
-        getExecutionContext,
-        getUnauthorizedErrorHandler: expect.any(Function),
-        onRequest: mockOnRequestHandler,
-      });
-    });
-
-    it('passes the Transport class (with onRequest in its closure) to child()', () => {
-      const clusterClient = new ClusterClient({
-        config: createConfig(),
-        logger,
-        type: 'custom-type',
-        authHeaders,
-        agentFactoryProvider,
-        kibanaVersion,
-        onRequestHandlerFactory: mockOnRequestHandlerFactory,
-      });
-      const request = httpServerMock.createKibanaRequest();
-
-      const scopedClusterClient = clusterClient.asScoped(request);
-      client = scopedClusterClient.asCurrentUser;
-
-      // The Transport class produced by createTransport is passed to child().
-      // The ES client's child() stores it in kInitialOptions so it propagates
-      // automatically to any further child() calls on the scoped client.
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.objectContaining({ Transport: mockTransport })
-      );
+      // Note: child() clients that do NOT override Transport inherit the parent's routing
+      // automatically, because the ES client propagates the Transport class to child clients.
+      // However, callers who pass { Transport: CustomTransport } to child() bypass our
+      // onRequest handler and lose CPS routing. This is a known limitation.
+      // TODO: consider intercepting child() to extend any custom Transport with our onRequest.
     });
 
     it('returns a distinct scoped cluster client on each call', () => {
@@ -1341,6 +1366,32 @@ describe('ClusterClient', () => {
         })
       );
     });
+
+    describe('CPS routing', () => {
+      it('always uses origin-only routing, regardless of the projectRouting option', () => {
+        authHeaders.get.mockReturnValue({ authorization: 'auth' });
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        // Even when the scoped client is created with 'space' routing, asSecondaryAuthUser
+        // is always a child of asInternalUser, which uses origin-only routing.
+        const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+        client = clusterClient.asScoped(request, { projectRouting: 'space' }).asSecondaryAuthUser;
+
+        // No Transport override means the child inherits asInternalUser's origin-only Transport.
+        expect(internalClient.child).toHaveBeenCalledWith(
+          expect.not.objectContaining({ Transport: expect.anything() })
+        );
+      });
+    });
   });
 
   describe('#close', () => {
@@ -1448,6 +1499,101 @@ describe('ClusterClient', () => {
 
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('without CPS (project_routing stripping)', () => {
+    // When CPS is disabled, the handler must strip any pre-existing project_routing
+    // value from the request body so it never reaches Elasticsearch.
+    const makeSearchParamsWithRouting = (): TransportRequestParams => ({
+      method: 'GET',
+      path: '/_search',
+      meta: { name: 'search', acceptedParams: ['project_routing'] },
+      body: { project_routing: 'some-value', query: { match_all: {} } },
+    });
+
+    beforeEach(() => {
+      mockOnRequestHandlerFactory.mockImplementation(getRequestHandlerFactory(false));
+    });
+
+    it('strips project_routing from asInternalUser requests', () => {
+      new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      const onRequest: OnRequestHandler = configureClientMock.mock.calls[0][1].onRequest;
+      const params = makeSearchParamsWithRouting();
+      onRequest({} as never, params, {});
+
+      expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
+    });
+
+    it('does not inject project_routing into asInternalUser requests', () => {
+      new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      const onRequest: OnRequestHandler = configureClientMock.mock.calls[0][1].onRequest;
+      const params = makeSearchParams();
+      onRequest({} as never, params, {});
+
+      expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
+    });
+
+    it('strips project_routing from asScoped requests', () => {
+      const onRequest = captureTransportOnRequest();
+
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+
+      const params = makeSearchParamsWithRouting();
+      onRequest.get()({} as never, params, {});
+
+      expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
+    });
+
+    it('does not inject project_routing into asScoped requests', () => {
+      const onRequest = captureTransportOnRequest();
+
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+
+      const params = makeSearchParams();
+      onRequest.get()({} as never, params, {});
+
+      expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
     });
   });
 });

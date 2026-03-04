@@ -53,6 +53,7 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
+  StepStabilityLevel,
   HttpMethod,
   StepPropertyHandler,
   PropertySelectionHandler,
@@ -73,6 +74,7 @@ export {
   ExecutionTypeValues,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
+  ActiveExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

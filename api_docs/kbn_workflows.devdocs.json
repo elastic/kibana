@@ -2178,7 +2178,7 @@
         "label": "BaseConnectorContract",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 418,
+        "lineNumber": 420,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2191,7 +2191,7 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 419,
+            "lineNumber": 421,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2207,7 +2207,7 @@
               "z.ZodType"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 420,
+            "lineNumber": 422,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2223,7 +2223,7 @@
               "false | \"required\" | \"optional\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 421,
+            "lineNumber": 423,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2239,7 +2239,7 @@
               "z.ZodType"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 422,
+            "lineNumber": 424,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2255,7 +2255,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 423,
+            "lineNumber": 425,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2271,7 +2271,7 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 424,
+            "lineNumber": 426,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2287,7 +2287,7 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 425,
+            "lineNumber": 427,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2305,7 +2305,32 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 426,
+            "lineNumber": 428,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.BaseConnectorContract.stability",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stability",
+            "description": [
+              "API stability level derived from the OpenAPI `x-state` field"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.StepStabilityLevel",
+                "text": "StepStabilityLevel"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "lineNumber": 430,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2322,7 +2347,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 428,
+            "lineNumber": 432,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2354,7 +2379,7 @@
               "<unknown> | undefined> | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 430,
+            "lineNumber": 434,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2654,7 +2679,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 436,
+        "lineNumber": 440,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2669,7 +2694,7 @@
               "Action type ID from Kibana actions plugin"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 437,
+            "lineNumber": 441,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2694,7 +2719,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 439,
+            "lineNumber": 443,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2712,7 +2737,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 441,
+            "lineNumber": 445,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2730,7 +2755,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 443,
+            "lineNumber": 447,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3545,7 +3570,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 463,
+        "lineNumber": 467,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3570,7 +3595,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 464,
+            "lineNumber": 468,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3588,7 +3613,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 466,
+            "lineNumber": 470,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3606,7 +3631,7 @@
               "{ headerParams: string[]; pathParams: string[]; urlParams: string[]; bodyParams: string[]; }"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 468,
+            "lineNumber": 472,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3632,7 +3657,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 492,
+        "lineNumber": 496,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3666,7 +3691,7 @@
               "<T>[]>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 493,
+            "lineNumber": 497,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3682,7 +3707,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 497,
+                "lineNumber": 501,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3705,7 +3730,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 497,
+                "lineNumber": 501,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3743,7 +3768,7 @@
               "<T> | null>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 499,
+            "lineNumber": 503,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3759,7 +3784,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 504,
+                "lineNumber": 508,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3782,7 +3807,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 504,
+                "lineNumber": 508,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3828,7 +3853,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 506,
+            "lineNumber": 510,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3844,7 +3869,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 512,
+                "lineNumber": 516,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3867,7 +3892,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 513,
+                "lineNumber": 517,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3891,7 +3916,7 @@
                   "<T> | null"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 514,
+                "lineNumber": 518,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4061,7 +4086,7 @@
         "label": "RequestOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 582,
+        "lineNumber": 586,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4074,7 +4099,7 @@
             "label": "method",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 583,
+            "lineNumber": 587,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4087,7 +4112,7 @@
             "label": "path",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 584,
+            "lineNumber": 588,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4103,7 +4128,7 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 585,
+            "lineNumber": 589,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4119,7 +4144,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 586,
+            "lineNumber": 590,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4135,7 +4160,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 587,
+            "lineNumber": 591,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4153,7 +4178,7 @@
               "Record<string, unknown>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 588,
+            "lineNumber": 592,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4169,7 +4194,7 @@
         "label": "SelectionContext",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 541,
+        "lineNumber": 545,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4184,7 +4209,7 @@
               "The step type ID (e.g., \"onechat.runAgent\")"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 542,
+            "lineNumber": 546,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4202,7 +4227,7 @@
               "\"config\" | \"input\""
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 544,
+            "lineNumber": 548,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4217,7 +4242,7 @@
               "The property key (e.g., \"agent_id\")"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 546,
+            "lineNumber": 550,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4233,7 +4258,7 @@
         "label": "SelectionDetails",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 529,
+        "lineNumber": 533,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4248,7 +4273,7 @@
               "Message to display (e.g., \"✓ Agent connected\" or \"Agent not found\")"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 530,
+            "lineNumber": 534,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4266,7 +4291,7 @@
               "{ text: string; path: string; }[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 532,
+            "lineNumber": 536,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4292,7 +4317,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 518,
+        "lineNumber": 522,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4310,7 +4335,7 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 519,
+            "lineNumber": 523,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4325,7 +4350,7 @@
               "The label displayed in the UI"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 521,
+            "lineNumber": 525,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4343,7 +4368,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 523,
+            "lineNumber": 527,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4361,7 +4386,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 525,
+            "lineNumber": 529,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4437,7 +4462,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 477,
+        "lineNumber": 481,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4462,7 +4487,7 @@
               "<Exclude<T, undefined>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 478,
+            "lineNumber": 482,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4481,7 +4506,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 483,
+            "lineNumber": 487,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6906,7 +6931,7 @@
         "label": "WorkflowsSearchParams",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 573,
+        "lineNumber": 577,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6919,7 +6944,7 @@
             "label": "size",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 574,
+            "lineNumber": 578,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6932,7 +6957,7 @@
             "label": "page",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 575,
+            "lineNumber": 579,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6948,7 +6973,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 576,
+            "lineNumber": 580,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6964,7 +6989,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 577,
+            "lineNumber": 581,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6980,7 +7005,7 @@
               "boolean[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 578,
+            "lineNumber": 582,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6996,7 +7021,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 579,
+            "lineNumber": 583,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7456,7 +7481,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 568,
+        "lineNumber": 572,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7897,7 +7922,7 @@
           "\"GET\" | \"DELETE\" | \"HEAD\" | \"OPTIONS\" | \"POST\" | \"PUT\" | \"PATCH\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 457,
+        "lineNumber": 461,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8290,6 +8315,23 @@
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "lineNumber": 719,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.StepStabilityLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "StepStabilityLevel",
+        "description": [],
+        "signature": [
+          "\"beta\" | \"stable\" | \"tech_preview\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "lineNumber": 418,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

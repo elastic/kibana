@@ -85,7 +85,8 @@
       "agentBuilder",
       "llmTasks",
       "workflowsManagement",
-      "workflowsExtensions"
+      "workflowsExtensions",
+      "cps"
     ],
     "requiredBundles": [
       "esUiShared",

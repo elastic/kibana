@@ -88,8 +88,38 @@ export function useBrowseIntegrationHook({
       }
     }
 
+    // Apply setup method filters (union: show cards matching ANY selected method)
+    const setupMethodFilters = urlFilters.setupMethod;
+    if (setupMethodFilters && setupMethodFilters.length > 0) {
+      cards = cards.filter((card) => {
+        return setupMethodFilters.some((method) => {
+          switch (method) {
+            case 'agentless':
+              return card.supportsAgentless === true;
+            case 'elastic_agent':
+              return card.type === 'integration' || card.type === 'input';
+            default:
+              return false;
+          }
+        });
+      });
+    }
+
+    // Apply signal filters (union: show cards matching ANY selected signal)
+    const signalFilters = urlFilters.signal;
+    if (signalFilters && signalFilters.length > 0) {
+      cards = cards.filter((card) => signalFilters.some((s) => card.signalTypes?.includes(s)));
+    }
+
     return cards;
-  }, [localSearch, searchTerm, sortedCards, urlFilters.status]);
+  }, [
+    localSearch,
+    searchTerm,
+    sortedCards,
+    urlFilters.status,
+    urlFilters.setupMethod,
+    urlFilters.signal,
+  ]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

@@ -43,6 +43,7 @@ export const getExecutionTitleColor = (
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
   isTestRun: boolean;
+  createdAt: Date | null;
   startedAt: Date | null;
   duration: number | null;
   executedBy?: string;
@@ -55,6 +56,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
   ({
     status,
     isTestRun,
+    createdAt,
     startedAt,
     duration,
     executedBy,
@@ -66,7 +68,8 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
-    const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
+    const displayDate = startedAt ?? (status === ExecutionStatus.QUEUED ? createdAt : null);
+    const formattedDate = displayDate ? getFormattedDate(displayDate) : null;
     const formattedDuration = useMemo(() => {
       if (duration) {
         return formatDuration(duration);
@@ -110,10 +113,20 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
-                {startedAt ? (
+                {displayDate ? (
                   <EuiToolTip position="left" content={formattedDate}>
                     <EuiText size="xs" tabIndex={0} color="subdued">
-                      <FormattedRelativeEnhanced value={startedAt} />
+                      {status === ExecutionStatus.QUEUED && !startedAt ? (
+                        <FormattedMessage
+                          id="workflows.workflowExecutionListItem.queuedAgo"
+                          defaultMessage="Queued {time}"
+                          values={{
+                            time: <FormattedRelativeEnhanced value={displayDate} />,
+                          }}
+                        />
+                      ) : (
+                        <FormattedRelativeEnhanced value={displayDate} />
+                      )}
                     </EuiText>
                   </EuiToolTip>
                 ) : (

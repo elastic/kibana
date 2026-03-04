@@ -57,7 +57,7 @@ in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lis
 
 ### Making sure the tool's namespace is registered as being internal
 
-Platform tools should all be namespaced under protected namespaces, to avoid id collisions with user-created tools. 
+Platform tools should all be namespaced under protected namespaces, to avoid id collisions with user-created tools.
 When introducing a new protected namespace (e.g. when adding a new category of tools), it must be added
 to the `protectedNamespaces` array in `x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts`
 
@@ -273,7 +273,6 @@ agentBuilder.agents.register({
 });
 ```
 
-
 ### Specific research and answer instructions
 
 It is possible to specify specific research and answer instructions for an agent, to avoid
@@ -288,10 +287,12 @@ agentBuilder.agents.register({
   avatar_icon: 'dashboardApp',
   configuration: {
     research: {
-      instructions: 'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...'
+      instructions:
+        'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...',
     },
     answer: {
-      instructions: 'When answering, if a dashboard configuration is present in the results, always render it using [...]',
+      instructions:
+        'When answering, if a dashboard configuration is present in the results, always render it using [...]',
     },
     tools: [
       {
@@ -325,6 +326,7 @@ class MyPlugin {
 ```
 
 There are two main categories of attachment types:
+
 - `inline`: attachment is self-contained, with the data attached to it.
   `reference`: reference a persisted resource (for example, a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
   - (Not implemented yet)
@@ -354,7 +356,7 @@ const textArrachmentType: InlineAttachmentTypeDefinition = {
   format: (input) => {
     return { type: 'text', value: input.content };
   },
-}
+};
 ```
 
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
@@ -362,7 +364,93 @@ for the full list of available configuration options.
 
 ### Browser-side registration
 
-Not implemented yet 
+Register a UI definition for your attachment type using the `attachments.addAttachmentType` API from the `agentBuilder` plugin's start contract:
+
+```ts
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.attachments.addAttachmentType('my_type', myAttachmentDefinition);
+  }
+}
+```
+
+#### Complete example
+
+```ts
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCodeBlock } from '@elastic/eui';
+import {
+  ActionButtonType,
+  type AttachmentUIDefinition,
+} from '@kbn/agent-builder-browser/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+
+type MyAttachment = Attachment<'my_type'>;
+
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: () => 'My attachment',
+  getIcon: () => 'document',
+
+  // Compact view rendered inline in the conversation
+  renderInlineContent: ({ attachment, isSidebar }) => {
+    if (isSidebar) {
+      // For example: render a condensed view in the sidebar only
+    }
+
+    return (
+      <EuiCodeBlock fontSize="s">{attachment.data.content}</EuiCodeBlock>
+    );
+  },
+
+  // Expanded view rendered in the canvas flyout
+  renderCanvasContent: ({ attachment }) => (
+    <EuiCodeBlock fontSize="m" lineNumbers isCopyable>
+      {attachment.data.content}
+    </EuiCodeBlock>
+  ),
+
+  // Customize buttons based on viewport context
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas }) => {
+    const buttons = [];
+
+    if (isSidebar) {
+      // add sidebar only buttons
+    }
+
+    if (isCanvas) {
+      // add canvas only buttons
+    }
+
+    buttons.push({
+      label: 'Copy',
+      icon: 'copy',
+      type: ActionButtonType.SECONDARY,
+      handler: async () => navigator.clipboard.writeText(attachment.data.content),
+    });
+
+    // openCanvas is {undefined} when already in canvas mode
+    if (openCanvas) {
+      buttons.push({
+        label: 'Open Canvas',
+        icon: 'play',
+        type: ActionButtonType.PRIMARY,
+        handler: openCanvas,
+      });
+    }
+
+    return buttons;
+  },
+};
+```
+
+#### Viewport
+
+The `getActionButtons` params include flags to customize behavior per viewport:
+
+- **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
+- **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
+- **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 
 ## Registering skills
 
@@ -400,7 +488,7 @@ agentBuilder.skills.register({
   // list of tools (from the tool registry) which will be enabled when the skill is read
   getRegistryTools: () => ['platform.core.generate_esql'],
   // list of inline tools which will be enabled when the skill is read
-  getInlineTools: () => [myInlineToolDefinition]
+  getInlineTools: () => [myInlineToolDefinition],
 });
 ```
 

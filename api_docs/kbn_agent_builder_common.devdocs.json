@@ -3048,7 +3048,7 @@
         "label": "AgentBuilderTelemetryEventsMap",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-        "lineNumber": 90,
+        "lineNumber": 122,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3064,7 +3064,7 @@
               "ReportOptInActionParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 91,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3080,7 +3080,7 @@
               "ReportOptOutParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 92,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3096,7 +3096,7 @@
               "ReportAddToChatClickedParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 93,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3112,7 +3112,7 @@
               "ReportAgentCreatedParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 94,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3128,7 +3128,7 @@
               "ReportAgentUpdatedParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 95,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3144,7 +3144,7 @@
               "ReportToolCreatedParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 96,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3160,7 +3160,7 @@
               "ReportRoundCompleteParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 97,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3176,7 +3176,39 @@
               "ReportRoundErrorParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-            "lineNumber": 98,
+            "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderTelemetryEventsMap.AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess",
+            "type": "Object",
+            "tags": [],
+            "label": "[AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]",
+            "description": [],
+            "signature": [
+              "ReportToolCallSuccessParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderTelemetryEventsMap.AGENT_BUILDER_EVENT_TYPES.ToolCallError",
+            "type": "Object",
+            "tags": [],
+            "label": "[AGENT_BUILDER_EVENT_TYPES.ToolCallError]",
+            "description": [],
+            "signature": [
+              "ReportToolCallErrorParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6282,6 +6314,60 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.UpdateOriginResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateOriginResponse",
+        "description": [
+          "\nResponse from the update origin API endpoint."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+        "lineNumber": 280,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UpdateOriginResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "lineNumber": 284,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UpdateOriginResponse.attachment",
+            "type": "Object",
+            "tags": [],
+            "label": "attachment",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.VersionedAttachment",
+                "text": "VersionedAttachment"
+              },
+              "<string, unknown>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "lineNumber": 285,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.UserIdAndName",
         "type": "Interface",
         "tags": [],
@@ -6912,10 +6998,10 @@
         "label": "AgentBuilderEventTypes",
         "description": [],
         "signature": [
-          "\"agent_builder_opt_in_action\" | \"agent_builder_opt_out\" | \"agent_builder_add_to_chat_clicked\" | \"agent_builder_agent_created\" | \"agent_builder_agent_updated\" | \"agent_builder_tool_created\" | \"agent_builder_round_complete\" | \"agent_builder_round_error\""
+          "\"agent_builder_opt_in_action\" | \"agent_builder_opt_out\" | \"agent_builder_add_to_chat_clicked\" | \"agent_builder_agent_created\" | \"agent_builder_agent_updated\" | \"agent_builder_tool_created\" | \"agent_builder_round_complete\" | \"agent_builder_round_error\" | \"agent_builder_tool_call_success\" | \"agent_builder_tool_call_error\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-        "lineNumber": 111,
+        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7001,7 +7087,7 @@
           "<Record<string, unknown>>[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-        "lineNumber": 445,
+        "lineNumber": 673,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7053,7 +7139,7 @@
           "<Record<string, unknown>>[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
-        "lineNumber": 451,
+        "lineNumber": 679,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8675,7 +8761,7 @@
         "label": "AGENT_BUILDER_EVENT_TYPES",
         "description": [],
         "signature": [
-          "{ readonly OptInAction: \"agent_builder_opt_in_action\"; readonly OptOut: \"agent_builder_opt_out\"; readonly AddToChatClicked: \"agent_builder_add_to_chat_clicked\"; readonly AgentCreated: \"agent_builder_agent_created\"; readonly AgentUpdated: \"agent_builder_agent_updated\"; readonly ToolCreated: \"agent_builder_tool_created\"; readonly RoundComplete: \"agent_builder_round_complete\"; readonly RoundError: \"agent_builder_round_error\"; }"
+          "{ readonly OptInAction: \"agent_builder_opt_in_action\"; readonly OptOut: \"agent_builder_opt_out\"; readonly AddToChatClicked: \"agent_builder_add_to_chat_clicked\"; readonly AgentCreated: \"agent_builder_agent_created\"; readonly AgentUpdated: \"agent_builder_agent_updated\"; readonly ToolCreated: \"agent_builder_tool_created\"; readonly RoundComplete: \"agent_builder_round_complete\"; readonly RoundError: \"agent_builder_round_error\"; readonly ToolCallSuccess: \"agent_builder_tool_call_success\"; readonly ToolCallError: \"agent_builder_tool_call_error\"; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
         "lineNumber": 14,

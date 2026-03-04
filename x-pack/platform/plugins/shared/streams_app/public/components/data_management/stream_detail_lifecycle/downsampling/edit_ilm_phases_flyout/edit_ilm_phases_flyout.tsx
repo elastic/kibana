@@ -57,7 +57,7 @@ export const EditIlmPhasesFlyout = ({
 }: EditIlmPhasesFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditIlmPhasesFlyoutTitle' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditIlmPhasesFlyout';
-  const { footerStyles, headerStyles, sectionStyles } = useStyles();
+  const { footerStyles, headerStyles, sectionStyles, phaseDescriptionStyles } = useStyles();
 
   const initialPhasesRef = useRef<IlmPolicyPhases>(initialPhases);
 
@@ -377,6 +377,7 @@ export const EditIlmPhasesFlyout = ({
                 onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
                 onCreateSnapshotRepository={onCreateSnapshotRepository}
                 isMetricsStream={isMetricsStream}
+                phaseDescriptionStyles={phaseDescriptionStyles}
               />
             ))}
           </OnFieldErrorsChangeProvider>

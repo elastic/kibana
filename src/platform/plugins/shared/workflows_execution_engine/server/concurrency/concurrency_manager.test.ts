@@ -27,6 +27,7 @@ describe('ConcurrencyManager', () => {
 
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
+      getQueuedExecutionsByConcurrencyGroup: jest.fn(),
       bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
       updateWorkflowExecution: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
@@ -604,6 +605,110 @@ describe('ConcurrencyManager', () => {
         'default'
       );
       expect(result2).toBe(true); // Should proceed (within limit for group2)
+    });
+
+    describe('queue strategy', () => {
+      it('should allow execution when within concurrency limit', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 2,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+        ]);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-2',
+          'default'
+        );
+
+        expect(result).toBe(true);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      });
+
+      it('should mark execution as QUEUED when at concurrency limit with room in queue', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 2,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+          'exec-2',
+        ]);
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+          { id: 'exec-3', workflowId: 'wf-1' },
+        ]);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-4',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+          id: 'exec-4',
+          status: ExecutionStatus.QUEUED,
+        });
+      });
+
+      it('should mark execution as SKIPPED when queue is full', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 1,
+          maxQueueSize: 2,
+        };
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+        ]);
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+          { id: 'exec-2', workflowId: 'wf-1' },
+          { id: 'exec-3', workflowId: 'wf-1' },
+        ]);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'server-1',
+          'exec-4',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+          id: 'exec-4',
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: 'Queue full (maxQueueSize: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        });
+      });
+
+      it('should not call forceRunIdleTasks for queue strategy', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'queue',
+          max: 1,
+          maxQueueSize: 5,
+        };
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+        ]);
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
+
+        await concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-2', 'default');
+
+        expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+      });
     });
 
     describe('error handling', () => {

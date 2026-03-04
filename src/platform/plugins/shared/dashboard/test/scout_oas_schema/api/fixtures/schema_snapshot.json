@@ -1,513 +1,631 @@
 [
-  {
+ {
+  "type": "object",
+  "properties": {
+   "title": {
+    "type": "string",
+    "description": "A human-readable title for the control"
+   },
+   "display_settings": {
     "type": "object",
     "properties": {
-      "title": {
-        "type": "string",
-        "description": "A human-readable title for the control"
-      },
-      "display_settings": {
-        "type": "object",
-        "properties": {
-          "placeholder": {
-            "type": "string"
-          },
-          "hide_action_bar": {
-            "type": "boolean"
-          },
-          "hide_exclude": {
-            "type": "boolean"
-          },
-          "hide_exists": {
-            "type": "boolean"
-          },
-          "hide_sort": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "single_select": {
-        "type": "boolean"
-      },
-      "selected_options": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "variable_name": {
-        "type": "string"
-      },
-      "variable_type": {
-        "type": "string",
-        "enum": ["fields", "values", "functions", "time_literal", "multi_values"]
-      },
-      "esql_query": {
-        "type": "string"
-      },
-      "control_type": {
-        "type": "string",
-        "enum": ["STATIC_VALUES", "VALUES_FROM_QUERY"]
-      },
-      "available_options": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      }
-    },
-    "additionalProperties": true,
-    "required": ["selected_options", "variable_name", "variable_type", "esql_query", "control_type"]
-  },
-  {
-    "type": "object",
-    "properties": {
-      "title": {
-        "type": "string",
-        "description": "A human-readable title for the control"
-      },
-      "data_view_id": {
-        "type": "string",
-        "description": "The ID of the data view that the control is tied to"
-      },
-      "field_name": {
-        "type": "string",
-        "description": "The name of the field in the data view that the control is tied to"
-      },
-      "use_global_filters": {
-        "type": "boolean"
-      },
-      "ignore_validations": {
-        "type": "boolean"
-      },
-      "display_settings": {
-        "type": "object",
-        "properties": {
-          "placeholder": {
-            "type": "string"
-          },
-          "hide_action_bar": {
-            "type": "boolean"
-          },
-          "hide_exclude": {
-            "type": "boolean"
-          },
-          "hide_exists": {
-            "type": "boolean"
-          },
-          "hide_sort": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "single_select": {
-        "type": "boolean"
-      },
-      "exclude": {
-        "type": "boolean"
-      },
-      "exists_selected": {
-        "type": "boolean"
-      },
-      "run_past_timeout": {
-        "type": "boolean"
-      },
-      "search_technique": {
-        "type": "string",
-        "enum": ["prefix", "wildcard", "exact"]
-      },
-      "selected_options": {
-        "type": "array",
-        "items": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "number"
-            }
-          ]
-        }
-      },
-      "sort": {
-        "type": "object",
-        "properties": {
-          "by": {
-            "type": "string",
-            "enum": ["_count", "_key"]
-          },
-          "direction": {
-            "type": "string",
-            "enum": ["asc", "desc"]
-          }
-        },
-        "additionalProperties": false,
-        "required": ["by", "direction"]
-      }
-    },
-    "additionalProperties": true,
-    "required": ["data_view_id", "field_name"]
-  },
-  {
-    "type": "object",
-    "properties": {
-      "title": {
-        "type": "string",
-        "description": "A human-readable title for the control"
-      },
-      "data_view_id": {
-        "type": "string",
-        "description": "The ID of the data view that the control is tied to"
-      },
-      "field_name": {
-        "type": "string",
-        "description": "The name of the field in the data view that the control is tied to"
-      },
-      "use_global_filters": {
-        "type": "boolean"
-      },
-      "ignore_validations": {
-        "type": "boolean"
-      },
-      "value": {
-        "type": "array",
-        "minItems": 2,
-        "maxItems": 2,
-        "items": {
-          "type": "string"
-        }
-      },
-      "step": {
-        "type": "number"
-      }
-    },
-    "additionalProperties": true,
-    "required": ["data_view_id", "field_name"]
-  },
-  {
-    "type": "object",
-    "properties": {
-      "start_percentage_of_time_range": {
-        "type": "number"
-      },
-      "end_percentage_of_time_range": {
-        "type": "number"
-      },
-      "is_anchored": {
-        "type": "boolean"
-      }
+     "placeholder": {
+      "type": "string"
+     },
+     "hide_action_bar": {
+      "type": "boolean"
+     },
+     "hide_exclude": {
+      "type": "boolean"
+     },
+     "hide_exists": {
+      "type": "boolean"
+     },
+     "hide_sort": {
+      "type": "boolean"
+     }
     },
     "additionalProperties": false
+   },
+   "single_select": {
+    "type": "boolean"
+   },
+   "selected_options": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   },
+   "variable_name": {
+    "type": "string"
+   },
+   "variable_type": {
+    "type": "string",
+    "enum": [
+     "fields",
+     "values",
+     "functions",
+     "time_literal",
+     "multi_values"
+    ]
+   },
+   "esql_query": {
+    "type": "string"
+   },
+   "control_type": {
+    "type": "string",
+    "enum": [
+     "STATIC_VALUES",
+     "VALUES_FROM_QUERY"
+    ]
+   },
+   "available_options": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   }
   },
-  {
+  "additionalProperties": true,
+  "required": [
+   "selected_options",
+   "variable_name",
+   "variable_type",
+   "esql_query",
+   "control_type"
+  ]
+ },
+ {
+  "type": "object",
+  "properties": {
+   "title": {
+    "type": "string",
+    "description": "A human-readable title for the control"
+   },
+   "data_view_id": {
+    "type": "string",
+    "description": "The ID of the data view that the control is tied to"
+   },
+   "field_name": {
+    "type": "string",
+    "description": "The name of the field in the data view that the control is tied to"
+   },
+   "use_global_filters": {
+    "type": "boolean"
+   },
+   "ignore_validations": {
+    "type": "boolean"
+   },
+   "display_settings": {
     "type": "object",
-    "description": "Markdown embeddable schema",
     "properties": {
-      "content": {
-        "type": "string"
+     "placeholder": {
+      "type": "string"
+     },
+     "hide_action_bar": {
+      "type": "boolean"
+     },
+     "hide_exclude": {
+      "type": "boolean"
+     },
+     "hide_exists": {
+      "type": "boolean"
+     },
+     "hide_sort": {
+      "type": "boolean"
+     }
+    },
+    "additionalProperties": false
+   },
+   "single_select": {
+    "type": "boolean"
+   },
+   "exclude": {
+    "type": "boolean"
+   },
+   "exists_selected": {
+    "type": "boolean"
+   },
+   "run_past_timeout": {
+    "type": "boolean"
+   },
+   "search_technique": {
+    "type": "string",
+    "enum": [
+     "prefix",
+     "wildcard",
+     "exact"
+    ]
+   },
+   "selected_options": {
+    "type": "array",
+    "items": {
+     "anyOf": [
+      {
+       "type": "string"
       },
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
+      {
+       "type": "number"
       }
+     ]
+    }
+   },
+   "sort": {
+    "type": "object",
+    "properties": {
+     "by": {
+      "type": "string",
+      "enum": [
+       "_count",
+       "_key"
+      ]
+     },
+     "direction": {
+      "type": "string",
+      "enum": [
+       "asc",
+       "desc"
+      ]
+     }
     },
     "additionalProperties": false,
-    "required": ["content"]
+    "required": [
+     "by",
+     "direction"
+    ]
+   }
   },
-  {
+  "additionalProperties": true,
+  "required": [
+   "data_view_id",
+   "field_name"
+  ]
+ },
+ {
+  "type": "object",
+  "properties": {
+   "title": {
+    "type": "string",
+    "description": "A human-readable title for the control"
+   },
+   "data_view_id": {
+    "type": "string",
+    "description": "The ID of the data view that the control is tied to"
+   },
+   "field_name": {
+    "type": "string",
+    "description": "The name of the field in the data view that the control is tied to"
+   },
+   "use_global_filters": {
+    "type": "boolean"
+   },
+   "ignore_validations": {
+    "type": "boolean"
+   },
+   "value": {
+    "type": "array",
+    "minItems": 2,
+    "maxItems": 2,
+    "items": {
+     "type": "string"
+    }
+   },
+   "step": {
+    "type": "number"
+   }
+  },
+  "additionalProperties": true,
+  "required": [
+   "data_view_id",
+   "field_name"
+  ]
+ },
+ {
+  "type": "object",
+  "properties": {
+   "start_percentage_of_time_range": {
+    "type": "number"
+   },
+   "end_percentage_of_time_range": {
+    "type": "number"
+   },
+   "is_anchored": {
+    "type": "boolean"
+   }
+  },
+  "additionalProperties": false
+ },
+ {
+  "description": "Markdown embeddable schema",
+  "anyOf": [
+   {
     "type": "object",
-    "description": "Synthetics stats overview embeddable schema",
+    "description": "Markdown by-value embeddable schema",
     "properties": {
-      "description": {
-        "type": "string"
+     "content": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "hide_title": {
+      "type": "boolean"
+     },
+     "hide_border": {
+      "type": "boolean"
+     },
+     "title": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "content"
+    ]
+   },
+   {
+    "type": "object",
+    "description": "Markdown by-reference embeddable schema",
+    "properties": {
+     "ref_id": {
+      "type": "string",
+      "description": "The unique identifier of the markdown panel."
+     },
+     "description": {
+      "type": "string"
+     },
+     "hide_title": {
+      "type": "boolean"
+     },
+     "hide_border": {
+      "type": "boolean"
+     },
+     "title": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "ref_id"
+    ]
+   }
+  ]
+ },
+ {
+  "type": "object",
+  "description": "Synthetics stats overview embeddable schema",
+  "properties": {
+   "description": {
+    "type": "string"
+   },
+   "hide_title": {
+    "type": "boolean"
+   },
+   "hide_border": {
+    "type": "boolean"
+   },
+   "title": {
+    "type": "string"
+   },
+   "drilldowns": {
+    "type": "array",
+    "maxItems": 100,
+    "items": {
+     "type": "object",
+     "properties": {
+      "encode_url": {
+       "type": "boolean",
+       "description": "When true, URL is escaped using percent encoding",
+       "default": true
       },
-      "hide_title": {
-        "type": "boolean"
+      "open_in_new_tab": {
+       "type": "boolean",
+       "default": true
       },
-      "title": {
-        "type": "string"
+      "url": {
+       "type": "string",
+       "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
       },
-      "drilldowns": {
-        "type": "array",
-        "maxItems": 100,
-        "items": {
-          "type": "object",
-          "properties": {
-            "encode_url": {
-              "type": "boolean",
-              "description": "When true, URL is escaped using percent encoding",
-              "default": true
-            },
-            "open_in_new_tab": {
-              "type": "boolean",
-              "default": true
-            },
-            "url": {
-              "type": "string",
-              "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
-            },
-            "label": {
-              "type": "string"
-            },
-            "trigger": {
-              "type": "string",
-              "enum": ["on_open_panel_menu"]
-            },
-            "type": {
-              "type": "string",
-              "enum": ["url_drilldown"]
-            }
-          },
-          "additionalProperties": false,
-          "required": ["url", "label", "trigger", "type"]
+      "label": {
+       "type": "string"
+      },
+      "trigger": {
+       "type": "string",
+       "enum": [
+        "on_open_panel_menu"
+       ]
+      },
+      "type": {
+       "type": "string",
+       "enum": [
+        "url_drilldown"
+       ]
+      }
+     },
+     "additionalProperties": false,
+     "required": [
+      "url",
+      "label",
+      "trigger",
+      "type"
+     ]
+    }
+   },
+   "filters": {
+    "type": "object",
+    "properties": {
+     "projects": {
+      "type": "array",
+      "description": "Filter by project",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
         }
-      },
-      "filters": {
-        "type": "object",
-        "properties": {
-          "projects": {
-            "type": "array",
-            "description": "Filter by project",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "tags": {
-            "type": "array",
-            "description": "Filter by tags",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_ids": {
-            "type": "array",
-            "description": "Filter by monitor IDs",
-            "maxItems": 5000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_types": {
-            "type": "array",
-            "description": "Filter by monitor types",
-            "maxItems": 10,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "locations": {
-            "type": "array",
-            "description": "Filter by monitor locations",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          }
-        },
-        "additionalProperties": false
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
       }
+     },
+     "tags": {
+      "type": "array",
+      "description": "Filter by tags",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_ids": {
+      "type": "array",
+      "description": "Filter by monitor IDs",
+      "maxItems": 5000,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_types": {
+      "type": "array",
+      "description": "Filter by monitor types",
+      "maxItems": 10,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "locations": {
+      "type": "array",
+      "description": "Filter by monitor locations",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     }
     },
     "additionalProperties": false
+   }
   },
-  {
+  "additionalProperties": false
+ },
+ {
+  "type": "object",
+  "description": "Synthetics monitors embeddable schema",
+  "properties": {
+   "filters": {
     "type": "object",
-    "description": "Synthetics monitors embeddable schema",
     "properties": {
-      "filters": {
-        "type": "object",
-        "properties": {
-          "projects": {
-            "type": "array",
-            "description": "Filter by project",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "tags": {
-            "type": "array",
-            "description": "Filter by tags",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_ids": {
-            "type": "array",
-            "description": "Filter by monitor IDs",
-            "maxItems": 5000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_types": {
-            "type": "array",
-            "description": "Filter by monitor types",
-            "maxItems": 10,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "locations": {
-            "type": "array",
-            "description": "Filter by monitor locations",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          }
+     "projects": {
+      "type": "array",
+      "description": "Filter by project",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
         },
-        "additionalProperties": false
-      },
-      "view": {
-        "description": "View mode for the monitors embeddable (defaults to cardView)",
-        "type": "string",
-        "enum": ["cardView", "compactView"]
-      },
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
       }
+     },
+     "tags": {
+      "type": "array",
+      "description": "Filter by tags",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_ids": {
+      "type": "array",
+      "description": "Filter by monitor IDs",
+      "maxItems": 5000,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_types": {
+      "type": "array",
+      "description": "Filter by monitor types",
+      "maxItems": 10,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "locations": {
+      "type": "array",
+      "description": "Filter by monitor locations",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     }
     },
     "additionalProperties": false
+   },
+   "view": {
+    "description": "View mode for the monitors embeddable (defaults to cardView)",
+    "type": "string",
+    "enum": [
+     "cardView",
+     "compactView"
+    ]
+   },
+   "description": {
+    "type": "string"
+   },
+   "hide_title": {
+    "type": "boolean"
+   },
+   "hide_border": {
+    "type": "boolean"
+   },
+   "title": {
+    "type": "string"
+   }
   },
-  {
-    "type": "object",
-    "properties": {},
-    "additionalProperties": true
-  }
+  "additionalProperties": false
+ },
+ {
+  "type": "object",
+  "properties": {},
+  "additionalProperties": true
+ }
 ]

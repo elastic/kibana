@@ -36,7 +36,7 @@ export function registerPostCancelWorkflowExecutionRoute({
         const { workflowExecutionId } = request.params;
         const spaceId = spaces.getSpaceId(request);
 
-        await api.cancelWorkflowExecution(workflowExecutionId, spaceId);
+        await api.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
         return response.ok();
       } catch (error) {
         return handleRouteError(response, error, { checkNotFound: true });

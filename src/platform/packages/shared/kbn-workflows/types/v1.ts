@@ -19,6 +19,9 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
 
+  // Waiting for a concurrency slot to open (queue strategy)
+  QUEUED = 'queued',
+
   // Done
   COMPLETED = 'completed',
   FAILED = 'failed',
@@ -42,6 +45,15 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
   ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+// Statuses that actively occupy a concurrency slot (excludes QUEUED, which is waiting for one)
+export const ActiveExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
 ] as const;
 
 export enum ExecutionType {
@@ -187,6 +199,7 @@ export interface WorkflowExecutionDto {
   id: string;
   status: ExecutionStatus;
   isTestRun: boolean;
+  createdAt: string;
   startedAt: string;
   error: SerializedError | null;
   finishedAt: string;
@@ -415,6 +428,8 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
+export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
@@ -425,6 +440,8 @@ export interface BaseConnectorContract {
   description: string | null;
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
+  /** API stability level derived from the OpenAPI `x-state` field */
+  stability?: StepStabilityLevel;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {

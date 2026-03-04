@@ -41,6 +41,9 @@ export const STATUS_LABELS = {
   [ExecutionStatus.SKIPPED]: i18n.translate('workflowsManagement.executionStatus.skipped', {
     defaultMessage: 'Skipped',
   }),
+  [ExecutionStatus.QUEUED]: i18n.translate('workflowsManagement.executionStatus.queued', {
+    defaultMessage: 'Queued',
+  }),
 };
 
 /**

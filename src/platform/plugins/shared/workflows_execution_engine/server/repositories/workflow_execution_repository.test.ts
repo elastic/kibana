@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ActiveExecutionStatuses,
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -411,7 +415,7 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('getRunningExecutionsByConcurrencyGroup', () => {
-    it('should query for non-terminal execution IDs by concurrency group key', async () => {
+    it('should query for active (slot-occupying) execution IDs by concurrency group key', async () => {
       const mockExecutions = [
         {
           _id: 'exec-1',
@@ -442,7 +446,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: NonTerminalExecutionStatuses,
+                  status: ActiveExecutionStatuses,
                 },
               },
             ],
@@ -483,7 +487,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: NonTerminalExecutionStatuses,
+                  status: ActiveExecutionStatuses,
                 },
               },
               {
@@ -607,6 +611,96 @@ describe('WorkflowExecutionRepository', () => {
           size: 10000, // Capped at ES max_result_window
         })
       );
+    });
+  });
+
+  describe('getQueuedExecutionsByConcurrencyGroup', () => {
+    it('should query for QUEUED execution IDs by concurrency group key', async () => {
+      const mockExecutions = [
+        {
+          _id: 'exec-1',
+          _source: { id: 'exec-1', workflowId: 'wf-1' },
+        },
+        {
+          _id: 'exec-2',
+          _source: { id: 'exec-2', workflowId: 'wf-1' },
+        },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 2, relation: 'eq' } },
+      });
+
+      const result = await repository.getQueuedExecutionsByConcurrencyGroup('server-1', 'default');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
+              { term: { status: ExecutionStatus.QUEUED } },
+            ],
+          },
+        },
+        _source: ['id', 'workflowId'],
+        sort: [{ createdAt: { order: 'asc' } }],
+        size: 5000,
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ id: 'exec-1', workflowId: 'wf-1' });
+      expect(result[1]).toEqual({ id: 'exec-2', workflowId: 'wf-1' });
+    });
+
+    it('should return empty array when no queued executions found', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const result = await repository.getQueuedExecutionsByConcurrencyGroup('server-1', 'default');
+      expect(result).toHaveLength(0);
+    });
+
+    it('should respect custom size parameter', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.getQueuedExecutionsByConcurrencyGroup('server-1', 'default', 3);
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 3,
+        })
+      );
+    });
+  });
+
+  describe('promoteQueuedExecution', () => {
+    it('should return updated when execution is promoted from QUEUED to PENDING', async () => {
+      esClient.update.mockResolvedValue({ result: 'updated' });
+
+      const result = await repository.promoteQueuedExecution('exec-1');
+
+      expect(result).toBe('updated');
+      expect(esClient.update).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: 'exec-1',
+        script: {
+          lang: 'painless',
+          source: expect.stringContaining("ctx._source.status == 'queued'"),
+        },
+      });
+    });
+
+    it('should return noop when execution is no longer QUEUED', async () => {
+      esClient.update.mockResolvedValue({ result: 'noop' });
+
+      const result = await repository.promoteQueuedExecution('exec-1');
+
+      expect(result).toBe('noop');
     });
   });
 

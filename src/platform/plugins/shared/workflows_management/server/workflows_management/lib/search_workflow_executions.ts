@@ -85,6 +85,7 @@ function transformToWorkflowExecutionListModel(
         status: workflowExecution.status,
         error: workflowExecution.error || null,
         isTestRun: workflowExecution.isTestRun ?? false,
+        createdAt: workflowExecution.createdAt,
         startedAt: workflowExecution.startedAt,
         finishedAt: workflowExecution.finishedAt,
         duration: workflowExecution.duration,

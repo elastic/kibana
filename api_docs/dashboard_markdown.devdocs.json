@@ -17,7 +17,7 @@
           "\"DASHBOARD_MARKDOWN\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -43,7 +43,7 @@
           "\"DASHBOARD_MARKDOWN\""
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -51,16 +51,67 @@
       },
       {
         "parentPluginId": "dashboardMarkdown",
-        "id": "def-server.MarkdownEditorState",
+        "id": "def-server.MarkdownByReferenceState",
         "type": "Type",
         "tags": [],
-        "label": "MarkdownEditorState",
+        "label": "MarkdownByReferenceState",
+        "description": [],
+        "signature": [
+          "{ readonly ref_id: string; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownByValueState",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownByValueState",
         "description": [],
         "signature": [
           "{ readonly content: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
-        "lineNumber": 27,
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownCreateRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownCreateRequestBody",
+        "description": [],
+        "signature": [
+          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly content: string; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownCreateResponseBody",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownCreateResponseBody",
+        "description": [],
+        "signature": [
+          "{ readonly spaces?: string[] | undefined; readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; created_by?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; title?: string | undefined; } & { content: string; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/types.ts",
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -74,24 +125,197 @@
         "label": "MarkdownEmbeddableState",
         "description": [],
         "signature": [
-          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly content: string; }"
+          "Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { content: string; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
-        "lineNumber": 28,
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownReadResponseBody",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownReadResponseBody",
+        "description": [],
+        "signature": [
+          "{ readonly spaces?: string[] | undefined; readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; created_by?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; title?: string | undefined; } & { content: string; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownUpdateResponseBody",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownUpdateResponseBody",
+        "description": [],
+        "signature": [
+          "{ readonly spaces?: string[] | undefined; readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; title?: string | undefined; } & { content: string; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/api/update/types.ts",
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.markdownEmbeddableSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "markdownEmbeddableSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { content: string; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>>"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.APP_ICON",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ICON",
+        "description": [],
+        "signature": [
+          "\"visText\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.APP_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "APP_NAME",
+        "description": [],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.DISPLAY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DISPLAY_NAME",
+        "description": [],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.MARKDOWN_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MARKDOWN_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/markdown\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.MARKDOWN_API_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "MARKDOWN_API_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.MARKDOWN_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MARKDOWN_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_MARKDOWN\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-common.MARKDOWN_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MARKDOWN_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"markdown\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

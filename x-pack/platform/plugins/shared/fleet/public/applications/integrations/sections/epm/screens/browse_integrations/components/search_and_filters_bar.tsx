@@ -21,8 +21,17 @@ import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 
+import type { EuiSelectableOption } from '@elastic/eui';
+
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
-import type { BrowseIntegrationSortType, IntegrationStatusFilterType } from '../types';
+import type {
+  BrowseIntegrationSortType,
+  IntegrationStatusFilterType,
+  SetupMethodFilterType,
+  SignalFilterType,
+} from '../types';
+import { SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT } from '../types';
+import { dataTypes } from '../../../../../../../../common/constants';
 import { StatusFilter } from '../../../components/status_filter';
 
 const SEARCH_DEBOUNCE_MS = 150;
@@ -136,6 +145,189 @@ const SortFilter: React.FC = () => {
   );
 };
 
+const SetupMethodFilter: React.FC<{
+  selectedMethods?: SetupMethodFilterType[];
+  onChange: (methods: SetupMethodFilterType[]) => void;
+}> = ({ selectedMethods = [], onChange }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const options: EuiSelectableOption[] = useMemo(
+    () => [
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodAgentlessOption',
+          { defaultMessage: 'Agentless' }
+        ),
+        key: SETUP_METHOD_AGENTLESS,
+        checked: selectedMethods.includes(SETUP_METHOD_AGENTLESS) ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.setupMethodAgentlessOption',
+      },
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodElasticAgentOption',
+          { defaultMessage: 'Elastic Agent' }
+        ),
+        key: SETUP_METHOD_ELASTIC_AGENT,
+        checked: selectedMethods.includes(SETUP_METHOD_ELASTIC_AGENT) ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.setupMethodElasticAgentOption',
+      },
+    ],
+    [selectedMethods]
+  );
+
+  const activeCount = selectedMethods.length;
+
+  const onSelectionChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const newMethods: SetupMethodFilterType[] = [];
+      newOptions.forEach((option) => {
+        if (option.checked === 'on' && option.key) {
+          newMethods.push(option.key as SetupMethodFilterType);
+        }
+      });
+      onChange(newMethods);
+    },
+    [onChange]
+  );
+
+  return (
+    <EuiPopover
+      id="browseIntegrationsSetupMethodPopover"
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      button={
+        <EuiFilterButton
+          data-test-subj="browseIntegrations.searchBar.setupMethodBtn"
+          iconType="arrowDown"
+          onClick={togglePopover}
+          isSelected={isOpen}
+          numFilters={activeCount}
+          hasActiveFilters={activeCount > 0}
+          numActiveFilters={activeCount}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodLabel"
+            defaultMessage="Setup method"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <EuiSelectable
+        data-test-subj="browseIntegrations.searchBar.setupMethodSelectableList"
+        searchable={false}
+        options={options}
+        onChange={onSelectionChange}
+        listProps={{
+          paddingSize: 's',
+          showIcons: true,
+          style: { minWidth: 250 },
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
+
+const SignalFilter: React.FC<{
+  selectedSignals?: SignalFilterType[];
+  onChange: (signals: SignalFilterType[]) => void;
+}> = ({ selectedSignals = [], onChange }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const options: EuiSelectableOption[] = useMemo(
+    () => [
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalLogsOption',
+          { defaultMessage: 'Logs' }
+        ),
+        key: dataTypes.Logs,
+        checked: selectedSignals.includes(dataTypes.Logs) ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.signalLogsOption',
+      },
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalMetricsOption',
+          { defaultMessage: 'Metrics' }
+        ),
+        key: dataTypes.Metrics,
+        checked: selectedSignals.includes(dataTypes.Metrics) ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.signalMetricsOption',
+      },
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalTracesOption',
+          { defaultMessage: 'Traces' }
+        ),
+        key: dataTypes.Traces,
+        checked: selectedSignals.includes(dataTypes.Traces) ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.signalTracesOption',
+      },
+    ],
+    [selectedSignals]
+  );
+
+  const activeCount = selectedSignals.length;
+
+  const onSelectionChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const newSignals: SignalFilterType[] = [];
+      newOptions.forEach((option) => {
+        if (option.checked === 'on' && option.key) {
+          newSignals.push(option.key as SignalFilterType);
+        }
+      });
+      onChange(newSignals);
+    },
+    [onChange]
+  );
+
+  return (
+    <EuiPopover
+      id="browseIntegrationsSignalPopover"
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      button={
+        <EuiFilterButton
+          data-test-subj="browseIntegrations.searchBar.signalBtn"
+          iconType="arrowDown"
+          onClick={togglePopover}
+          isSelected={isOpen}
+          numFilters={activeCount}
+          hasActiveFilters={activeCount > 0}
+          numActiveFilters={activeCount}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.allSignalsLabel"
+            defaultMessage="All signals"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <EuiSelectable
+        data-test-subj="browseIntegrations.searchBar.signalSelectableList"
+        searchable={false}
+        options={options}
+        onChange={onSelectionChange}
+        listProps={{
+          paddingSize: 's',
+          showIcons: true,
+          style: { minWidth: 250 },
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
+
 const SearchBar: React.FC = () => {
   const urlFilters = useUrlFilters();
   const addUrlFilters = useAddUrlFilters();
@@ -182,6 +374,21 @@ export const SearchAndFiltersBar: React.FC = ({}) => {
     },
     [addUrlFilters]
   );
+
+  const handleSetupMethodChange = useCallback(
+    (methods: SetupMethodFilterType[]) => {
+      addUrlFilters({ setupMethod: methods.length > 0 ? methods : undefined });
+    },
+    [addUrlFilters]
+  );
+
+  const handleSignalChange = useCallback(
+    (signals: SignalFilterType[]) => {
+      addUrlFilters({ signal: signals.length > 0 ? signals : undefined });
+    },
+    [addUrlFilters]
+  );
+
   return (
     <StickyFlexItem>
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
@@ -190,18 +397,11 @@ export const SearchAndFiltersBar: React.FC = ({}) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup compressed>
-            <EuiFilterButton>
-              <FormattedMessage
-                id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodLabel"
-                defaultMessage="Setup method"
-              />
-            </EuiFilterButton>
-            <EuiFilterButton>
-              <FormattedMessage
-                id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.allSignalsLabel"
-                defaultMessage="All signals"
-              />
-            </EuiFilterButton>
+            <SetupMethodFilter
+              selectedMethods={urlFilters.setupMethod}
+              onChange={handleSetupMethodChange}
+            />
+            <SignalFilter selectedSignals={urlFilters.signal} onChange={handleSignalChange} />
 
             <StatusFilter
               selectedStatuses={urlFilters.status}
