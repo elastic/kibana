@@ -30,6 +30,7 @@ describe('getStepIconType', () => {
     ['globe', 'http'],
     ['console', 'console'],
     ['database', 'data.set'],
+    ['grab', 'data.set'],
     ['clock', 'wait'],
     ['branch', 'if'],
     ['tokenBoolean', 'if-branch'],
