@@ -118,6 +118,7 @@ export function buildExpression({
     {
       title,
       description,
+      maxDataPoints,
     },
     datasourceExpressionsByLayers
   );

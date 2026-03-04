@@ -106,17 +106,6 @@ function getExpressionForLayer(
         isTextBased: [true],
       },
     });
-
-    if (maxDataPoints && maxDataPoints > 0) {
-      textBasedQueryToAst.chain.push({
-        type: 'function',
-        function: 'lens_downsample',
-        arguments: {
-          targetPoints: [maxDataPoints],
-        },
-      });
-    }
-
     textBasedQueryToAst.chain.push(...formatterOverrides);
     return textBasedQueryToAst;
   } else {

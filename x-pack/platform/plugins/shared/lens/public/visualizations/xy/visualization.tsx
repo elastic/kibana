@@ -897,13 +897,14 @@ export const getXyVisualization = ({
       />
     );
   },
-  toExpression: (state, layers, _attributes, datasourceExpressionsByLayers = {}) =>
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
       layers,
       paletteService,
       datasourceExpressionsByLayers,
-      eventAnnotationService
+      eventAnnotationService,
+      attributes?.maxDataPoints
     ),
 
   toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
