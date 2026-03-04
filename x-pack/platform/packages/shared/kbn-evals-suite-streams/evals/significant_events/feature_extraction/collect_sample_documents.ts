@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { FieldValue, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { FeatureExtractionScenario } from '../datasets';
+import { MANAGED_STREAM_SEARCH_PATTERN, type FeatureExtractionScenario } from '../datasets';
 
 const SAMPLE_DOCS_TARGET_UNIQUE_APPS = 8;
 const SAMPLE_DOCS_MAX = 150;
@@ -107,7 +107,7 @@ export const collectSampleDocuments = async ({
 
   while (docs.length < SAMPLE_DOCS_MAX && uniqueApps.size < SAMPLE_DOCS_TARGET_UNIQUE_APPS) {
     const searchResult = await esClient.search<Record<string, unknown>>({
-      index: 'logs*',
+      index: MANAGED_STREAM_SEARCH_PATTERN,
       size: SAMPLE_DOCS_PAGE_SIZE,
       query,
       sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
@@ -140,7 +140,7 @@ export const collectSampleDocuments = async ({
     const size = Math.min(REQUIRED_APP_SAMPLE_SIZE, remaining);
 
     const result = await esClient.search<Record<string, unknown>>({
-      index: 'logs*',
+      index: MANAGED_STREAM_SEARCH_PATTERN,
       size,
       query: { term: { 'resource.attributes.app': app } },
       sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],

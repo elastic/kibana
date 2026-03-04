@@ -22,16 +22,17 @@ import {
 import { evaluate } from '../../../src/evaluate';
 import { createQueryGenerationEvaluators } from '../../../src/evaluators/query_generation_evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scenario_criteria_llm_evaluator';
-import { getActiveDatasets, resolveScenarioSnapshotSource } from '../datasets';
+import {
+  getActiveDatasets,
+  MANAGED_STREAM_NAME,
+  MANAGED_STREAM_SEARCH_PATTERN,
+  resolveScenarioSnapshotSource,
+} from '../datasets';
 import { FEATURE_SOURCES_TO_RUN } from './resolve_feature_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedFeaturesFromDocs } from './get_computed_features_from_docs';
 
-const INDEX_REFRESH_WAIT_MS = 2500;
 const SAMPLE_DOCS_SIZE = 500;
-
-const MANAGED_STREAM_NAME = 'logs';
-const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
 
 const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
@@ -148,7 +149,7 @@ evaluate.describe(
                 );
               }
 
-              await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
+              await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
               const searchResult = await esClient.search<Record<string, unknown>>({
                 index: MANAGED_STREAM_SEARCH_PATTERN,

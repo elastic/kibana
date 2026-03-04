@@ -10,6 +10,9 @@ import { OTEL_DEMO_NAMESPACE } from '../../../scripts/significant_events_snapsho
 import { otelDemoDataset } from './otel_demo';
 import type { DatasetConfig, SnapshotSourceOverride } from './types';
 
+export const MANAGED_STREAM_NAME = 'logs';
+export const MANAGED_STREAM_SEARCH_PATTERN = `${MANAGED_STREAM_NAME}*`;
+
 const DATASETS: Record<string, DatasetConfig> = {
   [OTEL_DEMO_NAMESPACE]: otelDemoDataset,
 };

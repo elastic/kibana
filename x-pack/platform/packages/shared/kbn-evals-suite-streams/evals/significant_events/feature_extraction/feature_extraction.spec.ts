@@ -18,10 +18,13 @@ import {
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
 import { createFeatureExtractionEvaluators } from '../../../src/evaluators/feature_extraction_evaluators';
-import { getActiveDatasets, resolveScenarioSnapshotSource } from '../datasets';
+import {
+  getActiveDatasets,
+  MANAGED_STREAM_NAME,
+  MANAGED_STREAM_SEARCH_PATTERN,
+  resolveScenarioSnapshotSource,
+} from '../datasets';
 import { collectSampleDocuments } from './collect_sample_documents';
-
-const INDEX_REFRESH_WAIT_MS = 2500;
 
 const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
@@ -80,8 +83,7 @@ evaluate.describe(
           await cleanSignificantEventsDataStreams(esClient, log);
           await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
 
-          log.debug('Waiting for replayed indices to refresh');
-          await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
+          await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
           sampleDocuments = await collectSampleDocuments({ esClient, scenario, log });
           if (sampleDocuments.length === 0) {
@@ -117,7 +119,7 @@ evaluate.describe(
                   ).sample_documents;
 
                   const { features } = await identifyFeatures({
-                    streamName: 'logs',
+                    streamName: MANAGED_STREAM_NAME,
                     sampleDocuments: taskSampleDocuments,
                     systemPrompt: featuresPrompt,
                     inferenceClient,
