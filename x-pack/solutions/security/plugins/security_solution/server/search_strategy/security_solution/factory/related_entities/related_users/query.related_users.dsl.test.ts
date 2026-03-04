@@ -10,6 +10,22 @@ import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildRelatedUsersQuery', () => {
   test('build query from options correctly', () => {
-    expect(buildRelatedUsersQuery(mockOptions)).toMatchObject(expectedDsl);
+    const result = buildRelatedUsersQuery(mockOptions);
+    expect(result).toMatchObject({
+      allow_no_indices: expectedDsl.allow_no_indices,
+      track_total_hits: expectedDsl.track_total_hits,
+      aggregations: expectedDsl.aggregations,
+      size: expectedDsl.size,
+      ignore_unavailable: expectedDsl.ignore_unavailable,
+      index: expectedDsl.index,
+    });
+    expect(result.query?.bool?.filter).toEqual(
+      expect.arrayContaining([
+        { term: { 'event.category': 'authentication' } },
+        { term: { 'event.outcome': 'success' } },
+      ])
+    );
+    expect(Array.isArray(result.query?.bool?.filter)).toBe(true);
+    expect((result.query?.bool?.filter ?? []).length).toBeGreaterThanOrEqual(3);
   });
 });

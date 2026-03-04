@@ -56,13 +56,18 @@ const HostNameComponent: React.FC<Props> = ({
        * if and only if renderer is running inside security solution app
        * we check for event and timeline context
        * */
-      if (!eventContext || !isInTimelineContext) {
+      if (
+        !eventContext ||
+        !isInTimelineContext ||
+        !eventContext.enableHostDetailsFlyout
+      ) {
         return;
       }
 
       const { timelineID } = eventContext;
       // Use entityIdentifiers from source event if available, otherwise fall back to host.name only
-      const finalEntityIdentifiers = entityIdentifiers;
+      const finalEntityIdentifiers =
+        entityIdentifiers ?? (hostName ? { 'host.name': hostName } : undefined);
       openFlyout({
         right: {
           id: HostPanelKey,

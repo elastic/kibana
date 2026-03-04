@@ -15,7 +15,7 @@ import { UserPanelKey } from '../shared/constants';
 jest.mock('@kbn/expandable-flyout');
 
 const mockProps: UserPreviewPanelFooterProps = {
-  userName: 'test',
+  entityIdentifiers: { 'user.name': 'test' },
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
 };

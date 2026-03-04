@@ -189,10 +189,7 @@ describe('EntityStoreDataClient', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: [
-            '.entities.v1.latest.security_host_default',
-            '.entities.v1.latest.security_user_default',
-          ],
+          index: ['.entities.v2.latest.security_default'],
         })
       );
     });
@@ -204,7 +201,16 @@ describe('EntityStoreDataClient', () => {
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({ query: { match_all: {} } })
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { terms: { 'entity.EngineMetadata.Type': ['host'] } },
+                { match_all: {} },
+              ],
+            },
+          },
+        })
       );
     });
 
@@ -266,7 +272,7 @@ describe('EntityStoreDataClient', () => {
           total: 1,
           hits: [
             {
-              _index: '.entities.v1.latest.security_host_default',
+              _index: '.entities.v2.latest.security_default',
               _source: fakeEntityRecord,
             },
           ],
@@ -287,7 +293,7 @@ describe('EntityStoreDataClient', () => {
           total: 1,
           hits: [
             {
-              _index: '.entities.v1.latest.security_host_default',
+              _index: '.entities.v2.latest.security_default',
               _source: { asset: { criticality: 'deleted' }, ...fakeEntityRecord },
             },
           ],
@@ -296,7 +302,8 @@ describe('EntityStoreDataClient', () => {
 
       const response = await dataClient.searchEntities(defaultSearchParams);
 
-      expect(response.records[0]).toEqual(fakeEntityRecord);
+      expect(response.records[0]).toMatchObject(fakeEntityRecord);
+      expect(response.records[0]).toHaveProperty('asset', { criticality: 'deleted' });
     });
   });
 

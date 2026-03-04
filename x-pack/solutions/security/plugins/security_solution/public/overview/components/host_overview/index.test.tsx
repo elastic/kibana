@@ -34,6 +34,7 @@ describe('Host Summary Component', () => {
     anomaliesData: mockAnomalies,
     data: mockData.Hosts.edges[0].node,
     endDate: '2019-06-18T06:00:00.000Z',
+    entityIdentifiers: { 'host.name': 'testHostName' },
     id: 'hostOverview',
     indexNames: [],
     isInDetailsSidePanel: false,

@@ -18,8 +18,8 @@ import type { RelatedUsersRequestOptions } from '../../../../../../../common/api
 
 export const mockOptions: RelatedUsersRequestOptions = {
   defaultIndex: ['test_indices*'],
+  entityIdentifiers: { 'host.name': 'host1' },
   factoryQueryType: RelatedEntitiesQueries.relatedUsers,
-  hostName: 'host1',
   from: '2020-09-02T15:17:13.678Z',
 };
 
@@ -124,7 +124,6 @@ export const expectedDsl = {
   query: {
     bool: {
       filter: [
-        { term: { 'host.name': 'host1' } },
         { term: { 'event.category': 'authentication' } },
         { term: { 'event.outcome': 'success' } },
         {

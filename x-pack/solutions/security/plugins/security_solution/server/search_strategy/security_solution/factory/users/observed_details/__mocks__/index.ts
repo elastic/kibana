@@ -11,6 +11,7 @@ import { UsersQueries } from '../../../../../../../common/search_strategy/securi
 
 export const mockOptions: ObservedUserDetailsRequestOptions = {
   defaultIndex: ['test_indices*'],
+  entityIdentifiers: { 'user.name': 'bastion00.siem.estc.dev' },
   factoryQueryType: UsersQueries.observedDetails,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"user.name":{"query":"test_user"}}}],"should":[],"must_not":[]}}',
@@ -20,7 +21,6 @@ export const mockOptions: ObservedUserDetailsRequestOptions = {
     to: '2020-09-03T15:17:13.678Z',
   },
   params: {},
-  userName: 'bastion00.siem.estc.dev',
 } as ObservedUserDetailsRequestOptions;
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {

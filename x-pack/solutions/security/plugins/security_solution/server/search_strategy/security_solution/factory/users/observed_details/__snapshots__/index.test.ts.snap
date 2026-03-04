@@ -133,8 +133,51 @@ Object {
           }
         },
         {
-          \\"term\\": {
-            \\"user.name\\": \\"bastion00.siem.estc.dev\\"
+          \\"bool\\": {
+            \\"filter\\": [
+              {
+                \\"term\\": {
+                  \\"user.name\\": \\"bastion00.siem.estc.dev\\"
+                }
+              }
+            ],
+            \\"must_not\\": [
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"user.entity.id\\"
+                }
+              },
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"host.entity.id\\"
+                }
+              },
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"host.id\\"
+                }
+              },
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"host.name\\"
+                }
+              },
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"user.id\\"
+                }
+              },
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"user.email\\"
+                }
+              },
+              {
+                \\"exists\\": {
+                  \\"field\\": \\"user.domain\\"
+                }
+              }
+            ]
           }
         },
         {

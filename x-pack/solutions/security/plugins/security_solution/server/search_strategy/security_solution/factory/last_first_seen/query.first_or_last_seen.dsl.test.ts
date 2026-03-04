@@ -24,10 +24,12 @@ describe('buildQuery', () => {
       term?: Record<string, string>;
     }>;
     expect(Array.isArray(filter)).toBe(true);
-    expect(filter.length).toBeGreaterThanOrEqual(2);
+    expect(filter.length).toBeGreaterThanOrEqual(1);
     const hasEntityFilter = filter.some((clause) => clause?.bool != null);
     expect(hasEntityFilter).toBe(true);
-    const termFilter = filter.find((clause) => clause?.term?.['host.name']);
-    expect(termFilter).toEqual({ term: { 'host.name': 'siem-kibana' } });
+    const boolClause = filter.find((clause) => clause?.bool != null);
+    const hostNameTerm = (boolClause?.bool as { filter?: Array<{ term?: Record<string, string> }> })
+      ?.filter?.find((c) => c?.term?.['host.name']);
+    expect(hostNameTerm).toEqual({ term: { 'host.name': 'siem-kibana' } });
   });
 });

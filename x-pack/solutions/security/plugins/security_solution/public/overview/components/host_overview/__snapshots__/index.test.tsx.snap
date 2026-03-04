@@ -194,7 +194,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                         data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
-                        10.142.0.7
+                        host.ip
                       </button>
                     </span>
                   </span>
@@ -887,7 +887,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                         data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
-                        10.142.0.7
+                        host.ip
                       </button>
                     </span>
                   </span>

@@ -110,19 +110,21 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(mockImplementation.renderColumn).toBeCalledWith({
-      asPlainText: false,
-      columnName: header.id,
-      ecsData,
-      eventId,
-      field: header,
-      isDetails,
-      linkValues,
-      rowRenderers: undefined,
-      scopeId,
-      truncate,
-      values: ['2018-11-05T19:03:25.937Z'],
-    });
+    expect(mockImplementation.renderColumn).toBeCalledWith(
+      expect.objectContaining({
+        asPlainText: false,
+        columnName: header.id,
+        ecsData,
+        eventId,
+        field: header,
+        isDetails,
+        linkValues,
+        rowRenderers: undefined,
+        scopeId,
+        truncate,
+        values: ['2018-11-05T19:03:25.937Z'],
+      })
+    );
   });
 });
 

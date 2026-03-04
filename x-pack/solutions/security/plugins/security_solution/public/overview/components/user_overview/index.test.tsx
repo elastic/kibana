@@ -47,6 +47,7 @@ describe('User Summary Component', () => {
       },
     },
     endDate: '2019-06-18T06:00:00.000Z',
+    entityIdentifiers: { 'user.name': 'testUserName' },
     id: 'userOverview',
     isInDetailsSidePanel: false,
     isLoadingAnomaliesData: false,
