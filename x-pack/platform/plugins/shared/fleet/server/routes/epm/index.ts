@@ -472,6 +472,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       summary: `Review a pending policy upgrade for a package with deprecations`,
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
       },
     })
     .addVersion(

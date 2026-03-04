@@ -194,7 +194,8 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
         <p>
           <FormattedMessage
             id="xpack.fleet.integrations.settings.declinedUpgradeReviewDescription"
-            defaultMessage='You previously dismissed the upgrade review. Select "Resume upgrade" to review the changes and decide whether to accept the upgrade.'
+            defaultMessage="You previously dismissed the upgrade review. Select {resumeUpgrade} to review the changes and decide whether to accept the upgrade."
+            values={{ resumeUpgrade: <strong>Resume upgrade</strong> }}
           />
         </p>
         <EuiSpacer size="s" />
