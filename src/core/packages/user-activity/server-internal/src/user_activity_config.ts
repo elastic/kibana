@@ -36,10 +36,10 @@ const filterPolicySchema: Type<FilterPolicy> = schema.oneOf([
 /** Filters applied to user activity events (defaults to none). */
 const filtersSchema = schema.arrayOf(
   schema.object({
-    actions: schema.arrayOf(schema.string()),
+    actions: schema.arrayOf(schema.string(), { maxSize: 100 }),
     policy: filterPolicySchema,
   }),
-  { defaultValue: [] }
+  { defaultValue: [], maxSize: 100 }
 );
 
 /** @internal */
