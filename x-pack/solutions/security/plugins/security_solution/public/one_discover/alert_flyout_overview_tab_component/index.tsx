@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useEffect, useState } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
-import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import type { StartServices } from '../../types';
+import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
 export interface AlertFlyoutOverviewTabProps {
   /**

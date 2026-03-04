@@ -6,29 +6,29 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import React, { useCallback, useMemo } from 'react';
-import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
+import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
+import { useKibana } from '../../../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   ControlColumnProps,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../flyout/document_details/shared/constants/panel_keys';
-import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
-import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { useKibana } from '../../../lib/kibana';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
