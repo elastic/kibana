@@ -83,16 +83,16 @@ describe('getConnectorById', () => {
       createMockInferenceConnector({ connectorId: 'other' }),
     ]);
 
-    await expect(
-      getConnectorById({ actions, request, connectorId, esClient })
-    ).rejects.toThrow("No connector or inference endpoint found for id 'my-connector-id'");
+    await expect(getConnectorById({ actions, request, connectorId, esClient })).rejects.toThrow(
+      "No connector or inference endpoint found for id 'my-connector-id'"
+    );
   });
 
   it('throws if the connector list is empty', async () => {
     getConnectorListMock.mockResolvedValue([]);
 
-    await expect(
-      getConnectorById({ actions, request, connectorId, esClient })
-    ).rejects.toThrow("No connector or inference endpoint found for id 'my-connector-id'");
+    await expect(getConnectorById({ actions, request, connectorId, esClient })).rejects.toThrow(
+      "No connector or inference endpoint found for id 'my-connector-id'"
+    );
   });
 });

@@ -451,7 +451,9 @@ describe('createChatCompleteApi', () => {
 
     beforeEach(() => {
       mockEsClient.inference.get.mockResolvedValue({
-        endpoints: [{ inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' }],
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
       });
 
       resolveInferenceEndpointMock.mockResolvedValue({

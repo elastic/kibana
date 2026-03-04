@@ -30,8 +30,7 @@ export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiW
     const callback: ChatCompleteApiWithCallbackCallback = ({ model }) => {
       const { match, options: nextOptions } = promptToMessageOptions(prompt, input, model ?? {});
 
-      const template =
-        'mustache' in match.template ? match.template.mustache.template : undefined;
+      const template = 'mustache' in match.template ? match.template.mustache.template : undefined;
 
       return {
         ...rest,
