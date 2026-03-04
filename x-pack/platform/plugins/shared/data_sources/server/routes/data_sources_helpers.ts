@@ -104,11 +104,7 @@ async function ensureExtractionWorkflowExists(
   }
 
   // Create the extraction workflow (auto-generated UUID)
-  const created = await workflowManagement.management.createWorkflow(
-    { yaml },
-    spaceId,
-    request
-  );
+  const created = await workflowManagement.management.createWorkflow({ yaml }, spaceId, request);
 
   // Persist the workflow ID in the config SO
   await savedObjectsClient.create<ExtractionConfigAttributes>(
