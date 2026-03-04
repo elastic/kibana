@@ -8,16 +8,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '../../../ast/location';
-import { isOptionNode } from '../../../ast/is';
-import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
+import { within, isOptionNode } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLSingleAstItem,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 
 import type { ICommand } from '../registry';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../types';

@@ -19,7 +19,7 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
-import { getRequestHandlerFactory } from './cps_request_handler_factory';
+import { getRequestHandlerFactory } from './cps_request_handler';
 import { ClusterClient } from './cluster_client';
 import type { OnRequestHandler } from './create_transport';
 import {
