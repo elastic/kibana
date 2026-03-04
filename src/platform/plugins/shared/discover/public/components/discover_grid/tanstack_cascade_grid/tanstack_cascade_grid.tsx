@@ -14,14 +14,15 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
+  EuiDataGridToolbarControl,
   EuiEmptyPrompt,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
+  EuiProgress,
   EuiSelectable,
   EuiText,
   EuiToolTip,
@@ -30,7 +31,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -43,75 +44,92 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getCascadeGridStyles } from './tanstack_cascade_grid.styles';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
+// ── Constants ──
+
 const GROUP_ROW_HEIGHT = 32;
 const EXPANDED_PANEL_HEIGHT = 400;
+const LOADING_ROW_HEIGHT = GROUP_ROW_HEIGHT + 56;
+const EXPANDED_ROW_HEIGHT = GROUP_ROW_HEIGHT + EXPANDED_PANEL_HEIGHT;
 const MAX_DOCS_PER_GROUP = 100;
-const OVERSCAN = 25;
+const OVERSCAN = 15;
 
-// ── SI prefix number formatting (matching NumberBadge) ──
+const EMPTY_STRINGS: string[] = [];
+const EMPTY_SORT: SortOrder[] = [];
 
-const SI_PREFIXES_CENTER = 8;
-const siPrefixes = ['y', 'z', 'a', 'f', 'p', 'n', 'μ', 'm', '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+// ── Formatting helpers ──
 
-const getSiPrefixedNumber = (n: number): string => {
-  if (n === 0) return '0';
-  const base = Math.floor(Math.log10(Math.abs(n)));
-  const siBase = (base < 0 ? Math.ceil : Math.floor)(base / 3);
-  const prefix = siPrefixes[siBase + SI_PREFIXES_CENTER];
-  if (siBase === 0) return n.toString();
-  const baseNumber = parseFloat((n / Math.pow(10, siBase * 3)).toFixed(2));
-  return `${baseNumber}${prefix}`;
-};
+const SI_PREFIXES = ['y', 'z', 'a', 'f', 'p', 'n', 'μ', 'm', '', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
 
 const formatNumberBadge = (value: number): string => {
-  if (Math.floor(value / 1000) >= 1) return getSiPrefixedNumber(value);
-  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+  if (value === 0) return '0';
+  if (Math.abs(value) < 1000) return Number.isInteger(value) ? String(value) : value.toFixed(2);
+  const exp = Math.floor(Math.log10(Math.abs(value)));
+  const si = Math.floor(exp / 3);
+  return `${parseFloat((value / Math.pow(10, si * 3)).toFixed(2))}${SI_PREFIXES[si + 8]}`;
 };
 
 const formatCellValue = (value: unknown): string => {
-  if (value === null || value === undefined) return '-';
+  if (value == null) return '-';
   if (Array.isArray(value)) return value.join(', ');
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
 };
 
-const isBlankValue = (v: unknown): boolean => v === null || v === undefined || v === '';
+const isBlank = (v: unknown): boolean => v == null || v === '';
 
-interface StatsByInfo {
-  byFields: string[];
-  aggregateColumns: string[];
-}
+// ── Query parsing ──
 
-const parseStatsByColumns = (query: AggregateQuery | undefined, columns: string[]): StatsByInfo | undefined => {
+const parseStatsByColumns = (query: AggregateQuery | undefined, columns: string[]) => {
   if (!query || !('esql' in query)) return undefined;
-  // Use [\s\S]+? to span newlines between STATS and BY, and (.+) greedy to capture the rest
-  const byMatch = query.esql.match(/\bSTATS\b[\s\S]+?\bBY\b\s+(.+)/i);
-  if (!byMatch) return undefined;
-  // Strip everything after a pipe or end-of-line comment
-  let byClause = byMatch[1];
-  const pipeIdx = byClause.indexOf('|');
-  if (pipeIdx >= 0) byClause = byClause.slice(0, pipeIdx);
-  byClause = byClause.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '').trim();
-  const byFields = byClause.split(',').map((f) => f.trim()).filter(Boolean);
-  if (byFields.length === 0) return undefined;
+  const m = query.esql.match(/\bSTATS\b[\s\S]+?\bBY\b\s+(.+)/i);
+  if (!m) return undefined;
+  let clause = m[1];
+  const pipe = clause.indexOf('|');
+  if (pipe >= 0) clause = clause.slice(0, pipe);
+  clause = clause.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '').trim();
+  const byFields = clause.split(',').map((f) => f.trim()).filter(Boolean);
+  if (!byFields.length) return undefined;
   return { byFields, aggregateColumns: columns.filter((c) => !byFields.includes(c)) };
 };
 
-const buildWhereClause = (byFields: string[], record: DataTableRecord): string => {
-  return byFields.map((field) => {
+const buildWhereClause = (byFields: string[], record: DataTableRecord): string =>
+  byFields.map((field) => {
     const val = record.flattened[field];
-    if (val === null || val === undefined) return `\`${field}\` IS NULL`;
-    if (typeof val === 'number') return `\`${field}\` == ${val}`;
-    if (typeof val === 'boolean') return `\`${field}\` == ${val}`;
-    const escaped = String(val).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    return `\`${field}\` == "${escaped}"`;
+    if (val == null) return `\`${field}\` IS NULL`;
+    if (typeof val === 'number' || typeof val === 'boolean') return `\`${field}\` == ${val}`;
+    return `\`${field}\` == "${String(val).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }).join(' AND ');
+
+const splitOnPipe = (query: string): string[] => {
+  const parts: string[] = [];
+  let cur = '';
+  for (let i = 0; i < query.length; i++) {
+    const ch = query[i];
+    if (ch === '"' || ch === "'") {
+      const tri = query.slice(i, i + 3);
+      if (tri === '"""' || tri === "'''") {
+        const end = query.indexOf(tri, i + 3);
+        const s = end === -1 ? query.slice(i) : query.slice(i, end + 3);
+        cur += s; i += s.length - 1;
+      } else {
+        cur += ch; i++;
+        while (i < query.length && query[i] !== ch) {
+          if (query[i] === '\\' && i + 1 < query.length) { cur += query[i++]; }
+          cur += query[i++];
+        }
+        if (i < query.length) cur += query[i];
+      }
+    } else if (ch === '|') { parts.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  parts.push(cur);
+  return parts.map((s) => s.trim());
 };
 
-const buildSubQuery = (originalQuery: string, byFields: string[], record: DataTableRecord): string => {
-  const parts = originalQuery.split('|').map((s) => s.trim());
-  const statsIdx = parts.findIndex((p) => /^\s*STATS\b/i.test(p));
-  const base = statsIdx > 0 ? parts.slice(0, statsIdx) : [parts[0]];
+const buildSubQuery = (esql: string, byFields: string[], record: DataTableRecord): string => {
+  const parts = splitOnPipe(esql);
+  const si = parts.findIndex((p) => /^\s*STATS\b/i.test(p));
+  const base = si > 0 ? parts.slice(0, si) : [parts[0]];
   return `${base.join(' | ')} | WHERE ${buildWhereClause(byFields, record)} | LIMIT ${MAX_DOCS_PER_GROUP}`;
 };
 
@@ -122,15 +140,13 @@ export interface FetchGroupDocsParams {
   dataView: DataView;
   signal: AbortSignal;
 }
-
 export type FetchGroupDocsFn = (params: FetchGroupDocsParams) => Promise<DataTableRecord[]>;
-
 export type OpenInNewTabFn = (params: { appState?: { query?: AggregateQuery } }) => void;
 
 export interface TanStackCascadeGridProps {
   rows: DataTableRecord[];
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  columnsMeta?: UnifiedDataTableProps['columnsMeta'];
   dataView: DataView;
   query: AggregateQuery;
   showTimeCol: boolean;
@@ -156,14 +172,17 @@ interface GroupDocsState {
   error: string | null;
 }
 
-// Module-level caches that survive tab switches (component unmount/remount)
-const scrollPositionCache = new Map<string, number>();
-const expandedGroupsCache = new Map<string, Set<string>>();
-const groupDocsCacheMap = new Map<string, Map<string, GroupDocsState>>();
+// ── Module-level caches (survive tab switches, bounded) ──
 
-// ── Expanded group grid (UnifiedDataTable) ──
+const MAX_CACHE = 20;
+function evict<V>(cache: Map<string, V>) {
+  if (cache.size > MAX_CACHE) cache.delete(cache.keys().next().value!);
+}
+const scrollCache = new Map<string, number>();
+const expandCache = new Map<string, Set<string>>();
+const docsCache = new Map<string, Map<string, GroupDocsState>>();
 
-const EMPTY_SORT: SortOrder[] = [];
+// ── ExpandedGroupGrid ──
 
 const ExpandedGroupGrid = React.memo(({
   state, dataView, showTimeCol, renderDocumentView, externalCustomRenderers, onRetry, styles, rowId,
@@ -177,138 +196,124 @@ const ExpandedGroupGrid = React.memo(({
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [density, setDensity] = useState<DataGridDensity>(DataGridDensity.COMPACT);
+  const setExpandedDocCb = useCallback((doc: DataTableRecord | undefined) => setExpandedDoc(doc), []);
 
-  const setExpandedDocFn = useCallback(
-    (...args: Parameters<NonNullable<UnifiedDataTableProps['setExpandedDoc']>>) => setExpandedDoc(args[0]),
-    []
-  );
+  const docs = state.docs ?? [];
+  const toolbar = useMemo(() => getRenderCustomToolbarWithElements({
+    leftSide: <EuiText size="s"><strong>{docs.length} {docs.length === 1 ? 'result' : 'results'}</strong></EuiText>,
+  }), [docs.length]);
 
   if (state.loading && !state.docs) {
     return <div css={styles.docsPanelLoading}><EuiLoadingSpinner size="m" /><EuiText size="xs" color="subdued">Loading documents…</EuiText></div>;
   }
   if (state.error) {
-    return (
-      <div css={styles.docsPanelError}>
-        <EuiIcon type="warning" color="danger" /><EuiText size="xs" color="danger">{state.error}</EuiText>
-        <EuiButtonEmpty size="xs" onClick={onRetry}>Retry</EuiButtonEmpty>
-      </div>
-    );
+    return <div css={styles.docsPanelError}><EuiText size="xs" color="danger">{state.error}</EuiText><EuiButtonEmpty size="xs" onClick={onRetry}>Retry</EuiButtonEmpty></div>;
   }
-  const docs = state.docs ?? [];
-  if (docs.length === 0) {
+  if (!docs.length) {
     return <div css={styles.docsPanelLoading}><EuiText size="xs" color="subdued">No documents found for this group.</EuiText></div>;
   }
-
-  const renderCustomToolbar = getRenderCustomToolbarWithElements({
-    leftSide: (
-      <EuiText size="s">
-        <strong>{docs.length} {docs.length === 1 ? 'result' : 'results'}</strong>
-      </EuiText>
-    ),
-  });
 
   return (
     <div css={styles.docsPanel} data-test-subj="cascadeDocsPanel" style={{ height: EXPANDED_PANEL_HEIGHT }}>
       <EuiPanel paddingSize="none" css={styles.docsPanelInner}>
         <UnifiedDataTable
-          isPlainRecord
-          dataView={dataView}
-          showTimeCol={showTimeCol}
-          services={services}
-          sort={EMPTY_SORT}
-          isSortEnabled={false}
-          ariaLabelledBy={`cascade-leaf-${rowId}`}
-          consumer={`discover_cascade_leaf_${rowId}`}
-          rows={docs}
-          loadingState={state.loading ? DataLoadingState.loading : DataLoadingState.loaded}
-          columns={selectedColumns}
-          onSetColumns={setSelectedColumns}
-          renderCustomToolbar={renderCustomToolbar}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDocFn}
-          dataGridDensityState={density}
-          onUpdateDataGridDensity={setDensity}
-          renderDocumentView={renderDocumentView}
-          externalCustomRenderers={externalCustomRenderers}
-          paginationMode="infinite"
-          sampleSizeState={docs.length}
+          isPlainRecord dataView={dataView} showTimeCol={showTimeCol} services={services}
+          sort={EMPTY_SORT} isSortEnabled={false}
+          ariaLabelledBy={`cascade-leaf-${rowId}`} consumer={`discover_cascade_leaf_${rowId}`}
+          rows={docs} loadingState={state.loading ? DataLoadingState.loading : DataLoadingState.loaded}
+          columns={selectedColumns} onSetColumns={setSelectedColumns}
+          renderCustomToolbar={toolbar}
+          expandedDoc={expandedDoc} setExpandedDoc={setExpandedDocCb}
+          dataGridDensityState={density} onUpdateDataGridDensity={setDensity}
+          renderDocumentView={renderDocumentView} externalCustomRenderers={externalCustomRenderers}
+          paginationMode="infinite" sampleSizeState={docs.length}
         />
       </EuiPanel>
     </div>
   );
 });
 
-// ── Group row (matching old cascade layout: expand btn | title 4/10 | meta 6/10 | actions btn) ──
+// ── CascadeGroupRow ──
 
 const CascadeGroupRow = React.memo(({
-  record, isExpanded, onToggle, onActionsClick, byFields, aggregateColumns, styles, ariaProps,
+  record, isExpanded, onToggle, onActionsClick, byFields, aggregateColumns, styles,
+  index, totalRows,
 }: {
-  record: DataTableRecord; isExpanded: boolean; onToggle: () => void;
-  onActionsClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  record: DataTableRecord; isExpanded: boolean;
+  onToggle: (rowId: string, record: DataTableRecord) => void;
+  onActionsClick: (e: React.MouseEvent<HTMLButtonElement>, record: DataTableRecord) => void;
   byFields: string[]; aggregateColumns: string[];
   styles: ReturnType<typeof getCascadeGridStyles>;
-  ariaProps: Record<string, string | number | boolean>;
+  index: number; totalRows: number;
 }) => {
-  const groupValue = byFields.map((f) => record.flattened[f]).map(formatCellValue).join(', ');
-  const blank = byFields.every((f) => isBlankValue(record.flattened[f]));
+  const allBlank = byFields.every((f) => isBlank(record.flattened[f]));
+  const title = allBlank ? '(blank)' : byFields.map((f) => formatCellValue(record.flattened[f])).join(', ');
 
   return (
     <div
       css={[styles.groupRow, isExpanded && styles.groupRowExpanded]}
-      role="row"
-      tabIndex={-1}
-      data-test-subj="cascadeGroupRow"
-      data-row-id={record.id}
-      {...ariaProps}
-      onClick={onToggle}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+      role="row" tabIndex={0} data-test-subj="cascadeGroupRow"
+      data-row-id={record.id} data-row-type="root"
+      aria-expanded={isExpanded} aria-level={1} aria-posinset={index + 1} aria-setsize={totalRows}
+      onClick={() => onToggle(record.id, record)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(record.id, record); } }}
     >
-      {/* Expand/collapse button */}
-      <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} size="s" />
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="spaceBetween" responsive={false}
+        data-test-subj={`${record.id}-row-header`} css={styles.rowHeader}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'} color="text" size="xs"
+            aria-label={isExpanded ? 'collapse row' : 'expand row'}
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggle(record.id, record); }}
+            data-test-subj={`toggle-row-${record.id}-button`}
+          />
+        </EuiFlexItem>
 
-      {/* Title slot (4/10 flex growth) */}
-      <div css={[styles.groupTitle, blank && styles.groupTitleBlank]}>
-        <h4>{blank ? '(blank)' : groupValue}</h4>
-      </div>
+        <EuiFlexItem grow>
+          <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={4} css={styles.groupTitle}>
+              <EuiText size="s">
+                <h4 css={[styles.titleText, allBlank && styles.groupTitleBlank]}>{title}</h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={6}>
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
+                {aggregateColumns.map((col) => {
+                  const val = record.flattened[col];
+                  return (
+                    <EuiFlexItem key={col} grow={false}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" css={styles.metaLabel}><strong>{col}:</strong></EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          {typeof val === 'number'
+                            ? <EuiText size="s" css={styles.numberBadge} title={String(val)}><h5>{formatNumberBadge(val)}</h5></EuiText>
+                            : <EuiBadge color="hollow" css={styles.textBadge}>{isBlank(val) ? '(blank)' : formatCellValue(val)}</EuiBadge>}
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-      {/* Meta slots (6/10 flex growth) — aggregates */}
-      <div css={styles.groupMeta}>
-        {aggregateColumns.map((col) => {
-          const val = record.flattened[col];
-          return (
-            <div key={col} css={styles.metaSlot}>
-              <span css={styles.metaLabel}>{col}:</span>
-              {typeof val === 'number' ? (
-                <span css={styles.numberBadge} title={String(val)}>
-                  {formatNumberBadge(val)}
-                </span>
-              ) : (
-                <EuiBadge color="hollow" css={styles.textBadge}>
-                  {isBlankValue(val) ? '(blank)' : formatCellValue(val)}
-                </EuiBadge>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Actions button (3-dot menu) */}
-      <EuiButtonIcon
-        css={styles.actionsBtn}
-        iconType="boxesVertical"
-        aria-label="Row actions"
-        size="xs"
-        color="text"
-        onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onActionsClick(e); }}
-        data-test-subj="cascadeRowActionsBtn"
-      />
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon iconType="boxesVertical" size="xs" color="text"
+            aria-label={`${record.id}-cascade-row-actions`}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onActionsClick(e, record); }}
+            data-test-subj={`${record.id}-dscCascadeRowContextActionButton`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 });
 
-// ── Group By selector (matching old cascade header) ──
-
-const NONE_GROUP_OPTION = 'none';
+// ── GroupBySelector ──
 
 const GroupBySelector = React.memo(({
   availableColumns, currentSelectedColumns, onChange,
@@ -317,51 +322,32 @@ const GroupBySelector = React.memo(({
   onChange: (groups: string[]) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const options = useMemo(
-    () => [NONE_GROUP_OPTION, ...availableColumns].map((field) => ({
-      label: field,
-      'data-test-subj': field === NONE_GROUP_OPTION ? 'cascadeGroupByNone' : `cascadeGroupBy-${field}`,
-      checked: (field === NONE_GROUP_OPTION && !currentSelectedColumns.length) || currentSelectedColumns.includes(field) ? ('on' as const) : undefined,
+    () => ['none', ...availableColumns].map((f) => ({
+      label: f,
+      'data-test-subj': f === 'none' ? 'discoverCascadeLayoutOptOutButton' : `${f}-cascadeLayoutOptionBtn`,
+      checked: (f === 'none' && !currentSelectedColumns.length) || currentSelectedColumns.includes(f) ? ('on' as const) : undefined,
     })),
     [availableColumns, currentSelectedColumns]
   );
 
-  const handleChange = useCallback<NonNullable<React.ComponentProps<typeof EuiSelectable>['onActiveOptionChange']>>(
-    (option) => {
-      if (option) {
-        onChange([option.label].filter((o) => o !== NONE_GROUP_OPTION));
-      }
-      setIsOpen(false);
-    },
-    [onChange]
-  );
-
   return (
-    <EuiPopover
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
+    <EuiPopover isOpen={isOpen} closePopover={() => setIsOpen(false)} panelPaddingSize="none"
       button={
         <EuiFilterGroup>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="inspect"
-            onClick={() => setIsOpen((p) => !p)}
-            data-test-subj="cascadeGroupBySelector"
-          >
-            Group by{currentSelectedColumns.length > 0 && ` (${currentSelectedColumns.join(', ')})`}
-          </EuiButtonEmpty>
+          <EuiDataGridToolbarControl iconType="inspect" color="text" onClick={() => setIsOpen((p) => !p)}
+            badgeContent={currentSelectedColumns.length} data-test-subj="discoverEnableCascadeLayoutSwitch"
+          >Group by</EuiDataGridToolbarControl>
         </EuiFilterGroup>
       }
     >
-      <EuiSelectable
-        searchable={false}
-        listProps={{ isVirtualized: false }}
-        options={options}
-        singleSelection="always"
-        onActiveOptionChange={handleChange}
-        data-test-subj="cascadeGroupBySelectionList"
+      <EuiSelectable searchable={false} listProps={{ isVirtualized: false }} options={options} singleSelection="always"
+        onChange={(opts) => {
+          const sel = opts.find((o) => o.checked === 'on');
+          if (sel) onChange(sel.label === 'none' ? [] : [sel.label]);
+          setIsOpen(false);
+        }}
+        data-test-subj="discoverGroupBySelectionList"
       >
         {(list) => <div style={{ width: 300 }}>{list}</div>}
       </EuiSelectable>
@@ -372,10 +358,8 @@ const GroupBySelector = React.memo(({
 // ── Main component ──
 
 export const TanStackCascadeGrid: React.FC<TanStackCascadeGridProps> = React.memo(({
-  rows, columns, columnsMeta, dataView, query, showTimeCol,
-  sort, onSort, onFilter,
-  expandedDoc, setExpandedDoc, renderDocumentView,
-  loadingState, settings, fetchGroupDocuments, onOpenInNewTab,
+  rows, columns, dataView, query, showTimeCol, onFilter, renderDocumentView,
+  loadingState, fetchGroupDocuments, onOpenInNewTab,
   availableCascadeGroups, selectedCascadeGroups, onCascadeGroupingChange,
   externalCustomRenderers,
 }) => {
@@ -383,95 +367,100 @@ export const TanStackCascadeGrid: React.FC<TanStackCascadeGridProps> = React.mem
   const parentRef = useRef<HTMLDivElement | null>(null);
   const styles = useMemo(() => getCascadeGridStyles(euiTheme), [euiTheme]);
   const esqlQuery = 'esql' in query ? query.esql : '';
-
-  // Stable cache key: dataView id + query hash (survives tab switches)
   const cacheKey = `${dataView.id ?? dataView.title}::${esqlQuery}`;
 
-  // ── Parse STATS...BY ──
-  const statsByInfo = useMemo(() => parseStatsByColumns(query, columns), [query, columns]);
-  const byFields = statsByInfo?.byFields ?? [];
-  const aggregateColumns = statsByInfo?.aggregateColumns ?? [];
+  // Parse STATS...BY
+  const parsed = useMemo(() => parseStatsByColumns(query, columns), [query, columns]);
+  const byFields = parsed?.byFields ?? EMPTY_STRINGS;
+  const aggCols = parsed?.aggregateColumns ?? EMPTY_STRINGS;
 
-  // ── Expansion state (restore from cache on mount) ──
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    () => expandedGroupsCache.get(cacheKey) ?? new Set()
-  );
+  // ── Expansion state ──
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => expandCache.get(cacheKey) ?? new Set());
+  const expandedRef = useRef(expandedGroups);
+  expandedRef.current = expandedGroups;
+
   const toggleGroup = useCallback((rowId: string) => {
-    setExpandedGroups((prev) => { const next = new Set(prev); if (next.has(rowId)) next.delete(rowId); else next.add(rowId); return next; });
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowId)) next.delete(rowId); else next.add(rowId);
+      return next;
+    });
   }, []);
 
-  const expandAll = useCallback(() => {
-    const all = new Set(rows.map((r) => r.id));
-    setExpandedGroups(all);
-    rows.forEach((r) => fetchDocsForRow(r.id, r));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows]);
+  // ── Group docs fetching ──
+  const [groupDocs, setGroupDocs] = useState<Map<string, GroupDocsState>>(() => docsCache.get(cacheKey) ?? new Map());
+  const groupDocsRef = useRef(groupDocs);
+  groupDocsRef.current = groupDocs;
+  const abortsRef = useRef(new Map<string, AbortController>());
 
-  const collapseAll = useCallback(() => {
-    abortControllersRef.current.forEach((c) => c.abort());
-    abortControllersRef.current.clear();
-    setExpandedGroups(new Set());
-  }, []);
-
-  // ── Fetched documents cache (restore from module cache on mount) ──
-  const [groupDocsMap, setGroupDocsMap] = useState<Map<string, GroupDocsState>>(
-    () => groupDocsCacheMap.get(cacheKey) ?? new Map()
-  );
-  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
-
-  const groupDocsMapRef = useRef(groupDocsMap);
-  groupDocsMapRef.current = groupDocsMap;
-
-  const fetchDocsForRow = useCallback(async (rowId: string, record: DataTableRecord) => {
-    const existing = groupDocsMapRef.current.get(rowId);
-    if (existing?.docs) return;
-    abortControllersRef.current.get(rowId)?.abort();
-    const controller = new AbortController();
-    abortControllersRef.current.set(rowId, controller);
-    setGroupDocsMap((prev) => { const next = new Map(prev); next.set(rowId, { docs: null, loading: true, error: null }); return next; });
+  const fetchDocs = useCallback(async (rowId: string, record: DataTableRecord) => {
+    if (groupDocsRef.current.get(rowId)?.docs) return;
+    abortsRef.current.get(rowId)?.abort();
+    const ctrl = new AbortController();
+    abortsRef.current.set(rowId, ctrl);
+    setGroupDocs((m) => new Map(m).set(rowId, { docs: null, loading: true, error: null }));
     try {
-      const docs = await fetchGroupDocuments({ subQuery: { esql: buildSubQuery(esqlQuery, byFields, record) }, dataView, signal: controller.signal });
-      setGroupDocsMap((prev) => { const next = new Map(prev); next.set(rowId, { docs, loading: false, error: null }); return next; });
+      const docs = await fetchGroupDocuments({
+        subQuery: { esql: buildSubQuery(esqlQuery, byFields, record) },
+        dataView, signal: ctrl.signal,
+      });
+      setGroupDocs((m) => new Map(m).set(rowId, { docs, loading: false, error: null }));
     } catch (err: any) {
       if (err?.name === 'AbortError') return;
-      setGroupDocsMap((prev) => { const next = new Map(prev); next.set(rowId, { docs: null, loading: false, error: err?.message ?? 'Fetch failed' }); return next; });
+      setGroupDocs((m) => new Map(m).set(rowId, { docs: null, loading: false, error: err?.message ?? 'Fetch failed' }));
     } finally {
-      abortControllersRef.current.delete(rowId);
+      abortsRef.current.delete(rowId);
     }
   }, [esqlQuery, byFields, dataView, fetchGroupDocuments]);
 
-  const cancelFetch = useCallback((rowId: string) => { abortControllersRef.current.get(rowId)?.abort(); abortControllersRef.current.delete(rowId); }, []);
+  const cancelFetch = useCallback((rowId: string) => {
+    abortsRef.current.get(rowId)?.abort();
+    abortsRef.current.delete(rowId);
+  }, []);
 
-  useEffect(() => { return () => { abortControllersRef.current.forEach((c) => c.abort()); abortControllersRef.current.clear(); }; }, []);
+  // Cleanup on unmount
+  useEffect(() => () => { abortsRef.current.forEach((c) => c.abort()); }, []);
 
-  // Persist expansion + docs state to module cache on every change
-  useEffect(() => { expandedGroupsCache.set(cacheKey, expandedGroups); }, [cacheKey, expandedGroups]);
-  useEffect(() => { groupDocsCacheMap.set(cacheKey, groupDocsMap); }, [cacheKey, groupDocsMap]);
+  // Persist caches
+  useEffect(() => { expandCache.set(cacheKey, expandedGroups); evict(expandCache); }, [cacheKey, expandedGroups]);
+  useEffect(() => { docsCache.set(cacheKey, groupDocs); evict(docsCache); }, [cacheKey, groupDocs]);
 
-  // Reset on query change (not just row count — row count can fluctuate)
-  const prevCacheKeyRef = useRef(cacheKey);
+  // Reset when query changes
+  const prevKeyRef = useRef(cacheKey);
   useEffect(() => {
-    if (prevCacheKeyRef.current !== cacheKey) {
-      prevCacheKeyRef.current = cacheKey;
-      setExpandedGroups(expandedGroupsCache.get(cacheKey) ?? new Set());
-      setGroupDocsMap(groupDocsCacheMap.get(cacheKey) ?? new Map());
-      abortControllersRef.current.forEach((c) => c.abort());
-      abortControllersRef.current.clear();
+    if (prevKeyRef.current !== cacheKey) {
+      prevKeyRef.current = cacheKey;
+      setExpandedGroups(expandCache.get(cacheKey) ?? new Set());
+      setGroupDocs(docsCache.get(cacheKey) ?? new Map());
+      abortsRef.current.forEach((c) => c.abort());
+      abortsRef.current.clear();
     }
   }, [cacheKey]);
 
+  // Stable toggle/retry/actions handlers (same reference for all rows)
   const handleToggle = useCallback((rowId: string, record: DataTableRecord) => {
-    const willExpand = !expandedGroups.has(rowId);
+    const willExpand = !expandedRef.current.has(rowId);
     toggleGroup(rowId);
-    if (willExpand) fetchDocsForRow(rowId, record); else cancelFetch(rowId);
-  }, [expandedGroups, toggleGroup, fetchDocsForRow, cancelFetch]);
+    if (willExpand) fetchDocs(rowId, record); else cancelFetch(rowId);
+  }, [toggleGroup, fetchDocs, cancelFetch]);
 
   const handleRetry = useCallback((rowId: string, record: DataTableRecord) => {
-    setGroupDocsMap((prev) => { const next = new Map(prev); next.delete(rowId); return next; });
-    fetchDocsForRow(rowId, record);
-  }, [fetchDocsForRow]);
+    setGroupDocs((m) => { const n = new Map(m); n.delete(rowId); return n; });
+    fetchDocs(rowId, record);
+  }, [fetchDocs]);
 
-  // ── Context menu (3-dot popover matching old tab) ──
+  const expandAll = useCallback(() => {
+    setExpandedGroups(new Set(rows.map((r) => r.id)));
+    rows.forEach((r) => fetchDocs(r.id, r));
+  }, [rows, fetchDocs]);
+
+  const collapseAll = useCallback(() => {
+    abortsRef.current.forEach((c) => c.abort());
+    abortsRef.current.clear();
+    setExpandedGroups(new Set());
+  }, []);
+
+  // ── Context menu ──
   const popoverBtnRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRow, setPopoverRow] = useState<{ id: string; record: DataTableRecord } | null>(null);
   const closePopover = useCallback(() => setPopoverRow(null), []);
@@ -481,190 +470,173 @@ export const TanStackCascadeGrid: React.FC<TanStackCascadeGridProps> = React.mem
     setPopoverRow((prev) => prev?.id === record.id ? null : { id: record.id, record });
   }, []);
 
-  const contextMenuPanels = useMemo(() => {
+  const menuPanels = useMemo(() => {
     if (!popoverRow) return [];
-    const groupValue = byFields.map((f) => formatCellValue(popoverRow.record.flattened[f])).join(', ');
+    const val = byFields.map((f) => formatCellValue(popoverRow.record.flattened[f])).join(', ');
     return [{
       id: 'cascade-actions',
       items: [
-        {
-          name: 'Copy to clipboard',
-          icon: 'copy',
-          'data-test-subj': 'cascadeActionCopy',
-          onClick: () => { copyToClipboard(groupValue); closePopover(); },
-        },
+        { name: 'Copy to clipboard', icon: 'copy', 'data-test-subj': 'dscCascadeRowContextActionCopyToClipboard',
+          onClick: () => { copyToClipboard(val); closePopover(); } },
         ...(onFilter ? [
-          {
-            name: 'Filter in',
-            icon: 'plusInCircle',
-            'data-test-subj': 'cascadeActionFilterIn',
-            disabled: byFields.every((f) => isBlankValue(popoverRow.record.flattened[f])),
-            onClick: () => { byFields.forEach((f) => onFilter!(f, popoverRow.record.flattened[f], '+')); closePopover(); },
-          },
-          {
-            name: 'Filter out',
-            icon: 'minusInCircle',
-            'data-test-subj': 'cascadeActionFilterOut',
-            disabled: byFields.every((f) => isBlankValue(popoverRow.record.flattened[f])),
-            onClick: () => { byFields.forEach((f) => onFilter!(f, popoverRow.record.flattened[f], '-')); closePopover(); },
-          },
+          { name: 'Filter in', icon: 'plusInCircle', 'data-test-subj': 'dscCascadeRowContextActionFilterIn',
+            disabled: byFields.every((f) => isBlank(popoverRow.record.flattened[f])),
+            onClick: () => { byFields.forEach((f) => onFilter!(f, popoverRow.record.flattened[f], '+')); closePopover(); } },
+          { name: 'Filter out', icon: 'minusInCircle', 'data-test-subj': 'dscCascadeRowContextActionFilterOut',
+            disabled: byFields.every((f) => isBlank(popoverRow.record.flattened[f])),
+            onClick: () => { byFields.forEach((f) => onFilter!(f, popoverRow.record.flattened[f], '-')); closePopover(); } },
         ] : []),
         ...(onOpenInNewTab ? [
-          {
-            name: 'Open in new tab',
-            icon: 'discoverApp',
-            'data-test-subj': 'cascadeActionOpenInNewTab',
-            onClick: () => {
-              const subEsql = buildSubQuery(esqlQuery, byFields, popoverRow.record);
-              onOpenInNewTab({ appState: { query: { esql: subEsql } } });
-              closePopover();
-            },
-          },
+          { name: 'Open in new tab', icon: 'discoverApp', 'data-test-subj': 'dscCascadeRowContextActionOpenInNewTab',
+            onClick: () => { onOpenInNewTab({ appState: { query: { esql: buildSubQuery(esqlQuery, byFields, popoverRow.record) } } }); closePopover(); } },
         ] : []),
       ],
     }];
   }, [popoverRow, byFields, onFilter, onOpenInNewTab, esqlQuery, closePopover]);
 
   // ── Virtualizer ──
-  const getRowHeight = useCallback((index: number): number => {
-    const row = rows[index];
-    if (!row) return GROUP_ROW_HEIGHT;
-    if (!expandedGroups.has(row.id)) return GROUP_ROW_HEIGHT;
-    const state = groupDocsMap.get(row.id);
-    if (!state?.docs || state.docs.length === 0) return GROUP_ROW_HEIGHT + 56;
-    return GROUP_ROW_HEIGHT + EXPANDED_PANEL_HEIGHT;
-  }, [rows, expandedGroups, groupDocsMap]);
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
 
-  const rowVirtualizer = useVirtualizer({
+  const getRowHeight = useCallback((i: number): number => {
+    const r = rowsRef.current[i];
+    if (!r || !expandedRef.current.has(r.id)) return GROUP_ROW_HEIGHT;
+    const s = groupDocsRef.current.get(r.id);
+    return (!s?.docs || !s.docs.length) ? LOADING_ROW_HEIGHT : EXPANDED_ROW_HEIGHT;
+  }, []);
+
+  const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: getRowHeight,
     overscan: OVERSCAN,
-    initialOffset: scrollPositionCache.get(cacheKey) ?? 0,
+    initialOffset: scrollCache.get(cacheKey) ?? 0,
   });
-  useEffect(() => { rowVirtualizer.measure(); }, [expandedGroups, groupDocsMap, rowVirtualizer]);
 
-  // Persist scroll position to module cache
+  // Debounced re-measure when expansion or docs change
+  const rafRef = useRef(0);
   useEffect(() => {
-    const scrollEl = parentRef.current;
-    if (!scrollEl) return;
-    let rafId = 0;
-    const handleScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        scrollPositionCache.set(cacheKey, scrollEl.scrollTop);
-      });
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => virtualizer.measure());
+  }, [expandedGroups, groupDocs, virtualizer]);
+
+  // Persist scroll position
+  useEffect(() => {
+    const el = parentRef.current;
+    if (!el) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { scrollCache.set(cacheKey, el.scrollTop); evict(scrollCache); });
     };
-    scrollEl.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(rafId);
-      scrollEl.removeEventListener('scroll', handleScroll);
-    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => { cancelAnimationFrame(raf); el.removeEventListener('scroll', onScroll); };
   }, [cacheKey]);
 
   // ── Keyboard navigation ──
-  const [focusedIndex, setFocusedIndex] = useState(-1);
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const total = rows.length;
-    if (total === 0) return;
-    let next = focusedIndex;
-    const row = rows[focusedIndex];
+  const [focusIdx, setFocusIdx] = useState(-1);
+  const focusRef = useRef(focusIdx);
+  focusRef.current = focusIdx;
+
+  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const r = rowsRef.current;
+    const len = r.length;
+    if (!len) return;
+    const idx = focusRef.current;
+    let next = idx;
+    const row = r[idx];
     switch (e.key) {
-      case 'ArrowDown': e.preventDefault(); next = Math.min(focusedIndex + 1, total - 1); break;
-      case 'ArrowUp': e.preventDefault(); next = Math.max(focusedIndex - 1, 0); break;
-      case 'Home': e.preventDefault(); next = 0; break;
-      case 'End': e.preventDefault(); next = total - 1; break;
-      case 'ArrowRight': e.preventDefault(); if (row && !expandedGroups.has(row.id)) handleToggle(row.id, row); return;
-      case 'ArrowLeft': e.preventDefault(); if (row && expandedGroups.has(row.id)) handleToggle(row.id, row); return;
+      case 'ArrowDown': e.preventDefault(); next = Math.min(idx + 1, len - 1); break;
+      case 'ArrowUp':   e.preventDefault(); next = Math.max(idx - 1, 0); break;
+      case 'Home':      e.preventDefault(); next = 0; break;
+      case 'End':       e.preventDefault(); next = len - 1; break;
+      case 'ArrowRight': e.preventDefault(); if (row && !expandedRef.current.has(row.id)) handleToggle(row.id, row); return;
+      case 'ArrowLeft':  e.preventDefault(); if (row && expandedRef.current.has(row.id)) handleToggle(row.id, row); return;
       default: return;
     }
-    if (next !== focusedIndex) {
-      setFocusedIndex(next);
-      rowVirtualizer.scrollToIndex(next, { align: 'auto' });
+    if (next !== idx) {
+      setFocusIdx(next);
+      virtualizer.scrollToIndex(next, { align: 'auto' });
       requestAnimationFrame(() => {
-        (parentRef.current?.querySelector(`[data-row-id="${rows[next]?.id}"]`) as HTMLElement | null)?.focus();
+        (parentRef.current?.querySelector(`[data-row-id="${r[next]?.id}"]`) as HTMLElement | null)?.focus();
       });
     }
-  }, [focusedIndex, rows, expandedGroups, handleToggle, rowVirtualizer]);
+  }, [handleToggle, virtualizer]);
 
   // ── Full screen ──
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const toggleFullScreen = useCallback(() => setIsFullScreen((p) => !p), []);
+  const [fullScreen, setFullScreen] = useState(false);
 
-  const virtualItems = rowVirtualizer.getVirtualItems();
-  const isLoading = loadingState === DataLoadingState.loading;
-  const isEmpty = !isLoading && rows.length === 0;
+  const items = virtualizer.getVirtualItems();
+  const loading = loadingState === DataLoadingState.loading;
+  const empty = !loading && !rows.length;
+  const total = rows.length;
+
   return (
-    <div css={[styles.wrapper, isFullScreen && styles.fullScreen]} data-test-subj="tanstackCascadeWrapper">
-      {/* Toolbar — matches old tab header: left = count, right = controls */}
-      <div css={styles.toolbar}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{rows.length.toLocaleString()} {rows.length === 1 ? 'group' : 'groups'}</strong>
-              {byFields.length > 0 && <span style={{ fontWeight: 'normal' }}>{' '}· by {byFields.join(', ')}</span>}
-            </EuiText>
-          </EuiFlexItem>
-          {expandedGroups.size > 0 && (
+    <div css={[styles.wrapper, fullScreen && styles.fullScreen]} data-test-subj="tanstackCascadeWrapper">
+      {/* Toolbar */}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false} css={styles.toolbar}>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="accent">{expandedGroups.size} expanded</EuiBadge>
+              <EuiText size="s"><strong><span data-test-subj="discoverQueryHits">{total.toLocaleString()}</span> {total === 1 ? 'group' : 'groups'}</strong></EuiText>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <div css={styles.toolbarRight}>
-          {availableCascadeGroups && availableCascadeGroups.length > 0 && onCascadeGroupingChange && (
-            <GroupBySelector
-              availableColumns={availableCascadeGroups}
-              currentSelectedColumns={selectedCascadeGroups ?? []}
-              onChange={onCascadeGroupingChange}
-            />
-          )}
-          <EuiToolTip content="Expand all groups">
-            <EuiButtonIcon iconType="unfold" aria-label="Expand all groups" size="xs" onClick={expandAll} data-test-subj="cascadeExpandAll" />
-          </EuiToolTip>
-          <EuiToolTip content="Collapse all groups">
-            <EuiButtonIcon iconType="fold" aria-label="Collapse all groups" size="xs" onClick={collapseAll} disabled={expandedGroups.size === 0} data-test-subj="cascadeCollapseAll" />
-          </EuiToolTip>
-          <EuiToolTip content={isFullScreen ? 'Exit full screen' : 'Full screen'}>
-            <EuiButtonIcon iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'} aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'} size="xs" onClick={toggleFullScreen} data-test-subj="cascadeFullScreenButton" />
-          </EuiToolTip>
-        </div>
-      </div>
+            {expandedGroups.size > 0 && (
+              <EuiFlexItem grow={false}><EuiBadge color="accent">{expandedGroups.size} expanded</EuiBadge></EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Expand all groups">
+                <EuiButtonIcon iconType="unfold" aria-label="Expand all groups" size="xs" onClick={expandAll} data-test-subj="cascadeExpandAll" />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Collapse all groups">
+                <EuiButtonIcon iconType="fold" aria-label="Collapse all groups" size="xs" onClick={collapseAll} disabled={!expandedGroups.size} data-test-subj="cascadeCollapseAll" />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={fullScreen ? 'Exit full screen' : 'Full screen'}>
+                <EuiButtonIcon iconType={fullScreen ? 'fullScreenExit' : 'fullScreen'} aria-label={fullScreen ? 'Exit full screen' : 'Full screen'}
+                  size="xs" onClick={() => setFullScreen((p) => !p)} data-test-subj="cascadeFullScreenButton" />
+              </EuiToolTip>
+            </EuiFlexItem>
+            {availableCascadeGroups?.length && onCascadeGroupingChange ? (
+              <EuiFlexItem grow={false}>
+                <GroupBySelector availableColumns={availableCascadeGroups} currentSelectedColumns={selectedCascadeGroups ?? []} onChange={onCascadeGroupingChange} />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <div css={{ flex: 1, overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-        {isEmpty ? (
+      {/* Content */}
+      <div css={styles.contentArea}>
+        {empty ? (
           <EuiEmptyPrompt css={styles.emptyState} iconType="discoverApp" title={<h3>No groups found</h3>} body="The query returned no STATS...BY results." data-test-subj="cascadeNoResults" />
         ) : (
-          <div ref={parentRef} css={styles.scrollContainer} role="treegrid" aria-label="Cascade document groups" aria-readonly="true" tabIndex={0} onKeyDown={handleKeyDown}>
-            <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
-              <div css={styles.virtualInner} style={{ transform: `translateY(${virtualItems[0]?.start ?? 0}px)` }}>
-                {virtualItems.map((virtualRow) => {
-                  const row = rows[virtualRow.index];
-                  const rowId = row.id;
-                  const isExpanded = expandedGroups.has(rowId);
-                  const docsState = groupDocsMap.get(rowId);
+          <div ref={parentRef} css={styles.scrollContainer} role="treegrid" aria-label="Cascade document groups" aria-readonly="true" tabIndex={0} onKeyDown={onKeyDown}>
+            <div css={styles.virtualOuter} style={{ height: virtualizer.getTotalSize() }}>
+              <div css={styles.virtualInner} style={{ transform: `translateY(${items[0]?.start ?? 0}px)` }}>
+                {items.map((vi) => {
+                  const row = rows[vi.index];
+                  const expanded = expandedGroups.has(row.id);
+                  const ds = groupDocs.get(row.id);
                   return (
-                    <div key={rowId} data-index={virtualRow.index} role="rowgroup">
+                    <div key={row.id} data-index={vi.index} role="rowgroup">
                       <CascadeGroupRow
-                        record={row}
-                        isExpanded={isExpanded}
-                        onToggle={() => handleToggle(rowId, row)}
-                        onActionsClick={(e) => handleActionsClick(e, row)}
-                        byFields={byFields}
-                        aggregateColumns={aggregateColumns}
-                        styles={styles}
-                        ariaProps={{ 'aria-expanded': isExpanded, 'aria-level': 1, 'aria-posinset': virtualRow.index + 1, 'aria-setsize': rows.length }}
+                        record={row} isExpanded={expanded}
+                        onToggle={handleToggle} onActionsClick={handleActionsClick}
+                        byFields={byFields} aggregateColumns={aggCols} styles={styles}
+                        index={vi.index} totalRows={total}
                       />
-                      {isExpanded && docsState && (
-                        <ExpandedGroupGrid
-                          state={docsState}
-                          dataView={dataView}
-                          showTimeCol={showTimeCol}
-                          renderDocumentView={renderDocumentView}
-                          externalCustomRenderers={externalCustomRenderers}
-                          styles={styles}
-                          rowId={rowId}
-                          onRetry={() => handleRetry(rowId, row)}
+                      {ds?.loading && !ds.docs && <EuiProgress size="xs" color="accent" />}
+                      {expanded && ds && (
+                        <ExpandedGroupGrid state={ds} dataView={dataView} showTimeCol={showTimeCol}
+                          renderDocumentView={renderDocumentView} externalCustomRenderers={externalCustomRenderers}
+                          styles={styles} rowId={row.id} onRetry={() => handleRetry(row.id, row)}
                         />
                       )}
                     </div>
@@ -672,26 +644,15 @@ export const TanStackCascadeGrid: React.FC<TanStackCascadeGridProps> = React.mem
                 })}
               </div>
             </div>
-            {isLoading && <div css={styles.loadingOverlay}><EuiLoadingSpinner size="xl" /></div>}
+            {loading && <div css={styles.loadingOverlay}><EuiLoadingSpinner size="xl" /></div>}
           </div>
         )}
-
       </div>
 
-      {/* Actions popover — matches old tab's EuiWrappingPopover + EuiContextMenu */}
+      {/* Context menu popover */}
       {popoverRow && popoverBtnRef.current && (
-        <EuiWrappingPopover
-          button={popoverBtnRef.current}
-          isOpen
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downRight"
-        >
-          <EuiContextMenu
-            initialPanelId="cascade-actions"
-            panels={contextMenuPanels}
-            data-test-subj="cascadeContextMenu"
-          />
+        <EuiWrappingPopover button={popoverBtnRef.current} isOpen closePopover={closePopover} panelPaddingSize="none" anchorPosition="upLeft">
+          <EuiContextMenu initialPanelId="cascade-actions" panels={menuPanels} data-test-subj="cascadeContextMenu" />
         </EuiWrappingPopover>
       )}
     </div>

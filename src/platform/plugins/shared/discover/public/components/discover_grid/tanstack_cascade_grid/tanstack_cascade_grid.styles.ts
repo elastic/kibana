@@ -28,19 +28,16 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
   }),
 
   toolbar: css({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: `${euiTheme.size.s} 0`,
     flexShrink: 0,
-    gap: euiTheme.size.s,
-    flexWrap: 'wrap',
   }),
 
-  toolbarRight: css({
+  contentArea: css({
+    flex: 1,
+    overflow: 'hidden',
+    position: 'relative',
     display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.xs,
+    flexDirection: 'column',
   }),
 
   scrollContainer: css({
@@ -58,6 +55,7 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
   virtualOuter: css({
     position: 'relative',
     width: '100%',
+    contain: 'layout style',
   }),
 
   virtualInner: css({
@@ -65,19 +63,15 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
     top: 0,
     left: 0,
     width: '100%',
+    willChange: 'transform',
   }),
 
-  // -- Group row (matches CascadeRowPrimitive size="s" = 32px) --
+  // -- Group row (matches CascadeRowPrimitive) --
   groupRow: css({
-    display: 'flex',
-    alignItems: 'center',
     cursor: 'pointer',
-    padding: `0 ${euiTheme.size.s}`,
-    height: 32,
     borderBottom: euiTheme.border.thin,
     transition: 'background-color 100ms ease',
     userSelect: 'none',
-    gap: euiTheme.size.xs,
     outline: 'none',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     '&:hover': {
@@ -90,25 +84,25 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
 
   groupRowExpanded: css({
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    fontWeight: euiTheme.font.weight.semiBold,
   }),
 
-  // Title slot: 4/10 flex growth
+  rowHeader: css({
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    minHeight: 32,
+  }),
+
   groupTitle: css({
-    flex: '4 1 0',
     minWidth: 0,
+    overflow: 'hidden',
+  }),
+
+  titleText: css({
+    margin: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    fontSize: euiTheme.font.scale.s * euiTheme.base,
-    fontWeight: euiTheme.font.weight.semiBold,
-    '& h4': {
-      margin: 0,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      fontSize: 'inherit',
-      fontWeight: 'inherit',
-    },
+    fontSize: 'inherit',
+    fontWeight: 'inherit',
   }),
 
   groupTitleBlank: css({
@@ -116,39 +110,17 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
     color: euiTheme.colors.textSubdued,
   }),
 
-  // Meta slots: 6/10 flex growth
-  groupMeta: css({
-    flex: '6 1 0',
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.m,
-    overflow: 'hidden',
-    justifyContent: 'space-between',
-  }),
-
-  metaSlot: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.xs,
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    fontSize: euiTheme.font.scale.s * euiTheme.base,
-  }),
-
   metaLabel: css({
-    fontWeight: euiTheme.font.weight.bold,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    flexShrink: 0,
   }),
 
   numberBadge: css({
-    width: '7ch',
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
-    fontWeight: euiTheme.font.weight.semiBold,
-    flexShrink: 0,
+    '& h5': {
+      margin: 0,
+      fontSize: 'inherit',
+    },
   }),
 
   textBadge: css({
@@ -156,11 +128,6 @@ export const getCascadeGridStyles = (euiTheme: EuiThemeComputed) => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-  }),
-
-  actionsBtn: css({
-    flexShrink: 0,
-    marginLeft: 'auto',
   }),
 
   // -- Documents panel (expanded leaf — wraps UnifiedDataTable) --

@@ -220,7 +220,7 @@ test.describe('TanStack Cascade Grid', () => {
     await setupCascade(page);
 
     // Click the 3-dot actions button on first group row
-    const actionsBtn = page.locator('[data-test-subj="cascadeRowActionsBtn"]').first();
+    const actionsBtn = page.locator('[data-test-subj$="-dscCascadeRowContextActionButton"]').first();
     await expect(actionsBtn).toBeVisible();
     await actionsBtn.click();
     await page.waitForTimeout(500);
