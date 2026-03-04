@@ -7,7 +7,6 @@
 
 import type { ChangeEvent } from 'react';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiButtonSize } from '@elastic/eui/src/components/button/button';
@@ -36,13 +35,18 @@ const strings = {
 };
 
 interface Props {
-  gutterSize: EuiFlexGroupGutterSize;
-  buttonSize: EuiButtonSize;
+  gutterSize?: EuiFlexGroupGutterSize;
+  buttonSize?: EuiButtonSize;
   onSubmit: (interval: number) => void;
-  defaultValue: any;
+  defaultValue?: any;
 }
 
-export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue }: Props) => {
+export const CustomInterval = ({
+  gutterSize = 's' as EuiFlexGroupGutterSize,
+  buttonSize = 's' as EuiButtonSize,
+  onSubmit,
+  defaultValue = '',
+}: Props) => {
   const [customInterval, setCustomInterval] = useState(defaultValue);
   const refreshInterval = getTimeInterval(customInterval);
   const isInvalid = Boolean(customInterval.length && !refreshInterval);
@@ -84,17 +88,4 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
       </EuiFlexGroup>
     </form>
   );
-};
-
-CustomInterval.propTypes = {
-  buttonSize: PropTypes.string,
-  gutterSize: PropTypes.string,
-  defaultValue: PropTypes.string,
-  onSubmit: PropTypes.func.isRequired,
-};
-
-CustomInterval.defaultProps = {
-  buttonSize: 's',
-  gutterSize: 's',
-  defaultValue: '',
 };
