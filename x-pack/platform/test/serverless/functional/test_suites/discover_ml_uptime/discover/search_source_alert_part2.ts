@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       .expect(204, '');
 
   const createSearchSourceRule = async (): Promise<string> => {
-    const { body } = await supertest
+    const response = await supertest
       .post('/api/alerting/rule')
       .set({
         'kbn-xsrf': 'some-xsrf-token',
@@ -234,12 +234,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               ],
             },
+            frequency: {
+              summary: false,
+              notify_when: 'onActiveAlert',
+              throttle: null,
+            },
           },
         ],
-      })
-      .expect(200);
+      });
 
-    return body.id;
+    if (response.status !== 200) {
+      log.error(
+        `Failed to create search source rule: ${response.status} ${JSON.stringify(response.body)}`
+      );
+    }
+    expect(response.status).to.be(200);
+
+    return response.body.id;
   };
 
   const defineSearchSourceAlert = async (alertName: string) => {

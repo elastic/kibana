@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('discover x_pack (part 1)', function () {
+  describe('discover', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./reporting'));
