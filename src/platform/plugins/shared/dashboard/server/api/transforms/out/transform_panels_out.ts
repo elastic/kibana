@@ -73,7 +73,7 @@ function transformPanelProperties(
   isDashboardAppRequest: boolean = false
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
-  const { embeddableConfig, gridData, panelIndex, version } = panel;
+  const { embeddableConfig, gridData, panelIndex } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
@@ -99,6 +99,5 @@ function transformPanelProperties(
     config: transformedPanelConfig ? transformedPanelConfig : embeddableConfig,
     uid: panelIndex,
     type,
-    ...(version && { version }),
   };
 }
