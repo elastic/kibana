@@ -12,9 +12,9 @@ import { Route } from '@kbn/shared-ux-router';
 import type { HttpSetup } from '@kbn/core/public';
 
 import { TEMPLATE_NAME, MAPPINGS as DEFAULT_MAPPING } from './constants';
-import { TemplateEdit } from '..';
-import { WithAppDependencies } from '../../../../../__jest__/client_integration/helpers/setup_environment';
-import { wizardSteps } from '../../../../../__jest__/client_integration/helpers/actions/wizard_steps';
+import { TemplateEdit } from '../../../public/application/sections/template_edit';
+import { WithAppDependencies } from '../helpers/setup_environment';
+import { wizardSteps } from '../helpers/actions/wizard_steps';
 
 export const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
 export const UPDATED_MAPPING_TEXT_FIELD_NAME = 'updated_text_datatype';

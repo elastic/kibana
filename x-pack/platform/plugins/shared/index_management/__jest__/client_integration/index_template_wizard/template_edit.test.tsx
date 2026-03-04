@@ -6,11 +6,13 @@
  */
 
 import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
-import * as fixtures from '../../../../test/fixtures';
-import { API_BASE_PATH } from '../../../../common/constants';
+import * as fixtures from '../../../test/fixtures';
+import { API_BASE_PATH } from '../../../common/constants';
 
-import { TEMPLATE_NAME, SETTINGS, ALIASES, INDEX_PATTERNS } from './__jest__/constants';
+import { TEMPLATE_NAME, SETTINGS, ALIASES, INDEX_PATTERNS } from './constants';
+import { kibanaVersion, setupEnvironment } from '../helpers/setup_environment';
 import {
   EXISTING_COMPONENT_TEMPLATE,
   MAPPING,
@@ -19,11 +21,7 @@ import {
   UPDATED_MAPPING_TEXT_FIELD_NAME,
   completeStep,
   renderTemplateEdit,
-} from './__jest__/template_edit.helpers';
-import {
-  kibanaVersion,
-  setupEnvironment,
-} from '../../../../__jest__/client_integration/helpers/setup_environment';
+} from './template_edit.helpers';
 
 jest.mock('@kbn/code-editor');
 
@@ -39,6 +37,93 @@ describe('<TemplateEdit />', () => {
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([EXISTING_COMPONENT_TEMPLATE]);
+  });
+
+  // FLAKY: https://github.com/elastic/kibana/issues/253550
+  describe.skip('without mappings', () => {
+    const templateToEdit = fixtures.getTemplate({
+      name: 'index_template_without_mappings',
+      indexPatterns: ['indexPattern1'],
+      dataStream: {
+        hidden: true,
+        anyUnknownKey: 'should_be_kept',
+      },
+    });
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadTemplateResponse('my_template', templateToEdit);
+      renderTemplateEdit(httpSetup);
+
+      await screen.findByTestId('pageTitle');
+    });
+
+    test('allows you to add mappings', async () => {
+      // Navigate to mappings step
+      await completeStep.one();
+      await completeStep.two();
+      await completeStep.three();
+
+      // Now on mappings step - add a field
+      const nameInput = screen.getByTestId('nameParameterInput');
+      fireEvent.change(nameInput, { target: { value: 'field_1' } });
+
+      const createFieldForm = screen.getByTestId('createFieldForm');
+      await within(createFieldForm).findByTestId('fieldType');
+      const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
+      await fieldTypeComboBox.select('text');
+      // Close the combobox popover (portal) so it doesn't leak across tests.
+      await fieldTypeComboBox.close();
+
+      fireEvent.click(screen.getByTestId('addButton'));
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId(/fieldsListItem/)).toHaveLength(1);
+      });
+    }, 7500);
+
+    test('should keep data stream configuration', async () => {
+      // Fill logistics step with lifecycle
+      await completeStep.one({ version: 1, lifecycle: { value: 1, unit: 'd' } });
+
+      // Complete remaining steps
+      await completeStep.two();
+      await completeStep.three();
+      await completeStep.four();
+      await completeStep.five();
+
+      // Submit form
+      fireEvent.click(screen.getByTestId('nextButton'));
+
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/index_templates/${templateToEdit.name}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: templateToEdit.name,
+              indexPatterns: templateToEdit.indexPatterns,
+              version: 1,
+              allowAutoCreate: 'NO_OVERWRITE',
+              dataStream: {
+                hidden: true,
+                anyUnknownKey: 'should_be_kept',
+              },
+              indexMode: 'standard',
+              _kbnMeta: {
+                type: 'default',
+                hasDatastream: true,
+                isLegacy: false,
+              },
+              template: {
+                lifecycle: {
+                  enabled: true,
+                  data_retention: '1d',
+                },
+              },
+            }),
+          })
+        );
+      });
+    });
   });
 
   describe('with mappings', () => {
@@ -74,6 +159,7 @@ describe('<TemplateEdit />', () => {
 
     describe('form payload', () => {
       beforeEach(async () => {
+        // Complete all steps up to mappings
         await completeStep.one({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
@@ -81,7 +167,7 @@ describe('<TemplateEdit />', () => {
         });
         await completeStep.two();
         await completeStep.three(JSON.stringify(SETTINGS));
-      });
+      }, 20000);
 
       it('should send the correct payload with changed values', async () => {
         // Now on mappings step - edit the text_datatype field (avoid "first item wins")
@@ -103,9 +189,11 @@ describe('<TemplateEdit />', () => {
           expect(screen.queryByTestId('mappingsEditorFieldEdit')).not.toBeInTheDocument();
         });
 
+        // Complete remaining steps
         await completeStep.four();
         await completeStep.five(JSON.stringify(ALIASES));
 
+        // Submit the form
         fireEvent.click(screen.getByTestId('nextButton'));
 
         await waitFor(() => {
@@ -146,7 +234,7 @@ describe('<TemplateEdit />', () => {
             })
           );
         });
-      });
+      }, 6000);
     });
   });
 
@@ -171,6 +259,7 @@ describe('<TemplateEdit />', () => {
       // Complete step 1: Logistics
       await completeStep.one();
 
+      // Verify nonexistent template is selected
       expect(
         screen.queryByTestId('componentTemplatesSelection.emptyPrompt')
       ).not.toBeInTheDocument();
@@ -192,6 +281,7 @@ describe('<TemplateEdit />', () => {
         `Review details for '${TEMPLATE_NAME}'`
       );
 
+      // Submit form
       fireEvent.click(screen.getByTestId('nextButton'));
 
       await waitFor(() => {
