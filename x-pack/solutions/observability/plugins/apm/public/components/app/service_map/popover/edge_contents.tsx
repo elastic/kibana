@@ -25,12 +25,12 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
-function ConsumerEdgeInformationMessage() {
+function MessagingEdgeNoMetricsMessage() {
   return (
-    <EuiText color="subdued" size="s" data-test-subj="apmServiceMapConsumerEdgeInformationMessage">
-      {i18n.translate('xpack.apm.serviceMap.edgeContents.consumerEdgeInformationMessage', {
+    <EuiText color="subdued" size="s" data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage">
+      {i18n.translate('xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsMessage', {
         defaultMessage:
-          'No metrics available. Consumer connections from messaging queues are inferred and do not produce span metrics.',
+          'No metrics available. Grouped dependencies and inferred messaging consumer connections do not have associated span metrics.',
       })}
     </EuiText>
   );
@@ -86,10 +86,10 @@ export function EdgeContents({
     return null;
   }
 
-  if (isMsgQueueConsumerEdge) {
+  if (isMsgQueueConsumerEdge || edgeSelectionData?.isGrouped) {
     return (
       <EuiFlexItem>
-        <ConsumerEdgeInformationMessage />
+        <MessagingEdgeNoMetricsMessage />
       </EuiFlexItem>
     );
   }

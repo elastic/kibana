@@ -26,6 +26,8 @@ jest.mock('../../../../hooks/use_fetcher', () => ({
   useFetcher: () => ({ data: {}, status: 'success' }),
 }));
 
+const TEST_SUBJ = 'apmServiceMapMessagingEdgeNoMetricsMessage';
+
 const defaultProps = {
   environment: 'ENVIRONMENT_ALL' as const,
   start: '2026-01-01T00:00:00.000Z',
@@ -57,22 +59,39 @@ function createMsgQueueConsumerEdge(): ServiceMapEdge {
   } as unknown as ServiceMapEdge;
 }
 
+function createGroupedMessagingOutgoingEdge(): ServiceMapEdge {
+  return {
+    source: 'resourceGroup{order-service}',
+    target: 'consumer-service',
+    data: {
+      isBidirectional: false,
+      isGrouped: true,
+    },
+  } as unknown as ServiceMapEdge;
+}
+
 describe('EdgeContents', () => {
-  it('shows stats for a msg queue producer edge (service to msg queue)', () => {
+  it('shows stats for a producer edge (service to messaging queue)', () => {
     const edge = createMsgQueueProducerEdge();
 
     render(<EdgeContents selection={edge} {...defaultProps} />);
 
-    expect(
-      screen.queryByTestId('apmServiceMapConsumerEdgeInformationMessage')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ)).not.toBeInTheDocument();
   });
 
-  it('shows information message for a msg queue consumer edge (msg queue to service)', () => {
+  it('shows no-metrics message for a consumer edge (messaging queue to service)', () => {
     const edge = createMsgQueueConsumerEdge();
 
     render(<EdgeContents selection={edge} {...defaultProps} />);
 
-    expect(screen.getByTestId('apmServiceMapConsumerEdgeInformationMessage')).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ)).toBeInTheDocument();
+  });
+
+  it('shows no-metrics message for an outgoing edge from a grouped messaging node', () => {
+    const edge = createGroupedMessagingOutgoingEdge();
+
+    render(<EdgeContents selection={edge} {...defaultProps} />);
+
+    expect(screen.getByTestId(TEST_SUBJ)).toBeInTheDocument();
   });
 });
