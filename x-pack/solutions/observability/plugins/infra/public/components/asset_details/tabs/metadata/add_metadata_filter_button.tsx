@@ -37,7 +37,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
   } = useKibanaContextForPlugin();
 
   const existingFilter = useMemo(
-    () => searchCriteria?.filters.find((filter) => filter.meta.key === item.name),
+    () => searchCriteria?.filters?.find((filter) => filter.meta.key === item.name),
     [item.name, searchCriteria?.filters]
   );
 
