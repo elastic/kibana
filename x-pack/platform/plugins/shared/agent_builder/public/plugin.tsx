@@ -210,7 +210,7 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.addAttachment(attachment);
         }
       },
-      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+      setAgentBuilderChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
         // If there is already an active sidebar, update its props

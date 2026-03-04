@@ -119,7 +119,7 @@ export interface AgentBuilderPluginStart {
    * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
   toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
-  setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
+  setAgentBuilderChatConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
   /**
    * Adds an attachment to the active conversation sidebar.

@@ -111,8 +111,8 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   // Set conversation flyout active config on mount, clear on unmount
   useEffect(() => {
-    if (services.agentBuilder?.setConversationFlyoutActiveConfig) {
-      services.agentBuilder.setConversationFlyoutActiveConfig({
+    if (services.agentBuilder?.setAgentBuilderChatConfig) {
+      services.agentBuilder.setAgentBuilderChatConfig({
         sessionTag: 'security',
         agentId: THREAT_HUNTING_AGENT_ID,
         newConversation: false,

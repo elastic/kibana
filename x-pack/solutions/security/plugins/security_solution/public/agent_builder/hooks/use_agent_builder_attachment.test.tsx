@@ -125,7 +125,7 @@ describe('useAgentBuilderAttachment', () => {
     const partialAgentBuilderService: Partial<AgentBuilderPluginStart> &
       Pick<
         AgentBuilderPluginStart,
-        'tools' | 'setConversationFlyoutActiveConfig' | 'clearConversationFlyoutActiveConfig'
+        'tools' | 'setAgentBuilderChatConfig' | 'clearConversationFlyoutActiveConfig'
       > = {
       ...mockAgentBuilderService,
       openConversationFlyout: undefined,

@@ -108,7 +108,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setAgentBuilderChatConfig({
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {

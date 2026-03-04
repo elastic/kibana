@@ -171,7 +171,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       this.lastIsObservabilityApp = isObservabilityApp;
 
       if (isObservabilityApp) {
-        agentBuilder.setConversationFlyoutActiveConfig({
+        agentBuilder.setAgentBuilderChatConfig({
           agentId: OBSERVABILITY_AGENT_ID,
           sessionTag: OBSERVABILITY_SESSION_TAG,
           newConversation: false,

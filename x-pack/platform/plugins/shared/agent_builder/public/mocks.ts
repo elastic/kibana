@@ -62,7 +62,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     events: {
       chat$: EMPTY,
     },
-    setConversationFlyoutActiveConfig: jest.fn(),
+    setAgentBuilderChatConfig: jest.fn(),
     clearConversationFlyoutActiveConfig: jest.fn(),
     toggleConversationFlyout: jest.fn(),
     openConversationFlyout: jest

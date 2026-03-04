@@ -208,7 +208,7 @@ export function ErrorGroupDetails() {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setAgentBuilderChatConfig({
       newConversation: true,
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [

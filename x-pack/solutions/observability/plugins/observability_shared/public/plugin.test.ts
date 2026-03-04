@@ -43,7 +43,7 @@ describe('ObservabilitySharedPlugin', () => {
       coreStart.application.applications$ = applications$ as any;
 
       mockAgentBuilder = {
-        setConversationFlyoutActiveConfig: jest.fn(),
+        setAgentBuilderChatConfig: jest.fn(),
         clearConversationFlyoutActiveConfig: jest.fn(),
       };
     });
@@ -66,7 +66,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('apm');
 
-      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).toHaveBeenCalledWith({
+      expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenCalledWith({
         agentId: OBSERVABILITY_AGENT_ID,
         sessionTag: OBSERVABILITY_SESSION_TAG,
         newConversation: false,
@@ -98,7 +98,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next(undefined);
 
-      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
       expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).not.toHaveBeenCalled();
     });
 
@@ -128,7 +128,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('apm');
 
-      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
     });
 
     it('clears config when app has no category', () => {
@@ -165,7 +165,7 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('discover');
       currentAppId$.next('slo');
 
-      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).toHaveBeenLastCalledWith({
+      expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenLastCalledWith({
         agentId: OBSERVABILITY_AGENT_ID,
         sessionTag: OBSERVABILITY_SESSION_TAG,
         newConversation: false,
@@ -191,7 +191,7 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('infra');
 
       // Should only call setConfig once (for the first navigation to Observability)
-      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenCalledTimes(1);
       expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).not.toHaveBeenCalled();
     });
 
@@ -213,7 +213,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       // Should only call clearConfig once (for the first navigation to non-Observability)
       expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).toHaveBeenCalledTimes(1);
-      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
     });
   });
 });

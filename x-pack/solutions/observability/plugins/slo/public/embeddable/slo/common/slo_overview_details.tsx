@@ -71,7 +71,7 @@ export function SloOverviewDetailsContent({
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setAgentBuilderChatConfig({
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
