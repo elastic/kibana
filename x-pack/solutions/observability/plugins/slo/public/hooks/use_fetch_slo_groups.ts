@@ -15,7 +15,6 @@ import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { rewriteFiltersForSloSummary } from '../../common/rewrite_slo_filters';
 import type { GroupByField } from '../pages/slos/types';
 import type { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { useKibana } from './use_kibana';
@@ -68,15 +67,18 @@ export function useFetchSloGroups({
 
   const filters = useMemo(() => {
     try {
-      const allFilters = rewriteFiltersForSloSummary([
-        ...filterDSL,
-        ...(tagsFilter ? [tagsFilter] : []),
-        ...(statusFilter ? [statusFilter] : []),
-      ]);
       return JSON.stringify(
-        buildQueryFromFilters(allFilters, dataView, {
-          ignoreFilterIfFieldNotInIndex: false,
-        })
+        buildQueryFromFilters(
+          [
+            ...filterDSL,
+            ...(tagsFilter ? [tagsFilter] : []),
+            ...(statusFilter ? [statusFilter] : []),
+          ],
+          dataView,
+          {
+            ignoreFilterIfFieldNotInIndex: true,
+          }
+        )
       );
     } catch (e) {
       return '';

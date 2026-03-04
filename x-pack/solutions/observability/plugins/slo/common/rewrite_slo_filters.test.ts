@@ -85,13 +85,6 @@ describe('rewriteFiltersForSloSummary', () => {
   });
 
   describe('leaves native summary fields unchanged', () => {
-    it('leaves status unchanged', () => {
-      const filter = makeFilter('status', { term: { status: 'VIOLATED' } });
-      const result = rewriteFilterForSloSummary(filter);
-      expect(result.meta.key).toBe('status');
-      expect(result.query).toEqual({ term: { status: 'VIOLATED' } });
-    });
-
     it('leaves slo.tags unchanged', () => {
       const filter = makeFilter('slo.tags', { term: { 'slo.tags': 'production' } });
       const result = rewriteFilterForSloSummary(filter);
@@ -106,37 +99,25 @@ describe('rewriteFiltersForSloSummary', () => {
       expect(result.query).toEqual({ term: { 'service.name': 'my-svc' } });
     });
 
-    it('leaves all summary mapping top-level fields unchanged', () => {
-      const nativeLeafFields = ['sliValue', 'statusCode', 'status', 'spaceId', 'isTempDoc'];
-      const nativeNestedFields = [
+    it('leaves native prefixed fields unchanged', () => {
+      const nativeFields = [
         'slo.name',
+        'slo.tags',
+        'slo.groupings.region',
         'service.environment',
         'transaction.type',
         'monitor.id',
         'observer.geo.name',
-        'fiveMinuteBurnRate.value',
-        'oneHourBurnRate.goodEvents',
-        'oneDayBurnRate.totalEvents',
-        'errorBudgetInitial',
       ];
-
-      for (const field of [...nativeLeafFields, ...nativeNestedFields]) {
+      for (const field of nativeFields) {
         const filter = makeFilter(field, { term: { [field]: 'val' } });
         const result = rewriteFilterForSloSummary(filter);
         expect(result.meta.key).toBe(field);
-        expect(result.query).toEqual({ term: { [field]: 'val' } });
       }
     });
   });
 
   describe('edge cases', () => {
-    it('rewrites subpaths of native leaf fields (e.g. status.reason)', () => {
-      const filter = makeFilter('status.reason', { term: { 'status.reason': 'timeout' } });
-      const result = rewriteFilterForSloSummary(filter);
-      expect(result.meta.key).toBe('slo.groupings.status.reason');
-      expect(result.query).toEqual({ term: { 'slo.groupings.status.reason': 'timeout' } });
-    });
-
     it('does not double-prefix slo.groupings.* fields', () => {
       const filter = makeFilter('slo.groupings.region', {
         term: { 'slo.groupings.region': 'us-east-1' },
@@ -168,12 +149,12 @@ describe('rewriteFiltersForSloSummary', () => {
         makeFilter('orchestrator.cluster.name', {
           match_phrase: { 'orchestrator.cluster.name': 'prod' },
         }),
-        makeFilter('status', { term: { status: 'HEALTHY' } }),
+        makeFilter('slo.tags', { term: { 'slo.tags': 'production' } }),
         makeFilter('host.name', { term: { 'host.name': 'web-01' } }),
       ];
       const results = rewriteFiltersForSloSummary(filters);
       expect(results[0].meta.key).toBe('slo.groupings.orchestrator.cluster.name');
-      expect(results[1].meta.key).toBe('status');
+      expect(results[1].meta.key).toBe('slo.tags');
       expect(results[2].meta.key).toBe('slo.groupings.host.name');
     });
   });

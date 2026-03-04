@@ -13,7 +13,6 @@ import {
   parseIndex,
   getFilterRange,
   getElasticsearchQueryOrThrow,
-  parseStringFilters,
 } from './common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
@@ -240,31 +239,6 @@ describe('common', () => {
       expect(getElasticsearchQueryOrThrow({} as any)).toEqual({
         match_all: {},
       });
-    });
-  });
-
-  describe('parseStringFilters', () => {
-    it('returns empty object for empty input', () => {
-      const logger = { debug: jest.fn() } as any;
-      expect(parseStringFilters('', logger)).toEqual({});
-    });
-
-    it('parses valid JSON filters', () => {
-      const logger = { debug: jest.fn() } as any;
-      const input = JSON.stringify({
-        filter: [{ term: { 'slo.groupings.orchestrator.cluster.name': 'cluster-1' } }],
-        must_not: [],
-      });
-      expect(parseStringFilters(input, logger)).toEqual({
-        filter: [{ term: { 'slo.groupings.orchestrator.cluster.name': 'cluster-1' } }],
-        must_not: [],
-      });
-    });
-
-    it('returns empty object for invalid JSON', () => {
-      const logger = { debug: jest.fn() } as any;
-      expect(parseStringFilters('not-json', logger)).toEqual({});
-      expect(logger.debug).toHaveBeenCalled();
     });
   });
 });

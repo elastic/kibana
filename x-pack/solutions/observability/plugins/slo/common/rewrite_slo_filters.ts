@@ -6,19 +6,12 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { SUMMARY_MAPPING_PROPERTIES } from './summary_mapping_properties';
 
 const SLO_GROUPINGS_PREFIX = 'slo.groupings.';
 
-const SUMMARY_TOP_LEVEL_KEYS = Object.keys(SUMMARY_MAPPING_PROPERTIES);
-const SUMMARY_NATIVE_FIELDS = new Set(SUMMARY_TOP_LEVEL_KEYS);
-const SUMMARY_NATIVE_PREFIXES = SUMMARY_TOP_LEVEL_KEYS.filter((key) => {
-  const val = (SUMMARY_MAPPING_PROPERTIES as Record<string, unknown>)[key];
-  return val != null && typeof val === 'object' && 'properties' in val;
-}).map((key) => `${key}.`);
+const SUMMARY_NATIVE_PREFIXES = ['slo.', 'service.', 'transaction.', 'monitor.', 'observer.'];
 
 function isSummaryNativeField(field: string): boolean {
-  if (SUMMARY_NATIVE_FIELDS.has(field)) return true;
   return SUMMARY_NATIVE_PREFIXES.some((prefix) => field.startsWith(prefix));
 }
 

@@ -26,6 +26,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -188,7 +189,10 @@ export const getOverviewEmbeddableFactory = ({
         }, []);
         const fetchContext = useFetchContext(api);
         const mergedFilters = useMemo(
-          () => [...(groupFilters?.filters ?? []), ...(fetchContext.filters ?? [])],
+          () => [
+            ...(groupFilters?.filters ?? []),
+            ...rewriteFiltersForSloSummary(fetchContext.filters ?? []),
+          ],
           [groupFilters?.filters, fetchContext.filters]
         );
 

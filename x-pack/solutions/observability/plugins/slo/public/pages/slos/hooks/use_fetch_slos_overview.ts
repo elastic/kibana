@@ -11,7 +11,6 @@ import type { GetSLOStatsOverviewResponse } from '@kbn/slo-schema/src/rest_specs
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
-import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -52,15 +51,18 @@ export function useFetchSLOsOverview({
 
   const filters = useMemo(() => {
     try {
-      const allFilters = rewriteFiltersForSloSummary([
-        ...filterDSL,
-        ...(tagsFilter ? [tagsFilter] : []),
-        ...(statusFilter ? [statusFilter] : []),
-      ]);
       return JSON.stringify(
-        buildQueryFromFilters(allFilters, dataView, {
-          ignoreFilterIfFieldNotInIndex: false,
-        })
+        buildQueryFromFilters(
+          [
+            ...filterDSL,
+            ...(tagsFilter ? [tagsFilter] : []),
+            ...(statusFilter ? [statusFilter] : []),
+          ],
+          dataView,
+          {
+            ignoreFilterIfFieldNotInIndex: true,
+          }
+        )
       );
     } catch (e) {
       return '';
