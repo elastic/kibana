@@ -29,7 +29,6 @@ import type {
 import type { TextBasedLayer } from '@kbn/lens-common';
 import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { LensAttributes } from '../types';
 
 const dataView = 'test-dataview';
@@ -528,13 +527,13 @@ describe('filtersAndQueryToLensState', () => {
           type: 'condition',
           data_view_id: 'dv-1',
           condition: { field: 'category', operator: 'is', value: 'shoes' },
-        } satisfies AsCodeFilter,
+        },
         {
           type: 'dsl',
           data_view_id: 'dv-1',
           dsl: { query: { match_all: {} } },
-        } satisfies AsCodeFilter,
-      ] as unknown as LensApiState['filters'],
+        },
+      ],
     };
 
     const result = filtersAndQueryToLensState(apiState, []);
@@ -608,8 +607,8 @@ describe('filtersAndQueryToLensState', () => {
           type: 'condition',
           data_view_id: 'dv-1',
           condition: { field: 'category', operator: 'is', value: 'shoes' },
-        } satisfies AsCodeFilter,
-      ] as unknown as LensApiState['filters'],
+        },
+      ],
     };
 
     const existingReferences = [{ type: 'index-pattern', id: 'dv-1', name: 'layer_ref' }];

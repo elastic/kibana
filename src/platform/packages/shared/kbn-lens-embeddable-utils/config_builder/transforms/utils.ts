@@ -506,17 +506,17 @@ function injectFilterReferences(filters: Filter[], references: SavedObjectRefere
 
   const inject = (filter: Filter): Filter => {
     const injectedParams =
-      filter.meta?.type === FILTERS.COMBINED && Array.isArray(filter.meta.params)
+      filter.meta.type === FILTERS.COMBINED && Array.isArray(filter.meta.params)
         ? (filter.meta.params as unknown[]).map((p) => inject(p as Filter))
-        : filter.meta?.params;
+        : filter.meta.params;
 
-    if (!filter.meta?.index) {
+    if (!filter.meta.index) {
       return injectedParams !== undefined
-        ? { ...filter, meta: { ...(filter.meta ?? {}), params: injectedParams } }
+        ? { ...filter, meta: { ...filter.meta, params: injectedParams } }
         : filter;
     }
 
-    const reference = dataViewReferences.find((ref) => ref.name === filter.meta!.index);
+    const reference = dataViewReferences.find((ref) => ref.name === filter.meta.index);
     return {
       ...filter,
       meta: {
@@ -539,13 +539,13 @@ function extractFilterReferences(filters: Filter[], references: SavedObjectRefer
   const extractedReferences: SavedObjectReference[] = [];
   const extract = (filter: Filter): Filter => {
     const extractedParams =
-      filter.meta?.type === FILTERS.COMBINED && Array.isArray(filter.meta.params)
+      filter.meta.type === FILTERS.COMBINED && Array.isArray(filter.meta.params)
         ? (filter.meta.params as unknown[]).map((p) => extract(p as Filter))
-        : filter.meta?.params;
+        : filter.meta.params;
 
-    if (!filter.meta?.index || typeof filter.meta.index !== 'string') {
+    if (!filter.meta.index || typeof filter.meta.index !== 'string') {
       return extractedParams !== undefined
-        ? { ...filter, meta: { ...(filter.meta ?? {}), params: extractedParams } }
+        ? { ...filter, meta: { ...filter.meta, params: extractedParams } }
         : filter;
     }
 
