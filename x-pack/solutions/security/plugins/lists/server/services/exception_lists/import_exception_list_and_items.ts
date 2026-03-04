@@ -22,9 +22,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { deleteListItemsToBeOverwritten } from './utils/import/delete_list_items_to_overwrite';
 import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
 import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
 import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
+import { getAllListTypes } from './utils/import/find_all_exception_list_types';
+import { sortExceptionListsToUpdateOrCreate } from './utils/import/sort_exception_lists_to_create_update';
 
 export interface PromiseFromStreams {
   lists: Array<ImportExceptionListSchemaDecoded | Error>;
@@ -99,6 +102,61 @@ export const importExceptionsAsStream = async ({
   });
 };
 
+/**
+ * Delete exception list items for lists being overwritten.
+ * This is called AFTER items are imported to avoid race condition where
+ * rules would see empty exception lists during import.
+ */
+const deleteOverwrittenListItems = async ({
+  generateNewListId,
+  isOverwrite,
+  listsChunks,
+  savedObjectsClient,
+  user,
+}: {
+  generateNewListId: boolean;
+  isOverwrite: boolean;
+  listsChunks: ImportExceptionListSchemaDecoded[][];
+  savedObjectsClient: SavedObjectsClientContract;
+  user: string;
+}): Promise<void> => {
+  if (!isOverwrite) {
+    return;
+  }
+
+  for await (const listChunk of listsChunks) {
+    // sort by namespaceType
+    const [agnosticLists, nonAgnosticLists] = sortListsImportsByNamespace(listChunk);
+
+    // Gather lists referenced by items
+    const foundLists = await getAllListTypes(
+      agnosticLists.map((list) => ({ listId: list.list_id, namespaceType: list.namespace_type })),
+      nonAgnosticLists.map((list) => ({
+        listId: list.list_id,
+        namespaceType: list.namespace_type,
+      })),
+      savedObjectsClient
+    );
+
+    // Figure out what lists need items deleted
+    const { listItemsToDelete } = sortExceptionListsToUpdateOrCreate({
+      existingLists: foundLists,
+      generateNewListId,
+      isOverwrite,
+      lists: listChunk,
+      user,
+    });
+
+    // Delete items AFTER new items have been imported
+    await deleteListItemsToBeOverwritten({
+      listsOfItemsToDelete: listItemsToDelete,
+      savedObjectsClient,
+    });
+  }
+};
+
+import { sortListsImportsByNamespace } from './utils/import/sort_import_by_namespace';
+
 export const importExceptions = async ({
   exceptions,
   overwrite,
@@ -145,18 +203,31 @@ export const importExceptions = async ({
   const chunkParsedListObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionLists);
   const chunkParsedItemsObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionListItems);
 
-  // where the magic happens - purposely importing parent exception
-  // containers first, items second
+  // Import items FIRST to avoid race condition where rules see empty exception lists
+  // between delete and recreate operations
+  const importExceptionListItemsResponse = await importExceptionListItems({
+    isOverwrite: overwrite,
+    itemsChunks: chunkParsedItemsObjects,
+    savedObjectsClient,
+    user,
+  });
+
+  // Import exception list containers (skip internal item deletion - we handle it below)
   const importExceptionListsResponse = await importExceptionLists({
+    deleteItemsOnOverwrite: false, // Skip deletion here, we do it after items import
     generateNewListId,
     isOverwrite: overwrite,
     listsChunks: chunkParsedListObjects,
     savedObjectsClient,
     user,
   });
-  const importExceptionListItemsResponse = await importExceptionListItems({
+
+  // Delete old items AFTER new items are imported to prevent false-positive alerts
+  // This ensures rules always have exception items to evaluate against
+  await deleteOverwrittenListItems({
+    generateNewListId,
     isOverwrite: overwrite,
-    itemsChunks: chunkParsedItemsObjects,
+    listsChunks: chunkParsedListObjects,
     savedObjectsClient,
     user,
   });

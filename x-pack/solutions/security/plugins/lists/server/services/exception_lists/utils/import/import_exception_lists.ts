@@ -22,15 +22,18 @@ import { sortImportResponses } from './sort_import_responses';
  * @param exceptionListsClient - exceptions client
  * @param listsChunks - exception lists being imported
  * @param isOverwrite - if matching lis_id found, should list be overwritten
+ * @param deleteItemsOnOverwrite - if true, delete existing items before importing new ones (default: true)
  * @returns {Object} returns counts of successful imports and any errors found
  */
 export const importExceptionLists = async ({
+  deleteItemsOnOverwrite = true,
   isOverwrite,
   generateNewListId,
   listsChunks,
   savedObjectsClient,
   user,
 }: {
+  deleteItemsOnOverwrite?: boolean;
   isOverwrite: boolean;
   generateNewListId: boolean;
   listsChunks: ImportExceptionListSchemaDecoded[][];
@@ -69,13 +72,15 @@ export const importExceptionLists = async ({
       listsToCreate,
       savedObjectsClient,
     });
-    // lists that are to be updated where overwrite is true, need to have
-    // existing items removed. By selecting to overwrite, user selects to
-    // overwrite entire list + items
-    await deleteListItemsToBeOverwritten({
-      listsOfItemsToDelete: listItemsToDelete,
-      savedObjectsClient,
-    });
+    // Only delete items if explicitly enabled (defaults to true for backward compatibility)
+    // When disabled, caller is responsible for deleting items after importing new ones
+    // to prevent race condition where rules see empty exception lists
+    if (deleteItemsOnOverwrite) {
+      await deleteListItemsToBeOverwritten({
+        listsOfItemsToDelete: listItemsToDelete,
+        savedObjectsClient,
+      });
+    }
 
     const bulkUpdateResponse = await bulkUpdateImportedLists({
       listsToUpdate,
