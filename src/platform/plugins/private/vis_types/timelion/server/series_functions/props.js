@@ -17,42 +17,34 @@ const FORBIDDEN_TOP_LEVEL_SERIES_KEYS = new Set(['data', 'type']);
 const FORBIDDEN_TOP_LEVEL_SERIES_LIST_KEYS = new Set(['list', 'type']);
 const FORBIDDEN_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor', 'length']);
 
+const INVALID_PROP_NAME_ERROR = i18n.translate('timelion.serverSideErrors.props.invalidKey', {
+  defaultMessage: 'Invalid property name passed to props()',
+});
+
+const getForbiddenKeyErrorMsg = (key) =>
+  i18n.translate('timelion.serverSideErrors.props.forbiddenKey', {
+    defaultMessage: 'Setting "{key}" via props() is not allowed',
+    values: { key },
+  });
+
 function assertSafePropsKey(key, { global }) {
   if (!key || typeof key !== 'string' || key.trim() === '') {
-    throw new Error(
-      i18n.translate('timelion.serverSideErrors.props.invalidKey', {
-        defaultMessage: 'Invalid property name passed to props()',
-      })
-    );
+    throw new Error(INVALID_PROP_NAME_ERROR);
   }
 
   const path = _.toPath(key);
 
   if (path.length === 0 || path.some((segment) => segment == null || segment === '')) {
-    throw new Error(
-      i18n.translate('timelion.serverSideErrors.props.invalidKey', {
-        defaultMessage: 'Invalid property name passed to props()',
-      })
-    );
+    throw new Error(INVALID_PROP_NAME_ERROR);
   }
 
   if (path.some((segment) => FORBIDDEN_PATH_SEGMENTS.has(segment))) {
-    throw new Error(
-      i18n.translate('timelion.serverSideErrors.props.forbiddenKey', {
-        defaultMessage: 'Setting "{key}" via props() is not allowed',
-        values: { key },
-      })
-    );
+    throw new Error(getForbiddenKeyErrorMsg(key));
   }
 
   // Prevent array-like writes (eg `foo[2147483647]=...`) which can lead to OOM/hangs.
   if (path.some((segment) => typeof segment === 'string' && /^\d+$/.test(segment))) {
-    throw new Error(
-      i18n.translate('timelion.serverSideErrors.props.forbiddenKey', {
-        defaultMessage: 'Setting "{key}" via props() is not allowed',
-        values: { key },
-      })
-    );
+    throw new Error(getForbiddenKeyErrorMsg(key));
   }
 
   const topLevel = path[0];
@@ -60,12 +52,7 @@ function assertSafePropsKey(key, { global }) {
     ? FORBIDDEN_TOP_LEVEL_SERIES_LIST_KEYS
     : FORBIDDEN_TOP_LEVEL_SERIES_KEYS;
   if (forbiddenTopLevel.has(topLevel)) {
-    throw new Error(
-      i18n.translate('timelion.serverSideErrors.props.forbiddenKey', {
-        defaultMessage: 'Setting "{key}" via props() is not allowed',
-        values: { key },
-      })
-    );
+    throw new Error(getForbiddenKeyErrorMsg(key));
   }
 }
 
