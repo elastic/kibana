@@ -147,6 +147,8 @@ import { RuleDefinitionSection } from '../../../rule_management/components/rule_
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
 import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
+import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
@@ -342,6 +344,7 @@ export const RuleDetailsPage = connector(
     );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
+    const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
     const hasActionsPrivileges = useMemo(() => {
       if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
@@ -718,6 +721,11 @@ export const RuleDetailsPage = connector(
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                          {isAgentChatExperienceEnabled && rule != null ? (
+                            <EuiFlexItem grow={false}>
+                              <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
+                            </EuiFlexItem>
+                          ) : null}
                           <EuiFlexItem grow={false}>
                             <EditRuleSettingButtonLink
                               ruleId={ruleId}
