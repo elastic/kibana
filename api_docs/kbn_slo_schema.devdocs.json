@@ -1804,9 +1804,9 @@
         "signature": [
           "\"*\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 11,
-        "columnNumber": 7,
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
