@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityActionsButton } from './entity_actions_button';
 import type { EntityItem } from '../types';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
+import { GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID } from '../../../../test_ids';
 
 // Mock useExpandableFlyoutApi
 const mockOpenPreviewPanel = jest.fn();
@@ -75,6 +76,38 @@ describe('EntityActionsButton', () => {
           }),
         })
       );
+    });
+
+    describe('when entity is not available in entity store', () => {
+      const notInStoreItem: EntityItem = {
+        ...mockEntityItem,
+        availableInEntityStore: false,
+      };
+
+      it('should render entity details item as disabled', () => {
+        render(<EntityActionsButton item={notInStoreItem} scopeId={scopeId} />);
+
+        fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+        const entityDetailsItem = screen.getByTestId(
+          GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+        );
+        expect(entityDetailsItem).toBeInTheDocument();
+        expect(entityDetailsItem).toBeDisabled();
+      });
+
+      it('should not open preview panel when disabled entity details is clicked', () => {
+        render(<EntityActionsButton item={notInStoreItem} scopeId={scopeId} />);
+
+        fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+
+        const entityDetailsItem = screen.getByTestId(
+          GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+        );
+        fireEvent.click(entityDetailsItem);
+
+        expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
+      });
     });
   });
 });
