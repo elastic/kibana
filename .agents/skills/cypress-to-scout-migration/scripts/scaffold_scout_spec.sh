@@ -21,7 +21,7 @@ SPEC_NAME=""
 DOMAIN=""
 TEST_TYPE="parallel"
 PLUGIN_TEST_DIR=""
-SCOUT_PACKAGE="@kbn/scout"
+SCOUT_PACKAGE="@kbn/scout-security"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
