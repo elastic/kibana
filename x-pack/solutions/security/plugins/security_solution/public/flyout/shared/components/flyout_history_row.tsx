@@ -173,7 +173,7 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
 });
 
 /**
- * Row item for a attack details
+ * Row item for attack details
  */
 export const AttackDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
   const attackId = useMemo(() => {
