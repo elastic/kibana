@@ -49,9 +49,6 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
             fields: defaultGroupBy,
           }
         : undefined,
-      stateTransition: {
-        pendingCount: 1,
-      },
     }),
     [query, defaultGroupBy]
   );

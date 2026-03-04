@@ -69,10 +69,12 @@ export const TimeFieldSelect: React.FC = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.timeFieldLabel', {
               defaultMessage: 'Time Field',
             })}
+            fullWidth
             isInvalid={!!error}
             error={error?.message}
           >
             <EuiSelect
+              fullWidth
               options={timeFieldOptions}
               value={value ?? ''}
               onChange={handleChange}

@@ -16,7 +16,6 @@ describe('StateTransitionCountField', () => {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
-    expect(screen.getByText('Consecutive breaches')).toBeInTheDocument();
     expect(screen.getByTestId('stateTransitionCountInput')).toBeInTheDocument();
   });
 

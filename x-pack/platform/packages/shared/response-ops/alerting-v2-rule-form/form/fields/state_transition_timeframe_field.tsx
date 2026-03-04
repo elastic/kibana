@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
@@ -18,7 +18,13 @@ import {
 } from '../utils';
 import type { FormValues } from '../types';
 
-export const StateTransitionTimeframeField: React.FC = () => {
+interface StateTransitionTimeframeFieldProps {
+  numberPrependLabel?: string;
+}
+
+export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFieldProps> = ({
+  numberPrependLabel,
+}) => {
   const { control } = useFormContext<FormValues>();
 
   return (
@@ -26,25 +32,13 @@ export const StateTransitionTimeframeField: React.FC = () => {
       name="stateTransition.pendingTimeframe"
       control={control}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.timeframeLabel', {
-            defaultMessage: 'Breached for duration',
-          })}
-          helpText={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.timeframeHelpText', {
-            defaultMessage:
-              'How long the condition must be breached before the alert becomes active.',
-          })}
-          isInvalid={!!error}
-          error={error?.message}
-          fullWidth
-        >
-          <StateTransitionTimeframeInput
-            value={value}
-            onChange={onChange}
-            errors={error?.message}
-            inputRef={ref}
-          />
-        </EuiFormRow>
+        <StateTransitionTimeframeInput
+          value={value}
+          onChange={onChange}
+          errors={error?.message}
+          inputRef={ref}
+          numberPrependLabel={numberPrependLabel}
+        />
       )}
     />
   );
@@ -55,6 +49,7 @@ interface StateTransitionTimeframeInputProps {
   onChange: (value: string | undefined) => void;
   errors?: string;
   inputRef?: React.Ref<HTMLInputElement>;
+  numberPrependLabel?: string;
 }
 
 const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps> = ({
@@ -62,6 +57,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
   onChange,
   errors,
   inputRef,
+  numberPrependLabel,
 }) => {
   const [draftUnit, setDraftUnit] = useState<string>('m');
 
@@ -121,13 +117,14 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
           step={1}
           data-test-subj="stateTransitionTimeframeNumberInput"
           inputRef={inputRef}
+          prepend={numberPrependLabel ? [numberPrependLabel] : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiSelect
           fullWidth
           value={intervalUnit}
-          options={getTimeOptions(intervalNumber ?? 1)}
+          options={getTimeOptions(intervalNumber ?? 2)}
           onChange={onIntervalUnitChange}
           data-test-subj="stateTransitionTimeframeUnitInput"
           aria-label={i18n.translate(

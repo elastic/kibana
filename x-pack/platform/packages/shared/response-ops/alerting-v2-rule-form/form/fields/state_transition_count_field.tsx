@@ -6,13 +6,19 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
 
-export const StateTransitionCountField: React.FC = () => {
+interface StateTransitionCountFieldProps {
+  prependLabel?: string;
+}
+
+export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps> = ({
+  prependLabel,
+}) => {
   const { control } = useFormContext<FormValues>();
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -42,37 +48,28 @@ export const StateTransitionCountField: React.FC = () => {
         },
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countLabel', {
-            defaultMessage: 'Consecutive breaches',
-          })}
-          helpText={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countHelpText', {
-            defaultMessage: 'Number of consecutive breaches before the alert becomes active.',
-          })}
-          isInvalid={!!error}
-          error={error?.message}
-        >
-          <EuiFieldNumber
-            value={value ?? ''}
-            onChange={(e) => {
-              const val = e.target.value.trim();
-              if (val === '') {
-                onChange(1);
-              } else {
-                const parsedValue = parsePositiveIntegerInput(e.target.value);
-                if (parsedValue != null) {
-                  onChange(parsedValue);
-                }
+        <EuiFieldNumber
+          value={value ?? ''}
+          onChange={(e) => {
+            const val = e.target.value.trim();
+            if (val === '') {
+              onChange(undefined);
+            } else {
+              const parsedValue = parsePositiveIntegerInput(e.target.value);
+              if (parsedValue != null) {
+                onChange(parsedValue);
               }
-            }}
-            onKeyDown={onKeyDown}
-            min={1}
-            step={1}
-            isInvalid={!!error}
-            data-test-subj="stateTransitionCountInput"
-            inputRef={ref}
-          />
-        </EuiFormRow>
+            }
+          }}
+          onKeyDown={onKeyDown}
+          min={1}
+          step={1}
+          isInvalid={!!error}
+          data-test-subj="stateTransitionCountInput"
+          inputRef={ref}
+          fullWidth
+          prepend={prependLabel ? [prependLabel] : undefined}
+        />
       )}
     />
   );

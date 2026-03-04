@@ -16,7 +16,6 @@ describe('StateTransitionTimeframeField', () => {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
-    expect(screen.getByText('Breached for duration')).toBeInTheDocument();
     expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeInTheDocument();
     expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toBeInTheDocument();
   });
