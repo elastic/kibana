@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { type ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
   EuiBasicTable,
-  EuiButtonGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
   EuiSpacer,
   EuiText,
   type EuiBasicTableColumn,
@@ -38,6 +38,16 @@ const hasNonEmptyMetadata = (
 
 const accordionButtonCss = css`
   padding: 2px 0;
+`;
+
+const repetitionPaginationCss = css`
+  display: flex;
+  justify-content: center;
+
+  [data-test-subj='pagination-button-first'],
+  [data-test-subj='pagination-button-last'] {
+    display: none;
+  }
 `;
 
 const EvaluatorScoreAccordion: React.FC<{
@@ -168,17 +178,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       });
   }, [examples]);
 
-  const getSelectedRepetitionIndex = (row: ExampleScoreRow): number => {
-    const defaultRepetitionIndex = row.repetitionIndices[0] ?? 0;
-    const selectedRepetitionIndex = selectedRepetitions[row.exampleId];
-    if (
-      selectedRepetitionIndex == null ||
-      !row.repetitionIndices.includes(selectedRepetitionIndex)
-    ) {
-      return defaultRepetitionIndex;
-    }
-    return selectedRepetitionIndex;
-  };
+  const getSelectedRepetitionIndex = useCallback(
+    (row: ExampleScoreRow): number => {
+      const defaultRepetitionIndex = row.repetitionIndices[0] ?? 0;
+      const selectedRepetitionIndex = selectedRepetitions[row.exampleId];
+      if (
+        selectedRepetitionIndex == null ||
+        !row.repetitionIndices.includes(selectedRepetitionIndex)
+      ) {
+        return defaultRepetitionIndex;
+      }
+      return selectedRepetitionIndex;
+    },
+    [selectedRepetitions]
+  );
 
   const getScoresForSelectedRepetition = (
     row: ExampleScoreRow
@@ -222,38 +235,35 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       scoreDoc['@timestamp'],
     ].join(':');
 
+  const itemIdToExpandedRowMap = useMemo<Record<string, ReactNode>>(() => {
+    return rows.reduce<Record<string, ReactNode>>((acc, row) => {
+      if (row.repetitionIndices.length > 1) {
+        acc[row.exampleId] = (
+          <EuiPagination
+            className={repetitionPaginationCss}
+            aria-label={i18n.getRepetitionPaginationAriaLabel(row.exampleId)}
+            pageCount={row.repetitionIndices.length}
+            activePage={row.repetitionIndices.indexOf(getSelectedRepetitionIndex(row))}
+            onPageClick={(pageIndex) =>
+              setSelectedRepetitions((prev) => ({
+                ...prev,
+                [row.exampleId]: row.repetitionIndices[pageIndex],
+              }))
+            }
+            compressed
+          />
+        );
+      }
+      return acc;
+    }, {});
+  }, [rows, getSelectedRepetitionIndex]);
+
   const columns: Array<EuiBasicTableColumn<ExampleScoreRow>> = [
     {
       field: 'exampleId',
       name: i18n.COLUMN_EXAMPLE_ID,
-      render: (exampleId: string) => truncate(exampleId, EXAMPLE_ID_VISIBLE_LENGTH),
-    },
-    {
-      field: 'repetitionIndices',
-      name: i18n.COLUMN_REPETITION,
       width: '180px',
-      render: (_repetitionIndices: number[], row: ExampleScoreRow) =>
-        row.repetitionIndices.length > 1 ? (
-          <EuiButtonGroup
-            type="single"
-            isFullWidth={false}
-            legend={i18n.getRepetitionButtonGroupLegend(row.exampleId)}
-            options={row.repetitionIndices.map((repetitionIndex) => ({
-              id: String(repetitionIndex),
-              label: i18n.getRepetitionButtonLabel(repetitionIndex),
-            }))}
-            idSelected={String(getSelectedRepetitionIndex(row))}
-            onChange={(id) =>
-              setSelectedRepetitions((previousSelection) => ({
-                ...previousSelection,
-                [row.exampleId]: Number(id),
-              }))
-            }
-            buttonSize="compressed"
-          />
-        ) : (
-          i18n.getRepetitionButtonLabel(row.repetitionIndices[0] ?? 0)
-        ),
+      render: (exampleId: string) => truncate(exampleId, EXAMPLE_ID_VISIBLE_LENGTH),
     },
     {
       field: 'scoresByRepetition',
@@ -337,6 +347,8 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   return (
     <EuiBasicTable
       items={rows}
+      itemId="exampleId"
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       columns={columns}
       noItemsMessage={i18n.EMPTY_TABLE_MESSAGE}
       tableCaption={i18n.TABLE_CAPTION}

@@ -18,10 +18,6 @@ export const COLUMN_EVALUATOR_SCORES = i18n.translate(
   }
 );
 
-export const COLUMN_REPETITION = i18n.translate('xpack.evals.exampleScoresTable.columnRepetition', {
-  defaultMessage: 'Repetition',
-});
-
 export const COLUMN_INPUT = i18n.translate('xpack.evals.exampleScoresTable.columnInput', {
   defaultMessage: 'Input',
 });
@@ -65,14 +61,8 @@ export const getTraceButtonAriaLabel = (traceId: string) =>
     values: { traceId },
   });
 
-export const getRepetitionButtonLabel = (repetitionIndex: number) =>
-  i18n.translate('xpack.evals.exampleScoresTable.repetitionButtonLabel', {
-    defaultMessage: 'R{repetitionNumber}',
-    values: { repetitionNumber: repetitionIndex + 1 },
-  });
-
-export const getRepetitionButtonGroupLegend = (exampleId: string) =>
-  i18n.translate('xpack.evals.exampleScoresTable.repetitionButtonGroupLegend', {
+export const getRepetitionPaginationAriaLabel = (exampleId: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.repetitionPaginationAriaLabel', {
     defaultMessage: 'Select repetition for example {exampleId}',
     values: { exampleId },
   });

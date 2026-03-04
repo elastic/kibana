@@ -105,8 +105,12 @@ describe('ExampleScoresTable', () => {
     render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
     expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'R1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'R2' })).toBeInTheDocument();
+
+    const pagination = screen.getByRole('navigation', {
+      name: 'Select repetition for example example-id-0000000000000001',
+    });
+    expect(pagination).toBeInTheDocument();
+
     expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
     expect(screen.getByText(/"completion": "output-r1"/)).toBeInTheDocument();
     expect(screen.getByText('Criteria:')).toBeInTheDocument();
@@ -119,7 +123,8 @@ describe('ExampleScoresTable', () => {
     );
     expect(onTraceClick).toHaveBeenCalledWith('6d8639157ac4141c0000000000000001');
 
-    fireEvent.click(screen.getByRole('button', { name: 'R2' }));
+    const nextPageButton = screen.getByRole('button', { name: 'Next page' });
+    fireEvent.click(nextPageButton);
     expect(screen.getByText('0.10')).toBeInTheDocument();
 
     fireEvent.click(
@@ -130,7 +135,7 @@ describe('ExampleScoresTable', () => {
     expect(onTraceClick).toHaveBeenCalledWith('6d8639157ac4141c0000000000000002');
   });
 
-  it('renders a static repetition label for single-repetition rows', () => {
+  it('does not render repetition pagination for single-repetition rows', () => {
     const examples: EvaluationRunDatasetExample[] = [
       {
         example_id: 'example-id-single-repetition',
@@ -151,8 +156,12 @@ describe('ExampleScoresTable', () => {
 
     render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
-    expect(screen.getByText('R1')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'R1' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('navigation', {
+        name: 'Select repetition for example example-id-single-repetition',
+      })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
   });
 
   it('renders evaluator label as a badge when present', () => {
