@@ -123,6 +123,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|10",
         "alert|1",
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
