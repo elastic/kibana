@@ -225,6 +225,10 @@ After the Scout test is verified:
 - Forgetting triage gates and migrating flaky/invalid/duplicate tests
 - Skipping the Gate 4b risk scan — Cypress patterns that seem harmless produce flaky Scout tests
 - Using `page.waitForTimeout()` — forbidden, same as `cy.wait(ms)`
+- Using `page.waitForLoadState('networkidle')` — anti-pattern, actively removed from Scout tests; wait for specific elements instead
+- Using short custom timeouts on `waitFor()` (e.g., 3s) — causes CI flakiness; use the default (10s)
+- Adding explicit waits before `clear()`, `fill()`, `click()` — these auto-wait; the extra wait is redundant
+- Specifying `{ state: 'visible' }` on `waitFor()` — it's the default, omit it
 - Missing Scout tags (validated at runtime)
 - Using `esArchiver` for system indices (use `kbnClient`)
 - Not parallelizing tests that could run in parallel
@@ -255,3 +259,4 @@ Open only what you need:
 - Key differences between Cypress and Scout (auth, CI, MKI, tags, execution model): `references/cypress-vs-scout-differences.md`
 - Best practices for writing Scout tests (fixtures, page objects, parallelism): `references/migration-best-practices.md`
 - Flakiness risk patterns to scan for during Gate 4b (hard-coded waits, missing cleanup, force clicks, etc.): `references/flakiness-risk-patterns.md`
+- Complete before/after migration example with annotated decisions (Timeline creation): `references/example-migration.md`

@@ -92,8 +92,8 @@ Don't rely on test names — check what the test actually asserts.
 **If duplicate in API/unit:** Recommend deleting Cypress — lower layers are faster and more reliable.
 
 **If duplicate in Scout:**
-- Scout does NOT run on MKI; only Cypress runs on MKI
-- Cypress has `@serverless` → keep both (Cypress provides MKI coverage)
+- Scout now runs on MKI ([pipeline](https://buildkite.com/elastic/appex-qa-serverless-kibana-scout-tests))
+- Cypress has `@serverless` and Scout covers serverless → delete Cypress
 - Cypress is ESS-only and Scout covers ESS → delete Cypress
 
 **If duplicate in another Cypress test:** Compare quality, keep the better-written one.

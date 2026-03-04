@@ -26,6 +26,7 @@ Only use Scout UI tests for behavior that genuinely requires a browser.
 ```typescript
 // Forbidden
 await page.waitForTimeout(2000);
+await page.waitForLoadState('networkidle');  // Anti-pattern — actively removed from Scout tests
 
 // Locator assertions auto-retry
 await expect(page.testSubj.locator('myElement')).toBeVisible();
@@ -35,6 +36,17 @@ await expect.poll(async () => {
   return await page.testSubj.locator('alertRow').count();
 }).toBeGreaterThan(0);
 ```
+
+### `waitFor()` defaults
+
+- `{ state: 'visible' }` is the default — omit it: `await element.waitFor()` not `await element.waitFor({ state: 'visible' })`
+- Don't use short custom timeouts (e.g., 3s) — they cause CI flakiness. Use the default (10s) unless there is a strong, documented reason.
+
+### Built-in auto-waiting
+
+Many Playwright actions auto-wait before executing. Do not add explicit waits before these:
+- `click()`, `fill()`, `clear()`, `press()`, `type()`, `check()`, `selectOption()`
+- `waitFor()` is only needed when you want to assert readiness without performing an action
 
 ## Page Objects
 
