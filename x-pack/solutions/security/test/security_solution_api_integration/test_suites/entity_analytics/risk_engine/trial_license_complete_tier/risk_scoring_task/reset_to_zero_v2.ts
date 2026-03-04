@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(entities.length).to.eql(10);
 
       const riskByEntityId = entities.reduce<Record<string, number | undefined>>((acc, entity) => {
-        const entityId = entity['entity.id'];
+        const entityId = entity.entity?.id;
         if (typeof entityId === 'string') {
           acc[entityId] = getEntityRisk(entity)?.calculated_score_norm;
         }
