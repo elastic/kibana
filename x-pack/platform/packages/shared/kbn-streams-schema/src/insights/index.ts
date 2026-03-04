@@ -31,7 +31,6 @@ export function getImpactLevel(impact: InsightImpactLevel): InsightImpactLevelNu
 export const insightEvidenceSchema = z.object({
   streamName: z.string(),
   queryTitle: z.string(),
-  featureName: z.string().optional(),
   eventCount: z.number(),
 });
 export type InsightEvidence = z.infer<typeof insightEvidenceSchema>;

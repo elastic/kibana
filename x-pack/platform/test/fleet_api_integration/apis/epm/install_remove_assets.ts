@@ -696,6 +696,10 @@ const expectAssetsInstalled = ({
           ? {
               installed_kibana: [
                 {
+                  id: 'fleet-all_assets-inactivity-monitoring',
+                  type: 'alerting_rule_template',
+                },
+                {
                   id: 'sample_alerting_rule_template',
                   type: 'alerting_rule_template',
                 },
@@ -1007,6 +1011,10 @@ const expectAssetsInstalled = ({
             }
           : {
               installed_kibana: [
+                {
+                  id: 'fleet-all_assets-inactivity-monitoring',
+                  type: 'alerting_rule_template',
+                },
                 {
                   id: 'sample_alerting_rule_template',
                   type: 'alerting_rule_template',

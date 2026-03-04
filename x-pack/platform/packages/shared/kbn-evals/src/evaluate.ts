@@ -12,14 +12,12 @@ import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
-import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
-import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
@@ -51,7 +49,7 @@ function isElasticCloudEsUrl(esUrl: string): boolean {
 
 /**
  * Test type for evaluations. Loads an inference client and a
- * executor client (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+ * executor client.
  */
 
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
@@ -206,24 +204,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
-      const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
-
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
-      const executorClient = usePhoenixExecutor
-        ? new KibanaPhoenixClient({
-            config: getPhoenixConfig(),
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          })
-        : new KibanaEvalsClient({
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          });
+      const executorClient = new KibanaEvalsClient({
+        log,
+        model,
+        runId: process.env.TEST_RUN_ID!,
+        repetitions,
+      });
 
       const currentRunId = process.env.TEST_RUN_ID;
       await use(executorClient);
@@ -263,12 +251,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     {
       scope: 'worker',
     },
-  ],
-  phoenixClient: [
-    async ({ executorClient }, use) => {
-      await use(executorClient);
-    },
-    { scope: 'worker' },
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
