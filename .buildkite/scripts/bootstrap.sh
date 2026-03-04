@@ -36,19 +36,51 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
 fi
 
-# TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
-if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
-  echo "bootstrap failed, trying again in 15 seconds"
-  sleep 15
-
-  # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
-  # So, we should just delete node_modules in between attempts
-  rm -rf node_modules
-
-  echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install || yarn kbn bootstrap
+# Try to restore bootstrap-generated files from the build step.
+# If successful, skip the expensive kbn bootstrap (regeneration, webpack
+# pre-builds) and only run yarn install + install scripts.
+BOOTSTRAP_CACHE_RESTORED=false
+if [[ "${SKIP_BOOTSTRAP_CACHE:-}" != "true" ]]; then
+  BOOTSTRAP_CACHE="/tmp/bootstrap-cache.tar.gz"
+  if (buildkite-agent artifact download --step "build" "$BOOTSTRAP_CACHE" /tmp/ 2>/dev/null); then
+    echo "--- Restoring bootstrap cache from build step"
+    if tar -xzf "$BOOTSTRAP_CACHE" 2>/dev/null; then
+      FILE_COUNT=$(tar -tzf "$BOOTSTRAP_CACHE" 2>/dev/null | wc -l | tr -d ' ')
+      echo "Restored $FILE_COUNT files from bootstrap cache"
+      BOOTSTRAP_CACHE_RESTORED=true
+    else
+      echo "Failed to extract bootstrap cache, falling back to full bootstrap"
+    fi
+    rm -f "$BOOTSTRAP_CACHE"
+  fi
 fi
 
-if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
+if [[ "$BOOTSTRAP_CACHE_RESTORED" == "true" ]]; then
+  echo "--- yarn install (bootstrap cache restored)"
+  if ! yarn install --non-interactive; then
+    echo "yarn install failed, falling back to full bootstrap"
+    BOOTSTRAP_CACHE_RESTORED=false
+  else
+    echo "--- Running install scripts"
+    node scripts/yarn_install_scripts.js run
+  fi
+fi
+
+if [[ "$BOOTSTRAP_CACHE_RESTORED" != "true" ]]; then
+  # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
+  if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
+    echo "bootstrap failed, trying again in 15 seconds"
+    sleep 15
+
+    # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
+    # So, we should just delete node_modules in between attempts
+    rm -rf node_modules
+
+    echo "--- yarn install and bootstrap, attempt 2"
+    yarn kbn bootstrap --force-install || yarn kbn bootstrap
+  fi
+fi
+
+if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" && "$BOOTSTRAP_CACHE_RESTORED" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
