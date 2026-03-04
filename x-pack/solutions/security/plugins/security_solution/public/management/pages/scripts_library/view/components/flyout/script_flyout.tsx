@@ -13,8 +13,8 @@ import { useSetUrlParams } from '../../../../../components/artifact_list_page/ho
 import type { ListScriptsRequestQuery } from '../../../../../../../common/api/endpoint';
 import { useToasts } from '../../../../../../common/lib/kibana';
 import {
-  useScriptsLibraryUrlParams,
   type ScriptsLibraryUrlParams,
+  useScriptsLibraryUrlParams,
 } from '../scripts_library_url_params';
 import { EndpointScriptFlyoutLoading } from './script_flyout_loading';
 import { useGetEndpointScript } from '../../../../../hooks/script_library';
@@ -32,6 +32,8 @@ type ScriptFormStateItem =
       // required by submit hook types
       name: string;
       platform: EndpointScript['platform'];
+      fileType: EndpointScript['fileType'];
+      pathToExecutable: EndpointScript['pathToExecutable'];
       file?: File;
     };
 
@@ -46,7 +48,9 @@ const createFormState = (
       id: '',
       name: '',
       platform: [],
-    } as const),
+      fileType: 'script',
+      pathToExecutable: undefined,
+    } as ScriptFormStateItem),
 });
 export interface EndpointScriptFlyoutProps {
   onCloseFlyout: (hasFormChanged: boolean) => void;
@@ -121,11 +125,22 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>
     );
 
+    const submitScriptItem = useMemo(
+      () => ({
+        ...formState.scriptItem,
+        pathToExecutable:
+          formState.scriptItem.fileType === 'archive'
+            ? (formState.scriptItem.pathToExecutable as unknown as string)
+            : undefined,
+      }),
+      [formState.scriptItem]
+    );
+
     const {
       isLoading: isSubmittingData,
       mutateAsync: submitScriptData,
       error: submitScriptError,
-    } = useSubmitScript(formState.scriptItem);
+    } = useSubmitScript(submitScriptItem);
 
     const onSuccessSubmit = useCallback(() => {
       toasts.addSuccess(
@@ -145,8 +160,8 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     }, [toasts, isEditForm, isMounted, queryParams, onSuccess, setUrlParams]);
 
     const onSubmit = useCallback(() => {
-      submitScriptData(formState.scriptItem).then(onSuccessSubmit);
-    }, [formState.scriptItem, onSuccessSubmit, submitScriptData]);
+      submitScriptData(submitScriptItem).then(onSuccessSubmit);
+    }, [onSuccessSubmit, submitScriptData, submitScriptItem]);
 
     const onCloseFlyoutHandler = useCallback(
       () => onCloseFlyout(formState.hasFormChanged),

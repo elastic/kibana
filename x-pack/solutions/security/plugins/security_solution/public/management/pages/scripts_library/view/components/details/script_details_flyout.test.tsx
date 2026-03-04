@@ -7,8 +7,8 @@
 
 import React from 'react';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import {
   EndpointScriptDetailsFlyout,
@@ -16,6 +16,7 @@ import {
 } from './script_details_flyout';
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import { SORTED_SCRIPT_TAGS_KEYS } from '../../../../../../../common/endpoint/service/scripts_library/constants';
+import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 
 describe('EndpointScriptDetailsFlyout', () => {
   let render: (
@@ -130,8 +131,9 @@ describe('EndpointScriptDetailsFlyout', () => {
           description: '',
           instructions: '',
           example: '',
-          pathToExecutable: '',
-        },
+          pathToExecutable: undefined,
+          fileType: 'script',
+        } as EndpointScript,
       });
       const { getByTestId } = renderResult;
       const body = getByTestId('test-body');

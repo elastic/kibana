@@ -8,10 +8,7 @@
 import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
-/**
- * A script stored in the Endpoint (Elastic Defend) Scripts Library
- */
-export interface EndpointScript {
+interface EndpointScriptBase {
   id: string;
   name: string;
   platform: Array<SupportedHostOsType>;
@@ -22,8 +19,6 @@ export interface EndpointScript {
   fileHash: string;
   /** Id of the internally stored file for this script */
   fileId: string;
-  /** The type of the file, either a script or an archive */
-  fileType: 'script' | 'archive';
   /** If `true`, then the script, when invoked, requires input arguments to be provided */
   requiresInput: boolean;
   /**
@@ -33,14 +28,30 @@ export interface EndpointScript {
   description?: string;
   instructions?: string;
   example?: string;
-  /** If the file is an archive, this property would hold the file path in that archive to be executed */
-  pathToExecutable?: string;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
   updatedAt: string;
   version: string;
 }
+
+/**
+ * A script stored in the Endpoint (Elastic Defend) Scripts Library.
+ * Discriminated union on `fileType`: when `'archive'`, `pathToExecutable` is a required string;
+ * when `'script'`, `pathToExecutable` is `undefined`.
+ */
+export type EndpointScript =
+  | (EndpointScriptBase & {
+      /** The type of the file — a plain script */
+      fileType: 'script';
+      pathToExecutable?: undefined;
+    })
+  | (EndpointScriptBase & {
+      /** The type of the file — an archive containing an executable */
+      fileType: 'archive';
+      /** The file path inside the archive to be executed */
+      pathToExecutable: string;
+    });
 
 export interface EndpointScriptApiResponse {
   data: EndpointScript;
@@ -67,6 +78,7 @@ export type EditableScriptFields = Partial<
     EndpointScript,
     | 'name'
     | 'platform'
+    | 'fileType'
     | 'tags'
     | 'description'
     | 'instructions'

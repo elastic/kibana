@@ -33,6 +33,8 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
     const name = overrides.name ?? this.randomScriptName();
 
     const id = overrides.id ?? this.seededUUIDv4();
+    const fileType = overrides.fileType ?? this.randomFileType();
+
     const randomScript = {
       id,
       name,
@@ -41,6 +43,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
       fileSize: this.randomFileSizeInBytes(),
       fileHash: this.randomSHA256(),
       fileId: this.randomUUID(),
+      fileType,
       requiresInput: this.randomBoolean(),
       downloadUri: `/api/endpoint/scripts_library/${id}/download`,
       tags,
@@ -51,7 +54,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
         60
       )}`,
       example: `${this.randomString(30)}\n ${this.randomString(30)} \n ${this.randomString(30)}`,
-      pathToExecutable: `/usr/local/bin/${name}`,
+      pathToExecutable: fileType === 'archive' ? `/usr/local/bin/${name}` : undefined,
       createdBy,
       createdAt,
       updatedAt,
@@ -59,7 +62,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
       version: this.randomDocVersion(),
     };
 
-    return merge(randomScript, overrides);
+    return merge(randomScript, overrides) as EndpointScript;
   }
 
   generateListOfScripts(overrides: DeepPartial<EndpointScript>[] = [{}]): EndpointScript[] {
@@ -100,6 +103,10 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
       }
     }
     return selectedPlatforms;
+  }
+
+  protected randomFileType(): 'script' | 'archive' {
+    return this.randomChoice(['script', 'archive']);
   }
 
   protected randomSHA256(): string {

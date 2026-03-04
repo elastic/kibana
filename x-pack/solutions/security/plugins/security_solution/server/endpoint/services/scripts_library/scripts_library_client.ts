@@ -6,12 +6,12 @@
  */
 
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createFileHashTransform, createEsFileClient } from '@kbn/files-plugin/server';
+import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
 import type {
   ElasticsearchClient,
   Logger,
-  SavedObjectsClientContract,
   SavedObject,
+  SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -138,7 +138,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }: SavedObject<ScriptsLibrarySavedObjectAttributes>): EndpointScript {
     const downloadUri = SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', id);
 
-    return {
+    const baseEndpointScript = {
       id,
       name,
       platform: platform as EndpointScript['platform'],
@@ -146,19 +146,31 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       fileName,
       fileSize,
       fileHash,
-      fileType,
       downloadUri,
       requiresInput,
       description,
       instructions,
       example,
-      pathToExecutable,
       tags: tags as EndpointScript['tags'],
       createdBy,
       updatedBy,
       createdAt,
       updatedAt,
       version,
+    };
+
+    if (fileType === 'archive') {
+      return {
+        ...baseEndpointScript,
+        fileType: 'archive',
+        pathToExecutable: pathToExecutable as string,
+      };
+    }
+
+    return {
+      ...baseEndpointScript,
+      fileType: 'script',
+      pathToExecutable: undefined,
     };
   }
 
