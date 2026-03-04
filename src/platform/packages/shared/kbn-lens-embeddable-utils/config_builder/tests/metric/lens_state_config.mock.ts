@@ -149,7 +149,7 @@ export const breakdownMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -248,7 +248,7 @@ export const complexMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -314,7 +314,7 @@ export const simpleMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -478,7 +478,7 @@ export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -489,4 +489,187 @@ export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
+};
+
+export const defaultColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      metricAccessor: '6ffc4622-070d-45ac-ba12-5089f2992217',
+      secondaryTrend: {
+        type: 'none',
+      },
+      secondaryLabelPosition: 'before',
+      palette: {
+        type: 'palette',
+        name: 'status',
+        params: {
+          name: 'status',
+          reverse: false,
+          rangeType: 'number',
+          rangeMin: null,
+          rangeMax: null,
+          progression: 'fixed',
+          // correct stops
+          stops: [
+            {
+              color: '#24c292',
+              stop: 1548.66,
+            },
+            {
+              color: '#fcd883',
+              stop: 3097.33,
+            },
+            {
+              color: '#f6726a',
+              stop: 4646,
+            },
+          ],
+          steps: 3,
+          colorStops: [],
+          continuity: 'all',
+          maxSteps: 5,
+        },
+      },
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              '6ffc4622-070d-45ac-ba12-5089f2992217': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['6ffc4622-070d-45ac-ba12-5089f2992217'],
+            incompleteColumns: {},
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'default color by value palette',
+  version: 2,
+  visualizationType: 'lnsMetric',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};
+
+export const selectorColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      metricAccessor: '6ffc4622-070d-45ac-ba12-5089f2992217',
+      secondaryTrend: {
+        type: 'none',
+      },
+      secondaryLabelPosition: 'before',
+      palette: {
+        type: 'palette',
+        name: 'temperature',
+        params: {
+          name: 'temperature',
+          reverse: false,
+          rangeType: 'number',
+          rangeMin: 0,
+          rangeMax: null,
+          progression: 'fixed',
+          // incorrect stops - set to lower bound values
+          stops: [
+            {
+              color: '#61a2ff',
+              stop: 0,
+            },
+            {
+              color: '#ebeff5',
+              stop: 1548.66,
+            },
+            {
+              color: '#f6726a',
+              stop: 3097.33,
+            },
+          ],
+          steps: 3,
+          continuity: 'above',
+          maxSteps: 5,
+        },
+      },
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              '6ffc4622-070d-45ac-ba12-5089f2992217': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['6ffc4622-070d-45ac-ba12-5089f2992217'],
+            incompleteColumns: {},
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'testing color by value palette',
+  version: 2,
+  visualizationType: 'lnsMetric',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
 };
