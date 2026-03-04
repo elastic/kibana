@@ -27,6 +27,13 @@ export class EmbeddableEditorService {
   public getByValueInput = (): DiscoverSessionTab | undefined =>
     this.embeddableState?.valueInput as DiscoverSessionTab | undefined;
 
+  public clearEditorState = () => {
+    if (this.embeddableState) {
+      this.embeddableStateTransfer.clearEditorState('discover');
+      this.embeddableState = undefined;
+    }
+  };
+
   public transferBackToEditor = (state?: SavedSearchByValueAttributes) => {
     if (this.embeddableState) {
       const app = this.embeddableState.originatingApp;
