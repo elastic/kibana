@@ -16,10 +16,6 @@ import {
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-const isDatasetAlreadyExistsError = (error: unknown): boolean => {
-  return error instanceof Error && error.message.includes('already exists');
-};
-
 export const registerUpdateDatasetRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
     .put({
@@ -43,13 +39,12 @@ export const registerUpdateDatasetRoute = ({ router, logger }: RouteDependencies
       async (context, request, response) => {
         try {
           const { datasetId } = request.params;
-          const { name, description } = request.body;
+          const { description } = request.body;
           const coreContext = await context.core;
           const evalsContext = await context.evals;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const datasetClient = evalsContext.datasetService.getClient(esClient);
           const updatedDataset = await datasetClient.update(datasetId, {
-            name,
             description,
           });
 
@@ -69,13 +64,6 @@ export const registerUpdateDatasetRoute = ({ router, logger }: RouteDependencies
             },
           });
         } catch (error) {
-          if (isDatasetAlreadyExistsError(error)) {
-            return response.customError({
-              statusCode: 409,
-              body: { message: error.message },
-            });
-          }
-
           logger.error(`Failed to update evaluation dataset: ${error}`);
           return response.customError({
             statusCode: 500,

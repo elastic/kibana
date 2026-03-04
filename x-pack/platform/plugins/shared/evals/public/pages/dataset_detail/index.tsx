@@ -17,7 +17,6 @@ import {
   EuiConfirmModal,
   EuiDescriptionList,
   EuiFieldSearch,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -118,7 +117,6 @@ export const DatasetDetailPage: React.FC = () => {
   const deleteExample = useDeleteExample();
 
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
-  const [metadataName, setMetadataName] = useState('');
   const [metadataDescription, setMetadataDescription] = useState('');
   const [selectedExample, setSelectedExample] = useState<DatasetExample | null>(null);
   const [isEditingExample, setIsEditingExample] = useState(false);
@@ -141,7 +139,6 @@ export const DatasetDetailPage: React.FC = () => {
   } = useExampleScores(selectedExample?.id ?? '');
 
   const openMetadataModal = () => {
-    setMetadataName(dataset?.name ?? '');
     setMetadataDescription(dataset?.description ?? '');
     setFormError(null);
     setIsMetadataModalOpen(true);
@@ -161,9 +158,9 @@ export const DatasetDetailPage: React.FC = () => {
 
   const enterEditMode = useCallback(() => {
     if (!selectedExample) return;
-    setEditInput(prettyJson(selectedExample.input));
-    setEditOutput(prettyJson(selectedExample.output));
-    setEditMetadata(prettyJson(selectedExample.metadata));
+    setEditInput(prettyJson(selectedExample.input ?? {}));
+    setEditOutput(prettyJson(selectedExample.output ?? {}));
+    setEditMetadata(prettyJson(selectedExample.metadata ?? {}));
     setFormError(null);
     setIsEditingExample(true);
   }, [selectedExample]);
@@ -200,7 +197,7 @@ export const DatasetDetailPage: React.FC = () => {
       setFormError(null);
       await updateDataset.mutateAsync({
         datasetId: dataset.id,
-        updates: { name: metadataName, description: metadataDescription },
+        updates: { description: metadataDescription },
       });
       setIsMetadataModalOpen(false);
     } catch (error) {
@@ -905,12 +902,6 @@ export const DatasetDetailPage: React.FC = () => {
           </EuiModalHeader>
           <EuiModalBody>
             <EuiForm component="form">
-              <EuiFormRow label={i18n.METADATA_NAME_LABEL}>
-                <EuiFieldText
-                  value={metadataName}
-                  onChange={(event) => setMetadataName(event.target.value)}
-                />
-              </EuiFormRow>
               <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL}>
                 <EuiTextArea
                   value={metadataDescription}

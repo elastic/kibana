@@ -10,6 +10,7 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
+  MAX_SCORES_PER_QUERY,
   buildRouteValidationWithZod,
   buildExampleScoresQuery,
   SCORES_SORT_ORDER,
@@ -53,7 +54,7 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
             index: EVALUATIONS_INDEX_PATTERN,
             query: buildExampleScoresQuery(exampleId),
             sort: EXAMPLE_SCORES_SORT_ORDER,
-            size: 10000,
+            size: MAX_SCORES_PER_QUERY,
           });
 
           const hits = searchResponse.hits?.hits ?? [];

@@ -50,7 +50,6 @@ export const DatasetsListPage: React.FC = () => {
       {
         field: 'name',
         name: i18n.COLUMN_NAME,
-        sortable: true,
       },
       {
         field: 'description',
@@ -60,12 +59,10 @@ export const DatasetsListPage: React.FC = () => {
       {
         field: 'examples_count',
         name: i18n.COLUMN_EXAMPLES,
-        sortable: true,
       },
       {
         field: 'updated_at',
         name: i18n.COLUMN_LAST_UPDATED,
-        sortable: true,
         render: (updatedAt: string) => (updatedAt ? new Date(updatedAt).toLocaleString() : '-'),
       },
     ],

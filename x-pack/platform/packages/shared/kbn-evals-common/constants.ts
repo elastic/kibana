@@ -33,3 +33,6 @@ export const API_VERSIONS = {
 export const INTERNAL_API_ACCESS = 'internal' as const;
 
 export const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0' as const;
+
+export const MAX_EXAMPLES_PER_DATASET = 10_000 as const;
+export const MAX_SCORES_PER_QUERY = 10_000 as const;

@@ -17,6 +17,7 @@ import {
   EVALS_DATASET_EXAMPLE_URL,
   EVALS_DATASET_UPSERT_URL,
 } from '@kbn/evals-common';
+import { DatasetAlreadyExistsError } from '../../storage/errors';
 import { registerListDatasetsRoute } from './list_datasets';
 import { registerCreateDatasetRoute } from './create_dataset';
 import { registerGetDatasetRoute } from './get_dataset';
@@ -178,7 +179,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASETS_URL,
       });
-      datasetClient.create.mockRejectedValueOnce(new Error('Dataset with name already exists'));
+      datasetClient.create.mockRejectedValueOnce(new DatasetAlreadyExistsError(dataset.name));
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -189,7 +190,9 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(409);
-      expect(response.payload).toEqual({ message: 'Dataset with name already exists' });
+      expect(response.payload).toEqual({
+        message: `Dataset with name "${dataset.name}" already exists`,
+      });
     });
 
     it('returns 500 when create fails', async () => {
@@ -278,7 +281,7 @@ describe('dataset routes', () => {
   });
 
   describe('PUT /internal/evals/datasets/{datasetId}', () => {
-    it('updates dataset metadata', async () => {
+    it('updates dataset description', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerUpdateDatasetRoute,
         method: 'put',
@@ -290,13 +293,12 @@ describe('dataset routes', () => {
         method: 'put',
         path: EVALS_DATASET_URL.replace('{datasetId}', datasetId),
         params: { datasetId },
-        body: { name: dataset.name, description: dataset.description },
+        body: { description: dataset.description },
       });
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(datasetClient.update).toHaveBeenCalledWith(datasetId, {
-        name: dataset.name,
         description: dataset.description,
       });
       expect(response.status).toBe(200);
@@ -328,27 +330,6 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
-    });
-
-    it('returns 409 when rename conflicts with existing dataset', async () => {
-      const { handler, context, datasetClient } = buildRouteSetup({
-        registerRoute: registerUpdateDatasetRoute,
-        method: 'put',
-        path: EVALS_DATASET_URL,
-      });
-      datasetClient.update.mockRejectedValueOnce(new Error('Dataset with name already exists'));
-
-      const request = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: EVALS_DATASET_URL.replace('{datasetId}', datasetId),
-        params: { datasetId },
-        body: { name: 'other-name' },
-      });
-
-      const response = await handler(context as any, request, kibanaResponseFactory);
-
-      expect(response.status).toBe(409);
-      expect(response.payload).toEqual({ message: 'Dataset with name already exists' });
     });
 
     it('returns 500 when update fails', async () => {

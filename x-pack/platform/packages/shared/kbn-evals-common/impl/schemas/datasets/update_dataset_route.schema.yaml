@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Update Evaluation Dataset API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/datasets/{datasetId}:
     put:
@@ -25,15 +25,12 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
                 description:
                   type: string
               required:
-                - name
                 - description
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -56,7 +53,7 @@ paths:
                   - description
                   - created_at
                   - updated_at
-        "404":
+        '404':
           description: Dataset not found
           content:
             application/json:

@@ -28,7 +28,6 @@ export type UpdateEvaluationDatasetRequestParamsInput = z.input<
 
 export type UpdateEvaluationDatasetRequestBody = z.infer<typeof UpdateEvaluationDatasetRequestBody>;
 export const UpdateEvaluationDatasetRequestBody = z.object({
-  name: z.string(),
   description: z.string(),
 });
 export type UpdateEvaluationDatasetRequestBodyInput = z.input<

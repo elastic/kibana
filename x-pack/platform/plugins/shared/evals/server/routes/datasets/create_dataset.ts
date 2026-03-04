@@ -13,11 +13,8 @@ import {
   buildRouteValidationWithZod,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
+import { DatasetAlreadyExistsError } from '../../storage/errors';
 import type { RouteDependencies } from '../register_routes';
-
-const isDatasetAlreadyExistsError = (error: unknown): boolean => {
-  return error instanceof Error && error.message.includes('already exists');
-};
 
 export const registerCreateDatasetRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -55,7 +52,7 @@ export const registerCreateDatasetRoute = ({ router, logger }: RouteDependencies
             },
           });
         } catch (error) {
-          if (isDatasetAlreadyExistsError(error)) {
+          if (error instanceof DatasetAlreadyExistsError) {
             return response.customError({
               statusCode: 409,
               body: { message: error.message },

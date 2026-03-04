@@ -14,6 +14,7 @@ import type {
   DatasetExampleInput,
 } from './dataset_client';
 import { DatasetClient } from './dataset_client';
+import { DatasetAlreadyExistsError } from './errors';
 
 type DatasetStorageDocument = DatasetStorageProperties & { _id?: string };
 type DatasetExampleStorageDocument = DatasetExampleStorageProperties & { _id?: string };
@@ -255,23 +256,19 @@ describe('DatasetClient', () => {
     });
   });
 
-  it('updates dataset name by re-keying dataset and examples', async () => {
+  it('updates dataset description without changing the ID', async () => {
     const { client } = createClient();
 
     const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
-    const renamed = await client.update(created.id, {
-      name: 'dataset-2',
-      description: 'Renamed dataset',
+    const updated = await client.update(created.id, {
+      description: 'Updated description',
     });
 
-    expect(renamed).toBeDefined();
-    expect(renamed?.id).toBe(DatasetClient.getDatasetId('dataset-2'));
-    expect(renamed?.name).toBe('dataset-2');
-    expect(renamed?.description).toBe('Renamed dataset');
-    expect(renamed?.examples).toHaveLength(1);
-
-    const oldDataset = await client.get(created.id);
-    expect(oldDataset).toBeUndefined();
+    expect(updated).toBeDefined();
+    expect(updated?.id).toBe(created.id);
+    expect(updated?.name).toBe('dataset-1');
+    expect(updated?.description).toBe('Updated description');
+    expect(updated?.examples).toHaveLength(1);
   });
 
   it('deletes dataset and all associated examples', async () => {
@@ -283,6 +280,15 @@ describe('DatasetClient', () => {
 
     expect(deleted).toBe(true);
     expect(fetched).toBeUndefined();
+  });
+
+  it('throws DatasetAlreadyExistsError when creating a dataset with a duplicate name', async () => {
+    const { client } = createClient();
+
+    await client.create('dataset-1', 'A dataset');
+    await expect(client.create('dataset-1', 'Duplicate')).rejects.toThrow(
+      DatasetAlreadyExistsError
+    );
   });
 
   it('upsert diffs examples and reports added removed unchanged', async () => {

@@ -10,6 +10,7 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
+  MAX_SCORES_PER_QUERY,
   buildRouteValidationWithZod,
   buildDatasetExampleScoresQuery,
   SCORES_SORT_ORDER,
@@ -65,7 +66,7 @@ export const registerGetRunDatasetExamplesRoute = ({ router, logger }: RouteDepe
             index: EVALUATIONS_INDEX_PATTERN,
             query: buildDatasetExampleScoresQuery(datasetId, runId),
             sort: SCORES_SORT_ORDER,
-            size: 10000,
+            size: MAX_SCORES_PER_QUERY,
           });
 
           const scores = (searchResponse.hits?.hits ?? [])

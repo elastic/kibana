@@ -9,12 +9,12 @@ import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inf
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import {
+  DATASET_UUID_NAMESPACE,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
-  EVALS_DATASETS_URL,
   GetEvaluationDatasetResponse,
-  GetEvaluationDatasetsResponse,
 } from '@kbn/evals-common';
+import { v5 as uuidv5 } from 'uuid';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
@@ -265,7 +265,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
-      const listDatasetsPerPage = 100;
 
       const upsertDataset = evaluationsPluginEnabled
         ? async (dataset: EvaluationDataset) => {
@@ -284,54 +283,30 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const getDatasetByName = evaluationsPluginEnabled
         ? async (datasetName: string): Promise<EvaluationDatasetWithId | null> => {
-            let page = 1;
-            let total = Number.POSITIVE_INFINITY;
-
-            while ((page - 1) * listDatasetsPerPage < total) {
-              const listResponse = GetEvaluationDatasetsResponse.parse(
+            const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
+            try {
+              const datasetResponse = GetEvaluationDatasetResponse.parse(
                 await evaluationsKbnClient.request({
-                  path: EVALS_DATASETS_URL,
+                  path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
                   method: 'GET',
-                  query: {
-                    page,
-                    per_page: listDatasetsPerPage,
-                  },
                   retries: 0,
                 })
               );
 
-              total = listResponse.total;
-
-              const datasetSummary = listResponse.datasets.find(({ name }) => name === datasetName);
-              if (datasetSummary) {
-                const datasetResponse = GetEvaluationDatasetResponse.parse(
-                  await evaluationsKbnClient.request({
-                    path: EVALS_DATASET_URL.replace(
-                      '{datasetId}',
-                      encodeURIComponent(datasetSummary.id)
-                    ),
-                    method: 'GET',
-                    retries: 0,
-                  })
-                );
-
-                return {
-                  id: datasetResponse.id,
-                  name: datasetResponse.name,
-                  description: datasetResponse.description,
-                  examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-                    id,
-                    input,
-                    output,
-                    metadata,
-                  })),
-                };
-              }
-
-              page += 1;
+              return {
+                id: datasetResponse.id,
+                name: datasetResponse.name,
+                description: datasetResponse.description,
+                examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
+                  id,
+                  input,
+                  output,
+                  metadata,
+                })),
+              };
+            } catch {
+              return null;
             }
-
-            return null;
           }
         : undefined;
 

@@ -36,10 +36,6 @@ export const RUNS_SECTION_TITLE = i18n.translate('xpack.evals.datasetDetail.runs
   defaultMessage: 'Runs',
 });
 
-export const METADATA_NAME_LABEL = i18n.translate('xpack.evals.datasetDetail.metadataNameLabel', {
-  defaultMessage: 'Name',
-});
-
 export const METADATA_DESCRIPTION_LABEL = i18n.translate(
   'xpack.evals.datasetDetail.metadataDescriptionLabel',
   {

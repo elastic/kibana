@@ -13,8 +13,9 @@ import type {
   StorageClientBulkOperation,
   StorageIndexAdapter,
 } from '@kbn/storage-adapter';
-import { DATASET_UUID_NAMESPACE } from '@kbn/evals-common';
+import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import type { DatasetStorageProperties } from './datasets_storage';
+import { DatasetAlreadyExistsError } from './errors';
 import type { datasetsStorageSettings } from './datasets_storage';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { datasetExamplesStorageSettings } from './examples_storage';
@@ -120,7 +121,7 @@ export class DatasetClient {
   ): Promise<DatasetWithExamples> {
     const existing = await this.getByName(name);
     if (existing) {
-      throw new Error(`Dataset with name "${name}" already exists`);
+      throw new DatasetAlreadyExistsError(name);
     }
 
     const datasetId = DatasetClient.getDatasetId(name);
@@ -230,46 +231,26 @@ export class DatasetClient {
 
   async update(
     datasetId: string,
-    updates: Partial<Pick<DatasetStorageProperties, 'name' | 'description'>>
+    updates: Pick<DatasetStorageProperties, 'description'>
   ): Promise<DatasetWithExamples | undefined> {
     const existing = await this.get(datasetId);
     if (!existing) {
       return undefined;
     }
 
-    const updatedName = updates.name ?? existing.name;
-    const updatedDescription = updates.description ?? existing.description;
     const updatedAt = new Date().toISOString();
-    const updatedDatasetId = DatasetClient.getDatasetId(updatedName);
-
-    if (updatedDatasetId !== datasetId) {
-      const datasetWithTargetName = await this.getByName(updatedName);
-      if (datasetWithTargetName && datasetWithTargetName.id !== datasetId) {
-        throw new Error(`Dataset with name "${updatedName}" already exists`);
-      }
-    }
 
     await this.datasetsStorage.index({
-      id: updatedDatasetId,
+      id: datasetId,
       document: {
-        name: updatedName,
-        description: updatedDescription,
+        name: existing.name,
+        description: updates.description,
         created_at: existing.created_at,
         updated_at: updatedAt,
       },
     });
 
-    if (updatedDatasetId !== datasetId) {
-      await this.deleteExamplesByDatasetId(datasetId);
-
-      if (existing.examples.length > 0) {
-        await this.addExamples(updatedDatasetId, existing.examples, { touchDataset: false });
-      }
-
-      await this.datasetsStorage.delete({ id: datasetId });
-    }
-
-    return this.get(updatedDatasetId);
+    return this.get(datasetId);
   }
 
   async delete(datasetId: string): Promise<boolean> {
@@ -520,8 +501,8 @@ export class DatasetClient {
 
   private async getExamplesByDatasetId(datasetId: string): Promise<ExampleDocument[]> {
     const response = await this.examplesStorage.search({
-      track_total_hits: false,
-      size: 10000,
+      track_total_hits: true,
+      size: MAX_EXAMPLES_PER_DATASET,
       sort: [
         {
           created_at: {
@@ -535,6 +516,16 @@ export class DatasetClient {
         },
       },
     });
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+    if (total > MAX_EXAMPLES_PER_DATASET) {
+      throw new Error(
+        `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
+      );
+    }
 
     return response.hits.hits
       .filter(
