@@ -43,6 +43,10 @@ export class EntityAnalyticsManagementPage {
   // Engine Status tab
   public engineComponentsStatusTable: Locator;
 
+  // Privileges callouts
+  public riskEnginePrivilegesCallout: Locator;
+  public riskEnginePreviewPrivilegesCallout: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Page header
     this.managementPage = this.page.testSubj.locator('entityAnalyticsManagementPage');
@@ -78,6 +82,14 @@ export class EntityAnalyticsManagementPage {
 
     // Engine Status tab
     this.engineComponentsStatusTable = this.page.testSubj.locator('engine-status-panel');
+
+    // Privileges callouts
+    this.riskEnginePrivilegesCallout = this.page.testSubj.locator(
+      'callout-missing-risk-engine-privileges'
+    );
+    this.riskEnginePreviewPrivilegesCallout = this.page.testSubj.locator(
+      'missing-risk-engine-preview-permissions'
+    );
   }
 
   async navigate() {
