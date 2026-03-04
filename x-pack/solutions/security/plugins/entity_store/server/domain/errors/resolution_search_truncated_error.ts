@@ -8,7 +8,7 @@
 export class ResolutionSearchTruncatedError extends Error {
   constructor(context: string, returned: number, total: number) {
     super(
-      `${context}: search returned ${returned} of ${total} results, exceeding the maximum of ${returned}. ` +
+      `${context}: search returned ${returned} of ${total} total results. ` +
         `This resolution group is too large to process safely.`
     );
     this.name = 'ResolutionSearchTruncatedError';
