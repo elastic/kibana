@@ -26,11 +26,8 @@ import {
   SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
 } from '../../../../common/embeddables/error_budget/constants';
 import { SloErrorBudget } from './error_budget_burn_down';
-import type {
-  ErrorBudgetApi,
-  ErrorBudgetCustomInput,
-  ErrorBudgetEmbeddableState,
-} from './types';
+import type { ErrorBudgetApi, ErrorBudgetEmbeddableState } from './types';
+import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
 
 const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
@@ -59,9 +56,9 @@ export const getErrorBudgetEmbeddableFactory = ({
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
-      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(initialState, {
-        sloId: undefined,
-        sloInstanceId: undefined,
+      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomState>(initialState, {
+        slo_id: '',
+        slo_instance_id: undefined,
       });
       const reload$ = new Subject<boolean>();
 
@@ -85,8 +82,8 @@ export const getErrorBudgetEmbeddableFactory = ({
         getComparators: () => ({
           ...titleComparators,
           ...drilldownsManager.comparators,
-          sloId: 'referenceEquality',
-          sloInstanceId: 'referenceEquality',
+          slo_id: 'referenceEquality',
+          slo_instance_id: 'referenceEquality',
         }),
         onReset: (lastState) => {
           drilldownsManager.reinitializeState(lastState ?? {});
