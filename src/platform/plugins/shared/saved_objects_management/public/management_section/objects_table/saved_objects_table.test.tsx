@@ -175,7 +175,7 @@ describe('SavedObjectsTable', () => {
           type: 'search',
           meta: {
             title: `MySearch`,
-            icon: 'search',
+            icon: 'magnify',
             inAppUrl: {
               path: '/discover/2',
               uiCapabilitiesPath: 'discover_v2.show',
@@ -483,7 +483,7 @@ describe('SavedObjectsTable', () => {
         type: 'search',
         meta: {
           title: `MySearch`,
-          icon: 'search',
+          icon: 'magnify',
           editUrl: '/management/kibana/objects/savedSearches/2',
           inAppUrl: {
             path: '/discover/2',
@@ -500,7 +500,7 @@ describe('SavedObjectsTable', () => {
         meta: {
           title: 'MySearch',
           editUrl: '/management/kibana/objects/savedSearches/2',
-          icon: 'search',
+          icon: 'magnify',
           inAppUrl: {
             path: '/discover/2',
             uiCapabilitiesPath: 'discover_v2.show',

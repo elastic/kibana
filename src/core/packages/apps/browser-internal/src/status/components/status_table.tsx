@@ -91,7 +91,7 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={itemIdToExpandedRowMap[item.id] ? collapseLabel : expandLabel}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       ),
     },

@@ -118,7 +118,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
           {
             name: i18n.TABLE_ACTIONS.expand,
             description: i18n.TABLE_ACTIONS.expandDescription,
-            icon: 'expand',
+            icon: 'maximize',
             type: 'icon',
             'data-test-subj': 'expandDataStreamButton',
             onClick: (item: DataStreamResponse) => {

@@ -148,7 +148,7 @@ export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideC
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type="plusInCircle" size="m" aria-hidden={true} />
+                <EuiIcon type="plusCircle" size="m" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size={compressed ? 'xs' : 'm'}>

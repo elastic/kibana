@@ -62,7 +62,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="crossInCircle" size="s" aria-hidden={true} />
+          <EuiIcon type="crossCircle" size="s" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">

@@ -208,7 +208,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
       Component={Component}
       dataTestSubj="data-grid-host-details"
       href={href}
-      iconType="expand"
+      iconType="maximize"
       onClick={onClick}
       title={title ?? hostName}
     >

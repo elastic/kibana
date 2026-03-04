@@ -51,7 +51,7 @@ export const TakeActionButton = memo(() => {
         data-test-subj={TAKE_ACTION_BUTTON_TEST_ID}
         fill
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={togglePopover}
       >
         {TAKE_ACTION_BUTTON}

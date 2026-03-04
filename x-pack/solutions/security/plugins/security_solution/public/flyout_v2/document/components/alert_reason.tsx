@@ -54,7 +54,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
-            iconType="expand"
+            iconType="maximize"
             onClick={onShowFullReason}
             iconSide="right"
             data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}

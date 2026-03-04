@@ -94,7 +94,7 @@ export const DeploymentDetailsCloudIdInput: FC<{ cloudId: string; learnMoreUrl: 
             {(copy) => (
               <EuiButtonIcon
                 onClick={copy}
-                iconType="copyClipboard"
+                iconType="copy"
                 display="base"
                 size="m"
                 aria-label={i18n.translate('cloud.deploymentDetails.copyCloudIdButton.ariaLabel', {

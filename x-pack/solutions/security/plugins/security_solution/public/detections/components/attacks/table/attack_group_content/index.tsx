@@ -62,7 +62,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             aria-label={EXPAND_BUTTON_ARIAL_LABEL}
             color="text"
             data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
-            iconType="expand"
+            iconType="maximize"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               event.stopPropagation();
               openAttackDetailsFlyout();

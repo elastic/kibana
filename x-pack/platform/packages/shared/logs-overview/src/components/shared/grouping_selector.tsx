@@ -26,7 +26,7 @@ export const GroupingSelector: React.FC<GroupingSelectorProps> = ({
     () => (
       <EuiButton
         color="text"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         data-test-subj="logsOverviewGroupingSelector"
         onClick={() => setIsPopoverOpen((prev) => !prev)}

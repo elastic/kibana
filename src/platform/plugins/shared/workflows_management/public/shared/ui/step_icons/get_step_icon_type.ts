@@ -33,7 +33,7 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
       iconType = 'globe';
       break;
     case 'console':
-      iconType = 'console';
+      iconType = 'commandLine';
       break;
     case 'data.set':
       iconType = 'tableOfContents';
@@ -67,7 +67,7 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
 
     // connectors which use EUI icons
     case 'email':
-      iconType = 'email';
+      iconType = 'mail';
       break;
     case 'slack':
     case 'slack_api':

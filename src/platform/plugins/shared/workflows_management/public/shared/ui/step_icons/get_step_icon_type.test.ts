@@ -28,14 +28,14 @@ describe('getTriggerTypeIconType', () => {
 describe('getStepIconType', () => {
   it.each([
     ['globe', 'http'],
-    ['console', 'console'],
+    ['commandLine', 'console'],
     ['tableOfContents', 'data.set'],
     ['clock', 'wait'],
     ['branch', 'if'],
     ['tokenBoolean', 'if-branch'],
     ['refresh', 'foreach'],
     ['tokenNumber', 'foreach-iteration'],
-    ['email', 'email'],
+    ['mail', 'email'],
     ['logoSlack', 'slack'],
     ['logoSlack', 'slack_api'],
     ['sparkles', 'inference'],

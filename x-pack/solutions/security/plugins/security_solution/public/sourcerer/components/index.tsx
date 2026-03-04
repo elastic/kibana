@@ -431,7 +431,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               <StyledButtonEmpty
                 color="text"
                 data-test-subj="sourcerer-advanced-options-toggle"
-                iconType={expandAdvancedOptions ? 'arrowDown' : 'arrowRight'}
+                iconType={expandAdvancedOptions ? 'chevronSingleDown' : 'chevronSingleRight'}
                 onClick={onExpandAdvancedOptionsClicked}
               >
                 {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}

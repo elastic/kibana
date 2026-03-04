@@ -84,7 +84,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
     const linkIcon = useMemo(() => {
       return (
         <EuiIcon
-          type={'popout'}
+          type="external"
           size="m"
           css={css`
             margin-bottom: ${euiTheme.size.xs};

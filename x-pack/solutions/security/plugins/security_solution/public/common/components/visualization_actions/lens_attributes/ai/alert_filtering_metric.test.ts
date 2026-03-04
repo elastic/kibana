@@ -94,7 +94,7 @@ describe('getAlertFilteringMetricLensAttributes', () => {
     );
     expect(result.state.visualization).toEqual(
       expect.objectContaining({
-        icon: 'visLine',
+        icon: 'chartLine',
         layerId: 'unifiedHistogram',
       })
     );

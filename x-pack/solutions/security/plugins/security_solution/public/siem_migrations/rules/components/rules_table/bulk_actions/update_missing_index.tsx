@@ -51,7 +51,7 @@ export const UpdateMissingIndex = memo(
     return (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          iconType="documentEdit"
+          iconType="pencil"
           color={'primary'}
           onClick={onClick}
           disabled={isDisabled}

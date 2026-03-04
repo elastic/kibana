@@ -21,7 +21,7 @@ const defaultProps = {
     iconType: 'storage',
   },
 };
-const headerContent = <EuiIcon type="expand" />;
+const headerContent = <EuiIcon type="maximize" />;
 
 const children = <p>{'test content'}</p>;
 

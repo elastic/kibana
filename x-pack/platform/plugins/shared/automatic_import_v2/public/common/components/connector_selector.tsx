@@ -219,7 +219,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
 
   const input = (
     <EuiButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       size="s"
       color="text"
@@ -244,7 +244,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             isDisabled={isDisabled}
             size="xs"
             onClick={onAddConnectorClick}

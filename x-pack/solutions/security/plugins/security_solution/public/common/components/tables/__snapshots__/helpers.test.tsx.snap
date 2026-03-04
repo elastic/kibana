@@ -28,7 +28,7 @@ exports[`Table Helpers OverflowField it renders 1`] = `
   >
     <span
       class="css-1mvq9d1-MoreRowItems e1v2bxdw1"
-      data-euiicon-type="boxesHorizontal"
+      data-euiicon-type="boxesVertical"
     />
   </span>
 </span>

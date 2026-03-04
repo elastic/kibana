@@ -118,7 +118,7 @@ export const getTableColumns = (
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-                type="checkCircle"
+                type="checkCircleFill"
                 color="text"
                 size="m"
                 iconProps={{
@@ -318,7 +318,7 @@ export function QueryList({
                 >
                   {(copy) => (
                     <EuiButtonIcon
-                      iconType="copyClipboard"
+                      iconType="copy"
                       iconSize="m"
                       onClick={copy}
                       css={css`
@@ -433,7 +433,7 @@ export function QueryColumn({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+          iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
           size="xs"
           color="text"
           css={css`

@@ -226,7 +226,7 @@ export class EsqlStarredQueriesService {
                     defaultMessage: 'Add ES|QL query to Starred',
                   })
             }
-            iconType={isStarred ? 'starFilled' : 'starEmpty'}
+            iconType={isStarred ? 'starFill' : 'star'}
             disabled={!isStarred && this.checkIfStarredQueriesLimitReached()}
             onClick={async () => {
               this.queryToEdit = trimmedQueryString;
