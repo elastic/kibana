@@ -31,6 +31,12 @@ paths:
           schema:
             type: string
           description: Filter by git branch
+        - name: dataset_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by dataset ID
         - name: page
           in: query
           required: false
@@ -75,6 +81,12 @@ components:
           type: string
         suite_id:
           type: string
+        dataset_id:
+          type: string
+          nullable: true
+        dataset_name:
+          type: string
+          nullable: true
         task_model:
           $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
         evaluator_model:
