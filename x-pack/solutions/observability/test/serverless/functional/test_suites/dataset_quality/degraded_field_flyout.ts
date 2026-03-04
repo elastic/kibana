@@ -963,6 +963,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           // Field Limit Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigationAccordion'
