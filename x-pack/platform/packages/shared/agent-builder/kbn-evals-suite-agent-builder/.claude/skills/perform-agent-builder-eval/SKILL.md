@@ -38,11 +38,13 @@ Tell the user Elasticsearch is starting up.
 
 ### Step 3: Register GCS Snapshot Repository
 
-Wait for Elasticsearch to become available by polling until the cluster health endpoint responds:
+Wait for Elasticsearch to become available by polling until the cluster health endpoint responds. Fail after 30 attempts (approximately 2.5 minutes):
 
 ```bash
-until curl -s -u elastic:changeme http://localhost:9200/_cluster/health | grep -q '"status"'; do sleep 5; done
+MAX_RETRIES=30; COUNT=0; until curl -s -u elastic:changeme http://localhost:9200/_cluster/health | grep -q '"status"'; do COUNT=$((COUNT+1)); if [ "$COUNT" -ge "$MAX_RETRIES" ]; then echo "ERROR: Elasticsearch did not become available after $MAX_RETRIES attempts"; exit 1; fi; sleep 5; done
 ```
+
+If the poll times out, show the error to the user and suggest checking the Elasticsearch background task output for startup errors.
 
 Once ES is ready, register the GCS snapshot repository with these defaults:
 
