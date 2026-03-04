@@ -1,17 +1,11 @@
 ---
-applyTo: "{**/plugins/**/*.ts,**/packages/**/*.ts}"
+name: encrypted-saved-objects
+description: Encrypted Saved Objects (ESO) in Kibana — registration, AAD attribute choices, partial update safety, model version migrations with createModelVersion, canEncrypt checks, and Serverless constraints. Use when creating, modifying, or working with ESO types.
 ---
 
-# Encrypted Saved Objects (ESO) Guidelines
+# Encrypted Saved Objects (ESO)
 
-> **Sensitive Data Protection:** Encrypted Saved Objects protect credentials, API keys, PII, and other secrets stored in Kibana. Incorrect ESO changes can make objects permanently undecryptable. Follow these guidelines carefully when creating, modifying, or reviewing ESO-related code.
-
-## Review Style
-- Verify ESO registrations match the patterns described below
-- Flag any partial updates that touch encrypted or AAD attributes
-- Ensure model version migrations use `createModelVersion` when encrypted or AAD attributes change
-- Check for `canEncrypt` graceful degradation when ESO features are used
-- Tag `@elastic/kibana-security` for review on any PRs related to ESOs
+> **Sensitive Data Protection:** Encrypted Saved Objects protect credentials, API keys, PII, and other secrets stored in Kibana. Incorrect ESO changes can make objects permanently undecryptable.
 
 ## Overview
 
@@ -91,24 +85,20 @@ AAD attributes are **not encrypted** but are cryptographically bound to the encr
 **Required pattern:** Create a type-safe partial update helper that strips encrypted and AAD attributes:
 
 ```ts
-// Define which attributes cannot be partially updated
 export const MyTypeAttributesToEncrypt = ['secrets'];
 export const MyTypeAttributesIncludedInAAD = ['connectorType', 'createdAt'];
 export type MyTypeAttributesNotPartiallyUpdatable = 'secrets' | 'connectorType' | 'createdAt';
 
-// Create a type that excludes unsafe attributes
 export type PartiallyUpdateableMyTypeAttributes = Partial<
   Omit<MyTypeSO, MyTypeAttributesNotPartiallyUpdatable>
 >;
 
-// Implement a safe partial update function
 export async function partiallyUpdateMyType(
   savedObjectsClient: Pick<SavedObjectsClient, 'update'>,
   id: string,
   attributes: PartiallyUpdateableMyTypeAttributes,
   options: SavedObjectsUpdateOptions = {}
 ): Promise<void> {
-  // Strip any encrypted or AAD attributes that may have leaked in
   const safeAttributes = omit(attributes, [
     ...MyTypeAttributesToEncrypt,
     ...MyTypeAttributesIncludedInAAD,
@@ -117,7 +107,7 @@ export async function partiallyUpdateMyType(
 }
 ```
 
-**Flag if:** Any code calls `savedObjectsClient.update` or `savedObjectsRepository.update` on an ESO type without verifying that encrypted and AAD attributes are excluded from the update payload.
+Any code that calls `savedObjectsClient.update` or `savedObjectsRepository.update` on an ESO type must verify that encrypted and AAD attributes are excluded from the update payload.
 
 ## Accessing Decrypted Data
 
@@ -141,9 +131,7 @@ const finder = await encryptedSavedObjectsClient
   });
 ```
 
-**Flag if:**
-- Decrypted values are returned directly in HTTP responses without explicit justification
-- `getDecryptedAsInternalUser` is called with a type that is not registered as encrypted (throws at runtime)
+Decrypted values should not be returned directly in HTTP responses without explicit justification. Calling `getDecryptedAsInternalUser` with a type that is not registered as encrypted throws at runtime.
 
 ## Graceful Degradation with `canEncrypt`
 
@@ -163,7 +151,7 @@ if (!canEncrypt) {
 }
 ```
 
-**Flag if:** A plugin uses ESO features (registers types, calls `getDecryptedAsInternalUser`, etc.) without checking `canEncrypt` or handling the absence of an encryption key.
+Any plugin that uses ESO features (registers types, calls `getDecryptedAsInternalUser`, etc.) without checking `canEncrypt` or handling the absence of an encryption key has a bug.
 
 ## Model Version Migrations
 
@@ -266,9 +254,9 @@ During model version transformation, decryption occurs BEFORE the `forwardCompat
 | Change unencrypted to encrypted | No->Yes | Any | **Not supported** | N/A |
 | Change encrypted to unencrypted | Yes->No | N/A | **Not supported** | N/A |
 
-## Review Checklist
+## Checklist
 
-When reviewing PRs that touch ESO-related code, verify:
+When working with ESO-related code, verify:
 
 1. **Registration correctness**
    - [ ] `type` matches the Core Saved Object registration name
