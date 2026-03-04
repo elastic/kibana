@@ -1495,6 +1495,127 @@ describe('DocumentMigrator', () => {
       );
     });
   });
+
+  describe('typeVersionGuesser', () => {
+    const migrationV1 = jest.fn((doc: SavedObjectUnsanitizedDoc) => ({
+      ...doc,
+      attributes: { ...(doc.attributes as Record<string, unknown>), v1: true },
+    }));
+    const migrationV2 = jest.fn((doc: SavedObjectUnsanitizedDoc) => ({
+      ...doc,
+      attributes: { ...(doc.attributes as Record<string, unknown>), v2: true },
+    }));
+
+    beforeEach(() => {
+      migrationV1.mockClear();
+      migrationV2.mockClear();
+    });
+
+    it('applies all migrations when the guesser returns the oldest version', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'foo',
+          migrations: {
+            '1.0.0': migrationV1,
+            '2.0.0': migrationV2,
+          },
+          typeVersionGuesser: () => '0.0.0',
+        }),
+      });
+      migrator.prepareMigrations();
+
+      const result = migrator.migrate({ id: '1', type: 'foo', attributes: {} });
+
+      expect(migrationV1).toHaveBeenCalledTimes(1);
+      expect(migrationV2).toHaveBeenCalledTimes(1);
+      expect(result).toHaveProperty('typeMigrationVersion', '2.0.0');
+      expect(result.attributes).toEqual({ v1: true, v2: true });
+    });
+
+    it('skips migrations already covered by the guessed version', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'foo',
+          migrations: {
+            '1.0.0': migrationV1,
+            '2.0.0': migrationV2,
+          },
+          typeVersionGuesser: () => '1.0.0',
+        }),
+      });
+      migrator.prepareMigrations();
+
+      const result = migrator.migrate({ id: '1', type: 'foo', attributes: {} });
+
+      expect(migrationV1).not.toHaveBeenCalled();
+      expect(migrationV2).toHaveBeenCalledTimes(1);
+      expect(result).toHaveProperty('typeMigrationVersion', '2.0.0');
+      expect(result.attributes).toEqual({ v2: true });
+    });
+
+    it('skips all migrations when the guesser returns the latest version', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'foo',
+          migrations: {
+            '1.0.0': migrationV1,
+            '2.0.0': migrationV2,
+          },
+          typeVersionGuesser: () => '2.0.0',
+        }),
+      });
+      migrator.prepareMigrations();
+
+      const result = migrator.migrate({ id: '1', type: 'foo', attributes: {} });
+
+      expect(migrationV1).not.toHaveBeenCalled();
+      expect(migrationV2).not.toHaveBeenCalled();
+      expect(result).toHaveProperty('typeMigrationVersion', '2.0.0');
+    });
+
+    it('is not called when the document already has a typeMigrationVersion', () => {
+      const typeVersionGuesser = jest.fn(() => '0.0.0');
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'foo',
+          migrations: {
+            '1.0.0': migrationV1,
+            '2.0.0': migrationV2,
+          },
+          typeVersionGuesser,
+        }),
+      });
+      migrator.prepareMigrations();
+
+      migrator.migrate({ id: '1', type: 'foo', attributes: {}, typeMigrationVersion: '1.0.0' });
+
+      expect(typeVersionGuesser).not.toHaveBeenCalled();
+    });
+
+    it('receives the original document as argument', () => {
+      const typeVersionGuesser = jest.fn(() => '0.0.0');
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'foo',
+          migrations: { '1.0.0': migrationV1 },
+          typeVersionGuesser,
+        }),
+      });
+      migrator.prepareMigrations();
+
+      const doc = { id: '1', type: 'foo', attributes: { flag: 'original' } };
+      migrator.migrate(doc);
+
+      expect(typeVersionGuesser).toHaveBeenCalledWith(
+        expect.objectContaining({ attributes: { flag: 'original' } })
+      );
+    });
+  });
 });
 
 function renameAttr(path: string, newPath: string) {

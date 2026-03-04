@@ -19,6 +19,7 @@ import type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
 } from './model_version';
+import type { SavedObjectUnsanitizedDoc } from './serialization';
 
 /**
  * Definition of a type of savedObject.
@@ -207,7 +208,43 @@ export interface SavedObjectsType<Attributes = any> {
    * in server_types.ts.
    */
   supportsAccessControl?: boolean;
+
+  /**
+   * An optional function that, given a document without a `typeMigrationVersion`, returns an
+   * estimated version string representing the document's current schema state.
+   *
+   * The deprecated Saved Objects HTTP API allows callers to omit version metadata. When a document
+   * reaches the {@link IDocumentMigrator | DocumentMigrator} without a `typeMigrationVersion`, the
+   * migrator normally cannot determine which migrations are missing and skips all type migrations,
+   * stamping the document as up-to-date. This can cause validation failures when new required
+   * properties have been added to the schema after the document was originally created.
+   *
+   * When `typeVersionGuesser` is provided, it will be called for such versionless documents.
+   * The returned version is used as the effective starting point for migrations, so only the
+   * transforms introduced after that version will be applied, bringing the document up to date.
+   *
+   * If the document already has a `typeMigrationVersion`, this function is never called.
+   *
+   * @example
+   * ```ts
+   * typeVersionGuesser: (doc) => {
+   *   // If the document already has the 'tabs' structure introduced in model version 2,
+   *   // treat it as that version; otherwise fall back to version 1.
+   *   return doc.attributes?.tabs != null ? '10.2.0' : '10.1.0';
+   * }
+   * ```
+   */
+  typeVersionGuesser?: SavedObjectTypeVersionGuesser;
 }
+
+/**
+ * A function that, given a saved object document that lacks a `typeMigrationVersion`, returns an
+ * estimated version string. Used by the {@link IDocumentMigrator | DocumentMigrator} to determine
+ * which migrations to apply to documents coming from the deprecated Saved Objects HTTP API.
+ *
+ * @public
+ */
+export type SavedObjectTypeVersionGuesser = (document: SavedObjectUnsanitizedDoc) => string;
 
 /**
  * If defined, allows a type to run a search query and return a query filter that may match any documents which may
