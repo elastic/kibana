@@ -204,10 +204,7 @@ describe('EntityStoreDataClient', () => {
         expect.objectContaining({
           query: {
             bool: {
-              must: [
-                { terms: { 'entity.EngineMetadata.Type': ['host'] } },
-                { match_all: {} },
-              ],
+              must: [{ terms: { 'entity.EngineMetadata.Type': ['host'] } }, { match_all: {} }],
             },
           },
         })

@@ -56,11 +56,7 @@ const HostNameComponent: React.FC<Props> = ({
        * if and only if renderer is running inside security solution app
        * we check for event and timeline context
        * */
-      if (
-        !eventContext ||
-        !isInTimelineContext ||
-        !eventContext.enableHostDetailsFlyout
-      ) {
+      if (!eventContext || !isInTimelineContext || !eventContext.enableHostDetailsFlyout) {
         return;
       }
 
