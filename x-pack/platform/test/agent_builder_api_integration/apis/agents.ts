@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe.only('Agent API', () => {
+  describe('Agent API', () => {
     const createdAgentIds: string[] = [];
 
     const mockAgent = {
