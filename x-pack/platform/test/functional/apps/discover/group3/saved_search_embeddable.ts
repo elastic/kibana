@@ -260,7 +260,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.enterInlineEditing();
 
       const inlineEditCalloutText = await getDeletedTabCalloutText();
-      expect(inlineEditCalloutText).to.contain('Select a different tab');
+      expect(inlineEditCalloutText).to.contain('choose a different tab');
       const selectorText = await testSubjects.getVisibleText(
         'discoverEmbeddableInlineEditSelectTabAction'
       );
