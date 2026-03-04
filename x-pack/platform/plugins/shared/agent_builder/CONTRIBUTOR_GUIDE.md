@@ -452,6 +452,60 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 
+#### Dynamic canvas buttons with registerActionButtons
+
+For canvas content that needs to register buttons dynamically (e.g., a "Save" button that depends on runtime state like an API being available), use the `registerActionButtons` callback passed as the second argument to `renderCanvasContent`.
+
+The `getActionButtons` function provides **static** buttons. The `registerActionButtons` callback allows canvas content to add **dynamic** buttons that are merged with the static ones.
+
+```tsx
+import React, { useEffect, useState } from 'react';
+import {
+  ActionButtonType,
+  type ActionButton,
+  type AttachmentRenderProps,
+} from '@kbn/agent-builder-browser/attachments';
+
+interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
+  registerActionButtons?: (buttons: ActionButton[]) => void;
+}
+
+const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
+  attachment,
+  registerActionButtons,
+}) => {
+  const [api, setApi] = useState<MyApi | undefined>();
+
+  // Register buttons once the API is available
+  useEffect(() => {
+    if (!registerActionButtons || !api) {
+      return;
+    }
+
+    registerActionButtons([
+      {
+        label: 'Save',
+        icon: 'save',
+        type: ActionButtonType.PRIMARY,
+        handler: () => api.save(),
+      },
+    ]);
+  }, [api, registerActionButtons]);
+
+  return (
+    <MyEditor onApiReady={setApi} />
+  );
+};
+
+// In the attachment definition:
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  // ...
+  renderCanvasContent: (props, registerActionButtons) => (
+    <MyCanvasContent {...props} registerActionButtons={registerActionButtons} />
+  ),
+};
+```
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
