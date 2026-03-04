@@ -413,7 +413,6 @@ function enrichConfigurationWithVisualizationProperties(
     if (visualization.primaryPosition) {
       primaryMetric.position = visualization.primaryPosition;
     }
-
   }
 
   if (secondaryMetric) {

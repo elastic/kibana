@@ -136,7 +136,10 @@ describe('metric visualization', () => {
         titleWeight: 'bold',
       };
       expect(
-        visualization.initialize(() => stateWithLegacyTitleWeight.layerId, stateWithLegacyTitleWeight)
+        visualization.initialize(
+          () => stateWithLegacyTitleWeight.layerId,
+          stateWithLegacyTitleWeight
+        )
       ).toEqual(fullState);
     });
 
