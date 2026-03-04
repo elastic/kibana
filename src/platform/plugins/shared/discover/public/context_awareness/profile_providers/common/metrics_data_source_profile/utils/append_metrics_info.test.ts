@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/esql-utils', () => ({
+  hasTransformationalCommand: (esql?: string) => !!esql && /\|\s*(stats|keep)\s+/i.test(esql),
+}));
+
 import { buildMetricsInfoQuery } from './append_metrics_info';
 
 describe('buildMetricsInfoQuery', () => {
