@@ -127,6 +127,20 @@ export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
 
 export type StorageClientExistsIndex = () => Promise<boolean>;
 
+export interface StorageClientMigrateDocumentsResponse {
+  migrated: number;
+  total: number;
+}
+
+export interface StorageClientMigrateDocumentsOptions {
+  /** Number of documents to migrate per batch. Defaults to 1000. */
+  batchSize?: number;
+}
+
+export type StorageClientMigrateDocuments = (
+  options?: StorageClientMigrateDocumentsOptions
+) => Promise<StorageClientMigrateDocumentsResponse>;
+
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {
   search: StorageClientSearch<TDocumentType>;
   bulk: StorageClientBulk<TDocumentType>;
@@ -135,6 +149,7 @@ export interface InternalIStorageClient<TDocumentType extends { _id?: string } =
   clean: StorageClientClean;
   get: StorageClientGet<TDocumentType>;
   existsIndex: StorageClientExistsIndex;
+  migrateDocuments: StorageClientMigrateDocuments;
 }
 
 type UnionKeys<T> = T extends T ? keyof T : never;
@@ -178,3 +193,6 @@ export { StorageIndexAdapter } from './src/index_adapter';
 export { BulkOperationError } from './src/errors';
 
 export { types } from './types';
+
+export { defineVersioning, StorageSchemaVersioning } from './src/schema_versioning';
+export type { VersioningBuilder } from './src/schema_versioning';

@@ -21,5 +21,6 @@
     "@kbn/es-errors",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/std",
+    "@kbn/zod",
   ]
 }
