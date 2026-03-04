@@ -273,7 +273,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+        'response_actions.0.action_type_id: Invalid literal value, expected ".osquery", response_actions.0.params.command: Invalid literal value, expected "isolate", response_actions.0.params.command: Invalid enum value. Expected \'kill-process\' | \'suspend-process\', received \'execute\', response_actions.0.params.config: Required, response_actions.0.params.command: Invalid literal value, expected "runscript"'
       );
     });
     test('fails when provided with payload missing data', async () => {
@@ -289,7 +289,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
+        'response_actions.0.action_type_id: Invalid literal value, expected ".osquery", response_actions.0.params.command: Invalid literal value, expected "isolate", response_actions.0.params.config.field: Required, response_actions.0.params.command: Invalid literal value, expected "runscript"'
       );
     });
   });
