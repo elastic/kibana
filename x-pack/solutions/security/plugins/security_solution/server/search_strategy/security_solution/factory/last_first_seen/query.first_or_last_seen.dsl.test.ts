@@ -28,8 +28,9 @@ describe('buildQuery', () => {
     const hasEntityFilter = filter.some((clause) => clause?.bool != null);
     expect(hasEntityFilter).toBe(true);
     const boolClause = filter.find((clause) => clause?.bool != null);
-    const hostNameTerm = (boolClause?.bool as { filter?: Array<{ term?: Record<string, string> }> })
-      ?.filter?.find((c) => c?.term?.['host.name']);
+    const hostNameTerm = (
+      boolClause?.bool as { filter?: Array<{ term?: Record<string, string> }> }
+    )?.filter?.find((c) => c?.term?.['host.name']);
     expect(hostNameTerm).toEqual({ term: { 'host.name': 'siem-kibana' } });
   });
 });

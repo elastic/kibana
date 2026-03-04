@@ -37,10 +37,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const renderPreviewLink = (
-  entityIdentifiers: Record<string, string>,
-  dataTestSubj?: string
-) =>
+const renderPreviewLink = (entityIdentifiers: Record<string, string>, dataTestSubj?: string) =>
   render(
     <TestProviders>
       <PreviewLink
@@ -58,14 +55,14 @@ describe('<PreviewLink />', () => {
   });
 
   it('should not render a link if entityIdentifiers do not have preview', () => {
-    const { queryByTestId } = renderPreviewLink({ 'field': 'value' });
+    const { queryByTestId } = renderPreviewLink({ field: 'value' });
     expect(queryByTestId(FLYOUT_PREVIEW_LINK_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render children without link if entityIdentifiers do not have preview', () => {
     const { queryByTestId, getByTestId } = render(
       <TestProviders>
-        <PreviewLink entityIdentifiers={{ 'field': 'value' }} scopeId={'scopeId'}>
+        <PreviewLink entityIdentifiers={{ field: 'value' }} scopeId={'scopeId'}>
           <div data-test-subj="children">{'children'}</div>
         </PreviewLink>
       </TestProviders>
@@ -76,10 +73,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open host preview', () => {
-    const { getByTestId } = renderPreviewLink(
-      { 'host.name': 'host' },
-      'host-link'
-    );
+    const { getByTestId } = renderPreviewLink({ 'host.name': 'host' }, 'host-link');
     getByTestId('host-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -94,10 +88,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open user preview', () => {
-    const { getByTestId } = renderPreviewLink(
-      { 'user.name': 'user' },
-      'user-link'
-    );
+    const { getByTestId } = renderPreviewLink({ 'user.name': 'user' }, 'user-link');
     getByTestId('user-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -112,10 +103,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open network preview', () => {
-    const { getByTestId } = renderPreviewLink(
-      { 'source.ip': '100:XXX:XXX' },
-      'ip-link'
-    );
+    const { getByTestId } = renderPreviewLink({ 'source.ip': '100:XXX:XXX' }, 'ip-link');
     getByTestId('ip-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -130,10 +118,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open rule preview', () => {
-    const { getByTestId } = renderPreviewLink(
-      { 'kibana.alert.rule.name': 'ruleId' },
-      'rule-link'
-    );
+    const { getByTestId } = renderPreviewLink({ 'kibana.alert.rule.name': 'ruleId' }, 'rule-link');
     getByTestId('rule-link').click();
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
