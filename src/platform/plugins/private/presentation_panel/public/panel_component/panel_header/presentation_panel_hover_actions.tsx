@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import type { MouseEventHandler, ReactElement } from 'react';
+import type { MouseEventHandler } from 'react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
@@ -88,7 +88,6 @@ export interface PresentationPanelHoverActionsProps {
   getActions: PresentationPanelInternalProps['getActions'];
   setDragHandle: (id: string, ref: HTMLElement | null) => void;
   actionPredicate?: (actionId: string) => boolean;
-  children: ReactElement;
   className?: string;
   viewMode?: ViewMode;
   showNotifications?: boolean;
@@ -101,7 +100,6 @@ export const PresentationPanelHoverActions = ({
   getActions,
   setDragHandle,
   actionPredicate,
-  children,
   className,
   viewMode,
   showNotifications = true,
@@ -438,7 +436,6 @@ export const PresentationPanelHoverActions = ({
 
   return (
     <>
-      {children}
       {api && hasHoverActions && (
         <div
           className={classNames('embPanel__hoverActions', className)}
