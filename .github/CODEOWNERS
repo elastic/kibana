@@ -1229,7 +1229,6 @@ x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_getting_started @elastic/search-kibana
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
 x-pack/solutions/search/plugins/search_indices @elastic/search-kibana
-x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-kibana
 x-pack/solutions/search/plugins/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
