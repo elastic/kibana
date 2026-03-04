@@ -120,8 +120,8 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     }
 
     return () => {
-      if (services.agentBuilder?.clearConversationFlyoutActiveConfig) {
-        services.agentBuilder.clearConversationFlyoutActiveConfig();
+      if (services.agentBuilder?.clearAgentBuilderChatConfig) {
+        services.agentBuilder.clearAgentBuilderChatConfig();
       }
     };
   }, [services.agentBuilder]);

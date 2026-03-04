@@ -226,7 +226,7 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearAgentBuilderChatConfig();
     };
   }, [agentBuilder, errorId, serviceName, environment, start, end]);
 

@@ -219,7 +219,7 @@ export class AgentBuilderPlugin
           return { flyoutRef: this.activeSidebarRef };
         }
       },
-      clearConversationFlyoutActiveConfig: () => {
+      clearAgentBuilderChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           // Removes stale browserApiTools from the sidebar

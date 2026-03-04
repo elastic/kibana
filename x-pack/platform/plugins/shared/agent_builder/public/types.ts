@@ -120,7 +120,7 @@ export interface AgentBuilderPluginStart {
    */
   toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
   setAgentBuilderChatConfig: (config: EmbeddableConversationProps) => void;
-  clearConversationFlyoutActiveConfig: () => void;
+  clearAgentBuilderChatConfig: () => void;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.

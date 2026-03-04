@@ -90,7 +90,7 @@ export function SloOverviewDetailsContent({
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearAgentBuilderChatConfig();
     };
   }, [agentBuilder, slo]);
 

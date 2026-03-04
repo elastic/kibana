@@ -128,7 +128,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearAgentBuilderChatConfig();
     };
   }, [agentBuilder, serviceName, environment, start, end]);
 

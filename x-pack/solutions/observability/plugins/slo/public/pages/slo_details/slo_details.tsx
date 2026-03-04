@@ -129,7 +129,7 @@ export function SloDetailsPage() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearAgentBuilderChatConfig();
     };
   }, [agentBuilder, sloId, sloInstanceId, remoteName, slo]);
 

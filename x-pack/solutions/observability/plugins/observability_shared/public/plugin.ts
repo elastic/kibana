@@ -177,7 +177,7 @@ export class ObservabilitySharedPlugin implements Plugin {
           newConversation: false,
         });
       } else {
-        agentBuilder.clearConversationFlyoutActiveConfig?.();
+        agentBuilder.clearAgentBuilderChatConfig?.();
       }
     });
   }

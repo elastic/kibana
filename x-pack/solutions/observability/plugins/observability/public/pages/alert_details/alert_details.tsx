@@ -215,7 +215,7 @@ export function AlertDetails() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearAgentBuilderChatConfig();
     };
   }, [agentBuilder, alertDetail, ruleTypeBreached]);
 

@@ -44,7 +44,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       mockAgentBuilder = {
         setAgentBuilderChatConfig: jest.fn(),
-        clearConversationFlyoutActiveConfig: jest.fn(),
+        clearAgentBuilderChatConfig: jest.fn(),
       };
     });
 
@@ -86,7 +86,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('discover');
 
-      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).toHaveBeenCalled();
+      expect(mockAgentBuilder.clearAgentBuilderChatConfig).toHaveBeenCalled();
     });
 
     it('does not call agent methods when appId is undefined', () => {
@@ -99,7 +99,7 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next(undefined);
 
       expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
-      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.clearAgentBuilderChatConfig).not.toHaveBeenCalled();
     });
 
     it('does not throw when agentBuilder is undefined', () => {
@@ -144,7 +144,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('unknownApp');
 
-      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).toHaveBeenCalled();
+      expect(mockAgentBuilder.clearAgentBuilderChatConfig).toHaveBeenCalled();
     });
 
     it('handles rapid navigation between apps correctly', () => {
@@ -192,7 +192,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       // Should only call setConfig once (for the first navigation to Observability)
       expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenCalledTimes(1);
-      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.clearAgentBuilderChatConfig).not.toHaveBeenCalled();
     });
 
     it('skips redundant calls when navigating within non-Observability apps', () => {
@@ -212,7 +212,7 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('dashboard');
 
       // Should only call clearConfig once (for the first navigation to non-Observability)
-      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.clearAgentBuilderChatConfig).toHaveBeenCalledTimes(1);
       expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
     });
   });
