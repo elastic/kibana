@@ -70,6 +70,7 @@ export const DescriptionField: React.FC = () => {
             inputRef={ref}
             rows={2}
             fullWidth
+            compressed={true}
             isInvalid={!!error}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
               defaultMessage: 'Add an optional description for this rule...',

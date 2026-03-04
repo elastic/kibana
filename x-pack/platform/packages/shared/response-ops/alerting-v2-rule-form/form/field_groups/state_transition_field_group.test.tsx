@@ -33,6 +33,7 @@ describe('StateTransitionFieldGroup', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Breaches' }));
 
     expect(screen.getByTestId('stateTransitionCountInput')).toBeInTheDocument();
+    expect(screen.getByTestId('stateTransitionCountInput')).toHaveValue(2);
     expect(screen.queryByTestId('stateTransitionImmediateDescription')).not.toBeInTheDocument();
     expect(screen.queryByTestId('stateTransitionTimeframeNumberInput')).not.toBeInTheDocument();
   });
@@ -66,6 +67,8 @@ describe('StateTransitionFieldGroup', () => {
 
     expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeInTheDocument();
     expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toBeInTheDocument();
+    expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toHaveValue(2);
+    expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toHaveValue('m');
     expect(screen.queryByTestId('stateTransitionCountInput')).not.toBeInTheDocument();
   });
 });

@@ -20,7 +20,7 @@ describe('StateTransitionTimeframeField', () => {
     expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toBeInTheDocument();
   });
 
-  it('keeps state transition timeframe empty by default', () => {
+  it('defaults state transition timeframe to 2 minutes', () => {
     render(<StateTransitionTimeframeField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
@@ -28,7 +28,10 @@ describe('StateTransitionTimeframeField', () => {
     const numberInput = screen.getByTestId(
       'stateTransitionTimeframeNumberInput'
     ) as HTMLInputElement;
-    expect(numberInput.value).toBe('');
+    expect(numberInput.value).toBe('2');
+
+    const unitSelect = screen.getByTestId('stateTransitionTimeframeUnitInput');
+    expect(unitSelect).toHaveValue('m');
   });
 
   it('accepts a positive number and unit for state transition timeframe', () => {
@@ -59,7 +62,7 @@ describe('StateTransitionTimeframeField', () => {
     expect(unitSelect).toHaveValue('h');
   });
 
-  it('does not auto-populate state transition timeframe number when only unit changes', () => {
+  it('keeps default number when only unit changes', () => {
     render(<StateTransitionTimeframeField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
@@ -72,7 +75,7 @@ describe('StateTransitionTimeframeField', () => {
     fireEvent.change(unitSelect, { target: { value: 'h' } });
 
     expect(unitSelect).toHaveValue('h');
-    expect(numberInput.value).toBe('');
+    expect(numberInput.value).toBe('2');
   });
 
   it('renders with pre-filled state transition timeframe from form state', () => {

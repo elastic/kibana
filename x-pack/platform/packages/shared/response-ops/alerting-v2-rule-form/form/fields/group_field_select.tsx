@@ -65,6 +65,7 @@ export const GroupFieldSelect: React.FC = () => {
             <EuiComboBox
               id={groupByRowId}
               fullWidth
+              compressed={true}
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}

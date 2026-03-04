@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -25,12 +25,27 @@ interface StateTransitionTimeframeFieldProps {
 export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFieldProps> = ({
   numberPrependLabel,
 }) => {
-  const { control } = useFormContext<FormValues>();
+  const { control, getValues, setValue } = useFormContext<FormValues>();
+
+  useEffect(() => {
+    const currentTimeframe = getValues('stateTransition.pendingTimeframe');
+    if (currentTimeframe == null) {
+      setValue('stateTransition.pendingTimeframe', '2m');
+    }
+  }, [getValues, setValue]);
 
   return (
     <Controller
       name="stateTransition.pendingTimeframe"
       control={control}
+      rules={{
+        required: i18n.translate(
+          'xpack.alertingV2.ruleForm.stateTransition.timeframeRequiredError',
+          {
+            defaultMessage: 'Duration is required.',
+          }
+        ),
+      }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <StateTransitionTimeframeInput
           value={value}
@@ -109,6 +124,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
       <EuiFlexItem grow={2}>
         <EuiFieldNumber
           fullWidth
+          compressed={true}
           isInvalid={!!errors}
           value={intervalNumber ?? ''}
           onChange={onIntervalNumberChange}
@@ -123,6 +139,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
       <EuiFlexItem grow={3}>
         <EuiSelect
           fullWidth
+          compressed={true}
           value={intervalUnit}
           options={getTimeOptions(intervalNumber ?? 2)}
           onChange={onIntervalUnitChange}

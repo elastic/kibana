@@ -30,6 +30,7 @@ export const EnabledField: React.FC = () => {
           error={error?.message}
         >
           <EuiSwitch
+            compressed={true}
             label={
               value
                 ? i18n.translate('xpack.alertingV2.ruleForm.enabledOnLabel', {

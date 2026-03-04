@@ -33,6 +33,7 @@ export const TagsField: React.FC = () => {
           >
             <EuiComboBox
               fullWidth
+              compressed={true}
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}

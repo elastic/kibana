@@ -37,6 +37,9 @@ const MODE_OPTIONS = [
   },
 ];
 
+const DEFAULT_PENDING_COUNT = 2;
+const DEFAULT_PENDING_TIMEFRAME = '2m';
+
 const deriveMode = (stateTransition?: {
   pendingTimeframe?: string;
   pendingCount?: number;
@@ -61,13 +64,19 @@ export const StateTransitionFieldGroup: React.FC = () => {
           break;
         case 'breaches':
           setSelectedMode('breaches');
-          setValue('stateTransition.pendingCount', stateTransition?.pendingCount);
+          setValue(
+            'stateTransition.pendingCount',
+            stateTransition?.pendingCount ?? DEFAULT_PENDING_COUNT
+          );
           setValue('stateTransition.pendingTimeframe', undefined);
           break;
         case 'duration':
           setSelectedMode('duration');
           setValue('stateTransition.pendingCount', undefined);
-          setValue('stateTransition.pendingTimeframe', stateTransition?.pendingTimeframe);
+          setValue(
+            'stateTransition.pendingTimeframe',
+            stateTransition?.pendingTimeframe ?? DEFAULT_PENDING_TIMEFRAME
+          );
           break;
       }
     },
@@ -85,7 +94,7 @@ export const StateTransitionFieldGroup: React.FC = () => {
       })}
     >
       <EuiButtonGroup
-        buttonSize="s"
+        buttonSize="compressed"
         legend={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.delayModeLegend', {
           defaultMessage: 'Alert delay mode',
         })}

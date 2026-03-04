@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -13,6 +13,7 @@ import type { FormValues } from '../types';
 import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
 
 const MAX_PENDING_COUNT = 1000;
+const DEFAULT_PENDING_COUNT = 2;
 
 interface StateTransitionCountFieldProps {
   prependLabel?: string;
@@ -21,7 +22,14 @@ interface StateTransitionCountFieldProps {
 export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps> = ({
   prependLabel,
 }) => {
-  const { control } = useFormContext<FormValues>();
+  const { control, getValues, setValue } = useFormContext<FormValues>();
+
+  useEffect(() => {
+    const currentCount = getValues('stateTransition.pendingCount');
+    if (currentCount == null) {
+      setValue('stateTransition.pendingCount', DEFAULT_PENDING_COUNT);
+    }
+  }, [getValues, setValue]);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (INVALID_NUMBER_KEYS.includes(e.key)) {
@@ -34,6 +42,9 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       name="stateTransition.pendingCount"
       control={control}
       rules={{
+        required: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countRequiredError', {
+          defaultMessage: 'Consecutive breaches is required.',
+        }),
         min: 1,
         max: MAX_PENDING_COUNT,
         validate: (value) => {
@@ -48,6 +59,7 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <EuiFieldNumber
           value={value ?? ''}
+          compressed={true}
           onChange={(e) => {
             const val = e.target.value.trim();
             if (val === '') {
