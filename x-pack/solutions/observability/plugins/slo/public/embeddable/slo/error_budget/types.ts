@@ -9,7 +9,7 @@ import type {
   PublishesWritableTitle,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { Subject } from 'rxjs';
 import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { type CoreStart } from '@kbn/core/public';
@@ -29,7 +29,8 @@ export interface ErrorBudgetCustomInput {
 export type SloErrorBudgetEmbeddableState = SerializedTitles & ErrorBudgetCustomInput;
 export type ErrorBudgetApi = DefaultEmbeddableApi<SloErrorBudgetEmbeddableState> &
   PublishesWritableTitle &
-  PublishesTitle;
+  PublishesTitle &
+  HasDrilldowns;
 
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;

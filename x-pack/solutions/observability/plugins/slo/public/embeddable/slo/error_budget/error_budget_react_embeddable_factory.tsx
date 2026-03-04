@@ -21,7 +21,10 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_ERROR_BUDGET_ID } from './constants';
+import {
+  SLO_ERROR_BUDGET_ID,
+  SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/error_budget/constants';
 import { SloErrorBudget } from './error_budget_burn_down';
 import type {
   ErrorBudgetApi,
@@ -45,8 +48,15 @@ export const getErrorBudgetEmbeddableFactory = ({
 }) => {
   const factory: EmbeddableFactory<SloErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+    }) => {
       const deps = { ...coreStart, ...pluginsStart };
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(initialState, {
@@ -58,6 +68,7 @@ export const getErrorBudgetEmbeddableFactory = ({
       function serializeState() {
         return {
           ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
           ...sloErrorBudgetManager.getLatestState(),
         };
       }
@@ -66,13 +77,19 @@ export const getErrorBudgetEmbeddableFactory = ({
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloErrorBudgetManager.anyStateChange$),
+        anyStateChange$: merge(
+          drilldownsManager.anyStateChange$,
+          titleManager.anyStateChange$,
+          sloErrorBudgetManager.anyStateChange$
+        ),
         getComparators: () => ({
           ...titleComparators,
+          ...drilldownsManager.comparators,
           sloId: 'referenceEquality',
           sloInstanceId: 'referenceEquality',
         }),
         onReset: (lastState) => {
+          drilldownsManager.reinitializeState(lastState ?? {});
           sloErrorBudgetManager.reinitializeState(lastState);
           titleManager.reinitializeState(lastState);
         },
@@ -81,7 +98,9 @@ export const getErrorBudgetEmbeddableFactory = ({
       const api = finalizeApi({
         ...titleManager.api,
         ...unsavedChangesApi,
+        ...drilldownsManager.api,
         defaultTitle$,
+        supportedTriggers: () => SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
         serializeState,
       });
 
@@ -101,6 +120,7 @@ export const getErrorBudgetEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
             };
           }, []);
