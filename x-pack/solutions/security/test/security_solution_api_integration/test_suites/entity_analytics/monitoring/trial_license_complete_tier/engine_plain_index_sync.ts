@@ -15,7 +15,8 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Plain Index Sync', () => {
-    describe('Plain index sync', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/243912
+    describe.skip('Plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
 
