@@ -2,9 +2,9 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: n2d-standard-16
+      machineType: c4d-standard-16
+      diskType: hyperdisk-balanced
       diskSizeGb: 200
-      buildDirectory: /dev/shm/bk
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60

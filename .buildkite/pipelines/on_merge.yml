@@ -36,8 +36,8 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4d-standard-16-lssd
-      diskType: pd-ssd
+      machineType: c4d-standard-16
+      diskType: hyperdisk-balanced
     key: build
     timeout_in_minutes: 60
     retry:
