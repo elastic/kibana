@@ -130,7 +130,6 @@
     "@kbn/synthtrace-client",
     "@kbn/cps-utils",
     "@kbn/es-types",
-    "@kbn/esql-language"
   ],
   "exclude": ["target/**/*"]
 }
