@@ -46,8 +46,8 @@ const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
   },
-  transport: {
-    request: jest.fn().mockResolvedValue({ endpoints: [] }),
+  inference: {
+    get: jest.fn().mockResolvedValue({ endpoints: [] }),
   },
 } as any;
 

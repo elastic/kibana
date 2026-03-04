@@ -9,17 +9,17 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { resolveInferenceEndpoint } from './resolve_inference_endpoint';
 
 describe('resolveInferenceEndpoint', () => {
-  let mockTransportRequest: jest.Mock;
+  let mockInferenceGet: jest.Mock;
   let esClient: any;
   const logger = loggerMock.create();
 
   beforeEach(() => {
-    mockTransportRequest = jest.fn();
-    esClient = { transport: { request: mockTransportRequest } };
+    mockInferenceGet = jest.fn();
+    esClient = { inference: { get: mockInferenceGet } };
   });
 
   it('returns endpoint metadata from the ES response', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'my-endpoint',
@@ -47,7 +47,7 @@ describe('resolveInferenceEndpoint', () => {
   });
 
   it('falls back to model field when model_id is not present', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'my-endpoint',
@@ -75,7 +75,7 @@ describe('resolveInferenceEndpoint', () => {
   });
 
   it('throws when the endpoint does not exist', async () => {
-    mockTransportRequest.mockResolvedValue({ endpoints: [] });
+    mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
     await expect(
       resolveInferenceEndpoint({
@@ -87,7 +87,7 @@ describe('resolveInferenceEndpoint', () => {
   });
 
   it('throws when the endpoint task type is not chat_completion', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'my-embedding-endpoint',
@@ -107,7 +107,7 @@ describe('resolveInferenceEndpoint', () => {
   });
 
   it('propagates errors from the ES client', async () => {
-    mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
+    mockInferenceGet.mockRejectedValue(new Error('Connection refused'));
 
     await expect(
       resolveInferenceEndpoint({
@@ -119,7 +119,7 @@ describe('resolveInferenceEndpoint', () => {
   });
 
   it('handles missing service_settings gracefully', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'my-endpoint',

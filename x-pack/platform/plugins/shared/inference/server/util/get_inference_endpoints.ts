@@ -14,15 +14,6 @@ export interface InferenceEndpoint {
   serviceSettings?: Record<string, unknown>;
 }
 
-interface GetInferenceEndpointsResponse {
-  endpoints: Array<{
-    inference_id: string;
-    task_type: string;
-    service: string;
-    service_settings?: Record<string, unknown>;
-  }>;
-}
-
 /**
  * Retrieves all available inference endpoints, optionally filtered to
  * only `chat_completion` task type endpoints.
@@ -34,16 +25,13 @@ export const getInferenceEndpoints = async ({
   esClient: ElasticsearchClient;
   taskType?: string;
 }): Promise<InferenceEndpoint[]> => {
-  const response = await esClient.transport.request<GetInferenceEndpointsResponse>({
-    method: 'GET',
-    path: '/_inference',
-  });
+  const response = await esClient.inference.get();
 
   const endpoints = (response.endpoints ?? []).map((ep) => ({
     inferenceId: ep.inference_id,
     taskType: ep.task_type,
     service: ep.service,
-    serviceSettings: ep.service_settings,
+    serviceSettings: ep.service_settings as Record<string, unknown> | undefined,
   }));
 
   if (taskType) {

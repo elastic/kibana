@@ -9,15 +9,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceEndpoint } from './get_inference_endpoints';
 
-interface GetInferenceEndpointResponse {
-  endpoints: Array<{
-    inference_id: string;
-    task_type: string;
-    service: string;
-    service_settings?: Record<string, unknown>;
-  }>;
-}
-
 /**
  * Retrieves a specific inference endpoint by its ID.
  *
@@ -30,10 +21,7 @@ export const getInferenceEndpointById = async ({
   inferenceId: string;
   esClient: ElasticsearchClient;
 }): Promise<InferenceEndpoint> => {
-  const response = await esClient.transport.request<GetInferenceEndpointResponse>({
-    method: 'GET',
-    path: `/_inference/${encodeURIComponent(inferenceId)}`,
-  });
+  const response = await esClient.inference.get({ inference_id: inferenceId });
 
   const endpoint = response.endpoints?.[0];
   if (!endpoint) {
@@ -44,6 +32,6 @@ export const getInferenceEndpointById = async ({
     inferenceId: endpoint.inference_id,
     taskType: endpoint.task_type,
     service: endpoint.service,
-    serviceSettings: endpoint.service_settings,
+    serviceSettings: endpoint.service_settings as Record<string, unknown> | undefined,
   };
 };

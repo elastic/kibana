@@ -8,16 +8,16 @@
 import { getInferenceEndpointById } from './get_inference_endpoint_by_id';
 
 describe('getInferenceEndpointById', () => {
-  let mockTransportRequest: jest.Mock;
+  let mockInferenceGet: jest.Mock;
   let esClient: any;
 
   beforeEach(() => {
-    mockTransportRequest = jest.fn();
-    esClient = { transport: { request: mockTransportRequest } };
+    mockInferenceGet = jest.fn();
+    esClient = { inference: { get: mockInferenceGet } };
   });
 
   it('returns endpoint metadata', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'my-endpoint',
@@ -41,8 +41,8 @@ describe('getInferenceEndpointById', () => {
     });
   });
 
-  it('calls the correct ES API path', async () => {
-    mockTransportRequest.mockResolvedValue({
+  it('calls esClient.inference.get with the correct inference_id', async () => {
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'my-endpoint',
@@ -54,14 +54,11 @@ describe('getInferenceEndpointById', () => {
 
     await getInferenceEndpointById({ inferenceId: 'my-endpoint', esClient });
 
-    expect(mockTransportRequest).toHaveBeenCalledWith({
-      method: 'GET',
-      path: '/_inference/my-endpoint',
-    });
+    expect(mockInferenceGet).toHaveBeenCalledWith({ inference_id: 'my-endpoint' });
   });
 
   it('throws if the endpoint is not found', async () => {
-    mockTransportRequest.mockResolvedValue({ endpoints: [] });
+    mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
     await expect(getInferenceEndpointById({ inferenceId: 'missing', esClient })).rejects.toThrow(
       "Inference endpoint 'missing' not found"
@@ -69,7 +66,7 @@ describe('getInferenceEndpointById', () => {
   });
 
   it('propagates ES client errors', async () => {
-    mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
+    mockInferenceGet.mockRejectedValue(new Error('Connection refused'));
 
     await expect(
       getInferenceEndpointById({ inferenceId: 'my-endpoint', esClient })

@@ -8,16 +8,16 @@
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
 describe('getInferenceEndpoints', () => {
-  let mockTransportRequest: jest.Mock;
+  let mockInferenceGet: jest.Mock;
   let esClient: any;
 
   beforeEach(() => {
-    mockTransportRequest = jest.fn();
-    esClient = { transport: { request: mockTransportRequest } };
+    mockInferenceGet = jest.fn();
+    esClient = { inference: { get: mockInferenceGet } };
   });
 
   it('returns all endpoints when no taskType filter is provided', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'ep-1',
@@ -52,7 +52,7 @@ describe('getInferenceEndpoints', () => {
   });
 
   it('filters by taskType when provided', async () => {
-    mockTransportRequest.mockResolvedValue({
+    mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
           inference_id: 'ep-1',
@@ -79,21 +79,18 @@ describe('getInferenceEndpoints', () => {
   });
 
   it('returns empty array when no endpoints exist', async () => {
-    mockTransportRequest.mockResolvedValue({ endpoints: [] });
+    mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
     const result = await getInferenceEndpoints({ esClient });
 
     expect(result).toEqual([]);
   });
 
-  it('calls the correct ES API path', async () => {
-    mockTransportRequest.mockResolvedValue({ endpoints: [] });
+  it('calls esClient.inference.get with _all', async () => {
+    mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
     await getInferenceEndpoints({ esClient });
 
-    expect(mockTransportRequest).toHaveBeenCalledWith({
-      method: 'GET',
-      path: '/_inference',
-    });
+    expect(mockInferenceGet).toHaveBeenCalledWith({ inference_id: '_all' });
   });
 });

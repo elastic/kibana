@@ -65,8 +65,8 @@ describe('createChatCompleteApi', () => {
     ml: {
       inferTrainedModel: jest.fn(),
     },
-    transport: {
-      request: jest.fn().mockResolvedValue({ endpoints: [] }),
+    inference: {
+      get: jest.fn().mockResolvedValue({ endpoints: [] }),
     },
   } as any;
   beforeEach(() => {
@@ -449,7 +449,7 @@ describe('createChatCompleteApi', () => {
     const mockEndpointExecutor = { invoke: jest.fn() };
 
     beforeEach(() => {
-      mockEsClient.transport.request.mockResolvedValue({
+      mockEsClient.inference.get.mockResolvedValue({
         endpoints: [{ inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' }],
       });
 
