@@ -59,6 +59,24 @@ export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
   },
 };
 
+export const EXTRACTION_CONFIG_SAVED_OBJECT_TYPE = 'data_sources_extraction_config';
+export const EXTRACTION_CONFIG_SO_ID = 'data-sources-extraction-config';
+
+export interface ExtractionConfigAttributes {
+  workflowId: string;
+}
+
+const extractionConfigSchemaV1 = schema.object({
+  workflowId: schema.string(),
+});
+
+const extractionConfigMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    workflowId: { type: 'keyword' },
+  },
+};
+
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -80,6 +98,22 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
         schemas: {
           forwardCompatibility: dataSourceSchemaV1.extends({}, { unknowns: 'ignore' }),
           create: dataSourceSchemaV1,
+        },
+      },
+    },
+  });
+
+  savedObjects.registerType({
+    name: EXTRACTION_CONFIG_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'multiple-isolated',
+    mappings: extractionConfigMappings,
+    modelVersions: {
+      1: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: extractionConfigSchemaV1.extends({}, { unknowns: 'ignore' }),
+          create: extractionConfigSchemaV1,
         },
       },
     },

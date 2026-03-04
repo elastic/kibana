@@ -33,9 +33,13 @@ import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
 } from '../types';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
-
-const EXTRACTION_WORKFLOW_ID = 'workflow-00000000-0000-0000-0000-000000000001';
+import {
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  EXTRACTION_CONFIG_SAVED_OBJECT_TYPE,
+  EXTRACTION_CONFIG_SO_ID,
+  type DataSourceAttributes,
+  type ExtractionConfigAttributes,
+} from '../saved_objects';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -61,32 +65,60 @@ function slugify(input: string): string {
 }
 
 /**
- * Ensures the shared extraction workflow exists, creating it if necessary.
- * Uses a well-known ID so all data source download workflows can reference it via workflow.execute.
+ * Ensures the shared extraction workflow exists and returns its ID.
+ * Tracks the workflow ID in a singleton Saved Object so that:
+ * - The workflow uses an auto-generated UUID (no hardcoded IDs)
+ * - If a user deletes the workflow, we detect it and create a fresh one
  */
 async function ensureExtractionWorkflowExists(
   workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'],
+  savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
   request: KibanaRequest,
   logger: Logger
-): Promise<void> {
-  const existing = await workflowManagement.management.getWorkflow(
-    EXTRACTION_WORKFLOW_ID,
-    spaceId
-  );
-  if (existing) {
-    return;
-  }
-
+): Promise<string> {
   const yamlPath = join(__dirname, '..', 'workflows', 'extraction.yaml');
   const yaml = await fs.readFile(yamlPath, 'utf-8');
 
-  await workflowManagement.management.createWorkflow(
-    { yaml, id: EXTRACTION_WORKFLOW_ID },
+  // Check if we already have a tracked extraction workflow
+  try {
+    const configSo = await savedObjectsClient.get<ExtractionConfigAttributes>(
+      EXTRACTION_CONFIG_SAVED_OBJECT_TYPE,
+      EXTRACTION_CONFIG_SO_ID
+    );
+    const { workflowId } = configSo.attributes;
+
+    // Verify the workflow still exists and is usable
+    const existing = await workflowManagement.management.getWorkflow(workflowId, spaceId);
+    if (existing && existing.enabled && existing.valid) {
+      return workflowId;
+    }
+
+    // Workflow is gone or unusable — fall through to create a new one
+    logger.info(`Extraction workflow '${workflowId}' is missing or unusable, recreating`);
+  } catch (err) {
+    if (err.output?.statusCode !== 404) {
+      throw err;
+    }
+    // SO doesn't exist yet — first time setup
+  }
+
+  // Create the extraction workflow (auto-generated UUID)
+  const created = await workflowManagement.management.createWorkflow(
+    { yaml },
     spaceId,
     request
   );
-  logger.info(`Created shared extraction workflow with id '${EXTRACTION_WORKFLOW_ID}'`);
+
+  // Persist the workflow ID in the config SO
+  await savedObjectsClient.create<ExtractionConfigAttributes>(
+    EXTRACTION_CONFIG_SAVED_OBJECT_TYPE,
+    { workflowId: created.id },
+    { id: EXTRACTION_CONFIG_SO_ID, overwrite: true }
+  );
+
+  logger.info(`Created shared extraction workflow '${created.id}'`);
+  return created.id;
 }
 
 /**
@@ -214,7 +246,13 @@ export async function createDataSourceAndRelatedResources(
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
 
-  await ensureExtractionWorkflowExists(workflowManagement, spaceId, request, logger);
+  const extractionWorkflowId = await ensureExtractionWorkflowExists(
+    workflowManagement,
+    savedObjectsClient,
+    spaceId,
+    request,
+    logger
+  );
 
   logger.info(`data source workflows: ${JSON.stringify(dataSource.workflows)}`);
 
@@ -228,7 +266,13 @@ export async function createDataSourceAndRelatedResources(
       const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
       const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
       const prefixedName = `${slugify(name)}.${originalName}`;
-      const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
+      let prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
+
+      // Stamp the extraction workflow ID into download workflows
+      prefixedContent = prefixedContent.replaceAll(
+        '{{extraction_workflow_id}}',
+        extractionWorkflowId
+      );
 
       const workflow = await workflowManagement.management.createWorkflow(
         { yaml: prefixedContent },

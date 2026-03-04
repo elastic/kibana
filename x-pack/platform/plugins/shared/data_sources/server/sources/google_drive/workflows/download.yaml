@@ -40,7 +40,7 @@ steps:
       - name: extract_content
         type: workflow.execute
         with:
-          workflow-id: "workflow-00000000-0000-0000-0000-000000000001"
+          workflow-id: "{{extraction_workflow_id}}"
           inputs:
             content: "${{steps.download_file.output.content}}"
             filename: "${{steps.download_file.output.name}}"
