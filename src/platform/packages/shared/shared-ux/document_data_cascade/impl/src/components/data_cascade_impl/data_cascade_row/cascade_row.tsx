@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
@@ -42,6 +42,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   virtualRow,
   virtualRowStyle,
   enableRowSelection,
+  getVirtualizer,
   enableSecondaryExpansionAction,
 }: CascadeRowPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
@@ -53,7 +54,13 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     virtualRowIndex: virtualRow.index,
   });
 
+  const isExpandedOnMount = useRef<boolean>(rowIsExpanded);
+
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
+
+  if (isExpandedOnMount.current && rowIsExpanded && !isGroupNode) {
+    getVirtualizer().childController?.markRowAsReturning(virtualRow.index);
+  }
 
   const styles = useMemo(() => {
     return cascadeRowStyles(
