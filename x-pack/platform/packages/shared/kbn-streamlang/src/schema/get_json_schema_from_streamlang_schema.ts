@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
 import type { StreamType } from '../../types/streamlang';
+import { conditionSchema as conditionZodSchema } from '../../types/conditions';
 
 /**
  * JSON Schema produced by Zod v4's native `z.toJSONSchema()`. The output is a
@@ -961,4 +962,132 @@ function addStepsPropertyToObject(
  */
 function deepClone<T = any>(value: T): T {
   return value === undefined ? value : (JSON.parse(JSON.stringify(value)) as T);
+}
+
+// ---------------------------------------------------------------------------
+// Standalone condition schema for the condition syntax editor
+// ---------------------------------------------------------------------------
+
+/**
+ * Get Monaco YAML schema configuration for the standalone condition editor.
+ *
+ * This generates a JSON Schema from the condition Zod schema and applies
+ * the same fixups used for the full Streamlang schema (enum dedup,
+ * additionalProperties enforcement) plus condition-specific transforms
+ * (anyOf flattening, operator snippets).
+ *
+ * @returns Schema configuration object for monaco-yaml, or null if generation fails
+ */
+export function getConditionMonacoSchemaConfig(): {
+  uri: string;
+  fileMatch: string[];
+  schema: object;
+} | null {
+  try {
+    const jsonSchema = zodToJsonSchema(conditionZodSchema, {
+      name: 'ConditionSchema',
+      target: 'jsonSchema7',
+    });
+
+    const schema = fixConditionSchema(jsonSchema);
+    return {
+      uri: 'http://elastic.co/schemas/condition.json',
+      fileMatch: ['*'],
+      schema: schema as object,
+    };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.warn('Failed to generate condition JSON schema:', error);
+    return null;
+  }
+}
+
+function fixConditionSchema(schema: any): any {
+  let schemaString = JSON.stringify(schema);
+
+  // Dedup enum values (same fix as the Streamlang schema pipeline)
+  schemaString = schemaString.replace(/"enum":\s*\[([^\]]+)\]/g, (match, enumValues) => {
+    try {
+      const values = JSON.parse(`[${enumValues}]`);
+      const uniqueValues = [...new Set(values)];
+      return `"enum":${JSON.stringify(uniqueValues)}`;
+    } catch (e) {
+      return match;
+    }
+  });
+
+  // Rewrite internal $refs that point inside the anyOf structure.
+  // After flattening the anyOf, eq becomes a direct property so the path changes.
+  schemaString = schemaString.replace(
+    /#\/definitions\/ConditionSchema\/anyOf\/\d+\/anyOf\/\d+\/properties\/eq/g,
+    '#/definitions/ConditionSchema/properties/eq'
+  );
+
+  const fixedSchema = JSON.parse(schemaString);
+  fixAdditionalPropertiesInSchema(fixedSchema);
+  flattenConditionOneOf(fixedSchema);
+  return fixedSchema;
+}
+
+/**
+ * Flatten the ConditionSchema's anyOf union into a single object with all
+ * properties merged. This prevents monaco-yaml from showing redundant "object"
+ * entries in autocomplete — only individual property names appear.
+ *
+ * Snippets are populated by calling `addFilterConditionSnippets` on the
+ * variants before flattening, then collecting their `defaultSnippets`.
+ */
+function flattenConditionOneOf(schema: any): void {
+  const definitions = schema.definitions || schema.$defs;
+  if (!definitions?.ConditionSchema?.anyOf) {
+    return;
+  }
+
+  const conditionDef = definitions.ConditionSchema;
+
+  addFilterConditionSnippets(conditionDef);
+
+  const excludedProperties = new Set(['always', 'never']);
+  const mergedProperties: Record<string, any> = {};
+  const mergedSnippets: any[] = [];
+
+  function collect(node: any): void {
+    if (!node || typeof node !== 'object') return;
+    if (node.anyOf) {
+      node.anyOf.forEach((v: any) => collect(v));
+      return;
+    }
+    if (node.oneOf) {
+      node.oneOf.forEach((v: any) => collect(v));
+      return;
+    }
+    if (node.properties) {
+      const keys = Object.keys(node.properties);
+      if (keys.length === 1 && excludedProperties.has(keys[0])) {
+        return;
+      }
+      for (const [key, value] of Object.entries(node.properties)) {
+        if (!mergedProperties[key] && !excludedProperties.has(key)) {
+          mergedProperties[key] = value;
+        }
+      }
+    }
+    if (Array.isArray(node.defaultSnippets)) {
+      mergedSnippets.push(...node.defaultSnippets);
+    }
+  }
+
+  collect(conditionDef);
+
+  const { description } = conditionDef;
+  delete conditionDef.anyOf;
+  conditionDef.type = 'object';
+  conditionDef.properties = mergedProperties;
+  conditionDef.additionalProperties = false;
+  if (description) {
+    conditionDef.description = description;
+  }
+  if (mergedSnippets.length > 0) {
+    conditionDef.defaultSnippets = mergedSnippets;
+  }
 }

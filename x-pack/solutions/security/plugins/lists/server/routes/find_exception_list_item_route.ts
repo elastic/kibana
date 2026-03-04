@@ -53,8 +53,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             sort_order: sortOrder,
           } = request.query;
 
-          // Ignore empty filter values
-          const filter = rawFilter.filter((f) => f && f !== '');
+          const filter = rawFilter.filter(Boolean);
 
           if (listId.length !== namespaceType.length) {
             return siemResponse.error({

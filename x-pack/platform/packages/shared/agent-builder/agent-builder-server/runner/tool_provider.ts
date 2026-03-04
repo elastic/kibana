@@ -10,6 +10,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
+import type { ToolReturnSummarizerFn } from '../tools/builtin';
 
 /**
  * Common interface shared across all tool providers.
@@ -50,6 +51,12 @@ export interface ExecutableTool<
    * When provided, will replace the description when converting to llm tool.
    */
   getLlmDescription?: LlmDescriptionHandler<TConfig>;
+  /**
+   * Optional function to summarize a tool return for conversation history.
+   * When provided, this function will be called when processing conversation history
+   * to replace large tool results with compact summaries.
+   */
+  summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
 export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {

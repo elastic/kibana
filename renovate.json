@@ -2186,20 +2186,6 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/synthetics",
-      "matchDepNames": ["@elastic/synthetics"],
-      "reviewers": ["team:actionable-obs-team"],
-      "matchBaseBranches": ["main"],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "ci:all-cypress-suites",
-        "Team:obs-ux-management"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "json-schema-to-ts",
       "matchDepNames": ["json-schema-to-ts"],
       "reviewers": ["team:obs-ai-assistant"],
@@ -2375,6 +2361,24 @@
       "reviewers": ["team:appex-sharedux", "team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "esql-js",
+      "matchDepNames": [
+        "@elastic/esql"
+      ],
+      "reviewers": [
+        "team:kibana-esql"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2573,6 +2577,25 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "oxlint",
+      "matchDepNames": [
+        "oxlint"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:all-open"
+      ],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },

@@ -79,7 +79,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks",
-    "@kbn/scout"
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

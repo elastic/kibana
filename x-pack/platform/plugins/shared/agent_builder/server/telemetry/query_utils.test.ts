@@ -439,33 +439,39 @@ describe('query_utils', () => {
     });
 
     describe('getConversationMetrics', () => {
-      it('returns conversation metrics with aggregation data', async () => {
-        esClient.search.mockResolvedValue({
-          took: 1,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { total: { value: 100, relation: 'eq' }, hits: [] },
-          aggregations: {
-            rounds_distribution: {
-              buckets: [
-                { key: '1-5', doc_count: 60 },
-                { key: '6-10', doc_count: 25 },
-                { key: '11-20', doc_count: 10 },
-                { key: '21-50', doc_count: 4 },
-                { key: '51+', doc_count: 1 },
-              ],
-            },
-            total_tokens: {
-              value: 50000,
-            },
-          },
-        });
+      const mockConversationResponse = ({
+        totalHits = 100,
+        roundsBuckets = [
+          { key: '1-5', doc_count: 60 },
+          { key: '6-10', doc_count: 25 },
+          { key: '11-20', doc_count: 10 },
+          { key: '21-50', doc_count: 4 },
+          { key: '51+', doc_count: 1 },
+        ],
+        totalRounds = 745,
+        inputTokens = 30000,
+        outputTokens = 20000,
+      } = {}) => ({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: totalHits, relation: 'eq' as const }, hits: [] },
+        aggregations: {
+          rounds_distribution: { buckets: roundsBuckets },
+          total_rounds: { value: totalRounds },
+          total_input_tokens: { value: inputTokens },
+          total_output_tokens: { value: outputTokens },
+        },
+      });
+
+      it('returns conversation metrics with real round counts', async () => {
+        esClient.search.mockResolvedValue(mockConversationResponse());
 
         const result = await queryUtils.getConversationMetrics();
 
         expect(result).toEqual({
           total: 100,
-          total_rounds: 60 * 3 + 25 * 8 + 10 * 15 + 4 * 35 + 1 * 75, // = 180 + 200 + 150 + 140 + 75 = 745
+          total_rounds: 745,
           avg_rounds_per_conversation: 7.45,
           rounds_distribution: [
             { bucket: '1-5', count: 60 },
@@ -475,47 +481,33 @@ describe('query_utils', () => {
             { bucket: '51+', count: 1 },
           ],
           tokens_used: 50000,
+          tokens_input: 30000,
+          tokens_output: 20000,
           average_tokens_per_conversation: 500,
         });
       });
 
       it('handles total as number (not object)', async () => {
         esClient.search.mockResolvedValue({
-          took: 1,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          ...mockConversationResponse({ totalHits: 50 }),
           hits: { total: 50, hits: [] },
-          aggregations: {
-            rounds_distribution: {
-              buckets: [{ key: '1-5', doc_count: 50 }],
-            },
-            total_tokens: {
-              value: 10000,
-            },
-          },
         });
 
         const result = await queryUtils.getConversationMetrics();
 
         expect(result.total).toBe(50);
-        expect(result.average_tokens_per_conversation).toBe(200);
       });
 
       it('returns 0 for average when no conversations', async () => {
-        esClient.search.mockResolvedValue({
-          took: 1,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-          aggregations: {
-            rounds_distribution: {
-              buckets: [],
-            },
-            total_tokens: {
-              value: 0,
-            },
-          },
-        });
+        esClient.search.mockResolvedValue(
+          mockConversationResponse({
+            totalHits: 0,
+            roundsBuckets: [],
+            totalRounds: 0,
+            inputTokens: 0,
+            outputTokens: 0,
+          })
+        );
 
         const result = await queryUtils.getConversationMetrics();
 
@@ -525,8 +517,45 @@ describe('query_utils', () => {
           avg_rounds_per_conversation: 0,
           rounds_distribution: [],
           tokens_used: 0,
+          tokens_input: 0,
+          tokens_output: 0,
           average_tokens_per_conversation: 0,
         });
+      });
+
+      it('applies date filter when provided', async () => {
+        esClient.search.mockResolvedValue(
+          mockConversationResponse({
+            totalHits: 10,
+            totalRounds: 25,
+            inputTokens: 1000,
+            outputTokens: 500,
+          })
+        );
+
+        await queryUtils.getConversationMetrics({ gte: '2024-01-01T00:00:00.000Z' });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: [{ range: { created_at: { gte: '2024-01-01T00:00:00.000Z' } } }],
+              },
+            },
+          })
+        );
+      });
+
+      it('uses match_all when no date filter', async () => {
+        esClient.search.mockResolvedValue(mockConversationResponse());
+
+        await queryUtils.getConversationMetrics();
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: { match_all: {} },
+          })
+        );
       });
 
       it('does not log warning for index_not_found_exception', async () => {
@@ -557,6 +586,8 @@ describe('query_utils', () => {
           avg_rounds_per_conversation: 0,
           rounds_distribution: [],
           tokens_used: 0,
+          tokens_input: 0,
+          tokens_output: 0,
           average_tokens_per_conversation: 0,
         });
         expect(logger.warn).toHaveBeenCalledWith('Failed to fetch conversation metrics: ES error');
