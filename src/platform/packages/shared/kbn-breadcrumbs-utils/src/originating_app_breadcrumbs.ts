@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+
 /**
  * Builds breadcrumbs for the originating app context (e.g. [App] > [Tab]).
  */
@@ -21,11 +24,15 @@ export function getOriginatingAppBreadcrumbs({
   originatingPath?: string;
   breadcrumbTitle?: string;
   originatingAppName?: string;
-  navigateToApp: (appId: string, options?: { path?: string }) => void;
-}): Array<{ text: string; onClick: () => void }> {
+  navigateToApp: ApplicationStart['navigateToApp'];
+}): ChromeBreadcrumb[] {
   if (!breadcrumbTitle || !originatingApp || !originatingPath) return [];
-  const lastSlashIndex = originatingPath.lastIndexOf('/');
-  const listingPath = lastSlashIndex > 0 ? originatingPath.substring(0, lastSlashIndex) : undefined;
+  const trimmed = originatingPath.replace(/\/+$/, '');
+  const lastSlashIndex = trimmed.lastIndexOf('/');
+  const parentPath = lastSlashIndex > 0 ? trimmed.substring(0, lastSlashIndex) : undefined;
+  // Only use parentPath if it still contains a slash, i.e. it represents a real multi-segment path
+  // (e.g. '#/view' from '#/view/id') rather than a bare prefix (e.g. '#' from '#/list').
+  const listingPath = parentPath?.includes('/') ? parentPath : undefined;
 
   return [
     {

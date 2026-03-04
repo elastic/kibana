@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 
@@ -28,7 +29,7 @@ export function getCreateBreadcrumbs({
   originatingPath?: string;
   breadcrumbTitle?: string;
   redirectToOrigin?: () => void;
-  navigateToApp?: (appId: string, options?: { path?: string }) => void;
+  navigateToApp?: ApplicationStart['navigateToApp'];
 }) {
   const originatingCrumbs = navigateToApp
     ? getOriginatingAppBreadcrumbs({
@@ -95,7 +96,7 @@ export function getEditBreadcrumbs(
     originatingPath?: string;
     breadcrumbTitle?: string;
     redirectToOrigin?: () => void;
-    navigateToApp?: (appId: string, options?: { path?: string }) => void;
+    navigateToApp?: ApplicationStart['navigateToApp'];
   },
   title: string = defaultEditText
 ) {
