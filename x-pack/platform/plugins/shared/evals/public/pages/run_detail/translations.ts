@@ -64,9 +64,11 @@ export const COLUMN_MAX = i18n.translate('xpack.evals.runDetail.columns.max', {
   defaultMessage: 'Max',
 });
 
-export const COLUMN_COUNT = i18n.translate('xpack.evals.runDetail.columns.count', {
-  defaultMessage: 'Count',
-});
+export const getExampleCountLabel = (count: number) =>
+  i18n.translate('xpack.evals.runDetail.exampleCountLabel', {
+    defaultMessage: '{count, plural, one {# example} other {# examples}}',
+    values: { count },
+  });
 
 export const getPageTitle = (runId: string) =>
   i18n.translate('xpack.evals.runDetail.pageTitle', {

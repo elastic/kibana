@@ -10,7 +10,6 @@ import {
   EuiPageTemplate,
   EuiAccordion,
   EuiBasicTable,
-  EuiBadge,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
@@ -62,24 +61,37 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     error: examplesError,
   } = useRunDatasetExamples(runId, isOpen ? group.datasetId : '');
 
+  const exampleCount = group.stats[0]?.stats.count;
+
   return (
     <>
       <EuiAccordion
         id={`runDatasetAccordion-${group.datasetId}`}
         buttonContent={
-          <EuiText size="s">
-            <h4>
-              <EuiLink
-                onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onDatasetClick(group.datasetId);
-                }}
-              >
-                {group.datasetName}
-              </EuiLink>
-            </h4>
-          </EuiText>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h4>
+                  <EuiLink
+                    onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onDatasetClick(group.datasetId);
+                    }}
+                  >
+                    {group.datasetName}
+                  </EuiLink>
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+            {exampleCount != null && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.getExampleCountLabel(exampleCount)}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         }
         onToggle={(nextIsOpen) => setIsOpen(nextIsOpen)}
       >
@@ -153,38 +165,37 @@ export const RunDetailPage: React.FC = () => {
         field: 'evaluator_name',
         name: i18n.COLUMN_EVALUATOR,
         sortable: true,
-        render: (name: string) => <EuiBadge color="hollow">{name}</EuiBadge>,
+        render: (name: string) => (
+          <EuiText size="s">
+            <strong>{name}</strong>
+          </EuiText>
+        ),
       },
       {
         field: 'stats.mean',
         name: i18n.COLUMN_MEAN,
         sortable: true,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.median',
         name: i18n.COLUMN_MEDIAN,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.std_dev',
         name: i18n.COLUMN_STD_DEV,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.min',
         name: i18n.COLUMN_MIN,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.max',
         name: i18n.COLUMN_MAX,
-        render: (value: number) => value.toFixed(3),
-      },
-      {
-        field: 'stats.count',
-        name: i18n.COLUMN_COUNT,
-        width: '70px',
+        render: (value: number) => value.toFixed(2),
       },
     ],
     []

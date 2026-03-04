@@ -106,7 +106,13 @@ const EvaluatorScoreAccordion: React.FC<{
             <EuiText size="xs" color="subdued">
               <strong>{i18n.EVALUATOR_METADATA}</strong>
             </EuiText>
-            <EuiCodeBlock overflowHeight={100} language="json" paddingSize="s" fontSize="s">
+            <EuiCodeBlock
+              overflowHeight={100}
+              language="json"
+              paddingSize="none"
+              transparentBackground
+              fontSize="s"
+            >
               {JSON.stringify(evaluator.metadata, null, 2)}
             </EuiCodeBlock>
             <EuiSpacer size="xs" />
@@ -220,7 +226,13 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     }
 
     return (
-      <EuiCodeBlock overflowHeight={120} language="json" paddingSize="none" fontSize="s">
+      <EuiCodeBlock
+        overflowHeight={200}
+        language="json"
+        paddingSize="none"
+        transparentBackground
+        fontSize="s"
+      >
         {serializedValue}
       </EuiCodeBlock>
     );
@@ -262,13 +274,13 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'exampleId',
       name: i18n.COLUMN_EXAMPLE_ID,
-      width: '180px',
+      width: '120px',
       render: (exampleId: string) => truncate(exampleId, EXAMPLE_ID_VISIBLE_LENGTH),
     },
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_INPUT,
-      width: '240px',
+      width: '30%',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
@@ -280,7 +292,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_OUTPUT,
-      width: '240px',
+      width: '30%',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
@@ -350,6 +362,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       itemId="exampleId"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       columns={columns}
+      tableLayout="auto"
       noItemsMessage={i18n.EMPTY_TABLE_MESSAGE}
       tableCaption={i18n.TABLE_CAPTION}
     />
