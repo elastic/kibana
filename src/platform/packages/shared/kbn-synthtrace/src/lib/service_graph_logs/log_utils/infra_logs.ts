@@ -86,7 +86,7 @@ function resolveInfraCondition<C extends Exclude<InfraCategory, 'kubernetes'>>(
     const cappedLevel = level === 'error' ? 'warn' : level;
     return { condition: cappedLevel === 'info' ? 'healthy' : failCondition, level: cappedLevel };
   }
-  return { condition: failCondition, level: level === 'info' ? 'warn' : level };
+  return { condition: level === 'info' ? 'healthy' : failCondition, level };
 }
 
 export function generateInfraLog({
