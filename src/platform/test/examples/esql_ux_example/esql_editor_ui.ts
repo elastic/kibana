@@ -58,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Search and verify query updated with KQL
       const kqlInput = await testSubjects.find('esqlVisorKQLQueryInput');
+      await kqlInput.click();
       await kqlInput.type('test');
       await kqlInput.pressKeys(Key.ENTER);
 
