@@ -12,6 +12,8 @@
  * Used for generating realistic HTTP access logs with geo-location data.
  */
 
+import { random } from './http_random';
+
 export interface GeoLocation {
   city: string;
   country: string;
@@ -300,31 +302,27 @@ export const GEO_LOCATIONS: GeoLocation[] = [
  * Get a random geo-location from the collection.
  */
 export function getRandomGeoLocation(): GeoLocation {
-  return GEO_LOCATIONS[Math.floor(Math.random() * GEO_LOCATIONS.length)];
+  return GEO_LOCATIONS[Math.floor(random() * GEO_LOCATIONS.length)];
 }
 
 /**
  * Generate a random IPv4 address from a specific geo-location.
  */
 export function generateIPv4FromGeo(geo: GeoLocation): string {
-  const range = geo.ipv4Ranges[Math.floor(Math.random() * geo.ipv4Ranges.length)];
+  const range = geo.ipv4Ranges[Math.floor(random() * geo.ipv4Ranges.length)];
   const [baseIp, cidr] = range.split('/');
   const parts = baseIp.split('.');
   const subnet = parseInt(cidr, 10);
 
-  // For simplicity, randomize the last octet(s) based on subnet
   if (subnet >= 24) {
-    // /24 or smaller - randomize last octet
-    parts[3] = Math.floor(Math.random() * 256).toString();
+    parts[3] = Math.floor(random() * 256).toString();
   } else if (subnet >= 16) {
-    // /16 to /23 - randomize last two octets
-    parts[2] = Math.floor(Math.random() * 256).toString();
-    parts[3] = Math.floor(Math.random() * 256).toString();
+    parts[2] = Math.floor(random() * 256).toString();
+    parts[3] = Math.floor(random() * 256).toString();
   } else {
-    // /8 to /15 - randomize last three octets
-    parts[1] = Math.floor(Math.random() * 256).toString();
-    parts[2] = Math.floor(Math.random() * 256).toString();
-    parts[3] = Math.floor(Math.random() * 256).toString();
+    parts[1] = Math.floor(random() * 256).toString();
+    parts[2] = Math.floor(random() * 256).toString();
+    parts[3] = Math.floor(random() * 256).toString();
   }
 
   return parts.join('.');
@@ -334,24 +332,20 @@ export function generateIPv4FromGeo(geo: GeoLocation): string {
  * Generate a random IPv6 address from a specific geo-location.
  */
 export function generateIPv6FromGeo(geo: GeoLocation): string {
-  const range = geo.ipv6Ranges[Math.floor(Math.random() * geo.ipv6Ranges.length)];
+  const range = geo.ipv6Ranges[Math.floor(random() * geo.ipv6Ranges.length)];
   const [baseIp] = range.split('/');
 
-  // Remove trailing '::' if present and split into parts
   const baseParts = baseIp.replace(/:+$/, '').split(':').filter(Boolean);
 
-  // Calculate how many 16-bit groups we need in total (IPv6 has 8 groups)
   const totalGroups = 8;
   const baseGroups = baseParts.length;
   const suffixGroups = totalGroups - baseGroups;
 
-  // Generate random suffix groups
   const suffixParts = [];
   for (let i = 0; i < suffixGroups; i++) {
-    suffixParts.push(Math.floor(Math.random() * 65536).toString(16));
+    suffixParts.push(Math.floor(random() * 65536).toString(16));
   }
 
-  // Combine base prefix with random suffix
   return [...baseParts, ...suffixParts].join(':');
 }
 
@@ -423,14 +417,14 @@ export function generateIPWithGeo(cloudRegion?: string): {
   // 80% of traffic comes from the same continent as the cloud region,
   // 20% comes from anywhere (cross-region traffic is normal).
   let geo: GeoLocation;
-  if (cloudRegion && Math.random() < 0.8) {
+  if (cloudRegion && random() < 0.8) {
     const nearbyLocations = getGeoLocationsForRegion(cloudRegion);
-    geo = nearbyLocations[Math.floor(Math.random() * nearbyLocations.length)];
+    geo = nearbyLocations[Math.floor(random() * nearbyLocations.length)];
   } else {
     geo = getRandomGeoLocation();
   }
 
-  const isIPv6 = Math.random() < 0.1; // 10% IPv6
+  const isIPv6 = random() < 0.1; // 10% IPv6
 
   return {
     ip: isIPv6 ? generateIPv6FromGeo(geo) : generateIPv4FromGeo(geo),
