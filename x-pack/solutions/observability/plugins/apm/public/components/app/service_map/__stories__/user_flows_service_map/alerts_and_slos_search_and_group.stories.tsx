@@ -14,6 +14,7 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
+  MiniMap,
   MarkerType,
   useNodesState,
   useEdgesState,
@@ -160,8 +161,7 @@ function buildSubflowLayout<T extends Node>(
   keys.forEach((key) => {
     const children = byKey.get(key)!;
     const rows = Math.ceil(children.length / GROUP_COLUMNS);
-    const groupHeight =
-      rows * (NODE_HEIGHT + CHILD_GAP) - CHILD_GAP + 2 * GROUP_PADDING;
+    const groupHeight = rows * (NODE_HEIGHT + CHILD_GAP) - CHILD_GAP + 2 * GROUP_PADDING;
     const groupId = `group-${key.replace(/\s+/g, '-')}`;
     g.setNode(groupId, { width: groupWidth, height: groupHeight });
   });
@@ -212,8 +212,7 @@ function buildSubflowLayout<T extends Node>(
     const children = byKey.get(key)!;
     const groupId = `group-${key.replace(/\s+/g, '-')}`;
     const rows = Math.ceil(children.length / GROUP_COLUMNS);
-    const groupHeight =
-      rows * (NODE_HEIGHT + CHILD_GAP) - CHILD_GAP + 2 * GROUP_PADDING;
+    const groupHeight = rows * (NODE_HEIGHT + CHILD_GAP) - CHILD_GAP + 2 * GROUP_PADDING;
     const raw = groupPositions.get(key)!;
     const x = Math.round(raw.x * scale + offsetX);
     const y = Math.round(raw.y * scale + offsetY);
@@ -305,6 +304,7 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
   const [showEdgeLabels, setShowEdgeLabels] = useState(true);
   const [showAlertsBadges, setShowAlertsBadges] = useState(true);
   const [showSloBadges, setShowSloBadges] = useState(true);
+  const [showMinimap, setShowMinimap] = useState(true);
   const [groupBy, setGroupBy] = useState<GroupByOption>('none');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
@@ -506,9 +506,7 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
   }, [selectedNodeId]);
 
   const filterNoResults =
-    filterQuery.trim() !== '' &&
-    nodeIdsMatchingFilter !== null &&
-    nodeIdsMatchingFilter.size === 0;
+    filterQuery.trim() !== '' && nodeIdsMatchingFilter !== null && nodeIdsMatchingFilter.size === 0;
 
   return (
     <div style={{ padding: 16 }}>
@@ -605,6 +603,14 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
             data-test-subj="showSloBadgesSwitch"
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Show minimap"
+            checked={showMinimap}
+            onChange={(e) => setShowMinimap(e.target.checked)}
+            data-test-subj="showMinimapSwitch"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
@@ -638,10 +644,8 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
           >
             <Background />
             <Controls showInteractive={false} />
-            <FocusOnNode
-              nodeId={focusNodeId}
-              position={focusPosition}
-            />
+            {showMinimap && <MiniMap zoomable pannable />}
+            <FocusOnNode nodeId={focusNodeId} position={focusPosition} />
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover as ServiceMapNode | null}
