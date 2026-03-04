@@ -48,14 +48,13 @@ export function ClassicHeader() {
     helpMenu,
     navLinks$,
     recentlyAccessed$,
-    appMenu$,
   } = useChromeComponentsDeps();
 
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
-  const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
+  const headerActionMenuMounter = useHeaderActionMenuMounter();
 
-  const hasBetaConfig = useHasAppMenuConfig(appMenu$);
+  const hasBetaConfig = useHasAppMenuConfig();
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
@@ -169,7 +168,7 @@ export function ClassicHeader() {
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
                 {hasBetaConfig ? (
-                  <HeaderAppMenu config={appMenu$} />
+                  <HeaderAppMenu />
                 ) : (
                   <HeaderActionMenu mounter={headerActionMenuMounter} />
                 )}

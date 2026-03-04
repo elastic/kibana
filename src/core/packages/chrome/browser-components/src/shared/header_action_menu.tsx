@@ -9,16 +9,16 @@
 
 import type { FC } from 'react';
 import React, { useRef, useLayoutEffect, useState } from 'react';
-import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
+import { useChromeComponentsDeps } from '../context';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };
 }
 
-export const useHeaderActionMenuMounter = (
-  actionMenu$: Observable<MountPoint<HTMLElement> | undefined>
-) => {
+export const useHeaderActionMenuMounter = () => {
+  const { application } = useChromeComponentsDeps();
+  const actionMenu$ = application.currentActionMenu$;
   // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
   // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
   // therefore executing the mount method, causing everything to crash.

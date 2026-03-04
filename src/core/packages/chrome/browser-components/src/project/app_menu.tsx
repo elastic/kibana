@@ -13,8 +13,6 @@ import React, { useMemo } from 'react';
 import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../shared/header_action_menu';
 import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
-import { useChromeComponentsDeps } from '../context';
-
 const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   useMemo(() => {
     // Root bar styles
@@ -33,13 +31,12 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   }, [euiTheme]);
 
 export const AppMenuBar = () => {
-  const { application, appMenu$ } = useChromeComponentsDeps();
-  const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
+  const headerActionMenuMounter = useHeaderActionMenuMounter();
   const { euiTheme } = useEuiTheme();
 
   const styles = useAppMenuBarStyles(euiTheme);
 
-  const hasBetaConfig = useHasAppMenuConfig(appMenu$);
+  const hasBetaConfig = useHasAppMenuConfig();
 
   if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
 
@@ -50,7 +47,7 @@ export const AppMenuBar = () => {
       css={styles.root}
     >
       {hasBetaConfig ? (
-        <HeaderAppMenu config={appMenu$} />
+        <HeaderAppMenu />
       ) : (
         <HeaderActionMenu mounter={headerActionMenuMounter} />
       )}
