@@ -22,8 +22,6 @@ import {
   createIdConsistencyEvaluator,
 } from '../../../src/evaluators/feature_duplication_evaluators';
 
-evaluate.describe.configure({ timeout: 600_000 });
-
 evaluate.describe('Streams features duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;
   const to = kbnDatemath.parse('now')!;

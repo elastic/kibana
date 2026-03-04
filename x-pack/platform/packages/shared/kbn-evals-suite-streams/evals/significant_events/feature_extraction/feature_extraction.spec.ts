@@ -28,8 +28,6 @@ import { collectSampleDocuments } from './collect_sample_documents';
 
 const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
-evaluate.describe.configure({ timeout: 300_000 });
-
 evaluate.describe(
   'Streams feature extraction',
   { tag: tags.serverless.observability.complete },
