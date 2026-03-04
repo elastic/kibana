@@ -142,6 +142,7 @@
     "@kbn/scout",
     "@kbn/cps-utils",
     "@kbn/controls-constants",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }
