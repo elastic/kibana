@@ -885,6 +885,7 @@ const ESQLEditorInternal = function ESQLEditor({
       }
 
       trackValidationLatencyEnd(active);
+      performance.mark('esql-validation-complete');
 
       if (active) {
         const uniqueWarnings = filterDuplicatedWarnings(allWarnings);

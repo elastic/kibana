@@ -53,7 +53,6 @@ export const journey = new Journey({
 
     for (let i = 0; i < pipes.length; i++) {
       await typeESQLEditorQuery(pipes[i], page, 50);
-      await waitForValidation(page);
     }
   })
 
@@ -75,7 +74,6 @@ export const journey = new Journey({
 
     for (let i = 0; i < pipes.length; i++) {
       await typeESQLEditorQuery(pipes[i], page, 100);
-      await waitForValidation(page);
     }
   })
 
@@ -88,44 +86,41 @@ export const journey = new Journey({
     await setMonacoEditorValue('', page);
 
     for (const evalCount of [10, 25, 50, 75, 100]) {
+      const marksBefore = await countValidationMarks(page);
       await setMonacoEditorValue(buildLargeQuery(evalCount), page);
-      await waitForValidation(page);
+      await waitForValidation(page, marksBefore);
     }
 
-    await typeESQLEditorQuery(`\n| RENAME col0 AS renamed_field | KEEP renamed_field`, page, 200);
+    await typeESQLEditorQuery(`\n| RENAME col0 AS renamed_field | KEEP renamed_field`, page, 100);
+    await typeESQLEditorQuery(`\n| EVAL col90 = renamed_field`, page, 100);
   });
 
 // === UTILS ===========================================================================
 
-const MIN_VALIDATION_WAIT_MS = 200;
-const MAX_VALIDATION_WAIT_MS = 5000;
-const MAX_QUERY_LENGTH_FOR_SCALING = 6000;
+const countValidationMarks = (page: Page) =>
+  page.evaluate(() => performance.getEntriesByName('esql-validation-complete', 'mark').length);
 
-/**
- * Waits for validation to complete, scaling the timeout with the current
- * query length. Short queries wait ~200ms, long queries up to 5s.
- */
-const waitForValidation = async (page: Page) => {
-  const queryLength = await page.evaluate(() => {
-    const editor = (window as unknown as WithMonacoEnvironment).MonacoEnvironment.monaco.editor;
-    const model = editor.getModels()[0];
-    return model ? model.getValue().length : 0;
-  });
+const waitForValidation = async (page: Page, baseline?: number) => {
+  const marksBefore = baseline ?? (await countValidationMarks(page));
 
-  const ratio = Math.min(queryLength / MAX_QUERY_LENGTH_FOR_SCALING, 1);
-  const waitMs = Math.round(
-    MIN_VALIDATION_WAIT_MS + ratio * (MAX_VALIDATION_WAIT_MS - MIN_VALIDATION_WAIT_MS)
-  );
-  await page.waitForTimeout(waitMs);
+  await page
+    .waitForFunction(
+      ({ name, count }) => performance.getEntriesByName(name, 'mark').length > count,
+      { name: 'esql-validation-complete', count: marksBefore },
+      { timeout: 15000 }
+    )
+    .catch(() => {
+      // eslint-disable-next-line no-console
+      console.log(`Waited for too long for the validation to finish, continuing with the test...`);
+    });
 };
 
-/**
- * Types the given string letter by letter.
- */
 const typeESQLEditorQuery = async (value: string, page: Page, typingDelay: number) => {
   const editor = await getEditor(page);
+  const marksBefore = await countValidationMarks(page);
   await moveCursorToEnd(page, editor);
   await editor.pressSequentially(value, { delay: typingDelay, timeout: 0 });
+  await waitForValidation(page, marksBefore);
 };
 
 /**
@@ -163,6 +158,8 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
     return Boolean(monacoEditor?.getModels && monacoEditor.getModels().length);
   });
 
+  const marksBefore = await countValidationMarks(page);
+
   // Set the value directly via Monaco's API
   await page.evaluate(
     ({ codeEditorValue }) => {
@@ -182,6 +179,7 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
     },
     { expected: value }
   );
+  await waitForValidation(page, marksBefore);
 };
 
 /**
