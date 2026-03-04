@@ -69,5 +69,5 @@ To use the Google Calendar connector, you need a Google OAuth 2.0 access token w
 5. Copy the **Access token** and use it as the **Bearer Token** in the connector configuration.
 
 :::{note}
-OAuth 2.0 Playground tokens expire after 1 hour. For production use, implement a proper OAuth 2.0 flow with token refresh. See the [Google Identity documentation](https://developers.google.com/identity/protocols/oauth2) for details.
+OAuth 2.0 Playground tokens expire after 1 hour. For production use, implement a proper OAuth 2.0 flow with token refresh. Refer to the [Google Identity documentation](https://developers.google.com/identity/protocols/oauth2) for details.
 :::
