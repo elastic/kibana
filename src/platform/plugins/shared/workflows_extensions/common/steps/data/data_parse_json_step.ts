@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const DataParseJsonStepTypeId = 'data.parse_json' as const;
+export const DataParseJsonStepTypeId = 'data.parseJson' as const;
 
 export const ConfigSchema = z.object({
   source: z.unknown(),
@@ -48,7 +48,7 @@ Parse a JSON string into a structured object or array for use in downstream step
 
 \`\`\`yaml
 - name: parse-response
-  type: data.parse_json
+  type: data.parseJson
   source: "\${{ steps.http_request.output.body }}"
 \`\`\`
 

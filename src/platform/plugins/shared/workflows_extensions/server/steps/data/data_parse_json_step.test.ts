@@ -32,7 +32,7 @@ describe('dataParseJsonStepDefinition', () => {
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-parse-json-step',
-    stepType: 'data.parse_json',
+    stepType: 'data.parseJson',
   });
 
   describe('valid JSON parsing', () => {

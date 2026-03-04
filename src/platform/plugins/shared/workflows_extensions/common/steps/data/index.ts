@@ -59,8 +59,8 @@ export {
   type DataParseJsonStepOutputSchema,
 } from './data_parse_json_step';
 export {
-  DataToJsonStepTypeId,
-  dataToJsonStepCommonDefinition,
-  type DataToJsonStepInputSchema,
-  type DataToJsonStepOutputSchema,
-} from './data_to_json_step';
+  DataStringifyJsonStepTypeId,
+  dataStringifyJsonStepCommonDefinition,
+  type DataStringifyJsonStepInputSchema,
+  type DataStringifyJsonStepOutputSchema,
+} from './data_stringify_json_step';

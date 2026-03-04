@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const DataToJsonStepTypeId = 'data.to_json' as const;
+export const DataStringifyJsonStepTypeId = 'data.stringifyJson' as const;
 
 export const ConfigSchema = z.object({
   source: z.unknown(),
@@ -24,25 +24,25 @@ export const InputSchema = z.object({
 
 export const OutputSchema = z.string();
 
-export type DataToJsonStepConfigSchema = typeof ConfigSchema;
-export type DataToJsonStepInputSchema = typeof InputSchema;
-export type DataToJsonStepOutputSchema = typeof OutputSchema;
+export type DataStringifyJsonStepConfigSchema = typeof ConfigSchema;
+export type DataStringifyJsonStepInputSchema = typeof InputSchema;
+export type DataStringifyJsonStepOutputSchema = typeof OutputSchema;
 
-export const dataToJsonStepCommonDefinition: CommonStepDefinition<
-  DataToJsonStepInputSchema,
-  DataToJsonStepOutputSchema,
-  DataToJsonStepConfigSchema
+export const dataStringifyJsonStepCommonDefinition: CommonStepDefinition<
+  DataStringifyJsonStepInputSchema,
+  DataStringifyJsonStepOutputSchema,
+  DataStringifyJsonStepConfigSchema
 > = {
-  id: DataToJsonStepTypeId,
+  id: DataStringifyJsonStepTypeId,
   category: StepCategory.Data,
-  label: i18n.translate('workflowsExtensions.dataToJsonStep.label', {
-    defaultMessage: 'To JSON String',
+  label: i18n.translate('workflowsExtensions.dataStringifyJsonStep.label', {
+    defaultMessage: 'Stringify JSON',
   }),
-  description: i18n.translate('workflowsExtensions.dataToJsonStep.description', {
+  description: i18n.translate('workflowsExtensions.dataStringifyJsonStep.description', {
     defaultMessage: 'Convert a structured object or array to a JSON string',
   }),
   documentation: {
-    details: `# To JSON String
+    details: `# Stringify JSON
 
 Convert a structured value (object, array, etc.) into a JSON string for transport or presentation.
 
@@ -50,7 +50,7 @@ Convert a structured value (object, array, etc.) into a JSON string for transpor
 
 \`\`\`yaml
 - name: stringify-payload
-  type: data.to_json
+  type: data.stringifyJson
   source: "\${{ steps.build_payload.output }}"
   with:
     pretty: false
@@ -60,7 +60,7 @@ Convert a structured value (object, array, etc.) into a JSON string for transpor
 
 \`\`\`yaml
 - name: debug-output
-  type: data.to_json
+  type: data.stringifyJson
   source: "\${{ steps.build_payload.output }}"
   with:
     pretty: true

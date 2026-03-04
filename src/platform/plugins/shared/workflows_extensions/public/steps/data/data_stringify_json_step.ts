@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { dataToJsonStepCommonDefinition } from '../../../common/steps/data';
+import { dataStringifyJsonStepCommonDefinition } from '../../../common/steps/data';
 import { createPublicStepDefinition } from '../../step_registry/types';
 
-export const dataToJsonStepDefinition = createPublicStepDefinition({
-  ...dataToJsonStepCommonDefinition,
+export const dataStringifyJsonStepDefinition = createPublicStepDefinition({
+  ...dataStringifyJsonStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/code').then(({ icon }) => ({
       default: icon,

@@ -20,7 +20,7 @@ import {
   dataParseJsonStepDefinition,
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
-  dataToJsonStepDefinition,
+  dataStringifyJsonStepDefinition,
 } from './data';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
@@ -37,7 +37,7 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(dataRegexReplaceStepDefinition);
   serverStepRegistry.register(dataAggregateStepDefinition);
   serverStepRegistry.register(dataParseJsonStepDefinition);
-  serverStepRegistry.register(dataToJsonStepDefinition);
+  serverStepRegistry.register(dataStringifyJsonStepDefinition);
   serverStepRegistry.register(aiClassifyStepDefinition(core));
   serverStepRegistry.register(aiPromptStepDefinition(core));
   serverStepRegistry.register(aiSummarizeStepDefinition(core));
