@@ -20,6 +20,8 @@ import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
@@ -32,6 +34,9 @@ import type {
   OverviewEmbeddableState,
   SingleOverviewCustomState,
 } from '../common/embeddables/overview/types';
+import type {
+  ErrorBudgetEmbeddableState,
+} from '../common/embeddables/error_budget/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
@@ -199,6 +204,22 @@ export class SLOPlugin
         });
 
         registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, sloClient);
+
+        plugins.embeddable.registerLegacyURLTransform(
+          SLO_ERROR_BUDGET_ID,
+          async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+            const { getTransformOut } = await import(
+              '../common/embeddables/error_budget/transforms/get_transform_out'
+            );
+            const transformOut = getTransformOut(transformDrilldownsOut);
+            return (
+              storedState: object,
+              panelReferences?: Reference[],
+              containerReferences?: Reference[],
+              id?: string
+            ) => transformOut(storedState as ErrorBudgetEmbeddableState, panelReferences);
+          }
+        );
       }
     };
     registerEmbeddables();
