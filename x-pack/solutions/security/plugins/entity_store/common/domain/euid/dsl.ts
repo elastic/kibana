@@ -11,6 +11,44 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
 
 /**
+ * Returns a DSL filter that matches documents containing at least one
+ * identity field for the given entity type.
+ *
+ * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
+ * Use it to pre-filter searches/aggregations to only documents that could
+ * resolve to an entity of the requested type.
+ *
+ * @example
+ * ```ts
+ * const filter = getEuidDslDocumentsContainsIdFilter('user');
+ * // {
+ * //   bool: {
+ * //     should: [
+ * //       { exists: { field: 'user.entity.id' } },
+ * //       { exists: { field: 'user.id' } },
+ * //       { exists: { field: 'user.name' } },
+ * //       { exists: { field: 'user.email' } }
+ * //     ],
+ * //     minimum_should_match: 1
+ * //   }
+ * // }
+ * ```
+ */
+export function getEuidDslDocumentsContainsIdFilter(
+  entityType: EntityType
+): QueryDslQueryContainer {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  return {
+    bool: {
+      should: identityField.requiresOneOfFields.map((field) => ({
+        exists: { field },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+}
+
+/**
  * Constructs an Elasticsearch DSL filter for the provided entity type and document.
  *
  * It supports both flattened and nested document shapes.

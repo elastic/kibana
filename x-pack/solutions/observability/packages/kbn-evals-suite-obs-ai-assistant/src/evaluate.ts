@@ -55,12 +55,12 @@ export const evaluate = base.extend<
     },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateObservabilityAIAssistantDataset({
           chatClient,
           evaluators,
-          phoenixClient,
+          executorClient,
         })
       );
     },

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
@@ -16,16 +16,14 @@ export default {
   title: 'Components/Graph Components/Additional Components',
   render: (props) => {
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <ActionsComponent
-          css={css`
-            width: 42px;
-          `}
-          onInvestigateInTimeline={action('investigateInTimeline')}
-          onSearchToggle={action('searchToggle')}
-          {...props}
-        />
-      </ThemeProvider>
+      <ActionsComponent
+        css={css`
+          width: 42px;
+        `}
+        onInvestigateInTimeline={action('investigateInTimeline')}
+        onSearchToggle={action('searchToggle')}
+        {...props}
+      />
     );
   },
   argTypes: {

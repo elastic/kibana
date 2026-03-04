@@ -197,6 +197,11 @@ export interface ServiceNowError {
 
 export type ResponseError = AxiosError<ServiceNowError>;
 
+export interface ErrorMessageFormat {
+  error: string;
+  reason: string;
+}
+
 export interface ImportSetApiResponseSuccess {
   import_set: string;
   staging_table: string;

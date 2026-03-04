@@ -20,8 +20,14 @@ export const integrationSchemaV1 = schema.object({
   created_by: schema.string({ minLength: 1 }),
   last_updated_by: schema.maybe(schema.string({ minLength: 1 })),
   last_updated_at: schema.maybe(schema.string()),
-  status: schema.oneOf(
-    Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
+  /**
+   * @deprecated Status is now derived from data streams. This field is kept for backwards
+   * compatibility with existing saved objects and is no longer written by the service.
+   */
+  status: schema.maybe(
+    schema.oneOf(
+      Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
+    )
   ),
   metadata: schema.object(
     {
@@ -40,7 +46,34 @@ export const integrationSchemaV1 = schema.object({
       logo: schema.maybe(schema.string()),
       description: schema.string(),
       created_at: schema.maybe(schema.string()),
-      // allow other fields not explicitly defined here
+    },
+    { unknowns: 'allow' }
+  ),
+});
+
+export const integrationSchemaV2 = schema.object({
+  integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
+  created_by: schema.string({ minLength: 1 }),
+  created_by_profile_uid: schema.maybe(schema.string()),
+  last_updated_by: schema.maybe(schema.string({ minLength: 1 })),
+  last_updated_at: schema.maybe(schema.string()),
+  metadata: schema.object(
+    {
+      title: schema.string(),
+      version: schema.maybe(
+        schema.string({
+          minLength: MIN_VERSION_LENGTH,
+          maxLength: MAX_VERSION_LENGTH,
+          validate(value) {
+            if (!/^\d+\.\d+\.\d+$/.test(value)) {
+              return 'version must be in semantic versioning format (x.y.z)';
+            }
+          },
+        })
+      ),
+      logo: schema.maybe(schema.string()),
+      description: schema.string(),
+      created_at: schema.maybe(schema.string()),
     },
     { unknowns: 'allow' }
   ),

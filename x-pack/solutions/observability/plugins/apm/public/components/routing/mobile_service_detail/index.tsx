@@ -162,11 +162,13 @@ export const mobileServiceDetailRoute = {
             element: <TransactionDetails />,
             params: t.type({
               query: t.intersection([
-                t.type({
-                  transactionName: t.string,
-                  comparisonEnabled: toBooleanRt,
-                  showCriticalPath: toBooleanRt,
-                }),
+                t.intersection([
+                  t.type({
+                    comparisonEnabled: toBooleanRt,
+                    showCriticalPath: toBooleanRt,
+                  }),
+                  t.partial({ transactionName: t.string }),
+                ]),
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,

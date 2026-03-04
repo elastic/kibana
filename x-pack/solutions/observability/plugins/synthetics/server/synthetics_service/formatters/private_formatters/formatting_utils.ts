@@ -56,11 +56,6 @@ export const tlsArrayToYamlFormatter: FormatterFn = (fields, key) => {
 };
 
 export const stringToJsonFormatter: FormatterFn = (fields, key) => {
-  if (key === ConfigKey.SOURCE_INLINE) {
-    const value = inlineSourceFormatter(fields, key);
-
-    return value ? JSON.stringify(value) : null;
-  }
   const value = (fields[key] as string) ?? '';
   return value ? JSON.stringify(value) : null;
 };

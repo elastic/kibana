@@ -52,12 +52,14 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
     page = 0,
     perPage = 10,
     statusFilters,
+    kqlQuery,
   }: {
     serviceName: string;
     environment?: string;
     page?: number;
     perPage?: number;
     statusFilters?: string[];
+    kqlQuery?: string;
   }) {
     return apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/slos',
@@ -68,6 +70,7 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
           page,
           perPage,
           ...(statusFilters && { statusFilters: JSON.stringify(statusFilters) }),
+          ...(kqlQuery && { kqlQuery }),
         },
       },
     });
@@ -113,6 +116,16 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       const response = await getServiceSlos({
         serviceName,
         statusFilters: ['VIOLATED', 'DEGRADING'],
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.results).to.eql([]);
+    });
+
+    it('accepts kqlQuery parameter', async () => {
+      const response = await getServiceSlos({
+        serviceName,
+        kqlQuery: 'slo.name : "non-existent"',
       });
 
       expect(response.status).to.be(200);
@@ -192,6 +205,46 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       expect(foundStagingSlo).to.be(undefined);
 
       await sloApi.delete(prodSlo.id, adminRoleAuthc);
+      await sloApi.delete(stagingSlo.id, adminRoleAuthc);
+    });
+
+    it('includes SLOs created with wildcard (*) environment when filtering by a specific environment', async () => {
+      const prodSlo = await sloApi.create(
+        createApmSloInput('Prod SLO', serviceName, 'production'),
+        adminRoleAuthc
+      );
+      const wildcardSlo = await sloApi.create(
+        createApmSloInput('All Envs SLO', serviceName, '*'),
+        adminRoleAuthc
+      );
+      const stagingSlo = await sloApi.create(
+        createApmSloInput('Staging SLO', serviceName, 'staging'),
+        adminRoleAuthc
+      );
+
+      const prodResponse = await getServiceSlos({ serviceName, environment: 'production' });
+
+      expect(prodResponse.status).to.be(200);
+      expect(prodResponse.body.results.length).to.be(2);
+      expect(prodResponse.body.total).to.be(2);
+
+      const foundProdSlo = prodResponse.body.results.find(
+        (slo: { id: string }) => slo.id === prodSlo.id
+      );
+      expect(foundProdSlo).to.be.ok();
+
+      const foundWildcardSlo = prodResponse.body.results.find(
+        (slo: { id: string }) => slo.id === wildcardSlo.id
+      );
+      expect(foundWildcardSlo).to.be.ok();
+
+      const foundStagingSlo = prodResponse.body.results.find(
+        (slo: { id: string }) => slo.id === stagingSlo.id
+      );
+      expect(foundStagingSlo).to.be(undefined);
+
+      await sloApi.delete(prodSlo.id, adminRoleAuthc);
+      await sloApi.delete(wildcardSlo.id, adminRoleAuthc);
       await sloApi.delete(stagingSlo.id, adminRoleAuthc);
     });
 

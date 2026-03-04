@@ -240,7 +240,7 @@
           "(esqlQuery: string) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -256,7 +256,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
@@ -518,7 +518,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"match_any\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "lineNumber": 180,
@@ -554,17 +554,11 @@
         "description": [],
         "signature": [
           "(astExpression: ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.ESQLAstQueryExpression",
-            "text": "ESQLAstQueryExpression"
-          },
+          "ESQLAstQueryExpression",
           ") => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -577,16 +571,10 @@
             "label": "astExpression",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.ESQLAstQueryExpression",
-                "text": "ESQLAstQueryExpression"
-              }
+              "ESQLAstQueryExpression"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-            "lineNumber": 10,
+            "lineNumber": 11,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -710,7 +698,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"match_any\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "lineNumber": 202,
@@ -1015,7 +1003,7 @@
         "label": "validateHasWildcardWithWrongOperator",
         "description": [],
         "signature": [
-          "({ operator, value, }: { operator: \"exists\" | \"wildcard\" | \"match\" | \"nested\" | \"match_any\"; value: string | string[]; }) => boolean"
+          "({ operator, value, }: { operator: \"exists\" | \"match\" | \"nested\" | \"wildcard\" | \"match_any\"; value: string | string[]; }) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "lineNumber": 160,
@@ -1044,7 +1032,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"exists\" | \"wildcard\" | \"match\" | \"nested\" | \"match_any\""
+                  "\"exists\" | \"match\" | \"nested\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "lineNumber": 164,
@@ -1231,13 +1219,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.EditorError",
-                "text": "EditorError"
-              },
+              "EditorError",
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/parse_esql_query.ts",
@@ -1392,7 +1374,7 @@
         "label": "EntryTypes",
         "description": [],
         "signature": [
-          "\"wildcard\" | \"match\" | \"match_any\""
+          "\"match\" | \"wildcard\" | \"match_any\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "lineNumber": 65,
@@ -1464,7 +1446,7 @@
         "label": "TrustedAppEntryTypes",
         "description": [],
         "signature": [
-          "\"wildcard\" | \"match\""
+          "\"match\" | \"wildcard\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "lineNumber": 66,

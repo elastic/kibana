@@ -7,6 +7,7 @@
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiButton } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
@@ -25,6 +26,8 @@ import type { ScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
+import { DiscardChangesModal } from './discard_changes_modal';
+import { NoDataEmptyPrompt } from './no_data_empty_prompt';
 
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
@@ -44,11 +47,14 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     show: showFromUrl,
   } = useScriptsLibraryUrlParams();
 
-  const shouldShowFlyoutForm = useMemo(() => {
-    return showFromUrl === 'create' || showFromUrl === 'edit' || showFromUrl === 'details';
-  }, [showFromUrl]);
+  const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
-  const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+  const shouldShowFlyoutForm = useMemo(() => {
+    return (
+      (canWriteScriptsLibrary && (showFromUrl === 'create' || showFromUrl === 'edit')) ||
+      showFromUrl === 'details'
+    );
+  }, [canWriteScriptsLibrary, showFromUrl]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -56,6 +62,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   const [selectedItemForDelete, setSelectedItemForDelete] = useState<undefined | EndpointScript>(
     undefined
   );
+  const [showDiscardChangesModal, setShowDiscardChangesModal] = useState(false);
 
   const safePaging = useMemo(
     () => ({
@@ -91,6 +98,11 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     enabled: canReadScriptsLibrary,
     retry: false,
   });
+
+  const doesDataExist = useMemo(
+    () => isFetched && scriptsData?.total !== undefined && scriptsData.total > 0,
+    [isFetched, scriptsData?.total]
+  );
 
   // update query state from URL params on page re-load or URL changes
   useEffect(() => {
@@ -162,7 +174,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     [history, queryParams]
   );
 
-  const onCloseFlyout = useCallback(() => {
+  const onConfirmCloseFlyout = useCallback(() => {
     setSelectedItemForFlyout(undefined);
     history.push(
       getScriptsLibraryPath({
@@ -175,21 +187,32 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     );
   }, [history, queryParams]);
 
+  const onCloseFlyout = useCallback(
+    (hasFormChanged: boolean) => {
+      if (!hasFormChanged) {
+        onConfirmCloseFlyout();
+      } else {
+        setShowDiscardChangesModal(true);
+      }
+    },
+    [onConfirmCloseFlyout]
+  );
+
   const onDeleteModalSuccess = useCallback(() => {
-    onCloseFlyout();
+    onConfirmCloseFlyout();
     setSelectedItemForDelete(undefined);
     reFetchEndpointScriptsList();
-  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+  }, [onConfirmCloseFlyout, reFetchEndpointScriptsList]);
 
   const onDeleteModalCancel = useCallback(() => {
     setSelectedItemForDelete(undefined);
   }, []);
 
   const onSuccessCreateOrEdit = useCallback(() => {
-    onCloseFlyout();
+    onConfirmCloseFlyout();
     setSelectedItemForFlyout(undefined);
     reFetchEndpointScriptsList();
-  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+  }, [onConfirmCloseFlyout, reFetchEndpointScriptsList]);
 
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
@@ -206,7 +229,19 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
       data-test-subj={getTestId()}
       title={pageLabels.pageTitle}
       subtitle={pageLabels.pageAboutInfo}
-      hideHeader={false}
+      hideHeader={!doesDataExist}
+      actions={
+        canWriteScriptsLibrary ? (
+          <EuiButton
+            fill
+            iconType="upload"
+            onClick={() => onClickAction({ show: 'create' })}
+            data-test-subj={getTestId('upload-script-button')}
+          >
+            {pageLabels.pageAddButtonTitle}
+          </EuiButton>
+        ) : null
+      }
     >
       {shouldShowFlyoutForm && (
         <EndpointScriptFlyout
@@ -220,6 +255,20 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
         />
       )}
 
+      {showDiscardChangesModal && (
+        <DiscardChangesModal
+          data-test-subj={getTestId('discard-changes-modal')}
+          show={
+            showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete' | 'details'>
+          }
+          onCancel={() => setShowDiscardChangesModal(false)}
+          onConfirm={() => {
+            setShowDiscardChangesModal(false);
+            onConfirmCloseFlyout();
+          }}
+        />
+      )}
+
       {selectedItemForDelete && (
         <EndpointScriptDeleteModal
           scriptName={selectedItemForDelete.name}
@@ -229,7 +278,8 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
           data-test-subj={getTestId('delete-modal')}
         />
       )}
-      {isFetched && (
+
+      {doesDataExist ? (
         <ScriptsLibraryTable
           data-test-subj={getTestId('table')}
           items={tableItems}
@@ -242,6 +292,13 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
             field: scriptsData?.sortField as SortableScriptLibraryFields,
             direction: scriptsData?.sortDirection,
           }}
+        />
+      ) : (
+        <NoDataEmptyPrompt
+          onClick={() => onClickAction({ show: 'create' })}
+          canCreateScript={canWriteScriptsLibrary}
+          data-test-subj={getTestId('no-data-empty-prompt')}
+          isAddDisabled={isFetching}
         />
       )}
     </AdministrationListPage>
