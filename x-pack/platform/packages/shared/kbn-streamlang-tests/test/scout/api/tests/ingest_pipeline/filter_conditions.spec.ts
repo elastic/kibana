@@ -55,70 +55,71 @@ apiTest.describe(
       expect(ingestResult[3].attributes?.has_status_200).toBeUndefined();
     });
 
-    apiTest.describe('Special character escaping in Painless conditions', () => {
-      apiTest('should handle backslashes in eq condition', async ({ testBed }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'matched',
-              value: 'yes',
-              where: {
-                field: 'path',
-                eq: 'C:\\Program Files\\App',
-              },
-            } as SetProcessor,
-          ],
-        };
+    apiTest('special chars: should handle backslashes in eq condition', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'matched',
+            value: 'yes',
+            where: {
+              field: 'path',
+              eq: 'C:\\Program Files\\App',
+            },
+          } as SetProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [
-          { path: 'C:\\Program Files\\App' },
-          { path: 'C:/Program Files/App' },
-          { path: '/usr/local/app' },
-        ];
+      const docs = [
+        { path: 'C:\\Program Files\\App' },
+        { path: 'C:/Program Files/App' },
+        { path: '/usr/local/app' },
+      ];
 
-        await testBed.ingest('ingest-backslash-eq', docs, processors);
-        const result = await testBed.getDocsOrdered('ingest-backslash-eq');
+      await testBed.ingest('ingest-backslash-eq', docs, processors);
+      const result = await testBed.getDocsOrdered('ingest-backslash-eq');
 
-        expect(result[0].matched).toBe('yes');
-        expect(result[1].matched).toBeUndefined();
-        expect(result[2].matched).toBeUndefined();
-      });
+      expect(result[0].matched).toBe('yes');
+      expect(result[1].matched).toBeUndefined();
+      expect(result[2].matched).toBeUndefined();
+    });
 
-      apiTest('should handle double quotes in eq condition', async ({ testBed }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'matched',
-              value: 'yes',
-              where: {
-                field: 'message',
-                eq: 'He said "hello"',
-              },
-            } as SetProcessor,
-          ],
-        };
+    apiTest('special chars: should handle double quotes in eq condition', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'matched',
+            value: 'yes',
+            where: {
+              field: 'message',
+              eq: 'He said "hello"',
+            },
+          } as SetProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [
-          { message: 'He said "hello"' },
-          { message: 'He said hello' },
-          { message: "He said 'hello'" },
-        ];
+      const docs = [
+        { message: 'He said "hello"' },
+        { message: 'He said hello' },
+        { message: "He said 'hello'" },
+      ];
 
-        await testBed.ingest('ingest-quotes-eq', docs, processors);
-        const result = await testBed.getDocsOrdered('ingest-quotes-eq');
+      await testBed.ingest('ingest-quotes-eq', docs, processors);
+      const result = await testBed.getDocsOrdered('ingest-quotes-eq');
 
-        expect(result[0].matched).toBe('yes');
-        expect(result[1].matched).toBeUndefined();
-        expect(result[2].matched).toBeUndefined();
-      });
+      expect(result[0].matched).toBe('yes');
+      expect(result[1].matched).toBeUndefined();
+      expect(result[2].matched).toBeUndefined();
+    });
 
-      apiTest('should handle mixed special characters in eq condition', async ({ testBed }) => {
+    apiTest(
+      'special chars: should handle mixed special characters in eq condition',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -147,9 +148,12 @@ apiTest.describe(
         expect(result[0].matched).toBe('yes');
         expect(result[1].matched).toBeUndefined();
         expect(result[2].matched).toBeUndefined();
-      });
+      }
+    );
 
-      apiTest('should handle backslashes in contains condition', async ({ testBed }) => {
+    apiTest(
+      'special chars: should handle backslashes in contains condition',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -178,9 +182,12 @@ apiTest.describe(
         expect(result[0].matched).toBe('yes');
         expect(result[1].matched).toBe('yes');
         expect(result[2].matched).toBeUndefined();
-      });
+      }
+    );
 
-      apiTest('should handle backslashes in startsWith condition', async ({ testBed }) => {
+    apiTest(
+      'special chars: should handle backslashes in startsWith condition',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -209,9 +216,12 @@ apiTest.describe(
         expect(result[0].matched).toBe('yes');
         expect(result[1].matched).toBe('yes');
         expect(result[2].matched).toBeUndefined();
-      });
+      }
+    );
 
-      apiTest('should handle backslashes in endsWith condition', async ({ testBed }) => {
+    apiTest(
+      'special chars: should handle backslashes in endsWith condition',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -240,7 +250,7 @@ apiTest.describe(
         expect(result[0].matched).toBe('yes');
         expect(result[1].matched).toBe('yes');
         expect(result[2].matched).toBeUndefined();
-      });
-    });
+      }
+    );
   }
 );
