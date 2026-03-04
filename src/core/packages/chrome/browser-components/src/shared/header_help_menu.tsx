@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type { ChromeApplicationContext } from '../context';
 import type {
   ChromeHelpExtension,
   ChromeGlobalHelpExtensionMenuLink,
@@ -68,7 +68,7 @@ const buildDefaultContentLinks = ({
 ];
 
 interface Props {
-  navigateToUrl: InternalApplicationStart['navigateToUrl'];
+  navigateToUrl: ChromeApplicationContext['navigateToUrl'];
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;

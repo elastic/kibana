@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSX, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -21,6 +21,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
@@ -28,72 +29,10 @@ export type InternalChromeSetup = ChromeSetup;
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
-   * Used only by the rendering service to render the header UI
-   * @internal
-   *
-   * @remarks
-   * Header that is used with the "classic" navigation.
-   * It includes the header and the overlay classic navigation.
-   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getClassicHeaderComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the header UI
-   * @internal
-   *
-   * @remarks
-   * Header that is used with the "project" navigation (solution and serverless)
-   * It includes the header.
-   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getProjectHeaderComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the project side navigation UI
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getProjectSideNavComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the header banner UI
-   * @internal
-   *
-   * @remarks
-   * Can be used by layout service to render a banner separate from the header.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getHeaderBanner(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the chromeless header UI
-   * @internal
-   *
-   * @remarks
-   * Includes global loading indicator for chromeless state.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getChromelessHeader(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the project app menu UI
-   * @internal
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getProjectAppMenuComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the sidebar UI
+   * Deps bag passed to `createChromeComponents` by the layout service.
    * @internal
    */
-  getSidebarComponent(): JSX.Element;
+  componentDeps: ChromeComponentsDeps;
 
   /**
    * Used only by the rendering service to render the global footer UI (devbar)

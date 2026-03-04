@@ -17,6 +17,16 @@ jest.mock('@kbn/react-kibana-context-render', () => ({
     <div data-test-subj="kibana-render-context">{children}</div>
   )),
 }));
+jest.mock('@kbn/core-chrome-browser-components', () => ({
+  ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  ClassicHeader: () => <div>Hello chrome!</div>,
+  ProjectHeader: () => <div>Project chrome!</div>,
+  GridLayoutProjectSideNav: () => <div>Side nav!</div>,
+  HeaderTopBanner: () => <div>Banner!</div>,
+  ChromelessHeader: () => <div>Chromeless!</div>,
+  AppMenuBar: () => <div>App menu!</div>,
+  Sidebar: () => <div>Sidebar!</div>,
+}));
 jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
   return {
@@ -58,7 +68,6 @@ describe('RenderingService', () => {
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
     chrome = chromeServiceMock.createStartContract();
-    chrome.getClassicHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
