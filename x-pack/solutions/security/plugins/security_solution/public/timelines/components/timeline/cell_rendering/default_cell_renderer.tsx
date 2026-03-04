@@ -45,10 +45,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
-  const mergedData = useMemo(
-    () => mergeTimelineDataWithEcs(data, ecsData),
-    [data, ecsData]
-  );
+  const mergedData = useMemo(() => mergeTimelineDataWithEcs(data, ecsData), [data, ecsData]);
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';

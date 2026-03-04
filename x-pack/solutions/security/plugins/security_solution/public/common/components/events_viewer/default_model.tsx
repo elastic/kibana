@@ -21,9 +21,7 @@ export const eventsDefaultModel: SubsetDataTableModel = {
  * Returns the default model (including columns) for the given table id.
  * Hosts Events table uses columns that include all Host entity identifier fields.
  */
-export const getEventsDefaultModelForTable = (
-  tableId: TableId
-): SubsetDataTableModel => {
+export const getEventsDefaultModelForTable = (tableId: TableId): SubsetDataTableModel => {
   const columns =
     tableId === TableId.hostsPageEvents ? hostEventsDefaultHeaders : defaultEventHeaders;
   return {

@@ -9,8 +9,8 @@ export { getEuidFromObject } from './memory';
 export { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
 export { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } from './dsl';
 export {
-    buildEntityFiltersFromEntityIdentifiers,
-    buildGenericEntityFlyoutPreviewQuery,
+  buildEntityFiltersFromEntityIdentifiers,
+  buildGenericEntityFlyoutPreviewQuery,
 } from './entity_filters';
 export {
   getEuidEsqlDocumentsContainsIdFilter,

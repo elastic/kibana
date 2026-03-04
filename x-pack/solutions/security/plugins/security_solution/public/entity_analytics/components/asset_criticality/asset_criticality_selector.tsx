@@ -194,11 +194,12 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
   const criticalityFromStoreState: State | null = useMemo(() => {
     if (!entityRecord || !onSaveViaEntityStore) return null;
     return {
-      status: criticalityFromEntityStore && criticalityFromEntityStore !== 'unassigned' ? 'update' : 'create',
+      status:
+        criticalityFromEntityStore && criticalityFromEntityStore !== 'unassigned'
+          ? 'update'
+          : 'create',
       query: {
-        data: criticalityFromEntityStore
-          ? { criticality_level: criticalityFromEntityStore }
-          : null,
+        data: criticalityFromEntityStore ? { criticality_level: criticalityFromEntityStore } : null,
         isLoading: false,
         isError: false,
         error: null,

@@ -66,7 +66,11 @@ function getEntityNameFromRecord(record: EntityStoreRecord, entityType: EntityTy
  * Build a minimal RiskStats from entity store risk fields (for flyout display).
  */
 function buildMinimalRiskStats(
-  risk: { calculated_level?: string; calculated_score?: number; calculated_score_norm?: number } | null,
+  risk: {
+    calculated_level?: string;
+    calculated_score?: number;
+    calculated_score_norm?: number;
+  } | null,
   timestamp: string,
   idField: string,
   idValue: string
@@ -103,11 +107,7 @@ export function buildRiskScoreStateFromEntityRecord<T extends EntityType>(
   const name = getEntityNameFromRecord(record, entityType);
   const riskFromRecord = getRiskFromRecord(record);
   const idField =
-    entityType === 'host'
-      ? 'host.name'
-      : entityType === 'user'
-        ? 'user.name'
-        : 'service.name';
+    entityType === 'host' ? 'host.name' : entityType === 'user' ? 'user.name' : 'service.name';
   const riskStats = buildMinimalRiskStats(riskFromRecord, timestamp, idField, name);
 
   const dataItem = {

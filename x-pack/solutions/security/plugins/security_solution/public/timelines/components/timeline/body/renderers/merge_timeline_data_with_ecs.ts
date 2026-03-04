@@ -12,10 +12,7 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
  * Recursively flattens a nested object into TimelineNonEcsData format.
  * Handles ECS structure where values can be arrays (e.g. host.name: ['value']).
  */
-function flattenToTimelineNonEcsData(
-  obj: unknown,
-  prefix = ''
-): TimelineNonEcsData[] {
+function flattenToTimelineNonEcsData(obj: unknown, prefix = ''): TimelineNonEcsData[] {
   const result: TimelineNonEcsData[] = [];
 
   if (obj == null) {
@@ -23,7 +20,9 @@ function flattenToTimelineNonEcsData(
   }
 
   if (Array.isArray(obj)) {
-    const values = obj.filter((v): v is string | number => typeof v === 'string' || typeof v === 'number');
+    const values = obj.filter(
+      (v): v is string | number => typeof v === 'string' || typeof v === 'number'
+    );
     if (values.length > 0 && prefix) {
       result.push({ field: prefix, value: values.map(String) });
     }
@@ -40,7 +39,9 @@ function flattenToTimelineNonEcsData(
       if (value != null && typeof value === 'object' && !Array.isArray(value)) {
         result.push(...flattenToTimelineNonEcsData(value, fieldName));
       } else if (Array.isArray(value)) {
-        const values = value.filter((v): v is string | number => typeof v === 'string' || typeof v === 'number');
+        const values = value.filter(
+          (v): v is string | number => typeof v === 'string' || typeof v === 'number'
+        );
         if (values.length > 0) {
           result.push({ field: fieldName, value: values.map(String) });
         }

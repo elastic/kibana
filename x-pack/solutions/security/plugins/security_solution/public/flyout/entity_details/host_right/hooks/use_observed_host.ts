@@ -59,10 +59,7 @@ export const useObservedHost = (
   });
 
   const hostName = useMemo(
-    () =>
-      entityIdentifiers['host.name'] ||
-      Object.values(entityIdentifiers)[0] ||
-      '',
+    () => entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0] || '',
     [entityIdentifiers]
   );
 

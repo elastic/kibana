@@ -20,7 +20,7 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { euid } from '../../../../../../entity_store/common';
+import { euid } from '@kbn/entity-store/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';

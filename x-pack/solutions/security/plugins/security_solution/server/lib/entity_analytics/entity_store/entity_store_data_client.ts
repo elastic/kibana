@@ -1036,7 +1036,9 @@ export class EntityStoreDataClient {
     });
 
     const agg = response.aggregations?.severity as
-      | { buckets?: Array<{ key: string; doc_count?: number; unique_entries?: { value?: number } }> }
+      | {
+          buckets?: Array<{ key: string; doc_count?: number; unique_entries?: { value?: number } }>;
+        }
       | undefined;
     const buckets = agg?.buckets ?? [];
     const severityCount: Record<string, number> = {

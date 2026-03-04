@@ -40,7 +40,10 @@ export const getEntityType = (record: Entity): EntityType => {
   }
 
   const normalized =
-    ENTITY_TYPE_DISPLAY_TO_ENUM[rawType] ?? (Object.values(EntityType).includes(rawType as EntityType) ? (rawType as EntityType) : undefined);
+    ENTITY_TYPE_DISPLAY_TO_ENUM[rawType] ??
+    (Object.values(EntityType).includes(rawType as EntityType)
+      ? (rawType as EntityType)
+      : undefined);
   if (normalized === undefined) {
     throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
   }

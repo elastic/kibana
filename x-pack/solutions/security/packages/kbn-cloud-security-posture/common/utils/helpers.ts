@@ -5,11 +5,9 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import {
-  buildGenericEntityFlyoutPreviewQuery,
-} from '../../../../plugins/entity_store/common/domain/euid/entity_filters';
-
 import { i18n } from '@kbn/i18n';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common/domain/euid/entity_filters';
+
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 import { GENERIC_ENTITY_INDEX_ENRICH_POLICY, ENTITIES_LATEST_INDEX } from '../constants';
 

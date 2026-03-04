@@ -59,10 +59,7 @@ export const useObservedUser = (
   });
 
   const userName = useMemo(
-    () =>
-      entityIdentifiers['user.name'] ||
-      Object.values(entityIdentifiers)[0] ||
-      '',
+    () => entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
     [entityIdentifiers]
   );
 
