@@ -14,7 +14,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
   description:
     'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
-  interval: '1h',
+  interval: '1d',
   initialState: {},
   run: async ({ esClient, logger, status }) => {
     const namespace = status.metadata.namespace;
