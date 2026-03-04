@@ -18,11 +18,13 @@ export const aggregateQueryToAst = ({
   timeField,
   titleForInspector,
   descriptionForInspector,
+  maxDataPoints,
 }: {
   query: AggregateQuery;
   timeField?: string;
   titleForInspector?: string;
   descriptionForInspector?: string;
+  maxDataPoints?: number;
 }): undefined | ExpressionAstFunction => {
   return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
     query: query.esql,
@@ -30,5 +32,6 @@ export const aggregateQueryToAst = ({
     locale: i18n.getLocale(),
     titleForInspector,
     descriptionForInspector,
+    maxDataPoints,
   }).toAst();
 };

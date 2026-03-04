@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { useResizeObserver } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { LensInternalApi } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import { ExpressionWrapper } from '../expression_wrapper';
@@ -14,6 +15,8 @@ import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
 import { addLog } from '../logger';
+
+const WIDTH_CHANGE_THRESHOLD = 100;
 
 export function LensEmbeddableComponent({
   internalApi,
@@ -60,6 +63,20 @@ export function LensEmbeddableComponent({
   // take care of dispatching the event from the DOM node
   const rootRef = useDispatcher(hasRendered, api);
 
+  const [resizeElement, setResizeElement] = useState<HTMLDivElement | null>(null);
+  const { width: containerWidth } = useResizeObserver(resizeElement, 'width');
+  const lastReportedWidth = useRef<number>(0);
+
+  useEffect(() => {
+    if (
+      containerWidth > 0 &&
+      Math.abs(containerWidth - lastReportedWidth.current) > WIDTH_CHANGE_THRESHOLD
+    ) {
+      lastReportedWidth.current = containerWidth;
+      internalApi.updateContainerWidth(containerWidth);
+    }
+  }, [containerWidth, internalApi]);
+
   // Publish the data attributes only if avaialble/visible
   const title = useMemo(
     () =>
@@ -82,7 +99,10 @@ export function LensEmbeddableComponent({
       {...title}
       {...description}
       data-shared-item
-      ref={rootRef}
+      ref={(node) => {
+        rootRef.current = node;
+        setResizeElement(node);
+      }}
     >
       {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper {...expressionParams} paddingTop={hideTitle || !panelTitle?.length} />

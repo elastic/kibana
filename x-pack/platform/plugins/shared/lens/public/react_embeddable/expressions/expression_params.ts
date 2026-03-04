@@ -9,6 +9,7 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { Ast } from '@kbn/interpreter';
 import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -58,6 +59,28 @@ interface GetExpressionRendererPropsParams {
   updateBlockingErrors: (error: Error) => void;
   forceDSL?: boolean;
   getDisplayOptions: () => VisualizationDisplayOptions;
+  maxDataPoints?: number;
+}
+
+function injectMaxDataPoints(ast: Ast, maxDataPoints: number): Ast {
+  if (!ast.chain) {
+    return ast;
+  }
+  return {
+    ...ast,
+    chain: ast.chain.map((fn) => {
+      if (fn.function === 'esql') {
+        return {
+          ...fn,
+          arguments: {
+            ...fn.arguments,
+            maxDataPoints: [maxDataPoints],
+          },
+        };
+      }
+      return fn;
+    }),
+  };
 }
 
 async function getExpressionFromDocument(
@@ -66,12 +89,16 @@ async function getExpressionFromDocument(
     doc: LensDocument,
     forceDSL?: boolean
   ) => Promise<DocumentToExpressionReturnType>,
-  forceDSL?: boolean
+  forceDSL?: boolean,
+  maxDataPoints?: number
 ) {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState, activeDatasourceState } =
     await documentToExpression(document, forceDSL);
+
+  const finalAst = ast && maxDataPoints ? injectMaxDataPoints(ast, maxDataPoints) : ast;
+
   return {
-    expression: ast ? toExpression(ast) : null,
+    expression: finalAst ? toExpression(finalAst) : null,
     indexPatterns,
     indexPatternRefs,
     activeVisualizationState,
@@ -161,6 +188,7 @@ export async function getExpressionRendererParams(
     searchContext,
     forceDSL,
     getDisplayOptions,
+    maxDataPoints,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -178,7 +206,12 @@ export async function getExpressionRendererParams(
     indexPatternRefs,
     activeVisualizationState,
     activeDatasourceState,
-  } = await getExpressionFromDocument(state.attributes, documentToExpression, forceDSL);
+  } = await getExpressionFromDocument(
+    state.attributes,
+    documentToExpression,
+    forceDSL,
+    maxDataPoints
+  );
 
   // Apparently this change produces had lots of issues with solutions not using
   // the Embeddable incorrectly. Will comment for now and later on will restore it when

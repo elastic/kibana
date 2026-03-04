@@ -67,6 +67,7 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  applyDownsampling,
   type ESQLStatsQueryMeta,
 } from './src';
 

@@ -28,11 +28,15 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
+  firstValueFrom,
   map,
   merge,
+  of,
   pipe,
   skip,
   tap,
+  timeout,
   type Subscription,
 } from 'rxjs';
 import { getEditPath } from '../../common/constants';
@@ -227,6 +231,24 @@ export function loadEmbeddableData(
       services
     );
 
+    // Wait for the actual panel width from the ResizeObserver.
+    // On first load the component hasn't mounted yet, so containerWidth$ is 0.
+    // Awaiting here yields to the event loop, letting React render the outer div
+    // and the ResizeObserver to fire. Falls back to window.innerWidth after 500ms
+    // (e.g. panel in a collapsed section that never mounts).
+    let containerWidth = internalApi.containerWidth$.getValue();
+    if (containerWidth === 0) {
+      containerWidth = await firstValueFrom(
+        internalApi.containerWidth$.pipe(
+          filter((w) => w > 0),
+          timeout({
+            first: 500,
+            with: () => of(typeof window !== 'undefined' ? window.innerWidth : 0),
+          })
+        )
+      );
+    }
+
     // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
@@ -251,6 +273,7 @@ export function loadEmbeddableData(
         updateBlockingErrors,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
+        maxDataPoints: containerWidth > 0 ? containerWidth : undefined,
       }),
       getUsedDataViews(
         currentState.attributes.references,

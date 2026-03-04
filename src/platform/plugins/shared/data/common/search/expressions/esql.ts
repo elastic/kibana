@@ -28,6 +28,7 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
+  applyDownsampling,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -69,6 +70,7 @@ interface Arguments {
   titleForInspector?: string;
   descriptionForInspector?: string;
   ignoreGlobalFilters?: boolean;
+  maxDataPoints?: number;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -148,6 +150,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'Whether to ignore or use global query and filters',
         }),
       },
+      maxDataPoints: {
+        types: ['number'],
+        help: i18n.translate('data.search.esql.maxDataPoints.help', {
+          defaultMessage:
+            'Maximum number of data points the UI can display. Used for automatic downsampling.',
+        }),
+      },
     },
     allowCache: {
       withSideEffects: (_, { inspectorAdapters }) => {
@@ -156,7 +165,15 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     fn(
       input,
-      { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
+      {
+        query,
+        timeField,
+        locale,
+        titleForInspector,
+        descriptionForInspector,
+        ignoreGlobalFilters,
+        maxDataPoints,
+      },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
@@ -176,7 +193,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           // this is for backward compatibility, if the query is of fields or functions type
           // and the query is not set with ?? in the query, we should set it
           // https://github.com/elastic/elasticsearch/pull/122459
-          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
+          const variableFixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
+          const fixedQuery = maxDataPoints
+            ? applyDownsampling(variableFixedQuery, maxDataPoints)
+            : variableFixedQuery;
           const esQueryConfigs = getEsQueryConfig(
             uiSettings as Parameters<typeof getEsQueryConfig>[0]
           );
