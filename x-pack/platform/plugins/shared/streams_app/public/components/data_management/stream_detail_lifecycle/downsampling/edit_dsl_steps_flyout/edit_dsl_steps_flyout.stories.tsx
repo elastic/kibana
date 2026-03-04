@@ -52,7 +52,7 @@ export const Default: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next: IngestStreamLifecycleDSL) => {
+              onChange={(next: IngestStreamLifecycleDSL, _meta) => {
                 action('onChange')(next);
               }}
               onSave={(next: IngestStreamLifecycleDSL) => {
@@ -89,7 +89,7 @@ export const PreserveMsUnits: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next: IngestStreamLifecycleDSL) => {
+              onChange={(next: IngestStreamLifecycleDSL, _meta) => {
                 action('onChange')(next);
               }}
               onSave={(next: IngestStreamLifecycleDSL) => {
@@ -163,7 +163,7 @@ export const StepSyncing: Story = {
                   action('onClose')();
                   setIsOpen(false);
                 }}
-                onChange={(next: IngestStreamLifecycleDSL) => {
+                onChange={(next: IngestStreamLifecycleDSL, _meta) => {
                   action('onChange')(next);
                   setSteps(next);
                 }}
