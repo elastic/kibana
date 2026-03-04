@@ -26,11 +26,11 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
+import { createChromeComponents } from '@kbn/core-chrome-browser-components';
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
-import { createChromeComponents } from './ui/chrome_components';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
@@ -195,7 +195,6 @@ export class ChromeService {
       application,
       basePath: http.basePath,
       docLinks,
-      state,
       navControls: {
         left$: navControls.getLeft$(),
         center$: navControls.getCenter$(),
@@ -215,6 +214,20 @@ export class ChromeService {
       customBranding$: customBranding.customBranding$,
       appMenuActions$: application.currentActionMenu$,
       prependBasePath: http.basePath.prepend,
+
+      // State observables
+      badge$: state.badge.$,
+      breadcrumbs$: state.breadcrumbs.classic.$,
+      breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
+      customNavLink$: state.customNavLink.$,
+      globalHelpExtensionMenuLinks$: state.help.globalMenuLinks.$,
+      helpExtension$: state.help.extension.$,
+      helpSupportUrl$: state.help.supportUrl.$,
+      appMenu$: state.appMenu.$,
+      headerBanner$: state.headerBanner.$,
+      sideNavCollapsed$: state.sideNav.collapsed.$,
+      initialSideNavCollapsed: state.sideNav.collapsed.get(),
+      onToggleSideNavCollapsed: state.sideNav.collapsed.set,
     });
 
     // 8. Return chrome API

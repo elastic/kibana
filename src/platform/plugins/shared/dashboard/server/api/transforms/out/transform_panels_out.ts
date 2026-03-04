@@ -66,7 +66,7 @@ function transformPanelProperties(
   containerReferences?: SavedObjectReference[]
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
-  const { embeddableConfig, gridData, panelIndex, type, version } = panel;
+  const { embeddableConfig, gridData, panelIndex, type } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
@@ -89,6 +89,5 @@ function transformPanelProperties(
     config: transformedPanelConfig ? transformedPanelConfig : embeddableConfig,
     uid: panelIndex,
     type,
-    ...(version && { version }),
   };
 }
