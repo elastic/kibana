@@ -8,7 +8,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('spaces api with security', function () {
+  describe('spaces api with security (part 2)', function () {
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./delete'));

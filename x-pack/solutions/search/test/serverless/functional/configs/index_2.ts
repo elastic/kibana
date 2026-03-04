@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless search UI', function () {
+  describe('serverless search UI (part 2)', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/dashboards/import_dashboard'));

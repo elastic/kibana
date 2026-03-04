@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('discover/esql (part 2)', function () {
+  describe('discover/esql (part 3)', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./_esql_view_part2'));

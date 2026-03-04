@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Sanity checks', () => {
+  describe('Sanity checks (part 2)', () => {
     loadTestFile(require.resolve('./lens/formula_suite'));
   });
 }

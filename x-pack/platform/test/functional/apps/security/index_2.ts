@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security app', function () {
+  describe('security app (part 2)', function () {
     loadTestFile(require.resolve('./field_level_security'));
     loadTestFile(require.resolve('./user_email'));
     loadTestFile(require.resolve('./role_mappings'));

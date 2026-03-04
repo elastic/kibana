@@ -7,7 +7,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Observability - Deployment-agnostic APM API integration tests', function () {
+  describe('Serverless Observability - Deployment-agnostic APM API integration tests - Group 3', function () {
     this.tags(['esGate']);
 
     describe('APM', function () {

@@ -8,7 +8,7 @@
 import { setupTestUsers } from '../test_users';
 
 export default function loadTests({ loadTestFile, getService }) {
-  describe('Agents', () => {
+  describe('Agents (part 2)', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
     });

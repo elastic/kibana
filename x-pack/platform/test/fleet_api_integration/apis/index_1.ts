@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../api_integration/ftr_provider_cont
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   // total runtime ~ 4m
-  describe('Fleet Endpoints', function () {
+  describe('Fleet Endpoints (part 1)', function () {
     before(async () => {
       await setupTestUsers(getService('security'));
     });

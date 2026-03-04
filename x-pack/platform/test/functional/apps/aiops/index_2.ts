@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  describe('aiops', function () {
+  describe('aiops (part 2)', function () {
     this.tags(['skipFirefox', 'aiops']);
 
     before(async () => {

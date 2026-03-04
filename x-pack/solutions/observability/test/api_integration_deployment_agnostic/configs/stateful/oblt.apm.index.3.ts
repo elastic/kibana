@@ -8,7 +8,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Stateful Observability - Deployment-agnostic APM API integration tests', () => {
+  describe('Stateful Observability - Deployment-agnostic APM API integration tests - Group 3', () => {
     describe('APM', () => {
       loadTestFile(require.resolve('../../apis/apm/service_nodes'));
       loadTestFile(require.resolve('../../apis/apm/service_overview'));

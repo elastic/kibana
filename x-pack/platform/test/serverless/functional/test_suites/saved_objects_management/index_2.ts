@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Saved Objects Management', function () {
+  describe('Saved Objects Management (part 2)', function () {
     this.tags(['skipMKI', 'esGate']);
 
     loadTestFile(require.resolve('./import_warnings'));

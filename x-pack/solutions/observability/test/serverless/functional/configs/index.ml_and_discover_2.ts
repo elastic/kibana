@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless observability UI - ML and Discover (part 2)', function () {
+  describe('serverless observability UI - ML and Discover (part 3)', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/discover/embeddables'));

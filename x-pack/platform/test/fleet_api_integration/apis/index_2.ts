@@ -9,7 +9,7 @@ import { setupTestUsers } from './test_users';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Fleet Endpoints', function () {
+  describe('Fleet Endpoints (part 2)', function () {
     before(async () => {
       await setupTestUsers(getService('security'));
     });

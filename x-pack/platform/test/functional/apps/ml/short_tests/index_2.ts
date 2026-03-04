@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - short tests', function () {
+  describe('machine learning - short tests (part 2)', function () {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();

@@ -10,7 +10,7 @@ import { createUsersAndRoles } from '../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  describe('saved objects tagging - functional tests', function () {
+  describe('saved objects tagging - functional tests (part 2)', function () {
     before(async () => {
       await createUsersAndRoles(getService);
     });

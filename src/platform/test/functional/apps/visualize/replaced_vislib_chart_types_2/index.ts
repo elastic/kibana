@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   // TODO: Remove when vislib is removed
-  describe('visualize app - new charts library visualize', () => {
+  describe('visualize app - new charts library visualize (part 2)', () => {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);

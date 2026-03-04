@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { buildUp, tearDown } from '../../helpers';
 
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Alerting', function () {
+  describe('Alerting - group 6', function () {
     this.tags('skipFIPS');
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));

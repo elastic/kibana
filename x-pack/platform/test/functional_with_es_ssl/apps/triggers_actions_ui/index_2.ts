@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Actions and Triggers app', function () {
+  describe('Actions and Triggers app (part 2)', function () {
     loadTestFile(require.resolve('./stack_alerts_page'));
     loadTestFile(require.resolve('./maintenance_windows'));
     loadTestFile(require.resolve('./email'));

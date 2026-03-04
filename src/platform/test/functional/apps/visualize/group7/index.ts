@@ -15,7 +15,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('visualize app', () => {
+  describe('visualize app - group 7', () => {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);

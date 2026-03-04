@@ -6,7 +6,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Monitoring app', function () {
+  describe('Monitoring app (part 2)', function () {
     loadTestFile(require.resolve('./elasticsearch/shards'));
     // loadTestFile(require.resolve('./elasticsearch/shard_activity'));
 

@@ -9,7 +9,7 @@ import { setupTestUsers } from '../test_users';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  describe('EPM Endpoints', () => {
+  describe('EPM Endpoints (part 1)', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
     });

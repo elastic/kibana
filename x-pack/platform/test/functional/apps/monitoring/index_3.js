@@ -6,7 +6,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Monitoring app', function () {
+  describe('Monitoring app (part 3)', function () {
     loadTestFile(require.resolve('./logstash/node_detail'));
     loadTestFile(require.resolve('./logstash/node_detail_mb'));
     loadTestFile(require.resolve('./beats/cluster'));

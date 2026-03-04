@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('AgentBuilder Endpoints', function () {
+  describe('AgentBuilder Endpoints (part 2)', function () {
     loadTestFile(require.resolve('./tools/index_search_tools.ts'));
     loadTestFile(require.resolve('./agents.ts'));
     loadTestFile(require.resolve('./conversations.ts'));

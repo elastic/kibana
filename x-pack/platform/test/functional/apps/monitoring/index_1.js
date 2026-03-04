@@ -6,7 +6,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Monitoring app', function () {
+  describe('Monitoring app (part 1)', function () {
     loadTestFile(require.resolve('./feature_controls'));
 
     loadTestFile(require.resolve('./cluster/list'));

@@ -14,7 +14,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
 
-  describe('maps app', function () {
+  describe('maps app group5', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {

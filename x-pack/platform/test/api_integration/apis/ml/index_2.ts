@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('Machine Learning', function () {
+  describe('Machine Learning (part 2)', function () {
     this.tags(['ml']);
 
     before(async () => {
