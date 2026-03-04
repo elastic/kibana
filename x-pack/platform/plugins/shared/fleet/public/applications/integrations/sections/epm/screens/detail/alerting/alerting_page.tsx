@@ -85,18 +85,13 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
   // Detect missing inactivity monitoring template
   const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
   const hasDataStreams = (packageInfo.data_streams?.length ?? 0) > 0;
-  const isIntegrationPackage = packageInfo.type === 'integration';
   const inactivityTemplateId = getInactivityMonitoringTemplateId(name);
   const hasInactivityTemplate = useMemo(
     () => alertingAssets.some((asset) => asset.id === inactivityTemplateId),
     [alertingAssets, inactivityTemplateId]
   );
   const showInactivityCallout =
-    enableIntegrationInactivityAlerting &&
-    isIntegrationPackage &&
-    hasDataStreams &&
-    !hasInactivityTemplate &&
-    !isLoading;
+    enableIntegrationInactivityAlerting && hasDataStreams && !hasInactivityTemplate && !isLoading;
 
   const handleReinstallAlertingAssets = useCallback(async () => {
     setIsReinstalling(true);
@@ -129,10 +124,7 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
   }, [notifications.toasts, name, version, forceRefreshAssets]);
 
   // Redirect to overview if not installed or not an integration package
-  if (
-    packageInstallStatus.status !== InstallStatus.installed ||
-    packageInfo.type !== 'integration'
-  ) {
+  if (packageInstallStatus.status !== InstallStatus.installed) {
     return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
 

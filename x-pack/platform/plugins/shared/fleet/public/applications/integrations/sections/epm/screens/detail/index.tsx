@@ -705,7 +705,7 @@ export function Detail() {
       });
     }
 
-    if (isInstalled && packageInfo.type === 'integration') {
+    if (isInstalled) {
       tabs.push({
         id: 'alerting',
         name: (
