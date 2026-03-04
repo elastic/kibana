@@ -337,9 +337,11 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
             return rawFailures;
           }
           return (ts: number) => {
+            if (ts < incidentStartMs) {
+              return rawFailures(ts);
+            }
             const elapsed = ts - incidentStartMs;
-            const cycleRelative = ((elapsed % cycleDurationMs) + cycleDurationMs) % cycleDurationMs;
-            return rawFailures(incidentStartMs + cycleRelative);
+            return rawFailures(incidentStartMs + (elapsed % cycleDurationMs));
           };
         })();
 

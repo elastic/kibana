@@ -242,7 +242,7 @@ export function pickOutboundMessage({
   if (!template) {
     return {
       message: `Calling ${targetService} via ${protocol} -- ${httpStatus} in ${latencyMs}ms`,
-      level: 'info',
+      level: isOk ? 'info' : 'error',
     };
   }
 
