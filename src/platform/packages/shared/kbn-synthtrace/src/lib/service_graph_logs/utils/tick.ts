@@ -208,7 +208,16 @@ export function collectServiceDocs({
   if (spikeMultiplier === 0) return [];
 
   const baseRate = entryCfg?.rate ?? 1;
-  const traceCount = Math.max(0, Math.round(baseRate * spikeMultiplier));
+  const exactTraceCount = baseRate * spikeMultiplier;
+  const intPart = Math.floor(exactTraceCount);
+  const fracPart = exactTraceCount - intPart;
+  let traceCount = intPart;
+  if (fracPart > 0) {
+    const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
+    const rng = mulberry32(serviceStableSeed(tickSeed, entryService));
+    if (rng() < fracPart) traceCount += 1;
+  }
+  traceCount = Math.max(0, traceCount);
 
   const docs: Array<Partial<LogDocument>> = [];
   for (let m = 0; m < traceCount; m++) {
