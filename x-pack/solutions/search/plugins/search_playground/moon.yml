@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/license-management-plugin'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod
