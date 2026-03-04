@@ -72,7 +72,6 @@
     "@kbn/utility-types",
     "@kbn/console-plugin",
     "@kbn/actions-plugin",
-    "@kbn/apm-utils",
     "@kbn/alerting-types",
     "@kbn/core-http-common",
     "@kbn/scout",
