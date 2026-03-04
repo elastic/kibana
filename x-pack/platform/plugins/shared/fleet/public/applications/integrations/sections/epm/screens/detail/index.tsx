@@ -76,7 +76,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
-import { AlertingPage } from './alerting';
+import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -136,7 +136,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -289,6 +289,10 @@ export function Detail() {
     packageInfo &&
     hasDocumentation({ packageInfo, integration });
 
+  const showAlertingTab = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(type)
+  );
+
   // Track install status state
   useEffect(() => {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
@@ -423,6 +427,11 @@ export function Detail() {
         hash,
       });
 
+      const agentlessStatus = getAgentlessStatusForPackage(
+        packageInfo ?? undefined,
+        integration ?? undefined
+      );
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
@@ -431,8 +440,8 @@ export function Detail() {
         isFirstTimeAgentUser,
         pkgkey,
         prerelease,
-        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
-        isAgentlessDefault,
+        isAgentlessIntegration: agentlessStatus.isAgentless,
+        isAgentlessDefault: agentlessStatus.isDefaultDeploymentMode,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -467,9 +476,8 @@ export function Detail() {
       isFirstTimeAgentUser,
       pkgkey,
       prerelease,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       packageInfo,
-      isAgentlessDefault,
       returnAppId,
       returnPath,
       services.application,
@@ -701,7 +709,7 @@ export function Detail() {
       });
     }
 
-    if (isInstalled && packageInfo.type === 'integration') {
+    if (isInstalled && showAlertingTab) {
       tabs.push({
         id: 'alerting',
         name: (
@@ -792,6 +800,7 @@ export function Detail() {
     showCustomTab,
     showDocumentationTab,
     numOfDeferredInstallations,
+    showAlertingTab,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (

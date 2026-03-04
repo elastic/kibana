@@ -10,7 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 const CLASSIC_STREAM = 'logs-classic-license-test';
-const WIRED_STREAM = 'logs';
+const WIRED_STREAM = 'logs.otel';
 
 /**
  * Tests that verify enterprise-only features are hidden on the Advanced tab
@@ -64,9 +64,8 @@ test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
     // StreamDescription panel should be hidden
     await expect(page.getByText('Stream description')).toBeHidden();
 
-    // StreamDiscoveryConfiguration features/systems should be hidden
+    // StreamDiscoveryConfiguration features should be hidden
     await expect(page.getByText('Feature identification')).toBeHidden();
-    await expect(page.getByText('System identification')).toBeHidden();
 
     // Verify basic components ARE still visible
     // Index Configuration should be visible for wired streams
@@ -108,9 +107,8 @@ test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
     // StreamDescription panel should be hidden
     await expect(page.getByText('Stream description')).toBeHidden();
 
-    // StreamDiscoveryConfiguration features/systems should be hidden
+    // StreamDiscoveryConfiguration features should be hidden
     await expect(page.getByText('Feature identification')).toBeHidden();
-    await expect(page.getByText('System identification')).toBeHidden();
 
     // Verify basic components ARE still visible
     // Delete stream panel should be visible for classic streams

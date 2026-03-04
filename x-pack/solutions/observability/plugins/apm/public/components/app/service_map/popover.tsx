@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiPopover, EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -237,11 +237,25 @@ export function MapPopover({
         />
       </EuiPopover>
       {diagnosticFlyoutSelection && (
-        <DiagnosticFlyout
-          selection={diagnosticFlyoutSelection}
-          isOpen
-          onClose={() => setDiagnosticFlyoutSelection(null)}
-        />
+        <>
+          <EuiPortal>
+            <div
+              role="presentation"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: Number(euiTheme.levels.header),
+                cursor: 'default',
+              }}
+              onClick={() => setDiagnosticFlyoutSelection(null)}
+            />
+          </EuiPortal>
+          <DiagnosticFlyout
+            selection={diagnosticFlyoutSelection}
+            isOpen
+            onClose={() => setDiagnosticFlyoutSelection(null)}
+          />
+        </>
       )}
     </div>
   );

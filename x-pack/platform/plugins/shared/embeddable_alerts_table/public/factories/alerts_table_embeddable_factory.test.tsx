@@ -46,7 +46,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
     initializeDrilldownsManager: jest.fn(),
     initialState: {
-      timeRange: {
+      time_range: {
         from: '2025-01-01T00:00:00.000Z',
         to: '2025-01-01T01:00:00.000Z',
       },

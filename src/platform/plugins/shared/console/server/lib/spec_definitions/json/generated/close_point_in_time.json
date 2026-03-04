@@ -13,6 +13,7 @@
       "_pit"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-open-point-in-time",
     "availability": {
       "stack": true,
       "serverless": true

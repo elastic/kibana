@@ -23,7 +23,7 @@ export const filterSchema = schema.object(
       },
     }),
   },
-  { meta: { id: 'filterSimpleSchema' } }
+  { meta: { id: 'filterSimple', title: 'Simple Filter' } }
 );
 
 export const filterWithLabelSchema = schema.object(
@@ -43,7 +43,7 @@ export const filterWithLabelSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'filterWithLabelSchema' } }
+  { meta: { id: 'filterWithLabel', title: 'Filter with Label' } }
 );
 
 export type LensApiFilterType = typeof filterSchema.type;

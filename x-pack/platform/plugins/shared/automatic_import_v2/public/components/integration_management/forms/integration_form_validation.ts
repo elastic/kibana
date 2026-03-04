@@ -6,6 +6,7 @@
  */
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { normalizeTitleName } from '../../../common/lib/helper_functions';
 import type { IntegrationFormData, IntegrationFields, DataStreamFields } from './types';
 import * as i18n from './translations';
 
@@ -72,6 +73,19 @@ const selectedIndexRequiredValidator = () => ({
   },
 });
 
+const createUniqueDataStreamTitleValidator = (existingDataStreamTitles?: Set<string>) => ({
+  validator: ({ value }: { value: string }) => {
+    const normalizedTitle = normalizeTitleName(value ?? '');
+    if (!existingDataStreamTitles || !normalizedTitle) {
+      return undefined;
+    }
+    if (existingDataStreamTitles.has(normalizedTitle)) {
+      return { message: i18n.DATA_STREAM_TITLE_ALREADY_EXISTS };
+    }
+    return undefined;
+  },
+});
+
 const createIntegrationFieldsSchema = (
   packageNames: Set<string> | undefined,
   currentPackageName?: string
@@ -97,10 +111,22 @@ const createIntegrationFieldsSchema = (
   },
 });
 
-const dataStreamFieldsSchema: FormSchema<DataStreamFields> = {
+const createDataStreamFieldsSchema = (
+  existingDataStreamTitles?: Set<string>
+): FormSchema<DataStreamFields> => ({
   dataStreamTitle: {
     label: 'Data stream title',
-    validations: [{ validator: emptyField(i18n.DATA_STREAM_TITLE_REQUIRED) }],
+    validations: [
+      {
+        validator: ({ value }: { value: string }) => {
+          if (value.trim() === '') {
+            return { message: i18n.DATA_STREAM_TITLE_REQUIRED };
+          }
+          return undefined;
+        },
+      },
+      createUniqueDataStreamTitleValidator(existingDataStreamTitles),
+    ],
   },
   dataStreamDescription: {
     label: 'Data stream description',
@@ -131,18 +157,20 @@ const dataStreamFieldsSchema: FormSchema<DataStreamFields> = {
     label: 'Selected index',
     validations: [selectedIndexRequiredValidator()],
   },
-};
+});
 
 /**
  * Create the form schema for integration management
  *
  * @param packageNames - Set of existing package names for uniqueness validation
  * @param currentIntegrationTitle - For existing integrations, their current title to exclude from uniqueness check
+ * @param existingDataStreamTitles - Set of existing data stream titles for uniqueness validation (case-insensitive)
  * @returns The form schema with appropriate validations
  */
 export const createFormSchema = (
   packageNames?: Set<string>,
-  currentIntegrationTitle?: string
+  currentIntegrationTitle?: string,
+  existingDataStreamTitles?: Set<string>
 ): FormSchema<IntegrationFormData> => {
   const currentPackageName = currentIntegrationTitle
     ? titleToPackageName(currentIntegrationTitle)
@@ -151,6 +179,6 @@ export const createFormSchema = (
   return {
     integrationId: { validations: [] },
     ...createIntegrationFieldsSchema(packageNames, currentPackageName),
-    ...dataStreamFieldsSchema,
+    ...createDataStreamFieldsSchema(existingDataStreamTitles),
   };
 };
