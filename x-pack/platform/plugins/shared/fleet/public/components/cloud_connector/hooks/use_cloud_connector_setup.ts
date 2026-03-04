@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicyConfigRecord } from '../../../../common';
 import {
@@ -263,14 +263,34 @@ export const useCloudConnectorSetup = (
     [newPolicy, updatePolicy, packageInfo]
   );
 
-  const hasAppliedPrefillRef = useRef(false);
-
+  // Idempotent prefill: re-applies prefill values whenever the current policy
+  // diverges from the expected prefill state (e.g., due to other effects
+  // overwriting the policy during initialization).
   useEffect(() => {
-    if (cloudProvider !== 'aws' || !prefill?.isPrefilled || hasAppliedPrefillRef.current) {
+    if (cloudProvider !== 'aws' || !prefill?.isPrefilled) {
       return;
     }
 
-    hasAppliedPrefillRef.current = true;
+    const currentVars = extractRawCredentialVars(newPolicy, packageInfo);
+    if (!currentVars) {
+      return;
+    }
+
+    const currentRoleArn =
+      extractVarValue(currentVars.role_arn) ??
+      extractVarValue(currentVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]);
+    const currentExternalId =
+      extractVarValue(currentVars.external_id) ??
+      extractVarValue(currentVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]);
+
+    const needsUpdate =
+      (prefill.roleArn && currentRoleArn !== prefill.roleArn) ||
+      (prefill.externalId && currentExternalId !== prefill.externalId);
+
+    if (!needsUpdate) {
+      return;
+    }
+
     updatePolicyWithNewCredentials({
       ...newConnectionCredentials,
       roleArn: prefill.roleArn ?? newConnectionCredentials.roleArn,
@@ -279,6 +299,8 @@ export const useCloudConnectorSetup = (
     });
   }, [
     cloudProvider,
+    newPolicy,
+    packageInfo,
     newConnectionCredentials,
     prefill?.externalId,
     prefill?.isPrefilled,

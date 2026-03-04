@@ -206,7 +206,12 @@ export const updateInputVarsWithAwsCredentials = (
         value: inputCredentials.roleArn,
       };
     } else {
+      // Create under both short and long key names so validation finds the
+      // value regardless of which var name the package registers.
       updatedInputVars.role_arn = { value: inputCredentials.roleArn };
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = {
+        value: inputCredentials.roleArn,
+      };
     }
   } else {
     if (updatedInputVars.role_arn) {
@@ -226,7 +231,12 @@ export const updateInputVarsWithAwsCredentials = (
         value: inputCredentials.externalId,
       };
     } else {
+      // Create under both short and long key names so validation finds the
+      // value regardless of which var name the package registers.
       updatedInputVars.external_id = { value: inputCredentials.externalId };
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = {
+        value: inputCredentials.externalId,
+      };
     }
   } else {
     if (updatedInputVars.external_id) {
