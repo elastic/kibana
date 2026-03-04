@@ -3806,26 +3806,26 @@
         "signature": [
           "(initialTimeRangeState: ",
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          ") => ",
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>>) => ",
           "StateManager",
           "<",
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          ">"
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>>>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-        "lineNumber": 27,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3839,15 +3839,16 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/presentation-publishing",
+                "pluginId": "@kbn/utility-types",
                 "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.SerializedTimeRange",
-                "text": "SerializedTimeRange"
-              }
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
+              },
+              "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-            "lineNumber": 28,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4528,6 +4529,53 @@
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
             "lineNumber": 41,
             "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.transformTimeRangeOut",
+        "type": "Function",
+        "tags": [],
+        "label": "transformTimeRangeOut",
+        "description": [
+          "\nPre 9.4 the time_range state was stored in a camelCased key called timeRange.\nThis transform out function ensures that this state is not dropped when loading from\na legacy stored state. This should only be used for embeddables that existed before 9.4."
+        ],
+        "signature": [
+          "<StoredStateType extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & Record<string, unknown>>(storedState: StoredStateType) => StoredStateType"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/bwc/time_range_transforms.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.transformTimeRangeOut.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "storedState",
+            "description": [],
+            "signature": [
+              "StoredStateType"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/bwc/time_range_transforms.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -14087,45 +14135,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.SerializedTimeRange",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedTimeRange",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-        "lineNumber": 15,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.SerializedTimeRange.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.TitlesApi",
         "type": "Interface",
         "tags": [],
@@ -14883,6 +14892,23 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.SerializedTimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedTimeRange",
+        "description": [],
+        "signature": [
+          "{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.SerializedTitles",
         "type": "Type",
         "tags": [],
@@ -14892,7 +14918,7 @@
           "{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
-        "lineNumber": 14,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -14969,23 +14995,23 @@
         "label": "timeRangeComparators",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-        "lineNumber": 23,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.timeRangeComparators.timeRange",
+            "id": "def-common.timeRangeComparators.time_range",
             "type": "string",
             "tags": [],
-            "label": "timeRange",
+            "label": "time_range",
             "description": [],
             "signature": [
               "\"deepEquality\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
-            "lineNumber": 24,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
