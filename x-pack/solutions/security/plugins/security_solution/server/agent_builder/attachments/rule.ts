@@ -58,15 +58,11 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_LABS_SEARCH_TOOL_ID,
     ],
     getAgentDescription: () => {
-      const description = `You have access to a rule, query, or migration rule.
+      return `A security rule attachment. It may contain an existing rule, a migration rule, or an empty placeholder for a new rule.
 
-      If this is a migration rule, it includes both the old rule and the new rule.
+The create_detection_rule tool automatically updates this attachment with the generated rule data. After calling create_detection_rule, use the attachmentId and version from the tool result to render the attachment inline using <render_attachment id="ATTACHMENT_ID" version="VERSION" /> so the user can see the generated rule fields. You MUST include the version attribute from the tool result. Do NOT call attachment_update or attachment_read for rule attachments — the tool handles this.
 
-{ruleData}
-
-1. Extract the query or topic from the rule attachment.
-2. Use the appropriate tools to provide a response`;
-      return description;
+If this is a migration rule, it includes both the old rule and the new rule. Extract the query or topic from the rule attachment and use the appropriate tools to provide a response.`;
     },
   };
 };

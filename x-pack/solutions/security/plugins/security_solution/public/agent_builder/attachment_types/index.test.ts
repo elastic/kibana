@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 
@@ -14,101 +15,78 @@ describe('registerAttachmentUiDefinitions', () => {
   const mockAttachments: AttachmentServiceStartContract = {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
+  const mockApplication = {
+    navigateToApp: jest.fn(),
+  } as unknown as ApplicationStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('registers all three attachment types', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+  it('registers only the rule attachment type', () => {
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+      application: mockApplication,
+    });
 
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(3);
-  });
-
-  it('registers alert attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
-
-    const alertCall = mockAddAttachmentType.mock.calls.find(
-      (call) => call[0] === SecurityAgentBuilderAttachments.alert
+    expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
+    expect(mockAddAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.rule,
+      expect.any(Object)
     );
-    expect(alertCall).toBeDefined();
-
-    const config = alertCall![1];
-    expect(config.getIcon()).toBe('bell');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Alert');
-  });
-
-  it('registers entity attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
-
-    const entityCall = mockAddAttachmentType.mock.calls.find(
-      (call) => call[0] === SecurityAgentBuilderAttachments.entity
-    );
-    expect(entityCall).toBeDefined();
-
-    const config = entityCall![1];
-    expect(config.getIcon()).toBe('user');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Risk Entity');
   });
 
   it('registers rule attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+      application: mockApplication,
+    });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
-      (call) => call[0] === SecurityAgentBuilderAttachments.rule
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
     );
     expect(ruleCall).toBeDefined();
 
     const config = ruleCall![1];
-    expect(config.getIcon()).toBe('document');
+    expect(config.getIcon()).toBe('securityApp');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Rule');
   });
 
-  it('returns attachmentLabel when provided in attachment data', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+  it('returns attachmentLabel when provided in rule attachment data', () => {
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+      application: mockApplication,
+    });
 
-    const alertCall = mockAddAttachmentType.mock.calls.find(
-      (call) => call[0] === SecurityAgentBuilderAttachments.alert
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
     );
-    const config = alertCall![1];
+    const config = ruleCall![1];
 
     const attachment = {
       id: 'test',
-      type: 'test',
-      data: { attachmentLabel: 'Custom Label' },
+      type: SecurityAgentBuilderAttachments.rule,
+      data: { text: '{}', attachmentLabel: 'Custom Rule Name' },
     };
-    expect(config.getLabel(attachment)).toBe('Custom Label');
+    expect(config.getLabel(attachment)).toBe('Custom Rule Name');
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+      application: mockApplication,
+    });
 
-    const alertCall = mockAddAttachmentType.mock.calls.find(
-      (call) => call[0] === SecurityAgentBuilderAttachments.alert
+    const ruleCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
     );
-    const config = alertCall![1];
+    const config = ruleCall![1];
 
     const attachment = {
       id: 'test',
-      type: 'test',
-      data: {},
+      type: SecurityAgentBuilderAttachments.rule,
+      data: { text: '{}' },
     };
-    expect(config.getLabel(attachment)).toBe('Security Alert');
-  });
-
-  it('returns default label when attachment data is undefined', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
-
-    const alertCall = mockAddAttachmentType.mock.calls.find(
-      (call) => call[0] === SecurityAgentBuilderAttachments.alert
-    );
-    const config = alertCall![1];
-
-    const attachment = {
-      id: 'test',
-      type: 'test',
-      data: undefined,
-    };
-    expect(config.getLabel(attachment)).toBe('Security Alert');
+    expect(config.getLabel(attachment)).toBe('Security Rule');
   });
 });

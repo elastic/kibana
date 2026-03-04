@@ -15,8 +15,6 @@ import {
   EuiFlexGroup,
   EuiResizableContainer,
   EuiFlexItem,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
 } from '@elastic/eui';
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -92,7 +90,6 @@ import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
-import { RuleCreationSkeleton } from './rule_creation_skeleton';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const MyEuiPanel = styled(EuiPanel)<{
@@ -239,36 +236,37 @@ const CreateRulePageComponent: React.FC<{
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
-  useEffect(() => {
-    if (prevRuleType && prevRuleType !== ruleType) {
-      aboutStepForm.updateFieldValues({
-        threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
-      });
-      scheduleStepForm.updateFieldValues(
-        isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
-      );
-    }
-    setPrevRuleType(ruleType);
-  }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
-
-  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
-
-  // Listen to agent builder events for AI rule creation
-  const { shouldShowSkeleton } = useAgentBuilderRuleCreation(
+  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation(
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
     actionsStepForm
   );
 
-  // Collapse preview panel when skeleton is active
   useEffect(() => {
-    if (shouldShowSkeleton && togglePanelFnRef.current && isRulePreviewVisible) {
-      // Collapse the preview panel
-      togglePanelFnRef.current('preview', { direction: 'left' });
-      setIsRulePreviewVisible(false);
+    if (prevRuleType && prevRuleType !== ruleType) {
+      aboutStepForm.updateFieldValues({
+        threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
+      });
+      if (isAiRuleUpdateRef.current) {
+        isAiRuleUpdateRef.current = false;
+      } else {
+        scheduleStepForm.updateFieldValues(
+          isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
+        );
+      }
     }
-  }, [shouldShowSkeleton, isRulePreviewVisible]);
+    setPrevRuleType(ruleType);
+  }, [
+    aboutStepForm,
+    scheduleStepForm,
+    isThreatMatchRuleValue,
+    prevRuleType,
+    ruleType,
+    isAiRuleUpdateRef,
+  ]);
+
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
@@ -908,77 +906,71 @@ const CreateRulePageComponent: React.FC<{
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      {shouldShowSkeleton ? (
-                        <RuleCreationSkeleton />
-                      ) : (
-                        <>
-                          <CustomHeaderPageMemo
-                            backOptions={backComponent ? undefined : backOptions}
-                            backComponent={backComponent}
-                            isLoading={isCreateRuleLoading || loading}
-                            title={i18n.PAGE_TITLE}
-                            isRulePreviewVisible={isRulePreviewVisible}
-                            setIsRulePreviewVisible={setIsRulePreviewVisible}
-                            togglePanel={togglePanel}
-                            addToChatButton={addToChatButton}
-                          />
-                          <MyEuiPanel zindex={4} hasBorder>
-                            <MemoEuiAccordion
-                              initialIsOpen={true}
-                              id={RuleStep.defineRule}
-                              buttonContent={defineRuleButton}
-                              paddingSize="xs"
-                              ref={defineRuleRef}
-                              onToggle={toggleDefineStep}
-                              extraAction={memoDefineStepExtraAction}
-                            >
-                              {memoStepDefineRule}
-                            </MemoEuiAccordion>
-                          </MyEuiPanel>
-                          <EuiSpacer size="l" />
-                          <MyEuiPanel hasBorder zindex={3}>
-                            <MemoEuiAccordion
-                              initialIsOpen={false}
-                              id={RuleStep.aboutRule}
-                              buttonContent={aboutRuleButton}
-                              paddingSize="xs"
-                              ref={aboutRuleRef}
-                              onToggle={toggleAboutStep}
-                              extraAction={memoAboutStepExtraAction}
-                            >
-                              {memoStepAboutRule}
-                            </MemoEuiAccordion>
-                          </MyEuiPanel>
-                          <EuiSpacer size="l" />
-                          <MyEuiPanel hasBorder zindex={2}>
-                            <MemoEuiAccordion
-                              initialIsOpen={false}
-                              id={RuleStep.scheduleRule}
-                              buttonContent={scheduleRuleButton}
-                              paddingSize="xs"
-                              ref={scheduleRuleRef}
-                              onToggle={toggleScheduleStep}
-                              extraAction={memoScheduleStepExtraAction}
-                            >
-                              {memoStepScheduleRule}
-                            </MemoEuiAccordion>
-                          </MyEuiPanel>
-                          <EuiSpacer size="l" />
-                          <MyEuiPanel hasBorder zindex={1}>
-                            <MemoEuiAccordion
-                              initialIsOpen={false}
-                              id={RuleStep.ruleActions}
-                              buttonContent={ruleActionsButton}
-                              paddingSize="xs"
-                              ref={ruleActionsRef}
-                              onToggle={toggleActionsStep}
-                              extraAction={memoActionsStepExtraAction}
-                            >
-                              {memoStepRuleActions}
-                            </MemoEuiAccordion>
-                          </MyEuiPanel>
-                        </>
-                      )}
+                      <CustomHeaderPageMemo
+                        backOptions={backComponent ? undefined : backOptions}
+                        backComponent={backComponent}
+                        isLoading={isCreateRuleLoading || loading}
+                        title={i18n.PAGE_TITLE}
+                        isRulePreviewVisible={isRulePreviewVisible}
+                        setIsRulePreviewVisible={setIsRulePreviewVisible}
+                        togglePanel={togglePanel}
+                        addToChatButton={addToChatButton}
+                      />
+                      <MyEuiPanel zindex={4} hasBorder>
+                        <MemoEuiAccordion
+                          initialIsOpen={true}
+                          id={RuleStep.defineRule}
+                          buttonContent={defineRuleButton}
+                          paddingSize="xs"
+                          ref={defineRuleRef}
+                          onToggle={toggleDefineStep}
+                          extraAction={memoDefineStepExtraAction}
+                        >
+                          {memoStepDefineRule}
+                        </MemoEuiAccordion>
+                      </MyEuiPanel>
+                      <EuiSpacer size="l" />
+                      <MyEuiPanel hasBorder zindex={3}>
+                        <MemoEuiAccordion
+                          initialIsOpen={false}
+                          id={RuleStep.aboutRule}
+                          buttonContent={aboutRuleButton}
+                          paddingSize="xs"
+                          ref={aboutRuleRef}
+                          onToggle={toggleAboutStep}
+                          extraAction={memoAboutStepExtraAction}
+                        >
+                          {memoStepAboutRule}
+                        </MemoEuiAccordion>
+                      </MyEuiPanel>
+                      <EuiSpacer size="l" />
+                      <MyEuiPanel hasBorder zindex={2}>
+                        <MemoEuiAccordion
+                          initialIsOpen={false}
+                          id={RuleStep.scheduleRule}
+                          buttonContent={scheduleRuleButton}
+                          paddingSize="xs"
+                          ref={scheduleRuleRef}
+                          onToggle={toggleScheduleStep}
+                          extraAction={memoScheduleStepExtraAction}
+                        >
+                          {memoStepScheduleRule}
+                        </MemoEuiAccordion>
+                      </MyEuiPanel>
+                      <EuiSpacer size="l" />
+                      <MyEuiPanel hasBorder zindex={1}>
+                        <MemoEuiAccordion
+                          initialIsOpen={false}
+                          id={RuleStep.ruleActions}
+                          buttonContent={ruleActionsButton}
+                          paddingSize="xs"
+                          ref={ruleActionsRef}
+                          onToggle={toggleActionsStep}
+                          extraAction={memoActionsStepExtraAction}
+                        >
+                          {memoStepRuleActions}
+                        </MemoEuiAccordion>
+                      </MyEuiPanel>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
                 </EuiResizablePanel>
@@ -992,36 +984,12 @@ const CreateRulePageComponent: React.FC<{
                   minSize={'20%'}
                   onToggleCollapsed={onToggleCollapsedMemo}
                 >
-                  {shouldShowSkeleton ? (
-                    <EuiPanel
-                      hasBorder
-                      paddingSize="l"
-                      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                    >
-                      <EuiSkeletonTitle size="m" />
-                      <EuiSpacer size="m" />
-                      <EuiSkeletonText lines={2} />
-                      <EuiSpacer size="m" />
-                      <EuiSkeletonText lines={3} />
-                      <EuiSpacer size="m" />
-                      <EuiSkeletonText lines={2} />
-                      <EuiSpacer size="m" />
-                      <EuiSkeletonText lines={2} />
-                      <EuiSpacer size="l" />
-                      <EuiFlexGroup justifyContent="flexEnd">
-                        <EuiFlexItem grow={false}>
-                          <EuiSkeletonText lines={1} />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  ) : (
-                    <RulePreview
-                      verifyRuleDefinition={verifyRuleDefinitionForPreview}
-                      defineRuleData={defineStepData}
-                      aboutRuleData={aboutStepData}
-                      scheduleRuleData={scheduleStepData}
-                    />
-                  )}
+                  <RulePreview
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
+                    defineRuleData={defineStepData}
+                    aboutRuleData={aboutStepData}
+                    scheduleRuleData={scheduleStepData}
+                  />
                 </EuiResizablePanel>
               </>
             );

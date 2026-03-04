@@ -34,10 +34,12 @@ interface CreateRuleContextMenuProps {
  * Alternative implementation using SecuritySolutionLinkButton components
  * for better integration with existing routing
  */
-const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. 
+const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
 
 You can review and edit everything before enabling the rule. 
 Desired behavior or activity to detect:
+Detect users who, within a 2 hour interval window, either transfer over 100 MB of data or generate 100 or more events to a direct IP address (not a domain name)
+
 `;
 
 export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, isDisabled }) => {
@@ -46,7 +48,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     prefix: 'createRuleContextMenuLinks',
   });
   const { services } = useKibana();
-  const { agentBuilder, application } = services;
+  const { agentBuilder } = services;
 
   const m = useEuiPaddingSize('m');
   const xl = useEuiPaddingSize('xl');
@@ -61,23 +63,15 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   const handleAiRuleCreation = useCallback(() => {
     closePopover();
 
-    // Navigate to rule creation page with query parameter to indicate AI rule creation
-    application.navigateToApp('securitySolutionUI', {
-      path: '/rules/create?fromAiRuleCreation=true',
-    });
-
-    // Create empty rule attachment for new rule creation
-    const emptyRule = {};
     const emptyRuleAttachment: AttachmentInput = {
-      id: `empty-rule-${Date.now()}`,
+      id: 'ai-rule-creation',
       type: SecurityAgentBuilderAttachments.rule,
       data: {
-        text: JSON.stringify(emptyRule),
+        text: JSON.stringify({}),
         attachmentLabel: 'New Rule',
       },
     };
 
-    // Open agent builder flyout with initial message and empty rule attachment
     if (agentBuilder?.openConversationFlyout) {
       agentBuilder.openConversationFlyout({
         newConversation: true,
@@ -88,7 +82,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
         attachments: [emptyRuleAttachment],
       });
     }
-  }, [closePopover, application, agentBuilder]);
+  }, [closePopover, agentBuilder]);
 
   const createRuleButton = (
     <EuiButton

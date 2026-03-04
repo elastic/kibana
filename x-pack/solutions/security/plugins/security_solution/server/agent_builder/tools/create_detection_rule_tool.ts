@@ -16,6 +16,7 @@ import type {
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
@@ -37,8 +38,9 @@ export function createDetectionRuleTool(
   const toolDefinition: BuiltinToolDefinition<typeof createDetectionRuleSchema> = {
     id: SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.',
+    description: `Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.
+
+The tool stores the result as an attachment (creating new or updating existing). Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.`,
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
     availability: {
@@ -59,7 +61,10 @@ export function createDetectionRuleTool(
         });
       },
     },
-    handler: async ({ user_query: userQuery }, { esClient, modelProvider, request, events }) => {
+    handler: async (
+      { user_query: userQuery },
+      { esClient, modelProvider, request, events, attachments }
+    ) => {
       try {
         logger.debug(
           `Create detection rule tool invoked with query: ${userQuery.substring(0, 100)}...`
@@ -97,7 +102,89 @@ export function createDetectionRuleTool(
           rulesClient,
           events,
         });
+        // eslint-disable-next-line no-console
+        console.log('iterativeAgent', iterativeAgent.constructor.name);
         const result = await iterativeAgent.invoke({ userQuery });
+
+        // mock result
+        // TODO: remove this before merging
+        // const result = {
+        //   rule: {
+        //     references: [],
+        //     severity_mapping: [],
+        //     risk_score_mapping: [],
+        //     related_integrations: [],
+        //     required_fields: [],
+        //     actions: [],
+        //     exceptions_list: [],
+        //     false_positives: [],
+        //     author: [],
+        //     setup: '',
+        //     max_signals: 100,
+        //     risk_score: 21,
+        //     severity: 'low',
+        //     tags: [
+        //       'Domain: Network',
+        //       'Use Case: Data Exfiltration Detection',
+        //       'Tactic: Exfiltration',
+        //       'Data Source: Network Traffic',
+        //       'Tactic: Command and Control',
+        //       'Use Case: C2 Beaconing Detection',
+        //       'Use Case: Threat Detection',
+        //       'AI Rule Creation',
+        //     ],
+        //     threat: [
+        //       {
+        //         framework: 'MITRE ATT&CK',
+        //         tactic: {
+        //           id: 'TA0010',
+        //           name: 'Exfiltration',
+        //           reference: 'https://attack.mitre.org/tactics/TA0010/',
+        //         },
+        //         technique: [
+        //           {
+        //             id: 'T1041',
+        //             name: 'Exfiltration Over C2 Channel',
+        //             reference: 'https://attack.mitre.org/techniques/T1041/',
+        //           },
+        //         ],
+        //       },
+        //       {
+        //         framework: 'MITRE ATT&CK',
+        //         tactic: {
+        //           id: 'TA0011',
+        //           name: 'Command and Control',
+        //           reference: 'https://attack.mitre.org/tactics/TA0011/',
+        //         },
+        //         technique: [
+        //           {
+        //             id: 'T1071',
+        //             name: 'Application Layer Protocol',
+        //             reference: 'https://attack.mitre.org/techniques/T1071/',
+        //           },
+        //           {
+        //             id: 'T1095',
+        //             name: 'Non-Application Layer Protocol',
+        //             reference: 'https://attack.mitre.org/techniques/T1095/',
+        //           },
+        //         ],
+        //       },
+        //     ],
+        //     interval: '2h',
+        //     from: 'now-132m',
+        //     to: 'now',
+        //     query:
+        //       'FROM packetbeat-*\n| WHERE event.category == "network" AND network.direction == "egress" AND destination.domain IS NULL\n| STATS event_count = COUNT(*), total_bytes = SUM(network.bytes) BY user.name, destination.ip, BUCKET(@timestamp, 2 hours)\n| WHERE total_bytes > 104857600 OR event_count >= 100',
+        //     language: 'esql',
+        //     type: 'esql',
+        //     name: 'Potential Data Exfiltration to a Direct IP Address',
+        //     description:
+        //       'This rule detects users generating a high volume of egress network traffic to a direct IP address. It triggers when a user either transfers over 100 MB of data or generates 100 or more network events to a single IP address within a two-hour window. This activity could be indicative of data exfiltration or other unauthorized data transfers.',
+        //   },
+        //   errors: [],
+        //   success: true,
+        //   messages: [],
+        // };
 
         if (result.errors.length) {
           logger.error(`Rule creation failed with errors: ${result.errors.join('; ')}`);
@@ -116,6 +203,43 @@ export function createDetectionRuleTool(
 
         logger.debug(`Successfully created detection rule: ${result.rule.name}`);
 
+        const attachmentData = {
+          text: JSON.stringify(result.rule),
+          attachmentLabel: result.rule.name,
+        };
+        const attachmentDescription = `Rule: ${result.rule.name}`;
+
+        let resultAttachmentId: string | undefined;
+        let version: number | undefined;
+        let isUpdate = false;
+
+        try {
+          const existingAttachment = attachments
+            .getActive()
+            .find((a) => a.type === SecurityAgentBuilderAttachments.rule);
+
+          if (existingAttachment) {
+            logger.debug(`Deleting existing rule attachment ${existingAttachment.id}`);
+            await attachments.permanentDelete(existingAttachment.id);
+            isUpdate = true;
+          }
+
+          const created = await attachments.add({
+            type: SecurityAgentBuilderAttachments.rule,
+            data: attachmentData,
+            description: attachmentDescription,
+          });
+          resultAttachmentId = created.id;
+          version = created.current_version;
+          logger.debug(`Created rule attachment ${resultAttachmentId} v${version}`);
+        } catch (attachmentError) {
+          logger.warn(
+            `Could not persist rule attachment: ${
+              attachmentError instanceof Error ? attachmentError.message : String(attachmentError)
+            }`
+          );
+        }
+
         return {
           results: [
             {
@@ -123,6 +247,9 @@ export function createDetectionRuleTool(
               data: {
                 success: true,
                 rule: result.rule,
+                ...(resultAttachmentId && { attachmentId: resultAttachmentId }),
+                ...(version !== undefined && { version }),
+                ...(isUpdate && { is_update: isUpdate }),
               },
             },
           ],

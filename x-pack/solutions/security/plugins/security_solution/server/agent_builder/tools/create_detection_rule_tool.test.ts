@@ -159,7 +159,7 @@ describe('createDetectionRuleTool', () => {
       ]);
     });
 
-    it('returns rule as success result', async () => {
+    it('creates a new attachment when none exists', async () => {
       const mockRule = {
         name: 'Test Rule',
         query: 'FROM test | limit 100',
@@ -171,13 +171,20 @@ describe('createDetectionRuleTool', () => {
         errors: [],
       });
 
-      const result = await tool.handler(
-        { user_query: userQuery },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        })
-      );
+      const mockAttachmentId = 'new-rule-attachment-id';
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+      context.attachments.getActive.mockReturnValue([]);
+      context.attachments.add.mockResolvedValue({
+        id: mockAttachmentId,
+        type: 'security.rule',
+        versions: [],
+        current_version: 1,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
 
       expect(result).toEqual({
         results: [
@@ -186,11 +193,78 @@ describe('createDetectionRuleTool', () => {
             data: {
               success: true,
               rule: mockRule,
+              attachmentId: mockAttachmentId,
+              version: 1,
             },
           },
         ],
       });
+      expect(context.attachments.permanentDelete).not.toHaveBeenCalled();
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        type: 'security.rule',
+        data: {
+          text: JSON.stringify(mockRule),
+          attachmentLabel: 'Test Rule',
+        },
+        description: 'Rule: Test Rule',
+      });
       expect(mockIterativeAgent.invoke).toHaveBeenCalledWith({ userQuery });
+    });
+
+    it('deletes existing attachment and creates new one', async () => {
+      const mockRule = {
+        name: 'Updated Rule',
+        query: 'FROM logs | limit 50',
+        language: 'esql',
+        type: 'esql',
+      };
+      mockIterativeAgent.invoke.mockResolvedValue({
+        rule: mockRule,
+        errors: [],
+      });
+
+      const existingId = 'ai-rule-creation';
+      const newAttachmentId = 'new-unique-id';
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+      context.attachments.getActive.mockReturnValue([
+        { id: existingId, type: 'security.rule', versions: [], current_version: 1 },
+      ]);
+      context.attachments.permanentDelete.mockResolvedValue(undefined);
+      context.attachments.add.mockResolvedValue({
+        id: newAttachmentId,
+        type: 'security.rule',
+        versions: [],
+        current_version: 1,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
+
+      expect(context.attachments.permanentDelete).toHaveBeenCalledWith(existingId);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        type: 'security.rule',
+        data: {
+          text: JSON.stringify(mockRule),
+          attachmentLabel: 'Updated Rule',
+        },
+        description: 'Rule: Updated Rule',
+      });
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              success: true,
+              rule: mockRule,
+              attachmentId: newAttachmentId,
+              version: 1,
+              is_update: true,
+            },
+          },
+        ],
+      });
     });
 
     it('returns error when connector ID is not available', async () => {
