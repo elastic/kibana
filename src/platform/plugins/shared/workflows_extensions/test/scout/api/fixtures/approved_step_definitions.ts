@@ -34,7 +34,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'ai.guardrails',
-    handlerHash: '0000000000000000000000000000000000000000000000000000000000000000',
+    handlerHash: '0609a599c688746a15a184a67d2dea08c5f9f7845471a51c956532374fea1f88',
   },
   {
     id: 'ai.prompt',
