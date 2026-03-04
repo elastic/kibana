@@ -122,6 +122,7 @@ describe('createChatCompleteApi', () => {
       connectorId: 'connectorId',
       request,
       actions,
+      esClient: mockEsClient,
     });
   });
 
