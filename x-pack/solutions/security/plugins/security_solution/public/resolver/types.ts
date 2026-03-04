@@ -848,11 +848,6 @@ export interface ResolverProps {
   shouldUpdate: boolean;
 
   /**
-   * If true, the details panel is not shown in the graph and a view button is shown to manage the panel visibility.
-   */
-  isSplitPanel?: boolean;
-
-  /**
    * Optional callback for showing details panels separately from the graph.
    */
   showPanelOnClick?: () => void;
