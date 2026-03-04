@@ -70,7 +70,7 @@
 const path = require('path');
 const { execSync } = require('child_process');
 
-const minimatch = require('minimatch');
+const { minimatch } = require('minimatch');
 
 /** @type {Array.<RestrictedImportPath>} */
 const RESTRICTED_IMPORTS_PATHS = [
