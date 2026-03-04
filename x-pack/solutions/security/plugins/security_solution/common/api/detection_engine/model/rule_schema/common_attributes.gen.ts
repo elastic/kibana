@@ -46,8 +46,8 @@ export const RuleDescription = z.string().min(1);
 /**
   * The rule's version number.
 
-- For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
-- For custom rules it is set to `1` when the rule is created. 
+- For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules).
+- For custom rules it is set to `1` when the rule is created.
 > info
 > It is not incremented on each update. Compare this to the `revision` field.
 
@@ -561,8 +561,12 @@ export const RuleActionThrottle = z.union([
 ]);
 
 /**
- * Defines how often rules run actions.
- */
+  * Defines how often rules run actions.
+- `onActiveAlert`: Actions run on every rule execution that produces matching alerts. If the same alert is generated across consecutive rule runs (for example, due to overlapping time windows), the action fires each time.
+- `onThrottleInterval`: Actions run when an alert is first generated, then no more often than the interval specified in `throttle` on subsequent rule runs. Use when you want to limit notification frequency to a specific time interval.
+- `onActionGroupChange`: Actions run only once when an alert is first generated, and do not repeat on subsequent rule executions. Use when you want a single notification per alert.
+
+  */
 export type RuleActionNotifyWhen = z.infer<typeof RuleActionNotifyWhen>;
 export const RuleActionNotifyWhen = z.enum([
   'onActiveAlert',
