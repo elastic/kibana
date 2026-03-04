@@ -7,7 +7,7 @@
 
 import { useResizeObserver } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { LensInternalApi } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import { ExpressionWrapper } from '../expression_wrapper';
@@ -15,8 +15,6 @@ import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
 import { addLog } from '../logger';
-
-const WIDTH_CHANGE_THRESHOLD = 100;
 
 export function LensEmbeddableComponent({
   internalApi,
@@ -65,17 +63,9 @@ export function LensEmbeddableComponent({
 
   const [resizeElement, setResizeElement] = useState<HTMLDivElement | null>(null);
   const { width: containerWidth } = useResizeObserver(resizeElement, 'width');
-  const lastReportedWidth = useRef<number>(0);
 
   useEffect(() => {
-    if (containerWidth <= 0) {
-      return;
-    }
-    const isFirstMeasurement = lastReportedWidth.current === 0;
-    const exceedsThreshold =
-      Math.abs(containerWidth - lastReportedWidth.current) > WIDTH_CHANGE_THRESHOLD;
-    if (isFirstMeasurement || exceedsThreshold) {
-      lastReportedWidth.current = containerWidth;
+    if (containerWidth > 0) {
       internalApi.updateContainerWidth(containerWidth);
     }
   }, [containerWidth, internalApi]);

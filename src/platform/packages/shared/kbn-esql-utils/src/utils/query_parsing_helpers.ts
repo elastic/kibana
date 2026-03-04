@@ -30,8 +30,7 @@ import type {
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-
-const DEFAULT_ESQL_LIMIT = 1000;
+import { DEFAULT_ESQL_LIMIT } from '../../constants';
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;

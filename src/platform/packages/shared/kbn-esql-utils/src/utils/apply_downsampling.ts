@@ -9,10 +9,10 @@
 
 import { Parser, walk, isAssignment } from '@elastic/esql';
 import type { ESQLFunction } from '@elastic/esql/types';
+import { DEFAULT_ESQL_LIMIT } from '../../constants';
 
 const MIN_SAMPLE_RATE = 0.001;
 const MAX_SAMPLE_RATE = 1.0;
-const DEFAULT_ESQL_LIMIT = 1000;
 
 /**
  * Applies automatic downsampling to an ES|QL query based on the available
