@@ -30,8 +30,6 @@ export type SecondaryTrend =
       baselineValue: number | 'primary';
     };
 
-type TitleFontWeightString = Extract<TitleFontWeight, string>;
-
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LensLayerType;
@@ -62,7 +60,11 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  titleWeight?: TitleFontWeightString;
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  titleWeight?: MetricStyle['titleWeight'];
   primaryPosition?: MetricStyle['valuePosition'];
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
