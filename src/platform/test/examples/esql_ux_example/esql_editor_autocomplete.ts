@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('ES|QL Editor autocomplete', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/255931
+  describe.skip('ES|QL Editor autocomplete', function () {
     beforeEach(async () => {
       await esql.setEsqlEditorQuery('');
     });
@@ -68,6 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open timepicker and insert date when selecting a day', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE @timestamp > `);
+      await waitForSuggestionWidget(true);
       await browser.pressKeys(browser.keys.ENTER);
 
       const todayButton = await find.byCssSelector('.react-datepicker__day--today');
