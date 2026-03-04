@@ -155,7 +155,7 @@ spaceTest.describe(
 | `spaceTest` (not `test`) | Enables parallel execution — each worker gets its own Kibana space |
 | `browserAuth.loginAsPlatformEngineer()` | Least-privileged role for CRUD. Not `loginAsAdmin()` (masks permission bugs) |
 | `browserAuth.loginAsT1Analyst()` | Read-only RBAC test — verifies save button is disabled |
-| `test.step()` for multi-step flows | Reuses browser context within a single test (each `test()` creates a new context) |
+| `spaceTest.step()` for multi-step flows | Reuses browser context within a single test (each `spaceTest()` creates a new context) |
 | `beforeEach` + `afterAll` cleanup | `beforeEach` handles prior failed runs; `afterAll` cleans up after the suite |
 | `apiServices.timeline.createTimelineTemplate()` | API-based setup — not UI-based (faster, more reliable) |
 | `toContainText(['Second', 'First'])` | Ordered array assertion — replaces `.first()` / `.last()` (forbidden by `playwright/no-nth-methods`) |
