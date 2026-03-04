@@ -68,6 +68,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.mongodb",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.observability-ai-assistant",
   },
   Object {
