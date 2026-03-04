@@ -315,7 +315,7 @@ export class SearchService {
           const searchSourceDependencies: SearchSourceDependencies = {
             aggs: aggsStart,
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: this.asScoped(request).search,
+            search: this.asScoped(request, opts).search,
             onResponse: (req, res) => res,
             dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
