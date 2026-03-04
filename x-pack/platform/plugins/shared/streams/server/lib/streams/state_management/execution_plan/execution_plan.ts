@@ -277,15 +277,8 @@ export class ExecutionPlan {
   }
 
   private async unlinkSystems(actions: UnlinkSystemsAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.systemClient.syncSystemList(action.request.name, [])
-      )
-    );
+    // Systems have been removed; this is a no-op kept for backward compatibility
+    // with existing execution plans that may contain unlink_systems actions.
   }
 
   private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {

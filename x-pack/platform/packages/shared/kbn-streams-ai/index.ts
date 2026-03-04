@@ -6,11 +6,6 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
-export {
-  identifySystems,
-  type IdentifySystemsOptions,
-  type IdentifySystemsResult,
-} from './src/systems/identify_systems';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
