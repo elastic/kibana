@@ -2874,10 +2874,9 @@
     "@emotion/utils" "^1.2.1"
     csstype "^3.0.2"
 
-"@emotion/sheet@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@emotion/sheet/-/sheet-1.2.2.tgz#d58e788ee27267a14342303e1abb3d508b6d0fec"
-  integrity sha512-0QBtGvaqtWi+nx6doRwDdBIzhNdZrXUppvTM4dtZZWEGTXL/XE/yJxLMGlDT1Gt+UHH5IX1n+jkXyytE/av7OA==
+"@emotion/sheet@^1.2.2", "@emotion/sheet@file:./emotion_sheet.tgz":
+  version "1.4.0-verifybefore.0"
+  resolved "file:./emotion_sheet.tgz#d4a703f1e8f23c9fd183034bba22314d7fc77fe6"
 
 "@emotion/styled@11.11.0":
   version "11.11.0"
