@@ -430,12 +430,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       log.debug('wait for rule to fire and produce output docs');
       await retry.waitFor('output docs to appear', async () => {
-        const { body: result } = (await es.transport.request({
-          path: `/${OUTPUT_DATA_VIEW}/_search`,
-          method: 'POST',
-          body: { query: { match_all: {} } },
-        })) as { body: { hits: { total: { value: number } } } };
-        return result.hits.total.value > 0;
+        const result = await es.search({
+          index: OUTPUT_DATA_VIEW,
+          query: { match_all: {} },
+        });
+        return (result.hits.total as { value: number }).value > 0;
       });
 
       log.debug('refresh output data view field list');
