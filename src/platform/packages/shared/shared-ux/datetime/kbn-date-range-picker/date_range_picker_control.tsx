@@ -23,7 +23,6 @@ import {
 import { FOCUSABLE_SELECTOR } from './constants';
 import { resolveInitialFocus } from './utils';
 import { useDateRangePickerContext } from './date_range_picker_context';
-import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
 
@@ -48,11 +47,9 @@ export function DateRangePickerControl() {
     panelRef,
     panelId,
     initialFocus,
-    timeWindowButtonsConfig,
     onInputChange,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
-  const maxWidth = euiTheme.components.forms.maxWidth;
   const hintText = useInputHintText(text);
 
   const controlRef = useRef<HTMLDivElement>(null);
@@ -141,19 +138,12 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
-  const containerStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-    max-inline-size: ${maxWidth};
-  `;
-
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
 
   return (
-    <div css={containerStyles} ref={controlRef} onKeyDown={onControlKeyDown}>
+    <div ref={controlRef} onKeyDown={onControlKeyDown}>
       <EuiFormControlLayout
         compressed={compressed}
         isInvalid={isInvalid}
@@ -198,7 +188,6 @@ export function DateRangePickerControl() {
           </EuiToolTip>
         )}
       </EuiFormControlLayout>
-      {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import type { IconType } from '@elastic/eui';
 import type { TimeRangeBounds, TimeRangeBoundsOption } from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
+import { DateRangePickerLayout } from './date_range_picker_layout';
 import { DateRangePickerDialog } from './date_range_picker_dialog';
 import {
   DateRangePickerPanelNavigationProvider,
@@ -113,34 +114,36 @@ export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps)
 
   return (
     <DateRangePickerProvider {...props}>
-      <DateRangePickerDialog>
-        <DateRangePickerPanelNavigationProvider
-          defaultPanelId={defaultPanelId}
-          panelDescriptors={panelDescriptors}
-        >
-          <DateRangePickerPanel id="main">
-            <MainPanel />
-          </DateRangePickerPanel>
-          <DateRangePickerPanel id={CalendarPanel.PANEL_ID}>
-            <CalendarPanel />
-          </DateRangePickerPanel>
-          <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
-            <CustomTimeRangePanel />
-          </DateRangePickerPanel>
-          {panels.map(({ id, component: Component }) => (
-            <DateRangePickerPanel key={id} id={id}>
-              <Component />
+      <DateRangePickerLayout>
+        <DateRangePickerDialog>
+          <DateRangePickerPanelNavigationProvider
+            defaultPanelId={defaultPanelId}
+            panelDescriptors={panelDescriptors}
+          >
+            <DateRangePickerPanel id="main">
+              <MainPanel />
             </DateRangePickerPanel>
-          ))}
-          {/* TODO Example panels, can be removed after initial development finishes */}
-          <DateRangePickerPanel id={ExamplePanel.PANEL_ID}>
-            <ExamplePanel />
-          </DateRangePickerPanel>
-          <DateRangePickerPanel id={ExampleNestedPanel.PANEL_ID}>
-            <ExampleNestedPanel />
-          </DateRangePickerPanel>
-        </DateRangePickerPanelNavigationProvider>
-      </DateRangePickerDialog>
+            <DateRangePickerPanel id={CalendarPanel.PANEL_ID}>
+              <CalendarPanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
+              <CustomTimeRangePanel />
+            </DateRangePickerPanel>
+            {panels.map(({ id, component: Component }) => (
+              <DateRangePickerPanel key={id} id={id}>
+                <Component />
+              </DateRangePickerPanel>
+            ))}
+            {/* TODO Example panels, can be removed after initial development finishes */}
+            <DateRangePickerPanel id={ExamplePanel.PANEL_ID}>
+              <ExamplePanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={ExampleNestedPanel.PANEL_ID}>
+              <ExampleNestedPanel />
+            </DateRangePickerPanel>
+          </DateRangePickerPanelNavigationProvider>
+        </DateRangePickerDialog>
+      </DateRangePickerLayout>
     </DateRangePickerProvider>
   );
 }

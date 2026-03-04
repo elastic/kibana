@@ -72,7 +72,6 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
 
   return (
     <EuiPopover
-      css={css({ maxInlineSize: maxWidth })}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
       closePopover={closePopover}
