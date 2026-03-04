@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inlineSourceFormatter, secondsToCronFormatter } from '../formatting_utils';
+import { secondsToCronFormatter } from '../formatting_utils';
 import type { MonitorFields } from '../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
