@@ -307,9 +307,6 @@ describe('transformWorkpadOut', () => {
         expect(getDecodedConfig(transformedWorkpad)).toEqual({
           timeRange: DEFAULT_TIME_RANGE,
           savedObjectId: 'vis-id',
-          vis: {
-            legendOpen: true,
-          },
         });
       });
 

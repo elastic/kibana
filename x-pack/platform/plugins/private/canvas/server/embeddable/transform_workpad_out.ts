@@ -93,8 +93,8 @@ export function transformWorkpadOut(
               const visualizationConfig = {
                 savedObjectId: fn.arguments.id[0] as string,
                 vis:
-                  fn.arguments.hideLegend?.[0] != null
-                    ? { legendOpen: !fn.arguments.hideLegend?.[0] as boolean }
+                  fn.arguments.hideLegend?.[0] === true
+                    ? { legendOpen: !fn.arguments.hideLegend?.[0] }
                     : undefined,
                 timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
                 title:
