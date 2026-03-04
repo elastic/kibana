@@ -41,17 +41,18 @@ const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
 
 const getIlmPoliciesUrl = (basePath: string, policyName?: string): string => {
   const baseUrl = `${basePath}/app/management/data/index_lifecycle_management/policies`;
-  return policyName ? `${baseUrl}?policy=${policyName}` : baseUrl;
+  return policyName ? `${baseUrl}?policy=${encodeURIComponent(policyName)}` : baseUrl;
 };
-
 const getDataStreamUrl = (basePath: string, dataStreamName: string): string => {
-  return `${basePath}/app/management/data/index_management/data_streams/${dataStreamName}`;
+  return `${basePath}/app/management/data/index_management/data_streams/${encodeURIComponent(
+    dataStreamName
+  )}`;
 };
-
 const getIndexDetailsUrl = (basePath: string, indexName: string): string => {
-  return `${basePath}/app/management/data/index_management/indices/index_details?indexName=${indexName}`;
+  return `${basePath}/app/management/data/index_management/indices/index_details?indexName=${encodeURIComponent(
+    indexName
+  )}`;
 };
-
 // Extended RetentionInfo for table compatibility
 interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
 
@@ -79,39 +80,47 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
     if (!categoriesData?.mainCategoriesMap || !retentionData?.items) return [];
 
-    const activeOnly = categoriesData.mainCategoriesMap.filter((category) =>
-      activeCategories.includes(category.category as MainCategories)
-    );
+    const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
 
-    return activeOnly
-      .map((category) => {
-        // Find retention items where any backing index in this category contains the data stream name
-        const matchingRetention = retentionData.items.filter((retention) =>
-          category.indices.some((index) => index.indexName.includes(retention.indexName))
-        );
+    for (const category of categoriesData.mainCategoriesMap) {
+      const isActive = activeCategories.includes(category.category as MainCategories);
+      if (isActive) {
+        const matchingRetention: RetentionInfoWithStatus[] = [];
+        for (const retention of retentionData.items) {
+          const hasMatch = category.indices.some((idx) =>
+            idx.indexName.includes(retention.indexName)
+          );
+          if (hasMatch) {
+            matchingRetention.push(retention as RetentionInfoWithStatus);
+          }
+        }
 
-        return {
-          category: category.category,
-          items: matchingRetention as RetentionInfoWithStatus[],
-        };
-      })
-      .filter((cat) => cat.items.length > 0);
+        if (matchingRetention.length > 0) {
+          result.push({ category: category.category, items: matchingRetention });
+        }
+      }
+    }
+
+    return result;
   }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
 
-  // Calculate non-compliant statistics
+  // Count non-compliant items (deduplicated by indexName)
   const nonCompliantStats = useMemo(() => {
-    let totalNonCompliant = 0;
+    const seen = new Set<string>();
+    let nonCompliantCount = 0;
 
-    categories.forEach((category) => {
-      category.items.forEach((item) => {
-        if (item.status === 'non-compliant') totalNonCompliant++;
-      });
-    });
+    for (const category of categories) {
+      for (const item of category.items) {
+        if (!seen.has(item.indexName)) {
+          seen.add(item.indexName);
+          if (item.status === 'non-compliant') {
+            nonCompliantCount++;
+          }
+        }
+      }
+    }
 
-    return {
-      totalNonCompliant,
-      hasIssues: totalNonCompliant > 0,
-    };
+    return { totalNonCompliant: nonCompliantCount, hasIssues: nonCompliantCount > 0 };
   }, [categories]);
 
   // Case description
@@ -328,67 +337,48 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         }),
         width: '10%',
         render: (item: RetentionInfoWithStatus) => {
-          // Data stream with DSL or no management -> View Data Stream
-          if (item.retentionType === 'dsl' || (item.isDataStream && item.retentionType === null)) {
-            return (
-              <div style={{ textAlign: 'right' }}>
-                <EuiButtonEmpty
-                  size="xs"
-                  href={getDataStreamUrl(basePath, item.indexName)}
-                  target="_blank"
-                  iconType="popout"
-                  iconSide="right"
-                >
-                  {i18n.translate(
-                    'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
-                    {
-                      defaultMessage: 'View Data Stream',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </div>
+          let href: string;
+          let label: string;
+
+          const isDsl = item.retentionType === 'dsl';
+          const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
+          const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
+
+          if (isDsl || isUnmanagedDataStream) {
+            href = getDataStreamUrl(basePath, item.indexName);
+            label = i18n.translate(
+              'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
+              { defaultMessage: 'View Data Stream' }
             );
-          }
-          // ILM managed (data stream or standalone index)
-          if (item.retentionType === 'ilm' && item.policyName) {
-            return (
-              <div style={{ textAlign: 'right' }}>
-                <EuiButtonEmpty
-                  size="xs"
-                  href={getIlmPoliciesUrl(basePath, item.policyName)}
-                  target="_blank"
-                  iconType="popout"
-                  iconSide="right"
-                >
-                  {i18n.translate('xpack.securitySolution.siemReadiness.retention.action.viewIlm', {
-                    defaultMessage: 'View ILM policies',
-                  })}
-                </EuiButtonEmpty>
-              </div>
+          } else if (item.retentionType === 'ilm' && item.policyName) {
+            href = getIlmPoliciesUrl(basePath, item.policyName);
+            label = i18n.translate(
+              'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
+              { defaultMessage: 'View ILM policies' }
             );
-          }
-          // Standalone index with no management -> View Index
-          if (!item.isDataStream && item.retentionType === null) {
-            return (
-              <div style={{ textAlign: 'right' }}>
-                <EuiButtonEmpty
-                  size="xs"
-                  href={getIndexDetailsUrl(basePath, item.indexName)}
-                  target="_blank"
-                  iconType="popout"
-                  iconSide="right"
-                >
-                  {i18n.translate(
-                    'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
-                    {
-                      defaultMessage: 'View Index',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </div>
+          } else if (isUnmanagedIndex) {
+            href = getIndexDetailsUrl(basePath, item.indexName);
+            label = i18n.translate(
+              'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
+              { defaultMessage: 'View Index' }
             );
+          } else {
+            return null;
           }
-          return null;
+
+          return (
+            <div style={{ textAlign: 'right' }}>
+              <EuiButtonEmpty
+                size="xs"
+                href={href}
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                {label}
+              </EuiButtonEmpty>
+            </div>
+          );
         },
       },
     ],
