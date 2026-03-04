@@ -301,10 +301,10 @@ export async function pickTestGroupRunOrder() {
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
         type: FUNCTIONAL_TYPE,
-        defaultMin: 10,
+        defaultMin: 60,
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
-        // minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
         warmupMin: 3,
         names,
