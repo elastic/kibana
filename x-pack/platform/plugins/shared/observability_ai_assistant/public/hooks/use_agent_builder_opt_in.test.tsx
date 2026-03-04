@@ -192,8 +192,7 @@ describe('useAgentBuilderOptIn', () => {
       { path: '/' }
     );
     expect(
-      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart)
-        .openAgentBuilderChat
+      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart).openAgentBuilderChat
     ).toHaveBeenCalledWith({ newConversation: true });
   });
 
