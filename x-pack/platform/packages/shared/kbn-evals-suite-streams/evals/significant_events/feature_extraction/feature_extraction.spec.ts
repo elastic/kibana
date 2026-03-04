@@ -8,6 +8,7 @@
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -55,7 +56,7 @@ evaluate.describe(
 
     for (const { dataset, scenario } of featureExtractionRuns) {
       evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id}`, () => {
-        let sampleDocuments: Array<Record<string, unknown>> = [];
+        let sampleDocuments: Array<SearchHit<Record<string, unknown>>> = [];
 
         evaluate.beforeAll(async ({ esClient, log }) => {
           const source = resolveScenarioSnapshotSource({
@@ -112,7 +113,7 @@ evaluate.describe(
                 concurrency: 1,
                 task: async ({ input }) => {
                   const taskSampleDocuments = (
-                    input as { sample_documents: Array<Record<string, unknown>> }
+                    input as { sample_documents: Array<SearchHit<Record<string, unknown>>> }
                   ).sample_documents;
 
                   const { features } = await identifyFeatures({

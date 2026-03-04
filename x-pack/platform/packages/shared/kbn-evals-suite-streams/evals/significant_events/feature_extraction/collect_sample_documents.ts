@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { FeatureExtractionScenario } from '../datasets';
 
@@ -58,8 +58,8 @@ const addUniqueHitsToSample = ({
   seen,
   uniqueApps,
 }: {
-  hits: Array<{ _source?: Record<string, unknown> }>;
-  docs: Array<Record<string, unknown>>;
+  hits: Array<SearchHit<Record<string, unknown>>>;
+  docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
   uniqueApps: Set<string>;
 }): void => {
@@ -75,7 +75,7 @@ const addUniqueHitsToSample = ({
     }
 
     seen.add(key);
-    docs.push(source);
+    docs.push(hit);
 
     const app = getAppNameFromLogDoc(source);
     if (app) {
@@ -96,10 +96,10 @@ export const collectSampleDocuments = async ({
   esClient: Client;
   scenario: FeatureExtractionScenario;
   log: ToolingLog;
-}): Promise<Array<Record<string, unknown>>> => {
+}): Promise<Array<SearchHit<Record<string, unknown>>>> => {
   const query = scenario.input.log_query_filter ?? { match_all: {} };
 
-  const docs: Array<Record<string, unknown>> = [];
+  const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const uniqueApps = new Set<string>();
   const seen = new Set<string>();
 

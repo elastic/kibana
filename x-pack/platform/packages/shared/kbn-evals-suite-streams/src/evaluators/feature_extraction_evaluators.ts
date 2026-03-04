@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import { selectEvaluators } from '@kbn/evals';
 import type { BaseFeature } from '@kbn/streams-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
 
 export const VALID_FEATURE_TYPES = [
@@ -23,7 +24,7 @@ export type ValidFeatureType = (typeof VALID_FEATURE_TYPES)[number];
 
 export interface FeatureExtractionEvaluationExample {
   input: {
-    sample_documents: Array<Record<string, unknown>>;
+    sample_documents: Array<SearchHit<Record<string, unknown>>>;
   };
   output: {
     criteria: EvaluationCriterion[];
@@ -195,9 +196,14 @@ const evidenceGroundingEvaluator = {
   kind: 'CODE' as const,
   evaluate: async ({ input, output }: CodeEvaluatorParams) => {
     const features = output ?? [];
-    const documents = Array.isArray(input.sample_documents)
+    const rawDocs = Array.isArray(input.sample_documents)
       ? (input.sample_documents as Array<Record<string, unknown>>)
       : [];
+
+    const documents = rawDocs.map((doc) => {
+      const source = doc._source as Record<string, unknown> | undefined;
+      return source ?? doc;
+    });
 
     let totalEvidence = 0;
     let groundedEvidence = 0;
