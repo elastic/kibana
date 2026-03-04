@@ -165,6 +165,15 @@ components:
             description:
               description: The description of the integration
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            version:
+              description: The version of the integration
+              type: string
+            createdBy:
+              description: The username of the user who created the integration
+              type: string
+            createdByProfileUid:
+              description: The profile UID of the user who created the integration
+              type: string
             dataStreams:
               type: array
               description: The data streams of the integration
@@ -183,6 +192,7 @@ components:
             - totalDataStreamCount
             - successfulDataStreamCount
             - status
+            - createdBy
           properties:
             integrationId:
               description: The ID of the integration
@@ -190,12 +200,24 @@ components:
             title:
               description: The title of the integration
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            logo:
+              description: The logo of the integration (base64 encoded SVG)
+              type: string
             totalDataStreamCount:
               description: The number of data streams of the integration
               type: integer
             successfulDataStreamCount:
               description: The number of successful data streams of the integration
               type: integer
+            version:
+              description: The version of the integration
+              type: string
+            createdBy:
+              description: The username of the user who created the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            createdByProfileUid:
+              description: The profile UID of the user who created the integration
+              type: string
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"

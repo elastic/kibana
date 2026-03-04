@@ -24,6 +24,7 @@ import {
   afterGreaterThanPreviousStep,
   afterMustBeInteger,
   afterMustBeNonNegative,
+  afterSmallerThanDataRetention,
   requiredAfterValue,
 } from '../validations';
 import { useOnStepFieldErrorsChange } from '../error_tracking';
@@ -32,6 +33,8 @@ export interface AfterFieldProps {
   item: ArrayItem;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  dataRetentionMs?: number;
+  dataRetentionEsFormat?: string;
 }
 
 const getAfterFieldsToValidateOnChange = (stepIndex: number, includeCurrent = true) => {
@@ -44,7 +47,13 @@ const getAfterFieldsToValidateOnChange = (stepIndex: number, includeCurrent = tr
     ]);
 };
 
-export const AfterField = ({ item, dataTestSubj, timeUnitOptions }: AfterFieldProps) => {
+export const AfterField = ({
+  item,
+  dataTestSubj,
+  timeUnitOptions,
+  dataRetentionMs,
+  dataRetentionEsFormat,
+}: AfterFieldProps) => {
   const form = useFormContext();
   const stepIndex = getStepIndexFromArrayItemPath(item.path);
 
@@ -84,8 +93,18 @@ export const AfterField = ({ item, dataTestSubj, timeUnitOptions }: AfterFieldPr
       { validator: afterMustBeNonNegative },
       { validator: afterMustBeInteger },
       ...(stepIndex <= 0 ? [] : [{ validator: afterGreaterThanPreviousStep }]),
+      ...(dataRetentionMs !== undefined && dataRetentionEsFormat
+        ? [
+            {
+              validator: afterSmallerThanDataRetention({
+                retentionMs: dataRetentionMs,
+                retentionEsFormat: dataRetentionEsFormat,
+              }),
+            },
+          ]
+        : []),
     ],
-    [stepIndex]
+    [dataRetentionEsFormat, dataRetentionMs, stepIndex]
   );
 
   const afterValueConfig = useMemo(
@@ -172,9 +191,9 @@ export const AfterField = ({ item, dataTestSubj, timeUnitOptions }: AfterFieldPr
                 return (
                   <EuiFormRow
                     label={i18n.translate('xpack.streams.editDslStepsFlyout.afterLabel', {
-                      defaultMessage: 'Downsample after data stored',
+                      defaultMessage: 'Downsample data after',
                     })}
-                    helpText={isInvalid ? undefined : helpText}
+                    helpText={helpText}
                     isInvalid={isInvalid}
                     error={isInvalid ? errorMessage : null}
                   >
@@ -187,7 +206,7 @@ export const AfterField = ({ item, dataTestSubj, timeUnitOptions }: AfterFieldPr
                           aria-label={i18n.translate(
                             'xpack.streams.editDslStepsFlyout.afterAriaLabel',
                             {
-                              defaultMessage: 'Downsample after value',
+                              defaultMessage: 'Downsample data after value',
                             }
                           )}
                           value={currentValue}

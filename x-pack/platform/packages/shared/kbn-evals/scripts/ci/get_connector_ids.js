@@ -53,17 +53,36 @@ const connectorIds =
     : connectorEntries
         .filter(([id, connector]) => {
           const defaultModel = connector?.config?.defaultModel;
-          return (
-            requested.includes(id) ||
-            (typeof defaultModel === 'string' && requested.includes(defaultModel))
-          );
+          const eisModelId = connector?.config?.providerConfig?.model_id;
+
+          const matchesRequested = (requestedValue) => {
+            if (requestedValue === id) return true;
+            if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
+            if (typeof eisModelId === 'string') {
+              if (requestedValue === eisModelId) return true;
+              if (
+                requestedValue.startsWith('eis/') &&
+                requestedValue.slice('eis/'.length) === eisModelId
+              ) {
+                return true;
+              }
+            }
+            return false;
+          };
+
+          return requested.some(matchesRequested);
         })
         .map(([id]) => id);
 
 if (requested.length > 0 && !requested.includes('all') && connectorIds.length === 0) {
-  const availableModels = connectorEntries
-    .map(([, connector]) => connector?.config?.defaultModel)
-    .filter((m) => typeof m === 'string');
+  const availableModels = connectorEntries.flatMap(([, connector]) => {
+    const out = [];
+    const defaultModel = connector?.config?.defaultModel;
+    if (typeof defaultModel === 'string') out.push(defaultModel);
+    const eisModelId = connector?.config?.providerConfig?.model_id;
+    if (typeof eisModelId === 'string') out.push(`eis/${eisModelId}`);
+    return out;
+  });
   console.error(
     `No connectors matched EVAL_MODEL_GROUPS="${requested.join(',')}". ` +
       `Available models: ${availableModels.join(',')}`

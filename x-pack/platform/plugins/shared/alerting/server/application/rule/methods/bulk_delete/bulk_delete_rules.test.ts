@@ -8,6 +8,7 @@
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
+  coreFeatureFlagsMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
@@ -98,6 +99,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
@@ -694,7 +697,7 @@ describe('bulkDelete', () => {
     });
 
     test('logs audit event when authentication failed', async () => {
-      authorization.ensureAuthorized.mockImplementation(() => {
+      authorization.bulkEnsureAuthorized.mockImplementation(() => {
         throw new Error('Unauthorized');
       });
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({

@@ -47,11 +47,19 @@ const labelsSchemaProps = {
 
 const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'));
 
+const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+  meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
+});
+
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
     schema.object(legendSchemaProps, {
-      meta: { id: 'heatmapLegend', description: 'Legend configuration' },
+      meta: {
+        id: 'heatmapLegend',
+        title: 'Legend',
+        description: 'Legend configuration',
+      },
     })
   ),
   ...sharedPanelInfoSchema,
@@ -64,8 +72,15 @@ const heatmapSharedStateSchema = {
             {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
+              sort: schema.maybe(heatmapSortPredicateSchema),
             },
-            { meta: { id: 'heatmapXAxis', description: 'X axis configuration' } }
+            {
+              meta: {
+                id: 'heatmapXAxis',
+                title: 'X Axis',
+                description: 'X axis configuration',
+              },
+            }
           )
         ),
         y: schema.maybe(
@@ -73,12 +88,25 @@ const heatmapSharedStateSchema = {
             {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(simpleLabelsSchema),
+              sort: schema.maybe(heatmapSortPredicateSchema),
             },
-            { meta: { id: 'heatmapYAxis', description: 'Y axis configuration' } }
+            {
+              meta: {
+                id: 'heatmapYAxis',
+                title: 'Y Axis',
+                description: 'Y axis configuration',
+              },
+            }
           )
         ),
       },
-      { meta: { id: 'heatmapAxes', description: 'Axis configuration for X and Y axes' } }
+      {
+        meta: {
+          id: 'heatmapAxes',
+          title: 'Axes',
+          description: 'Axis configuration for X and Y axes',
+        },
+      }
     )
   ),
   cells: schema.maybe(
@@ -95,7 +123,7 @@ const heatmapSharedStateSchema = {
           })
         ),
       },
-      { meta: { id: 'heatmapCells', description: 'Cells configuration' } }
+      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
     )
   ),
 };
@@ -124,7 +152,7 @@ export const heatmapStateSchemaNoESQL = schema.object(
       heatmapStateMetricOptionsSchemaProps
     ),
   },
-  { meta: { id: 'heatmapNoESQL' } }
+  { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
 );
 
 export const heatmapStateSchemaESQL = schema.object(
@@ -134,11 +162,11 @@ export const heatmapStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
-  { meta: { id: 'heatmapESQL' } }
+  { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );
 
 export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
-  meta: { id: 'heatmapChartSchema' },
+  meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
 });
 
 export type HeatmapState = TypeOf<typeof heatmapStateSchema>;

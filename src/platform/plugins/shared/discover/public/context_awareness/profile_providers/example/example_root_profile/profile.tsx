@@ -7,26 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
-import React, { useState } from 'react';
+import React from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import { ExampleContextProvider } from '../example_context';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
   isExperimental: true,
   profile: {
-    getRenderAppWrapper,
     getDefaultAdHocDataViews,
+    getDefaultEsqlQuery,
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       '@timestamp': (props) => {
@@ -83,6 +75,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                   // To do so, simply return a React element and call onFinishAction when you're done.
                   return (
                     <EuiFlyout
+                      aria-label="Example custom action flyout"
                       onClose={onFinishAction}
                       data-test-subj="example-custom-root-action12-flyout"
                     >
@@ -111,45 +104,12 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
 export const createExampleSolutionViewRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-solution-view-root-profile',
   isExperimental: true,
-  profile: { getRenderAppWrapper, getDefaultAdHocDataViews },
+  profile: { getDefaultAdHocDataViews },
   resolve: (params) => ({
     isMatch: true,
     context: { solutionType: params.solutionNavId as SolutionType },
   }),
 });
-
-const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper'] =
-  (PrevWrapper) =>
-  ({ children }) => {
-    const [currentMessage, setCurrentMessage] = useState<string | undefined>(undefined);
-
-    return (
-      <PrevWrapper>
-        <ExampleContextProvider value={{ currentMessage, setCurrentMessage }}>
-          {children}
-          {currentMessage && (
-            <EuiFlyout
-              type="push"
-              maxWidth={500}
-              onClose={() => setCurrentMessage(undefined)}
-              data-test-subj="exampleRootProfileFlyout"
-            >
-              <EuiFlyoutHeader hasBorder>
-                <EuiTitle size="m">
-                  <h2>Inspect message</h2>
-                </EuiTitle>
-              </EuiFlyoutHeader>
-              <EuiFlyoutBody>
-                <EuiCodeBlock isCopyable data-test-subj="exampleRootProfileCurrentMessage">
-                  {currentMessage}
-                </EuiCodeBlock>
-              </EuiFlyoutBody>
-            </EuiFlyout>
-          )}
-        </ExampleContextProvider>
-      </PrevWrapper>
-    );
-  };
 
 const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocDataViews'] =
   (prev) => () =>
@@ -162,3 +122,9 @@ const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocD
         timeFieldName: '@timestamp',
       },
     ];
+
+const getDefaultEsqlQuery: RootProfileProvider['profile']['getDefaultEsqlQuery'] =
+  (prev) => () => ({
+    ...prev(),
+    query: 'FROM my-example-* | LIMIT 10',
+  });

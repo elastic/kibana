@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { formatMillisecondsInUnit, parseInterval, toMilliseconds } from './duration_utils';
+import {
+  formatMillisecondsInUnit,
+  getDoubledDurationFromPrevious,
+  parseInterval,
+  toMilliseconds,
+} from './duration_utils';
 
 describe('downsampling/shared/duration_utils', () => {
   describe('toMilliseconds()', () => {
@@ -17,7 +22,6 @@ describe('downsampling/shared/duration_utils', () => {
     it('returns NaN for non-numeric values', () => {
       expect(Number.isNaN(toMilliseconds('abc', 'd'))).toBe(true);
       expect(Number.isNaN(toMilliseconds('1d', 'd'))).toBe(true);
-      expect(Number.isNaN(toMilliseconds('1.5', 'h'))).toBe(true);
     });
 
     it('converts numeric values using the unit multiplier', () => {
@@ -25,6 +29,7 @@ describe('downsampling/shared/duration_utils', () => {
       expect(toMilliseconds('2', 'm')).toBe(120_000);
       expect(toMilliseconds('3', 'h')).toBe(10_800_000);
       expect(toMilliseconds('4', 'd')).toBe(345_600_000);
+      expect(toMilliseconds('1.5', 'h')).toBe(5_400_000);
       expect(toMilliseconds('1', 'ms')).toBe(1);
       expect(toMilliseconds('1000', 'micros')).toBe(1);
       expect(toMilliseconds('1000000', 'nanos')).toBe(1);
@@ -36,6 +41,7 @@ describe('downsampling/shared/duration_utils', () => {
       expect(parseInterval('20d')).toEqual({ value: '20', unit: 'd' });
       expect(parseInterval('30m')).toEqual({ value: '30', unit: 'm' });
       expect(parseInterval('5s')).toEqual({ value: '5', unit: 's' });
+      expect(parseInterval('1.5h')).toEqual({ value: '1.5', unit: 'h' });
       expect(parseInterval('0ms')).toEqual({ value: '0', unit: 'ms' });
       expect(parseInterval('1500ms')).toEqual({ value: '1500', unit: 'ms' });
       expect(parseInterval('500micros')).toEqual({ value: '500', unit: 'micros' });
@@ -52,7 +58,6 @@ describe('downsampling/shared/duration_utils', () => {
       expect(parseInterval('1.2.3d')).toBeUndefined();
       expect(parseInterval(' 1d')).toBeUndefined();
       expect(parseInterval('1d ')).toBeUndefined();
-      expect(parseInterval('1.5h')).toBeUndefined();
     });
   });
 
@@ -71,6 +76,62 @@ describe('downsampling/shared/duration_utils', () => {
     it('allows overriding precision', () => {
       expect(formatMillisecondsInUnit(1.234 * 3_600_000, 'h', 3)).toBe('1.234h');
       expect(formatMillisecondsInUnit(106_617_600, 'd', 3)).toBe('1.234d');
+    });
+  });
+
+  describe('getDoubledDurationFromPrevious()', () => {
+    it('doubles the previous value and preserves the unit', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '30',
+          previousUnit: 'd',
+          previousValueFallback: 30,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '60', unit: 'd', ms: 60 * 86_400_000 });
+    });
+
+    it('uses fallback when previous value is invalid', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: 'abc',
+          previousUnit: 'h',
+          previousValueFallback: 1,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '2', unit: 'h', ms: 2 * 3_600_000 });
+    });
+
+    it('uses fallback when previous value violates minimum constraints', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '-5',
+          previousUnit: 'm',
+          previousValueFallback: 0,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '0', unit: 'm', ms: 0 });
+
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '0',
+          previousUnit: 'd',
+          previousValueFallback: 1,
+          previousValueMinExclusive: 0,
+        })
+      ).toEqual({ value: '2', unit: 'd', ms: 2 * 86_400_000 });
+    });
+
+    it('allows overriding the multiplier', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '10',
+          previousUnit: 's',
+          multiplier: 3,
+          previousValueFallback: 10,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '30', unit: 's', ms: 30_000 });
     });
   });
 });

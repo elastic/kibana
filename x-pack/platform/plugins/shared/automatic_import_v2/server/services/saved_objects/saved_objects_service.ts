@@ -35,7 +35,7 @@ export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline: Pipeline;
-  pipelineDocs?: Array<estypes.IngestSimulateDocumentResult>;
+  pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -46,50 +46,6 @@ export class AutomaticImportSavedObjectService {
   constructor(logger: LoggerFactory, savedObjectsClient: SavedObjectsClient) {
     this.logger = logger.get('savedObjectsService');
     this.savedObjectsClient = savedObjectsClient;
-  }
-
-  /**
-   * Helper function to parse and increment a semantic version string (x.y.z)
-   * @param currentVersion - Current semantic version string (e.g., "1.0.0")
-   * @param incrementType - Optional: Which part to increment: 'major' | 'minor' | 'patch'. Defaults to 'patch'.
-   * @returns Incremented semantic version string
-   */
-  private incrementSemanticVersion(
-    currentVersion: string | undefined,
-    incrementType: 'major' | 'minor' | 'patch' = 'patch'
-  ): string {
-    if (!currentVersion) {
-      return '0.0.0';
-    }
-
-    const versionParts = currentVersion.split('.');
-    if (versionParts.length !== 3) {
-      throw new Error('Invalid version format');
-    }
-
-    let [major, minor, patch] = versionParts.map((v) => parseInt(v, 10));
-
-    if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-      return '0.0.0';
-    }
-
-    switch (incrementType) {
-      case 'major':
-        major += 1;
-        minor = 0;
-        patch = 0;
-        break;
-      case 'minor':
-        minor += 1;
-        patch = 0;
-        break;
-      case 'patch':
-      default:
-        patch += 1;
-        break;
-    }
-
-    return `${major}.${minor}.${patch}`;
   }
 
   /**
@@ -109,8 +65,8 @@ export class AutomaticImportSavedObjectService {
     try {
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
-        status: TASK_STATUSES.pending,
         created_by: authenticatedUser.username,
+        created_by_profile_uid: authenticatedUser.profile_uid,
         metadata: {
           title: integrationParams.title,
           description: integrationParams.description,
@@ -142,15 +98,13 @@ export class AutomaticImportSavedObjectService {
   /**
    * Create or update an integration
    * @param data - The integration data. Must include an integration_id.
-   * @param expectedVersion - The expected version for optimistic concurrency control at the application layer. Required to ensure data consistency.
-   * @param versionUpdate - Optional: specify which version part to increment ('major' | 'minor' | 'patch'). Defaults to incrementing 'patch'.
+   * @param newVersion - The target version to store in integration metadata.
    * @param options - The options for the update.
    * @returns The update response
    */
   public async updateIntegration(
     data: IntegrationAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
+    newVersion: string,
     options?: SavedObjectsUpdateOptions<IntegrationAttributes>
   ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
     const { integration_id: integrationId } = data;
@@ -167,21 +121,14 @@ export class AutomaticImportSavedObjectService {
         throw new Error(`Integration ${integrationId} not found`);
       }
 
-      const currentVersion = existingIntegration.metadata?.version || '0.0.0';
-      if (currentVersion !== expectedVersion) {
-        throw new Error(
-          `Version conflict: Integration ${integrationId} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`
-        );
-      }
-
-      const newVersion = this.incrementSemanticVersion(currentVersion, versionUpdate);
-
       const integrationData: IntegrationAttributes = {
         integration_id: existingIntegration.integration_id,
         created_by: existingIntegration.created_by,
-        status: data.status,
+        created_by_profile_uid:
+          data.created_by_profile_uid ?? existingIntegration.created_by_profile_uid,
         last_updated_by: data.last_updated_by ?? existingIntegration.last_updated_by,
         last_updated_at: new Date().toISOString(),
+        status: data.status ?? existingIntegration.status,
         metadata: {
           ...existingIntegration.metadata,
           ...data.metadata,
@@ -492,6 +439,8 @@ export class AutomaticImportSavedObjectService {
           filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(
             integrationId
           )}`,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
         });
       return dataStreamsResponse.saved_objects.map((dataStream) => dataStream.attributes);
     } catch (error) {
