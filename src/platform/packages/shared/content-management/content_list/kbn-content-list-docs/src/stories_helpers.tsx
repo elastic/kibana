@@ -32,11 +32,12 @@ import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provide
 import {
   MOCK_DASHBOARDS,
   createMockFindItems,
+  createMockFavoritesClient,
   extractTagIds,
   mockTagsService,
 } from '@kbn/content-list-mock-data';
 
-export { mockTagsService };
+export { mockTagsService, createMockFavoritesClient };
 
 // =============================================================================
 // Mock Data
