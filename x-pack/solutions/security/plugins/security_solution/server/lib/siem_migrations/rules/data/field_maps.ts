@@ -104,6 +104,7 @@ export const getIntegrationsFieldMap: ({
     required: true,
     ...(elserInferenceId ? { inference_id: elserInferenceId } : {}),
   },
+  fields_metadata: { type: 'object', required: false },
 });
 
 export const getPrebuiltRulesFieldMap: ({

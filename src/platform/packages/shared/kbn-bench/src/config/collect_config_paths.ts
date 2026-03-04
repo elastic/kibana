@@ -8,7 +8,7 @@
  */
 import Path from 'path';
 import execa from 'execa';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 export async function collectConfigPaths({
   patterns,
@@ -47,7 +47,7 @@ export async function collectConfigPaths({
 
   const matchingFiles = matchers.length
     ? files.filter((file) => {
-        return matchers.some((matcher) => matcher.test(file));
+        return matchers.some((matcher) => matcher && matcher.test(file));
       })
     : files;
 

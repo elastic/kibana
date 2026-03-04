@@ -34,4 +34,8 @@ export class TelemetryClient implements ITelemetryClient {
   ) => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED, params);
   };
+
+  public reportSloInfoShown = (): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_INFO_SHOWN, {});
+  };
 }
