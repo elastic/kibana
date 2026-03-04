@@ -115,7 +115,6 @@ enabled:
   - src/platform/test/functional/apps/discover/group17/config.ts
   - src/platform/test/functional/apps/discover/group18/config.ts
   - src/platform/test/functional/apps/discover/group19/config.ts
-  - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config_1.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/discover/query_mode/config.ts
@@ -383,7 +382,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group4/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group5/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
-  - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config_1.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config_2.ts
   - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
@@ -395,10 +393,8 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group4/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group5/config.ts
-  - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config_1.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config_2.ts
-  - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config_1.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config_2.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/group1/config.ts

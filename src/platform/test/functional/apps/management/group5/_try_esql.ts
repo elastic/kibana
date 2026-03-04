@@ -11,13 +11,15 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const PageObjects = getPageObjects(['settings', 'common', 'discover']);
 
   describe('No Data Views: Try ES|QL', () => {
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.emptyKibanaIndex();
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('navigates to Discover and presents an ES|QL query', async () => {

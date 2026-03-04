@@ -8,17 +8,14 @@
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(
-    require.resolve('../../../../configs/ess/rules_management.trial.config')
-  );
+  const baseFleetApiConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
-  const testConfig = {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('..'), require.resolve('../index_2')],
+  return {
+    ...baseFleetApiConfig.getAll(),
+    testFiles: [require.resolve('./apis/index_2')],
     junit: {
-      reportName: 'Rules Management - Prebuilt Rules Upgrade (Customization Enabled) - ESS Env',
+      reportName: 'X-Pack Fleet API Integration Tests',
     },
+    indexRefreshInterval: '1s',
   };
-
-  return testConfig;
 }

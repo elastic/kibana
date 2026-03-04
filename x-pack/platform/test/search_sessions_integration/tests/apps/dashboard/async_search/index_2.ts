@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const searchSessions = getService('searchSessions');
   const { common } = getPageObjects(['common']);
 
-  describe('Dashboard', function () {
+  describe('Dashboard (Part 2)', function () {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
@@ -32,7 +32,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await searchSessions.deleteAllSearchSessions();
     });
 
-    loadTestFile(require.resolve('./entrypoint'));
-    loadTestFile(require.resolve('./async_search'));
+    loadTestFile(require.resolve('./session_searches_integration'));
+    loadTestFile(require.resolve('./save_search_session'));
   });
 }
