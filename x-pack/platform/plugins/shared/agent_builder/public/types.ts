@@ -39,7 +39,7 @@ export interface ConversationSidebarRef {
 }
 
 export interface OpenConversationSidebarReturn {
-  flyoutRef: ConversationSidebarRef;
+  chatRef: ConversationSidebarRef;
 }
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -103,10 +103,10 @@ export interface AgentBuilderPluginStart {
    * ```tsx
    * // Open a new conversation with close handler
    * const { chatRef } = plugins.agentBuilder.openAgentBuilderChat({
-   *   onClose: () => console.log('Sidebar closed')
+   *   onClose: () => console.log('Chat closed')
    * });
    *
-   * // Programmatically close the sidebar
+   * // Programmatically close the chat
    * chatRef.close();
    * ```
    */

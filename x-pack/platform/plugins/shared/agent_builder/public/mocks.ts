@@ -72,7 +72,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
           close: jest.fn(),
         };
         return {
-          flyoutRef: mockSidebarRef,
+          chatRef: mockSidebarRef,
         };
       }),
     addAttachment: jest.fn(),

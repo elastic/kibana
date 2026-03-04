@@ -14,7 +14,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 
-const mockFlyoutRef = {
+const mockChatRef = {
   close: jest.fn(),
 };
 
@@ -22,7 +22,7 @@ const mockOpenAgentBuilderChat = jest.fn<
   unknown,
   Parameters<AgentBuilderPluginStart['openAgentBuilderChat']>
 >(() => ({
-  flyoutRef: mockFlyoutRef,
+  chatRef: mockChatRef,
 }));
 
 const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {

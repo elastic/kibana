@@ -169,7 +169,7 @@ export class AgentBuilderPlugin
       // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
-        return { flyoutRef: this.activeSidebarRef };
+        return { chatRef: this.activeSidebarRef };
       }
 
       // Set runtime context before opening
@@ -197,7 +197,7 @@ export class AgentBuilderPlugin
       };
 
       this.activeSidebarRef = sidebarRef;
-      return { flyoutRef: sidebarRef };
+      return { chatRef: sidebarRef };
     };
 
     const agentBuilderService: AgentBuilderPluginStart = {
@@ -216,7 +216,7 @@ export class AgentBuilderPlugin
         // If there is already an active sidebar, update its props
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           this.sidebarCallbacks.updateProps(config);
-          return { flyoutRef: this.activeSidebarRef };
+          return { chatRef: this.activeSidebarRef };
         }
       },
       clearAgentBuilderChatConfig: () => {
