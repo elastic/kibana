@@ -91,7 +91,7 @@ const StickySidebar = styled(EuiFlexItem)`
 `;
 
 export interface SidebarProps extends Props {
-  CreateIntegrationCardButton?: React.ComponentType<{ compressed?: boolean }>;
+  CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
   onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
@@ -152,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </span>
               </EuiLink>
             ) : (
-              <CreateIntegrationCardButton compressed />
+              <CreateIntegrationCardButton />
             )}
           </EuiAccordion>
           <EuiSpacer size="m" />
