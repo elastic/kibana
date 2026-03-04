@@ -1,3 +1,7 @@
+env:
+  BUILDKITE_GIT_CLONE_FLAGS: "--filter=tree:0"
+  BUILDKITE_GIT_FETCH_FLAGS: "--prune --filter=tree:0"
+
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
