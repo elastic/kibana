@@ -44,7 +44,7 @@ describe('BreadcrumbsWithExtensionsWrapper', () => {
       return () => {};
     };
     const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([
-      { content: mount },
+      { mount },
     ]);
     render(
       <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>

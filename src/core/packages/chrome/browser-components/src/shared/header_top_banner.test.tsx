@@ -35,7 +35,7 @@ describe('HeaderTopBanner', () => {
       el.setAttribute('data-test-subj', 'mount-banner');
       return () => {};
     };
-    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>({ content: mount });
+    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>({ mount });
     renderWithEuiTheme(<HeaderTopBanner headerBanner$={headerBanner$} />);
     expect(screen.getByTestId('mount-banner')).toBeInTheDocument();
   });
