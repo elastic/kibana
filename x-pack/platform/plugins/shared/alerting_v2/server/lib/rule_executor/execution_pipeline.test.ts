@@ -346,7 +346,7 @@ describe('RuleExecutionPipeline', () => {
 
       expect(mockEsClient.indices.refresh).toHaveBeenCalledTimes(1);
       expect(mockEsClient.indices.refresh).toHaveBeenCalledWith({
-        index: '.alerts-events',
+        index: '.alerting-events',
       });
     });
 
