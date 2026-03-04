@@ -45,10 +45,7 @@ function findSubjects(component: ReactWrapper) {
 }
 
 async function mountAndFindSubjects(
-  props: Omit<
-    DiscoverNoResultsProps,
-    'onDisableFilters' | 'data' | 'isTimeBased' | 'stateContainer'
-  >
+  props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'isTimeBased'>
 ) {
   const isTimeBased = props.dataView.isTimeBased();
   const toolkit = getDiscoverInternalStateMock({ services });

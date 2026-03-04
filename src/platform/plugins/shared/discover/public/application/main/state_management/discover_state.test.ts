@@ -21,7 +21,7 @@ jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
 }));
 
-import type { DiscoverStateContainerParams } from '../../../customizations';
+import type { DiscoverStateMockParams } from '../../../__mocks__/discover_state.mock';
 import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
   fromSavedSearchToSavedObjectTab,
@@ -102,7 +102,11 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
     state: nextState,
     customizationService: await getConnectedCustomizationService({
       customizationCallbacks: [],
-      stateContainer: nextState,
+      internalState: nextState.internalState,
+      injectCurrentTab: nextState.injectCurrentTab,
+      getCurrentTab: nextState.getCurrentTab,
+      runtimeStateManager: nextState.runtimeStateManager,
+      stateStorage: nextState.stateStorage,
       services: mockServices,
     }),
     runtimeStateManager,
@@ -117,7 +121,7 @@ describe('Discover state', () => {
 
   describe('Test discover state', () => {
     let history: History<HistoryLocationState>;
-    let state: DiscoverStateContainerParams;
+    let state: DiscoverStateMockParams;
     const getCurrentUrl = () => history.createHref(history.location);
 
     beforeEach(async () => {
@@ -206,7 +210,7 @@ describe('Discover state', () => {
   describe('Test discover state with overridden state storage', () => {
     let history: History<HistoryLocationState>;
     let stateStorage: IKbnUrlStateStorage;
-    let state: DiscoverStateContainerParams;
+    let state: DiscoverStateMockParams;
 
     beforeEach(async () => {
       jest.useFakeTimers();
@@ -1475,7 +1479,7 @@ describe('Discover state', () => {
 
   describe('Test discover state with embedded mode', () => {
     let history: History<HistoryLocationState>;
-    let state: DiscoverStateContainerParams;
+    let state: DiscoverStateMockParams;
     const getCurrentUrl = () => history.createHref(history.location);
 
     beforeEach(async () => {

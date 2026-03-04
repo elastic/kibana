@@ -40,16 +40,12 @@ describe('getConnectedCustomizationService', () => {
     const injectCurrentTab = createTabActionInjector(tabId);
     const getCurrentTab = () => selectTab(toolkit.internalState.getState(), tabId);
     const servicePromise = getConnectedCustomizationService({
-      stateContainer: {
-        internalState: toolkit.internalState,
-        runtimeStateManager: toolkit.runtimeStateManager,
-        stateStorage: toolkit.stateStorageContainer,
-        searchSessionManager: toolkit.searchSessionManager,
-        customizationContext: toolkit.customizationContext,
-        injectCurrentTab,
-        getCurrentTab,
-      },
       customizationCallbacks,
+      internalState: toolkit.internalState,
+      injectCurrentTab,
+      getCurrentTab,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      stateStorage: toolkit.stateStorageContainer,
       services,
     });
     let service: ConnectedCustomizationService | undefined;

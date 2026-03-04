@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverStateContainerParams } from '../customizations';
 import { getExtendedDiscoverStateContainer } from '../customizations';
 import {
   getDataStateContainer,
@@ -17,7 +16,12 @@ import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { createDiscoverServicesMock, discoverServiceMock } from './services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import type { RuntimeStateManager, TabState } from '../application/main/state_management/redux';
+import type {
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+} from '../application/main/state_management/redux';
 import {
   DEFAULT_TAB_STATE,
   internalStateActions,
@@ -56,6 +60,20 @@ interface CreateInternalStateStoreMockOptions {
   stateStorageContainer?: IKbnUrlStateStorage;
   customizationContext?: DiscoverCustomizationContext;
   services?: DiscoverServices;
+}
+
+/**
+ * @deprecated Used only by deprecated `getDiscoverStateMock`, `createDataStateContainer`,
+ * and `initializeDataStateInDiscoverStateMock`. Use `getDiscoverInternalStateMock` instead.
+ */
+export interface DiscoverStateMockParams {
+  internalState: InternalStateStore;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
+  runtimeStateManager: RuntimeStateManager;
+  stateStorage: IKbnUrlStateStorage;
+  searchSessionManager: DiscoverSearchSessionManager;
+  customizationContext: DiscoverCustomizationContext;
 }
 
 function createInternalStateStoreMock({
@@ -250,18 +268,13 @@ export function getDiscoverInternalStateMock({
 
         const injectCurrentTab = createTabActionInjector(tabId);
         const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-        const stateContainerParams: DiscoverStateContainerParams = {
+        const customizationService = await getConnectedCustomizationService({
+          customizationCallbacks: [],
           internalState,
           injectCurrentTab,
           getCurrentTab,
           runtimeStateManager,
           stateStorage: stateStorageContainer,
-          searchSessionManager,
-          customizationContext,
-        };
-        const customizationService = await getConnectedCustomizationService({
-          stateContainer: stateContainerParams,
-          customizationCallbacks: [],
           services,
         });
 
@@ -528,7 +541,15 @@ export function getDiscoverStateMock({
 
   const injectCurrentTab = createTabActionInjector(currentTabId);
   const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
-  const stateContainer: DiscoverStateContainerParams = {
+  const extendedContainer = getExtendedDiscoverStateContainer({
+    internalState,
+    injectCurrentTab,
+    getCurrentTab,
+    runtimeStateManager,
+    stateStorage: stateStorageContainer,
+    services,
+  });
+  const stateContainer: DiscoverStateMockParams = {
     internalState,
     injectCurrentTab,
     getCurrentTab,
@@ -537,7 +558,6 @@ export function getDiscoverStateMock({
     searchSessionManager,
     customizationContext,
   };
-  const extendedContainer = getExtendedDiscoverStateContainer(stateContainer, services);
 
   const tabRuntimeState = selectTabRuntimeState(
     runtimeStateManager,
@@ -572,7 +592,7 @@ export function getDiscoverStateMock({
  * @deprecated Prefer using `toolkit.initializeSingleTab()` which creates and stores the dataStateContainer.
  */
 export function createDataStateContainer(
-  stateContainer: DiscoverStateContainerParams,
+  stateContainer: DiscoverStateMockParams,
   services: DiscoverServices = discoverServiceMock
 ): DiscoverDataStateContainer {
   return getDataStateContainer({
@@ -593,7 +613,7 @@ export function createDataStateContainer(
  * @deprecated Prefer using `toolkit.initializeSingleTab()` which handles this automatically.
  */
 export function initializeDataStateInDiscoverStateMock(
-  stateContainer: DiscoverStateContainerParams,
+  stateContainer: DiscoverStateMockParams,
   services: DiscoverServices = discoverServiceMock
 ): DiscoverDataStateContainer {
   const { runtimeStateManager, internalState } = stateContainer;

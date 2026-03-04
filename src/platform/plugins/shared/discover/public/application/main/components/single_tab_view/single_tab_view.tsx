@@ -18,7 +18,6 @@ import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { getDataStateContainer } from '../../state_management/discover_data_state_container';
-import type { DiscoverStateContainerParams } from '../../../../customizations';
 import {
   RuntimeStateProvider,
   internalStateActions,
@@ -92,18 +91,13 @@ export const SingleTabView = ({
     } = {}) => {
       const injectCurrentTab = createTabActionInjector(currentTabId);
       const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
-      const stateContainerParams: DiscoverStateContainerParams = {
+      const customizationService = await getConnectedCustomizationService({
+        customizationCallbacks,
         internalState,
         injectCurrentTab,
         getCurrentTab,
         runtimeStateManager,
         stateStorage: urlStateStorage,
-        searchSessionManager,
-        customizationContext,
-      };
-      const customizationService = await getConnectedCustomizationService({
-        stateContainer: stateContainerParams,
-        customizationCallbacks,
         services,
       });
 

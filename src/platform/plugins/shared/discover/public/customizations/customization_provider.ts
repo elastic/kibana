@@ -24,17 +24,7 @@ import type {
   TabActionInjector,
   TabState,
 } from '../application/main/state_management/redux';
-import type { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 
-export interface DiscoverStateContainerParams {
-  internalState: InternalStateStore;
-  injectCurrentTab: TabActionInjector;
-  getCurrentTab: () => TabState;
-  runtimeStateManager: RuntimeStateManager;
-  stateStorage: IKbnUrlStateStorage;
-  searchSessionManager: DiscoverSearchSessionManager;
-  customizationContext: DiscoverCustomizationContext;
-}
 import type {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
@@ -80,31 +70,42 @@ export interface ConnectedCustomizationService extends DiscoverCustomizationServ
   cleanup: () => Promise<void>;
 }
 
-export const getExtendedDiscoverStateContainer = (
-  stateContainer: DiscoverStateContainerParams,
-  services: DiscoverServices
-): ExtendedDiscoverStateContainer => ({
-  internalState: stateContainer.internalState,
-  injectCurrentTab: stateContainer.injectCurrentTab,
-  getCurrentTab: stateContainer.getCurrentTab,
-  stateStorage: stateContainer.stateStorage,
+export const getExtendedDiscoverStateContainer = ({
+  internalState,
+  injectCurrentTab,
+  getCurrentTab,
+  runtimeStateManager,
+  stateStorage,
+  services,
+}: {
+  internalState: InternalStateStore;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
+  runtimeStateManager: RuntimeStateManager;
+  stateStorage: IKbnUrlStateStorage;
+  services: DiscoverServices;
+}): ExtendedDiscoverStateContainer => ({
+  internalState,
+  injectCurrentTab,
+  getCurrentTab,
+  stateStorage,
   createAppStateObservable: () =>
     createTabAppStateObservable({
-      tabId: stateContainer.getCurrentTab().id,
-      internalState$: from(stateContainer.internalState),
-      getState: stateContainer.internalState.getState,
+      tabId: getCurrentTab().id,
+      internalState$: from(internalState),
+      getState: internalState.getState,
     }),
   createTabPersistableStateObservable: () =>
     createTabPersistableStateObservable({
-      tabId: stateContainer.getCurrentTab().id,
-      internalState$: from(stateContainer.internalState),
-      getState: stateContainer.internalState.getState,
+      tabId: getCurrentTab().id,
+      internalState$: from(internalState),
+      getState: internalState.getState,
     }),
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
     return getInitialAppState({
       initialUrlState: undefined,
       persistedTab: fromSavedSearchToSavedObjectTab({
-        tab: stateContainer.getCurrentTab(),
+        tab: getCurrentTab(),
         savedSearch: newSavedSearch,
         services,
       }),
@@ -114,9 +115,9 @@ export const getExtendedDiscoverStateContainer = (
   },
   getSavedSearchFromCurrentTab: async () => {
     return await selectTabSavedSearch({
-      tabId: stateContainer.getCurrentTab().id,
-      getState: stateContainer.internalState.getState,
-      runtimeStateManager: stateContainer.runtimeStateManager,
+      tabId: getCurrentTab().id,
+      getState: internalState.getState,
+      runtimeStateManager,
       services,
     });
   },
@@ -132,15 +133,30 @@ export const getExtendedDiscoverStateContainer = (
 
 export const getConnectedCustomizationService = async ({
   customizationCallbacks,
-  stateContainer: originalStateContainer,
+  internalState,
+  injectCurrentTab,
+  getCurrentTab,
+  runtimeStateManager,
+  stateStorage,
   services,
 }: {
   customizationCallbacks: CustomizationCallback[];
-  stateContainer: DiscoverStateContainerParams;
+  internalState: InternalStateStore;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
+  runtimeStateManager: RuntimeStateManager;
+  stateStorage: IKbnUrlStateStorage;
   services: DiscoverServices;
 }): Promise<ConnectedCustomizationService> => {
   const customizations = createCustomizationService();
-  const stateContainer = getExtendedDiscoverStateContainer(originalStateContainer, services);
+  const stateContainer = getExtendedDiscoverStateContainer({
+    internalState,
+    injectCurrentTab,
+    getCurrentTab,
+    runtimeStateManager,
+    stateStorage,
+    services,
+  });
   const callbacks = customizationCallbacks.map((callback) =>
     Promise.resolve(callback({ customizations, stateContainer }))
   );

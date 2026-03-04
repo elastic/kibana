@@ -250,7 +250,7 @@ describe('selectTabSavedSearch', () => {
       },
     });
 
-    // Add tab but don't initialize it (no stateContainer)
+    // Add tab but don't initialize it
     await addNewTab({ tab: newTab });
 
     const savedSearch = await selectTabSavedSearch({
