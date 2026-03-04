@@ -205,6 +205,51 @@ steps:
     expect(results[0].message).toContain('==');
   });
 
+  it('should not flag == inside a quoted KQL value', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: 'field: "value==other"'
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toEqual([]);
+  });
+
+  it('should not flag != inside a quoted KQL value', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: 'field: "value!=other"'
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toEqual([]);
+  });
+
+  it('should not flag = inside a quoted KQL value', () => {
+    const yaml = `name: test
+steps:
+  - name: check
+    type: if
+    condition: 'field: "a=b"'
+    steps:
+      - name: inner
+        type: action`;
+    const doc = parseDocument(yaml);
+    const results = validateIfConditions(doc);
+
+    expect(results).toEqual([]);
+  });
+
   it('should include KQL examples in the hover message', () => {
     const yaml = `name: test
 steps:

@@ -27,7 +27,7 @@ const KQL_EXAMPLES_HOVER = [
 ].join('\n\n');
 
 function containsTemplate(condition: string): boolean {
-  return condition.includes('{{') || condition.includes('${{');
+  return condition.includes('{{');
 }
 
 function isExpressionSyntax(condition: string): boolean {
@@ -41,12 +41,22 @@ interface OperatorDetectionResult {
 }
 
 /**
+ * Strip quoted string contents so operators inside values (e.g. `field: "a==b"`)
+ * don't trigger false positives during regex-based operator detection.
+ */
+function stripQuotedContents(condition: string): string {
+  return condition.replace(/"[^"]*"|'[^']*'/g, '""');
+}
+
+/**
  * Detects common invalid operators that KQL doesn't support but users commonly try.
  * KQL treats these as free-text searches rather than throwing errors, so we must
  * detect them explicitly.
  */
 function detectInvalidOperator(condition: string): OperatorDetectionResult | null {
-  if (/\S+\s*==\s*\S+/.test(condition)) {
+  const unquoted = stripQuotedContents(condition);
+
+  if (/\S+\s*==\s*\S+/.test(unquoted)) {
     const message = i18n.translate('workflows.validateIfConditions.invalidEqualityOperator', {
       defaultMessage:
         'Invalid condition syntax: "==" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
@@ -54,7 +64,7 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
     return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
   }
 
-  if (/\S+\s*!=\s*\S+/.test(condition)) {
+  if (/\S+\s*!=\s*\S+/.test(unquoted)) {
     const message = i18n.translate('workflows.validateIfConditions.invalidInequalityOperator', {
       defaultMessage:
         'Invalid condition syntax: "!=" is not a valid KQL operator. Use "NOT field: value" for inequality.',
@@ -62,7 +72,7 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
     return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
   }
 
-  if (/\S+\s*(?<![<>!:])=(?!=)\s*\S+/.test(condition) && !condition.includes(':')) {
+  if (/\S+\s*(?<![<>!:])=(?!=)\s*\S+/.test(unquoted) && !unquoted.includes(':')) {
     const message = i18n.translate('workflows.validateIfConditions.invalidAssignmentOperator', {
       defaultMessage:
         'Invalid condition syntax: "=" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',

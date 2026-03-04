@@ -150,6 +150,36 @@ steps:
     expect(collectIfConditionItems(doc)).toEqual([]);
   });
 
+  it('should collect conditions from nested if-steps inside else branches', () => {
+    const yaml = `name: test
+steps:
+  - name: outer
+    type: if
+    condition: "field: true"
+    steps:
+      - name: then_step
+        type: action
+    else:
+      - name: else_check
+        type: if
+        condition: "field: false"
+        steps:
+          - name: inner
+            type: action`;
+    const doc = parseDocument(yaml);
+    const items = collectIfConditionItems(doc);
+
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({
+      condition: 'field: true',
+      conditionKind: 'if-step',
+    });
+    expect(items[1]).toMatchObject({
+      condition: 'field: false',
+      conditionKind: 'if-step',
+    });
+  });
+
   it('should skip conditions with empty string values', () => {
     const yaml = `name: test
 steps:
