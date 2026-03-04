@@ -116,6 +116,7 @@ export const getArtifactTabsTests = (artifactsData: ArtifactsFixtureType[]) => (
             cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
             cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
+            cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('not.exist');
           }
         );
 
@@ -124,6 +125,7 @@ export const getArtifactTabsTests = (artifactsData: ArtifactsFixtureType[]) => (
           visitArtifactTab(testData.tabId);
 
           cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
+          cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('exist');
 
           cy.getByTestSubj('unexisting-manage-artifacts-button').should('exist').click();
 
