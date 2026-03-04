@@ -483,6 +483,10 @@ describe('scripts library client', () => {
     });
 
     it('should return script record on successful update', async () => {
+      soClientMock.get.mockResolvedValue(
+        ScriptsLibraryMock.generateSavedObjectScriptEntry({ name: 'updated script' })
+      );
+
       await expect(
         scriptsClient.update({
           id: '1-2-3',
@@ -493,7 +497,7 @@ describe('scripts library client', () => {
         createdBy: 'elastic',
         downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         id: '1-2-3',
-        name: 'my script',
+        name: 'updated script',
         fileHash: 'e5441eb2bb',
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
@@ -506,6 +510,43 @@ describe('scripts library client', () => {
         updatedBy: 'elastic',
         version: 'WzgsMV0=',
       });
+    });
+
+    it('should update pathToExecutable for an archive script', async () => {
+      soClientMock.get.mockResolvedValue(
+        ScriptsLibraryMock.generateSavedObjectScriptEntry({
+          file_type: 'archive',
+          path_to_executable: '/usr/local/bin/updated_script',
+        })
+      );
+
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          fileType: 'archive',
+          pathToExecutable: '/usr/local/bin/updated_script',
+        })
+      ).resolves.toMatchObject({
+        fileType: 'archive',
+        pathToExecutable: '/usr/local/bin/updated_script',
+      });
+    });
+
+    it('should clear pathToExecutable when updating fileType to script', async () => {
+      await scriptsClient.update({
+        id: '1-2-3',
+        fileType: 'script',
+      });
+
+      expect(soClientMock.update).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        expect.objectContaining({
+          file_type: 'script',
+          path_to_executable: '',
+        }),
+        expect.anything()
+      );
     });
   });
 
