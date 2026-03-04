@@ -123,12 +123,23 @@ spaceTest('full workflow', async ({ pageObjects }) => {
 
 ## Parallelization
 
+Parallel test runs are encouraged but have trade-offs:
+
+- Test suites **must** be Space-isolated (`spaceTest` + `scoutSpace`)
+- Kibana archive ingestion must be done **within the test suite file**, not in the global setup hook
+- Kibana / ES may be slower because multiple workers ingest and interact with the UI concurrently
+
 Use `spaceTest` + `scoutSpace` — each worker gets its own Kibana space.
 
 - Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook()`
 - Clean up space-scoped mutations in `afterAll`
 - Place parallel specs in `test/scout*/ui/parallel_tests/`
 - Place sequential specs in `test/scout*/ui/tests/`
+
+### File size and role separation
+
+- Keep spec files focused and small: aim for **4–5 short test scenarios** or **2–3 long scenarios** per file. This is critical for parallel execution, where the test runner balances work at the spec-file level — oversized specs create bottlenecks.
+- Keep **one role per file** to simulate a realistic user flow. If tests use different auth roles (e.g., CRUD vs read-only), split them into separate spec files with the appropriate login in each file's `beforeEach`.
 
 ## Fixtures
 

@@ -92,7 +92,7 @@ Don't rely on test names — check what the test actually asserts.
 **If duplicate in API/unit:** Recommend deleting Cypress — lower layers are faster and more reliable.
 
 **If duplicate in Scout:**
-- Scout now runs on MKI ([pipeline](https://buildkite.com/elastic/appex-qa-serverless-kibana-scout-tests))
+- Scout runs on MKI and supports both stateful and serverless environments
 - Cypress has `@serverless` and Scout covers serverless → delete Cypress
 - Cypress is ESS-only and Scout covers ESS → delete Cypress
 
@@ -207,7 +207,17 @@ All fixes must follow team conventions:
 
 ## After completing a fix
 
-Always run the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner) to verify fixes before merging.
+Always verify fixes with the Flaky Test Runner before merging. To trigger a flaky test run, post a comment on the GitHub PR with the following format:
+
+```
+/flaky scoutConfig:<path-to-playwright-config>:<number-of-runs>
+```
+
+For example:
+
+```
+/flaky scoutConfig:src/platform/plugins/shared/dashboard/test/scout/ui/parallel.playwright.config.ts:30
+```
 
 When the fix is verified or the PR is ready, end the conversation by requesting feedback:
 

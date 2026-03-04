@@ -74,29 +74,33 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, () => {
 | Selectors in separate `screens/` files | Structural | Moved to page object `readonly` properties |
 | Actions in separate `tasks/` files | Structural | Moved to page object methods |
 
-## After: Scout (`timeline_creation.spec.ts`, abbreviated)
+## After: Scout (split into two files — one role per file)
+
+The migration splits tests by role: CRUD tests in `timeline_creation.spec.ts` (platform engineer) and read-only tests in `timeline_read_only.spec.ts` (T1 analyst). Each file is self-contained with its own setup/teardown and login in `beforeEach`.
+
+### `timeline_creation.spec.ts` (CRUD role)
 
 ```typescript
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
-  'Timelines',
+  'Timeline creation',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeEach(async ({ apiServices }) => {
-      await apiServices.timeline.deleteAll();           // Defensive cleanup — handles prior failed runs
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
+      await apiServices.timeline.deleteAll();
+      await browserAuth.loginAsPlatformEngineer();
+      await pageObjects.timelinePage.navigateToTimelines();
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
-      await apiServices.timeline.deleteAll();           // Final cleanup
+      await apiServices.timeline.deleteAll();
     });
 
-    spaceTest('should show the different timeline states', async ({ browserAuth, pageObjects }) => {
+    spaceTest('should show the different timeline states', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
 
-      await browserAuth.loginAsPlatformEngineer();      // Least-privileged role, not loginAsAdmin()
-      await timelinePage.navigateToTimelines();
       await timelinePage.open();
 
       await spaceTest.step('Verify unsaved state', async () => {
@@ -106,7 +110,6 @@ spaceTest.describe(
       await spaceTest.step('Save and verify saved state', async () => {
         await timelinePage.saveWithName('Test');
         await expect(timelinePage.saveStatus).toBeHidden();
-        await timelinePage.waitForSaveComplete();       // Replaces LOADING_INDICATOR wait
       });
 
       await spaceTest.step('Modify query and verify unsaved changes', async () => {
@@ -115,15 +118,10 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('should save timelines as new', async ({ browserAuth, pageObjects }) => {
+    spaceTest('should save timelines as new', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
 
-      await browserAuth.loginAsPlatformEngineer();
-      await timelinePage.navigateToTimelines();
-
       await spaceTest.step('Verify empty state', async () => {
-        // EuiBasicTable always renders an empty-state <tr> — cannot assert row count as 0.
-        // Assert on the empty-state message text instead.
         await expect(timelinePage.timelinesTable).toContainText(
           '0 timelines match the search criteria'
         );
@@ -132,18 +130,59 @@ spaceTest.describe(
       await spaceTest.step('Create, save, and save as new', async () => {
         await timelinePage.open();
         await timelinePage.saveWithName('First');
-        await timelinePage.waitForSaveComplete();
+        await expect(timelinePage.saveStatus).toBeHidden();
         await timelinePage.saveAsNew('Second');
       });
 
       await spaceTest.step('Verify both timelines in list', async () => {
         await timelinePage.close();
-        const rows = timelinePage.getTimelineRows();
-        await expect(rows).toHaveCount(2);
-        // toContainText with array checks order — replaces .first()/.last()
-        await expect(rows).toContainText(['Second', 'First']);
+        await expect(timelinePage.timelineRows).toHaveCount(2);
+        await expect(timelinePage.timelineRows).toContainText(['Second', 'First']);
       });
     });
+  }
+);
+```
+
+### `timeline_read_only.spec.ts` (read-only role)
+
+```typescript
+import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
+
+spaceTest.describe(
+  'Timeline read-only',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
+      await apiServices.timeline.deleteAll();
+      await browserAuth.loginAsT1Analyst();
+      await pageObjects.timelinePage.navigateToTimelines();
+    });
+
+    spaceTest.afterAll(async ({ apiServices }) => {
+      await apiServices.timeline.deleteAll();
+    });
+
+    spaceTest(
+      'should not be able to create/update timeline with only read privileges',
+      async ({ pageObjects }) => {
+        const { timelinePage } = pageObjects;
+
+        await timelinePage.open();
+        await timelinePage.createNew();
+
+        await expect(timelinePage.panel).toBeVisible();
+        await expect(timelinePage.saveButton).toBeDisabled();
+
+        await spaceTest.step('Hover save button and verify read-only tooltip', async () => {
+          await timelinePage.hoverSaveButton();
+          await expect(timelinePage.saveTooltip).toContainText(
+            'you do not have the required permissions to save timelines'
+          );
+        });
+      }
+    );
   }
 );
 ```
@@ -153,11 +192,13 @@ spaceTest.describe(
 | Decision | Why |
 |----------|-----|
 | `spaceTest` (not `test`) | Enables parallel execution — each worker gets its own Kibana space |
+| One role per file | Simulates a realistic user flow — each file = one role, one full-flow |
+| Login + navigation in `beforeEach` | Shared setup across all tests in the file — avoids duplication |
 | `browserAuth.loginAsPlatformEngineer()` | Least-privileged role for CRUD. Not `loginAsAdmin()` (masks permission bugs) |
 | `browserAuth.loginAsT1Analyst()` | Read-only RBAC test — verifies save button is disabled |
 | `spaceTest.step()` for multi-step flows | Reuses browser context within a single test (each `spaceTest()` creates a new context) |
 | `beforeEach` + `afterAll` cleanup | `beforeEach` handles prior failed runs; `afterAll` cleans up after the suite |
-| `apiServices.timeline.createTimelineTemplate()` | API-based setup — not UI-based (faster, more reliable) |
+| `apiServices.timeline.deleteAll()` | API-based cleanup — not UI-based (faster, more reliable) |
 | `toContainText(['Second', 'First'])` | Ordered array assertion — replaces `.first()` / `.last()` (forbidden by `playwright/no-nth-methods`) |
 
 ## Page object: `TimelinePage` (abbreviated)
