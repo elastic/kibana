@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
   EuiButtonGroup,
@@ -135,7 +134,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       )
     );
 
-  const renderJsonPreview = (value: unknown, accordionId: string) => {
+  const renderJsonPreview = (value: unknown) => {
     if (value == null) {
       return '-';
     }
@@ -146,11 +145,9 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     }
 
     return (
-      <EuiAccordion id={accordionId} buttonContent={i18n.JSON_PREVIEW_BUTTON_LABEL}>
-        <EuiCodeBlock overflowHeight={120} language="json" paddingSize="s" fontSize="s">
-          {serializedValue}
-        </EuiCodeBlock>
-      </EuiAccordion>
+      <EuiCodeBlock overflowHeight={120} language="json" paddingSize="none" fontSize="s">
+        {serializedValue}
+      </EuiCodeBlock>
     );
   };
 
@@ -197,31 +194,25 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_INPUT,
+      width: '240px',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
         const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
-        return renderJsonPreview(
-          firstScoreDocument?.example.input,
-          `example-input-${row.exampleId}-${selectedRepetitionIndex}`
-        );
+        return renderJsonPreview(firstScoreDocument?.example.input);
       },
     },
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_OUTPUT,
+      width: '240px',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
         const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
-        return renderJsonPreview(
-          firstScoreDocument?.task.output,
-          `task-output-${row.exampleId}-${selectedRepetitionIndex}`
-        );
+        return renderJsonPreview(firstScoreDocument?.task.output);
       },
     },
     {

@@ -83,10 +83,3 @@ export const getRepetitionButtonGroupLegend = (exampleId: string) =>
     defaultMessage: 'Select repetition for example {exampleId}',
     values: { exampleId },
   });
-
-export const JSON_PREVIEW_BUTTON_LABEL = i18n.translate(
-  'xpack.evals.exampleScoresTable.jsonPreviewButtonLabel',
-  {
-    defaultMessage: 'View JSON',
-  }
-);

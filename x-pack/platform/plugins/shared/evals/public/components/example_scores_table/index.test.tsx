@@ -61,7 +61,7 @@ const buildScore = ({
 });
 
 describe('ExampleScoresTable', () => {
-  it('renders repetition navigation and JSON accordions for multi-repetition rows', () => {
+  it('renders repetition navigation and inline JSON previews for multi-repetition rows', () => {
     const onTraceClick = jest.fn();
     const examples: EvaluationRunDatasetExample[] = [
       {
@@ -96,7 +96,8 @@ describe('ExampleScoresTable', () => {
     expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'R1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'R2' })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'View JSON' })).toHaveLength(2);
+    expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
+    expect(screen.getByText(/"completion": "output-r1"/)).toBeInTheDocument();
     expect(screen.getByText('Criteria: 0.95')).toBeInTheDocument();
 
     fireEvent.click(
