@@ -57,6 +57,11 @@ export const integrationSchemaV2 = schema.object({
   created_by_profile_uid: schema.maybe(schema.string()),
   last_updated_by: schema.maybe(schema.string({ minLength: 1 })),
   last_updated_at: schema.maybe(schema.string()),
+  status: schema.maybe(
+    schema.oneOf(
+      Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
+    )
+  ),
   metadata: schema.object(
     {
       title: schema.string(),
