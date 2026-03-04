@@ -584,6 +584,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    WaitForInputStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
