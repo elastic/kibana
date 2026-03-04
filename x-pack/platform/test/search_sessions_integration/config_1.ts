@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable import/no-default-export */
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../functional/services';

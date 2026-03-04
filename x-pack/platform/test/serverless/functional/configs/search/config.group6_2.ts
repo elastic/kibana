@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseTestConfig.getAll(),
     testFiles: [
-      require.resolve('../../test_suites/discover_ml_uptime/discover'), // 7 min 30 sec
+      require.resolve('../../test_suites/discover_ml_uptime/discover/index_2'), // 7 min 30 sec
     ],
     junit: {
       reportName: 'Serverless Search Functional Tests - Common Group 6 (Part 2)',

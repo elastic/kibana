@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable import/no-default-export */
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

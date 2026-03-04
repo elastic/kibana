@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable import/no-default-export */
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';

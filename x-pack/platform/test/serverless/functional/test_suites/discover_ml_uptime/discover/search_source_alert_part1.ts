@@ -35,14 +35,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
-  const comboBox = getService('comboBox');
   const dataViews = getService('dataViews');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
   const ACTION_TYPE_ID = '.index';
   const RULE_NAME = 'test-search-source-alert';
-  const ADHOC_RULE_NAME = 'test-adhoc-alert';
   let sourceDataViewId: string;
   let outputDataViewId: string;
   let connectorId: string;

@@ -15,11 +15,9 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, discover, header, timePicker } = getPageObjects([
+  const { common, lens, timePicker } = getPageObjects([
     'common',
     'lens',
-    'discover',
-    'header',
     'timePicker',
   ]);
   const testSubjects = getService('testSubjects');

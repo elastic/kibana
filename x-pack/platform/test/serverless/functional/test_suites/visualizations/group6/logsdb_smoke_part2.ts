@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
+  const indexPatterns = getService('indexPatterns');
   const dataStreams = getService('dataStreams');
   const esArchiver = getService('esArchiver');
   const monacoEditor = getService('monacoEditor');

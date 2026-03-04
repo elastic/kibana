@@ -15,11 +15,8 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, discover, header, timePicker } = getPageObjects([
-    'common',
+  const { lens, timePicker } = getPageObjects([
     'lens',
-    'discover',
-    'header',
     'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
@@ -29,9 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataStreams = getService('dataStreams');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
-  const monacoEditor = getService('monacoEditor');
-  const retry = getService('retry');
-
   const createDocs = getDocsGenerator(log, es, 'logsdb');
 
   describe('lens logsdb downgrade', function () {

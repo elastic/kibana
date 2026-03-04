@@ -20,30 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
-  const toastsService = getService('toasts');
-
-  const loginWithReadOnlyUser = async () => {
-    await securityService.user.create('global_dashboard_read_privileges_user', {
-      password: 'global_dashboard_read_privileges_user-password',
-      roles: ['viewer'],
-      full_name: 'test user',
-    });
-
-    await security.forceLogout();
-
-    await security.login(
-      'global_dashboard_read_privileges_user',
-      'global_dashboard_read_privileges_user-password',
-      {
-        expectSpaceSelector: false,
-      }
-    );
-  };
-
-  const logoutAndDeleteReadOnlyUser = async () => {
-    await security.forceLogout();
-    await securityService.user.delete('global_dashboard_read_privileges_user');
-  };
 
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();

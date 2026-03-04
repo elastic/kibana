@@ -18,8 +18,8 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       await tearDown(getService);
     });
 
-    loadTestFile(require.resolve('../../group2/tests/alerting/alert_deletion'));
-    loadTestFile(require.resolve('../../group2/tests/alerting/aggregate'));
-    loadTestFile(require.resolve('../../group2/tests/alerting/mute_all'));
+    loadTestFile(require.resolve('../../../group2/tests/alerting/alert_deletion'));
+    loadTestFile(require.resolve('../../../group2/tests/alerting/aggregate'));
+    loadTestFile(require.resolve('../../../group2/tests/alerting/mute_all'));
   });
 }

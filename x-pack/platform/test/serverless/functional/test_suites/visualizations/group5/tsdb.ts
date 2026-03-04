@@ -16,16 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
   const dataStreams = getService('dataStreams');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
-  const comboBox = getService('comboBox');
-
-  const createDocs = getDocsGenerator(log, es, 'tsdb');
 
   describe('lens tsdb', function () {
     const tsdbIndex = 'kibana_sample_data_logstsdb';

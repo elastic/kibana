@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'svlCommonPage']);
   const find = getService('find');
   const listingTable = getService('listingTable');
-  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const config = getService('config');
 

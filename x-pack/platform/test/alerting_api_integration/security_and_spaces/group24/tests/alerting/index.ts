@@ -18,7 +18,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       await tearDown(getService);
     });
 
-    loadTestFile(require.resolve('../../group2/tests/alerting/update'));
-    loadTestFile(require.resolve('../../group2/tests/alerting/update_api_key'));
+    loadTestFile(require.resolve('../../../group2/tests/alerting/update'));
+    loadTestFile(require.resolve('../../../group2/tests/alerting/update_api_key'));
   });
 }
