@@ -13,6 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createQueryClientWrapper } from '../test_utils';
 import { DynamicRuleForm } from './dynamic_rule_form';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 // Mock the ES|QL utils to avoid complex setup
 jest.mock('@kbn/esql-utils', () => ({
@@ -28,6 +29,7 @@ const createMockServices = () => ({
   http: httpServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
 });
 
 describe('DynamicRuleForm', () => {

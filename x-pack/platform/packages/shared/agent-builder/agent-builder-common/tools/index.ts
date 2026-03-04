@@ -15,6 +15,7 @@ export {
   defaultAgentToolIds,
   editableToolTypes,
   isInternalTool,
+  isExcludedFromFilestore,
   isAttachmentTool,
   isFilestoreTool,
 } from './constants';

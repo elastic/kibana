@@ -24,6 +24,18 @@ describe('getGapFilteredRuleIds', () => {
 
   const defaultGapFillStatuses = [gapFillStatus.UNFILLED];
 
+  const defaultSummary = {
+    totalUnfilledDurationMs: 0,
+    totalInProgressDurationMs: 0,
+    totalFilledDurationMs: 0,
+    totalDurationMs: 0,
+    rulesByGapFillStatus: {
+      unfilled: 0,
+      inProgress: 0,
+      filled: 0,
+    },
+  };
+
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     jest.resetAllMocks();
@@ -34,6 +46,7 @@ describe('getGapFilteredRuleIds', () => {
       rulesClient.getRuleIdsWithGaps.mockResolvedValue({
         total: 0,
         ruleIds: [],
+        summary: defaultSummary,
       });
 
       const result = await getGapFilteredRuleIds({
@@ -58,6 +71,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 3,
         ruleIds,
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const result = await getGapFilteredRuleIds({
@@ -80,6 +94,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 2,
         ruleIds,
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const result = await getGapFilteredRuleIds({
@@ -106,6 +121,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 11,
         ruleIds: allRuleIds,
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const result = await getGapFilteredRuleIds({
@@ -129,6 +145,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 11,
         ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const mockRules = Array.from({ length: 11 }, (_, i) => {
@@ -165,6 +182,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 11,
         ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const mockRules = Array.from({ length: 5 }, (_, i) => {
@@ -209,6 +227,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 11,
         ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       rulesClient.find.mockResolvedValue(
@@ -240,6 +259,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 25,
         ruleIds: Array.from({ length: 25 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const batch1Rules = Array.from({ length: 3 }, (_, i) => {
@@ -288,6 +308,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 25,
         ruleIds: Array.from({ length: 25 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const batch1Rules = Array.from({ length: 10 }, (_, i) => {
@@ -337,6 +358,7 @@ describe('getGapFilteredRuleIds', () => {
       rulesClient.getRuleIdsWithGaps.mockResolvedValue({
         total: 0,
         ruleIds: [],
+        summary: defaultSummary,
       });
 
       await getGapFilteredRuleIds({
@@ -360,6 +382,7 @@ describe('getGapFilteredRuleIds', () => {
         total: 11,
         ruleIds: Array.from({ length: 11 }, (_, i) => `rule-${i}`),
         latestGapTimestamp: 1,
+        summary: defaultSummary,
       });
 
       const mockRules = Array.from({ length: 5 }, (_, i) => {
