@@ -114,7 +114,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:.es-query',
         'alerting:.geo-containment',
         'alerting:.index-threshold',
-        'alerting:api_key_provisioning',
         'alerting:apm.anomaly',
         'alerting:apm.error_rate',
         'alerting:apm.transaction_duration',
