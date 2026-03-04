@@ -26,12 +26,11 @@
 #     - Apply workflow tags to the seed alert.
 #     - Auto-close the alert if it meets the false-positive thresholds.
 #
-# NOTE: Do not edit this workflow directly as changes will be overridden by the preinstalled workflow.
 #
 # Author: Elastic
 # =============================================================================
 
-name: "security.alert.validation"
+name: "security.alert.validation2"
 enabled: true
 description: "Security alert validation workflow. Author: Elastic"
 version: "1"
@@ -41,6 +40,13 @@ tags:
 
 triggers:
   - type: alert
+
+settings:
+  concurrency: 
+    strategy: queue
+    max: 10
+    maxQueueSize: 10000
+    key: "alert.validation"
 
 # ---------------------------------------------------------------------------
 # Configuration constants
@@ -735,12 +741,12 @@ steps:
           - name: onechat_runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
-            connector-id: openai-gpt-4.1
+            connector-id: gpt41Azure
             create-conversation: true
             on-failure:
               retry:
-                max-attempts: 5
-                delay: "30s"
+                max-attempts: 3
+                delay: "10s"
             with:
               message: "{{ steps.build_agent_message.output.message }}"
               attachments:
@@ -935,3 +941,4 @@ steps:
                       signal_ids:
                         - '{{ foreach.item._id }}'
                       reason: 'false_positive'
+

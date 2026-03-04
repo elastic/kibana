@@ -42,7 +42,7 @@ curl --location 'http://localhost:5601/api/detection_engine/rules/_bulk_action' 
     "query": "",
     "edit": [
       {
-        "type": "add_rule_actions",
+        "type": "set_rule_actions",
         "value": {
           "actions": [
             {
@@ -50,7 +50,7 @@ curl --location 'http://localhost:5601/api/detection_engine/rules/_bulk_action' 
               "params": {
                 "subAction": "run",
                 "subActionParams": {
-                  "workflowId": "workflow-3cf6d7f4-864f-4722-834d-ae1743f445ea",
+                  "workflowId": "workflow-ee942aa0-f46e-4549-8edf-6cb178dd7669",
                   "summaryMode": false
                 }
               }

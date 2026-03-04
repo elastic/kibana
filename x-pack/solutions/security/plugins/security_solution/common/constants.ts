@@ -728,8 +728,8 @@ export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
 
 export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG =
   'securitySolution.preinstalledWorkflowsEnabled' as const;
-export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT = false as const;
+export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT = true as const;
 
 export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
   'securitySolution.registerAlertValidationStepsEnabled' as const;
-export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = true as const;
