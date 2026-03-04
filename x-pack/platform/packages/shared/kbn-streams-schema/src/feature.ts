@@ -35,6 +35,7 @@ export const baseFeatureSchema = z.object({
   properties: z.record(z.string(), z.unknown()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()).optional(),
+  evidence_doc_ids: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   filter: conditionSchema.optional(),
   meta: z.record(z.string(), z.unknown()).optional(),

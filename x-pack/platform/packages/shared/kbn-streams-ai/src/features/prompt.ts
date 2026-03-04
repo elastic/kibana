@@ -40,10 +40,13 @@ const featuresSchema = {
           },
           properties: {
             type: 'object',
+            description:
+              'Stable, low-cardinality identifying properties. Must contain at least one key/value.',
             properties: {},
             minProperties: 1,
             description:
               'Core identifying properties of the feature (e.g. {"name": "order-service"}). Empty properties are invalid — every feature must have at least one stable identifying property.',
+            additionalProperties: true,
           },
           confidence: {
             type: 'number',
@@ -57,6 +60,14 @@ const featuresSchema = {
             },
             description:
               'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
+          },
+          evidence_doc_ids: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'Evidence sources for traceability. This must be the Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Keep an empty array when not applicable.',
           },
           tags: {
             type: 'array',
@@ -107,6 +118,7 @@ const featuresSchema = {
             type: 'object',
             properties: {},
             description: 'Useful metadata that is not captured in other properties.',
+            additionalProperties: true,
           },
         },
         required: [

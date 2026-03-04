@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
+import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
   streamName: string;
-  sampleDocuments: Array<Record<string, any>>;
+  sampleDocuments: Array<SearchHit<Record<string, any>>>;
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
   logger: Logger;
@@ -36,11 +38,20 @@ export async function identifyFeatures({
 }> {
   logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
 
+  const formattedDocuments = compact(
+    sampleDocuments.map((hit) =>
+      formatRawDocument({
+        hit,
+        shouldNotTruncate(key: string) {
+          return key.includes('tags');
+        },
+      })
+    )
+  );
+
   const response = await withSpan('invoke_prompt', () =>
     inferenceClient.prompt({
-      input: {
-        sample_documents: JSON.stringify(sampleDocuments),
-      },
+      input: { sample_documents: JSON.stringify(formattedDocuments) },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
       abortSignal: signal,
     })

@@ -9,6 +9,7 @@
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
