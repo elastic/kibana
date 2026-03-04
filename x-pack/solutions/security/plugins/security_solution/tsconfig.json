@@ -232,7 +232,6 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
-    "@kbn/esql-language",
     "@kbn/inference-langchain",
     "@kbn/scout-security",
     "@kbn/custom-icons",
@@ -277,6 +276,11 @@
     "@kbn/entity-store",
     "@kbn/as-code-filters-transforms",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/workflows-ui",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows",
+    "@kbn/deeplinks-workflows",
+    "@kbn/core-rendering-browser"
   ]
 }
