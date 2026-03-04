@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+
+export interface RunningQueriesServerSetupDependencies {
+  features: FeaturesPluginSetup;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RunningQueriesServerSetup {}
 

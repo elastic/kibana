@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useMemo, type PropsWithChildren } from 'react';
-import type { ChromeStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { Capabilities, ChromeStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { RunningQueriesApiService } from '../lib/api';
 
@@ -31,18 +31,27 @@ const RunningQueriesAppContext = React.createContext<RunningQueriesAppContextVal
 );
 
 export const RunningQueriesAppContextProvider: React.FC<
-  PropsWithChildren<Omit<RunningQueriesAppContextValue, 'capabilities'>>
-> = ({ children, ...contextValue }) => {
+  PropsWithChildren<
+    Omit<RunningQueriesAppContextValue, 'capabilities'> & { kibanaCapabilities: Capabilities }
+  >
+> = ({ children, kibanaCapabilities, ...contextValue }) => {
   const { data, isLoading } = contextValue.apiService.useLoadPrivileges();
 
   const capabilities = useMemo<RunningQueriesCapabilities>(
     () => ({
-      canCancelTasks: Boolean(data?.canCancelTasks),
+      canCancelTasks:
+        Boolean(data?.canCancelTasks) && kibanaCapabilities.running_queries?.save !== false,
       canViewTasks: Boolean(data?.canViewTasks),
       isLoading,
       missingClusterPrivileges: data?.missingClusterPrivileges ?? [],
     }),
-    [data?.canCancelTasks, data?.canViewTasks, data?.missingClusterPrivileges, isLoading]
+    [
+      data?.canCancelTasks,
+      data?.canViewTasks,
+      data?.missingClusterPrivileges,
+      isLoading,
+      kibanaCapabilities,
+    ]
   );
 
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, RUNNING_QUERIES_READ_PRIVILEGE } from '../../common/constants';
 import type { RouteOptions } from '.';
 
 export const registerPrivilegesRoute = ({ router, logger }: RouteOptions) => {
@@ -16,8 +16,7 @@ export const registerPrivilegesRoute = ({ router, logger }: RouteOptions) => {
       path: `${API_BASE_PATH}/privileges`,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is only available to authenticated users',
+          requiredPrivileges: [RUNNING_QUERIES_READ_PRIVILEGE],
         },
       },
       validate: false,

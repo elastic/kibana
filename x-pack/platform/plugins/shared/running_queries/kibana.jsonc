@@ -11,6 +11,7 @@
     "browser": true,
     "configPath": ["xpack", "running_queries"],
     "requiredPlugins": [
+      "features",
       "management",
       "share"
     ],

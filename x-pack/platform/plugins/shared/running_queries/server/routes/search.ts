@@ -6,7 +6,7 @@
  */
 
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, RUNNING_QUERIES_READ_PRIVILEGE } from '../../common/constants';
 import type { RouteOptions } from '.';
 import { transformTasks } from '../lib/transform_tasks';
 
@@ -16,8 +16,7 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
       path: `${API_BASE_PATH}/search`,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is only available to authenticated users',
+          requiredPrivileges: [RUNNING_QUERIES_READ_PRIVILEGE],
         },
       },
       validate: false,

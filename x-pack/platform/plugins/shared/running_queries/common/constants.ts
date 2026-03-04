@@ -11,3 +11,6 @@ export const API_BASE_PATH = '/internal/running_queries';
 export const PLUGIN_NAME = i18n.translate('xpack.runningQueries.pluginName', {
   defaultMessage: 'Running queries',
 });
+
+export const RUNNING_QUERIES_READ_PRIVILEGE = 'running_queries-read';
+export const RUNNING_QUERIES_WRITE_PRIVILEGE = 'running_queries-write';
