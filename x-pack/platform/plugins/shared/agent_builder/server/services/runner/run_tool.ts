@@ -7,6 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
+import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
@@ -202,7 +203,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
   runToolReturn = afterToolHooksResult.toolReturn;
 
-  if (runToolReturn.results) {
+  if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
     runToolReturn.results.forEach((result) => {
       resultStore.add({
         tool_id: tool.id,
