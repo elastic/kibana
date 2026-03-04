@@ -23,7 +23,6 @@ import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
   LifecycleBadge,
-  TimeSeriesBadge,
   WiredStreamBadge,
 } from '../../stream_badges';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -125,45 +124,41 @@ export function Wrapper({
   return (
     <>
       <EuiPageHeader
-        paddingSize="l"
+        paddingSize="m"
         bottomBorder="extended"
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
+        pageTitleProps={{ css: css`font-size: 1.4rem !important; line-height: 1.4rem !important;` }}
         pageTitle={
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
-            alignItems="baseline"
+            alignItems="center"
             justifyContent="spaceBetween"
             wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap direction="row">
               {streamId}
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
-                <EuiFlexItem grow={true}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-                    {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
-                    {Streams.ingest.all.GetResponse.is(definition) &&
-                      definition.index_mode === 'time_series' && <TimeSeriesBadge />}
-                    {Streams.ingest.all.GetResponse.is(definition) && (
-                      <LifecycleBadge
-                        lifecycle={definition.effective_lifecycle}
-                        dataTestSubj={`lifecycleBadge-${streamId}`}
-                      />
-                    )}
-                    <DatasetQualityIndicator
-                      quality={quality}
-                      isLoading={isQualityLoading}
-                      verbose={true}
-                      showTooltip={true}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                {Streams.ingest.all.GetResponse.is(definition) && (
+                  <LifecycleBadge
+                    lifecycle={definition.effective_lifecycle}
+                    dataTestSubj={`lifecycleBadge-${streamId}`}
+                  />
+                )}
+                <DatasetQualityIndicator
+                  quality={quality}
+                  isLoading={isQualityLoading}
+                  verbose={true}
+                  showTooltip={true}
+                />
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <EuiFlexItem>
+            {/* View in Discover and Give feedback moved to global header (overflow + primary) */}
+            {/* <EuiFlexItem>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   {Streams.ingest.all.GetResponse.is(definition) && (
@@ -181,7 +176,7 @@ export function Wrapper({
                   <FeedbackButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
+            </EuiFlexItem> */}
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {

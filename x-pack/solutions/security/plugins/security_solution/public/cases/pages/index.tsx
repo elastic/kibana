@@ -11,6 +11,8 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
+import { CaseCallouts } from '@kbn/cases-plugin/public';
+import { EuiPageSection } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
 import { AlertsTable } from '../../detections/components/alerts_table';
@@ -41,15 +43,18 @@ import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { EaseAlertsTable } from '../components/ease/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
 import { CASES_FEATURES } from '..';
+import { getSecurityCasesHeaderAppActionsConfig } from '../../app/home/header_app_actions/header_app_actions_config';
 
 const CaseContainerComponent: React.FC = () => {
   const {
     application: { capabilities },
     cases,
+    chrome,
     telemetry,
   } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
   const dispatch = useDispatch();
   const { openFlyout } = useExpandableFlyoutApi();
   const {
@@ -65,6 +70,20 @@ const CaseContainerComponent: React.FC = () => {
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218741
   const EASE = capabilities[SECURITY_FEATURE_ID].configurations;
+
+  useEffect(() => {
+    if (!chrome?.setHeaderAppActionsConfig) return;
+    if (userCasesPermissions?.create) {
+      chrome.setHeaderAppActionsConfig(
+        getSecurityCasesHeaderAppActionsConfig(() => createCaseFlyout.open())
+      );
+    } else {
+      chrome.setHeaderAppActionsConfig(undefined);
+    }
+    return () => {
+      chrome.setHeaderAppActionsConfig(undefined);
+    };
+  }, [chrome, createCaseFlyout, userCasesPermissions?.create]);
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
@@ -154,72 +173,78 @@ const CaseContainerComponent: React.FC = () => {
   }, []);
 
   return (
-    <SecuritySolutionPageWrapper noPadding>
-      <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {cases.ui.getCases({
-          basePath: CASES_PATH,
-          owner: [APP_ID],
-          features: {
-            ...CASES_FEATURES,
-            metrics: [
-              CaseMetricsFeature.ALERTS_COUNT,
-              CaseMetricsFeature.ALERTS_USERS,
-              CaseMetricsFeature.ALERTS_HOSTS,
-              CaseMetricsFeature.CONNECTORS,
-              CaseMetricsFeature.LIFESPAN,
-            ],
-            alerts: {
-              isExperimental: false,
-              read: hasAlertsRead,
-              all: hasAlertsAll,
-            },
-            events: { enabled: true },
-          },
-          refreshRef,
-          actionsNavigation: {
-            href: endpointDetailsHref,
-            onClick: (endpointId: string, e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateTo({
-                path: getEndpointDetailsPath({
-                  name: 'endpointActivityLog',
-                  selected_endpoint: endpointId,
-                }),
-              });
-            },
-          },
-          ...(canReadRules
-            ? {
-                ruleDetailsNavigation: {
-                  onClick: onRuleDetailsClick,
+    <>
+      <CaseCallouts />
+      <SecuritySolutionPageWrapper noPadding>
+        <EuiPageSection paddingSize="m" component="div" grow>
+          <CaseDetailsRefreshContext.Provider value={refreshRef}>
+            {cases.ui.getCases({
+              basePath: CASES_PATH,
+              owner: [APP_ID],
+              renderCalloutInRoute: false,
+              features: {
+                ...CASES_FEATURES,
+                metrics: [
+                  CaseMetricsFeature.ALERTS_COUNT,
+                  CaseMetricsFeature.ALERTS_USERS,
+                  CaseMetricsFeature.ALERTS_HOSTS,
+                  CaseMetricsFeature.CONNECTORS,
+                  CaseMetricsFeature.LIFESPAN,
+                ],
+                alerts: {
+                  isExperimental: false,
+                  read: hasAlertsRead,
+                  all: hasAlertsAll,
                 },
-              }
-            : {}),
-          showAlertDetails,
-          timelineIntegration: {
-            editor_plugins: {
-              parsingPlugin: timelineMarkdownPlugin.parser,
-              processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin({
-                interactionsUpsellingMessage,
-                canSeeTimeline,
-              }),
-            },
-            hooks: {
-              useInsertTimeline,
-            },
-          },
-          useFetchAlertData,
-          onAlertsTableLoaded,
-          permissions: userCasesPermissions,
-          renderAlertsTable,
-          renderEventsTable: EventsTableForCases,
-        })}
-      </CaseDetailsRefreshContext.Provider>
-      <SpyRoute pageName={SecurityPageName.case} />
-    </SecuritySolutionPageWrapper>
+                events: { enabled: true },
+              },
+              refreshRef,
+              actionsNavigation: {
+                href: endpointDetailsHref,
+                onClick: (endpointId: string, e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateTo({
+                    path: getEndpointDetailsPath({
+                      name: 'endpointActivityLog',
+                      selected_endpoint: endpointId,
+                    }),
+                  });
+                },
+              },
+              ...(canReadRules
+                ? {
+                    ruleDetailsNavigation: {
+                      onClick: onRuleDetailsClick,
+                    },
+                  }
+                : {}),
+              showAlertDetails,
+              timelineIntegration: {
+                editor_plugins: {
+                  parsingPlugin: timelineMarkdownPlugin.parser,
+                  processingPluginRenderer: timelineMarkdownPlugin.renderer,
+                  uiPlugin: timelineMarkdownPlugin.plugin({
+                    interactionsUpsellingMessage,
+                    canSeeTimeline,
+                  }),
+                },
+                hooks: {
+                  useInsertTimeline,
+                },
+              },
+              useFetchAlertData,
+              onAlertsTableLoaded,
+              permissions: userCasesPermissions,
+              renderAlertsTable,
+              renderEventsTable: EventsTableForCases,
+            })}
+          </CaseDetailsRefreshContext.Provider>
+          <SpyRoute pageName={SecurityPageName.case} />
+        </EuiPageSection>
+      </SecuritySolutionPageWrapper>
+    </>
   );
 };
 

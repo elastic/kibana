@@ -7,15 +7,18 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/constants';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
+import { MaintenanceWindowStatus } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
-import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
@@ -48,13 +51,58 @@ import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import { getColumns } from '../../components/alerts_table/common/get_columns';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';
+import { getObservabilityAlertsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
+
+/** Clear the App Menu (optional) slot for Alerts so it does not show "Add data" as the only item. */
+function useClearAppMenu() {
+  const { appMountParameters } = usePluginContext();
+  useEffect(() => {
+    const setHeaderActionMenu = appMountParameters?.setHeaderActionMenu;
+    if (setHeaderActionMenu) {
+      setHeaderActionMenu(undefined);
+      return () => setHeaderActionMenu(undefined);
+    }
+  }, [appMountParameters?.setHeaderActionMenu]);
+}
+
+/** Renders the maintenance window callout only when it would be shown, avoiding an empty EuiFlexItem. */
+function MaintenanceWindowCalloutSection(
+  props: React.ComponentProps<typeof MaintenanceWindowCallout>
+): React.ReactElement | null {
+  const { kibanaServices, categories = [] } = props;
+  const {
+    application: { capabilities },
+  } = kibanaServices;
+  const isMaintenanceWindowDisabled =
+    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.show &&
+    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.save;
+  const { data: activeMaintenanceWindows = [] } = useFetchActiveMaintenanceWindows(kibanaServices, {
+    enabled: !isMaintenanceWindowDisabled,
+  });
+
+  const categoryList = Array.isArray(categories) ? categories : [];
+  const shouldShow = useMemo(() => {
+    if (isMaintenanceWindowDisabled || !activeMaintenanceWindows?.length) return false;
+    return activeMaintenanceWindows.some(({ status, categoryIds }) => {
+      if (status !== MaintenanceWindowStatus.Running) return false;
+      if (!Array.isArray(categoryIds)) return true;
+      return categoryIds.some((c) => categoryList.includes(c));
+    });
+  }, [isMaintenanceWindowDisabled, activeMaintenanceWindows, categoryList]);
+
+  if (!shouldShow) return null;
+  return (
+    <EuiFlexItem>
+      <MaintenanceWindowCallout {...props} />
+    </EuiFlexItem>
+  );
+}
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -67,6 +115,7 @@ const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 const tableColumns = getColumns({ showRuleName: true });
 
 function InternalAlertsPage() {
+  useClearAppMenu();
   const kibanaServices = useKibana().services;
   const {
     data,
@@ -78,6 +127,7 @@ function InternalAlertsPage() {
     cases,
     settings,
     charts,
+    chrome,
     dataViews,
     observabilityAIAssistant,
     share: {
@@ -269,30 +319,25 @@ function InternalAlertsPage() {
 
   const manageRulesHref = useRulesLink().href;
 
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig && manageRulesHref) {
+      chrome.setHeaderAppActionsConfig(
+        getObservabilityAlertsHeaderAppActionsConfig(manageRulesHref)
+      );
+      return () => {
+        chrome.setHeaderAppActionsConfig(undefined);
+      };
+    }
+  }, [chrome, manageRulesHref]);
+
   return (
     <Provider value={alertSearchBarStateContainer}>
-      <ObservabilityPageTemplate
-        data-test-subj="alertsPageWithData"
-        pageHeader={{
-          pageTitle: (
-            <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
-          ),
-          rightSideItems: renderRuleStats(
-            ruleStats,
-            manageRulesHref as string,
-            ruleStatsLoading,
-            locators.get<RulesLocatorParams>(rulesLocatorID)
-          ),
-        }}
-      >
-        <HeaderMenu />
+      <ObservabilityPageTemplate data-test-subj="alertsPageWithData">
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            <MaintenanceWindowCallout
-              kibanaServices={kibanaServices}
-              categories={[DEFAULT_APP_CATEGORIES.observability.id]}
-            />
-          </EuiFlexItem>
+          <MaintenanceWindowCalloutSection
+            kibanaServices={kibanaServices}
+            categories={[DEFAULT_APP_CATEGORIES.observability.id]}
+          />
           <EuiFlexItem>
             <ObservabilityAlertSearchBar
               {...alertSearchBarStateProps}
@@ -314,7 +359,6 @@ function InternalAlertsPage() {
                 uiSettings,
               }}
             />
-            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             {hasInitialControlLoadingFinished ? (
@@ -332,6 +376,45 @@ function InternalAlertsPage() {
             ) : (
               <AlertsLoader />
             )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="l"
+              responsive={false}
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                  {renderRuleStats(
+                    ruleStats,
+                    manageRulesHref as string,
+                    ruleStatsLoading,
+                    locators.get<RulesLocatorParams>(rulesLocatorID),
+                    { includeManageRulesInPageHeader: false }
+                  ).map((item, index) => (
+                    <EuiFlexItem key={index} grow={false}>
+                      {item}
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {manageRulesHref && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="manageRulesPageButton"
+                    href={manageRulesHref}
+                    iconType="gear"
+                    color="text"
+                    size="s"
+                  >
+                    {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+                      defaultMessage: 'Manage Rules',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             {esQuery && hasInitialControlLoadingFinished && (

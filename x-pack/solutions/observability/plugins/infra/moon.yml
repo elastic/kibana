@@ -128,6 +128,7 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/react-kibana-mount'
+  - '@kbn/shared-ux-card-no-data'
   - '@kbn/shared-ux-card-no-data-types'
   - '@kbn/licensing-types'
   - '@kbn/apm-types'

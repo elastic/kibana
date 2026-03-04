@@ -58,6 +58,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     ruleTypeIds,
     storageKey,
     disableLocalStorageSync = false,
+    prependControls,
+    appendControls,
   } = props;
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
@@ -435,6 +437,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     >
       <div className="filter-group__wrapper">
         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+          {prependControls ? (
+            <EuiFlexItem grow={false}>{prependControls}</EuiFlexItem>
+          ) : null}
           {Array.isArray(controlsFromUrl) ? (
             <EuiFlexItem grow={true} data-test-subj={TEST_IDS.FILTER_CONTROLS}>
               <ControlGroupRenderer
@@ -447,6 +452,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
               />
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>
+          ) : null}
+          {appendControls ? (
+            <EuiFlexItem grow={false}>{appendControls}</EuiFlexItem>
           ) : null}
           {!isViewMode && !showFiltersChangedBanner ? (
             <>

@@ -77,7 +77,7 @@ describe('TracesInDiscoverCallout', () => {
   });
 
   describe('Rendering', () => {
-    it('renders the callout with title, content and button', async () => {
+    it('renders the small callout with title as link', async () => {
       await act(async () => {
         render(<TracesInDiscoverCallout />);
       });
@@ -85,14 +85,9 @@ describe('TracesInDiscoverCallout', () => {
       expect(
         await screen.findByText('Try the new traces experience in Discover')
       ).toBeInTheDocument();
-      expect(
-        await screen.findByText(
-          'Now you can view and analyse the full-screen waterfall and explore your trace data in context.'
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId('apmServiceInventoryTracesInDiscoverCalloutButton')
-      ).toBeInTheDocument();
+      const link = screen.getByTestId('apmServiceInventoryTracesInDiscoverCalloutButton');
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', 'mock-discover-url');
     });
   });
 

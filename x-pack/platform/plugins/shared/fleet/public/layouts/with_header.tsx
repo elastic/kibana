@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPageBody, EuiSpacer, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 import type { HeaderProps } from '../components';
 import { Header } from '../components';
@@ -14,7 +14,7 @@ import { Header } from '../components';
 import { Page, ContentWrapper, Wrapper } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
-  restrictWidth?: number;
+  restrictWidth?: number | boolean;
   restrictHeaderWidth?: number;
   'data-test-subj'?: string;
   children?: React.ReactNode;
@@ -31,18 +31,19 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   noSpacerInContent,
   ...rest
 }) => {
-  const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
-  const fullWidthSize = isBiggerScreen ? '80%' : '100%';
+  // Default restrictWidth to false and header to full width.
+  const pageRestrictWidth = restrictWidth !== undefined ? restrictWidth : false;
+  const headerMaxWidth = restrictHeaderWidth !== undefined ? restrictHeaderWidth : '100%';
 
   return (
     <Wrapper>
       <Header
-        maxWidth={restrictHeaderWidth || fullWidthSize}
+        maxWidth={headerMaxWidth}
         data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
         {...rest}
       />
       <Page
-        restrictWidth={restrictWidth || fullWidthSize}
+        restrictWidth={pageRestrictWidth}
         data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
       >
         <EuiPageBody>

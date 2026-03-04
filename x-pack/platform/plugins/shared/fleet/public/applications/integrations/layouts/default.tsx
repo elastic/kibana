@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
+import { EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ExperimentalFeaturesService } from '../../../services';
-import { useLink, useStartServices } from '../../../hooks';
+import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
 import { WithHeaderLayout } from '.';
@@ -23,7 +22,6 @@ interface Props {
 
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection, noSpacerInContent }) => {
-    const { automaticImport } = useStartServices();
     const { getHref } = useLink();
     const tabs = [
       {
@@ -48,47 +46,9 @@ export const DefaultLayout: React.FC<Props> = memo(
       },
     ];
 
-    const { CreateIntegrationCardButton } = automaticImport?.components ?? {};
-
     return (
       <WithHeaderLayout
         noSpacerInContent={noSpacerInContent}
-        leftColumn={
-          <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.fleet.integrationsHeaderTitle"
-                  defaultMessage="Integrations"
-                />
-              </h1>
-            </EuiText>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.fleet.epm.pageSubtitle"
-                    defaultMessage="Choose an integration to start collecting and analyzing your data."
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiSpacer size="s" />
-          </EuiFlexGroup>
-        }
-        rightColumnGrow={false}
-        rightColumn={
-          ExperimentalFeaturesService.get()
-            .newBrowseIntegrationUx ? undefined : CreateIntegrationCardButton ? (
-            <EuiFlexItem grow={false}>
-              <CreateIntegrationCardButton />
-            </EuiFlexItem>
-          ) : undefined
-        }
         tabs={tabs.map((tab) => {
           const notificationCount = notificationsBySection?.[tab.section];
           return {

@@ -42,7 +42,7 @@ export function SearchBar({
     isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={true}>
       <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
         <EuiFlexItem>
           <EuiFlexGroup
@@ -77,12 +77,12 @@ export function SearchBar({
             {showTimeComparison && (
               <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
+                <EuiSpacer size="s" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
     </EuiFlexItem>
   );
 }

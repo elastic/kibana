@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
@@ -23,14 +23,16 @@ import {
   useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { TABS_ONLY_APP_MENU_CONFIG } from '../top_nav/use_top_nav_menu_items';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
-import { useSwitchModesTour } from './use_switch_modes_tour';
 
 const MAX_TABS_COUNT = 25;
 
 export const TabsView = (props: SingleTabViewProps) => {
+  const { customizationContext } = props;
   const services = useDiscoverServices();
+  const { chrome } = services;
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
@@ -48,10 +50,21 @@ export const TabsView = (props: SingleTabViewProps) => {
     (state) => state.scopedEbtManager$
   );
 
-  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
+  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems } =
     useAppMenuData({ currentDataView });
 
-  const switchModesTourStep = useSwitchModesTour();
+  // When standalone, clear the chrome app menu bar so it doesn't show overflow actions (New, Open, Share, etc.).
+  // Those actions live in the global header; the only row below the header should be the app content (UnifiedTabs).
+  useEffect(() => {
+    if (customizationContext.displayMode !== 'standalone') {
+      return;
+    }
+    chrome.setAppMenu(undefined);
+    services.setHeaderActionMenu(undefined);
+    return () => {
+      chrome.setAppMenu(undefined);
+    };
+  }, [chrome, customizationContext.displayMode, services]);
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -81,37 +94,37 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   return (
-    <>
-      {switchModesTourStep}
-      {/**
-       * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
-       * where this might not be good enough.
-       */}
-      <EuiResizeObserver onResize={onResize}>
-        {(resizeRef) => (
-          <div ref={resizeRef}>
-            <UnifiedTabs
-              services={services}
-              items={items}
-              selectedItemId={currentTabId}
-              recentlyClosedItems={recentlyClosedItems}
-              unsavedItemIds={unsavedTabIds}
-              maxItemsCount={MAX_TABS_COUNT}
-              hideTabsBar={hideTabsBar}
-              createItem={createItem}
-              getPreviewData={getPreviewData}
-              renderContent={renderContent}
-              onChanged={onChanged}
-              onEBTEvent={onEvent}
-              onClearRecentlyClosed={onClearRecentlyClosed}
-              getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-              appendRight={
-                <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
-              }
-            />
-          </div>
-        )}
-      </EuiResizeObserver>
-    </>
+    /**
+     * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
+     * where this might not be good enough.
+     */
+    <EuiResizeObserver onResize={onResize}>
+      {(resizeRef) => (
+        <div ref={resizeRef}>
+          <UnifiedTabs
+            services={services}
+            items={items}
+            selectedItemId={currentTabId}
+            recentlyClosedItems={recentlyClosedItems}
+            unsavedItemIds={unsavedTabIds}
+            maxItemsCount={MAX_TABS_COUNT}
+            hideTabsBar={hideTabsBar}
+            createItem={createItem}
+            getPreviewData={getPreviewData}
+            renderContent={renderContent}
+            onChanged={onChanged}
+            onEBTEvent={onEvent}
+            onClearRecentlyClosed={onClearRecentlyClosed}
+            getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+            appendRight={
+              <AppMenuComponent
+                config={TABS_ONLY_APP_MENU_CONFIG}
+                isCollapsed={shouldCollapseAppMenu}
+              />
+            }
+          />
+        </div>
+      )}
+    </EuiResizeObserver>
   );
 };

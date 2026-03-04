@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiStat, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiStat, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CaseStatuses } from '../../../common/types/domain';
 import { statuses } from './config';
 
@@ -35,13 +36,15 @@ const StatusStatsComponent: React.FC<Props> = ({
     [caseCount, caseStatus, dataTestSubj, isLoading]
   );
   return (
-    <EuiStat
-      data-test-subj={dataTestSubj}
-      description={description}
-      title={title}
-      titleSize="xs"
-      text-align="left"
-    />
+    <EuiPanel hasBorder paddingSize="m" grow={false}>
+      <EuiStat
+        data-test-subj={dataTestSubj}
+        description={description}
+        title={title}
+        titleSize="xs"
+        text-align="left"
+      />
+  </EuiPanel>
   );
 };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { type ComponentProps, useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiShowFor, EuiToolTip } from '@elastic/eui';
 import type { EuiToolTip as EuiToolTipRef } from '@elastic/eui';
@@ -14,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
@@ -163,11 +163,27 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   > = (props) => (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        {isServerless ? (
-          <EuiButtonEmpty {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
-        ) : (
-          <EuiButton {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
-        )}
+        <EuiButton
+          size="s"
+          {...props}
+          css={css`
+            height: 28px;
+            background: linear-gradient(to right, #d9e8ff 17%, #ece2fe 83%) !important;
+
+            /* Gradient only on the text label, not the icon */
+            & > span > span {
+              background: linear-gradient(to right, #1750ba 17%, #6b3c9f 83%);
+              -webkit-background-clip: text;
+              background-clip: text;
+              color: transparent;
+            }
+          `}
+          data-test-subj="observabilityAiAssistantAppNavControlButton"
+        >
+          {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
+            defaultMessage: 'AI Agent',
+          })}
+        </EuiButton>
       </EuiShowFor>
       <EuiShowFor sizes={['xs', 's']}>
         <EuiButtonIcon
@@ -206,11 +222,11 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           }}
           color="primary"
           size="s"
-          iconType={AssistantIcon}
+          iconType="productRobot"
           isLoading={chatService.loading}
         >
           {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
-            defaultMessage: 'AI Assistant',
+            defaultMessage: 'AI Agent',
           })}
         </AiAssistantButton>
       </EuiToolTip>

@@ -28,6 +28,7 @@ export function RumDatePicker() {
       rangeTo={rangeTo}
       refreshPaused={refreshPaused}
       refreshInterval={refreshInterval}
+      width="auto"
       onTimeRangeRefresh={({ start, end }) => {
         clearCache();
         refreshTimeRange({ rangeFrom: start, rangeTo: end });

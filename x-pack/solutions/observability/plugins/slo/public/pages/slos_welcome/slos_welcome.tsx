@@ -14,6 +14,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -84,7 +85,7 @@ export function SlosWelcomePage() {
       <SloPermissionsCallout />
       <EuiPageTemplate.EmptyPrompt
         title={
-          <EuiTitle size="l">
+          <EuiTitle size="m">
             <h1>
               {i18n.translate('xpack.slo.sloList.welcomePrompt.title', {
                 defaultMessage: 'Track and deliver on your SLOs',
@@ -92,12 +93,12 @@ export function SlosWelcomePage() {
             </h1>
           </EuiTitle>
         }
-        icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
-        color="transparent"
-        layout="horizontal"
+        icon={<EuiImage size="s" src={illustration} alt="" />}
+        color="plain"
+        layout="vertical"
         hasBorder={false}
         body={
-          <>
+          <EuiText size="s">
             <p>
               {i18n.translate('xpack.slo.sloList.welcomePrompt.messageParagraph1', {
                 defaultMessage:
@@ -105,31 +106,31 @@ export function SlosWelcomePage() {
               })}
             </p>
 
-            <p>
+            {/* <p>
               {i18n.translate('xpack.slo.sloList.welcomePrompt.messageParagraph2', {
                 defaultMessage:
                   'Easily report the uptime and reliability of your services to stakeholders with real-time insights.',
               })}
-            </p>
+            </p> */}
             <EuiSpacer size="s" />
-          </>
+          </EuiText>
         }
         actions={
           <>
             {hasRightLicense ? (
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <EuiTitle size="xxs">
-                    <span>
-                      {i18n.translate('xpack.slo.sloList.welcomePrompt.getStartedMessage', {
-                        defaultMessage: 'To get started, create your first SLO.',
-                      })}
-                    </span>
-                  </EuiTitle>
-                </EuiFlexItem>
+              // <EuiFlexGroup direction="column">
+              //   <EuiFlexItem>
+              //     <EuiTitle size="xxs">
+              //       <span>
+              //         {i18n.translate('xpack.slo.sloList.welcomePrompt.getStartedMessage', {
+              //           defaultMessage: 'To get started, create your first SLO.',
+              //         })}
+              //       </span>
+              //     </EuiTitle>
+              //   </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <span>
+              //   <EuiFlexItem>
+              //     <span>
                     <EuiButton
                       data-test-subj="o11ySloListWelcomePromptCreateSloButton"
                       fill
@@ -141,9 +142,9 @@ export function SlosWelcomePage() {
                         defaultMessage: 'Create SLO',
                       })}
                     </EuiButton>
-                  </span>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              //     </span>
+              //   </EuiFlexItem>
+              // </EuiFlexGroup>
             ) : (
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>

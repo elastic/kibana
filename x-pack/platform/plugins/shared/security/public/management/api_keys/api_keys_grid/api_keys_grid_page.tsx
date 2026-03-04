@@ -355,7 +355,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
             paddingSize="none"
             bottomBorder
           />
-          <EuiSpacer />
           <KibanaPageTemplate.Section paddingSize="none">
             {createdApiKey && (
               <>

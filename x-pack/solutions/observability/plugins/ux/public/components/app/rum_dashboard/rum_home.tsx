@@ -7,9 +7,8 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
-import { EuiSpacer } from '@elastic/eui';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
@@ -87,47 +86,33 @@ export function RumHome() {
   return (
     <PageTemplateComponent
       noDataConfig={isLoading ? undefined : noDataConfig}
-      pageHeader={{ children: <PageHeader /> }}
       isPageDataLoaded={isLoading === false}
       isEmptyState={isLoading}
     >
       {isLoading && <EmptyStateLoading />}
       <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+        <DashboardToolbar />
         <RumOverview />
       </div>
     </PageTemplateComponent>
   );
 }
 
-function PageHeader() {
-  const sizes = useBreakpoints();
-
-  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
-
+function DashboardToolbar() {
   return (
-    <div style={{ width: '100%' }}>
-      <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h1 className="eui-textNoWrap">{DASHBOARD_LABEL}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
-          <RumDatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <WebApplicationSelect />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UserPercentile />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UxEnvironmentFilter />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup gutterSize="s" alignItems="center" style={{ marginBottom: 8 }}>
+      <EuiFlexItem grow={false}>
+        <WebApplicationSelect />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <UserPercentile />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <UxEnvironmentFilter />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <RumDatePicker />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

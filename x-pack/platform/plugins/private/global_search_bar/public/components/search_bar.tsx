@@ -92,7 +92,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
-  const [isVisible, setIsVisible] = useState(false);
+  // Global header prototype: show search input by default (replace search icon with search input)
+  const [isVisible, setIsVisible] = useState(true);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks
@@ -114,6 +115,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     },
     [useEuiMinBreakpoint('xl')]: {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
+    },
+    marginRight: euiTheme.size.xs,
+    maxWidth: '320px',
+    height: '28px',
+    input: {
+      height: '28px',
     },
   });
   // Initialize searchableTypes data
@@ -349,6 +356,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         onClick={() => {
           setIsVisible(true);
         }}
+        css={css`
+          margin-right: 8px;
+        `}
       >
         <EuiIcon type="search" size="m" />
       </EuiHeaderSectionItemButton>
@@ -357,18 +367,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const getAppendForChromeStyle = () => {
     if (chromeStyle === 'project') {
-      return (
-        <EuiButtonIcon
-          aria-label={i18nStrings.closeSearchAriaText}
-          color="text"
-          data-test-subj="nav-search-conceal"
-          iconType="cross"
-          onClick={() => {
-            reportEvent.searchBlur();
-            setIsVisible(false);
-          }}
-        />
-      );
+      return null;
     }
 
     if (showAppend) {
@@ -430,7 +429,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         popoverRef: setButtonRef,
-        panelStyle: { marginTop: '6px' },
+        anchorPosition: 'downRight',
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>

@@ -390,11 +390,13 @@ export function InternalDashboardTopNav({
       <AppMenu
         setAppMenu={coreServices.chrome.setAppMenu}
         config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
+          // App menu (middle bar below global header) is optional; when no items are passed it won't show.
+          // visibilityProps.showTopNavMenu
+          //   ? viewMode === 'edit'
+          //     ? editModeTopNavConfig
+          //     : viewModeTopNavConfig
+          //   : undefined
+          undefined
         }
       />
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
@@ -432,9 +434,9 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
-      <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
+      {/* <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
-      </MountPointPortal>
+      </MountPointPortal> */}
     </div>
   );
 }
@@ -454,16 +456,16 @@ const topNavStyles = {
         },
       },
       '.controlGroup': {
-        padding: euiTheme.size.s,
+        padding: euiTheme.size.base,
         paddingTop: 0,
       },
-    }),
-  updateIcon: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '.kbnBody &': {
-        marginLeft: euiTheme.size.xs,
-        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
-        cursor: 'pointer',
+      // Dashboard-only: override unified search bar bottom padding
+      '[data-test-subj="globalQueryBar"]': {
+        paddingBottom: euiTheme.size.s,
       },
+    }),
+  updateIcon: () =>
+    css({
+      display: 'none',
     }),
 };

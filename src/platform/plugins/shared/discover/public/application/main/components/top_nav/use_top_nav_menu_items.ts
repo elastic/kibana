@@ -9,7 +9,14 @@
 
 import { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { discoverTopNavMenuContext } from './discover_topnav_menu';
+
+/**
+ * Config that shows only tabs in the app menu (no action buttons).
+ * Used when app-level actions are rendered in the global header instead.
+ */
+export const TABS_ONLY_APP_MENU_CONFIG: AppMenuConfig = {};
 
 /**
  * Hook to access the top nav menu items from context.

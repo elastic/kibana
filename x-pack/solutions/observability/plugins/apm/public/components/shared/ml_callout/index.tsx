@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
@@ -26,6 +26,7 @@ export function MLCallout({
   onCreateJobClick,
   anomalyDetectionSetupState,
   isOnSettingsPage,
+  compact = false,
 }: {
   anomalyDetectionSetupState: AnomalyDetectionSetupState;
   onDismiss?: () => void;
@@ -33,6 +34,8 @@ export function MLCallout({
   onCreateJobClick?: () => void;
   isOnSettingsPage: boolean;
   append?: React.ReactElement;
+  /** When true, renders a small callout with title as link only (no description or button). */
+  compact?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const apmGetLearnMoreHref = useAPMHref({ path: '/settings/anomaly-detection' });
@@ -152,6 +155,22 @@ export function MLCallout({
   }
 
   const dismissable = !isOnSettingsPage;
+
+  if (compact) {
+    return (
+      <EuiCallOut
+        size="s"
+        title={
+          <EuiLink href={apmGetLearnMoreHref} data-test-subj="apmMLCalloutLearnMoreLink">
+            {properties.title}
+          </EuiLink>
+        }
+        iconType={properties.icon}
+        color={properties.color}
+        onDismiss={dismissable ? onDismiss : undefined}
+      />
+    );
+  }
 
   const hasAnyActions = properties.primaryAction || dismissable;
 

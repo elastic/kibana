@@ -375,7 +375,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         ))}
 
       {shouldShowRulesTable && (
-        <>
+        <div style={{ padding: '0 12px' }}>
           {selectedTab === AllRulesTabs.monitoring && (
             <>
               <RulesWithGapsOverviewPanel />
@@ -406,7 +406,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             }}
             {...tableProps}
           />
-        </>
+        </div>
       )}
     </>
   );

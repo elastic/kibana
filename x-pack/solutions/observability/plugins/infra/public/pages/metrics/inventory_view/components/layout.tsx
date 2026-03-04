@@ -143,15 +143,9 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
       <PageContent>
         <EuiFlexGroup direction="column" gutterSize="s">
           <TopActionContainer grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">
               <Toolbar nodeType={nodeType} currentTime={currentTime} />
-              <EuiFlexGroup
-                responsive={false}
-                css={css`
-                  margin: 0;
-                  justify-content: flex-end;
-                `}
-              >
+              <EuiFlexGroup responsive={false} alignItems="flexEnd" justifyContent="flexEnd">
                 {view === 'map' && (
                   <EuiFlexItem grow={false}>
                     <LegendControls

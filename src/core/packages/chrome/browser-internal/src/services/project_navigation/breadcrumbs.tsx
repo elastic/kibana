@@ -148,7 +148,7 @@ function buildRootCrumb({
         <EuiTextTruncate text={kibanaName} width={96} />
       ) : (
         i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
-          defaultMessage: 'Deployment',
+          defaultMessage: 'Thor-hammer-prod',
         })
       ),
       'data-test-subj': 'deploymentCrumb',

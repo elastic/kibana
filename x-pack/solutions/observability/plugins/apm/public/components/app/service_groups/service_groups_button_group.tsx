@@ -40,7 +40,8 @@ export function ServiceGroupsButtonGroup({
   const history = useHistory();
   return (
     <EuiButtonGroup
-      color="primary"
+      color="text"
+      buttonSize="compressed"
       options={[buttonGroupOptions.allServices.option, buttonGroupOptions.serviceGroups.option]}
       idSelected={selectedNavButton as string}
       onChange={(id) => {

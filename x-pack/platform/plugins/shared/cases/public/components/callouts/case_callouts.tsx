@@ -5,25 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { useLicense } from '../../common/use_license';
 import { PlatinumLicenseCallout } from './platinum_callout';
 
 const CaseCalloutsComponent: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { isAtLeastPlatinum } = useLicense();
 
   return !isAtLeastPlatinum() ? (
-    <EuiFlexGroup
-      gutterSize="none"
-      css={{ marginBottom: euiTheme.size.l }}
-      data-test-subj="case-callouts"
-    >
-      <EuiFlexItem>
-        <PlatinumLicenseCallout />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <PlatinumLicenseCallout />
   ) : null;
 };
 

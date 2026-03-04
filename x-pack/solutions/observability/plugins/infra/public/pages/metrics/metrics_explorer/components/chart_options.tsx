@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSwitchProps } from '@elastic/eui';
 import {
   EuiRadioGroup,
-  EuiButtonEmpty,
+  EuiButton,
   EuiPopover,
   EuiForm,
   EuiFormRow,
@@ -33,7 +33,8 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
   const [isPopoverOpen, { toggle: togglePopover }] = useBoolean(false);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButton
+      color="text"
       aria-label={i18n.translate(
         'xpack.infra.metricsExplorerChartOptions.customizeButton.ariaLabel',
         { defaultMessage: 'Customize' }
@@ -48,7 +49,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
         id="xpack.infra.metricsExplorer.customizeChartOptions"
         defaultMessage="Customize"
       />
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 
   const yAxisRadios = [

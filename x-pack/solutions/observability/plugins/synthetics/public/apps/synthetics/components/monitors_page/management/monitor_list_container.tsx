@@ -15,7 +15,6 @@ import { MonitorAsyncError } from './monitor_errors/monitor_async_error';
 import { ListFilters } from '../common/monitor_filters/list_filters';
 import { MonitorList } from './monitor_list_table/monitor_list';
 import { MonitorStats } from './monitor_stats/monitor_stats';
-import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 
 export const MonitorListContainer = ({
@@ -57,7 +56,6 @@ export const MonitorListContainer = ({
 
   return (
     <>
-      <AlertingCallout />
       <MonitorAsyncError />
       <ListFilters handleFilterChange={handleFilterChange} />
       <EuiSpacer />

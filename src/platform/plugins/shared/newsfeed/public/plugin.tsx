@@ -50,10 +50,12 @@ export class NewsfeedPublicPlugin
     const isScreenshotMode = screenshotMode.isScreenshotMode();
 
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
+    /* Global header prototype: Newsfeed hidden (will be addressed in a later phase)
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api, target, core),
     });
+    */
 
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {

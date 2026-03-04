@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { SingleTabView, type SingleTabViewProps } from '.';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 
 export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
-  const { chrome } = useDiscoverServices();
-  const topNavMenuItems = useTopNavMenuItems();
+  const { chrome, setHeaderActionMenu } = useDiscoverServices();
+
+  // When using global header actions, do not show the chrome app menu bar (no overflow actions).
+  useEffect(() => {
+    setHeaderActionMenu(undefined);
+    return () => {};
+  }, [setHeaderActionMenu]);
 
   return (
     <>
-      {topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />}
+      <AppMenu config={undefined} setAppMenu={chrome.setAppMenu} />
       <SingleTabView {...props} />
     </>
   );

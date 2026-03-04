@@ -9,12 +9,16 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiHeader,
+  EuiHeaderLinks,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiImage,
   EuiLoadingSpinner,
+  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,6 +26,7 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHeaderAppActionsConfig,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
   ChromeNavControl,
@@ -30,7 +35,7 @@ import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import React, { type ComponentProps, useCallback } from 'react';
+import React, { type ComponentProps, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs';
@@ -62,27 +67,177 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   `,
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation
+
+    [data-test-subj='breadcrumbs'] [aria-current='page'] {
+      font-weight: 600;
+    }
   `,
   leftNavcontrols: css`
     .navcontrols__separator {
       display: flex;
-      margin-right: ${size.xs};
+      margin-inline: ${size.s};
       &:after {
-        background: ${colors.lightShade};
         content: '';
         flex-shrink: 0;
         margin-block-start: ${size.xs};
         margin-block-end: 0;
         margin-inline: ${size.s};
-        block-size: 16px;
+        block-size: 8px;
         inline-size: 1px;
         transform: translateY(-1px) rotate(15deg);
+        display: none;
       }
     }
   `,
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
+
+const overflowMenuCss = css`
+  width: 240px;
+`;
+
+/** POC: toolbar styles for secondary actions (mirrored from kbn-unified-data-table render_custom_toolbar controlGroup / controlGroupIconButton). */
+const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  controlGroup:
+    euiTheme &&
+    css({
+      position: 'relative',
+      overflow: 'hidden',
+      // borderRadius: euiTheme.border.radius.small,
+      display: 'inline-flex',
+      alignItems: 'stretch',
+      flexDirection: 'row',
+
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        // border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        // borderRadius: 'inherit',
+        pointerEvents: 'none',
+      },
+
+      '& .headerAppActionsSecondaryToolbarControlIconButton .euiButtonIcon': {
+        // borderRadius: 0,
+        border: 'none',
+      },
+
+      // '& .headerAppActionsSecondaryToolbarControlIconButton + .headerAppActionsSecondaryToolbarControlIconButton':
+      //   {
+      //     borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      //   },
+
+      // /* Divider between multiple buttons inside one wrapper (e.g. Dashboard Share + Exit) */
+      // '& .euiButtonIcon + .euiButtonIcon': {
+      //   borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      // },
+    }),
+  controlGroupIconButton:
+    euiTheme &&
+    css({
+      '.euiToolTipAnchor .euiButtonIcon, .euiButtonIcon': {
+        inlineSize: '28px',
+        blockSize: '28px',
+        minWidth: '28px',
+        minHeight: '28px',
+        color: euiTheme.colors.textSubdued,
+        // borderRadius: 'inherit',
+
+        '&:hover, &:active, &:focus': {
+          background: 'transparent',
+          animation: 'none !important',
+          transform: 'none !important',
+        },
+      },
+    }),
+});
+
+const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppActionsConfig }> = ({
+  config,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+  const hasOverflow = config.overflowPanels && config.overflowPanels.length > 0;
+  const secondaryToolbarCss = getSecondaryToolbarCss({ euiTheme });
+  const hasSecondaryActions = config.secondaryActions && config.secondaryActions.length > 0;
+  const showToolbar = hasSecondaryActions || hasOverflow;
+
+  const overflowButton = (
+    <EuiButtonIcon
+      color="text"
+      iconType="boxesVertical"
+      aria-label="More actions"
+      onClick={() => setIsOverflowOpen(!isOverflowOpen)}
+      data-test-subj="headerGlobalNav-appActionsOverflowButton"
+    />
+  );
+
+  const hasPrimaryActions = config.primaryActions && config.primaryActions.length > 0;
+  const showPrimaryActionsSeparator = showToolbar && hasPrimaryActions;
+
+  const primaryActionsSeparatorCss = css({
+    borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    paddingInlineStart: euiTheme.size.s,
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.s,
+  });
+
+  const primaryActionsContent = config.primaryActions?.map((action, index) => (
+    <React.Fragment key={index}>{action}</React.Fragment>
+  ));
+
+  return (
+    <EuiHeaderLinks gutterSize="xs" popoverBreakpoints="none">
+      {showToolbar && (
+        <div
+          className="headerAppActionsSecondaryToolbarControlGroup"
+          css={secondaryToolbarCss.controlGroup}
+          data-test-subj="headerGlobalNav-appActionsSecondaryToolbar"
+        >
+          {config.secondaryActions?.map((action, index) => (
+            <div
+              key={index}
+              className="headerAppActionsSecondaryToolbarControlIconButton"
+              css={secondaryToolbarCss.controlGroupIconButton}
+            >
+              {action}
+            </div>
+          ))}
+          {hasOverflow && (
+            <div
+              className="headerAppActionsSecondaryToolbarControlIconButton"
+              css={secondaryToolbarCss.controlGroupIconButton}
+            >
+              <EuiPopover
+                button={overflowButton}
+                isOpen={isOverflowOpen}
+                closePopover={() => setIsOverflowOpen(false)}
+                anchorPosition="downLeft"
+                panelPaddingSize="none"
+              >
+                <EuiContextMenu
+                  css={overflowMenuCss}
+                  size="s"
+                  panels={config.overflowPanels as ComponentProps<typeof EuiContextMenu>['panels']}
+                  initialPanelId={0}
+                />
+              </EuiPopover>
+            </div>
+          )}
+        </div>
+      )}
+      {showPrimaryActionsSeparator ? (
+        <div css={primaryActionsSeparatorCss} data-test-subj="headerGlobalNav-appActionsPrimary">
+          {primaryActionsContent}
+        </div>
+      ) : (
+        primaryActionsContent
+      )}
+    </EuiHeaderLinks>
+  );
+};
 
 const headerStrings = {
   logo: {
@@ -114,6 +269,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  headerAppActionsConfig$: Observable<ChromeHeaderAppActionsConfig | undefined>;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -214,6 +370,7 @@ export const ProjectHeader = ({
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
+  const headerAppActionsConfig = useObservable(observables.headerAppActionsConfig$, undefined);
 
   const topBarStyles = () => css`
     box-shadow: none !important;
@@ -260,11 +417,18 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
+            {headerAppActionsConfig && (
+              <EuiHeaderSection grow={false} css={{ paddingInline: euiTheme.size.s }}>
+                <EuiHeaderSectionItem>
+                  <GlobalHeaderAppActionsFromConfig config={headerAppActionsConfig} />
+                </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            )}
+
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
                 <HeaderNavControls navControls$={observables.navControlsCenter$} />
               </EuiHeaderSectionItem>
-
               <EuiHeaderSectionItem>
                 <HeaderHelpMenu
                   isServerless={isServerless}
@@ -278,12 +442,7 @@ export const ProjectHeader = ({
                   navigateToUrl={application.navigateToUrl}
                 />
               </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem
-                css={css`
-                  gap: ${euiTheme.size.s};
-                `}
-              >
+              <EuiHeaderSectionItem>
                 <HeaderNavControls navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

@@ -8,13 +8,16 @@
 import React, { useMemo } from 'react';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { CaseCallouts } from '../callouts/case_callouts';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
 import { CasesTableHeader } from './header';
 import { useKibana } from '../../common/lib/kibana';
 
+/**
+ * All-cases list content (header + table). Does not include the license callout;
+ * hosts that embed Cases can render CaseCallouts outside the page body for a flush layout.
+ */
 export const AllCases: React.FC = () => {
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
 
@@ -27,7 +30,6 @@ export const AllCases: React.FC = () => {
 
   return (
     <>
-      <CaseCallouts />
       <CasesTableHeader actionsErrors={actionsErrors} />
       <AllCasesList />
     </>

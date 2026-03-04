@@ -30,4 +30,10 @@ export interface CasesRoutesProps {
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
   renderAlertsTable?: ComponentType<CaseViewAlertsTableProps>;
   renderEventsTable?: ComponentType<CaseViewEventsTableProps>;
+  /**
+   * When true (default), the all-cases list route renders the license callout inside the page body.
+   * When false, the callout is not rendered in the route; the host should render it outside the
+   * page body (e.g. flush to container edges) and pass false so the callout is not duplicated.
+   */
+  renderCalloutInRoute?: boolean;
 }

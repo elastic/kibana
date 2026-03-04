@@ -58,12 +58,19 @@ const errorsLabel = i18n.translate('xpack.observability.alerts.ruleStats.errors'
   defaultMessage: 'Errors',
 });
 
+export interface RenderRuleStatsOptions {
+  /** When false, the "Manage Rules" button and its divider are omitted (e.g. when shown in global header). Default true. */
+  includeManageRulesInPageHeader?: boolean;
+}
+
 export const renderRuleStats = (
   ruleStats: RuleStatsState,
   manageRulesHref: string,
   ruleStatsLoading: boolean,
-  rulesLocator?: LocatorPublic<RulesLocatorParams>
+  rulesLocator?: LocatorPublic<RulesLocatorParams>,
+  options?: RenderRuleStatsOptions
 ) => {
+  const { includeManageRulesInPageHeader = true } = options ?? {};
   const handleNavigateToRules = async (stats: RuleStatsState, status: Status) => {
     const count = getStatCount(stats, status);
     if (count > 0) {
@@ -155,8 +162,9 @@ export const renderRuleStats = (
       />
     </ConditionalWrap>
   );
-  return [
+  const items: React.ReactNode[] = [
     <StyledStat
+      key="ruleCount"
       title={ruleStats.total}
       description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
         defaultMessage: 'Rule count',
@@ -169,11 +177,16 @@ export const renderRuleStats = (
     disabledStatsComponent,
     snoozedStatsComponent,
     errorStatsComponent,
-    <Divider />,
-    <EuiButtonEmpty data-test-subj="manageRulesPageButton" href={manageRulesHref}>
-      {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
-        defaultMessage: 'Manage Rules',
-      })}
-    </EuiButtonEmpty>,
-  ].reverse();
+  ];
+  if (includeManageRulesInPageHeader) {
+    items.push(<Divider key="divider" />);
+    items.push(
+      <EuiButtonEmpty key="manageRules" data-test-subj="manageRulesPageButton" href={manageRulesHref}>
+        {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+          defaultMessage: 'Manage Rules',
+        })}
+      </EuiButtonEmpty>
+    );
+  }
+  return items.reverse();
 };

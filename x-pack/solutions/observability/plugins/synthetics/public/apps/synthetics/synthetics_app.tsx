@@ -18,7 +18,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { SyntheticsSharedContext } from './contexts/synthetics_shared_context';
 import { kibanaService } from '../../utils/kibana_service';
-import { ActionMenu } from './components/common/header/action_menu';
+import { getSyntheticsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
 import type { SyntheticsAppProps } from './contexts';
 import { SyntheticsSettingsContextProvider } from './contexts';
@@ -46,6 +46,10 @@ const Application = (props: SyntheticsAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
+  useEffect(() => {
+    coreStart.chrome.setHeaderAppActionsConfig(getSyntheticsHeaderAppActionsConfig());
+  }, [coreStart.chrome]);
+
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
@@ -69,7 +73,6 @@ const Application = (props: SyntheticsAppProps) => {
                   <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
                     <InspectorContextProvider>
                       <PageRouter />
-                      <ActionMenu appMountParameters={appMountParameters} />
                       <TestNowModeFlyoutContainer />
                     </InspectorContextProvider>
                   </div>

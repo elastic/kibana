@@ -18,7 +18,6 @@ import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -26,16 +25,15 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { FeedbackButton } from '../feedback_button';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
-import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
+import { getStreamsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -43,11 +41,24 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
+        streams: { streamsRepositoryClient, getClassicStatus },
       },
     },
     core,
   } = context;
+
+  // Global header app actions: overflow (Settings) + New (create classic stream)
+  useEffect(() => {
+    core.chrome.setHeaderAppActionsConfig(
+      getStreamsHeaderAppActionsConfig({
+        onSettings: () => setIsSettingsFlyoutOpen(true),
+        onCreateClassicStream: () => setIsClassicStreamCreationFlyoutOpen(true),
+      })
+    );
+    return () => {
+      core.chrome.setHeaderAppActionsConfig(undefined);
+    };
+  }, [core.chrome]);
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
 
@@ -71,9 +82,6 @@ export function StreamListView() {
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
     useState<boolean>(false);
-  const [wiredStreamsStatus, setWiredStreamsStatus] = useState<WiredStreamsStatus | undefined>(
-    undefined
-  );
 
   useEffect(() => {
     const fetchClassicStatus = async () => {
@@ -90,23 +98,6 @@ export function StreamListView() {
     };
     fetchClassicStatus();
   }, [getClassicStatus, core.notifications.toasts]);
-
-  const refreshWiredStatus = React.useCallback(async () => {
-    try {
-      const status = await getWiredStatus();
-      setWiredStreamsStatus(status);
-    } catch (error) {
-      core.notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
-          defaultMessage: 'Error fetching wired streams status',
-        }),
-      });
-    }
-  }, [getWiredStatus, core.notifications.toasts]);
-
-  useEffect(() => {
-    refreshWiredStatus();
-  }, [refreshWiredStatus]);
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
@@ -149,7 +140,8 @@ export function StreamListView() {
 
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      {/* Page header commented out: actions moved to global header (overflow + New button) */}
+      {/* <StreamsAppPageTemplate.Header
         bottomBorder="extended"
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
@@ -214,7 +206,14 @@ export function StreamListView() {
             )}
           </EuiFlexGroup>
         }
-      />
+      /> */}
+      {!streamsListFetch.loading &&
+        !isEmpty(streamsListFetch.value?.streams) && (
+          <WelcomeTourCallout
+            hasClassicStreams={hasClassicStreams}
+            firstClassicStreamName={firstClassicStreamName}
+          />
+        )}
       <StreamsAppPageTemplate.Body grow>
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
@@ -230,31 +229,17 @@ export function StreamListView() {
         ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
           <StreamsListEmptyPrompt />
         ) : (
-          <>
-            <WelcomeTourCallout
-              hasClassicStreams={hasClassicStreams}
-              firstClassicStreamName={firstClassicStreamName}
-            />
-            <LegacyLogsDeprecationCallout
-              streamsStatus={wiredStreamsStatus}
-              openFlyout={() => setIsSettingsFlyoutOpen(true)}
-            />
-            <StreamsTreeTable
-              loading={streamsListFetch.loading}
-              streams={streamsListFetch.value?.streams}
-              canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
-              wiredStreamsStatus={wiredStreamsStatus}
-              openFlyout={() => setIsSettingsFlyoutOpen(true)}
-            />
-          </>
+          <StreamsTreeTable
+            loading={streamsListFetch.loading}
+            streams={streamsListFetch.value?.streams}
+            canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
+          />
         )}
       </StreamsAppPageTemplate.Body>
       {isSettingsFlyoutOpen && (
         <StreamsSettingsFlyout
           onClose={() => setIsSettingsFlyoutOpen(false)}
           refreshStreams={streamsListFetch.refresh}
-          streamsStatus={wiredStreamsStatus}
-          onRefreshStatus={refreshWiredStatus}
         />
       )}
       {isClassicStreamCreationFlyoutOpen && (

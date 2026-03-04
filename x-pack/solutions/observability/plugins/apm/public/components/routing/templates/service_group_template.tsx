@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -15,7 +16,6 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -109,58 +109,53 @@ export function ServiceGroupTemplate({
             ...(selectedTab
               ? [
                   {
-                    title: selectedTab.breadcrumbLabel || selectedTab.label,
+                    title: TAB_BREADCRUMB_LABELS[serviceGroupContextTab],
                     href: selectedTab.href,
-                  } as { title: string; href: string },
+                  },
                 ]
               : []),
           ],
-    [pagePath, pageTitle, query, router, selectedTab, serviceGroupName, serviceGroupsLink],
+    [pagePath, pageTitle, query, router, selectedTab, serviceGroupContextTab, serviceGroupName, serviceGroupsLink],
     {
       omitRootOnServerless: true,
     }
   );
 
   return (
-    <ApmIndexSettingsContextProvider>
-      <ApmMainTemplate
-        pageTitle={serviceGroupsPageTitle}
-        pageHeader={{
-          tabs,
-          breadcrumbs: !isAllServices
-            ? [
-                {
-                  text: (
-                    <>
-                      <EuiIcon size="s" type="arrowLeft" />{' '}
-                      {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                        defaultMessage: 'Return to service groups',
-                      })}
-                    </>
-                  ),
-                  color: 'primary',
-                  'aria-current': false,
-                  href: serviceGroupsLink,
-                },
-              ]
-            : undefined,
-          ...pageHeader,
-        }}
-        environmentFilter={environmentFilter}
-        showServiceGroupSaveButton={!isAllServices}
-        showServiceGroupsNav={isAllServices}
-        selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
-        {...pageTemplateProps}
-      >
-        {children}
-      </ApmMainTemplate>
-    </ApmIndexSettingsContextProvider>
+    <ApmMainTemplate
+      pageTitle={serviceGroupsPageTitle}
+      pageHeader={{
+        tabs,
+        bottomBorder: 'extended',
+        paddingSize: 'none',
+        ...pageHeader,
+        css: css`
+          padding-inline: 8px;
+        `,
+      }}
+      environmentFilter={false}
+      showServiceGroupSaveButton={!isAllServices}
+      showServiceGroupsNav={false}
+      showPageHeader={true}
+      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
+      {...pageTemplateProps}
+    >
+      {children}
+    </ApmMainTemplate>
   );
 }
 
+const TAB_BREADCRUMB_LABELS: Record<'service-inventory' | 'service-map', string> = {
+  'service-inventory': i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+    defaultMessage: 'Inventory',
+  }),
+  'service-map': i18n.translate('xpack.apm.serviceGroup.serviceMap', {
+    defaultMessage: 'Service map',
+  }),
+};
+
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key: 'service-inventory' | 'service-map';
-  breadcrumbLabel?: string;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
@@ -170,9 +165,6 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
-      breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-        defaultMessage: 'Inventory',
-      }),
       label: (
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -193,12 +185,12 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
     },
   ];
 
+  // Omit breadcrumbLabel so it is not passed to EuiTab (React will warn on unknown DOM props)
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, breadcrumbLabel }) => ({
+    .map(({ href, key, label }) => ({
       href,
       label,
       isSelected: key === selectedTab,
-      breadcrumbLabel,
     }));
 }

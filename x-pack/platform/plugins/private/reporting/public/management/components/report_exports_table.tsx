@@ -449,7 +449,6 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
 
     return (
       <Fragment>
-        <EuiSpacer size={'l'} />
         {this.state.selectedJobs.length > 0 && (
           <div>
             <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">

@@ -14,6 +14,7 @@ import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { FilterBar } from './filter_bar';
 import { LayoutView } from './layout_view';
+import { SavedViews } from './saved_views';
 
 export const SnapshotContainer = React.memo(function SnapshotContainer() {
   const { sourceId } = useSourceContext();
@@ -50,7 +51,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
 
   return (
     <>
-      <FilterBar interval={interval} />
+      <FilterBar interval={interval} rightSideItems={<SavedViews />} />
       <LayoutView loading={loading} nodes={nodes} interval={interval} />
     </>
   );

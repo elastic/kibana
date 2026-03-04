@@ -186,10 +186,7 @@ const SearchAndFilterComponent: React.FC<Props> = ({
     <>
       <EuiFlexGroup
         alignItems="center"
-        css={css`
-          gap: 16px;
-        `}
-        gutterSize="none"
+        gutterSize="s"
         wrap={true}
       >
         <EuiFlexItem grow={1}>

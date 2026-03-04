@@ -53,6 +53,7 @@ import {
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
+import { getFleetHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
@@ -277,7 +278,7 @@ const FleetTopNav = memo(
     }, [euiTheme]);
 
     const { TopNavMenu } = services.navigation.ui;
-    const isFeedbackEnabled = services.notifications.feedback.isEnabled();
+    // const isFeedbackEnabled = services.notifications.feedback.isEnabled();
 
     const topNavConfig: TopNavMenuData[] = [];
 
@@ -296,21 +297,22 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    if (isFeedbackEnabled) {
-      topNavConfig.push({
-        label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
-          defaultMessage: 'Give feedback',
-        }),
-        iconType: 'popout',
-        run: () => window.open(FEEDBACK_URL),
-      });
-    }
+    // Give feedback button in app menu bar — commented out.
+    // if (isFeedbackEnabled) {
+    //   topNavConfig.push({
+    //     label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+    //       defaultMessage: 'Give feedback',
+    //     }),
+    //     iconType: 'popout',
+    //     run: () => window.open(FEEDBACK_URL),
+    //   });
+    // }
 
     return (
       <TopNavMenu
         appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
         config={topNavConfig}
-        setMenuMountPoint={setHeaderActionMenu}
+        setMenuMountPoint={undefined}
       />
     );
   }
@@ -334,8 +336,15 @@ export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
+    const { chrome } = useStartServices();
 
     const authz = useAuthz();
+
+    // Global header app actions; hide app menu (set to undefined) so only global header shows.
+    useEffect(() => {
+      setHeaderActionMenu(undefined);
+      chrome.setHeaderAppActionsConfig(getFleetHeaderAppActionsConfig());
+    }, [setHeaderActionMenu, chrome]);
 
     return (
       <>

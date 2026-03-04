@@ -541,20 +541,22 @@ const getPanelOpenerHref = (
   return firstAvailableHref ?? 'missing-href-😭';
 };
 
+const asString = (v: unknown): v is string => typeof v === 'string' && v.length > 0;
+
 const getIcon = (node: ChromeProjectNavigationNode | null): string => {
-  if (node?.icon) {
-    return node.icon as string;
+  if (node?.icon && asString(node.icon)) {
+    return node.icon;
   }
 
   if (node && AppDeepLinkIdToIcon[node.id]) {
     return AppDeepLinkIdToIcon[node.id];
   }
 
-  if (node?.deepLink?.euiIconType) {
+  if (node?.deepLink?.euiIconType && asString(node.deepLink.euiIconType)) {
     return node.deepLink.euiIconType;
   }
 
-  if (node?.deepLink?.icon) {
+  if (node?.deepLink?.icon && asString(node.deepLink.icon)) {
     return node.deepLink.icon;
   }
 

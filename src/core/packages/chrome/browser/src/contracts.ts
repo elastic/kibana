@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
@@ -22,6 +23,7 @@ import type {
 } from './breadcrumb';
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import type { ChromeHeaderAppActionsConfig } from './header_app_actions_config';
 import type { SolutionId } from './project_navigation';
 import type { SidebarStart, SidebarSetup } from './sidebar';
 
@@ -142,6 +144,30 @@ export interface ChromeStart {
    * };
    */
   setAppMenu(config?: AppMenuConfig): void;
+
+  /**
+   * Get an observable of the current global header app actions mount (app-defined actions in the global header).
+   */
+  getGlobalHeaderAppActions$(): Observable<MountPoint<HTMLDivElement> | undefined>;
+
+  /**
+   * Set the global header app actions. Apps can mount their primary actions (e.g. New, Share, Overflow, Save) here.
+   * Cleared when the app unmounts. Pass `undefined` to clear.
+   */
+  setGlobalHeaderAppActions(mount: MountPoint<HTMLDivElement> | undefined): void;
+
+  /**
+   * Get an observable of the current header app actions config (overflow menu + New/Share/Save buttons).
+   * Set by the current app via setHeaderAppActionsConfig(); cleared on app change.
+   */
+  getHeaderAppActionsConfig$(): Observable<ChromeHeaderAppActionsConfig | undefined>;
+
+  /**
+   * Set the header app actions config for the global header section (overflow, New, Share, Save).
+   * Same pattern as setHelpExtension: app sets config when it mounts; cleared on app change.
+   * Pass `undefined` to clear.
+   */
+  setHeaderAppActionsConfig(config?: ChromeHeaderAppActionsConfig): void;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs

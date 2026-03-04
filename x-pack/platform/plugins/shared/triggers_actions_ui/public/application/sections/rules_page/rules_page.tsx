@@ -7,6 +7,7 @@
 
 import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -20,13 +21,10 @@ import {
 } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import { RulesSettingsLink } from '../../components/rules_setting/rules_settings_link';
-import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
-import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
@@ -48,7 +46,7 @@ const RulesPage = () => {
   } = useKibana().services;
   const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
-  const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes: [],
@@ -81,14 +79,6 @@ const RulesPage = () => {
   const openRuleTypeModal = useCallback(() => {
     setRuleTypeModalVisibility(true);
   }, []);
-
-  const headerActions = [
-    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-    <RulesSettingsLink
-      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-    />,
-    <RulesListDocLink />,
-  ];
 
   const onSectionChange = (newSection: Section) => {
     if (newSection === 'logs') {
@@ -147,16 +137,20 @@ const RulesPage = () => {
 
   const renderRulesList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
-        <RulesList
-          consumers={NON_SIEM_CONSUMERS}
-          rulesListKey="rules-page"
-          showCreateRuleButtonInPrompt={true}
-          navigateToEditRuleForm={navigateToEditRuleForm}
-          navigateToCreateRuleForm={navigateToCreateRuleForm}
-          ruleDetailsRoute={rulesAppDetailsRoute}
-        />
-      </KibanaPageTemplate.Section>
+      <>
+        <div id="rules-list-callout-slot" data-test-subj="rulesListCalloutSlot" />
+        <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
+          <RulesList
+            consumers={NON_SIEM_CONSUMERS}
+            rulesListKey="rules-page"
+            showCreateRuleButtonInPrompt={true}
+            navigateToEditRuleForm={navigateToEditRuleForm}
+            navigateToCreateRuleForm={navigateToCreateRuleForm}
+            ruleDetailsRoute={rulesAppDetailsRoute}
+            calloutSlotId="rules-list-callout-slot"
+          />
+        </KibanaPageTemplate.Section>
+      </>
     );
   }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
 
@@ -189,23 +183,8 @@ const RulesPage = () => {
     <>
       <RulesPageTemplate
         pageHeader={{
-          paddingSize: 'xl',
-          bottomBorder: true,
-          pageTitle: (
-            <span data-test-subj="appTitle">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.rulesPage.pageTitle"
-                defaultMessage="Rules"
-              />
-            </span>
-          ),
-          rightSideItems: headerActions,
-          description: (
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesPage.pageDescription"
-              defaultMessage="Manage and monitor all of your rules in one place."
-            />
-          ),
+          paddingSize: 'none',
+          bottomBorder: 'extended',
           tabs: tabs.map((tab) => ({
             label: tab.name,
             onClick: () => onSectionChange(tab.id),
@@ -213,6 +192,9 @@ const RulesPage = () => {
             key: tab.id,
             'data-test-subj': `${tab.id}Tab`,
           })),
+          css: css`
+            padding-inline: 8px;
+          `,
         }}
       >
         <EuiSpacer size="l" />

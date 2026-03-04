@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, EuiBadge } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiBadge, useEuiTheme } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -60,6 +60,7 @@ const TabNavigationItemComponent = ({
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
 export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }) => {
+  const { euiTheme } = useEuiTheme();
   const [{ tabName }] = useRouteSpy();
   const mapLocationToTab = useCallback(
     (): string =>
@@ -103,7 +104,14 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }
     [navTabs, selectedTabId, search]
   );
 
-  return <EuiTabs data-test-subj="navigation-container">{renderTabs}</EuiTabs>;
+  return (
+    <EuiTabs
+      data-test-subj="navigation-container"
+      style={{ paddingInline: euiTheme.size.m }}
+    >
+      {renderTabs}
+    </EuiTabs>
+  );
 };
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';

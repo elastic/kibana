@@ -11,10 +11,11 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiStat,
+  EuiPanel,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusStats } from '../status/status_stats';
@@ -32,33 +33,60 @@ export const CasesMetrics: React.FC = () => {
 
   return (
     <>
-      <EuiPanel hasBorder paddingSize="m" grow={false}>
-        <EuiFlexGroup responsive={true} data-test-subj="cases-metrics-stats">
-          <EuiFlexItem grow={true}>
-            <StatusStats
-              dataTestSubj="openStatsHeader"
-              caseCount={status?.open ?? 0}
-              caseStatus={CaseStatuses.open}
-              isLoading={isCasesMetricsLoading}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <StatusStats
-              dataTestSubj="inProgressStatsHeader"
-              caseCount={status?.inProgress ?? 0}
-              caseStatus={CaseStatuses['in-progress']}
-              isLoading={isCasesMetricsLoading}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <StatusStats
-              dataTestSubj="closedStatsHeader"
-              caseCount={status?.closed ?? 0}
-              caseStatus={CaseStatuses.closed}
-              isLoading={isCasesMetricsLoading}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
+      <EuiFlexGroup responsive={true} gutterSize="s" data-test-subj="cases-metrics-stats">
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            max-width: 240px;
+          `}
+        >
+          <StatusStats
+            dataTestSubj="openStatsHeader"
+            caseCount={status?.open ?? 0}
+            caseStatus={CaseStatuses.open}
+            isLoading={isCasesMetricsLoading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            max-width: 240px;
+          `}
+        >
+          <StatusStats
+            dataTestSubj="inProgressStatsHeader"
+            caseCount={status?.inProgress ?? 0}
+            caseStatus={CaseStatuses['in-progress']}
+            isLoading={isCasesMetricsLoading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            max-width: 240px;
+          `}
+        >
+          <StatusStats
+            dataTestSubj="closedStatsHeader"
+            caseCount={status?.closed ?? 0}
+            caseStatus={CaseStatuses.closed}
+            isLoading={isCasesMetricsLoading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            max-width: 240px;
+          `}
+        >
+          <EuiPanel
+            hasBorder
+            paddingSize="m"
+            css={css`
+              max-width: 240px;
+            `}
+            grow={false}
+          >
             <EuiStat
               data-test-subj={'mttrStatsHeader'}
               description={
@@ -82,10 +110,10 @@ export const CasesMetrics: React.FC = () => {
               titleSize="xs"
               text-align="left"
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="l" />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
     </>
   );
 };

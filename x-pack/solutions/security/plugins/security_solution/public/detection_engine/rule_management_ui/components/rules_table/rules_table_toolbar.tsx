@@ -73,8 +73,8 @@ export const RulesTableToolbar = React.memo(() => {
   );
 
   return (
-    <EuiFlexGroup justifyContent={'spaceBetween'}>
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup justifyContent={'spaceBetween'} gutterSize="none">
+      <EuiFlexItem grow={true}>
         <TabNavigation navTabs={ruleTabs} />
       </EuiFlexItem>
     </EuiFlexGroup>

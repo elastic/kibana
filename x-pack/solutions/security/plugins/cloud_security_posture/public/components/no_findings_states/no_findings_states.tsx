@@ -212,7 +212,7 @@ const EmptySecurityFindingsPrompt = () => {
             </h2>
           }
           layout="vertical"
-          color="plain"
+          color="subdued"
           body={
             <p>
               <FormattedMessage
@@ -297,7 +297,7 @@ const EmptySecurityFindingsPrompt = () => {
               </h2>
             }
             layout="vertical"
-            color="plain"
+            color="subdued"
             body={
               <p>
                 <FormattedMessage

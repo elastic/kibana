@@ -32,18 +32,24 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
           >
             {i18n.EMPTY_PROMPT_BUTTON}
           </EuiButton>,
-          <EuiButtonEmpty
-            key="documentation-button"
-            target="_blank"
-            href={docLinks.alerting.maintenanceWindows}
-            iconType="question"
-          >
-            {i18n.EMPTY_PROMPT_DOCUMENTATION}
-          </EuiButtonEmpty>,
         ];
       }
       return null;
-    }, [showCreateButton, onClickCreate, docLinks]);
+    }, [showCreateButton, onClickCreate]);
+
+    const footer = useMemo(
+      () => (
+        <EuiButtonEmpty
+          data-test-subj="mw-empty-prompt-documentation"
+          target="_blank"
+          href={docLinks.alerting.maintenanceWindows}
+          iconType="question"
+        >
+          {i18n.EMPTY_PROMPT_DOCUMENTATION}
+        </EuiButtonEmpty>
+      ),
+      [docLinks.alerting.maintenanceWindows]
+    );
 
     return (
       <EuiPageTemplate.EmptyPrompt
@@ -51,6 +57,7 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
         title={emptyTitle}
         body={emptyBody}
         actions={renderActions}
+        footer={footer}
       />
     );
   }

@@ -6,6 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -58,19 +59,27 @@ export const MetricsExplorerCharts = ({
 
   if (!data || first(data.pages)!.series.length === 0) {
     return (
-      <NoData
-        titleText={i18n.translate('xpack.infra.metricsExplorer.noDataTitle', {
-          defaultMessage: 'There is no data to display.',
-        })}
-        bodyText={i18n.translate('xpack.infra.metricsExplorer.noDataBodyText', {
-          defaultMessage: 'Try adjusting your time, filters or group by settings.',
-        })}
-        refetchText={i18n.translate('xpack.infra.metricsExplorer.noDataRefetchText', {
-          defaultMessage: 'Check for new data',
-        })}
-        testString="metrics-explorer-no-data"
-        onRefetch={onRefetch}
-      />
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          min-height: 100%;
+        `}
+        data-test-subj="metrics-explorer-no-data"
+      >
+        <NoData
+          titleText={i18n.translate('xpack.infra.metricsExplorer.noDataTitle', {
+            defaultMessage: 'There is no data to display.',
+          })}
+          bodyText={i18n.translate('xpack.infra.metricsExplorer.noDataBodyText', {
+            defaultMessage: 'Try adjusting your time, filters or group by settings.',
+          })}
+          refetchText={i18n.translate('xpack.infra.metricsExplorer.noDataRefetchText', {
+            defaultMessage: 'Check for new data',
+          })}
+          onRefetch={onRefetch}
+        />
+      </div>
     );
   }
 

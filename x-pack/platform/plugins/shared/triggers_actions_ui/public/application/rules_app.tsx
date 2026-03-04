@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type {
@@ -54,6 +54,7 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
+import { getRulesHeaderAppActionsConfig } from './sections/rules_page/header_app_actions/header_app_actions_config';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -123,7 +124,14 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     actions: { validateEmailAddresses, enabledEmailServices },
     application: { navigateToApp },
     isServerless,
+    chrome,
   } = useKibana().services;
+
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig) {
+      chrome.setHeaderAppActionsConfig(getRulesHeaderAppActionsConfig());
+    }
+  }, [chrome]);
 
   return (
     <ConnectorProvider

@@ -8,10 +8,10 @@
 import React, { lazy, useCallback, useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { useLocation, matchPath } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import type { Section } from '../../../constants';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
@@ -27,7 +27,11 @@ import { CreateConnectorFlyout } from '../../action_connector_form/create_connec
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import type { EditConnectorProps } from './types';
 import { loadAllActions } from '../../../lib/action_connector_api';
-import { hasSaveActionsCapability } from '../../../lib/capabilities';
+
+/** Body-only padding; Management uses mainProps paddingSize 'none' so tabs are edge-to-edge. */
+const bodyPaddingCss = css`
+  padding: 24px;
+`;
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -44,14 +48,10 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const {
     chrome,
     setBreadcrumbs,
-    docLinks,
     actionTypeRegistry,
     http,
     notifications: { toasts },
-    application: { capabilities },
   } = useKibana().services;
-
-  const location = useLocation();
 
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
@@ -152,67 +152,11 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     });
   };
 
-  const createConnectorButton = (
-    <EuiButton
-      data-test-subj="createConnectorButton"
-      fill
-      iconType="plusInCircle"
-      iconSide="left"
-      onClick={() => setAddFlyoutVisibility(true)}
-      isLoading={false}
-    >
-      {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
-        defaultMessage: 'Create connector',
-      })}
-    </EuiButton>
-  );
-
-  const documentationButton = (
-    <EuiButtonEmpty
-      data-test-subj="documentationButton"
-      key="documentation-button"
-      target="_blank"
-      href={docLinks.links.alerting.actionTypes}
-      iconType="question"
-    >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
-        defaultMessage="Documentation"
-      />
-    </EuiButtonEmpty>
-  );
-
-  let topRightSideButtons: React.ReactNode[] = [];
-
-  if (
-    matchPath(location.pathname, {
-      path: routeToConnectors,
-      exact: true,
-    }) ||
-    matchPath(location.pathname, { path: routeToConnectorEdit, exact: true })
-  ) {
-    topRightSideButtons = [];
-    const canSave = hasSaveActionsCapability(capabilities);
-    if (canSave) {
-      topRightSideButtons.push(createConnectorButton);
-    }
-    topRightSideButtons.push(documentationButton);
-  } else if (matchPath(location.pathname, { path: routeToLogs, exact: true })) {
-    topRightSideButtons = [documentationButton];
-  }
-
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
+      <EuiPageTemplate.Header
         paddingSize="none"
-        pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
-          defaultMessage: 'Connectors',
-        })}
-        description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
-          defaultMessage: 'Connect third-party software with your alerting data.',
-        })}
-        rightSideItems={topRightSideButtons}
+        bottomBorder="extended"
         tabs={tabs.map((tab) => ({
           label: tab.name,
           onClick: () => onSectionChange(tab.id),
@@ -220,11 +164,15 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           key: tab.id,
           'data-test-subj': `${tab.id}Tab`,
         }))}
+        css={css`
+          padding-inline: 8px;
+        `}
       />
 
       <EuiSpacer size="l" />
 
-      {addFlyoutVisible && (
+      <div css={bodyPaddingCss}>
+        {addFlyoutVisible && (
         <CreateConnectorFlyout
           onClose={() => {
             setAddFlyoutVisibility(false);
@@ -267,6 +215,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           </Routes>
         </HealthCheck>
       </HealthContextProvider>
+      </div>
     </>
   );
 };

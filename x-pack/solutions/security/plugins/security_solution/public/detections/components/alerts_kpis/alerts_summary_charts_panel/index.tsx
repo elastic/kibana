@@ -67,7 +67,9 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     <KpiPanel
       $toggleStatus={isExpanded}
       data-test-subj="alerts-charts-panel"
-      hasBorder
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
       height={panelHeight}
     >
       <HeaderSection

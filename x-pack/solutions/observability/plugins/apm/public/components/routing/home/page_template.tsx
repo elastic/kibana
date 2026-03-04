@@ -20,6 +20,8 @@ export function page<
   children,
   title,
   showServiceGroupSaveButton = false,
+  environmentFilter = true,
+  showPageHeader = true,
   params,
 }: {
   path: TPath;
@@ -27,6 +29,8 @@ export function page<
   children?: TChildren;
   title: string;
   showServiceGroupSaveButton?: boolean;
+  environmentFilter?: boolean;
+  showPageHeader?: boolean;
   params?: TParams;
 }): Record<
   TPath,
@@ -42,6 +46,8 @@ export function page<
           <ApmMainTemplate
             pageTitle={title}
             showServiceGroupSaveButton={showServiceGroupSaveButton}
+            environmentFilter={environmentFilter}
+            showPageHeader={showPageHeader}
           >
             {element}
           </ApmMainTemplate>

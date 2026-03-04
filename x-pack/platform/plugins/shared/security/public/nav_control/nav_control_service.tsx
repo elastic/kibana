@@ -106,25 +106,26 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    core.chrome.navControls.registerRight({
-      order: 4000,
-      mount: (element: HTMLElement) => {
-        ReactDOM.render(
-          core.rendering.addContext(
-            <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-              <SecurityNavControl
-                editProfileUrl={core.http.basePath.prepend('/security/account')}
-                logoutUrl={this.logoutUrl}
-                userMenuLinks$={this.userMenuLinks$}
-              />
-            </Providers>
-          ),
-          element
-        );
-
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
-    });
+    // POC: User profile menu moved to side nav footer; comment out header registration so only the side nav shows it (dumb version). Other right-side nav controls (e.g. AI Agent) still render.
+    // core.chrome.navControls.registerRight({
+    //   order: 4000,
+    //   mount: (element: HTMLElement) => {
+    //     ReactDOM.render(
+    //       core.rendering.addContext(
+    //         <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+    //           <SecurityNavControl
+    //             editProfileUrl={core.http.basePath.prepend('/security/account')}
+    //             logoutUrl={this.logoutUrl}
+    //             userMenuLinks$={this.userMenuLinks$}
+    //           />
+    //         </Providers>
+    //       ),
+    //       element
+    //     );
+    //
+    //     return () => ReactDOM.unmountComponentAtNode(element);
+    //   },
+    // });
 
     this.navControlRegistered = true;
   }

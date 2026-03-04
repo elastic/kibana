@@ -382,13 +382,13 @@ export const createNavigationTree = ({
       },
     ],
     footer: [
-      {
-        title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-          defaultMessage: 'Add data',
-        }),
-        link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
-      },
+      // {
+      //   title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+      //     defaultMessage: 'Add data',
+      //   }),
+      //   link: 'observabilityOnboarding',
+      //   icon: 'plusInCircle',
+      // },
       {
         id: 'devTools',
         title: i18n.translate('xpack.serverlessObservability.nav.devTools', {

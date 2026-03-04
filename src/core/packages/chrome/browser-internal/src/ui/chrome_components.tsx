@@ -113,6 +113,7 @@ export const createChromeComponents = ({
       navControlsExtension$={navControls.extension$}
       customBranding$={customBranding$}
       appMenu$={state.appMenu.$}
+      globalHeaderAppActions$={state.globalHeaderAppActions.$}
     />
   );
 
@@ -135,6 +136,7 @@ export const createChromeComponents = ({
       docLinks={docLinks}
       kibanaVersion={config.kibanaVersion}
       prependBasePath={prependBasePath}
+      headerAppActionsConfig$={state.headerAppActionsConfig.$}
     />
   );
 

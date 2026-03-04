@@ -50,6 +50,7 @@ export class CloudDataMigrationPlugin
         linkType: 'custom',
         target: '_blank',
         href: 'https://ela.st/cloud-migration',
+        iconType: 'cloudFilled',
         content: i18n.translate('xpack.cloudDataMigration.helpMenuMoveDataTitle', {
           defaultMessage: 'Move data to Elastic Cloud',
         }),

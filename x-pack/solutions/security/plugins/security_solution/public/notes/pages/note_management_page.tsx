@@ -13,12 +13,12 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';
 import { DeleteNoteButtonIcon } from '../components/delete_note_button';
-import { Title } from '../../common/components/header_page/title';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
@@ -234,19 +234,19 @@ export const NoteManagementPage = () => {
 
   if (fetchError) {
     return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{i18n.TABLE_ERROR}</h2>}
-        body={<p>{fetchErrorData as React.ReactNode}</p>}
-      />
+      <EuiPageSection paddingSize="m" component="div" grow>
+        <EuiEmptyPrompt
+          iconType="error"
+          color="danger"
+          title={<h2>{i18n.TABLE_ERROR}</h2>}
+          body={<p>{fetchErrorData as React.ReactNode}</p>}
+        />
+      </EuiPageSection>
     );
   }
 
   return (
-    <>
-      <Title title={i18n.NOTES} />
-      <EuiSpacer size="m" />
+    <EuiPageSection paddingSize="m" component="div" grow>
       <SearchRow />
       <EuiSpacer size="m" />
       <NotesUtilityBar />
@@ -262,7 +262,7 @@ export const NoteManagementPage = () => {
         loading={fetchLoading}
       />
       {isDeleteModalVisible && <DeleteConfirmModal />}
-    </>
+    </EuiPageSection>
   );
 };
 

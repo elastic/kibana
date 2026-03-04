@@ -6,32 +6,29 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ServiceGroupsButtonGroup } from '../service_groups/service_groups_button_group';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
 import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
-import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import type { SortFunction } from '../../shared/managed_table';
-import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { useApmHeaderAppActions } from '../../../header_app_actions/use_apm_header_app_actions';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
-import { TracesInDiscoverCallout } from './traces_in_discover_callout';
-import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -175,15 +172,15 @@ function useServicesDetailedStatisticsFetcher({
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
+  useApmHeaderAppActions();
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
-    query: { rangeFrom, rangeTo, sortField },
+    query: { rangeFrom, rangeTo, sortField, serviceGroup },
   } = useApmParams('/services');
-  const {
-    services: { telemetry },
-  } = useKibana<ApmPluginStartDeps & ApmServices>();
+
+  const selectedNavButton = serviceGroup ? 'serviceGroups' : 'allServices';
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -202,16 +199,6 @@ export function ServiceInventory() {
     renderedItems,
   });
 
-  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
-
-  const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
-    `apm.userHasDismissedServiceInventoryMlCallout.${anomalyDetectionSetupState}`,
-    false
-  );
-
-  const displayMlCallout =
-    !userHasDismissedCallout && shouldDisplayMlCallout(anomalyDetectionSetupState);
-
   const noItemsMessage = useMemo(() => {
     return (
       <EuiEmptyPrompt
@@ -226,16 +213,6 @@ export function ServiceInventory() {
       />
     );
   }, []);
-
-  const mlCallout = (
-    <EuiFlexItem>
-      <MLCallout
-        isOnSettingsPage={false}
-        anomalyDetectionSetupState={anomalyDetectionSetupState}
-        onDismiss={() => setUserHasDismissedCallout(true)}
-      />
-    </EuiFlexItem>
-  );
 
   // Track if user has explicitly selected a sort column via URL params
   const isDefaultSort = !sortField;
@@ -294,19 +271,18 @@ export function ServiceInventory() {
       });
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, rangeFrom, rangeTo]);
-
-  useEffect(() => {
-    if (hasSlos) {
-      telemetry.reportSloInfoShown();
-    }
-  }, [hasSlos, telemetry]);
-
   return (
     <>
-      <SearchBar showTimeComparison />
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <TracesInDiscoverCallout />
-        {displayMlCallout && mlCallout}
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ApmEnvironmentFilter />
+        </EuiFlexItem>
+        <SearchBar showTimeComparison />
+      </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <ApmServicesTable
             status={mainStatisticsStatus}

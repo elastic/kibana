@@ -43,6 +43,7 @@ export class FeedbackPlugin implements Plugin {
       return {};
     }
 
+    /* Global header prototype: Feedback button hidden (moved to overflow popover)
     core.chrome.navControls.registerRight({
       order: 1001,
       mount: (element) => {
@@ -124,6 +125,7 @@ export class FeedbackPlugin implements Plugin {
         };
       },
     });
+    */
 
     return {};
   }

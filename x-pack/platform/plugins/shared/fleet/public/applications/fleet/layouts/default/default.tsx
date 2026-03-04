@@ -18,7 +18,8 @@ import { TourManagerProvider } from '../../../../hooks/use_tour_manager';
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
 import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
 
-import { DefaultPageTitle } from './default_page_title';
+// Title and description hidden so only tabs remain (same as Dashboards).
+// import { DefaultPageTitle } from './default_page_title';
 
 interface Props {
   section?: Section;
@@ -145,7 +146,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           }
         />
       )}
-      <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
+      <WithHeaderLayout rightColumn={rightColumn} tabs={tabs}>
         {children}
       </WithHeaderLayout>
       {canEnableAutomaticAgentUpgrades ? (

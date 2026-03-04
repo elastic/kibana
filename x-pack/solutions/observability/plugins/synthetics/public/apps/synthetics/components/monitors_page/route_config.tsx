@@ -11,6 +11,7 @@ import type { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RefreshButton } from '../common/components/refresh_button';
+import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
@@ -37,8 +38,9 @@ export const getMonitorsRoute = (
       path: OVERVIEW_ROUTE,
       component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
+      contentAboveTemplate: <AlertingCallout />,
       pageHeader: {
-        ...sharedProps,
+        // ...sharedProps,
         tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },
@@ -50,8 +52,9 @@ export const getMonitorsRoute = (
       path: MONITORS_ROUTE,
       component: MonitorManagementPage,
       dataTestSubj: 'syntheticsMonitorManagementPage',
+      contentAboveTemplate: <AlertingCallout />,
       pageHeader: {
-        ...sharedProps,
+        // ...sharedProps,
         tabs: getMonitorsTabs(syntheticsPath, 'management', location),
       },
     },

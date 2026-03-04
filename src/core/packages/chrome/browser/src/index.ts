@@ -15,6 +15,13 @@ export type {
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
+  ChromeHeaderAppActionsConfig,
+  ChromeHeaderAppActionsOverflowPanel,
+  ChromeHeaderAppActionsOverflowPanelListItem,
+  ChromeHeaderAppActionsSavePopoverPanel,
+  ChromeHeaderAppActionsSavePopoverItem,
+} from './header_app_actions_config';
+export type {
   ChromeHelpExtension,
   ChromeHelpMenuActions,
   ChromeHelpExtensionLinkBase,

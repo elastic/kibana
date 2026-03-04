@@ -8,17 +8,20 @@
 import React, { useState, lazy, useEffect, useCallback } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
+
+/** Body-only padding; Management uses mainProps paddingSize 'none' so tabs are edge-to-edge. */
+// const bodyPaddingCss = css`
+//   padding: 16px;
+// `;
 
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { getCreateRuleRoute, getCreateRuleFromTemplateRoute } from '@kbn/rule-data-utils';
-import { RulesSettingsLink } from './components/rules_setting/rules_settings_link';
-import { RulesListDocLink } from './sections/rules_list/components/rules_list_doc_link';
-import { CreateRuleButton } from './sections/rules_list/components/create_rule_button';
 import type { Section } from './constants';
 import { routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
@@ -52,7 +55,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ruleTypeRegistry,
     application: { navigateToApp },
   } = useKibana().services;
-  const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes: [],
@@ -89,20 +92,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     setRuleTypeModalVisibility(true);
   }, []);
 
-  const headerActions = [
-    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-    <RulesSettingsLink
-      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-    />,
-    <RulesListDocLink />,
-  ];
-
   const renderRulesList = useCallback(() => {
     return suspendedComponentWithProps(
       RulesList,
       'xl'
     )({
       showCreateRuleButtonInPrompt: true,
+      calloutSlotId: 'rules-list-callout-slot',
     });
   }, []);
 
@@ -124,19 +120,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     <>
       <EuiPageTemplate.Header
         paddingSize="none"
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage id="xpack.triggersActionsUI.home.appTitle" defaultMessage="Rules" />
-          </span>
-        }
-        rightSideItems={headerActions}
-        description={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.home.sectionDescription"
-            defaultMessage="Detect conditions using rules."
-          />
-        }
+        bottomBorder="extended"
         tabs={tabs.map((tab) => ({
           label: tab.name,
           onClick: () => onSectionChange(tab.id),
@@ -144,18 +128,23 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           key: tab.id,
           'data-test-subj': `${tab.id}Tab`,
         }))}
+        css={css`
+          padding-inline: 8px;
+        `}
       />
-      <EuiSpacer size="l" />
-      <HealthContextProvider>
-        <PerformanceContextProvider>
-          <HealthCheck waitForCheck={true}>
-            <Routes>
-              <Route exact path={routeToLogs} component={renderLogsList} />
-              <Route exact path={routeToRules} component={renderRulesList} />
-            </Routes>
-          </HealthCheck>
-        </PerformanceContextProvider>
-      </HealthContextProvider>
+      <div id="rules-list-callout-slot" data-test-subj="rulesListCalloutSlot" />
+      <div>
+        <HealthContextProvider>
+          <PerformanceContextProvider>
+            <HealthCheck waitForCheck={true}>
+              <Routes>
+                <Route exact path={routeToLogs} component={renderLogsList} />
+                <Route exact path={routeToRules} component={renderRulesList} />
+              </Routes>
+            </HealthCheck>
+          </PerformanceContextProvider>
+        </HealthContextProvider>
+      </div>
 
       {ruleTypeModalVisible && (
         <RuleTypeModal

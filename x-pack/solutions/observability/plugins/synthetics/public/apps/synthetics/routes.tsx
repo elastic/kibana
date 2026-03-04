@@ -19,7 +19,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { CertRefreshBtn, CertificateTitle, CertificatesPage } from './components/certificates';
+import { CertificatesRoute } from './components/certificates/certificates_route';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import type { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
@@ -53,6 +53,10 @@ export type RouteProps = LazyObservabilityPageTemplateProps & {
   component: React.FC;
   dataTestSubj: string;
   title: string;
+  /** Rendered above the page template (full-width, flush with container). */
+  contentAboveTemplate?: React.ReactNode;
+  /** When true, the route component renders its own page template (e.g. with dynamic noDataConfig). */
+  customTemplate?: boolean;
 };
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
@@ -154,12 +158,9 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: CERTIFICATES_ROUTE,
-      component: CertificatesPage,
+      component: CertificatesRoute,
       dataTestSubj: 'uptimeCertificatesPage',
-      pageHeader: {
-        pageTitle: <CertificateTitle />,
-        rightSideItems: [<CertRefreshBtn />],
-      },
+      customTemplate: true,
     },
   ];
 };
@@ -198,19 +199,26 @@ export const PageRouter: FC = () => {
           component: RouteComponent,
           dataTestSubj,
           pageHeader,
+          contentAboveTemplate,
+          customTemplate,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              <SyntheticsPageTemplateComponent
-                pageHeader={isUnprivileged ? undefined : pageHeader}
-                data-test-subj={'synthetics-page-template'}
-                isPageDataLoaded={true}
-                {...pageTemplateProps}
-              >
-                {isUnprivileged || <RouteComponent />}
-              </SyntheticsPageTemplateComponent>
+              {contentAboveTemplate}
+              {customTemplate ? (
+                !isUnprivileged && <RouteComponent />
+              ) : (
+                <SyntheticsPageTemplateComponent
+                  pageHeader={isUnprivileged ? undefined : pageHeader}
+                  data-test-subj={'synthetics-page-template'}
+                  isPageDataLoaded={true}
+                  {...pageTemplateProps}
+                >
+                  {isUnprivileged || <RouteComponent />}
+                </SyntheticsPageTemplateComponent>
+              )}
             </div>
           </Route>
         )

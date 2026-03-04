@@ -6,13 +6,9 @@
  */
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
-import {
-  EuiHeaderSectionItemButton,
-  EuiPopover,
-  EuiSkeletonRectangle,
-  useEuiTheme,
-} from '@elastic/eui';
-import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { EuiButton, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -23,14 +19,17 @@ import { SpacesMenu } from './components/spaces_menu';
 import { SPACES_QUERY_KEY, useSpaces } from './hooks/use_spaces';
 import { SolutionViewTour } from './solution_view_tour';
 import type { Space } from '../../common';
+import type { SolutionView } from '../../common';
 import type { EventTracker } from '../analytics';
-import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 
-// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
-const LazySpaceAvatar = lazy(() =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }))
-);
+const SOLUTION_ICON_MAP: Record<NonNullable<SolutionView>, string> = {
+  es: 'logoElasticsearch',
+  oblt: 'logoObservability',
+  security: 'logoSecurity',
+  workplaceai: 'logoElasticsearch',
+  classic: 'logoElasticStack',
+};
 
 export interface Props {
   spacesManager: SpacesManager;
@@ -87,17 +86,6 @@ const NavControlPopoverUI = ({
     };
   }, [spacesManager, showTour$]);
 
-  const getAlignedLoadingSpinner = useCallback(() => {
-    return (
-      <EuiSkeletonRectangle
-        borderRadius="m"
-        contentAriaLabel={i18n.translate('xpack.spaces.navControl.popover.loadingSpacesLabel', {
-          defaultMessage: 'Loading spaces navigation',
-        })}
-      />
-    );
-  }, []);
-
   const toggleSpaceSelector = useCallback(() => {
     setShowSpaceSelector(!showSpaceSelector);
     // Invalidate spaces cache when opening the popover to ensure fresh data
@@ -105,50 +93,6 @@ const NavControlPopoverUI = ({
       queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
     }
   }, [showSpaceSelector, queryClient]);
-
-  const getButton = useCallback(
-    (linkIcon: JSX.Element, linkTitle: string) => {
-      return (
-        <EuiHeaderSectionItemButton
-          aria-controls={popoutContentId}
-          aria-expanded={showSpaceSelector}
-          aria-haspopup="true"
-          aria-label={i18n.translate('xpack.spaces.navControl.popover.spacesNavigationLabel', {
-            defaultMessage: 'Spaces navigation',
-          })}
-          aria-describedby="spacesNavDetails"
-          data-test-subj="spacesNavSelector"
-          title={linkTitle}
-          onClick={toggleSpaceSelector}
-        >
-          {linkIcon}
-          <p id="spacesNavDetails" hidden>
-            {i18n.translate('xpack.spaces.navControl.popover.spaceNavigationDetails', {
-              defaultMessage:
-                '{space} is the currently selected space. Click this button to open a popover that allows you to select the active space.',
-              values: {
-                space: linkTitle,
-              },
-            })}
-          </p>
-        </EuiHeaderSectionItemButton>
-      );
-    },
-    [showSpaceSelector, toggleSpaceSelector]
-  );
-
-  const getActiveSpaceButton = useCallback(() => {
-    if (!activeSpace) {
-      return getButton(getAlignedLoadingSpinner(), 'loading spaces navigation');
-    }
-
-    return getButton(
-      <Suspense fallback={getAlignedLoadingSpinner()}>
-        <LazySpaceAvatar space={activeSpace} size={'s'} />
-      </Suspense>,
-      (activeSpace as Space).name
-    );
-  }, [activeSpace, getButton, getAlignedLoadingSpinner]);
 
   const closeSpaceSelector = useCallback(() => {
     setShowSpaceSelector(false);
@@ -160,7 +104,41 @@ const NavControlPopoverUI = ({
     toggleSpaceSelector();
   }, [onFinishTour, toggleSpaceSelector]);
 
-  const button = getActiveSpaceButton();
+  const solutionIconType =
+    allowSolutionVisibility && activeSpace?.solution
+      ? SOLUTION_ICON_MAP[activeSpace.solution]
+      : SOLUTION_ICON_MAP.classic;
+
+  const spaceButtonLabel = !activeSpace
+    ? i18n.translate('xpack.spaces.navControl.popover.loadingSpacesLabel', {
+        defaultMessage: 'Loading spaces navigation',
+      })
+    : (activeSpace as Space).name;
+
+  const spaceButton = (
+    <EuiButton
+      aria-controls={popoutContentId}
+      aria-expanded={showSpaceSelector}
+      aria-haspopup="true"
+      aria-label={i18n.translate('xpack.spaces.navControl.popover.spacesNavigationLabel', {
+        defaultMessage: 'Spaces navigation',
+      })}
+      data-test-subj="spacesNavSelector"
+      iconType={solutionIconType}
+      onClick={toggleSpaceSelector}
+      color="text"
+      size="s"
+      css={css`
+        background-color: transparent !important;
+        block-size: 28px;
+        margin-left: 4px;
+        max-width: 200px;
+      `}
+    >
+      {spaceButtonLabel}
+    </EuiButton>
+  );
+
   const isTourOpen = Boolean(activeSpace) && showTour && !showSpaceSelector;
 
   return (
@@ -174,7 +152,7 @@ const NavControlPopoverUI = ({
     >
       <EuiPopover
         id="spcMenuPopover"
-        button={button}
+        button={spaceButton}
         isOpen={showSpaceSelector}
         closePopover={closeSpaceSelector}
         anchorPosition={anchorPosition}

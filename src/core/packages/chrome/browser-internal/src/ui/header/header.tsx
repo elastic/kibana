@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -34,6 +35,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -41,6 +43,7 @@ import { HeaderAppMenu } from './header_app_menu';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderExtension } from './header_extension';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
@@ -76,6 +79,7 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   appMenu$: Observable<AppMenuConfig | undefined>;
+  globalHeaderAppActions$: Observable<MountPoint<HTMLDivElement> | undefined>;
 }
 
 export function Header({
@@ -99,6 +103,7 @@ export function Header({
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
+  const globalHeaderAppActions = useObservable(observables.globalHeaderAppActions$, undefined);
 
   const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
 
@@ -145,6 +150,7 @@ export function Header({
                   <EuiHideFor sizes={['xs', 's']}>
                     <HeaderNavControls navControls$={observables.navControlsExtension$} />
                   </EuiHideFor>,
+                  /* Global header prototype: Help menu hidden (Docs/Feedback in overflow)
                   <HeaderHelpMenu
                     isServerless={isServerless}
                     globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
@@ -156,6 +162,7 @@ export function Header({
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
                   />,
+                  */
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
               },
@@ -207,6 +214,11 @@ export function Header({
             <HeaderBadge badge$={observables.badge$} />
 
             <EuiHeaderSection side="right">
+              {globalHeaderAppActions && (
+                <EuiHeaderSectionItem>
+                  <HeaderExtension extension={globalHeaderAppActions} />
+                </EuiHeaderSectionItem>
+              )}
               <EuiHeaderSectionItem>
                 {hasBetaConfig ? (
                   <HeaderAppMenu config={observables.appMenu$} />

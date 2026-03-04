@@ -15,4 +15,5 @@ export type {
 } from '@kbn/shared-ux-card-no-data-types';
 
 export { NoDataCard } from './src/no_data_card';
+export { ElasticAgentCardIllustration } from './src/elastic_agent_card_illustration';
 export { NoDataCardKibanaProvider, NoDataCardProvider } from './src/services';

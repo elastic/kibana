@@ -25,13 +25,13 @@ import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-sha
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
+import { useUxHeaderAppActions } from '../header_app_actions/use_ux_header_app_actions';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -53,6 +53,7 @@ export const uxRoutes: RouteDefinition[] = [
 ];
 
 function UxApp() {
+  useUxHeaderAppActions();
   const { http } = useKibanaServices();
   const basePath = http.basePath.get();
 
@@ -157,7 +158,6 @@ export function UXAppRoot({
                         <CsmSharedContextProvider>
                           <UxApp />
                         </CsmSharedContextProvider>
-                        <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
                       </UrlParamsProvider>
                     </InspectorContextProvider>
                   </DatePickerContextProvider>

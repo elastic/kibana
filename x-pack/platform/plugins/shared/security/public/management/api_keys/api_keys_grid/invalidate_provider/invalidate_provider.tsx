@@ -202,7 +202,6 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
                 )}
               </p>
             </EuiCallOut>
-            <EuiSpacer />
           </>
         )}
         {!isSingle ? (
