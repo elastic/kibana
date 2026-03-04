@@ -186,7 +186,7 @@ export interface DocViewerExtension {
    * @param props The doc view render props
    * @returns A React element to render above the tabs
    */
-  renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**

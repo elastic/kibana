@@ -170,7 +170,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Use when:** Add "Related events", "Stack trace", "Analysis", or custom header section.
 
-**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderCustomHeader?(props) => ReactElement }`
+**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderHeader?(props) => ReactElement }`
 
 **Screenshot:**
 ![Doc viewer example](./docs/extension_points/get_doc_viewer.png)

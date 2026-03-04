@@ -118,7 +118,7 @@ export function DiscoverGridFlyout({
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
       docViewsRegistry={docViewer.docViewsRegistry}
-      renderCustomHeader={docViewer.renderCustomHeader}
+      renderCustomHeader={docViewer.renderHeader}
       isEsqlQuery={isESQLQuery}
       hit={hit}
       hits={hits}

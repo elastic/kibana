@@ -23,7 +23,7 @@ export const CustomDocViewerHeader: React.FC<DocViewRenderProps> = ({ hit }) => 
       data-test-subj="exampleCustomDocViewerHeader"
     >
       <p>
-        This is a custom header rendered via the <code>renderCustomHeader</code> extension point.
+        This is a custom header rendered via the <code>renderHeader</code> extension point.
       </p>
       {message && (
         <p>

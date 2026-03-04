@@ -93,7 +93,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
             return prevValue.docViewsRegistry(registry);
           },
-          renderCustomHeader: (props) => <CustomDocViewerHeader {...props} />,
+          renderHeader: (props) => <CustomDocViewerHeader {...props} />,
         };
       },
     /**
