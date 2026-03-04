@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { buildThreatDescription } from '../../../detection_engine/rule_creation_ui/components/description_step/helpers';
@@ -18,10 +18,8 @@ import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test
  * Retrieves mitre attack information from the alert document.
  */
 const getMitreComponentParts = (hit: DataTableRecord) => {
-  const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as
-    | Array<{ threat?: Threat | Threats }>
-    | { threat?: Threat | Threats }
-    | undefined;
+  const raw = getFieldValue(hit, ALERT_RULE_PARAMETERS);
+  const ruleParameters = typeof raw === 'string' ? JSON.parse(raw) : raw;
   const firstParam = Array.isArray(ruleParameters) ? ruleParameters[0] : ruleParameters;
   const threat = firstParam?.threat ?? null;
   if (!threat) {
