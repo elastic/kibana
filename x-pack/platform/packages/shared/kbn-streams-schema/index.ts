@@ -211,6 +211,25 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult } from './src/api/features';
 
-export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export {
+  type GenerateInsightsResult,
+  type Insight,
+  type InsightCore,
+  type InsightEvidence,
+  type InsightImpactLevel,
+  type InsightImpactLevelNumeric,
+  type InsightUserEvaluation,
+  type InsightMeta,
+  type SaveInsightBody,
+  insightSchema,
+  insightCoreSchema,
+  insightMetaSchema,
+  insightEvidenceSchema,
+  insightImpactLevelSchema,
+  insightImpactLevelNumericSchema,
+  insightUserEvaluationSchema,
+  INSIGHT_IMPACT_LEVEL_MAP,
+  getImpactLevel,
+} from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
