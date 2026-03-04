@@ -18,7 +18,7 @@ steps:
     agents:
       machineType: n2d-standard-8
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-west1-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
@@ -32,7 +32,7 @@ steps:
     agents:
       machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-west1-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     timeout_in_minutes: 60
     key: checks
@@ -46,7 +46,7 @@ steps:
     agents:
       machineType: n2d-standard-16
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-west1-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -60,7 +60,7 @@ steps:
     agents:
       machineType: n2d-standard-32
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-west1-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
@@ -75,7 +75,7 @@ steps:
       machineType: c4d-standard-32
       diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c
       diskSizeGb: 105
     key: linting_with_oxlint
     timeout_in_minutes: 60
@@ -89,7 +89,7 @@ steps:
     agents:
       machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-west1-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -102,7 +102,7 @@ steps:
     agents:
       machineType: n2d-highmem-4
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-west1-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
@@ -161,7 +161,7 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
-      spotZones: us-central1-b,us-east1-b,us-east4-b
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: build_api_docs
     timeout_in_minutes: 60
