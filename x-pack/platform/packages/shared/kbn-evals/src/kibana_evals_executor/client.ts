@@ -178,6 +178,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
+                  exampleId: example.id,
                 });
               });
             })

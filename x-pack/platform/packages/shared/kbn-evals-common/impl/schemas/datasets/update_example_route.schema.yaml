@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Update Evaluation Dataset Example API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/datasets/{datasetId}/examples/{exampleId}:
     put:
@@ -30,7 +30,7 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateExamplePayload'
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -57,12 +57,9 @@ paths:
                 required:
                   - id
                   - dataset_id
-                  - input
-                  - output
-                  - metadata
                   - created_at
                   - updated_at
-        "404":
+        '404':
           description: Dataset or example not found
           content:
             application/json:
@@ -90,7 +87,3 @@ components:
         metadata:
           type: object
           additionalProperties: true
-      required:
-        - input
-        - output
-        - metadata

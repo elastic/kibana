@@ -18,9 +18,9 @@ import { z } from '@kbn/zod';
 
 export type UpdateExamplePayload = z.infer<typeof UpdateExamplePayload>;
 export const UpdateExamplePayload = z.object({
-  input: z.object({}).catchall(z.unknown()),
-  output: z.object({}).catchall(z.unknown()),
-  metadata: z.object({}).catchall(z.unknown()),
+  input: z.object({}).catchall(z.unknown()).optional(),
+  output: z.object({}).catchall(z.unknown()).optional(),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
 });
 
 export type UpdateEvaluationDatasetExampleRequestParams = z.infer<
@@ -48,9 +48,9 @@ export type UpdateEvaluationDatasetExampleResponse = z.infer<
 export const UpdateEvaluationDatasetExampleResponse = z.object({
   id: z.string(),
   dataset_id: z.string(),
-  input: z.object({}).catchall(z.unknown()),
-  output: z.object({}).catchall(z.unknown()),
-  metadata: z.object({}).catchall(z.unknown()),
+  input: z.object({}).catchall(z.unknown()).optional(),
+  output: z.object({}).catchall(z.unknown()).optional(),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });

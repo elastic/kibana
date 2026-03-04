@@ -266,9 +266,9 @@ export const DatasetDetailPage: React.FC = () => {
     if (!searchQuery.trim()) return dataset.examples;
     const query = searchQuery.toLowerCase();
     return dataset.examples.filter((example) => {
-      const inputStr = compactJson(example.input).toLowerCase();
-      const outputStr = compactJson(example.output).toLowerCase();
-      const metadataStr = compactJson(example.metadata).toLowerCase();
+      const inputStr = compactJson(example.input ?? {}).toLowerCase();
+      const outputStr = compactJson(example.output ?? {}).toLowerCase();
+      const metadataStr = compactJson(example.metadata ?? {}).toLowerCase();
       return inputStr.includes(query) || outputStr.includes(query) || metadataStr.includes(query);
     });
   }, [dataset?.examples, searchQuery]);
@@ -289,6 +289,7 @@ export const DatasetDetailPage: React.FC = () => {
         field: 'input',
         name: i18n.COLUMN_INPUT,
         render: (value: unknown) => {
+          if (value == null) return <EuiText size="s">-</EuiText>;
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
@@ -303,6 +304,7 @@ export const DatasetDetailPage: React.FC = () => {
         field: 'output',
         name: i18n.COLUMN_OUTPUT,
         render: (value: unknown) => {
+          if (value == null) return <EuiText size="s">-</EuiText>;
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
@@ -317,6 +319,7 @@ export const DatasetDetailPage: React.FC = () => {
         field: 'metadata',
         name: i18n.COLUMN_METADATA,
         render: (value: unknown) => {
+          if (value == null) return <EuiText size="s">-</EuiText>;
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
@@ -739,7 +742,7 @@ export const DatasetDetailPage: React.FC = () => {
                   paddingSize="m"
                 >
                   <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
-                    {prettyJson(selectedExample.input)}
+                    {prettyJson(selectedExample.input ?? {})}
                   </EuiCodeBlock>
                 </EuiAccordion>
                 <EuiSpacer size="m" />
@@ -750,7 +753,7 @@ export const DatasetDetailPage: React.FC = () => {
                   paddingSize="m"
                 >
                   <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
-                    {prettyJson(selectedExample.output)}
+                    {prettyJson(selectedExample.output ?? {})}
                   </EuiCodeBlock>
                 </EuiAccordion>
                 <EuiSpacer size="m" />
@@ -761,7 +764,7 @@ export const DatasetDetailPage: React.FC = () => {
                   paddingSize="m"
                 >
                   <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
-                    {prettyJson(selectedExample.metadata)}
+                    {prettyJson(selectedExample.metadata ?? {})}
                   </EuiCodeBlock>
                 </EuiAccordion>
                 <EuiSpacer size="l" />

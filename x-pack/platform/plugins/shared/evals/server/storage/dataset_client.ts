@@ -32,13 +32,13 @@ interface ExampleDocument extends DatasetExampleStorageProperties {
 }
 
 interface NormalizedExample {
-  input: Record<string, unknown>;
-  output: Record<string, unknown>;
-  metadata: Record<string, unknown>;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface DatasetExampleInput {
-  input: Record<string, unknown>;
+  input?: Record<string, unknown>;
   output?: Record<string, unknown>;
   metadata?: Record<string, unknown> | null;
 }
@@ -621,11 +621,21 @@ export class DatasetClient {
   }
 }
 
+const EMPTY_EXAMPLE_METADATA = { description: 'empty-example' } as const;
+
 const normalizeExample = (example: DatasetExampleInput): NormalizedExample => {
+  const hasInput = example.input != null;
+  const hasOutput = example.output != null;
+  const hasMetadata = example.metadata != null;
+
+  if (!hasInput && !hasOutput && !hasMetadata) {
+    return { metadata: EMPTY_EXAMPLE_METADATA };
+  }
+
   return {
-    input: example.input ?? {},
-    output: example.output ?? {},
-    metadata: omitBy(example.metadata ?? {}, isEmpty),
+    ...(hasInput ? { input: example.input } : {}),
+    ...(hasOutput ? { output: example.output } : {}),
+    ...(hasMetadata ? { metadata: omitBy(example.metadata!, isEmpty) } : {}),
   };
 };
 

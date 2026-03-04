@@ -66,20 +66,20 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function toDatasetRouteExample(example: Example) {
-  if (!isObjectRecord(example.input)) {
-    throw new Error('Dataset example input must be an object for dataset upsert route');
+  if (example.input != null && !isObjectRecord(example.input)) {
+    throw new Error('Dataset example input must be an object when provided');
   }
-  if (!isObjectRecord(example.output)) {
-    throw new Error('Dataset example output must be an object for dataset upsert route');
+  if (example.output != null && !isObjectRecord(example.output)) {
+    throw new Error('Dataset example output must be an object when provided');
   }
   if (example.metadata != null && !isObjectRecord(example.metadata)) {
     throw new Error('Dataset example metadata must be an object when provided');
   }
 
   return {
-    input: example.input,
-    output: example.output,
-    metadata: example.metadata ?? {},
+    ...(example.input != null && { input: example.input }),
+    ...(example.output != null && { output: example.output }),
+    ...(example.metadata != null && { metadata: example.metadata }),
   };
 }
 
@@ -308,7 +308,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               id: datasetResponse.id,
               name: datasetResponse.name,
               description: datasetResponse.description,
-              examples: datasetResponse.examples.map(({ input, output, metadata }) => ({
+              examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
+                id,
                 input,
                 output,
                 metadata,

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Add Evaluation Dataset Examples API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/datasets/{datasetId}/examples:
     post:
@@ -32,7 +32,7 @@ paths:
               required:
                 - examples
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -43,7 +43,7 @@ paths:
                     type: integer
                 required:
                   - added
-        "404":
+        '404':
           description: Dataset not found
           content:
             application/json:
@@ -71,7 +71,3 @@ components:
         metadata:
           type: object
           additionalProperties: true
-      required:
-        - input
-        - output
-        - metadata

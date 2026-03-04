@@ -469,6 +469,58 @@ describe('dataset routes', () => {
       expect(response.payload).toEqual({ added: 2 });
     });
 
+    it('adds examples with only input (no output or metadata)', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        body: {
+          examples: [{ input: { question: 'input-only' } }],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, [
+        { input: { question: 'input-only' } },
+      ]);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ added: 1 });
+    });
+
+    it('adds a completely empty example (no input, output, or metadata)', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [] });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        body: {
+          examples: [{}],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, [{}]);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ added: 1 });
+    });
+
     it('returns 404 when dataset does not exist', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerAddExamplesRoute,
@@ -688,6 +740,82 @@ describe('dataset routes', () => {
         added: 1,
         removed: 0,
         unchanged: 2,
+      });
+    });
+
+    it('upserts examples with only input (no output or metadata)', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerUpsertDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_UPSERT_URL,
+      });
+      datasetClient.upsert.mockResolvedValueOnce({
+        dataset_id: datasetId,
+        added: 2,
+        removed: 0,
+        unchanged: 0,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_UPSERT_URL,
+        body: {
+          name: dataset.name,
+          description: dataset.description,
+          examples: [
+            { input: { searchTerm: 'query 1' } },
+            { input: { searchTerm: 'query 2' }, metadata: { minDocs: 1 } },
+          ],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.upsert).toHaveBeenCalledWith(dataset.name, dataset.description, [
+        { input: { searchTerm: 'query 1' } },
+        { input: { searchTerm: 'query 2' }, metadata: { minDocs: 1 } },
+      ]);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        dataset_id: datasetId,
+        added: 2,
+        removed: 0,
+        unchanged: 0,
+      });
+    });
+
+    it('upserts a completely empty example', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerUpsertDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_UPSERT_URL,
+      });
+      datasetClient.upsert.mockResolvedValueOnce({
+        dataset_id: datasetId,
+        added: 1,
+        removed: 0,
+        unchanged: 0,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_UPSERT_URL,
+        body: {
+          name: dataset.name,
+          description: dataset.description,
+          examples: [{}],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.upsert).toHaveBeenCalledWith(dataset.name, dataset.description, [{}]);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        dataset_id: datasetId,
+        added: 1,
+        removed: 0,
+        unchanged: 0,
       });
     });
 

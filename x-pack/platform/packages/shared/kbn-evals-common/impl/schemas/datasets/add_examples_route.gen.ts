@@ -18,9 +18,9 @@ import { z } from '@kbn/zod';
 
 export type AddExamplesPayload = z.infer<typeof AddExamplesPayload>;
 export const AddExamplesPayload = z.object({
-  input: z.object({}).catchall(z.unknown()),
-  output: z.object({}).catchall(z.unknown()),
-  metadata: z.object({}).catchall(z.unknown()),
+  input: z.object({}).catchall(z.unknown()).optional(),
+  output: z.object({}).catchall(z.unknown()).optional(),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
 });
 
 export type AddEvaluationDatasetExamplesRequestParams = z.infer<

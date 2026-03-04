@@ -26,9 +26,9 @@ export const datasetExamplesStorageSettings = {
 
 export interface DatasetExampleStorageProperties {
   dataset_id: string;
-  input: Record<string, unknown>;
-  output: Record<string, unknown>;
-  metadata: Record<string, unknown>;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

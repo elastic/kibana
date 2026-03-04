@@ -125,7 +125,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         description: dataset.description,
         examples: dataset.examples.map((example) => {
           return {
-            input: example.input,
+            input: example.input ?? {},
             output: (example.output ?? null) as any,
             metadata: (example.metadata ?? {}) as any,
           };

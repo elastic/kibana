@@ -18,9 +18,9 @@ import { z } from '@kbn/zod';
 
 export type UpsertDatasetExamplePayload = z.infer<typeof UpsertDatasetExamplePayload>;
 export const UpsertDatasetExamplePayload = z.object({
-  input: z.object({}).catchall(z.unknown()),
-  output: z.object({}).catchall(z.unknown()),
-  metadata: z.object({}).catchall(z.unknown()),
+  input: z.object({}).catchall(z.unknown()).optional(),
+  output: z.object({}).catchall(z.unknown()).optional(),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
 });
 
 export type UpsertEvaluationDatasetRequestBody = z.infer<typeof UpsertEvaluationDatasetRequestBody>;

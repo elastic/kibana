@@ -36,7 +36,12 @@ export interface Example<
   TExpected = any,
   TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
 > {
-  input: TInput;
+  /**
+   * Stable identifier for this example, typically a content hash.
+   * Optional because inline datasets may not have persisted IDs.
+   */
+  id?: string;
+  input?: TInput;
   /**
    * Expected output/ground truth for the example.
    *

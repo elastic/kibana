@@ -19,9 +19,9 @@ import { z } from '@kbn/zod';
 export type DatasetExample = z.infer<typeof DatasetExample>;
 export const DatasetExample = z.object({
   id: z.string(),
-  input: z.object({}).catchall(z.unknown()),
-  output: z.object({}).catchall(z.unknown()),
-  metadata: z.object({}).catchall(z.unknown()),
+  input: z.object({}).catchall(z.unknown()).optional(),
+  output: z.object({}).catchall(z.unknown()).optional(),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });

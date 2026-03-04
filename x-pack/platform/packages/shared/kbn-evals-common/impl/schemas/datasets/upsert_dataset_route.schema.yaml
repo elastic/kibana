@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Upsert Evaluation Dataset API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/datasets/_upsert:
     post:
@@ -32,7 +32,7 @@ paths:
                 - description
                 - examples
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -67,7 +67,3 @@ components:
         metadata:
           type: object
           additionalProperties: true
-      required:
-        - input
-        - output
-        - metadata
