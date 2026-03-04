@@ -12,7 +12,6 @@ const TIMELINE_TEMPLATES_URL = 'security/timelines/template';
 
 export class TimelinePage {
   readonly panel: Locator;
-  readonly flyoutWrapper: Locator;
   readonly queryInput: Locator;
   readonly saveStatus: Locator;
   readonly saveButton: Locator;
@@ -27,17 +26,14 @@ export class TimelinePage {
   readonly createNewTimelineOption: Locator;
   readonly bottomBarToggle: Locator;
   readonly timelinesTable: Locator;
-  readonly collapsedActionsButton: Locator;
   readonly createFromTemplateButton: Locator;
   readonly customTemplatesTab: Locator;
-  readonly loadingIndicator: Locator;
   readonly kqlTextarea: Locator;
   readonly saveButtonTooltipAnchor: Locator;
   readonly timelineRows: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.panel = this.page.testSubj.locator('timeline-modal-header-panel');
-    this.flyoutWrapper = this.page.testSubj.locator('timeline-portal-ref');
     this.queryInput = this.page.testSubj.locator('timelineQueryInput');
     this.saveStatus = this.panel.locator('[data-test-subj="timeline-save-status"]');
     this.saveButton = this.page.testSubj.locator('timeline-modal-save-timeline');
@@ -54,10 +50,8 @@ export class TimelinePage {
     this.createNewTimelineOption = this.page.testSubj.locator('timeline-modal-new-timeline');
     this.bottomBarToggle = this.page.testSubj.locator('timeline-bottom-bar-title-button');
     this.timelinesTable = this.page.testSubj.locator('timelines-table');
-    this.collapsedActionsButton = this.page.testSubj.locator('euiCollapsedItemActionsButton');
     this.createFromTemplateButton = this.page.testSubj.locator('create-from-template');
     this.customTemplatesTab = this.page.testSubj.locator('Custom templates');
-    this.loadingIndicator = this.page.testSubj.locator('globalLoadingIndicator');
     this.kqlTextarea = this.page.testSubj
       .locator('timeline-search-or-filter-search-container')
       .locator('textarea');
@@ -69,7 +63,7 @@ export class TimelinePage {
 
   async navigateToTimelines() {
     await this.page.gotoApp(TIMELINES_URL);
-    await this.timelinesTable.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.timelinesTable.waitFor({ timeout: 30_000 });
   }
 
   async navigateToTemplates() {
@@ -78,7 +72,7 @@ export class TimelinePage {
 
   async open() {
     await this.bottomBarToggle.click();
-    await this.panel.waitFor({ state: 'visible', timeout: 10_000 });
+    await this.panel.waitFor();
   }
 
   async close() {
@@ -88,7 +82,6 @@ export class TimelinePage {
 
   async createNew() {
     await this.newTimelineDropdownButton.click();
-    await this.createNewTimelineOption.waitFor({ state: 'visible' });
     await this.createNewTimelineOption.click();
   }
 
@@ -111,7 +104,6 @@ export class TimelinePage {
 
   private async openSaveModalAndSetTitle(name: string) {
     await this.saveButton.click();
-    await this.titleInput.waitFor({ state: 'visible' });
     await this.titleInput.clear();
     await this.titleInput.fill(name);
     await this.titleInput.press('Enter');
@@ -132,37 +124,23 @@ export class TimelinePage {
     await this.kqlTextarea.press('Enter');
   }
 
-  async waitForSaveComplete() {
-    await this.loadingIndicator.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-    await this.loadingIndicator.waitFor({ state: 'hidden', timeout: 30_000 });
-  }
-
   async selectCustomTemplates() {
-    await this.timelinesTable.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.timelinesTable.waitFor({ timeout: 30_000 });
     await this.customTemplatesTab.click();
-    await this.collapsedActionsButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
-  async expandFirstEventAction() {
-    await this.collapsedActionsButton.click();
-    await this.createFromTemplateButton.waitFor({ state: 'visible', timeout: 10_000 });
+  async createTimelineFromTemplate(templateTitle: string) {
+    const templateRow = this.timelinesTable
+      .locator('tbody')
+      .getByRole('row')
+      .filter({ hasText: templateTitle });
+    await templateRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
+    await this.createFromTemplateButton.click();
   }
 
   async hoverSaveButton() {
     // EUI wraps disabled buttons in a tooltip anchor <span> that intercepts
     // pointer events, so we hover the wrapper instead of the button itself.
     await this.saveButtonTooltipAnchor.hover();
-  }
-
-  async clickCreateFromTemplate() {
-    // EUI's collapsed actions popover re-renders continuously due to an app bug
-    // in StatefulOpenTimeline (open_timeline/index.tsx ~406-419), detaching the
-    // button before Playwright's stability check completes. dispatchEvent
-    // bypasses actionability checks without using force:true.
-    await this.createFromTemplateButton.dispatchEvent('click');
-  }
-
-  getTimelineRows() {
-    return this.timelineRows;
   }
 }

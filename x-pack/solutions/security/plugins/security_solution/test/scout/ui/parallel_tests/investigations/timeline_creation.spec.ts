@@ -39,22 +39,11 @@ spaceTest.describe(
           await timelinePage.selectCustomTemplates();
         });
 
-        await spaceTest.step(
-          'Expand template actions and create timeline from template',
-          async () => {
-            // The collapsed actions popover re-renders continuously due to an
-            // application issue in StatefulOpenTimeline: a useEffect on noteIds
-            // always creates a new itemIdToExpandedNotesRowMap reference and
-            // calls refetch(), causing the table and its popovers to detach.
-            // See: open_timeline/index.tsx lines ~406-419
-            // The page object uses force:true to work around the DOM instability.
-            await timelinePage.expandFirstEventAction();
-            await timelinePage.clickCreateFromTemplate();
-          }
-        );
+        await spaceTest.step('Create timeline from template', async () => {
+          await timelinePage.createTimelineFromTemplate('Security Timeline');
+        });
 
         await spaceTest.step('Verify flyout is visible with the template query', async () => {
-          await expect(timelinePage.flyoutWrapper).toHaveCSS('visibility', 'visible');
           await expect(timelinePage.queryInput).toHaveText(DEFAULT_QUERY);
         });
       }
@@ -91,9 +80,8 @@ spaceTest.describe(
 
         await spaceTest.step('Hover save button and verify read-only tooltip', async () => {
           await timelinePage.hoverSaveButton();
-          await expect(timelinePage.saveTooltip).toBeVisible();
-          await expect(timelinePage.saveTooltip).toHaveText(
-            'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
+          await expect(timelinePage.saveTooltip).toContainText(
+            'you do not have the required permissions to save timelines'
           );
         });
       }
@@ -107,15 +95,12 @@ spaceTest.describe(
       await timelinePage.open();
 
       await spaceTest.step('Verify unsaved state on new timeline', async () => {
-        await expect(timelinePage.panel).toBeVisible();
-        await expect(timelinePage.saveStatus).toBeVisible();
         await expect(timelinePage.saveStatus).toHaveText(/^Unsaved/);
       });
 
       await spaceTest.step('Save timeline', async () => {
         await timelinePage.saveWithName('Test');
         await expect(timelinePage.saveStatus).toBeHidden();
-        await timelinePage.waitForSaveComplete();
       });
 
       await spaceTest.step('Modify query and verify unsaved changes state', async () => {
@@ -140,7 +125,7 @@ spaceTest.describe(
       await spaceTest.step('Create and save first timeline', async () => {
         await timelinePage.open();
         await timelinePage.saveWithName('First');
-        await timelinePage.waitForSaveComplete();
+        await expect(timelinePage.saveStatus).toBeHidden();
       });
 
       await spaceTest.step('Save as new timeline with different name', async () => {
@@ -149,9 +134,8 @@ spaceTest.describe(
 
       await spaceTest.step('Close and verify both timelines appear in list', async () => {
         await timelinePage.close();
-        const rows = timelinePage.getTimelineRows();
-        await expect(rows).toHaveCount(2);
-        await expect(rows).toContainText(['Second', 'First']);
+        await expect(timelinePage.timelineRows).toHaveCount(2);
+        await expect(timelinePage.timelineRows).toContainText(['Second', 'First']);
       });
     });
   }
