@@ -11,9 +11,6 @@ export class DiscoverValidationPage {
   constructor(private page: Page) {}
 
   async waitForDiscoverToLoad() {
-    await this.page.waitForLoadState('networkidle');
-
-    // Wait for the histogram component to be fully rendered
     await this.page.getByTestId('unifiedHistogramRendered').waitFor({
       timeout: 60000,
       state: 'visible',
