@@ -12417,7 +12417,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2059,
+                "lineNumber": 2063,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12430,7 +12430,7 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2060,
+                "lineNumber": 2064,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12454,7 +12454,7 @@
                   " | undefined; agentVersion?: string | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2061,
+                "lineNumber": 2065,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12578,7 +12578,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2215,
+                "lineNumber": 2219,
                 "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12617,7 +12617,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2295,
+                "lineNumber": 2299,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12641,7 +12641,7 @@
                   ", \"perPage\" | \"kuery\"> & { spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2296,
+                "lineNumber": 2300,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12688,7 +12688,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2325,
+                "lineNumber": 2329,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12712,7 +12712,7 @@
                   ", \"perPage\" | \"sortField\" | \"sortOrder\" | \"kuery\"> & { fields?: string[] | undefined; spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2326,
+                "lineNumber": 2330,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -18855,7 +18855,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/server/config.ts",
-        "lineNumber": 445,
+        "lineNumber": 450,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
