@@ -11,7 +11,7 @@ import {
   OBSERVABILITY_AGENT_ID,
   OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
 } from '@kbn/observability-agent-builder-plugin/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -65,39 +65,6 @@ export function TransactionDetails() {
     [apmRouter, path, query, transactionName]
   );
 
-  // redirect to transaction list when transactionName is missing (e.g. bad URL, encoding issue)
-  if (!transactionName || transactionName.trim() === '') {
-    const transactionsListPath = routePath?.includes('mobile-services')
-      ? '/mobile-services/{serviceName}/transactions'
-      : '/services/{serviceName}/transactions';
-
-    // Preserve only safe query params for the transaction list (time range and filters)
-    const safeQuery = {
-      comparisonEnabled: query.comparisonEnabled,
-      environment: query.environment,
-      kuery: query.kuery,
-      latencyAggregationType: query.latencyAggregationType,
-      offset: query.offset,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
-      serviceGroup: query.serviceGroup,
-      transactionType: query.transactionType,
-    };
-
-    const redirectPath = apmRouterNoBasePath.link(transactionsListPath, {
-      path: { serviceName: path.serviceName },
-      query: safeQuery,
-    });
-    return <Redirect to={redirectPath} />;
-  }
-
-  if (!transactionTypeFromUrl && transactionType) {
-    replace(history, { query: { transactionType } });
-  }
-
-  const isServerless = isServerlessAgentName(serverlessType);
-
-  // Configure agent builder global flyout with the transaction attachment
   useEffect(() => {
     if (
       !agentBuilder ||
@@ -149,6 +116,38 @@ export function TransactionDetails() {
     start,
     end,
   ]);
+
+  // redirect to transaction list when transactionName is missing (e.g. bad URL, encoding issue)
+  if (!transactionName || transactionName.trim() === '') {
+    const transactionsListPath = routePath?.includes('mobile-services')
+      ? '/mobile-services/{serviceName}/transactions'
+      : '/services/{serviceName}/transactions';
+
+    // Preserve only safe query params for the transaction list (time range and filters)
+    const safeQuery = {
+      comparisonEnabled: query.comparisonEnabled,
+      environment: query.environment,
+      kuery: query.kuery,
+      latencyAggregationType: query.latencyAggregationType,
+      offset: query.offset,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      serviceGroup: query.serviceGroup,
+      transactionType: query.transactionType,
+    };
+
+    const redirectPath = apmRouterNoBasePath.link(transactionsListPath, {
+      path: { serviceName: path.serviceName },
+      query: safeQuery,
+    });
+    return <Redirect to={redirectPath} />;
+  }
+
+  if (!transactionTypeFromUrl && transactionType) {
+    replace(history, { query: { transactionType } });
+  }
+
+  const isServerless = isServerlessAgentName(serverlessType);
 
   return (
     <>
