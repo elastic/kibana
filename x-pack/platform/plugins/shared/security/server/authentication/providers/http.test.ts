@@ -13,9 +13,10 @@ import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { HTTPAuthenticationProvider } from './http';
+import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import { ROUTE_TAG_ACCEPT_JWT } from '../../routes/tags';
+import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -282,6 +283,225 @@ describe('HTTPAuthenticationProvider', () => {
 
         expect(request.headers.authorization).toBe(header);
       }
+    });
+  });
+
+  describe('UIAM OAuth authentication', () => {
+    let mockOptionsWithUiam: MockAuthenticationProviderOptions;
+
+    beforeEach(() => {
+      mockOptionsWithUiam = mockAuthenticationProviderOptions({ name: 'http', uiam: true });
+    });
+
+    it('exchanges UIAM OAuth token and authenticates successfully on tagged route.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const user = mockAuthenticatedUser();
+      const expectedAudience = mockOptionsWithUiam.getServerBaseURL();
+
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue({
+        ephemeralToken: 'essu_ephemeral_token',
+        audience: expectedAudience,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        acceptUiamOAuth: true,
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            authHeaders: {
+              authorization: 'Bearer essu_ephemeral_token',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            },
+          }
+        )
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
+        'essu_oauth_access_token',
+        expectedAudience
+      );
+
+      expect(mockOptionsWithUiam.client.asScoped).toHaveBeenCalledWith({
+        headers: {
+          ...request.headers,
+          authorization: 'Bearer essu_ephemeral_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+        },
+      });
+    });
+
+    it('fails authentication when audience does not match.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const expectedAudience = mockOptionsWithUiam.getServerBaseURL();
+
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue({
+        ephemeralToken: 'essu_ephemeral_token',
+        audience: 'https://wrong-kibana.example.com',
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        acceptUiamOAuth: true,
+      });
+
+      const result = await provider.authenticate(request);
+
+      expect(result.failed()).toBe(true);
+      expect(result.error?.message).toContain(
+        'OAuth access token audience does not match Kibana audience.'
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
+        'essu_oauth_access_token',
+        expectedAudience
+      );
+
+      expect(mockOptionsWithUiam.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('fails authentication when UIAM token exchange fails.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const exchangeError = new Error('UIAM service unavailable');
+
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockRejectedValue(exchangeError);
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        acceptUiamOAuth: true,
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(exchangeError)
+      );
+    });
+
+    it('does not intercept essu_ tokens on non-tagged routes (falls through to ES).', async () => {
+      const header = 'Bearer essu_some_token';
+      const user = mockAuthenticatedUser();
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        acceptUiamOAuth: true,
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning when essu_ token is used on a non-tagged route.', async () => {
+      const header = 'Bearer essu_some_token';
+      const user = mockAuthenticatedUser();
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        acceptUiamOAuth: true,
+      });
+
+      await provider.authenticate(request);
+
+      expect(mockOptionsWithUiam.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Detected UIAM OAuth token on a non-MCP endpoint')
+      );
+    });
+
+    it('does not intercept essu_ tokens when acceptUiamOAuth is not enabled.', async () => {
+      const header = 'Bearer essu_some_token';
+      const user = mockAuthenticatedUser();
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+    });
+
+    it('does not intercept non-essu_ Bearer tokens on tagged routes.', async () => {
+      const header = 'Bearer regular_jwt_token';
+      const user = mockAuthenticatedUser();
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        acceptUiamOAuth: true,
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
     });
   });
 

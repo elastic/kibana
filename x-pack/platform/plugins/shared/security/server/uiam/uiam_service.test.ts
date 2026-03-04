@@ -355,6 +355,60 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#exchangeOAuthToken', () => {
+    it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
+      const mockResponse = {
+        token: 'essu_ephemeral_token_value',
+        audience: 'https://my-project.kb.us-east-1.cloud.es.io',
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken(
+          'essu_oauth_access_token',
+          'https://my-project.kb.us-east-1.cloud.es.io'
+        )
+      ).resolves.toEqual({
+        ephemeralToken: 'essu_ephemeral_token_value',
+        audience: 'https://my-project.kb.us-east-1.cloud.es.io',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer essu_oauth_access_token',
+          },
+          body: JSON.stringify({
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io',
+          }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws and logs error when UIAM service returns an error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: { message: 'Invalid token' } }),
+        headers: new Headers(),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_invalid_token', 'https://kibana.example.com')
+      ).rejects.toThrow();
+    });
+  });
+
   describe('#grantApiKey', () => {
     it('properly calls UIAM service to grant an API key with Bearer scheme and name', async () => {
       const mockResponse: GrantUiamApiKeyResponse = {

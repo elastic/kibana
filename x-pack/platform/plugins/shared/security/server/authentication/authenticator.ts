@@ -94,7 +94,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement' | 'uiam'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
@@ -698,6 +698,7 @@ export class Authenticator {
       new HTTPAuthenticationProvider(options, {
         supportedSchemes,
         jwt: this.options.config.authc.http.jwt,
+        acceptUiamOAuth: this.options.config.uiam?.enabled,
       })
     );
   }

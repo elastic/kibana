@@ -133,6 +133,17 @@ export interface UiamServicePublic {
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
+   * Exchanges an OAuth access token for an ephemeral UIAM token.
+   * @param accessToken The OAuth access token.
+   * @param expectedAudience The audience value Kibana expects.
+   * @returns The ephemeral token and the audience returned by UIAM.
+   */
+  exchangeOAuthToken(
+    accessToken: string,
+    expectedAudience: string
+  ): Promise<{ ephemeralToken: string; audience: string }>;
+
+  /**
    * Revokes a UIAM API key by its ID.
    * @param apiKeyId The ID of the API key to revoke.
    * @param apiKey The API key to revoke; will be used for authentication on this request.
@@ -248,6 +259,46 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
+      );
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.exchangeOAuthToken}.
+   */
+  async exchangeOAuthToken(
+    accessToken: string,
+    expectedAudience: string
+  ): Promise<{ ephemeralToken: string; audience: string }> {
+    this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
+
+    try {
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/authentication/_authenticate?include_token=true`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ audience: expectedAudience }),
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      return {
+        ephemeralToken: response.token,
+        audience: response.audience,
+      };
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
 
       throw err;
