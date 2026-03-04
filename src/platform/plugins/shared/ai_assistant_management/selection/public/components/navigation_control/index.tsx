@@ -113,9 +113,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         <AiButton
           iconType="aiAssistantLogo"
           onClick={() => setModalOpen(true)}
-          aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
-            defaultMessage: 'Open the AI Assistant selector',
-          })}
           variant="base"
           size="s"
           data-test-subj="aiAssistantHeaderButton"
