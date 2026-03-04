@@ -71,10 +71,6 @@ export function transformWorkpadOut(
             : fromExpression(element.expression);
 
         ast.chain = ast.chain.map((fn) => {
-          if (!fn) {
-            console.log('element.expression', element.expression);
-            console.log('ast', JSON.stringify(ast, null, 2));
-          }
           if (!embeddableFunctions.includes(fn.function)) return fn;
 
           // migrate legacy embeddable expressions to generic embeddable expression
