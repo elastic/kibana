@@ -57,6 +57,10 @@ export type PhaseVolumeConfig<TName extends string = string> = Partial<
   Record<TName, PhaseVolumeEntry>
 >;
 
+type VolumeKey<TServiceGraph extends ServiceGraph> =
+  | ServiceNamesOf<TServiceGraph>
+  | ServiceDependenciesOf<TServiceGraph>;
+
 /** Failures, volume, and noise for a single time-bounded phase — all scoped to `[start, end)`. */
 export interface PhaseConfig<TServiceGraph extends ServiceGraph = ServiceGraph> {
   failures?: FailureMap<ServiceNamesOf<TServiceGraph>, ServiceDependenciesOf<TServiceGraph>>;
@@ -157,14 +161,9 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
     }
 
     if (config.volume) {
-      const volumeResult: ChannelVolume<
-        ServiceNamesOf<TServiceGraph> | ServiceDependenciesOf<TServiceGraph>
-      > = {};
+      const volumeResult: ChannelVolume<VolumeKey<TServiceGraph>> = {};
       for (const [key, entry] of Object.entries(config.volume) as Array<
-        [
-          ServiceNamesOf<TServiceGraph> | ServiceDependenciesOf<TServiceGraph>,
-          PhaseVolumeEntry | undefined
-        ]
+        [VolumeKey<TServiceGraph>, PhaseVolumeEntry | undefined]
       >) {
         if (entry !== undefined) {
           volumeResult[key] = {
@@ -192,11 +191,17 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
   const phases = (
     list: Array<ScenarioBuildResult<TServiceGraph>>
   ): ScenarioBuildResult<TServiceGraph> => {
-    const merged: ScenarioBuildResult = {};
+    const merged: ScenarioBuildResult<TServiceGraph> = {};
 
     const failureFns = list
       .filter((r) => r.failures !== undefined)
-      .map((r) => r.failures as FailuresOrFn);
+      .map(
+        (r) =>
+          r.failures as FailuresOrFn<
+            ServiceNamesOf<TServiceGraph>,
+            ServiceDependenciesOf<TServiceGraph>
+          >
+      );
 
     if (failureFns.length > 0) {
       merged.failures = (ts: number) => {
@@ -208,11 +213,11 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
       };
     }
 
-    const volumeMap: Record<string, ChannelEntry> = {};
+    const volumeMap: ChannelVolume<VolumeKey<TServiceGraph>> = {};
     for (const r of list) {
       if (!r.volume) continue;
       for (const [key, entry] of Object.entries(r.volume) as Array<
-        [string, ChannelEntry | undefined]
+        [VolumeKey<TServiceGraph>, ChannelEntry | undefined]
       >) {
         if (!entry) continue;
         if (!volumeMap[key]) {

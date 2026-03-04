@@ -323,13 +323,12 @@ export function collectInfraDocs({
   });
   const currentIndex = genState.infraIndex;
   const { svc, dep } = selectInfraPair(allDeps, priorityPairs, currentIndex);
+  genState.infraIndex++;
 
   const depCfg = volume?.[dep];
   if (!resolveChannelEvery(depCfg?.every, index)) {
     return [];
   }
-
-  genState.infraIndex++;
 
   const spikeMultiplier = resolveSpikes(depCfg?.spikes, timestamp, ctx, svc.name);
   const baseRate = depCfg?.rate ?? 1;
