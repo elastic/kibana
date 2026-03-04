@@ -6,8 +6,10 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { KbnClient } from '@kbn/test';
 import { KbnClient as TestKbnClient } from '@kbn/test';
+import { EVALS_DATASETS_URL } from '@kbn/evals-common';
 import { wrapKbnClientWithRetries } from './kbn_client_with_retries';
 
 export interface GetEvaluationsKbnClientParams {
@@ -69,4 +71,34 @@ export function getEvaluationsKbnClient({
   });
 
   return wrapKbnClientWithRetries({ kbnClient: withVersionHeader, log });
+}
+
+/**
+ * Probes the target Kibana to check whether the evals plugin is enabled
+ * by hitting a lightweight datasets list endpoint.
+ */
+export async function checkEvaluationsPluginEnabled({
+  kbnClient,
+  log,
+}: {
+  kbnClient: KbnClient;
+  log: SomeDevLog;
+}): Promise<boolean> {
+  try {
+    await kbnClient.request({
+      path: EVALS_DATASETS_URL,
+      method: 'GET',
+      query: { page: 1, per_page: 1 },
+      retries: 0,
+    });
+    log.info('Evals dataset management is available on the target Kibana');
+    return true;
+  } catch (error) {
+    log.warning(
+      'Evals dataset management is not available on the target Kibana. ' +
+        'Dataset syncing will be skipped. To enable, set xpack.evals.enabled: true ' +
+        'in the target Kibana configuration.'
+    );
+    return false;
+  }
 }

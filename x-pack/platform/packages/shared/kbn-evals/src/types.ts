@@ -195,6 +195,11 @@ export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   evaluationsKbnClient: ScoutWorkerFixtures['kbnClient'];
   /**
+   * Whether the target Kibana has the evals plugin enabled (xpack.evals.enabled: true).
+   * Determined once per worker by probing the plugin's enabled endpoint.
+   */
+  evaluationsPluginEnabled: boolean;
+  /**
    * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;

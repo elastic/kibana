@@ -161,7 +161,16 @@ export const startCmd: Command<void> = {
     node scripts/evals stop
   `,
   flags: {
-    string: ['suite', 'config', 'evaluation-connector-id', 'project', 'repetitions', 'grep'],
+    string: [
+      'suite',
+      'config',
+      'evaluation-connector-id',
+      'project',
+      'repetitions',
+      'grep',
+      'evaluations-kbn-url',
+      'evaluations-kbn-api-key',
+    ],
     boolean: ['skip-server', 'dry-run'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
     default: { 'skip-server': false, 'dry-run': false },
@@ -348,6 +357,16 @@ export const startCmd: Command<void> = {
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
       envOverrides.EVALUATION_REPETITIONS = repetitions;
+    }
+
+    const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
+    if (evaluationsKbnUrl) {
+      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+    }
+
+    const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
+    if (evaluationsKbnApiKey) {
+      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
     }
 
     const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];

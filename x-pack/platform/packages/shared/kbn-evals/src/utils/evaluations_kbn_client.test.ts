@@ -11,6 +11,7 @@ import {
   getEvaluationsKbnClient,
   withKbnClientDefaultHeaders,
   withKbnClientApiKeyAuth,
+  checkEvaluationsPluginEnabled,
 } from './evaluations_kbn_client';
 
 jest.mock('./kbn_client_with_retries', () => ({
@@ -175,5 +176,49 @@ describe('getEvaluationsKbnClient', () => {
       })
     );
     expect(defaultKbnClient.request).not.toHaveBeenCalled();
+  });
+});
+
+describe('checkEvaluationsPluginEnabled', () => {
+  it('returns true when the datasets endpoint responds successfully', async () => {
+    const kbnClient = createMockKbnClient();
+
+    const result = await checkEvaluationsPluginEnabled({ kbnClient, log });
+
+    expect(result).toBe(true);
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/internal/evals/datasets',
+        method: 'GET',
+        query: { page: 1, per_page: 1 },
+      })
+    );
+    expect(log.info).toHaveBeenCalledWith(
+      'Evals dataset management is available on the target Kibana'
+    );
+  });
+
+  it('returns false when the datasets endpoint returns a 404', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { statusCode: 404 }));
+
+    const result = await checkEvaluationsPluginEnabled({ kbnClient, log });
+
+    expect(result).toBe(false);
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Evals dataset management is not available')
+    );
+  });
+
+  it('returns false when the request fails with a network error', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockRejectedValue(new Error('ECONNREFUSED'));
+
+    const result = await checkEvaluationsPluginEnabled({ kbnClient, log });
+
+    expect(result).toBe(false);
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Dataset syncing will be skipped')
+    );
   });
 });

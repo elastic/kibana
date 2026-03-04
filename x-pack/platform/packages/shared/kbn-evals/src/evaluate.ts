@@ -22,7 +22,10 @@ import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
-import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
+import {
+  getEvaluationsKbnClient,
+  checkEvaluationsPluginEnabled,
+} from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
@@ -99,6 +102,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   evaluationsKbnClient: [
     async ({ kbnClient, log }, use) => {
       await use(getEvaluationsKbnClient({ kbnClient, log }));
+    },
+    { scope: 'worker' },
+  ],
+  evaluationsPluginEnabled: [
+    async ({ evaluationsKbnClient, log }, use) => {
+      await use(await checkEvaluationsPluginEnabled({ kbnClient: evaluationsKbnClient, log }));
     },
     { scope: 'worker' },
   ],
@@ -223,6 +232,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       {
         log,
         evaluationsKbnClient,
+        evaluationsPluginEnabled,
         connector,
         evaluationConnector,
         repetitions,
@@ -257,71 +267,73 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       const listDatasetsPerPage = 100;
 
-      const upsertDataset = async (dataset: EvaluationDataset) => {
-        await evaluationsKbnClient.request({
-          path: EVALS_DATASET_UPSERT_URL,
-          method: 'POST',
-          body: {
-            name: dataset.name,
-            description: dataset.description,
-            examples: dataset.examples.map(toDatasetRouteExample),
-          },
-          retries: 0,
-        });
-      };
-
-      const getDatasetByName = async (
-        datasetName: string
-      ): Promise<EvaluationDatasetWithId | null> => {
-        let page = 1;
-        let total = Number.POSITIVE_INFINITY;
-
-        while ((page - 1) * listDatasetsPerPage < total) {
-          const listResponse = GetEvaluationDatasetsResponse.parse(
+      const upsertDataset = evaluationsPluginEnabled
+        ? async (dataset: EvaluationDataset) => {
             await evaluationsKbnClient.request({
-              path: EVALS_DATASETS_URL,
-              method: 'GET',
-              query: {
-                page,
-                per_page: listDatasetsPerPage,
+              path: EVALS_DATASET_UPSERT_URL,
+              method: 'POST',
+              body: {
+                name: dataset.name,
+                description: dataset.description,
+                examples: dataset.examples.map(toDatasetRouteExample),
               },
               retries: 0,
-            })
-          );
-
-          total = listResponse.total;
-
-          const datasetSummary = listResponse.datasets.find(({ name }) => name === datasetName);
-          if (datasetSummary) {
-            const datasetResponse = GetEvaluationDatasetResponse.parse(
-              await evaluationsKbnClient.request({
-                path: EVALS_DATASET_URL.replace(
-                  '{datasetId}',
-                  encodeURIComponent(datasetSummary.id)
-                ),
-                method: 'GET',
-                retries: 0,
-              })
-            );
-
-            return {
-              id: datasetResponse.id,
-              name: datasetResponse.name,
-              description: datasetResponse.description,
-              examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-                id,
-                input,
-                output,
-                metadata,
-              })),
-            };
+            });
           }
+        : undefined;
 
-          page += 1;
-        }
+      const getDatasetByName = evaluationsPluginEnabled
+        ? async (datasetName: string): Promise<EvaluationDatasetWithId | null> => {
+            let page = 1;
+            let total = Number.POSITIVE_INFINITY;
 
-        return null;
-      };
+            while ((page - 1) * listDatasetsPerPage < total) {
+              const listResponse = GetEvaluationDatasetsResponse.parse(
+                await evaluationsKbnClient.request({
+                  path: EVALS_DATASETS_URL,
+                  method: 'GET',
+                  query: {
+                    page,
+                    per_page: listDatasetsPerPage,
+                  },
+                  retries: 0,
+                })
+              );
+
+              total = listResponse.total;
+
+              const datasetSummary = listResponse.datasets.find(({ name }) => name === datasetName);
+              if (datasetSummary) {
+                const datasetResponse = GetEvaluationDatasetResponse.parse(
+                  await evaluationsKbnClient.request({
+                    path: EVALS_DATASET_URL.replace(
+                      '{datasetId}',
+                      encodeURIComponent(datasetSummary.id)
+                    ),
+                    method: 'GET',
+                    retries: 0,
+                  })
+                );
+
+                return {
+                  id: datasetResponse.id,
+                  name: datasetResponse.name,
+                  description: datasetResponse.description,
+                  examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
+                    id,
+                    input,
+                    output,
+                    metadata,
+                  })),
+                };
+              }
+
+              page += 1;
+            }
+
+            return null;
+          }
+        : undefined;
 
       const executorClient = new KibanaEvalsClient({
         log,
