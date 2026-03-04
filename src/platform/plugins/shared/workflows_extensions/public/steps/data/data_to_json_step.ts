@@ -14,7 +14,7 @@ import { createPublicStepDefinition } from '../../step_registry/types';
 export const dataToJsonStepDefinition = createPublicStepDefinition({
   ...dataToJsonStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/document').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/code').then(({ icon }) => ({
       default: icon,
     }))
   ),
