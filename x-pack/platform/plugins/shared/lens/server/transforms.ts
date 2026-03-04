@@ -10,12 +10,40 @@ import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
+import { referencesSchema } from '@kbn/content-management-utils';
+import {
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
+  ON_CLICK_ROW,
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
+
+/**
+ * Triggers that Lens visualizations support, derived from visualization definitions:
+ * - ON_CLICK_VALUE: VIS_EVENT_TO_TRIGGER.filter (all visualizations)
+ * - ON_SELECT_RANGE: VIS_EVENT_TO_TRIGGER.brush (xy, heatmap)
+ * - ON_CLICK_ROW: VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick (datatable)
+ * - ON_APPLY_FILTER: VIS_EVENT_TO_TRIGGER.applyFilter (all visualizations)
+ * - ON_OPEN_PANEL_MENU: VIS_EVENT_TO_TRIGGER.openPanelMenu (all visualizations)
+ */
+const LENS_SUPPORTED_DRILLDOWN_TRIGGERS = [
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
+  ON_CLICK_ROW,
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
+];
 
 export function registerLensEmbeddableTransforms(
   embeddableSetup: EmbeddableSetup,
@@ -27,7 +55,9 @@ export function registerLensEmbeddableTransforms(
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
         transformOut: getTransformOut(builder, drilldownTransforms.transformOut, false),
       } satisfies LensTransforms),
-    getSchema: () => lensPanelSchema,
+    getSchema: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+      return getLensPanelSchema(getDrilldownsSchema);
+    },
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
 
@@ -40,34 +70,45 @@ export function registerLensEmbeddableTransforms(
   });
 }
 
-const lensByValuePanelSchema = schema.object(
-  {
-    // TODO: add missing config properties
-    attributes: lensApiStateSchema,
-  },
-  {
-    unknowns: 'allow',
-    meta: {
-      description: 'Lens by-value embeddable schema',
-    },
-  }
-);
-
-const lensByRefPanelSchema = schema.object(
-  {
-    // TODO: add missing config properties
-    savedObjectId: schema.string(),
-  },
-  {
-    unknowns: 'allow',
-    meta: {
-      description: 'Lens by-ref embeddable schema',
-    },
-  }
-);
-
-export const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema], {
-  meta: {
-    description: 'Lens embeddable schema',
-  },
+const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ({
+  references: schema.maybe(referencesSchema),
+  ...serializedTimeRangeSchema.getPropSchemas(),
+  ...serializedTitlesSchema.getPropSchemas(),
+  ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).getPropSchemas(),
 });
+
+const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  schema.object(
+    {
+      attributes: lensApiStateSchema,
+      ...getSharedPanelSchema(getDrilldownsSchema),
+    },
+    {
+      meta: {
+        description: 'Lens by-value embeddable schema',
+      },
+    }
+  );
+
+const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  schema.object(
+    {
+      savedObjectId: schema.string(),
+      ...getSharedPanelSchema(getDrilldownsSchema),
+    },
+    {
+      meta: {
+        description: 'Lens by-ref embeddable schema',
+      },
+    }
+  );
+
+const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  schema.oneOf(
+    [getLensByValuePanelSchema(getDrilldownsSchema), getLensByRefPanelSchema(getDrilldownsSchema)],
+    {
+      meta: {
+        description: 'Lens embeddable schema',
+      },
+    }
+  );

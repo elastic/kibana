@@ -44,6 +44,7 @@ import { registerLensAPIRoutes } from './api/routes';
 import { fetchLensFeatureFlags } from '../common';
 import { registerLensEmbeddableTransforms } from './transforms';
 import { registerLensEmbeddableTransformsForDashboardApp } from './dashboard_app_transforms';
+import { registerDiscoverDrilldown } from './drilldowns/register_discover_drilldown';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -112,6 +113,8 @@ export class LensServerPlugin
       DataViewPersistableStateService.getAllMigrations.bind(DataViewPersistableStateService),
       this.customVisualizationMigrations
     );
+
+    registerDiscoverDrilldown(plugins.embeddable);
 
     plugins.embeddable.registerEmbeddableFactory(
       lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
