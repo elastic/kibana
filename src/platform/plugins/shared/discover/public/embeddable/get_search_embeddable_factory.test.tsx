@@ -27,6 +27,7 @@ import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
 import { SolutionType } from '../context_awareness';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -195,6 +196,62 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
+    });
+  });
+
+  describe('missing data view', () => {
+    const getNoDataViewRuntimeState = (searchMock?: jest.Mock): SearchEmbeddableRuntimeState => {
+      const searchSource = createSearchSourceMock({}, undefined, searchMock);
+      const parentSearchSource = createSearchSourceMock({});
+      discoverServiceMock.data.search.searchSource.create = jest
+        .fn()
+        .mockResolvedValueOnce(searchSource)
+        .mockResolvedValueOnce(parentSearchSource);
+
+      return {
+        timeRange: { from: 'now-15m', to: 'now' },
+        columns: ['message', 'extension'],
+        rowHeight: 30,
+        headerRowHeight: 5,
+        rowsPerPage: 50,
+        sampleSize: 250,
+        serializedSearchSource: searchSource.getSerializedFields(),
+      };
+    };
+
+    it('should render missing data view prompt when data view is not found', async () => {
+      runtimeState = getNoDataViewRuntimeState();
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+      const { queryByTestId } = renderWithI18n(<Component />);
+
+      await waitFor(() => {
+        expect(queryByTestId('discoverEmbeddableMissingDataViewCallout')).toBeVisible();
+        expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not fetch data when data view is missing', async () => {
+      const { search } = createSearchFnMock(0);
+      runtimeState = getNoDataViewRuntimeState(search);
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(search).not.toHaveBeenCalled();
+      expect(api.dataLoading$.getValue()).toBe(false);
     });
   });
 

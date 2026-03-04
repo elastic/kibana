@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,14 +16,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getSortArray,
 } from '@kbn/discover-utils';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import {
-  apiPublishesWritableViewMode,
-  getViewModeSubject,
-  useBatchedPublishingSubjects,
-  type ViewMode,
-} from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
@@ -35,16 +29,11 @@ import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { isObject } from 'lodash';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import {
-  DiscoverGridEmbeddable,
-  type InlineEditingProps,
-  type ViewModeDeletedTabAction,
-} from './saved_search_grid';
+import { DiscoverGridEmbeddable, type InlineEditingProps } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { useAdditionalCellActions } from '../../context_awareness';
@@ -60,25 +49,17 @@ interface SavedSearchEmbeddableComponentProps {
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
-  isSelectedTabDeleted: boolean;
   inlineEditing: InlineEditingProps;
   stateManager: SearchEmbeddableStateManager;
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
-const apiPublishesIsEditableByUser = (
-  parentApi: unknown
-): parentApi is { isEditableByUser: boolean } =>
-  isObject(parentApi) &&
-  typeof (parentApi as { isEditableByUser?: boolean }).isEditableByUser === 'boolean';
-
 export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
   enableDocumentViewer,
-  isSelectedTabDeleted,
   inlineEditing,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
@@ -90,11 +71,6 @@ export function SearchEmbeddableGridComponent({
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
-
-  const viewModeSubject$ = useMemo(
-    () => getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view'),
-    [api]
-  );
 
   const [
     loading,
@@ -113,7 +89,6 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
-    viewMode,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -130,32 +105,8 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$,
-    viewModeSubject$
+    esqlVariables$ ?? emptyEsqlVariables$
   );
-
-  const isEditMode = viewMode === 'edit';
-
-  const canShowDashboardWriteControls = Boolean(
-    discoverServices.capabilities.dashboard_v2?.showWriteControls
-  );
-
-  const canEditDashboardByAccessControl = apiPublishesIsEditableByUser(parentApi)
-    ? parentApi.isEditableByUser
-    : false;
-
-  const canSwitchToEditMode = apiPublishesWritableViewMode(parentApi);
-
-  const canEditPanelInViewMode =
-    canShowDashboardWriteControls && canEditDashboardByAccessControl && canSwitchToEditMode;
-
-  const onEditPanel = useCallback(() => {
-    if (canSwitchToEditMode) parentApi.setViewMode('edit');
-  }, [canSwitchToEditMode, parentApi]);
-
-  const viewModeDeletedTabAction: ViewModeDeletedTabAction = canEditPanelInViewMode
-    ? { type: 'editPanel', onClick: onEditPanel }
-    : { type: 'contactAdmin' };
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
   // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
@@ -313,10 +264,7 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
-      isEditMode={isEditMode}
-      isSelectedTabDeleted={isSelectedTabDeleted}
       inlineEditing={inlineEditing}
-      viewModeDeletedTabAction={viewModeDeletedTabAction}
     />
   );
 }

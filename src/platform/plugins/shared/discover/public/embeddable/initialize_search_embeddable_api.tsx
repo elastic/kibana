@@ -34,6 +34,7 @@ import {
 } from '@kbn/es-query';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
@@ -48,10 +49,24 @@ const initializeSearchSource = async (
   discoverServices: DiscoverServices,
   serializedSearchSource?: SerializedSearchSourceFields
 ) => {
-  const [searchSource, parentSearchSource] = await Promise.all([
-    discoverServices.data.search.searchSource.create(serializedSearchSource),
-    discoverServices.data.search.searchSource.create(),
-  ]);
+  let searchSource: ISearchSource;
+  let parentSearchSource: ISearchSource;
+
+  try {
+    [searchSource, parentSearchSource] = await Promise.all([
+      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(),
+    ]);
+  } catch (error) {
+    if (error instanceof SavedObjectNotFound) {
+      [searchSource, parentSearchSource] = await Promise.all([
+        discoverServices.data.search.searchSource.create(),
+        discoverServices.data.search.searchSource.create(),
+      ]);
+    } else {
+      throw error;
+    }
+  }
 
   searchSource.setParent(parentSearchSource);
 
@@ -219,7 +234,7 @@ export const initializeSearchEmbeddableApi = async ({
     // Ensure all state updates happen synchronously to prevent multiple reloads
     searchSource$.next(newSearchSource);
 
-    if (newDataView) dataViews$.next([newDataView]);
+    dataViews$.next(newDataView ? [newDataView] : undefined);
 
     const newQuery = newSearchSource.getField('query');
     const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;

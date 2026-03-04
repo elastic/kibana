@@ -33,6 +33,8 @@ import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
+import { SearchEmbeddableDeletedTabPrompt } from './components/search_embeddable_deleted_tab_prompt';
+import { SearchEmbeddableMissingDataViewPrompt } from './components/search_embeddable_missing_data_view_prompt';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
@@ -334,42 +336,6 @@ export const getSearchEmbeddableFactory = ({
           const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;
 
           const dataView = useMemo(() => dataViews?.[0], [dataViews]);
-          const isMissingDataView = !dataView && !isSelectedTabDeletedForDisplay;
-
-          if (!dataView && !isSelectedTabDeletedForDisplay) {
-            blockingError$.next(
-              new Error(
-                i18n.translate('discover.embeddable.search.dataViewError', {
-                  defaultMessage: 'Missing data view {indexPatternId}',
-                  values: {
-                    indexPatternId:
-                      typeof runtimeState.serializedSearchSource?.index === 'string'
-                        ? runtimeState.serializedSearchSource.index
-                        : runtimeState.serializedSearchSource?.index?.id ?? '',
-                  },
-                })
-              )
-            );
-          }
-
-          useEffect(() => {
-            if (isMissingDataView) {
-              dataLoading$.next(false);
-              blockingError$.next(
-                new Error(
-                  i18n.translate('discover.embeddable.search.dataViewError', {
-                    defaultMessage: 'Missing data view {indexPatternId}',
-                    values: {
-                      indexPatternId:
-                        typeof runtimeState.serializedSearchSource?.index === 'string'
-                          ? runtimeState.serializedSearchSource.index
-                          : runtimeState.serializedSearchSource?.index?.id ?? '',
-                    },
-                  })
-                )
-              );
-            }
-          }, [isMissingDataView]);
 
           const onAddFilter = useCallback<DocViewFilterFn>(
             async (field, value, operator) => {
@@ -399,6 +365,41 @@ export const getSearchEmbeddableFactory = ({
             () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
             [savedSearch, dataView]
           );
+
+          if (isSelectedTabDeletedForDisplay) {
+            return (
+              <SearchEmbeddableDeletedTabPrompt
+                api={api}
+                canShowDashboardWriteControls={Boolean(
+                  discoverServices.capabilities.dashboard_v2?.showWriteControls
+                )}
+                inlineEditing={{
+                  hasPendingChanges: hasPendingInlineTabChanges,
+                  isActive: isInlineEditing,
+                  onApply: inlineEditingApi.applyInlineTabSelection,
+                  onCancel: inlineEditingApi.cancelInlineTabSelection,
+                }}
+              />
+            );
+          }
+
+          if (!dataView) {
+            return (
+              <SearchEmbeddableMissingDataViewPrompt
+                api={api}
+                canShowDashboardWriteControls={Boolean(
+                  discoverServices.capabilities.dashboard_v2?.showWriteControls
+                )}
+                inlineEditing={{
+                  hasPendingChanges: hasPendingInlineTabChanges,
+                  isActive: isInlineEditing,
+                  onApply: inlineEditingApi.applyInlineTabSelection,
+                  onCancel: inlineEditingApi.cancelInlineTabSelection,
+                }}
+                onEditInDiscover={editApi?.onEdit}
+              />
+            );
+          }
 
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
@@ -438,7 +439,6 @@ export const getSearchEmbeddableFactory = ({
                               ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
                               : true
                           }
-                          isSelectedTabDeleted={isSelectedTabDeletedForDisplay}
                           inlineEditing={{
                             isActive: isInlineEditing,
                             hasPendingChanges: hasPendingInlineTabChanges,
