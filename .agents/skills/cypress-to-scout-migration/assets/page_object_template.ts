@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
+import type { ScoutPage, Locator } from '@kbn/scout-security';
 
 const PAGE_URL = 'security/TODO_PAGE_PATH';
 
