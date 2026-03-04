@@ -28,6 +28,20 @@ const extractTimeRangeFromAst = (ast?: Ast): TimeRange => {
     : DEFAULT_TIME_RANGE;
 };
 
+const extractMapCenterFromAst = (
+  ast?: Ast
+): { lat: number; lon: number; zoom: number } | undefined => {
+  if (!ast?.chain?.length) return;
+
+  return ast.chain[0].function === 'mapCenter'
+    ? {
+        lat: ast.chain[0].arguments.lat[0] as number,
+        lon: ast.chain[0].arguments.lon[0] as number,
+        zoom: ast.chain[0].arguments.zoom[0] as number,
+      }
+    : undefined;
+};
+
 export function transformWorkpadOut(
   workpad: WorkpadAttributes,
   references: SavedObjectReference[] = []
@@ -57,6 +71,10 @@ export function transformWorkpadOut(
             : fromExpression(element.expression);
 
         ast.chain = ast.chain.map((fn) => {
+          if (!fn) {
+            console.log('element.expression', element.expression);
+            console.log('ast', JSON.stringify(ast, null, 2));
+          }
           if (!embeddableFunctions.includes(fn.function)) return fn;
 
           // migrate legacy embeddable expressions to generic embeddable expression
@@ -67,6 +85,7 @@ export function transformWorkpadOut(
                 timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
                 title:
                   fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
+                // skipping the palette argument because it's too complex to parse without the interpreter
               };
               fn.function = 'embeddable';
               fn.arguments = {
@@ -77,13 +96,14 @@ export function transformWorkpadOut(
             case 'savedVisualization':
               const visualizationConfig = {
                 savedObjectId: fn.arguments.id[0] as string,
+                vis:
+                  fn.arguments.hideLegend?.[0] != null
+                    ? { legendOpen: !fn.arguments.hideLegend?.[0] as boolean }
+                    : undefined,
                 timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
-                colors: fn.arguments.colors?.[0] ? (fn.arguments.colors[0] as string) : undefined,
-                hideLegend: fn.arguments.hideLegend?.[0]
-                  ? (fn.arguments.hideLegend[0] as boolean)
-                  : undefined,
                 title:
                   fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
+                // skipping the colors argument because it's too complex to parse without evaluating the expression
               };
               // migrate legacy savedVisualization to embeddable expression
               fn.function = 'embeddable';
@@ -99,6 +119,9 @@ export function transformWorkpadOut(
                 timeRange: extractTimeRangeFromAst(fn.arguments.timerange?.[0] as Ast),
                 title:
                   fn.arguments.title?.[0] == null ? undefined : (fn.arguments.title[0] as string),
+                hiddenLayers:
+                  fn.arguments.hideLayer?.length > 0 ? (fn.arguments.hideLayer as string[]) : [],
+                mapCenter: extractMapCenterFromAst(fn.arguments.center?.[0] as Ast),
               };
               fn.function = 'embeddable';
               fn.arguments = {
