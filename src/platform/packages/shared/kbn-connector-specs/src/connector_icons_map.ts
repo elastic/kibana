@@ -35,6 +35,14 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
+    '.pagerduty-v2',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
+    '.pagerduty',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
     '.brave-search',
     lazy(
       () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
@@ -95,6 +103,7 @@ export const ConnectorIconsMap: Map<
     '.firecrawl',
     lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
   ],
+  ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
     '.zendesk',
     lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
