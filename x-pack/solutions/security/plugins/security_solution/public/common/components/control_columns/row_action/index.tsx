@@ -12,7 +12,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { KibanaContextProvider, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import {
   DocumentDetailsLeftPanelKey,
@@ -28,6 +28,7 @@ import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/t
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -106,14 +107,13 @@ const RowActionComponent = ({
     if (newFlyoutSystemEnabled && esHitRecord) {
       const hit: DataTableRecord = buildDataTableRecord(esHitRecord);
       overlays.openSystemFlyout(
-        <KibanaContextProvider services={services}>
-          <OverviewTab hit={hit} />
-        </KibanaContextProvider>,
+        flyoutProviders({ services, children: <OverviewTab hit={hit} /> }),
         {
+          ownFocus: false,
           // @ts-ignore EUI to fix this typing issue
           resizable: true,
+          size: 's',
           type: 'overlay',
-          ownFocus: false,
         }
       );
     } else {

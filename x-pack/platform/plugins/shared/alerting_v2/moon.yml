@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-v2-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: '@elastic/rna-project-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/alerting-v2-plugin'
   description: Moon project for @kbn/alerting-v2-plugin
   channel: ''
-  owner: '@elastic/response-ops'
+  owner: '@elastic/rna-project-team'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/alerting_v2
 dependsOn:
@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-http-server'
   - '@kbn/logging'
-  - '@kbn/es-types'
   - '@kbn/spaces-utils'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
@@ -55,7 +54,6 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/test'
-  - '@kbn/esql-language'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/core-user-profile-common'
@@ -63,6 +61,7 @@ dependsOn:
   - '@kbn/core-user-profile-server'
   - '@kbn/es-mappings'
   - '@kbn/std'
+  - '@kbn/eval-kql'
 tags:
   - plugin
   - prod

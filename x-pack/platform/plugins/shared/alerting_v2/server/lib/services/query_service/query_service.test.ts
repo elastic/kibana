@@ -28,7 +28,7 @@ describe('QueryService', () => {
   });
 
   describe('executeQuery', () => {
-    const mockQuery = 'FROM .alerts-* | LIMIT 10';
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
     const mockFilter = {
       bool: {
         filter: [
@@ -105,7 +105,7 @@ describe('QueryService', () => {
   });
 
   describe('executeQueryRows', () => {
-    const mockQuery = 'FROM .alerts-* | LIMIT 10';
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
 
     const mockResponse: EsqlQueryResponse = {
       columns: [
@@ -191,7 +191,7 @@ describe('QueryService', () => {
   });
 
   describe('executeQueryStream', () => {
-    const mockQuery = 'FROM .alerts-* | LIMIT 10';
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
 
     it('yields rows from JSON fallback response', async () => {
       const mockResponse: EsqlQueryResponse = {

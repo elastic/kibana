@@ -33,7 +33,10 @@ function buildConnectorDecoration(
   return {
     range: { startLineNumber: lineNumber, startColumn, endLineNumber: lineNumber, endColumn },
     options: {
-      inlineClassName: `type-inline-highlight type-${baseConnectorType}${techPreviewClass}`,
+      inlineClassName: `type-inline-highlight type-${baseConnectorType.replaceAll(
+        '.',
+        '-'
+      )}${techPreviewClass}`,
       stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
     },
   };

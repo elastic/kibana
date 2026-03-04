@@ -569,7 +569,7 @@
               "Icon/button color (matches EUI button color palette)."
             ],
             "signature": [
-              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
             "lineNumber": 46,
