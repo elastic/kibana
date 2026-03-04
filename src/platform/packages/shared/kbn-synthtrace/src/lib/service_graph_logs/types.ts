@@ -92,13 +92,13 @@ export interface ServiceLogTemplates {
 /** Error types that originate from the infra/platform layer rather than service logic. */
 export type InfraErrorType =
   | 'k8s_oom'
-  | 'k8s_crash_loop_back'
+  | 'k8s_crash_loop_backoffoff'
   | 'message_queue_failure'
   | 'cache_failure';
 
 const INFRA_ERROR_TYPES: readonly InfraErrorType[] = [
   'k8s_oom',
-  'k8s_crash_loop_back',
+  'k8s_crash_loop_backoffoff',
   'message_queue_failure',
   'cache_failure',
 ];
@@ -114,7 +114,7 @@ export const ERROR_TYPE_STATUS: Record<ErrorType, number> = {
   gateway_timeout: 504,
   bad_gateway: 502,
   db_timeout: 503,
-  k8s_crash_loop_back: 503,
+  k8s_crash_loop_backoffoff: 503,
   k8s_oom: 503,
   message_queue_failure: 503,
   cache_failure: 503,
@@ -150,7 +150,7 @@ export interface ServiceMessages {
   bad_gateway: RuntimeMessagePool;
   gateway_timeout: RuntimeMessagePool;
   k8s_oom: RuntimeMessagePool;
-  k8s_crash_loop_back: RuntimeMessagePool;
+  k8s_crash_loop_backoffoff: RuntimeMessagePool;
 }
 
 export interface SuccessCorpus {

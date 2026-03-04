@@ -57,7 +57,7 @@ export const SERVICE_MESSAGES: ServiceMessages = {
   gateway_timeout: REQUEST.gateway_timeout,
   db_timeout: pluck(pluck(DATABASE, 'app'), 'db_timeout'),
   k8s_oom: KUBERNETES.kubelet.app.k8s_oom,
-  k8s_crash_loop_back: KUBERNETES.kubelet.app.k8s_crash_loop_back,
+  k8s_crash_loop_backoffoff: KUBERNETES.kubelet.app.k8s_crash_loop_backoffoff,
 };
 
 const SUCCESS: SuccessCorpus = {

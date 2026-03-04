@@ -157,9 +157,14 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
     }
 
     if (config.volume) {
-      const volumeResult: ChannelVolume<string> = {};
+      const volumeResult: ChannelVolume<
+        ServiceNamesOf<TServiceGraph> | ServiceDependenciesOf<TServiceGraph>
+      > = {};
       for (const [key, entry] of Object.entries(config.volume) as Array<
-        [string, PhaseVolumeEntry | undefined]
+        [
+          ServiceNamesOf<TServiceGraph> | ServiceDependenciesOf<TServiceGraph>,
+          PhaseVolumeEntry | undefined
+        ]
       >) {
         if (entry !== undefined) {
           volumeResult[key] = {

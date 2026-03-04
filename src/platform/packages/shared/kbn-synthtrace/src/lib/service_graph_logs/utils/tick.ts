@@ -140,7 +140,7 @@ function buildInfraDocs({
   const cachedMeta = metadataCache?.get(svc.name);
   const serviceErrorType = failingServiceErrors.get(svc.name);
   const k8sErrorType =
-    serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_back'
+    serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoffoff'
       ? serviceErrorType
       : undefined;
 

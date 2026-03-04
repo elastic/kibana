@@ -31,7 +31,7 @@ export const INFRA_LOG_TYPES = {
   database: ['healthy', 'db_timeout'] as const,
   message_queue: ['healthy', 'broker_down'] as const,
   cache: ['healthy', 'eviction'] as const,
-  kubernetes: ['healthy', 'oom', 'crash_loop_back'] as const,
+  kubernetes: ['healthy', 'oom', 'crash_loop_backoff'] as const,
   host: ['healthy', 'resource_pressure'] as const,
 } satisfies Record<InfraCategory, readonly string[]>;
 

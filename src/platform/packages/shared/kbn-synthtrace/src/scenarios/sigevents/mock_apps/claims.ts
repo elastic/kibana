@@ -57,14 +57,14 @@ export const CLAIMS_APP = defineMockApp({
           // Warn ramp: liveness probe misses and restart count climb before full crash-loop.
           phase('0m', '2m', {
             failures: {
-              services: { 'policy-lookup': { errorType: 'k8s_crash_loop_back', rate: 0.2 } },
+              services: { 'policy-lookup': { errorType: 'k8s_crash_loop_backoffoff', rate: 0.2 } },
             },
             volume: { 'claim-intake': { scale: 2 }, 'policy-lookup': { scale: 3 } },
             noise: { scale: 3 },
           }),
           phase('2m', '7m', {
             failures: {
-              services: { 'policy-lookup': { errorType: 'k8s_crash_loop_back', rate: 0.95 } },
+              services: { 'policy-lookup': { errorType: 'k8s_crash_loop_backoffoff', rate: 0.95 } },
             },
             volume: { 'claim-intake': { scale: 2 }, 'policy-lookup': { scale: 3 } },
             noise: { scale: 3 },
@@ -150,7 +150,11 @@ export const CLAIMS_APP = defineMockApp({
             failures: {
               infra: { postgres: { errorType: 'db_timeout', rate: 0.8 } },
               services: {
-                'claim-intake': { errorType: 'k8s_crash_loop_back', rate: 0.95, multiplier: 5 },
+                'claim-intake': {
+                  errorType: 'k8s_crash_loop_backoffoff',
+                  rate: 0.95,
+                  multiplier: 5,
+                },
               },
             },
             volume: { 'claim-intake': { scale: 2 }, postgres: { scale: 4 } },

@@ -11,7 +11,7 @@ import type { InfraLogType } from '../constants';
 import type { InfraPool, RuntimeMessagePool, TechPool } from '../types';
 
 type KubeConditions = Exclude<InfraLogType['kubernetes'], 'healthy'>;
-type AppKubelet = Record<'k8s_oom' | 'k8s_crash_loop_back', RuntimeMessagePool>;
+type AppKubelet = Record<'k8s_oom' | 'k8s_crash_loop_backoffoff', RuntimeMessagePool>;
 
 export const KUBERNETES: Record<string, TechPool<InfraPool<KubeConditions>, AppKubelet>> = {
   kubelet: {
@@ -29,7 +29,7 @@ export const KUBERNETES: Record<string, TechPool<InfraPool<KubeConditions>, AppK
           `{timestamp} kubelet[1]: E oom_handler.go:64] OOMKilling container "{container_name}" in pod "{namespace}/{pod_name}" on node {node_name}: memory limit exceeded`,
         ],
       },
-      crash_loop_back: {
+      crash_loop_backoff: {
         warn: [
           `{timestamp} kubelet[1]: W pod_workers.go:965] Warning: container "{container_name}" in pod "{namespace}/{pod_name}" terminated, backoff delay 10s`,
           `{timestamp} kubelet[1]: W status_manager.go:789] container "{container_name}" in pod "{namespace}/{pod_name}" is not running, status=Error`,
@@ -73,7 +73,7 @@ export const KUBERNETES: Record<string, TechPool<InfraPool<KubeConditions>, AppK
           ],
         },
       },
-      k8s_crash_loop_back: {
+      k8s_crash_loop_backoffoff: {
         go: {
           warn: [`level=warn msg="liveness probe failing" consecutive=2 path=/healthz`],
           error: [
