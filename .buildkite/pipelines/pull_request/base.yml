@@ -68,6 +68,21 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
+    label: 'Linting (with oxlint)'
+    agents:
+      machineType: c4d-standard-32
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-c,us-central1-a
+      diskSizeGb: 105
+    key: linting_with_oxlint
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:

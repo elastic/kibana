@@ -18,8 +18,8 @@ import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectPicker } from './project_picker';
 
 describe('ProjectPicker', () => {
-  const mockFetchProjects = jest.fn().mockResolvedValue({
-    origin: {
+  const mockProjects = {
+    originProject: {
       _id: 'origin',
       _alias: 'Origin CPSProject',
       _type: 'observability',
@@ -39,12 +39,14 @@ describe('ProjectPicker', () => {
         _organisation: 'test-org',
       },
     ],
-  });
+    isLoading: false,
+    error: null,
+  };
 
   const defaultProps = {
     projectRouting: undefined as ProjectRouting | undefined,
     onProjectRoutingChange: jest.fn(),
-    fetchProjects: mockFetchProjects,
+    projects: mockProjects,
     totalProjectCount: 2,
   };
 
