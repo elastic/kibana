@@ -35,7 +35,8 @@
     "@kbn/yaml-rule-editor",
     "@kbn/code-editor",
     "@kbn/monaco",
-    "@kbn/core-application-browser-mocks"
+    "@kbn/core-application-browser-mocks",
+    "@kbn/react-hooks"
   ]
 }
 
