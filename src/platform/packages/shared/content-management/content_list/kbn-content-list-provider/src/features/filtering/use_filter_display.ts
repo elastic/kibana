@@ -37,11 +37,13 @@ export const useFilterDisplay = (): FilterDisplayState => {
   const hasSorting = supports.sorting;
   const hasSearch = supports.search;
   const hasTags = supports.tags;
+  const hasStarred = supports.starred;
 
   return {
     hasSorting,
     hasSearch,
     hasTags,
-    hasFilters: hasSorting || hasTags,
+    hasStarred,
+    hasFilters: hasSorting || hasTags || hasStarred,
   };
 };

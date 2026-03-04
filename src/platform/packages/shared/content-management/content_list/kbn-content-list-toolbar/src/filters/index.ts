@@ -17,6 +17,13 @@ export {
   type TagFilterRendererProps,
   useTagQueryParser,
 } from './tags';
+export {
+  StarredFilter,
+  type StarredFilterProps,
+  StarredFilterRenderer,
+  type StarredFilterRendererProps,
+  useStarredQueryParser,
+} from './starred';
 
 // Common popover components.
 export { FilterPopover, useFilterPopover, type FilterPopoverProps } from './filter_popover';

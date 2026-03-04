@@ -16,8 +16,10 @@ import { filter } from '../filters/part';
 import { Filters, type FiltersProps } from '../filters/filters';
 import type { FilterContext } from '../filters/part';
 
-/** Default filters when no children are provided. */
+// Default order: starred toggle → tag facet → sort. Each resolves to undefined when its
+// corresponding service/feature is absent, so unused entries are silently dropped.
 const DEFAULT_PARTS: ParsedPart[] = [
+  { type: 'part', part: 'filter', preset: 'starred', instanceId: 'starred', attributes: {} },
   { type: 'part', part: 'filter', preset: 'tags', instanceId: 'tags', attributes: {} },
   { type: 'part', part: 'filter', preset: 'sort', instanceId: 'sort', attributes: {} },
 ];
@@ -79,7 +81,7 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
-  const { hasTags } = useFilterDisplay();
+  const { hasTags, hasStarred } = useFilterDisplay();
 
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
@@ -88,10 +90,10 @@ export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   // consider keying on a more stable signal.
   return useMemo(() => {
     const parts = parseFilterParts(children);
-    const context: FilterContext = { hasSorting, hasTags };
+    const context: FilterContext = { hasSorting, hasTags, hasStarred };
 
     return parts
       .map((part) => filter.resolve(part, context))
       .filter((f): f is SearchFilterConfig => f !== undefined);
-  }, [children, hasSorting, hasTags]);
+  }, [children, hasSorting, hasTags, hasStarred]);
 };
