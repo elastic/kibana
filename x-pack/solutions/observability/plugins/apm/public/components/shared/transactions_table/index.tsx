@@ -14,6 +14,7 @@ import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -98,7 +99,8 @@ export function TransactionsTable({
 
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
-  const { transactionType, serviceName, indexSettings } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
+  const { indexSettings = [] } = useApmIndexSettingsContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
