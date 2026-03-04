@@ -16,7 +16,8 @@
     "@kbn/share-plugin",
     "@kbn/config-schema",
     "@kbn/test-jest-helpers",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/features-plugin"
   ],
   "exclude": ["target/**/*"]
 }
