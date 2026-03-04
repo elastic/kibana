@@ -6154,6 +6154,49 @@ Object {
                         ],
                         "type": "object",
                       },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
                     ],
                   },
                 },
@@ -6841,6 +6884,49 @@ Object {
                         "required": Array [
                           "command",
                           "config",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
                         ],
                         "type": "object",
                       },
@@ -7600,6 +7686,49 @@ Object {
                         ],
                         "type": "object",
                       },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
                     ],
                   },
                 },
@@ -8268,6 +8397,49 @@ Object {
                         "required": Array [
                           "command",
                           "config",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
                         ],
                         "type": "object",
                       },
@@ -8995,6 +9167,49 @@ Object {
                         "required": Array [
                           "command",
                           "config",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
                         ],
                         "type": "object",
                       },
@@ -9726,6 +9941,49 @@ Object {
                         ],
                         "type": "object",
                       },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
                     ],
                   },
                 },
@@ -10451,6 +10709,49 @@ Object {
                         "required": Array [
                           "command",
                           "config",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "runscript",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "linux": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "scriptId": Object {
+                                    "type": "string",
+                                  },
+                                  "scriptInput": Object {
+                                    "type": "string",
+                                  },
+                                  "timeout": Object {
+                                    "type": "integer",
+                                  },
+                                },
+                                "type": "object",
+                              },
+                              "macos": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                              "windows": Object {
+                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                              },
+                            },
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
                         ],
                         "type": "object",
                       },

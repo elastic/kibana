@@ -28,7 +28,7 @@ export interface ActiveAction {
   type: ActionType;
 }
 
-export type FilterType = 'sort';
+export type FilterType = 'sort' | 'tags';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -93,9 +93,10 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     type: 'name',
     label: 'Column.Name',
     allowMultiple: false,
-    defaultProps: { showDescription: true },
+    defaultProps: { showDescription: true, showTags: false },
     configurableProps: [
       { name: 'showDescription', label: 'showDescription', type: 'boolean', defaultValue: true },
+      { name: 'showTags', label: 'showTags', type: 'boolean', defaultValue: false },
       { name: 'width', label: 'width', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
@@ -134,6 +135,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
 
 export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
   { type: 'sort', label: 'Filters.Sort' },
+  { type: 'tags', label: 'Filters.Tags' },
 ];
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
