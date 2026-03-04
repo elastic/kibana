@@ -62,8 +62,15 @@ const resolveFailures = (
 ): FailureMap | undefined =>
   typeof failuresOrFn === 'function' ? failuresOrFn(timestamp) : failuresOrFn;
 
-const resolveChannelEvery = (every: number | undefined, index: number): boolean =>
-  !every || every <= 1 || index % every === 0;
+const resolveChannelEvery = (every: number | undefined, index: number): boolean => {
+  if (every == null || every === 1) {
+    return true;
+  }
+  if (every <= 0) {
+    return false;
+  }
+  return index % every === 0;
+};
 
 export const cycleTimestamp = (ts: number, cycleMs: number, originMs: number): number => {
   if (ts < originMs) {

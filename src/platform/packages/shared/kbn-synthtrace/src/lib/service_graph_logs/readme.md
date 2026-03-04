@@ -73,7 +73,7 @@ Templates are plain string arrays with `{placeholder}` tokens. Add entries to an
 
 ### Adding a failure scenario
 
-Add an entry to the `scenarios` record in the relevant `MockAppDefinition` (e.g. `mock_apps/claims.ts`). A scenario is a `build({ at })` function that returns `failures`, `volume`, and `noise` keys. `at(offsetMin)` converts a minute offset from the incident start to an absolute timestamp.
+Add an entry to the `scenarios` record in the relevant `MockAppDefinition` (e.g. `mock_apps/claims.ts`). A scenario is a `build({ at })` function that returns `failures`, `volume`, and `noise` keys. `at(offset)` converts a relative time offset (e.g. `'30s'`, `'5m'`, `'1h'`) from the incident start into an absolute timestamp.
 
 ### Adding a new mock app
 
