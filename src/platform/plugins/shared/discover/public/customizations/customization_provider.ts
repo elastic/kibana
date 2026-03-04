@@ -37,6 +37,7 @@ import type { DiscoverServices } from '../build_services';
 import {
   fromSavedSearchToSavedObjectTab,
   internalStateActions,
+  selectTabRuntimeState,
   selectTabSavedSearch,
 } from '../application/main/state_management/redux';
 import { defaultCustomizationContext } from './defaults';
@@ -121,6 +122,8 @@ export const getExtendedDiscoverStateContainer = ({
       services,
     });
   },
+  getCurrentTabDataView$: () =>
+    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataView$,
   internalActions: {
     setAppState: internalStateActions.setAppState,
     updateGlobalState: internalStateActions.updateGlobalState,
@@ -128,6 +131,8 @@ export const getExtendedDiscoverStateContainer = ({
     resetAppState: internalStateActions.resetAppState,
     initializeAndSync: internalStateActions.initializeAndSync,
     stopSyncing: internalStateActions.stopSyncing,
+    openDiscoverSession: internalStateActions.openDiscoverSession,
+    fetchData: internalStateActions.fetchData,
   },
 });
 
