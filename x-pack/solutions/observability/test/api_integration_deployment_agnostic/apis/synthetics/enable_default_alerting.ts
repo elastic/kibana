@@ -47,6 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       _httpMonitorJson = getFixtureJson('http_monitor');
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await privateLocationTestService.installSyntheticsPackage();
       await alerting.createIndexConnector({
         roleAuthc: editorUser,
         name: TEST_INDEX_CONNECTOR_NAME,
