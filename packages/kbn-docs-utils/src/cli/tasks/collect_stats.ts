@@ -62,10 +62,14 @@ export async function collectStats(
 
     const pluginApi = pluginApiMap[id];
     const paths = pathsByPlugin.get(plugin) ?? [];
+    const [eslintDisableCounts, enzymeImportCounts] = await Promise.all([
+      countEslintDisableLines(paths),
+      countEnzymeImports(paths),
+    ]);
 
     allPluginStats[id] = {
-      ...(await countEslintDisableLines(paths)),
-      ...(await countEnzymeImports(paths)),
+      ...eslintDisableCounts,
+      ...enzymeImportCounts,
       ...collectApiStatsForPlugin(pluginApi, {
         missingApiItems,
         referencedDeprecations,
