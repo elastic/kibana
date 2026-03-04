@@ -14,9 +14,9 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { HeaderAppMenu } from '../header/header_app_menu';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
-import { useHasAppMenuConfig } from '../use_has_app_menu_config';
+import { HeaderAppMenu } from '../shared/header_app_menu';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from '../shared/header_action_menu';
+import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
 
 interface AppMenuBarProps {
   // TODO: get rid of observable
