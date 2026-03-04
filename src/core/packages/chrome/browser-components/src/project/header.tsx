@@ -36,10 +36,10 @@ import type { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Breadcrumbs } from './breadcrumbs';
-import { HeaderHelpMenu } from '../header/header_help_menu';
-import { HeaderNavControls } from '../header/header_nav_controls';
-import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
-import { HeaderPageAnnouncer } from '../header/header_page_announcer';
+import { HeaderHelpMenu } from '../shared/header_help_menu';
+import { HeaderNavControls } from '../shared/header_nav_controls';
+import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
+import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
