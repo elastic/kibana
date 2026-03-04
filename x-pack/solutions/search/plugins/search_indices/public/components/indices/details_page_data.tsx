@@ -15,7 +15,11 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { EisCloudConnectPromoCallout, EisUpdateCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisUpdateCallout,
+  useCloudConnectStatus,
+} from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
@@ -47,14 +51,22 @@ export const IndexDetailsData = ({
   userPrivileges,
   mappingData,
 }: IndexDetailsDataProps) => {
-  const { application, cloud } = useKibana().services;
+  const { application, cloud, cloudConnect } = useKibana().services;
   const { isAtLeastEnterprise } = useLicense();
+  const {
+    isLoading: isCloudConnectStatusLoading,
+    isCloudConnected,
+    isCloudConnectEisEnabled,
+  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const documents = indexDocuments?.results?.data ?? [];
 
+  const isCloudConnectedWithEis = isCloudConnected && isCloudConnectEisEnabled;
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEis) &&
+      (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
+    false;
 
   const fieldsForUpdate = useMemo<NormalizedFields['byId'] | undefined>(() => {
     const properties = mappingData?.mappings?.properties;
@@ -79,15 +91,17 @@ export const IndexDetailsData = ({
 
   return (
     <>
-      <EisCloudConnectPromoCallout
-        promoId="indexDetailsData"
-        isSelfManaged={!cloud?.isCloudEnabled}
-        direction="row"
-        navigateToApp={() =>
-          application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-        }
-        addSpacer="top"
-      />
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsData"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="top"
+        />
+      )}
       {fieldsForUpdate && (
         <EisUpdateCallout
           ctaLink={docLinks.elasticInferenceService}
