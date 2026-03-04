@@ -15,7 +15,8 @@ import type {
 } from '@kbn/storage-adapter';
 import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import type { DatasetStorageProperties } from './datasets_storage';
-import { DatasetAlreadyExistsError } from './errors';
+import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
+import { ExampleAlreadyExistsError } from './example_already_exists_error';
 import type { datasetsStorageSettings } from './datasets_storage';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { datasetExamplesStorageSettings } from './examples_storage';
@@ -270,12 +271,13 @@ export class DatasetClient {
   async addExamples(
     datasetId: string,
     examples: DatasetExampleInput[],
-    options: { touchDataset?: boolean } = {}
+    options: { touchDataset?: boolean; rejectDuplicates?: boolean } = {}
   ): Promise<{ added: number }> {
     if (examples.length === 0) {
       return { added: 0 };
     }
 
+    const rejectDuplicates = options.rejectDuplicates ?? true;
     const now = new Date().toISOString();
     const operations: Array<StorageClientBulkOperation<DatasetExampleStorageDocument>> =
       examples.map((example) => {
@@ -306,6 +308,10 @@ export class DatasetClient {
       throw new Error(`Failed to add ${failed} examples to dataset "${datasetId}"`);
     }
 
+    if (rejectDuplicates && conflicts > 0) {
+      throw new ExampleAlreadyExistsError(`${conflicts} duplicate${conflicts > 1 ? 's' : ''}`);
+    }
+
     const added = operations.length - conflicts;
 
     if ((options.touchDataset ?? true) && added > 0) {
@@ -334,6 +340,13 @@ export class DatasetClient {
       datasetId: existing.dataset_id,
       example: updatedExample,
     });
+
+    if (updatedId !== exampleId) {
+      const collision = await this.getExampleById(updatedId);
+      if (collision) {
+        throw new ExampleAlreadyExistsError(updatedId);
+      }
+    }
 
     await this.examplesStorage.index({
       id: updatedId,
@@ -445,7 +458,7 @@ export class DatasetClient {
     const toDelete = Array.from(existingExampleIdsByHash.values());
 
     const [{ added }] = await Promise.all([
-      this.addExamples(existing.id, toAdd, { touchDataset: false }),
+      this.addExamples(existing.id, toAdd, { touchDataset: false, rejectDuplicates: false }),
       this.examplesStorage.bulk({
         operations: toDelete.map((id) => ({
           delete: { _id: id },

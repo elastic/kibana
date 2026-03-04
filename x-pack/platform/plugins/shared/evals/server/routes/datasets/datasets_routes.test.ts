@@ -17,7 +17,8 @@ import {
   EVALS_DATASET_EXAMPLE_URL,
   EVALS_DATASET_UPSERT_URL,
 } from '@kbn/evals-common';
-import { DatasetAlreadyExistsError } from '../../storage/errors';
+import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
+import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
 import { registerListDatasetsRoute } from './list_datasets';
 import { registerCreateDatasetRoute } from './create_dataset';
 import { registerGetDatasetRoute } from './get_dataset';
@@ -523,6 +524,30 @@ describe('dataset routes', () => {
       expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
       expect(datasetClient.addExamples).not.toHaveBeenCalled();
     });
+
+    it('returns 409 when adding a duplicate example', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.addExamples.mockRejectedValueOnce(new ExampleAlreadyExistsError('1 duplicate'));
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        body: {
+          examples: [{ input: datasetExample.input, output: datasetExample.output, metadata: {} }],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('already exists');
+    });
   });
 
   describe('PUT /internal/evals/datasets/{datasetId}/examples/{exampleId}', () => {
@@ -608,6 +633,33 @@ describe('dataset routes', () => {
         message: `Evaluation dataset example not found: ${exampleId}`,
       });
       expect(datasetClient.updateExample).not.toHaveBeenCalled();
+    });
+
+    it('returns 409 when updated content matches another existing example', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerUpdateExampleRoute,
+        method: 'put',
+        path: EVALS_DATASET_EXAMPLE_URL,
+      });
+      datasetClient.get.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.updateExample.mockRejectedValueOnce(
+        new ExampleAlreadyExistsError('collision-id')
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'put',
+        path: EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', datasetId).replace(
+          '{exampleId}',
+          exampleId
+        ),
+        params: { datasetId, exampleId },
+        body: { input: { question: 'duplicate content' } },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('already exists');
     });
   });
 

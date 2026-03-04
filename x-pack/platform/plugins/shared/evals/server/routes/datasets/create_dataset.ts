@@ -13,7 +13,7 @@ import {
   buildRouteValidationWithZod,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
-import { DatasetAlreadyExistsError } from '../../storage/errors';
+import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerCreateDatasetRoute = ({ router, logger }: RouteDependencies) => {

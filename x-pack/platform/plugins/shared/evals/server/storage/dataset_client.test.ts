@@ -14,7 +14,8 @@ import type {
   DatasetExampleInput,
 } from './dataset_client';
 import { DatasetClient } from './dataset_client';
-import { DatasetAlreadyExistsError } from './errors';
+import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
+import { ExampleAlreadyExistsError } from './example_already_exists_error';
 
 type DatasetStorageDocument = DatasetStorageProperties & { _id?: string };
 type DatasetExampleStorageDocument = DatasetExampleStorageProperties & { _id?: string };
@@ -313,5 +314,36 @@ describe('DatasetClient', () => {
       baseExampleB.input,
       baseExampleC.input,
     ]);
+  });
+
+  it('throws ExampleAlreadyExistsError when updating an example to match another existing example', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const exampleToUpdate = created.examples[0];
+
+    await expect(
+      client.updateExample(exampleToUpdate.id, {
+        input: baseExampleB.input,
+        output: baseExampleB.output,
+        metadata: baseExampleB.metadata,
+      })
+    ).rejects.toThrow(ExampleAlreadyExistsError);
+
+    const dataset = await client.get(created.id);
+    expect(dataset?.examples).toHaveLength(2);
+  });
+
+  it('throws ExampleAlreadyExistsError when adding a duplicate example', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+
+    await expect(client.addExamples(created.id, [baseExampleA])).rejects.toThrow(
+      ExampleAlreadyExistsError
+    );
+
+    const dataset = await client.get(created.id);
+    expect(dataset?.examples).toHaveLength(1);
   });
 });

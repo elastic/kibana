@@ -14,6 +14,7 @@ import {
   buildRouteValidationWithZod,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
+import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerUpdateExampleRoute = ({ router, logger }: RouteDependencies) => {
@@ -82,6 +83,13 @@ export const registerUpdateExampleRoute = ({ router, logger }: RouteDependencies
             },
           });
         } catch (error) {
+          if (error instanceof ExampleAlreadyExistsError) {
+            return response.customError({
+              statusCode: 409,
+              body: { message: error.message },
+            });
+          }
+
           logger.error(`Failed to update evaluation dataset example: ${error}`);
           return response.customError({
             statusCode: 500,
