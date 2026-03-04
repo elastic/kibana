@@ -155,7 +155,6 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
-  - '@kbn/esql-language'
 tags:
   - plugin
   - prod

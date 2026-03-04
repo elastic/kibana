@@ -377,7 +377,7 @@ describe('getNormalizedDataStreams', () => {
     const useApmVar = vars?.find((v) => v.name === 'use_apm');
     expect(useApmVar).toBeDefined();
     expect(useApmVar?.default).toEqual(true);
-    expect(useApmVar?.title).toEqual('Use Elastic APM');
+    expect(useApmVar?.title).toEqual('Enable Elastic APM Enrichment');
   });
 });
 
