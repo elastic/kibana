@@ -32,7 +32,6 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
@@ -122,16 +121,14 @@ const UnifiedHistogramGuard = ({
   return (
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
-        <DiscoverMainProvider value={currentCustomizationService.stateContainer}>
-          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <ScopedServicesProvider
-              scopedProfilesManager={currentScopedProfilesManager}
-              scopedEBTManager={currentScopedEbtManager}
-            >
-              <ChartsWrapper panelsToggle={panelsToggle} />
-            </ScopedServicesProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+          <ScopedServicesProvider
+            scopedProfilesManager={currentScopedProfilesManager}
+            scopedEBTManager={currentScopedEbtManager}
+          >
+            <ChartsWrapper panelsToggle={panelsToggle} />
+          </ScopedServicesProvider>
+        </RuntimeStateProvider>
       </DiscoverCustomizationProvider>
     </CurrentTabProvider>
   );

@@ -22,11 +22,9 @@ import {
   DiscoverCustomizationProvider,
   type DiscoverCustomizationService,
 } from '../customizations';
-import { DiscoverMainProvider } from '../application/main/state_management/discover_state_provider';
 import { type ScopedProfilesManager } from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
-import type { TestDiscoverStateContainer } from './discover_state.mock';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartPortalsRenderer } from '../application/main/components/chart';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -36,16 +34,29 @@ import { type InternalStateMockToolkit } from './discover_state.mock';
 import { from } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
+export type DiscoverTestProviderProps = PropsWithChildren<{
+  services?: DiscoverServices;
+  customizationService?: DiscoverCustomizationService;
+  scopedProfilesManager?: ScopedProfilesManager;
+  scopedEbtManager?: ScopedDiscoverEBTManager;
+  runtimeState?: CombinedRuntimeState;
+  currentTabId?: string;
+}>;
+
+export type DiscoverToolkitTestProviderProps = PropsWithChildren<{
+  toolkit: InternalStateMockToolkit;
+  usePortalsRenderer?: boolean;
+}>;
+
 /**
  * Similar to {@link DiscoverTestProvider} but accepts an {@link InternalStateMockToolkit}
  * returned by `getDiscoverInternalStateMock`, which is generally preferred for component tests.
  */
 export const DiscoverToolkitTestProvider = ({
   toolkit,
-  ...props
-}: Pick<DiscoverTestProviderProps, 'usePortalsRenderer' | 'children'> & {
-  toolkit: InternalStateMockToolkit;
-}) => {
+  usePortalsRenderer,
+  children,
+}: DiscoverToolkitTestProviderProps) => {
   const [internalState$] = useState(() => from(toolkit.internalState));
   const internalState = useObservable(internalState$, toolkit.internalState.getState());
   const currentTabId = internalState.tabs.unsafeCurrentId;
@@ -70,25 +81,12 @@ export const DiscoverToolkitTestProvider = ({
       scopedEbtManager={scopedEbtManager}
       runtimeState={runtimeState}
       currentTabId={currentTabId}
-      {...props}
-    />
+      usePortalsRenderer={usePortalsRenderer}
+    >
+      {children}
+    </DiscoverTestProviderInternal>
   );
 };
-
-export type DiscoverTestProviderProps = PropsWithChildren<{
-  services?: DiscoverServices;
-  /**
-   * @deprecated Use `DiscoverToolkitTestProvider` with the toolkit from `getDiscoverInternalStateMock()` instead.
-   * The stateContainer is only needed for the customization framework context (DiscoverMainProvider).
-   */
-  stateContainer?: TestDiscoverStateContainer;
-  customizationService?: DiscoverCustomizationService;
-  scopedProfilesManager?: ScopedProfilesManager;
-  scopedEbtManager?: ScopedDiscoverEBTManager;
-  runtimeState?: CombinedRuntimeState;
-  currentTabId?: string;
-  usePortalsRenderer?: boolean;
-}>;
 
 /**
  * **Prefer {@link DiscoverToolkitTestProvider} when possible.**
@@ -97,13 +95,11 @@ export type DiscoverTestProviderProps = PropsWithChildren<{
  */
 export const DiscoverTestProvider = ({
   services: originalServices,
-  stateContainer,
   customizationService,
   runtimeState,
   scopedProfilesManager: originalScopedProfilesManager,
   scopedEbtManager: originalScopedEbtManager,
-  currentTabId: originalCurrentTabId,
-  usePortalsRenderer,
+  currentTabId,
   children,
 }: DiscoverTestProviderProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -121,7 +117,6 @@ export const DiscoverTestProvider = ({
       services.profilesManager.createScopedProfilesManager({ scopedEbtManager }),
     [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
   );
-  const currentTabId = originalCurrentTabId ?? stateContainer?.getCurrentTab().id;
 
   children = (
     <ScopedServicesProvider
@@ -136,11 +131,7 @@ export const DiscoverTestProvider = ({
     children = <RuntimeStateProvider {...runtimeState}>{children}</RuntimeStateProvider>;
   }
 
-  if (stateContainer) {
-    children = <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>;
-  }
-
-  if (currentTabId && !usePortalsRenderer) {
+  if (currentTabId) {
     children = <CurrentTabProvider currentTabId={currentTabId}>{children}</CurrentTabProvider>;
   }
 
@@ -149,24 +140,6 @@ export const DiscoverTestProvider = ({
       <DiscoverCustomizationProvider value={customizationService}>
         {children}
       </DiscoverCustomizationProvider>
-    );
-  }
-
-  if (stateContainer && usePortalsRenderer) {
-    children = (
-      <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
-        {children}
-      </ChartPortalsRenderer>
-    );
-  }
-
-  if (stateContainer) {
-    children = (
-      <RuntimeStateManagerProvider value={stateContainer.runtimeStateManager}>
-        <InternalStateProvider store={stateContainer.internalState}>
-          {children}
-        </InternalStateProvider>
-      </RuntimeStateManagerProvider>
     );
   }
 

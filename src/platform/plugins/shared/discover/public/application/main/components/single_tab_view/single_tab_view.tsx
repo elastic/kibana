@@ -42,7 +42,6 @@ import {
   getConnectedCustomizationService,
 } from '../../../../customizations';
 import { NoDataPage } from './no_data_page';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { DiscoverMainApp } from './main_app';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
@@ -184,16 +183,14 @@ export const SingleTabView = ({
 
   return (
     <DiscoverCustomizationProvider value={currentCustomizationService}>
-      <DiscoverMainProvider value={currentCustomizationService.stateContainer}>
-        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <ScopedServicesProvider
-            scopedProfilesManager={scopedProfilesManager}
-            scopedEBTManager={scopedEbtManager}
-          >
-            <DiscoverMainApp />
-          </ScopedServicesProvider>
-        </RuntimeStateProvider>
-      </DiscoverMainProvider>
+      <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+        <ScopedServicesProvider
+          scopedProfilesManager={scopedProfilesManager}
+          scopedEBTManager={scopedEbtManager}
+        >
+          <DiscoverMainApp />
+        </ScopedServicesProvider>
+      </RuntimeStateProvider>
     </DiscoverCustomizationProvider>
   );
 };

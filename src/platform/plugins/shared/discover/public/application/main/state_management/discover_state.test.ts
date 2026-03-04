@@ -21,7 +21,7 @@ jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
 }));
 
-import type { TestDiscoverStateContainer } from '../../../__mocks__/discover_state.mock';
+import type { DiscoverStateContainerParams } from '../../../customizations';
 import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
   fromSavedSearchToSavedObjectTab,
@@ -56,7 +56,7 @@ import type { DiscoverServices, HistoryLocationState } from '../../../build_serv
 import {
   getDiscoverInternalStateMock,
   getDiscoverStateMock,
-  getOrCreateDataStateFromMock,
+  initializeDataStateInDiscoverStateMock,
   createDataStateContainer,
 } from '../../../__mocks__/discover_state.mock';
 import { getConnectedCustomizationService } from '../../../customizations';
@@ -117,14 +117,14 @@ describe('Discover state', () => {
 
   describe('Test discover state', () => {
     let history: History<HistoryLocationState>;
-    let state: TestDiscoverStateContainer;
+    let state: DiscoverStateContainerParams;
     const getCurrentUrl = () => history.createHref(history.location);
 
     beforeEach(async () => {
       history = createBrowserHistory();
       history.push('/');
       state = getDiscoverStateMock({ history });
-      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
+      initializeDataStateInDiscoverStateMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
@@ -206,7 +206,7 @@ describe('Discover state', () => {
   describe('Test discover state with overridden state storage', () => {
     let history: History<HistoryLocationState>;
     let stateStorage: IKbnUrlStateStorage;
-    let state: TestDiscoverStateContainer;
+    let state: DiscoverStateContainerParams;
 
     beforeEach(async () => {
       jest.useFakeTimers();
@@ -224,7 +224,7 @@ describe('Discover state', () => {
         useHashQuery: true,
       });
       state = getDiscoverStateMock({ stateStorageContainer: stateStorage, history });
-      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
+      initializeDataStateInDiscoverStateMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
@@ -278,7 +278,7 @@ describe('Discover state', () => {
       } as SavedSearch;
 
       const { state } = await getState('/#?_a=(sort:!(!(timestamp,desc)))', { savedSearch });
-      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
+      initializeDataStateInDiscoverStateMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeAndSync)()
       );
@@ -487,7 +487,7 @@ describe('Discover state', () => {
       const { state } = await getState();
       const nextId = 'id';
       mockServices.data.search.session.start = jest.fn(() => nextId);
-      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
+      initializeDataStateInDiscoverStateMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeAndSync)()
       );
@@ -1475,7 +1475,7 @@ describe('Discover state', () => {
 
   describe('Test discover state with embedded mode', () => {
     let history: History<HistoryLocationState>;
-    let state: TestDiscoverStateContainer;
+    let state: DiscoverStateContainerParams;
     const getCurrentUrl = () => history.createHref(history.location);
 
     beforeEach(async () => {
@@ -1488,7 +1488,7 @@ describe('Discover state', () => {
           displayMode: 'embedded',
         },
       });
-      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
+      initializeDataStateInDiscoverStateMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );

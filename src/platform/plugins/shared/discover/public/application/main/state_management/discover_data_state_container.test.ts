@@ -17,7 +17,7 @@ import type { DataDocuments$ } from './discover_data_state_container';
 import {
   getDiscoverInternalStateMock,
   getDiscoverStateMock,
-  getOrCreateDataStateFromMock,
+  initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
@@ -44,7 +44,7 @@ describe('test getDataStateContainer', () => {
 
   test('return is valid', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = getOrCreateDataStateFromMock(stateContainer);
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
 
     expect(dataState.refetch$).toBeInstanceOf(Subject);
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
@@ -63,7 +63,7 @@ describe('test getDataStateContainer', () => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
-    const dataState = getOrCreateDataStateFromMock(stateContainer);
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
     const unsubscribe = dataState.subscribe();
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
@@ -113,7 +113,7 @@ describe('test getDataStateContainer', () => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
-    const dataState = getOrCreateDataStateFromMock(stateContainer);
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
     const unsubscribe = dataState.subscribe();
 
     await waitFor(() => {
@@ -140,7 +140,7 @@ describe('test getDataStateContainer', () => {
     mockFetchDocuments.mockResolvedValue({ records: moreRecords });
 
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = getOrCreateDataStateFromMock(stateContainer);
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
     dataState.data$.documents$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: initialRecords,
@@ -182,7 +182,7 @@ describe('test getDataStateContainer', () => {
     it('should update app state from default profile state', async () => {
       mockFetchDocuments.mockResolvedValue({ records: [] });
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-      const dataState = getOrCreateDataStateFromMock(stateContainer);
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
       const dataUnsub = dataState.subscribe();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
@@ -234,7 +234,7 @@ describe('test getDataStateContainer', () => {
 
     it('should not update app state from default profile state', async () => {
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-      const dataState = getOrCreateDataStateFromMock(stateContainer);
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
       const dataUnsub = dataState.subscribe();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
