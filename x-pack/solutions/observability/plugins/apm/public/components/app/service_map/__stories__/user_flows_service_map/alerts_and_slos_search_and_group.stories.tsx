@@ -7,45 +7,40 @@
 
 import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import type { NodeTypes } from '@xyflow/react';
-import type { EdgeTypes } from '@xyflow/react';
 import {
   ReactFlow,
   ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
-  MarkerType,
   useNodesState,
   useEdgesState,
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
+  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldNumber,
   EuiFieldSearch,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiFormLabel,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { Node } from '@xyflow/react';
 import type { Edge } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { ServiceNode } from '../../service_node';
-import { DependencyNode } from '../../dependency_node';
-import { ServiceMapEdge as ServiceMapEdgeComponent } from '../../service_map_edge';
 import { applyDagreLayout } from '../../layout';
 import { NODE_WIDTH, NODE_HEIGHT } from '../../constants';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../../common/service_map';
 import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 import { MapPopover } from '../../popover';
-import { ServiceMapEdgeWithLabel } from './service_map_edge_with_label';
-import { ServiceNodeWithAlertAndSloBadges } from './service_node_with_alert_and_slo_badges';
 import {
   BASE_NODES,
   BASE_EDGES,
@@ -61,6 +56,8 @@ import {
   BADGE_NODE_IDS,
 } from './alerts_and_slos_shared_data';
 import { SubflowGroupNode } from './subflow_group_node';
+import { generateServiceMapElements, type GenerateOptions } from '../generate_elements';
+import { GroupedResourcesNode } from '../../grouped_resources_node';
 
 const defaultEnvironment = 'ENVIRONMENT_ALL' as const;
 const defaultTimeRange = {
@@ -82,7 +79,11 @@ const LAYOUT_MARGIN = 48;
 
 type GroupByOption = 'none' | 'agentName' | 'transactionName';
 
-const nodeTypes = { ...baseNodeTypes, group: SubflowGroupNode };
+const nodeTypes = {
+  ...baseNodeTypes,
+  group: SubflowGroupNode,
+  groupedResources: GroupedResourcesNode,
+};
 
 function getHeight() {
   return window.innerHeight - 280;
@@ -296,7 +297,19 @@ const GROUP_BY_OPTIONS: Array<{ value: GroupByOption; text: string }> = [
   { value: 'transactionName', text: 'Transaction name' },
 ];
 
+const DEFAULT_GENERATE_OPTIONS: GenerateOptions = {
+  serviceCount: 10,
+  dependencyCount: 5,
+  includeGroupedResources: true,
+  groupedResourceCount: 2,
+  hasAnomalies: true,
+  includeBidirectional: true,
+};
+
 export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
+  const [generateOptions, setGenerateOptions] = useState<GenerateOptions>(DEFAULT_GENERATE_OPTIONS);
+  const [sourceNodes, setSourceNodes] = useState<Node[]>(() => BASE_NODES);
+  const [sourceEdges, setSourceEdges] = useState<Edge[]>(() => BASE_EDGES);
   const [filterQuery, setFilterQuery] = useState('');
   const [goToQuery, setGoToQuery] = useState('');
   const [showOnlyWithAlerts, setShowOnlyWithAlerts] = useState(false);
@@ -308,9 +321,21 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
   const [groupBy, setGroupBy] = useState<GroupByOption>('none');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [exportJson, setExportJson] = useState<string>('');
+
+  const handleGenerateMap = useCallback(() => {
+    const { nodes, edges } = generateServiceMapElements(generateOptions);
+    setSourceNodes(nodes as Node[]);
+    setSourceEdges(edges as Edge[]);
+    setExportJson('');
+  }, [generateOptions]);
+
+  const handleGetJson = useCallback(() => {
+    setExportJson(JSON.stringify({ nodes: sourceNodes, edges: sourceEdges }, null, 2));
+  }, [sourceNodes, sourceEdges]);
 
   const nodesWithPathStyle = useMemo(() => {
-    return BASE_NODES.map((node) => {
+    return sourceNodes.map((node) => {
       if (!PROBLEM_PATH_NODE_IDS.has(node.id)) return node;
       const data = node.data as Record<string, unknown>;
       if (node.type === 'dependency') {
@@ -318,10 +343,10 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
       }
       return { ...node, data: { ...data, ...PROBLEM_PATH_SERVICE_ANOMALY } };
     });
-  }, []);
+  }, [sourceNodes]);
 
   const edgesWithPathStyle = useMemo(() => {
-    return BASE_EDGES.map((edge) => {
+    return sourceEdges.map((edge) => {
       if (PROBLEM_PATH_EDGE_IDS.has(edge.id)) {
         const count = MOCK_FAILED_REQUESTS[edge.id]?.length ?? 0;
         const isDependencyEdge = edge.target === 'postgresql';
@@ -332,7 +357,7 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
       }
       return edge;
     });
-  }, [showEdgeLabels]);
+  }, [showEdgeLabels, sourceEdges]);
 
   const visibleNodeIdsByFilter = useMemo(() => {
     if (!showOnlyWithAlerts && !showOnlyWithViolatedSlos) return null;
@@ -340,15 +365,15 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
     if (showOnlyWithAlerts) NODE_IDS_WITH_ALERTS.forEach((id) => serviceIds.add(id));
     if (showOnlyWithViolatedSlos) NODE_IDS_WITH_SLOS.forEach((id) => serviceIds.add(id));
     const dependencyNodeIds = new Set(
-      BASE_NODES.filter((n) => n.type === 'dependency').map((n) => n.id)
+      sourceNodes.filter((n) => n.type === 'dependency').map((n) => n.id)
     );
     const visible = new Set(serviceIds);
-    BASE_EDGES.forEach((e) => {
+    sourceEdges.forEach((e) => {
       if (serviceIds.has(e.source) && dependencyNodeIds.has(e.target)) visible.add(e.target);
       if (serviceIds.has(e.target) && dependencyNodeIds.has(e.source)) visible.add(e.source);
     });
     return visible;
-  }, [showOnlyWithAlerts, showOnlyWithViolatedSlos]);
+  }, [showOnlyWithAlerts, showOnlyWithViolatedSlos, sourceNodes, sourceEdges]);
 
   const filterQueryLower = filterQuery.trim().toLowerCase();
   const nodeIdsMatchingFilter = useMemo(() => {
@@ -360,12 +385,12 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
     });
     if (matched.size === 0) return matched;
     const withNeighbors = new Set(matched);
-    BASE_EDGES.forEach((e) => {
+    sourceEdges.forEach((e) => {
       if (matched.has(e.source)) withNeighbors.add(e.target);
       if (matched.has(e.target)) withNeighbors.add(e.source);
     });
     return withNeighbors;
-  }, [filterQueryLower, nodesWithPathStyle]);
+  }, [filterQueryLower, nodesWithPathStyle, sourceEdges]);
 
   const filteredNodes = useMemo(() => {
     let list = nodesWithPathStyle;
@@ -514,11 +539,137 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
         <p>
           Filter by service name to show only matching services and their neighbors. Use Go to
           service to pan the map to a service without filtering. Group by Agent name to show
-          services inside subflow-style boxes (one group node per agent). Other filters match the
-          Alerts and SLOs (many services) story.
+          services inside subflow-style boxes (one group node per agent). Use the Generate map
+          toolbar to set map size and options, then click Generate to replace the map. Other filters
+          match the Alerts and SLOs (many services) story.
         </p>
       </EuiCallOut>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content="Number of service nodes">
+            <EuiFieldNumber
+              data-test-subj="serviceCountInput"
+              prepend="Services"
+              value={generateOptions.serviceCount}
+              min={1}
+              max={100}
+              onChange={(e) =>
+                setGenerateOptions((prev) => ({
+                  ...prev,
+                  serviceCount: e.target.valueAsNumber ?? 1,
+                }))
+              }
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content="Number of dependency nodes">
+            <EuiFieldNumber
+              data-test-subj="dependencyCountInput"
+              prepend="Dependencies"
+              value={generateOptions.dependencyCount}
+              min={0}
+              max={50}
+              onChange={(e) =>
+                setGenerateOptions((prev) => ({
+                  ...prev,
+                  dependencyCount: e.target.valueAsNumber ?? 0,
+                }))
+              }
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Anomalies"
+            checked={generateOptions.hasAnomalies}
+            onChange={(e) =>
+              setGenerateOptions((prev) => ({ ...prev, hasAnomalies: e.target.checked }))
+            }
+            data-test-subj="generateAnomaliesSwitch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Grouped resources"
+            checked={generateOptions.includeGroupedResources}
+            onChange={(e) =>
+              setGenerateOptions((prev) => ({
+                ...prev,
+                includeGroupedResources: e.target.checked,
+              }))
+            }
+            data-test-subj="generateGroupedResourcesSwitch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFieldNumber
+            data-test-subj="groupedResourceCountInput"
+            prepend="Groups"
+            value={generateOptions.groupedResourceCount}
+            min={1}
+            max={5}
+            disabled={!generateOptions.includeGroupedResources}
+            onChange={(e) =>
+              setGenerateOptions((prev) => ({
+                ...prev,
+                groupedResourceCount: e.target.valueAsNumber ?? 1,
+              }))
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Bidirectional edges"
+            checked={generateOptions.includeBidirectional}
+            onChange={(e) =>
+              setGenerateOptions((prev) => ({ ...prev, includeBidirectional: e.target.checked }))
+            }
+            data-test-subj="generateBidirectionalSwitch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="generateMapButton"
+            onClick={handleGenerateMap}
+            iconType="refresh"
+          >
+            Generate map
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton data-test-subj="getJsonButton" onClick={handleGetJson} iconType="exportAction">
+            Get JSON
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>
+          Nodes: {sourceNodes.length} | Edges: {sourceEdges.length}
+          {exportJson ? ' | JSON exported below' : ''}
+        </p>
+      </EuiText>
+      {exportJson && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText
+            size="xs"
+            style={{
+              whiteSpace: 'pre-wrap',
+              fontFamily: 'monospace',
+              maxHeight: 120,
+              overflow: 'auto',
+            }}
+          >
+            {exportJson}
+          </EuiText>
+        </>
+      )}
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
         <EuiFlexItem grow={false} style={{ minWidth: 200 }}>
@@ -545,6 +696,7 @@ export const AlertsAndSlosSearchAndGroup: StoryFn = () => {
           <EuiFormLabel htmlFor="group-by-select">Group by</EuiFormLabel>
           <EuiSelect
             id="group-by-select"
+            aria-label="Group by"
             options={GROUP_BY_OPTIONS}
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value as GroupByOption)}
