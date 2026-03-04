@@ -15,7 +15,7 @@
  *
  *   1. categorize_text aggregation (get_log_groups tool)
  *   2. Log rate analysis (run_log_rate_analysis tool)
- *   3. Iterative negation-filter funneling (logs_search_simple tool)
+ *   3. Iterative negation-filter funneling (search_logs tool)
  *
  * THE STORY:
  * A routine configuration change reduces the Redis cache TTL from 300s to 5s
@@ -83,7 +83,7 @@
  *   service.name=cart-service, log.level=error, event.dataset=cart.api,
  *   host.name=cart-pod-*, labels.config_version=v43.
  *
- * TECHNIQUE 3 — negation-filter funnel (logs_search_simple):
+ * TECHNIQUE 3 — negation-filter funnel (search_logs):
  *   Step 1: Broad → 100K+ logs, mostly health checks
  *   Step 2: NOT message:"GET /health" → removes ~43K
  *   Step 3: NOT service.name:"load-balancer" → removes ~25K

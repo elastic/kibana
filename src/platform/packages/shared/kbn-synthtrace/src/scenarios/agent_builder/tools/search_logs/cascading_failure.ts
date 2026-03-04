@@ -49,12 +49,12 @@
  *   - fluent-bit (kube-system): log collector noise
  *   - task-scheduler (kube-system): cron noise
  *
- * Validate via logs_search_simple tool:
+ * Validate via search_logs tool:
  *
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
- *   "tool_id": "observability.logs_search_simple",
+ *   "tool_id": "observability.search_logs",
  *   "tool_params": { "start": "now-1h", "end": "now" }
  * }
  * ```

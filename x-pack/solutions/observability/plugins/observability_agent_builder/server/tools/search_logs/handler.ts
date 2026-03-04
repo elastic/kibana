@@ -7,9 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { parseDatemath } from '../../utils/time';
-import { DEFAULT_KEEP_FIELDS, MAX_CELL_VALUE_LENGTH } from './constants';
+import { MAX_CELL_VALUE_LENGTH } from './constants';
 
-export interface LogsSearchSimpleParams {
+export interface SearchLogsParams {
   start: string;
   end: string;
   index: string;
@@ -17,6 +17,7 @@ export interface LogsSearchSimpleParams {
   limit: number;
   bucketSize: string;
   breakdownField?: string;
+  fields: string[];
 }
 
 export interface HistogramBucket {
@@ -31,20 +32,20 @@ export interface LogSample {
   [key: string]: unknown;
 }
 
-export interface LogsSearchSimpleResult {
+export interface SearchLogsResult {
   histogram: HistogramBucket[];
   totalCount: number;
   samples: LogSample[];
 }
 
-export async function logsSearchSimpleHandler({
+export async function searchLogsHandler({
   esClient,
   params,
 }: {
   esClient: ElasticsearchClient;
-  params: LogsSearchSimpleParams;
-}): Promise<LogsSearchSimpleResult> {
-  const { start, end, index, kqlFilter, limit, bucketSize, breakdownField } = params;
+  params: SearchLogsParams;
+}): Promise<SearchLogsResult> {
+  const { start, end, index, kqlFilter, limit, bucketSize, breakdownField, fields } = params;
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end, { roundUp: true });
@@ -74,7 +75,7 @@ export async function logsSearchSimpleHandler({
     .join('\n');
 
   const result = await runEsqlQuery(esClient, query);
-  return parseForkedResult(result, breakdownField);
+  return parseForkedResult(result, breakdownField, fields);
 }
 
 interface EsqlResult {
@@ -95,7 +96,11 @@ async function runEsqlQuery(esClient: ElasticsearchClient, query: string): Promi
   };
 }
 
-function parseForkedResult(result: EsqlResult, breakdownField?: string): LogsSearchSimpleResult {
+function parseForkedResult(
+  result: EsqlResult,
+  breakdownField: string | undefined,
+  fields: string[]
+): SearchLogsResult {
   if (!result.columns?.length || !result.values?.length) {
     return { histogram: [], totalCount: 0, samples: [] };
   }
@@ -109,7 +114,7 @@ function parseForkedResult(result: EsqlResult, breakdownField?: string): LogsSea
 
   const histogram = parseHistogram(grouped.fork1, breakdownField);
   const totalCount = parseTotalCount(grouped.fork2);
-  const samples = parseSamples(grouped.fork3);
+  const samples = parseSamples(grouped.fork3, fields);
 
   return { histogram, totalCount, samples };
 }
@@ -192,19 +197,21 @@ function parseTotalCount(fork: EsqlResult | undefined): number {
   return Number(fork.values[0][totalIdx]) || 0;
 }
 
-const SAMPLE_FIELDS = new Set(['_id', '_index', '@timestamp', ...DEFAULT_KEEP_FIELDS]);
+const ALWAYS_INCLUDED_FIELDS = ['_id', '_index', '@timestamp'];
 
-function parseSamples(fork: EsqlResult | undefined): LogSample[] {
+function parseSamples(fork: EsqlResult | undefined, fields: string[]): LogSample[] {
   if (!fork?.values.length) {
     return [];
   }
+
+  const allowedFields = new Set([...ALWAYS_INCLUDED_FIELDS, ...fields]);
 
   return fork.values.map((row) => {
     const sample: LogSample = {};
     for (let i = 0; i < fork.columns.length; i++) {
       const col = fork.columns[i].name;
       const value = row[i];
-      if (value != null && SAMPLE_FIELDS.has(col)) {
+      if (value != null && allowedFields.has(col)) {
         sample[col] = truncateCellValue(value);
       }
     }
