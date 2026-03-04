@@ -12,7 +12,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -54,8 +53,6 @@ function renderDashboard() {
     transactionTypes: [],
     fallbackToTransactions: false,
     serviceAgentStatus: FETCH_STATUS.SUCCESS,
-    indexSettings: [],
-    indexSettingsStatus: FETCH_STATUS.SUCCESS,
   });
 
   const history = createMemoryHistory();
@@ -83,7 +80,6 @@ describe('JsonMetricsDashboard', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-    jest.clearAllMocks();
   });
   describe('getCreationOptions', () => {
     it('returns useControlsIntegration: true', async () => {
@@ -153,8 +149,6 @@ describe('JsonMetricsDashboard', () => {
         transactionTypes: [],
         fallbackToTransactions: false,
         serviceAgentStatus: FETCH_STATUS.SUCCESS,
-        indexSettings: [],
-        indexSettingsStatus: FETCH_STATUS.SUCCESS,
       });
 
       const history = createMemoryHistory();
@@ -181,7 +175,7 @@ describe('JsonMetricsDashboard', () => {
 
       const options = await capturedGetCreationOptions!();
       const input = options.getInitialInput!();
-      const config = input.pinned_panels![0].config as OptionsListDSLControlState;
+      const config = input.pinned_panels![0].config as { data_view_id: string };
 
       expect(config.data_view_id).toBe('');
     });
