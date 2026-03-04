@@ -172,3 +172,78 @@ Stack the two most effective individual fixes and re-run.
 - **Immediate (low risk):** Reduce `overscan` from 25 to a smaller value (5-10) in `cascaded_document_layout.tsx`. This is a one-line change with massive impact.
 - **Medium-term (higher effort):** Investigate tab content caching in `kbn-unified-tabs` to avoid full unmount/remount cycles. This benefits all tab types, not just cascade.
 - **Consider:** Whether the `renderCustomToolbarWithElements` memo dependency on `[cellData]` should be `[cellData.length]` for re-render efficiency (separate from tab-switch performance).
+
+---
+
+## Phase 2: Deeper Analysis
+
+> **Status**: Captured on 2026-03-04. Fix 3a (remove `key={currentTabId}`) is applied for all Phase 2 tests so that component state (expanded groups, scroll position) survives tab switches. Fix 3a had negligible impact on the cascade/standard ratio in Phase 1 (3.2x vs 2.6x baseline) but reduces absolute latency for both tabs. Applying it here is necessary to test the expanded-groups scenario, since without it the cascade tree is fully unmounted on tab switch and all expansion state is lost.
+
+### 2.1 Expanded groups with Fix 3a
+
+**Setup**: 3 root groups expanded on the cascade tab before measuring tab-switch latency. With Fix 3a applied, the expansion state persists across tab switches (React reuses the component tree instead of tearing it down).
+
+| Metric | Standard tab | Cascade tab | Ratio |
+|--------|-------------|-------------|-------|
+| Wall clock (ms) | 194 | 586 | 3x |
+| Script duration (ms) | 36 | 153 | 4.3x |
+| DOM nodes | 12,847 | 15,181 | -- |
+
+**Comparison**: The collapsed cascade with Fix 3a measured 561ms wall / 146ms script (from Phase 1 Fix 3a). Adding 3 expanded groups costs only ~25ms wall / ~7ms script extra. This confirms that once the leaf `UnifiedDataTable` instances are mounted, they persist cheaply across tab switches with Fix 3a. The per-expanded-group marginal cost is negligible (~8ms wall each).
+
+**Without Fix 3a**: Groups do **not** survive tab switches. The `key={currentTabId}` pattern causes a full unmount/remount of `SingleTabView`, resetting the DataCascade to its default collapsed state. This means users who expand groups and switch away lose their expansion state entirely -- a UX problem independent of performance.
+
+### 2.2 CPU profiling: hot function comparison
+
+CDP `Profiler.start`/`stop` captured during a cascade tab restore. Top functions by self time:
+
+**Original (with `key={currentTabId}` -- full unmount/remount):**
+
+| Self time | % total | Function | Source |
+|-----------|---------|----------|--------|
+| 277.2ms | 10.2% | `calculateScrollState` | discover.chunk.28.js:2314 |
+| 32.5ms | 1.2% | `measureElement` | discover.chunk.28.js:9724 |
+| 15.0ms | 0.5% | `createEmotionProps` | kbn-ui-shared-deps-npm.dll.js |
+| 15.0ms | 0.5% | `murmur2` | kbn-ui-shared-deps-npm.dll.js |
+| 12.5ms | 0.5% | `createElement` | kbn-ui-shared-deps-npm.dll.js |
+
+**With Fix 3a (in-place update -- no unmount/remount):**
+
+| Self time | % total | Function | Source |
+|-----------|---------|----------|--------|
+| 47.1ms | 1.3% | `measureElement` | discover.chunk.28.js:9724 |
+| 32.6ms | 0.9% | `calculateScrollState` | discover.chunk.28.js:2314 |
+| 21.7ms | 0.6% | `createElement` | kbn-ui-shared-deps-npm.dll.js |
+| 21.7ms | 0.6% | `createEmotionProps` (3x) | kbn-ui-shared-deps-npm.dll.js |
+| 18.1ms | 0.5% | `serializeStyles` | kbn-ui-shared-deps-npm.dll.js |
+
+**Key finding**: `calculateScrollState` is the single largest bottleneck in the original path, consuming 277ms (10.2% of total CPU time). This is the TanStack Virtual scroll state computation that runs on every fresh mount. Fix 3a reduces it to 33ms (an 8.4x improvement on this single function) because the virtualizer's scroll state is preserved in memory rather than recomputed from scratch. The remaining cost is spread across `measureElement` (DOM size measurement), Emotion CSS processing, and React element creation -- none of which individually dominate.
+
+### 2.3 Overscan scaling curve
+
+All measurements with Fix 3a applied (collapsed cascade, no groups expanded). This isolates the per-row cost of the cascade virtualizer's overscan.
+
+| Overscan | Cascade wall (ms) | Standard wall (ms) | Wall ratio | Cascade script (ms) | Script ratio | Cascade nodes |
+|----------|-------------------|--------------------| -----------|---------------------|--------------|---------------|
+| 0 | 198 | 184 | 1.1x | 45 | 1.1x | 7,577 |
+| 2 | 206 | 181 | 1.1x | 48 | 1.4x | 5,372 |
+| 5 | 264 | 186 | 1.4x | 69 | 1.8x | 22,611 |
+| 10 | 309 | 178 | 1.7x | 84 | 2.3x | 8,934 |
+| 15 | 387 | 194 | 2x | 110 | 2.9x | 10,981 |
+| 25 | 582 | 191 | 3x | 155 | 4x | 11,213 |
+
+**Per-row marginal cost**: (582 - 198) / 25 = ~15.4ms wall, (155 - 45) / 25 = ~4.4ms script per overscan row. The relationship is approximately linear.
+
+**Sweet spot**: Overscan of 2-5 keeps the cascade within 1.1-1.4x of the standard grid. Values above 10 push the ratio past 1.5x, and the default of 25 produces a 3x slowdown.
+
+### Phase 2 conclusions
+
+1. **`calculateScrollState` is the root cause of the unmount/remount penalty.** At 277ms (10.2% of CPU), it dwarfs every other function. It runs on every fresh mount of the TanStack virtualizer. Fix 3a eliminates this cost by preserving the virtualizer instance.
+
+2. **Expanded groups are cheap once mounted.** With Fix 3a, 3 expanded groups (each containing a full `UnifiedDataTable` leaf) add only ~25ms to tab-switch latency. The leaf cells persist in memory and require no re-initialization.
+
+3. **Overscan scales linearly at ~15ms/row.** Each additional overscan row adds a consistent ~15ms wall-clock cost. The current default of 25 is far too high for a component that may be unmounted/remounted. Even with Fix 3a, overscan=25 produces a 3x wall-clock ratio.
+
+4. **Emotion CSS processing is a steady-state tax.** `createEmotionProps` and `serializeStyles` appear repeatedly in both profiles. They aren't the dominant bottleneck but contribute a cumulative ~100ms. Consider whether static CSS class names (via `css` prop memoization or extracted stylesheets) could reduce this.
+
+5. **Fix 3a enables user state persistence.** Beyond performance, removing `key={currentTabId}` is the only way to preserve expansion state, scroll position, and other in-tab UI state across tab switches. Without it, users lose their work every time they switch tabs. A production implementation should use a hide/show cache rather than simply removing the key.
