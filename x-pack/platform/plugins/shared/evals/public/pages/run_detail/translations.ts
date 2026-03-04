@@ -24,14 +24,6 @@ export const STAT_REPETITIONS = i18n.translate('xpack.evals.runDetail.stat.repet
   defaultMessage: 'Repetitions',
 });
 
-export const STAT_TOTAL_SCORES = i18n.translate('xpack.evals.runDetail.stat.totalScores', {
-  defaultMessage: 'Total Scores',
-});
-
-export const STAT_TRACES = i18n.translate('xpack.evals.runDetail.stat.traces', {
-  defaultMessage: 'Traces',
-});
-
 export const SECTION_DATASETS = i18n.translate('xpack.evals.runDetail.section.datasets', {
   defaultMessage: 'Datasets',
 });

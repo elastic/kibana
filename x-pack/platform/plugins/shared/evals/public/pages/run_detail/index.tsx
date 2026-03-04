@@ -27,11 +27,7 @@ import {
 import { css } from '@emotion/css';
 import { useParams, useHistory } from 'react-router-dom';
 import type { EvaluatorStats } from '@kbn/evals-common';
-import {
-  useEvaluationRun,
-  useEvaluationRunScores,
-  useRunDatasetExamples,
-} from '../../hooks/use_evals_api';
+import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { TraceWaterfall } from '../../components/trace_waterfall';
 import * as i18n from './translations';
@@ -122,20 +118,9 @@ export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
   const history = useHistory();
   const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
-  const { data: scoresData, isLoading: scoresLoading } = useEvaluationRunScores(runId);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
   const runIdShort = runId.slice(0, 12);
-
-  const uniqueTraceIds = useMemo(() => {
-    if (!scoresData?.scores) return [];
-    const traceIds = new Set<string>();
-    for (const score of scoresData.scores) {
-      const traceId = (score as any).task?.trace_id;
-      if (traceId) traceIds.add(traceId);
-    }
-    return Array.from(traceIds);
-  }, [scoresData?.scores]);
 
   const datasetStatsGroups = useMemo(() => {
     const groupedStats = new Map<
@@ -250,25 +235,6 @@ export const RunDetailPage: React.FC = () => {
                   <EuiStat
                     title={String(runDetail.total_repetitions ?? '-')}
                     description={i18n.STAT_REPETITIONS}
-                    titleSize="xs"
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel hasShadow={false} hasBorder>
-                  <EuiStat
-                    title={String(scoresData?.total ?? '-')}
-                    description={i18n.STAT_TOTAL_SCORES}
-                    titleSize="xs"
-                    isLoading={scoresLoading}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel hasShadow={false} hasBorder>
-                  <EuiStat
-                    title={String(uniqueTraceIds.length)}
-                    description={i18n.STAT_TRACES}
                     titleSize="xs"
                   />
                 </EuiPanel>
