@@ -40,7 +40,7 @@ describe('dataRegexReplaceStepDefinition', () => {
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
-    stepType: 'data.regex_replace',
+    stepType: 'data.regexReplace',
   });
 
   describe('simple replacement', () => {
