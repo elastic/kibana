@@ -33,7 +33,10 @@ const createEntityDoc = (
 
 const createSearchResponse = (docs: Array<Record<string, unknown>>) => ({
   hits: {
-    hits: docs.map((doc) => ({ _source: doc })),
+    hits: docs.map((doc) => ({
+      _id: `doc-${doc['entity.id']}`,
+      _source: doc,
+    })),
     total: { value: docs.length, relation: 'eq' as const },
   },
 });
@@ -43,7 +46,10 @@ const createTruncatedSearchResponse = (
   actualTotal: number
 ) => ({
   hits: {
-    hits: docs.map((doc) => ({ _source: doc })),
+    hits: docs.map((doc) => ({
+      _id: `doc-${doc['entity.id']}`,
+      _source: doc,
+    })),
     total: { value: actualTotal, relation: 'eq' as const },
   },
 });

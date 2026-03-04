@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
+import { getFieldValue } from '../../../common/domain/euid/commons';
 import { getLatestEntitiesIndexName } from '../assets/latest_index';
 import {
   ChainResolutionError,
@@ -19,7 +20,6 @@ import {
   ResolutionUpdateError,
   SelfLinkError,
 } from '../errors';
-import { hashEuid } from '../crud_client/utils';
 import {
   searchEntitiesByIds,
   searchByResolvedToField,
@@ -54,6 +54,11 @@ export interface ResolutionGroup {
   group_size: number;
 }
 
+interface FetchedEntities {
+  sources: Map<string, Record<string, unknown>>;
+  docIds: Map<string, string>;
+}
+
 export class ResolutionClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
@@ -83,14 +88,14 @@ export class ResolutionClient {
 
     // 3. Fetch and validate all involved entities exist
     const allIds = [targetId, ...entityIds];
-    const entities = await this.fetchAndValidateEntities(allIds);
+    const { sources, docIds } = await this.fetchAndValidateEntities(allIds);
 
     // 4. Validate: all same type
-    this.validateSameEntityType(entities);
+    this.validateSameEntityType(sources);
 
     // 5. Validate: target has no resolved_to (is not an alias)
-    const targetEntity = entities.get(targetId)!;
-    const targetResolvedTo = targetEntity[RESOLVED_TO_FIELD] as string | undefined;
+    const targetEntity = sources.get(targetId)!;
+    const targetResolvedTo = getFieldValue(targetEntity, RESOLVED_TO_FIELD);
     if (targetResolvedTo) {
       throw new ChainResolutionError(targetId, targetResolvedTo);
     }
@@ -103,8 +108,8 @@ export class ResolutionClient {
     const skipped: string[] = [];
 
     for (const entityId of entityIds) {
-      const entity = entities.get(entityId)!;
-      const resolvedTo = entity[RESOLVED_TO_FIELD] as string | undefined;
+      const entity = sources.get(entityId)!;
+      const resolvedTo = getFieldValue(entity, RESOLVED_TO_FIELD);
 
       if (resolvedTo === targetId) {
         skipped.push(entityId);
@@ -125,7 +130,7 @@ export class ResolutionClient {
     this.logger.debug(`Linking ${linked.length} entities to target '${targetId}'`);
 
     const updates = linked.map((entityId) => ({
-      docId: hashEuid(entityId),
+      docId: docIds.get(entityId)!,
       doc: { [RESOLVED_TO_FIELD]: targetId },
     }));
     const linkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates });
@@ -144,15 +149,15 @@ export class ResolutionClient {
 
     // 1. Deduplicate and fetch all entities
     const entityIds = [...new Set(rawEntityIds)];
-    const entities = await this.fetchAndValidateEntities(entityIds);
+    const { sources, docIds } = await this.fetchAndValidateEntities(entityIds);
 
     // 2. Categorize: aliases to unlink vs non-aliases to skip
     const toUnlink: string[] = [];
     const skipped: string[] = [];
 
     for (const entityId of entityIds) {
-      const entity = entities.get(entityId)!;
-      const resolvedTo = entity[RESOLVED_TO_FIELD] as string | undefined;
+      const entity = sources.get(entityId)!;
+      const resolvedTo = getFieldValue(entity, RESOLVED_TO_FIELD);
       if (resolvedTo) {
         toUnlink.push(entityId);
       } else {
@@ -168,7 +173,7 @@ export class ResolutionClient {
     this.logger.debug(`Unlinking ${toUnlink.length} entities`);
 
     const updates = toUnlink.map((entityId) => ({
-      docId: hashEuid(entityId),
+      docId: docIds.get(entityId)!,
       doc: { [RESOLVED_TO_FIELD]: null },
     }));
     const unlinkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates });
@@ -186,11 +191,11 @@ export class ResolutionClient {
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Fetch the requested entity
-    const entities = await this.fetchAndValidateEntities([entityId]);
-    const inputEntity = entities.get(entityId)!;
+    const { sources } = await this.fetchAndValidateEntities([entityId]);
+    const inputEntity = sources.get(entityId)!;
 
     // 2. Determine the target ID
-    const resolvedTo = inputEntity[RESOLVED_TO_FIELD] as string | undefined;
+    const resolvedTo = getFieldValue(inputEntity, RESOLVED_TO_FIELD);
     const targetId = resolvedTo ?? entityId;
 
     // 3. Query for target + all aliases in one search
@@ -210,7 +215,7 @@ export class ResolutionClient {
 
     for (const hit of response.hits.hits) {
       const source = hit._source as Record<string, unknown>;
-      const hitEntityId = source[ENTITY_ID_FIELD] as string;
+      const hitEntityId = getFieldValue(source, ENTITY_ID_FIELD);
 
       if (hitEntityId === targetId) {
         target = source;
@@ -270,9 +275,7 @@ export class ResolutionClient {
    * Fetches entities by their entity.id values and validates that all exist.
    * Throws EntitiesNotFoundError if any IDs are missing.
    */
-  private async fetchAndValidateEntities(
-    entityIds: string[]
-  ): Promise<Map<string, Record<string, unknown>>> {
+  private async fetchAndValidateEntities(entityIds: string[]): Promise<FetchedEntities> {
     const index = getLatestEntitiesIndexName(this.namespace);
     const response = await searchEntitiesByIds(this.esClient, {
       index,
@@ -280,19 +283,25 @@ export class ResolutionClient {
       entityIds,
     });
 
-    const entities = new Map<string, Record<string, unknown>>();
+    const sources = new Map<string, Record<string, unknown>>();
+    const docIds = new Map<string, string>();
     for (const hit of response.hits.hits) {
       const source = hit._source as Record<string, unknown>;
-      const id = source[ENTITY_ID_FIELD] as string;
-      entities.set(id, source);
+      const id = getFieldValue(source, ENTITY_ID_FIELD);
+      if (id) {
+        sources.set(id, source);
+        if (hit._id) {
+          docIds.set(id, hit._id);
+        }
+      }
     }
 
-    const missingIds = entityIds.filter((id) => !entities.has(id));
+    const missingIds = entityIds.filter((id) => !sources.has(id));
     if (missingIds.length > 0) {
       throw new EntitiesNotFoundError(missingIds);
     }
 
-    return entities;
+    return { sources, docIds };
   }
 
   /**
@@ -314,8 +323,12 @@ export class ResolutionClient {
     const result = new Map<string, string[]>();
     for (const hit of response.hits.hits) {
       const source = hit._source as Record<string, unknown>;
-      const resolvedTo = source[RESOLVED_TO_FIELD] as string;
-      const aliasId = source[ENTITY_ID_FIELD] as string;
+      const resolvedTo = getFieldValue(source, RESOLVED_TO_FIELD);
+      const aliasId = getFieldValue(source, ENTITY_ID_FIELD);
+
+      if (!resolvedTo || !aliasId) {
+        continue;
+      }
 
       const existing = result.get(resolvedTo) ?? [];
       existing.push(aliasId);
@@ -330,7 +343,7 @@ export class ResolutionClient {
   private validateSameEntityType(entities: Map<string, Record<string, unknown>>): void {
     const types = new Set<string>();
     for (const entity of entities.values()) {
-      const type = entity[ENGINE_METADATA_TYPE_FIELD] as string | undefined;
+      const type = getFieldValue(entity, ENGINE_METADATA_TYPE_FIELD);
       if (type) {
         types.add(type);
       }
