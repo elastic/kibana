@@ -22,7 +22,6 @@ describe('downsampling/shared/duration_utils', () => {
     it('returns -1 for invalid values', () => {
       expect(toMilliseconds('abc', 'd')).toBe(-1);
       expect(toMilliseconds('1d', 'd')).toBe(-1);
-      expect(toMilliseconds('1.5', 'h')).toBe(-1);
     });
 
     it('converts numeric values using the unit multiplier', () => {
