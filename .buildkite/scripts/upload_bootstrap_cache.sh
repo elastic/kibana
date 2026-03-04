@@ -9,23 +9,29 @@ source .buildkite/scripts/common/util.sh
 # the expensive regeneration / webpack pre‑build steps.
 #
 # What's included:
-#   - tsconfig.base.json & tsconfig.refs.json (generated path mappings)
+#   - tsconfig.base.json (generated path mappings)
+#   - config-paths.json (tsconfig project discovery cache)
 #   - package-map.json files (package discovery cache)
 #   - kbn-synthetic-package-map (generated package map)
 #   - .moon/cache (webpack pre-builds, version extraction, etc.)
-#   - .buildkite/tsconfig.json (bootstrapped buildkite tooling)
+#   - .buildkite/node_modules (bootstrapped buildkite tooling)
 
 echo "--- Archive bootstrap-generated files"
 
-BOOTSTRAP_CACHE="/tmp/bootstrap-cache.tar.gz"
+BOOTSTRAP_CACHE_NAME="bootstrap-cache.tar.gz"
+BOOTSTRAP_CACHE="/tmp/$BOOTSTRAP_CACHE_NAME"
 
 {
   # tsconfig generated files
   echo "tsconfig.base.json"
-  echo "tsconfig.refs.json"
 
-  # buildkite bootstrapped files
-  find .buildkite -name 'tsconfig.json' -maxdepth 2 2>/dev/null
+  # tsconfig project discovery cache
+  find packages/kbn-ts-projects -name 'config-paths.json' 2>/dev/null
+
+  # buildkite bootstrapped tooling (npm i output)
+  if [[ -d .buildkite/node_modules ]]; then
+    find .buildkite/node_modules -type f 2>/dev/null
+  fi
 
   # package maps
   find src/platform/packages -name 'package-map.json' 2>/dev/null
@@ -44,4 +50,5 @@ CACHE_SIZE=$(du -h "$BOOTSTRAP_CACHE" | cut -f1)
 echo "Bootstrap cache archive: $CACHE_SIZE"
 
 echo "--- Upload bootstrap cache"
-buildkite-agent artifact upload "$BOOTSTRAP_CACHE" || echo "Failed to upload bootstrap cache"
+cd /tmp
+buildkite-agent artifact upload "$BOOTSTRAP_CACHE_NAME" || echo "Failed to upload bootstrap cache"

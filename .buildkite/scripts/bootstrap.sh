@@ -42,7 +42,7 @@ fi
 BOOTSTRAP_CACHE_RESTORED=false
 if [[ "${SKIP_BOOTSTRAP_CACHE:-}" != "true" ]]; then
   BOOTSTRAP_CACHE="/tmp/bootstrap-cache.tar.gz"
-  if (buildkite-agent artifact download --step "build" "$BOOTSTRAP_CACHE" /tmp/ 2>/dev/null); then
+  if (buildkite-agent artifact download --step "build" "bootstrap-cache.tar.gz" /tmp/ 2>/dev/null); then
     echo "--- Restoring bootstrap cache from build step"
     if tar -xzf "$BOOTSTRAP_CACHE" 2>/dev/null; then
       FILE_COUNT=$(tar -tzf "$BOOTSTRAP_CACHE" 2>/dev/null | wc -l | tr -d ' ')
