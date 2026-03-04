@@ -6,6 +6,7 @@
  */
 
 import type { Feature, Streams } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -83,6 +84,7 @@ export async function generateSignificantEvents({
       input: {
         name: stream.name,
         description: stream.description,
+        stream_type: getStreamTypeFromDefinition(stream),
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },

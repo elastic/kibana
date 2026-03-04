@@ -329,16 +329,27 @@ The optional `evidence` field grounds your queries in stream features. Include e
 
 ## ES|QL Query Reference
 
-You generate complete ES|QL queries. Every query MUST follow this structure:
+You generate complete ES|QL queries. Every query MUST start with a `FROM` clause followed by a `WHERE` clause:
 
 ```
-FROM <name>,<name>.* | WHERE <filtering_expression>
+FROM ... | WHERE <filtering_expression>
 ```
 
-Where `<name>` is the stream name provided in the input (the `name` field). Always include both `<name>` and `<name>.*` in the `FROM` clause, separated by a comma.
+The exact `FROM` clause depends on the **stream type** (provided in the input as `stream_type`). Use `<name>` to refer to the stream name from the input.
 
-**Example:** If the input stream name is `web_logs`, your query would be:
-`FROM web_logs,web_logs.* | WHERE body.text:"error"`
+| Stream type | FROM clause | Example (`web_logs`) |
+| :--- | :--- | :--- |
+| `wired` | `FROM <name>, <name>.* METADATA _id, _source` | `FROM web_logs, web_logs.* METADATA _id, _source \| WHERE body.text:"error"` |
+| `classic` | `FROM <name> METADATA _id, _source` | `FROM web_logs METADATA _id, _source \| WHERE body.text:"error"` |
+| `query` | `FROM $.<name> METADATA _id, _source` | `FROM $.web_logs METADATA _id, _source \| WHERE body.text:"error"` |
+
+**Key differences:**
+- **Wired streams** use a hierarchical data model, always include both `<name>` and the `<name>.*` wildcard to capture child streams.
+- **Classic streams** are flat, use only `<name>` without a wildcard suffix.
+- **Query streams** are readonly, we need to target the related ES|QL view. Use only $.`<name>` without a wildcard suffix.
+- All types require `METADATA _id, _source` at the end of the FROM clause.
+
+**IMPORTANT:** Examples throughout this prompt use a generic `FROM logs,logs.*` format for illustration purposes. You MUST always use the correct FROM clause for the stream type provided in the input.
 
 Do NOT include processing commands like `STATS`, `EVAL`, `SORT`, `LIMIT`, or `KEEP` — only `FROM ... | WHERE ...` queries are supported at this time.
 
