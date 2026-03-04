@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 
 type TimeUnit = 's' | 'm' | 'h' | 'd';
+export const POSITIVE_INTEGER_REGEX = /^[1-9][0-9]*$/;
+export const INVALID_NUMBER_KEYS = ['-', '+', '.', 'e', 'E'];
 
 const TIME_UNITS: Record<TimeUnit, string> = {
   s: i18n.translate('xpack.alertingV2.ruleForm.timeUnits.seconds', {
@@ -108,4 +110,13 @@ export const formatDuration = (duration: number, short: boolean = false): string
   }
   const seconds = duration / 1000;
   return short ? `${seconds}s` : `${seconds} second${seconds > 1 ? 's' : ''}`;
+};
+
+export const parsePositiveIntegerInput = (rawValue: string): number | undefined => {
+  const trimmedValue = rawValue.trim();
+  if (!POSITIVE_INTEGER_REGEX.test(trimmedValue)) {
+    return undefined;
+  }
+
+  return parseInt(trimmedValue, 10);
 };

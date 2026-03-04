@@ -9,11 +9,14 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import { getDurationUnitValue, getDurationNumberInItsUnit, getTimeOptions } from '../utils';
+import {
+  getDurationUnitValue,
+  getDurationNumberInItsUnit,
+  getTimeOptions,
+  INVALID_NUMBER_KEYS,
+  parsePositiveIntegerInput,
+} from '../utils';
 import type { FormValues } from '../types';
-
-const INTEGER_REGEX = /^[1-9][0-9]*$/;
-const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 export const StateTransitionTimeframeField: React.FC = () => {
   const { control } = useFormContext<FormValues>();
@@ -74,14 +77,15 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
 
   const onIntervalNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value.trim();
-      if (raw === '') {
+      const val = e.target.value.trim();
+      if (val === '') {
         onChange(undefined);
         return;
       }
-      if (INTEGER_REGEX.test(raw)) {
-        const parsed = parseInt(raw, 10);
-        onChange(`${parsed}${intervalUnit}`);
+
+      const parsedValue = parsePositiveIntegerInput(e.target.value);
+      if (parsedValue != null) {
+        onChange(`${parsedValue}${intervalUnit}`);
       }
     },
     [intervalUnit, onChange]
@@ -99,7 +103,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
   );
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (INVALID_KEYS.includes(e.key)) {
+    if (INVALID_NUMBER_KEYS.includes(e.key)) {
       e.preventDefault();
     }
   }, []);

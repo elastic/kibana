@@ -51,9 +51,7 @@ const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData =
     ...(hasStateTransition
       ? {
           state_transition: {
-            ...(stateTransition!.pendingCount != null
-              ? { pending_count: stateTransition!.pendingCount }
-              : {}),
+            pending_count: stateTransition!.pendingCount,
             ...(stateTransition!.pendingTimeframe != null
               ? { pending_timeframe: stateTransition!.pendingTimeframe }
               : {}),

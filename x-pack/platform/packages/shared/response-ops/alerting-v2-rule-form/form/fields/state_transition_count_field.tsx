@@ -10,14 +10,13 @@ import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
-
-const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
+import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
 
 export const StateTransitionCountField: React.FC = () => {
   const { control } = useFormContext<FormValues>();
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (INVALID_KEYS.includes(e.key)) {
+    if (INVALID_NUMBER_KEYS.includes(e.key)) {
       e.preventDefault();
     }
   }, []);
@@ -56,13 +55,13 @@ export const StateTransitionCountField: React.FC = () => {
           <EuiFieldNumber
             value={value ?? ''}
             onChange={(e) => {
-              const raw = e.target.value.trim();
-              if (raw === '') {
-                onChange(undefined);
+              const val = e.target.value.trim();
+              if (val === '') {
+                onChange(1);
               } else {
-                const parsed = parseInt(raw, 10);
-                if (!isNaN(parsed)) {
-                  onChange(parsed);
+                const parsedValue = parsePositiveIntegerInput(e.target.value);
+                if (parsedValue != null) {
+                  onChange(parsedValue);
                 }
               }
             }}
@@ -71,7 +70,6 @@ export const StateTransitionCountField: React.FC = () => {
             step={1}
             isInvalid={!!error}
             data-test-subj="stateTransitionCountInput"
-            placeholder="1"
             inputRef={ref}
           />
         </EuiFormRow>

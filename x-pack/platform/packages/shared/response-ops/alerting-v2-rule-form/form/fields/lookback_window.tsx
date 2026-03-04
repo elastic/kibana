@@ -8,10 +8,13 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getDurationUnitValue, getDurationNumberInItsUnit, getTimeOptions } from '../utils';
-
-const INTEGER_REGEX = /^[1-9][0-9]*$/;
-const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
+import {
+  getDurationUnitValue,
+  getDurationNumberInItsUnit,
+  getTimeOptions,
+  INVALID_NUMBER_KEYS,
+  parsePositiveIntegerInput,
+} from '../utils';
 
 const LOOKBACK_WINDOW_TITLE_PREFIX = i18n.translate(
   'xpack.alertingV2.ruleForm.lookbackWindow.titlePrefix',
@@ -45,9 +48,8 @@ export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement
 
     const onIntervalNumberChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value.trim();
-        if (INTEGER_REGEX.test(val)) {
-          const parsedValue = parseInt(val, 10);
+        const parsedValue = parsePositiveIntegerInput(e.target.value);
+        if (parsedValue != null) {
           onChange(`${parsedValue}${intervalUnit}`);
         }
       },
@@ -62,7 +64,7 @@ export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement
     );
 
     const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (INVALID_KEYS.includes(e.key)) {
+      if (INVALID_NUMBER_KEYS.includes(e.key)) {
         e.preventDefault();
       }
     }, []);
