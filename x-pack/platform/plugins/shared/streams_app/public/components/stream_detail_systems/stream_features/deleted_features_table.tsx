@@ -7,53 +7,49 @@
 
 import React, { useMemo } from 'react';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { DeleteFeatureModal } from './delete_feature_modal';
 import { BaseFeaturesTable } from './base_features_table';
 import {
-  useStreamFeaturesTable,
-  FEATURES_LABEL,
-  TABLE_CAPTION_LABEL,
-  DELETE_SELECTED,
-} from './use_stream_features_table';
+  useDeletedFeaturesTable,
+  DELETED_FEATURES_LABEL,
+  DELETED_TABLE_CAPTION_LABEL,
+  RESTORE_SELECTED,
+} from './use_deleted_features_table';
 
-interface StreamFeaturesTableProps {
+interface DeletedFeaturesTableProps {
   definition: Streams.all.Definition;
   isLoadingFeatures: boolean;
-  features: Feature[];
+  deletedFeatures: Feature[];
   refreshFeatures: () => void;
   isIdentifyingFeatures: boolean;
   selectedFeature: Feature | null;
   onSelectFeature: (feature: Feature | null) => void;
 }
 
-export function StreamFeaturesTable({
+export function DeletedFeaturesTable({
   definition,
   isLoadingFeatures,
-  features,
+  deletedFeatures,
   refreshFeatures,
   isIdentifyingFeatures,
   selectedFeature,
   onSelectFeature,
-}: StreamFeaturesTableProps) {
+}: DeletedFeaturesTableProps) {
   const {
     pagination,
     selectedFeatures,
     setSelectedFeatures,
-    isBulkDeleteModalVisible,
-    showBulkDeleteModal,
-    hideBulkDeleteModal,
-    handleDeleteFeature,
-    handleBulkDelete,
+    handleRestoreFeature,
+    handleBulkRestore,
     clearSelection,
     handleTableChange,
-    isDeleting,
-    isBulkDeleting,
+    isRestoring,
+    isBulkRestoring,
     columns,
     items,
     noItemsMessage,
-  } = useStreamFeaturesTable({
+  } = useDeletedFeaturesTable({
     definition,
-    features,
+    deletedFeatures,
     refreshFeatures,
     isIdentifyingFeatures,
     selectedFeature,
@@ -62,27 +58,26 @@ export function StreamFeaturesTable({
 
   const bulkAction = useMemo(
     () => ({
-      label: DELETE_SELECTED,
-      iconType: 'trash',
-      color: 'danger' as const,
-      isLoading: isBulkDeleting,
-      onClick: showBulkDeleteModal,
+      label: RESTORE_SELECTED,
+      iconType: 'returnKey',
+      isLoading: isBulkRestoring,
+      onClick: handleBulkRestore,
     }),
-    [isBulkDeleting, showBulkDeleteModal]
+    [isBulkRestoring, handleBulkRestore]
   );
 
   const flyoutActions = useMemo(
-    () => ({ onDelete: handleDeleteFeature, isDeleting }),
-    [handleDeleteFeature, isDeleting]
+    () => ({ onRestore: handleRestoreFeature, isRestoring }),
+    [handleRestoreFeature, isRestoring]
   );
 
   return (
     <BaseFeaturesTable
-      titleLabel={FEATURES_LABEL}
-      tableCaptionLabel={TABLE_CAPTION_LABEL}
+      titleLabel={DELETED_FEATURES_LABEL}
+      tableCaptionLabel={DELETED_TABLE_CAPTION_LABEL}
       isLoadingFeatures={isLoadingFeatures}
       isIdentifyingFeatures={isIdentifyingFeatures}
-      features={features}
+      features={deletedFeatures}
       selectedFeature={selectedFeature}
       onSelectFeature={onSelectFeature}
       pagination={pagination}
@@ -95,15 +90,6 @@ export function StreamFeaturesTable({
       noItemsMessage={noItemsMessage}
       bulkAction={bulkAction}
       flyoutActions={flyoutActions}
-    >
-      {isBulkDeleteModalVisible && selectedFeatures.length > 0 && (
-        <DeleteFeatureModal
-          features={selectedFeatures}
-          isLoading={isBulkDeleting}
-          onCancel={hideBulkDeleteModal}
-          onConfirm={handleBulkDelete}
-        />
-      )}
-    </BaseFeaturesTable>
+    />
   );
 }

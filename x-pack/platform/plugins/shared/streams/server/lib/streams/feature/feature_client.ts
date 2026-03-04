@@ -40,8 +40,14 @@ interface FeatureBulkIndexOperation {
 interface FeatureBulkDeleteOperation {
   delete: { id: string };
 }
+interface FeatureBulkRestoreOperation {
+  restore: { id: string };
+}
 
-export type FeatureBulkOperation = FeatureBulkIndexOperation | FeatureBulkDeleteOperation;
+export type FeatureBulkOperation =
+  | FeatureBulkIndexOperation
+  | FeatureBulkDeleteOperation
+  | FeatureBulkRestoreOperation;
 
 export const MAX_FEATURE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
@@ -57,11 +63,26 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
-    const { indexOps, deleteFeatures } = await this.resolveValidBulkOperations(stream, operations);
+    const { indexOps, deleteFeatures, restoreFeatures } = await this.resolveValidBulkOperations(
+      stream,
+      operations
+    );
 
-    const now = new Date().toISOString();
+    const now = Date.now();
+    const nowIso = new Date(now).toISOString();
+
     const softDeleteIndexOps = deleteFeatures.map((feature) => {
-      const document = toStorage(stream, { ...feature, deleted_at: now, expires_at: undefined });
+      const document = toStorage(stream, { ...feature, deleted_at: nowIso, expires_at: undefined });
+      return { index: { document, _id: document[FEATURE_UUID] } };
+    });
+
+    const restoreIndexOps = restoreFeatures.map((feature) => {
+      const document = toStorage(stream, {
+        ...feature,
+        deleted_at: undefined,
+        last_seen: nowIso,
+        expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
+      });
       return { index: { document, _id: document[FEATURE_UUID] } };
     });
 
@@ -71,7 +92,7 @@ export class FeatureClient {
     });
 
     return this.clients.storageClient.bulk({
-      operations: [...regularIndexOps, ...softDeleteIndexOps],
+      operations: [...regularIndexOps, ...softDeleteIndexOps, ...restoreIndexOps],
       throwOnFail: true,
     });
   }
@@ -214,27 +235,56 @@ export class FeatureClient {
   private async resolveValidBulkOperations(
     stream: string,
     operations: FeatureBulkOperation[]
-  ): Promise<{ indexOps: FeatureBulkIndexOperation[]; deleteFeatures: Feature[] }> {
-    const indexOps = operations.filter((op): op is FeatureBulkIndexOperation => 'index' in op);
-    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
+  ): Promise<{
+    indexOps: FeatureBulkIndexOperation[];
+    deleteFeatures: Feature[];
+    restoreFeatures: Feature[];
+  }> {
+    const indexOps: FeatureBulkIndexOperation[] = [];
+    const deleteIdSet = new Set<string>();
+    const restoreIdSet = new Set<string>();
 
-    const deleteFeatures: Feature[] =
-      deleteIds.length > 0
+    for (const op of operations) {
+      if ('index' in op) {
+        indexOps.push(op);
+      } else if ('delete' in op) {
+        deleteIdSet.add(op.delete.id);
+      } else {
+        restoreIdSet.add(op.restore.id);
+      }
+    }
+
+    const allIds = [...deleteIdSet, ...restoreIdSet];
+
+    const allFeatures =
+      allIds.length > 0
         ? (
             await this.clients.storageClient.search({
-              size: deleteIds.length,
+              size: allIds.length,
               track_total_hits: false,
               query: {
                 bool: {
-                  filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
-                  must_not: [{ exists: { field: FEATURE_DELETED_AT } }],
+                  filter: [{ terms: { _id: allIds } }, ...termQuery(STREAM_NAME, stream)],
                 },
               },
             })
-          ).hits.hits.map((hit) => fromStorage(hit._source))
+          ).hits.hits.flatMap((hit) =>
+            hit._id ? [{ id: hit._id, feature: fromStorage(hit._source) }] : []
+          )
         : [];
 
-    return { indexOps, deleteFeatures };
+    const deleteFeatures: Feature[] = [];
+    const restoreFeatures: Feature[] = [];
+
+    for (const { id, feature } of allFeatures) {
+      if (deleteIdSet.has(id) && !feature.deleted_at) {
+        deleteFeatures.push(feature);
+      } else if (restoreIdSet.has(id) && feature.deleted_at) {
+        restoreFeatures.push(feature);
+      }
+    }
+
+    return { indexOps, deleteFeatures, restoreFeatures };
   }
 
   findDuplicateFeature({

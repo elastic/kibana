@@ -253,11 +253,6 @@ export const TABLE_CAPTION_LABEL = i18n.translate(
   }
 );
 
-export const CLEAR_SELECTION = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.clearSelection',
-  { defaultMessage: 'Clear selection' }
-);
-
 export const DELETE_SELECTED = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.actions.deleteSelection',
   {

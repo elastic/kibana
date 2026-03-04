@@ -35,12 +35,29 @@ import { InfoPanel } from '../../info_panel';
 import { DeleteFeatureModal } from './delete_feature_modal';
 import { getConfidenceColor } from './use_stream_features_table';
 
-interface FeatureDetailsFlyoutProps {
+type FeatureDetailsFlyoutProps = {
   feature: Feature;
   onClose: () => void;
-  onDelete?: () => Promise<void>;
-  isDeleting?: boolean;
-}
+} & (
+  | {
+      onDelete: () => Promise<void>;
+      isDeleting: boolean;
+      onRestore?: undefined;
+      isRestoring?: undefined;
+    }
+  | {
+      onRestore: () => Promise<void>;
+      isRestoring: boolean;
+      onDelete?: undefined;
+      isDeleting?: undefined;
+    }
+  | {
+      onDelete?: undefined;
+      isDeleting?: undefined;
+      onRestore?: undefined;
+      isRestoring?: undefined;
+    }
+);
 
 const noDataPlaceholder = '-';
 
@@ -49,6 +66,8 @@ export function FeatureDetailsFlyout({
   onClose,
   onDelete,
   isDeleting = false,
+  onRestore,
+  isRestoring = false,
 }: FeatureDetailsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({
@@ -61,6 +80,11 @@ export function FeatureDetailsFlyout({
   const handleDeleteClick = () => {
     closeActionsPopover();
     showDeleteModal();
+  };
+
+  const handleRestoreClick = () => {
+    closeActionsPopover();
+    onRestore?.();
   };
 
   const displayTitle = feature.title ?? feature.id;
@@ -127,6 +151,16 @@ export function FeatureDetailsFlyout({
       title: EXPIRES_AT_LABEL,
       description: <EuiText size="s">{feature.expires_at ?? noDataPlaceholder}</EuiText>,
     },
+    ...(feature.deleted_at
+      ? [
+          {
+            title: DELETED_AT_LABEL,
+            description: (
+              <EuiText size="s">{new Date(feature.deleted_at).toLocaleString()}</EuiText>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -147,7 +181,7 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {onDelete && (
+              {(onDelete || onRestore) && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     button={
@@ -155,6 +189,7 @@ export function FeatureDetailsFlyout({
                         data-test-subj="streamsAppFeatureDetailsFlyoutActionsButton"
                         iconType="boxesVertical"
                         aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                        isLoading={isRestoring}
                         onClick={toggleActionsPopover}
                       />
                     }
@@ -165,19 +200,32 @@ export function FeatureDetailsFlyout({
                   >
                     <EuiContextMenuPanel
                       size="s"
-                      items={[
-                        <EuiContextMenuItem
-                          key="delete"
-                          icon={<EuiIcon type="trash" color="danger" />}
-                          css={css`
-                            color: ${euiTheme.colors.danger};
-                          `}
-                          onClick={handleDeleteClick}
-                          data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
-                        >
-                          {DELETE_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                      ]}
+                      items={
+                        onRestore
+                          ? [
+                              <EuiContextMenuItem
+                                key="restore"
+                                icon={<EuiIcon type="returnKey" aria-hidden={true} />}
+                                onClick={handleRestoreClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutRestoreAction"
+                              >
+                                {RESTORE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : [
+                              <EuiContextMenuItem
+                                key="delete"
+                                icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                                css={css`
+                                  color: ${euiTheme.colors.danger};
+                                `}
+                                onClick={handleDeleteClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
+                              >
+                                {DELETE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                      }
                     />
                   </EuiPopover>
                 </EuiFlexItem>
@@ -315,6 +363,14 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
 
 const DELETE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
   defaultMessage: 'Delete',
+});
+
+const RESTORE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.restoreAction', {
+  defaultMessage: 'Restore',
+});
+
+const DELETED_AT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.deletedAtLabel', {
+  defaultMessage: 'Deleted at',
 });
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
