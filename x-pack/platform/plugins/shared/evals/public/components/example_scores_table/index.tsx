@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
+  EuiButtonGroup,
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -35,8 +38,8 @@ interface EvaluatorScoreBadge {
 interface ExampleScoreRow {
   exampleId: string;
   exampleIndex: number | null;
-  evaluatorScoreBadges: EvaluatorScoreBadge[];
-  traceIds: string[];
+  repetitionIndices: number[];
+  scoresByRepetition: Record<number, EvaluationRunDatasetExample['scores']>;
 }
 
 export interface ExampleScoresTableProps {
@@ -48,6 +51,8 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   examples,
   onTraceClick,
 }) => {
+  const [selectedRepetitions, setSelectedRepetitions] = useState<Record<string, number>>({});
+
   const rows = useMemo<ExampleScoreRow[]>(() => {
     return [...examples]
       .sort((a, b) => {
@@ -67,103 +72,217 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           return a.evaluator.name.localeCompare(b.evaluator.name);
         });
 
-        const evaluatorScoreCounts = scoreDocuments.reduce<Record<string, number>>((acc, score) => {
-          const key = score.evaluator.name;
-          acc[key] = (acc[key] ?? 0) + 1;
+        const scoresByRepetition = scoreDocuments.reduce<
+          Record<number, EvaluationRunDatasetExample['scores']>
+        >((acc, score) => {
+          const repetitionIndex = score.task.repetition_index;
+          const existingScores = acc[repetitionIndex] ?? [];
+          existingScores.push(score);
+          acc[repetitionIndex] = existingScores;
           return acc;
         }, {});
 
-        const evaluatorScoreBadges: EvaluatorScoreBadge[] = scoreDocuments.map((score) => {
-          const includeRepetition = (evaluatorScoreCounts[score.evaluator.name] ?? 0) > 1;
-          const repetitionLabel = includeRepetition ? ` (r${score.task.repetition_index + 1})` : '';
-          const scoreLabel = formatScore(score.evaluator.score);
-
-          return {
-            key: [
-              score.evaluator.name,
-              score.task.repetition_index,
-              score.task.trace_id ?? 'no_trace',
-              score['@timestamp'],
-            ].join(':'),
-            label: `${score.evaluator.name}${repetitionLabel}: ${scoreLabel}`,
-          };
-        });
-
-        const traceIds = Array.from(
-          new Set(
-            scoreDocuments
-              .map((score) => score.task.trace_id)
-              .filter((value): value is string => Boolean(value))
-          )
-        );
+        const repetitionIndices = Object.keys(scoresByRepetition)
+          .map((value) => Number(value))
+          .sort((a, b) => a - b);
 
         return {
           exampleId: example.example_id,
           exampleIndex: example.example_index,
-          evaluatorScoreBadges,
-          traceIds,
+          repetitionIndices,
+          scoresByRepetition,
         };
       });
   }, [examples]);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<ExampleScoreRow>>>(
-    () => [
-      {
-        field: 'exampleIndex',
-        name: i18n.COLUMN_EXAMPLE_NUMBER,
-        width: '120px',
-        render: (exampleIndex: number | null) =>
-          exampleIndex == null ? '-' : String(exampleIndex + 1),
-      },
-      {
-        field: 'exampleId',
-        name: i18n.COLUMN_EXAMPLE_ID,
-        render: (exampleId: string) => truncate(exampleId, EXAMPLE_ID_VISIBLE_LENGTH),
-      },
-      {
-        field: 'evaluatorScoreBadges',
-        name: i18n.COLUMN_EVALUATOR_SCORES,
-        render: (evaluatorScoreBadges: EvaluatorScoreBadge[]) =>
-          evaluatorScoreBadges.length > 0 ? (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {evaluatorScoreBadges.map((evaluatorScoreBadge) => (
-                <EuiFlexItem key={evaluatorScoreBadge.key} grow={false}>
-                  <EuiBadge color="hollow">{evaluatorScoreBadge.label}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ) : (
-            <EuiText color="subdued" size="s">
-              {i18n.NO_EVALUATOR_SCORES}
-            </EuiText>
-          ),
-      },
-      {
-        field: 'traceIds',
-        name: i18n.COLUMN_TRACE,
-        render: (traceIds: string[]) =>
-          traceIds.length > 0 ? (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {traceIds.map((traceId) => (
-                <EuiFlexItem key={traceId} grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="apmTrace"
-                    onClick={() => onTraceClick(traceId)}
-                    aria-label={i18n.getTraceButtonAriaLabel(traceId)}
-                  >
-                    {truncate(traceId, TRACE_ID_VISIBLE_LENGTH)}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ) : (
-            '-'
-          ),
-      },
-    ],
-    [onTraceClick]
-  );
+  const getSelectedRepetitionIndex = (row: ExampleScoreRow): number => {
+    const defaultRepetitionIndex = row.repetitionIndices[0] ?? 0;
+    const selectedRepetitionIndex = selectedRepetitions[row.exampleId];
+    if (
+      selectedRepetitionIndex == null ||
+      !row.repetitionIndices.includes(selectedRepetitionIndex)
+    ) {
+      return defaultRepetitionIndex;
+    }
+    return selectedRepetitionIndex;
+  };
 
-  return <EuiBasicTable items={rows} columns={columns} noItemsMessage={i18n.EMPTY_TABLE_MESSAGE} />;
+  const getScoresForSelectedRepetition = (
+    row: ExampleScoreRow
+  ): EvaluationRunDatasetExample['scores'] => {
+    const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
+    return row.scoresByRepetition[selectedRepetitionIndex] ?? [];
+  };
+
+  const getEvaluatorScoreBadges = (row: ExampleScoreRow): EvaluatorScoreBadge[] =>
+    getScoresForSelectedRepetition(row).map((score) => ({
+      key: [
+        row.exampleId,
+        score.evaluator.name,
+        score.task.repetition_index,
+        score.task.trace_id ?? 'no_trace',
+        score['@timestamp'],
+      ].join(':'),
+      label: `${score.evaluator.name}: ${formatScore(score.evaluator.score)}`,
+    }));
+
+  const getSelectedTraceIds = (row: ExampleScoreRow): string[] =>
+    Array.from(
+      new Set(
+        getScoresForSelectedRepetition(row)
+          .map((score) => score.task.trace_id)
+          .filter((value): value is string => Boolean(value))
+      )
+    );
+
+  const renderJsonPreview = (value: unknown, accordionId: string) => {
+    if (value == null) {
+      return '-';
+    }
+
+    const serializedValue = JSON.stringify(value, null, 2);
+    if (!serializedValue) {
+      return '-';
+    }
+
+    return (
+      <EuiAccordion id={accordionId} buttonContent={i18n.JSON_PREVIEW_BUTTON_LABEL}>
+        <EuiCodeBlock overflowHeight={120} language="json" paddingSize="s" fontSize="s">
+          {serializedValue}
+        </EuiCodeBlock>
+      </EuiAccordion>
+    );
+  };
+
+  const columns: Array<EuiBasicTableColumn<ExampleScoreRow>> = [
+    {
+      field: 'exampleIndex',
+      name: i18n.COLUMN_EXAMPLE_NUMBER,
+      width: '120px',
+      render: (exampleIndex: number | null) =>
+        exampleIndex == null ? '-' : String(exampleIndex + 1),
+    },
+    {
+      field: 'exampleId',
+      name: i18n.COLUMN_EXAMPLE_ID,
+      render: (exampleId: string) => truncate(exampleId, EXAMPLE_ID_VISIBLE_LENGTH),
+    },
+    {
+      field: 'repetitionIndices',
+      name: i18n.COLUMN_REPETITION,
+      width: '180px',
+      render: (_repetitionIndices: number[], row: ExampleScoreRow) =>
+        row.repetitionIndices.length > 1 ? (
+          <EuiButtonGroup
+            type="single"
+            isFullWidth={false}
+            legend={i18n.getRepetitionButtonGroupLegend(row.exampleId)}
+            options={row.repetitionIndices.map((repetitionIndex) => ({
+              id: String(repetitionIndex),
+              label: i18n.getRepetitionButtonLabel(repetitionIndex),
+            }))}
+            idSelected={String(getSelectedRepetitionIndex(row))}
+            onChange={(id) =>
+              setSelectedRepetitions((previousSelection) => ({
+                ...previousSelection,
+                [row.exampleId]: Number(id),
+              }))
+            }
+            buttonSize="compressed"
+          />
+        ) : (
+          i18n.getRepetitionButtonLabel(row.repetitionIndices[0] ?? 0)
+        ),
+    },
+    {
+      field: 'scoresByRepetition',
+      name: i18n.COLUMN_INPUT,
+      render: (
+        _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
+        row: ExampleScoreRow
+      ) => {
+        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
+        const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
+        return renderJsonPreview(
+          firstScoreDocument?.example.input,
+          `example-input-${row.exampleId}-${selectedRepetitionIndex}`
+        );
+      },
+    },
+    {
+      field: 'scoresByRepetition',
+      name: i18n.COLUMN_OUTPUT,
+      render: (
+        _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
+        row: ExampleScoreRow
+      ) => {
+        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
+        const selectedRepetitionIndex = getSelectedRepetitionIndex(row);
+        return renderJsonPreview(
+          firstScoreDocument?.task.output,
+          `task-output-${row.exampleId}-${selectedRepetitionIndex}`
+        );
+      },
+    },
+    {
+      field: 'scoresByRepetition',
+      name: i18n.COLUMN_EVALUATOR_SCORES,
+      render: (
+        _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
+        row: ExampleScoreRow
+      ) => {
+        const evaluatorScoreBadges = getEvaluatorScoreBadges(row);
+        return evaluatorScoreBadges.length > 0 ? (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {evaluatorScoreBadges.map((evaluatorScoreBadge) => (
+              <EuiFlexItem key={evaluatorScoreBadge.key} grow={false}>
+                <EuiBadge color="hollow">{evaluatorScoreBadge.label}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          <EuiText color="subdued" size="s">
+            {i18n.NO_EVALUATOR_SCORES}
+          </EuiText>
+        );
+      },
+    },
+    {
+      field: 'scoresByRepetition',
+      name: i18n.COLUMN_TRACE,
+      render: (
+        _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
+        row: ExampleScoreRow
+      ) => {
+        const traceIds = getSelectedTraceIds(row);
+        return traceIds.length > 0 ? (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {traceIds.map((traceId) => (
+              <EuiFlexItem key={traceId} grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="apmTrace"
+                  onClick={() => onTraceClick(traceId)}
+                  aria-label={i18n.getTraceButtonAriaLabel(traceId)}
+                >
+                  {truncate(traceId, TRACE_ID_VISIBLE_LENGTH)}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          '-'
+        );
+      },
+    },
+  ];
+
+  return (
+    <EuiBasicTable
+      items={rows}
+      columns={columns}
+      noItemsMessage={i18n.EMPTY_TABLE_MESSAGE}
+      tableCaption={i18n.TABLE_CAPTION}
+    />
+  );
 };

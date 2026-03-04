@@ -280,9 +280,7 @@ export const DatasetDetailPage: React.FC = () => {
         name: i18n.COLUMN_EXAMPLE_ID,
         width: '160px',
         render: (value: string) => (
-          <EuiText size="xs" className={truncatedCellStyles}>
-            {value.slice(0, 16)}...
-          </EuiText>
+          <EuiLink className={truncatedCellStyles}>{value.slice(0, 16)}...</EuiLink>
         ),
       },
       {
@@ -605,8 +603,11 @@ export const DatasetDetailPage: React.FC = () => {
                 onClick: () => openExampleFlyout(item),
                 className: css`
                   cursor: pointer;
-                  &:hover {
-                    background-color: var(--euiColorLightestShade);
+                  transition: background-color 150ms ease-in-out;
+                  &:hover,
+                  &:hover td,
+                  &:hover .euiTableRowCell {
+                    background-color: var(--euiColorLightestShade) !important;
                   }
                 `,
               })}
