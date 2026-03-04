@@ -13,7 +13,6 @@ import {
   createScoutConfig,
   measurePerformanceAsync,
   getEsClient,
-  getKbnClient,
 } from '../../common';
 import { ScoutLogger } from '../../common/services/logger';
 import type { ScoutTestOptions } from '../types';
@@ -33,8 +32,7 @@ export async function ingestTestDataHook(config: FullConfig, archives: string[])
     const serversConfigDir = projectUse.serversConfigDir;
     const scoutConfig = createScoutConfig(serversConfigDir, configName, log);
     const esClient = getEsClient(scoutConfig, log);
-    const kbnClient = getKbnClient(scoutConfig, log);
-    const esArchiver = getEsArchiver(esClient, kbnClient, log);
+    const esArchiver = getEsArchiver(esClient, log);
 
     log.debug('[setup] loading test data (only if indexes do not exist)...');
     for (const archive of archives) {

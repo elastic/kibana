@@ -103,6 +103,7 @@ import {
   getDescription,
   getFirstDataLayer,
   getLayersByType,
+  getRecommendedXAxisTitleVisibility,
   getReferenceLayers,
   getVisualizationType,
   isAnnotationsLayer,
@@ -643,7 +644,7 @@ export const getXyVisualization = ({
   },
 
   setDimension(props) {
-    const { prevState, layerId, columnId, groupId } = props;
+    const { prevState, layerId, columnId, groupId, frame } = props;
 
     const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
       (l) => l.layerId === layerId
@@ -660,8 +661,24 @@ export const getXyVisualization = ({
     }
 
     const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
+    let stateWithRecommendedXAxisTitleVisibility = prevState;
+
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
+
+      const datasourceLayer = frame.datasourceLayers[layerId];
+      const operation = datasourceLayer?.getOperationForColumnId(columnId);
+      const recommendedAxisSettings = getRecommendedXAxisTitleVisibility(
+        prevState.axisTitlesVisibilitySettings,
+        operation,
+        prevState.xTitle
+      );
+      if (recommendedAxisSettings) {
+        stateWithRecommendedXAxisTitleVisibility = {
+          ...prevState,
+          axisTitlesVisibilitySettings: recommendedAxisSettings,
+        };
+      }
     }
     if (groupId === 'y') {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
@@ -677,8 +694,10 @@ export const getXyVisualization = ({
       }
     }
     return {
-      ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+      ...stateWithRecommendedXAxisTitleVisibility,
+      layers: stateWithRecommendedXAxisTitleVisibility.layers.map((l) =>
+        l.layerId === layerId ? newLayer : l
+      ),
     };
   },
 
