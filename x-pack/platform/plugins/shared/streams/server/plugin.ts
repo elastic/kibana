@@ -47,6 +47,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
+import { RelationshipService } from './lib/streams/relationships/relationship_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -110,6 +111,7 @@ export class StreamsPlugin
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
     const systemService = new SystemService(core, this.logger);
+    const relationshipService = new RelationshipService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -124,6 +126,7 @@ export class StreamsPlugin
         attachmentClient,
         featureClient,
         systemClient,
+        relationshipClient,
         contentClient,
         queryClient,
       ] = await Promise.all([
@@ -131,6 +134,7 @@ export class StreamsPlugin
         attachmentService.getClientWithRequest({ request }),
         featureService.getClientWithRequest({ request }),
         systemService.getClientWithRequest({ request }),
+        relationshipService.getClientWithRequest({ request }),
         contentService.getClient(),
         queryService.getClientWithRequest({ request }),
       ]);
@@ -156,6 +160,7 @@ export class StreamsPlugin
         queryClient,
         systemClient,
         featureClient,
+        relationshipClient,
       });
 
       return {
@@ -165,6 +170,7 @@ export class StreamsPlugin
         streamsClient,
         featureClient,
         systemClient,
+        relationshipClient,
         inferenceClient,
         contentClient,
         queryClient,

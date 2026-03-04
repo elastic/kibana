@@ -1047,6 +1047,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_relationships',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
   }
 }
