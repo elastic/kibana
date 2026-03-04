@@ -1,0 +1,6 @@
+steps:
+  - label: Run Dynamic Pipeline
+    command: |
+      bash -eo pipefail -c '.buildkite/scripts/pipelines/pull_request/pipeline.sh | buildkite-agent pipeline upload'
+    plugins:
+      - elastic/es-partial-checkout: ~
