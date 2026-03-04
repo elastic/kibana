@@ -8,7 +8,6 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from './types';
@@ -16,9 +15,10 @@ import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export async function create(
-  requestCtx: RequestHandlerContext,
+  requestCtx: DashboardApiRequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
   createParams?: DashboardCreateRequestParams,
@@ -55,7 +55,8 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(
+  return await getDashboardCRUResponseBody(
+    requestCtx,
     savedObject,
     'create',
     dashboardStateSchema,

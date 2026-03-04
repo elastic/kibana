@@ -14,9 +14,10 @@ import { registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 import { registerReadRoute } from './read';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerRoutes(http: HttpServiceSetup) {
-  const { versioned: versionedRouter } = http.createRouter();
+  const { versioned: versionedRouter } = http.createRouter<DashboardApiRequestHandlerContext>();
 
   //
   // REST API routes

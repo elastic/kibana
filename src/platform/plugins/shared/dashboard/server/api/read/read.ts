@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardReadResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export async function read(
-  requestCtx: RequestHandlerContext,
+  requestCtx: DashboardApiRequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   isDashboardAppRequest: boolean = false
@@ -33,7 +33,8 @@ export async function read(
     id
   );
 
-  const response = getDashboardCRUResponseBody(
+  const response = await getDashboardCRUResponseBody(
+    requestCtx,
     savedObject,
     'read',
     dashboardStateSchema,

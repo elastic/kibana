@@ -11,9 +11,21 @@ import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
 import type { DashboardPanel, DashboardState, DashboardPinnedPanel } from './types';
 
+interface DroppedPanels {
+  total: number;
+  byType: Record<string, number>;
+}
+
 export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
   const warnings: string[] = [];
+  let droppedPanels: DroppedPanels | undefined;
   const { pinned_panels, panels, ...rest } = dashboardState;
+
+  function recordDroppedPanelType(panelType: string) {
+    if (!droppedPanels) droppedPanels = { total: 0, byType: {} };
+    droppedPanels.total += 1;
+    droppedPanels.byType[panelType] = (droppedPanels.byType[panelType] ?? 0) + 1;
+  }
 
   function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
@@ -24,6 +36,7 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
         warnings.push(
           `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
         );
+        recordDroppedPanelType(panel.type);
         return false;
       }
     }
@@ -34,6 +47,7 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
+      recordDroppedPanelType(panel.type);
     }
     return Boolean(panelSchema);
   }
@@ -75,5 +89,6 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
       ...(pinned_panels && { pinned_panels: mappedPinnedPanels }),
     } as DashboardState,
     warnings,
+    ...(droppedPanels && { droppedPanels }),
   };
 }

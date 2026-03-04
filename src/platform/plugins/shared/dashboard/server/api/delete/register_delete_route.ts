@@ -8,12 +8,13 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
+import { counterNames } from '../telemetry/increment_external_counter';
+import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
-export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
     path: `${basePath}/{id}`,
@@ -37,6 +38,8 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
       },
     },
     async (ctx, req, res) => {
+      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      dashboardApi.telemetry.incrementExternal(counterNames.external('delete'));
       try {
         await deleteDashboard(ctx, req.params.id);
       } catch (e) {

@@ -27,6 +27,7 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -49,6 +50,7 @@ import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
+import { registerDashboardApiRouteHandlerContext } from './request_handler_context';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -70,6 +72,7 @@ export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -101,6 +104,8 @@ export class DashboardPlugin
     }
 
     if (plugins.usageCollection) {
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('dashboard_api');
+
       // Registers routes for tracking and fetching dashboard views
       registerContentInsights(
         {
@@ -125,6 +130,7 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
+    registerDashboardApiRouteHandlerContext(core, this.apiUsageCounter);
     registerRoutes(core.http);
 
     void registerAccessControl({
