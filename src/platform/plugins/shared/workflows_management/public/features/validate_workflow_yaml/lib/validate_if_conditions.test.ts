@@ -286,7 +286,7 @@ steps:
     expect(results[0].message).toContain('==');
   });
 
-  it("should error for bare \"== '1'\" with no field (Peter: \"== '1'\")", () => {
+  it('should error for bare "== \'1\'" with no field (Peter: "== \'1\'")', () => {
     const yaml = `name: test
 steps:
   - name: check
