@@ -10,6 +10,7 @@ import {
   ReactFlow,
   Background,
   Controls,
+  ControlButton,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -24,13 +25,15 @@ import {
   useEuiTheme,
   EuiScreenReaderOnly,
   EuiScreenReaderLive,
+  EuiIcon,
   useGeneratedHtmlId,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { applyDagreLayout } from './layout';
-import { FIT_VIEW_PADDING, FIT_VIEW_DURATION } from './constants';
+import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
@@ -65,6 +68,8 @@ interface GraphProps {
   kuery: string;
   start: string;
   end: string;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 function GraphInner({
@@ -76,6 +81,8 @@ function GraphInner({
   kuery,
   start,
   end,
+  isFullscreen = false,
+  onToggleFullscreen,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -114,7 +121,8 @@ function GraphInner({
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
     if (layoutedNodes.length > 0) {
-      setTimeout(() => fitView(getFitViewOptions()), 50);
+      const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
+      return () => clearTimeout(timer);
     }
   }, [
     layoutedNodes,
@@ -225,6 +233,25 @@ function GraphInner({
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
   });
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === keys.ESCAPE && isFullscreen && onToggleFullscreen) {
+        e.preventDefault();
+        onToggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isFullscreen, onToggleFullscreen]);
+
+  const fullscreenButtonLabel = isFullscreen
+    ? i18n.translate('xpack.apm.serviceMap.fullScreenExitButton', {
+        defaultMessage: 'Exit fullscreen (esc)',
+      })
+    : i18n.translate('xpack.apm.serviceMap.fullScreenButton', {
+        defaultMessage: 'Enter fullscreen',
+      });
 
   const containerStyle = useMemo(
     () => ({
@@ -354,7 +381,21 @@ function GraphInner({
         edgesFocusable={false}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
-        <Controls showInteractive={false} position="top-left" css={controlsStyles} />
+        <Controls showInteractive={false} position="top-left" css={controlsStyles}>
+          {onToggleFullscreen && (
+            <ControlButton
+              onClick={onToggleFullscreen}
+              title={fullscreenButtonLabel}
+              aria-label={fullscreenButtonLabel}
+              data-test-subj="serviceMapFullScreenButton"
+            >
+              <EuiIcon
+                type={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                aria-label={fullscreenButtonLabel}
+              />
+            </ControlButton>
+          )}
+        </Controls>
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}

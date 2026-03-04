@@ -105,6 +105,8 @@ export interface ExecuteAgentParams {
   request: KibanaRequest;
   /** Execution parameters (serializable). */
   params: AgentExecutionParams;
+  /** Optional execution ID. When provided, it will be used instead of generating a new one. Must be unique. */
+  executionId?: string;
   /** Optional abort signal. When aborted, the execution will be cancelled. */
   abortSignal?: AbortSignal;
   /**
@@ -148,6 +150,11 @@ export interface AgentExecutionService {
    * Creates an execution document and returns the execution ID along with an events observable.
    */
   executeAgent(params: ExecuteAgentParams): Promise<ExecuteAgentResult>;
+
+  /**
+   * Retrieve an agent execution by its ID.
+   */
+  getExecution(executionId: string): Promise<AgentExecution | undefined>;
 
   /**
    * Abort an ongoing execution.

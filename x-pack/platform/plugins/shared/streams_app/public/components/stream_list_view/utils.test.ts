@@ -238,10 +238,12 @@ describe('filterCollapsedStreamRows', () => {
 
   it('filters out grandchildren if parent is collapsed', () => {
     // Add a grandchild for testing
-    const grandchild = createStream('logs-a.child1.grandchild', '1h');
+    const logsOtel = createStream('logs.otel', '1d');
+    const logsOtelChild = createStream('logs.otel.child1', '8h');
+    const grandchild = createStream('logs.otel.child1.grandchild', '1h');
     const streamsWithGrandchild = asTrees([
-      rootA,
-      aChild1,
+      logsOtel,
+      logsOtelChild,
       grandchild,
       aChild2,
       aChild3,
@@ -260,10 +262,10 @@ describe('filterCollapsedStreamRows', () => {
       'asc' as Direction,
       {}
     );
-    const collapsed = new Set<string>(['logs-a.child1']);
+    const collapsed = new Set<string>(['logs.otel.child1']);
     const filtered = filterCollapsedStreamRows(rowsWithGrandchild, collapsed, 'nameSortKey');
     // Should include logs-a.child1, but not its grandchild
-    expect(filtered.map((r) => r.stream.name)).toContain('logs-a.child1');
-    expect(filtered.map((r) => r.stream.name)).not.toContain('logs-a.child1.grandchild');
+    expect(filtered.map((r) => r.stream.name)).toContain('logs.otel.child1');
+    expect(filtered.map((r) => r.stream.name)).not.toContain('logs.otel.child1.grandchild');
   });
 });

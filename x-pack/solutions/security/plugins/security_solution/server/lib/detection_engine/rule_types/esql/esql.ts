@@ -33,6 +33,7 @@ import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 import type { ExcludedDocument, EsqlState } from './types';
@@ -89,6 +90,9 @@ export const esqlExecutor = async ({
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
     const isRuleAggregating = computeIsESQLQueryAggregating(ruleParams.query);
     const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
@@ -112,6 +116,7 @@ export const esqlExecutor = async ({
      * All alerts for aggregating queries are unique anyway
      */
     let iteration = 0;
+    let totalEventsFound = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
@@ -130,7 +135,7 @@ export const esqlExecutor = async ({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
-          filters: dataTiersFilters,
+          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
@@ -171,6 +176,7 @@ export const esqlExecutor = async ({
         );
 
         const results = response.values.map((row) => rowToDocument(response.columns, row));
+        totalEventsFound += results.length;
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -182,6 +188,11 @@ export const esqlExecutor = async ({
           hasLoggedRequestsReachedLimit,
           runtimeMappings: sharedParams.runtimeMappings,
           excludedDocuments,
+          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          primaryTimestamp,
+          secondaryTimestamp,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -235,8 +246,9 @@ export const esqlExecutor = async ({
             maxNumberOfAlertsMultiplier: 1,
           });
 
-          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
-          ruleExecutionLogger.info(`Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}, Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -267,7 +279,9 @@ export const esqlExecutor = async ({
           });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -307,6 +321,8 @@ export const esqlExecutor = async ({
       result.errors.push(error.message);
       result.success = false;
     }
+
+    result.totalEventsFound = totalEventsFound;
 
     return {
       ...result,

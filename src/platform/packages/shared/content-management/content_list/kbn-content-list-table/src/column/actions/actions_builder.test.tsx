@@ -26,7 +26,7 @@ const defaultContext: ColumnBuilderContext = {
   },
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: true },
+  supports: { sorting: true, pagination: true, search: true, selection: true },
 };
 
 describe('actions column builder', () => {

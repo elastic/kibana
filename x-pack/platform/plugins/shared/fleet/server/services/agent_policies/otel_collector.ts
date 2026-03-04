@@ -171,6 +171,19 @@ function generateOtelTypeTransforms(
           },
         ],
       };
+    case 'profiles':
+      return {
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              `set(attributes["data_stream.type"], "profiles")`,
+              `set(attributes["data_stream.dataset"], "${dataset}")`,
+              `set(attributes["data_stream.namespace"], "${namespace}")`,
+            ],
+          },
+        ],
+      };
     default:
       throw new FleetError(`unexpected data stream type ${type}`);
   }
@@ -182,7 +195,7 @@ export function extractSignalTypesFromPipelines(
   const signalTypes = new Set<string>();
   Object.keys(pipelines).forEach((pipelineId) => {
     const signalType = getSignalType(pipelineId);
-    if (signalType && ['logs', 'metrics', 'traces'].includes(signalType)) {
+    if (signalType && ['logs', 'metrics', 'traces', 'profiles'].includes(signalType)) {
       signalTypes.add(signalType);
     }
   });

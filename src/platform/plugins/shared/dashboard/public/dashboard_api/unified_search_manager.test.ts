@@ -15,7 +15,20 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 describe('initializeUnifiedSearchManager', () => {
   describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(
+        getSampleDashboardState({
+          filters: [
+            {
+              type: 'condition',
+              condition: {
+                field: 'status',
+                operator: 'is',
+                value: 'active',
+              },
+            },
+          ],
+        })
+      );
       const unifiedSearchManager = initializeUnifiedSearchManager(
         lastSavedState$.value,
         new BehaviorSubject<boolean>(false),
@@ -127,6 +140,57 @@ describe('initializeUnifiedSearchManager', () => {
           from: 'now-30m',
         });
       });
+    });
+  });
+  describe('getState', () => {
+    test('Should return as code filters', () => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(
+        getSampleDashboardState({
+          filters: [
+            {
+              type: 'condition',
+              condition: {
+                field: 'status',
+                operator: 'is',
+                value: 'active',
+              },
+            },
+          ],
+        })
+      );
+      const unifiedSearchManager = initializeUnifiedSearchManager(
+        lastSavedState$.value,
+        new BehaviorSubject<boolean>(false),
+        new Subject<void>(),
+        () => lastSavedState$.value,
+        {
+          useUnifiedSearchIntegration: false,
+        }
+      );
+      // change the unified search filter
+      unifiedSearchManager.api.setFilters([
+        {
+          meta: {
+            key: 'status',
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              status: 'inactive',
+            },
+          },
+        },
+      ]);
+      expect(unifiedSearchManager.internalApi.getState().filters).toEqual([
+        {
+          type: 'condition',
+          condition: {
+            field: 'status',
+            operator: 'is',
+            value: 'inactive',
+          },
+        },
+      ]);
     });
   });
 });

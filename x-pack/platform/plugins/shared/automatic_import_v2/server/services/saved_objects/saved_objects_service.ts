@@ -109,8 +109,8 @@ export class AutomaticImportSavedObjectService {
     try {
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
-        status: TASK_STATUSES.pending,
         created_by: authenticatedUser.username,
+        created_by_profile_uid: authenticatedUser.profile_uid,
         metadata: {
           title: integrationParams.title,
           description: integrationParams.description,
@@ -179,7 +179,6 @@ export class AutomaticImportSavedObjectService {
       const integrationData: IntegrationAttributes = {
         integration_id: existingIntegration.integration_id,
         created_by: existingIntegration.created_by,
-        status: data.status,
         last_updated_by: data.last_updated_by ?? existingIntegration.last_updated_by,
         last_updated_at: new Date().toISOString(),
         metadata: {
@@ -492,6 +491,8 @@ export class AutomaticImportSavedObjectService {
           filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(
             integrationId
           )}`,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
         });
       return dataStreamsResponse.saved_objects.map((dataStream) => dataStream.attributes);
     } catch (error) {

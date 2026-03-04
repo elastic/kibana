@@ -13,13 +13,16 @@ import '@testing-library/jest-dom';
 import type { ActionBuilderContext, DeleteActionProps } from '../types';
 import { buildDeleteAction } from './delete_action';
 
+const onDelete = jest.fn();
+
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
     onDelete: jest.fn(async () => {}),
   },
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: true },
+  supports: { sorting: true, pagination: true, search: true, selection: true },
+  actions: { onDelete },
 };
 
 describe('delete action builder', () => {
@@ -40,7 +43,6 @@ describe('delete action builder', () => {
         'data-test-subj': 'content-list-table-action-delete',
       });
 
-      // `name` is a ReactNode wrapping the label in danger-colored text.
       const { getByText } = render(<>{result!.name as ReactNode}</>);
       expect(getByText('Delete')).toBeInTheDocument();
     });
@@ -80,22 +82,27 @@ describe('delete action builder', () => {
       expect(getByText('Remove')).toBeInTheDocument();
     });
 
-    it('has a no-op `onClick` handler (stub for delete orchestration)', () => {
+    it('calls `actions.onDelete` with the item wrapped in an array', () => {
       const result = buildDeleteAction({}, defaultContext);
-
-      expect(result?.onClick).toBeInstanceOf(Function);
-
-      // Clicking should not throw or call `onDelete` directly.
-      const onDelete = jest.fn();
-      const context: ActionBuilderContext = {
-        ...defaultContext,
-        itemConfig: { onDelete },
-      };
-      const stubResult = buildDeleteAction({}, context);
       const item = { id: '1', title: 'Test' };
 
-      stubResult?.onClick?.(item, {} as React.MouseEvent);
-      expect(onDelete).not.toHaveBeenCalled();
+      result?.onClick?.(item, {} as React.MouseEvent);
+
+      expect(onDelete).toHaveBeenCalledWith([item]);
+    });
+
+    it('does not call `itemConfig.onDelete` directly', () => {
+      const itemOnDelete = jest.fn();
+      const context: ActionBuilderContext = {
+        ...defaultContext,
+        itemConfig: { onDelete: itemOnDelete },
+      };
+      const result = buildDeleteAction({}, context);
+      const item = { id: '1', title: 'Test' };
+
+      result?.onClick?.(item, {} as React.MouseEvent);
+
+      expect(itemOnDelete).not.toHaveBeenCalled();
     });
   });
 });

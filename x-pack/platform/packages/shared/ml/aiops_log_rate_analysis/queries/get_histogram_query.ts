@@ -20,7 +20,9 @@ export function getHistogramQuery(
   });
 
   if (histogramQuery.bool && Array.isArray(histogramQuery.bool.filter)) {
-    const existingFilter = histogramQuery.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
+    const existingFilter = histogramQuery.bool.filter.filter(
+      (d) => Object.keys(d || {})[0] !== 'range'
+    );
 
     histogramQuery.bool.filter = [
       ...existingFilter,

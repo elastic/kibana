@@ -23,6 +23,8 @@ const defaultProps = {
   caseConnectors: getCaseConnectorsMockResponse(),
   data: basicCase,
   manualAlertsData: { 'some-id': { _id: 'some-id' } },
+  commentRefs: { current: {} },
+  handleManageQuote: jest.fn(),
 };
 
 jest.mock('react-router-dom', () => ({

@@ -56,7 +56,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
         lensService?.navigateToPrefilledEditor(
           {
             id: '',
-            timeRange: {
+            time_range: {
               from: startDate ?? 'now-1d',
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',

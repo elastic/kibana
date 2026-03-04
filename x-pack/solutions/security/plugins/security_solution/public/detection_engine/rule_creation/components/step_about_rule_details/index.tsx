@@ -89,13 +89,13 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       {loading && (
         <>
           <EuiProgress size="xs" color="accent" position="absolute" />
-          <HeaderSection title={i18n.ABOUT_TEXT} />
+          <HeaderSection title={i18n.ABOUT_TEXT} border hideSubtitle />
         </>
       )}
       {stepData != null && stepDataDetails != null && (
         <EuiFlexGroup gutterSize="xs" direction="column" className={fullHeight}>
           <EuiFlexItem grow={false} key="header">
-            <HeaderSection title={i18n.ABOUT_TEXT}>
+            <HeaderSection title={i18n.ABOUT_TEXT} border hideSubtitle>
               {toggleOptions.length > 0 && (
                 <EuiButtonGroup
                   options={toggleOptions}

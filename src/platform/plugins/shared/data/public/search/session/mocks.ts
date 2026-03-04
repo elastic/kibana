@@ -15,7 +15,9 @@ import type { SessionMeta } from './search_session_state';
 import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';
 import type { ISearchSessionEBTManager } from './ebt_manager';
 
-export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
+export function getSessionsClientMock(
+  overrides: Partial<jest.Mocked<ISessionsClient>> = {}
+): jest.Mocked<ISessionsClient> {
   return {
     get: jest.fn(),
     create: jest.fn(),
@@ -24,6 +26,8 @@ export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
     extend: jest.fn(),
     delete: jest.fn(),
     rename: jest.fn(),
+    status: jest.fn(),
+    ...overrides,
   };
 }
 

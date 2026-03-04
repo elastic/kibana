@@ -323,7 +323,7 @@ export function loadEmbeddableData(
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
-      if (getState().enhancements?.dynamicActions?.events.length) {
+      if (getState().drilldowns?.length) {
         reload('viewMode');
       }
     }),

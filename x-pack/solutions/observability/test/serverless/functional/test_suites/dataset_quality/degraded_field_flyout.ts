@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('svlLogsSynthtraceClient');
   const esClient = getService('es');
   const retry = getService('retry');
-  const queryBar = getService('queryBar');
+  const browser = getService('browser');
   const to = new Date().toISOString();
   const type = 'logs';
   const degradedDatasetName = 'synth.degraded';
@@ -114,10 +114,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover');
 
+        // Confirm URL contains ES|QL query for the specific degraded field
         await retry.tryForTime(5000, async () => {
-          const queryText = await queryBar.getQueryString();
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
 
-          expect(queryText).to.be('_ignored: test_field');
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${degradedDataStreamName}`);
+          expect(decodedUrl).to.contain('MV_CONTAINS(_ignored');
+          expect(decodedUrl).to.contain('test_field');
         });
       });
     });

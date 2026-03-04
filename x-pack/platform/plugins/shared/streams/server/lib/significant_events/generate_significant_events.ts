@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams } from '@kbn/streams-schema';
+import { ensureMetadata } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { FeatureClient } from '../streams/feature/feature_client';
@@ -17,8 +18,6 @@ interface Params {
   connectorId: string;
   start: number;
   end: number;
-  system?: System;
-  sampleDocsSize?: number;
   systemPrompt: string;
 }
 
@@ -38,7 +37,7 @@ export async function generateSignificantEventDefinitions(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt } = params;
+  const { definition, connectorId, start, end, systemPrompt } = params;
   const { inferenceClient, featureClient, logger, signal, esClient } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
@@ -52,9 +51,7 @@ export async function generateSignificantEventDefinitions(
     end,
     inferenceClient: boundInferenceClient,
     logger,
-    system,
     signal,
-    sampleDocsSize,
     systemPrompt,
     // Server owns data access; AI layer only requests context via this callback.
     getFeatures: async (filters) => {
@@ -66,8 +63,7 @@ export async function generateSignificantEventDefinitions(
   return {
     queries: queries.map((query) => ({
       title: query.title,
-      kql: query.kql,
-      feature: system ? { name: system.name, filter: system.filter, type: system.type } : undefined,
+      esql: { query: ensureMetadata(query.esql) },
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),
