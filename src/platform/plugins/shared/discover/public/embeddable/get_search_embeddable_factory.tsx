@@ -333,9 +333,28 @@ export const getSearchEmbeddableFactory = ({
           const isSelectedTabDeletedForDisplay = isTabDeleted(selectedTabIdForDisplay, tabs);
           const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;
 
-          const dataView = useMemo(() => {
-            const hasDataView = (dataViews ?? []).length > 0;
-            if (!hasDataView) {
+          const dataView = useMemo(() => dataViews?.[0], [dataViews]);
+          const isMissingDataView = !dataView && !isSelectedTabDeletedForDisplay;
+
+          if (!dataView && !isSelectedTabDeletedForDisplay) {
+            blockingError$.next(
+              new Error(
+                i18n.translate('discover.embeddable.search.dataViewError', {
+                  defaultMessage: 'Missing data view {indexPatternId}',
+                  values: {
+                    indexPatternId:
+                      typeof runtimeState.serializedSearchSource?.index === 'string'
+                        ? runtimeState.serializedSearchSource.index
+                        : runtimeState.serializedSearchSource?.index?.id ?? '',
+                  },
+                })
+              )
+            );
+          }
+
+          useEffect(() => {
+            if (isMissingDataView) {
+              dataLoading$.next(false);
               blockingError$.next(
                 new Error(
                   i18n.translate('discover.embeddable.search.dataViewError', {
@@ -349,10 +368,8 @@ export const getSearchEmbeddableFactory = ({
                   })
                 )
               );
-              return;
             }
-            return dataViews![0];
-          }, [dataViews]);
+          }, [isMissingDataView]);
 
           const onAddFilter = useCallback<DocViewFilterFn>(
             async (field, value, operator) => {

@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can edit a session and return to the dashboard', async () => {
       await addSearchEmbeddableToDashboard('logstash hits');
       expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
-      await discover.editInDiscover();
+      await discover.editEmbeddableInDiscover();
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -291,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('resets back to a normal Discover session if navigated away from an edit session', async () => {
       await addSearchEmbeddableToDashboard();
-      await discover.editInDiscover();
+      await discover.editEmbeddableInDiscover();
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
       await Promise.all([

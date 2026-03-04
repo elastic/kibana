@@ -1082,7 +1082,7 @@ export class DiscoverPageObject extends FtrService {
 
   /** Discover Embeddable helper methods   */
 
-  public async editInDiscover() {
+  public async editEmbeddableInDiscover() {
     await this.dashboardPanelActions.clickEdit();
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');

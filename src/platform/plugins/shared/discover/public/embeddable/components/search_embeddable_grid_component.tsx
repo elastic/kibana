@@ -18,8 +18,12 @@ import {
 } from '@kbn/discover-utils';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import {
+  apiPublishesWritableViewMode,
+  getViewModeSubject,
+  useBatchedPublishingSubjects,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
@@ -31,6 +35,7 @@ import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { isObject } from 'lodash';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { isEsqlMode } from '../initialize_fetch';
@@ -65,16 +70,8 @@ const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 const apiPublishesIsEditableByUser = (
   parentApi: unknown
 ): parentApi is { isEditableByUser: boolean } =>
-  typeof parentApi === 'object' &&
-  parentApi !== null &&
-  typeof (parentApi as { isEditableByUser?: unknown }).isEditableByUser === 'boolean';
-
-const apiCanSetViewMode = (
-  parentApi: unknown
-): parentApi is { setViewMode: (viewMode: ViewMode) => void } =>
-  typeof parentApi === 'object' &&
-  parentApi !== null &&
-  typeof (parentApi as { setViewMode?: unknown }).setViewMode === 'function';
+  isObject(parentApi) &&
+  typeof (parentApi as { isEditableByUser?: boolean }).isEditableByUser === 'boolean';
 
 export function SearchEmbeddableGridComponent({
   api,
@@ -86,8 +83,10 @@ export function SearchEmbeddableGridComponent({
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
-  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
-    ? api.parentApi.esqlVariables$
+  const parentApi = api.parentApi;
+
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
@@ -138,27 +137,21 @@ export function SearchEmbeddableGridComponent({
   const isEditMode = viewMode === 'edit';
 
   const canShowDashboardWriteControls = Boolean(
-    (
-      discoverServices.capabilities as {
-        dashboard_v2?: {
-          showWriteControls?: boolean;
-        };
-      }
-    ).dashboard_v2?.showWriteControls
+    discoverServices.capabilities.dashboard_v2?.showWriteControls
   );
 
-  const canEditDashboardByAccessControl = apiPublishesIsEditableByUser(api.parentApi)
-    ? api.parentApi.isEditableByUser
+  const canEditDashboardByAccessControl = apiPublishesIsEditableByUser(parentApi)
+    ? parentApi.isEditableByUser
     : false;
 
-  const canSwitchToEditMode = apiCanSetViewMode(api.parentApi);
+  const canSwitchToEditMode = apiPublishesWritableViewMode(parentApi);
 
   const canEditPanelInViewMode =
     canShowDashboardWriteControls && canEditDashboardByAccessControl && canSwitchToEditMode;
 
   const onEditPanel = useCallback(() => {
-    if (apiCanSetViewMode(api.parentApi)) api.parentApi.setViewMode('edit');
-  }, [api.parentApi]);
+    if (canSwitchToEditMode) parentApi.setViewMode('edit');
+  }, [canSwitchToEditMode, parentApi]);
 
   const viewModeDeletedTabAction: ViewModeDeletedTabAction = canEditPanelInViewMode
     ? { type: 'editPanel', onClick: onEditPanel }
