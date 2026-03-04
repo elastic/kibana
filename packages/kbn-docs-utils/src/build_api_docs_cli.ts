@@ -27,6 +27,7 @@ import {
   type CliContext,
 } from './cli';
 import { runCheckPackageDocs } from './check_package_docs_cli';
+import { resolveAffectedBuildPlanFromMoon } from './build_api_docs_affected';
 
 const rootDir = Path.join(__dirname, '../../..');
 
@@ -64,6 +65,28 @@ export function runBuildApiDocsCli() {
         await apm.flush();
         await runCheckPackageDocs(log, flags as CliFlags);
         return;
+      }
+
+      const hasPluginFilter = !!options.pluginFilter && options.pluginFilter.length > 0;
+      const hasPackageFilter = !!options.packageFilter && options.packageFilter.length > 0;
+
+      if (!options.fullBuild && !hasPluginFilter && !hasPackageFilter) {
+        const affectedBuildPlan = resolveAffectedBuildPlanFromMoon(options.changesMode);
+        log.info(`[build_api_docs] ${affectedBuildPlan.message}`);
+
+        if (affectedBuildPlan.mode === 'skip') {
+          transaction?.end();
+          await apm.flush();
+          return;
+        }
+
+        if (affectedBuildPlan.mode === 'filtered') {
+          options = {
+            ...options,
+            pluginFilter: affectedBuildPlan.pluginFilter,
+            packageFilter: affectedBuildPlan.packageFilter,
+          };
+        }
       }
 
       const spanSetup = transaction.startSpan('build_api_docs.setup', 'setup');
@@ -117,9 +140,12 @@ export function runBuildApiDocsCli() {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['plugin', 'package', 'stats'],
-        boolean: ['references'],
+        string: ['plugin', 'package', 'stats', 'changes'],
+        boolean: ['full', 'references'],
         help: `
+          --full             Disable affected-only mode and run full API docs build.
+          --changes [mode]   Only consider uncommitted local changes instead of the entire branch.
+                             Optionally pass 'staged' or 'unstaged' to filter further.
           --plugin           Optionally, run for only a specific plugin by its plugin ID (plugin.id in kibana.jsonc).
           --package          Optionally, run for only a specific package by its package ID (id in kibana.jsonc, e.g., @kbn/core).
           --stats            Deprecated. Use check_package_docs_cli instead. When provided, validation is routed

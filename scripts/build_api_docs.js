@@ -8,4 +8,9 @@
  */
 
 require('@kbn/setup-node-env');
+
+if (!process.env.CI && process.env.ELASTIC_APM_LOG_LEVEL == null) {
+  process.env.ELASTIC_APM_LOG_LEVEL = 'off';
+}
+
 require('@kbn/docs-utils').runBuildApiDocsCli();

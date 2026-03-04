@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
-
-export { regenerateMoonProjects };
+export { regenerateMoonProjects } from './cli/regenerate_moon_projects';
+export {
+  getAffectedMoonProjectIds,
+  getMoonProjectConfigPaths,
+  isMoonAffectedQueryDependencyPath,
+  MOON_AFFECTED_QUERY_DEPENDENCY_PATHS,
+  readMoonProjects,
+  type MoonProjectMetadata,
+  MOON_PROJECT_CONFIG_PATTERNS,
+} from './project_metadata';

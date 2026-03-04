@@ -33,7 +33,5 @@ export function getSourceFileMatching(
   project: Project,
   absolutePath: string
 ): SourceFile | undefined {
-  return project.getSourceFiles().find((file) => {
-    return file.getFilePath().startsWith(absolutePath);
-  });
+  return project.getSourceFile(absolutePath) ?? project.getSourceFile(`${absolutePath}x`);
 }

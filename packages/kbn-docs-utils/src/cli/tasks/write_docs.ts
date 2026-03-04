@@ -86,39 +86,41 @@ export async function writeDocs(
       } else {
         log.info(`Plugin ${pluginApi.id} has no public API.`);
       }
-
-      const spanWriteDeprecationDocByPlugin = transaction.startSpan(
-        'build_api_docs.writeDeprecationDocByPlugin',
-        'write'
-      );
-
-      await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-
-      spanWriteDeprecationDocByPlugin?.end();
-
-      const spanWriteDeprecationDueByTeam = transaction.startSpan(
-        'build_api_docs.writeDeprecationDueByTeam',
-        'write'
-      );
-
-      await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
-
-      spanWriteDeprecationDueByTeam?.end();
-
-      const spanWriteDeprecationDocByApi = transaction.startSpan(
-        'build_api_docs.writeDeprecationDocByApi',
-        'write'
-      );
-
-      await writeDeprecationDocByApi(
-        outputFolder,
-        referencedDeprecations,
-        unreferencedDeprecations,
-        log
-      );
-
-      spanWriteDeprecationDocByApi?.end();
     }
+  }
+
+  if (!options.stats) {
+    const spanWriteDeprecationDocByPlugin = transaction.startSpan(
+      'build_api_docs.writeDeprecationDocByPlugin',
+      'write'
+    );
+
+    await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+
+    spanWriteDeprecationDocByPlugin?.end();
+
+    const spanWriteDeprecationDueByTeam = transaction.startSpan(
+      'build_api_docs.writeDeprecationDueByTeam',
+      'write'
+    );
+
+    await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
+
+    spanWriteDeprecationDueByTeam?.end();
+
+    const spanWriteDeprecationDocByApi = transaction.startSpan(
+      'build_api_docs.writeDeprecationDocByApi',
+      'write'
+    );
+
+    await writeDeprecationDocByApi(
+      outputFolder,
+      referencedDeprecations,
+      unreferencedDeprecations,
+      log
+    );
+
+    spanWriteDeprecationDocByApi?.end();
   }
 
   if (initialDocIds) {

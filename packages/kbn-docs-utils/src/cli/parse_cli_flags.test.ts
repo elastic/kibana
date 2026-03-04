@@ -62,10 +62,39 @@ describe('parseCliFlags', () => {
 
     const result = parseCliFlags(flags);
 
+    expect(result.fullBuild).toBe(false);
     expect(result.collectReferences).toBe(false);
     expect(result.stats).toBeUndefined();
     expect(result.pluginFilter).toBeUndefined();
     expect(result.packageFilter).toBeUndefined();
+  });
+
+  it('handles full flag correctly', () => {
+    const flags: CliFlags = {
+      full: true,
+    };
+
+    const result = parseCliFlags(flags);
+
+    expect(result.fullBuild).toBe(true);
+  });
+
+  it('sets changesMode to all when --changes is passed without a value', () => {
+    expect(parseCliFlags({ changes: true }).changesMode).toBe('all');
+    expect(parseCliFlags({ changes: '' }).changesMode).toBe('all');
+  });
+
+  it('sets changesMode to staged or unstaged', () => {
+    expect(parseCliFlags({ changes: 'staged' }).changesMode).toBe('staged');
+    expect(parseCliFlags({ changes: 'unstaged' }).changesMode).toBe('unstaged');
+  });
+
+  it('throws for invalid --changes value', () => {
+    expect(() => parseCliFlags({ changes: 'invalid' })).toThrow('--changes must be');
+  });
+
+  it('defaults changesMode to undefined', () => {
+    expect(parseCliFlags({}).changesMode).toBeUndefined();
   });
 
   it('accepts single check flag', () => {

@@ -99,6 +99,23 @@ const normalizeStats = (value: unknown | string[]) => {
   return value;
 };
 
+const VALID_CHANGES_MODES = new Set(['staged', 'unstaged']);
+
+const parseChangesFlag = (
+  value: string | boolean | undefined
+): 'all' | 'staged' | 'unstaged' | undefined => {
+  if (value === undefined || value === false) {
+    return undefined;
+  }
+  if (value === true || value === '') {
+    return 'all';
+  }
+  if (VALID_CHANGES_MODES.has(value)) {
+    return value as 'staged' | 'unstaged';
+  }
+  throw new Error(`--changes must be 'staged' or 'unstaged', got '${value}'`);
+};
+
 /**
  * Parses and validates CLI flags, normalizing them into a consistent format.
  *
@@ -107,6 +124,8 @@ const normalizeStats = (value: unknown | string[]) => {
  * @throws {Error} If flags are invalid.
  */
 export function parseCliFlags(flags: CliFlags): CliOptions {
+  const fullBuild = flags.full === true;
+  const changesMode = parseChangesFlag(flags.changes);
   const collectReferences = flags.references === true;
   const pluginFilter = dedupe(normalizeStringList(flags.plugin, 'plugin'));
   const packageFilter = dedupe(normalizeStringList(flags.package, 'package'));
@@ -118,6 +137,8 @@ export function parseCliFlags(flags: CliFlags): CliOptions {
   validateStats(stats);
 
   return {
+    fullBuild,
+    changesMode,
     collectReferences,
     stats,
     pluginFilter,
