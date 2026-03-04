@@ -63,9 +63,6 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   app: [ALERTS_FEATURE_ID, 'kibana', 'securitySolution'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
-  management: {
-    insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
-  },
   privileges: {
     all: {
       app: ['securitySolution', ALERTS_FEATURE_ID, 'kibana'],
@@ -76,10 +73,6 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       },
       alerting: {
         alert: { all: alertingFeatures },
-      },
-      // TODO: figure out if this should be here
-      management: {
-        insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
       },
       ui: [ALERTS_UI_READ, ALERTS_UI_EDIT],
       api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_ALL, ALERTS_API_READ, USERS_API_READ],
@@ -93,9 +86,6 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       },
       alerting: {
         alert: { read: alertingFeatures },
-      },
-      management: {
-        insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
       },
       ui: [ALERTS_UI_READ],
       api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_READ, USERS_API_READ],
