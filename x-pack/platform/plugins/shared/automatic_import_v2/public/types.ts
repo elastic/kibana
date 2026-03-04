@@ -9,7 +9,8 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { useGetAllIntegrations, useGetIntegrationById } from './common';
+import type { useGetAllIntegrations } from './common/hooks/use_get_all_integrations';
+import type { useGetIntegrationById } from './common/hooks/use_get_integration_by_id';
 import type { CreateIntegrationComponent } from './components/create_integration/types';
 import type { CreateIntegrationSideCardButtonComponent } from './components/create_integration_card_button/types';
 import type { DataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout/types';
