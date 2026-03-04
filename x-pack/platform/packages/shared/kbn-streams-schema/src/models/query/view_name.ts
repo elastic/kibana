@@ -34,3 +34,26 @@ export function getStreamNameFromViewName(viewName: string): string | null {
   }
   return null;
 }
+
+/**
+ * Generates the ES|QL view query for a wired stream.
+ * The query targets the stream's own data plus the ES|QL views of its direct children,
+ * so that each view in the hierarchy includes data from downstream children transitively.
+ * @param streamName - The wired stream name (e.g. 'logs.otel')
+ * @param directChildrenNames - Names of the stream's direct children (from routing destinations)
+ * @returns The ES|QL FROM query for the view
+ * @example getWiredStreamViewQuery('logs.otel', ['logs.otel.child1', 'logs.otel.child2'])
+ *   => 'FROM logs.otel, $.logs.otel.child1, $.logs.otel.child2'
+ * @example getWiredStreamViewQuery('logs.otel.leaf', [])
+ *   => 'FROM logs.otel.leaf'
+ */
+export function getWiredStreamViewQuery(
+  streamName: string,
+  directChildrenNames: string[] = []
+): string {
+  if (directChildrenNames.length === 0) {
+    return `FROM ${streamName}`;
+  }
+  const childViews = directChildrenNames.map(getEsqlViewName).join(', ');
+  return `FROM ${streamName}, ${childViews}`;
+}

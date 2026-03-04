@@ -8,6 +8,7 @@
 import type { IngestStreamIndexMode } from '../models/ingest/base';
 import { Streams } from '../models/streams';
 import { getIndexPatternsForStream } from './hierarchy_helpers';
+import { getEsqlViewName } from '../models/query/view_name';
 
 export interface GetDiscoverEsqlQueryOptions {
   /**
@@ -56,6 +57,11 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
   if (Streams.QueryStream.Definition.is(definition)) {
     // Use the ES|QL view name as the query source
     return `FROM ${definition.query.view} | SORT @timestamp DESC`;
+  }
+
+  if (Streams.WiredStream.Definition.is(definition)) {
+    const metadataSuffix = includeMetadata ? ' METADATA _source' : '';
+    return `FROM ${getEsqlViewName(definition.name)}${metadataSuffix}`;
   }
 
   const indexPatterns = getIndexPatternsForStream(definition);

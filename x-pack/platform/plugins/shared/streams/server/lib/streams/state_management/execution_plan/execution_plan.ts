@@ -6,9 +6,10 @@
  */
 
 import { groupBy } from 'lodash';
-import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getSegments, getStreamNameFromViewName } from '@kbn/streams-schema';
 import { StatusError } from '../../errors/status_error';
+import { processInDepthOrder } from '../../helpers/process_in_depth_order';
 import {
   deleteComponent,
   upsertComponent,
@@ -384,28 +385,16 @@ export class ExecutionPlan {
   }
 
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
-    const actionWithStreamsDepth = actions.map((action) => ({
-      ...action,
-      depth: getSegments(action.stream).length - 1,
-    }));
-
-    const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
-    const depths = Object.keys(actionsByDepth)
-      .map(Number)
-      .sort((a, b) => b - a); // Sort descending: deepest (children) first
-
-    // Process each depth level sequentially, with pipelines at the same depth in parallel
-    for (const depth of depths) {
-      await Promise.all(
-        actionsByDepth[depth].map((action) =>
-          upsertIngestPipeline({
-            esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-            logger: this.dependencies.logger,
-            pipeline: action.request,
-          })
-        )
-      );
-    }
+    await processInDepthOrder(
+      actions,
+      (action) => getSegments(action.stream).length - 1,
+      (action) =>
+        upsertIngestPipeline({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          pipeline: action.request,
+        })
+    );
   }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
@@ -497,19 +486,19 @@ export class ExecutionPlan {
   }
 
   private async upsertEsqlViews(actions: UpsertEsqlViewAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
+    await processInDepthOrder(
+      actions,
+      (action) => {
+        const streamName = getStreamNameFromViewName(action.request.name);
+        return streamName ? getSegments(streamName).length - 1 : 0;
+      },
+      (action) =>
         upsertEsqlView({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
           query: action.request.query,
         })
-      )
     );
   }
 

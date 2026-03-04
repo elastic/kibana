@@ -214,6 +214,37 @@ export class StreamsApp {
     return null;
   }
 
+  /**
+   * Verifies that the Discover button for a wired stream links to the ES|QL view ($.streamname)
+   * rather than the raw glob pattern.
+   */
+  async verifyWiredStreamDiscoverLinkUsesView(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Wired streams should use the ES|QL view ($.streamname), not the raw glob pattern
+    const viewFragment = encodeURIComponent(`FROM $.${streamName}`);
+    const rawFragment = encodeURIComponent(`FROM ${streamName}, ${streamName}.*`);
+
+    if (href.includes(rawFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} still uses raw glob pattern. Expected view reference ($.${streamName}).`
+      );
+    }
+    if (!href.includes(viewFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} does not contain expected view fragment. href=${href} expected=FROM $.${streamName}`
+      );
+    }
+  }
+
   async verifyStreamsAreInTable(streamNames: string[]) {
     for (const name of streamNames) {
       await expect(

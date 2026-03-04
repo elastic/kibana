@@ -108,6 +108,7 @@ export namespace WiredStream {
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
     effective_settings: WiredIngestStreamEffectiveSettings;
     effective_failure_store: WiredIngestStreamEffectiveFailureStore;
+    view_name: string;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<
@@ -128,6 +129,7 @@ const WiredStreamSchema = {
       effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
       effective_settings: wiredIngestStreamEffectiveSettingsSchema,
       effective_failure_store: wiredIngestStreamEffectiveFailureStoreSchema,
+      view_name: z.string(),
     })
   ),
   UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

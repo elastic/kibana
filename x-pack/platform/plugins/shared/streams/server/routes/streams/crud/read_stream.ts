@@ -13,6 +13,7 @@ import {
   findInheritedFailureStore,
   getRoot,
   LOGS_ECS_STREAM_NAME,
+  getEsqlViewName,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -173,6 +174,7 @@ export async function readStream({
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
     effective_failure_store: effectiveFailureStore,
+    view_name: getEsqlViewName(streamDefinition.name),
   };
   return body;
 }

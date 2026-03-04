@@ -42,6 +42,7 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
@@ -267,6 +268,15 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
+
+    backfillWiredStreamViews({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((err: Error) => {
+      this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
+        error: err,
+      });
+    });
 
     return {};
   }

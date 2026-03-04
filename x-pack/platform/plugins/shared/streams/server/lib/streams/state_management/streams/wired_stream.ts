@@ -16,6 +16,8 @@ import {
   isInheritLifecycle,
   getInheritedFieldsFromAncestors,
   validateStreamName,
+  getEsqlViewName,
+  getWiredStreamViewQuery,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
@@ -792,6 +794,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
+      {
+        type: 'upsert_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
+          query: getWiredStreamViewQuery(
+            this._definition.name,
+            this._definition.ingest.wired.routing.map((r) => r.destination)
+          ),
+        },
+      },
     ];
   }
 
@@ -875,6 +887,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         request: generateReroutePipeline({
           definition: this._definition,
         }),
+      });
+      actions.push({
+        type: 'upsert_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
+          query: getWiredStreamViewQuery(
+            this._definition.name,
+            this._definition.ingest.wired.routing.map((r) => r.destination)
+          ),
+        },
       });
     }
     if (this._changes.processing) {
@@ -1045,6 +1067,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'unlink_features',
         request: {
           name: this._definition.name,
+        },
+      },
+      {
+        type: 'delete_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
         },
       },
     ];

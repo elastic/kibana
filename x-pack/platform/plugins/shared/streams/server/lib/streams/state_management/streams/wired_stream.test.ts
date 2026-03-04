@@ -10,6 +10,7 @@ import { WiredStream } from './wired_stream';
 import type { StateDependencies, StreamChange } from '../types';
 import type { State } from '../state';
 import type { StreamChangeStatus } from '../stream_active_record/stream_active_record';
+import type { ElasticsearchAction } from '../execution_plan/types';
 
 interface WiredStreamChanges {
   ownFields: boolean;
@@ -28,6 +29,8 @@ interface WiredStreamTestable {
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
+  doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]>;
+  doDetermineDeleteActions(): Promise<ElasticsearchAction[]>;
 }
 
 describe('WiredStream', () => {
@@ -375,6 +378,108 @@ describe('WiredStream', () => {
     });
   });
 
+  describe('doDetermineCreateActions - ES|QL view', () => {
+    const createMockDependenciesWithEs = (): StateDependencies =>
+      ({
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        isServerless: false,
+        isDev: false,
+        scopedClusterClient: {
+          asCurrentUser: {
+            indices: {
+              getDataStream: jest.fn().mockResolvedValue({
+                data_streams: [{ _meta: { managed_by: 'streams' } }],
+              }),
+            },
+          },
+        },
+      } as unknown as StateDependencies);
+
+    it('includes upsert_esql_view action with correct name and query', async () => {
+      const definition = createBaseWiredStreamDefinition({
+        name: 'logs.otel',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: { fields: {}, routing: [] },
+          failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
+        },
+      });
+      const stream = new WiredStream(definition, createMockDependenciesWithEs());
+      const desiredState = createMockState(new Map([['logs.otel', { definition }]]));
+
+      const actions = await (stream as unknown as WiredStreamTestable).doDetermineCreateActions(
+        desiredState
+      );
+      const viewAction = (actions as ElasticsearchAction[]).find(
+        (a) => a.type === 'upsert_esql_view'
+      ) as Extract<ElasticsearchAction, { type: 'upsert_esql_view' }> | undefined;
+
+      expect(viewAction).toBeDefined();
+      expect(viewAction?.request.name).toBe('$.logs.otel');
+      expect(viewAction?.request.query).toBe('FROM logs.otel');
+    });
+
+    it('uses the stream name to build the view query', async () => {
+      const rootDef = createBaseWiredStreamDefinition({
+        name: 'logs.otel',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: { fields: {}, routing: [] },
+          failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
+        },
+      });
+      const definition = createBaseWiredStreamDefinition({ name: 'logs.otel.nginx' });
+      const stream = new WiredStream(definition, createMockDependenciesWithEs());
+      const desiredState = createMockState(
+        new Map([
+          ['logs.otel', { definition: rootDef }],
+          ['logs.otel.nginx', { definition }],
+        ])
+      );
+
+      const actions = await (stream as unknown as WiredStreamTestable).doDetermineCreateActions(
+        desiredState
+      );
+      const viewAction = (actions as ElasticsearchAction[]).find(
+        (a) => a.type === 'upsert_esql_view'
+      ) as Extract<ElasticsearchAction, { type: 'upsert_esql_view' }> | undefined;
+
+      expect(viewAction?.request.name).toBe('$.logs.otel.nginx');
+      expect(viewAction?.request.query).toBe('FROM logs.otel.nginx');
+    });
+  });
+
+  describe('doDetermineDeleteActions - ES|QL view', () => {
+    it('includes delete_esql_view action with the correct view name', async () => {
+      const definition = createBaseWiredStreamDefinition({ name: 'logs.otel' });
+      const stream = new WiredStream(definition, createMockDependencies());
+
+      const actions = await (stream as unknown as WiredStreamTestable).doDetermineDeleteActions();
+      const viewAction = (actions as ElasticsearchAction[]).find(
+        (a) => a.type === 'delete_esql_view'
+      ) as Extract<ElasticsearchAction, { type: 'delete_esql_view' }> | undefined;
+
+      expect(viewAction).toBeDefined();
+      expect(viewAction?.request.name).toBe('$.logs.otel');
+    });
+
+    it('uses the stream name to build the delete view name', async () => {
+      const definition = createBaseWiredStreamDefinition({ name: 'logs.otel.nginx' });
+      const stream = new WiredStream(definition, createMockDependencies());
+
+      const actions = await (stream as unknown as WiredStreamTestable).doDetermineDeleteActions();
+      const viewAction = (actions as ElasticsearchAction[]).find(
+        (a) => a.type === 'delete_esql_view'
+      ) as Extract<ElasticsearchAction, { type: 'delete_esql_view' }> | undefined;
+
+      expect(viewAction?.request.name).toBe('$.logs.otel.nginx');
+    });
+  });
+
   describe('doHandleUpsertChange - _changes flags for existing streams', () => {
     it('sets ownFields to true when fields changed for existing stream', async () => {
       const existingDefinition = createBaseWiredStreamDefinition({
@@ -490,6 +595,130 @@ describe('WiredStream', () => {
       );
 
       expect(stream.hasChangedLifecycle()).toBe(false);
+    });
+  });
+
+  describe('ES|QL view actions', () => {
+    const createMockDependenciesWithEsClient = (): StateDependencies =>
+      ({
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        isServerless: false,
+        isDev: false,
+        scopedClusterClient: {
+          asCurrentUser: {
+            indices: {
+              getDataStream: jest.fn().mockResolvedValue({
+                data_streams: [{ _meta: { managed_by: 'streams' } }],
+              }),
+            },
+          },
+          asInternalUser: {},
+        },
+      } as unknown as StateDependencies);
+
+    describe('doDetermineDeleteActions', () => {
+      it('includes delete_esql_view for the stream view', async () => {
+        const definition = createBaseWiredStreamDefinition({ name: 'logs.test' });
+        const stream = new WiredStream(definition, createMockDependencies());
+
+        const actions = await (stream as unknown as WiredStreamTestable).doDetermineDeleteActions();
+
+        const deleteViewAction = actions.find(
+          (a): a is Extract<ElasticsearchAction, { type: 'delete_esql_view' }> =>
+            a.type === 'delete_esql_view'
+        );
+        expect(deleteViewAction).toBeDefined();
+        expect(deleteViewAction?.request.name).toBe('$.logs.test');
+      });
+    });
+
+    describe('doDetermineCreateActions', () => {
+      const rootLogsDef = createBaseWiredStreamDefinition({
+        name: 'logs',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: { fields: {}, routing: [] },
+          failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
+        },
+      });
+
+      it('creates a view with only the stream itself when there are no children', async () => {
+        const definition = createBaseWiredStreamDefinition({
+          name: 'logs.test',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
+          },
+        });
+
+        const deps = createMockDependenciesWithEsClient();
+        const stream = new WiredStream(definition, deps);
+        const desiredState = createMockState(
+          new Map([
+            ['logs', { definition: rootLogsDef }],
+            ['logs.test', { definition }],
+          ])
+        );
+
+        const actions = await (stream as unknown as WiredStreamTestable).doDetermineCreateActions(
+          desiredState
+        );
+
+        const upsertViewAction = actions.find(
+          (a): a is Extract<ElasticsearchAction, { type: 'upsert_esql_view' }> =>
+            a.type === 'upsert_esql_view'
+        );
+        expect(upsertViewAction).toBeDefined();
+        expect(upsertViewAction?.request.name).toBe('$.logs.test');
+        expect(upsertViewAction?.request.query).toBe('FROM logs.test');
+      });
+
+      it('creates a view referencing child views when the stream has children', async () => {
+        const definition = createBaseWiredStreamDefinition({
+          name: 'logs.test',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            wired: {
+              fields: {},
+              routing: [
+                { destination: 'logs.test.child1', where: { always: {} }, status: 'enabled' },
+                { destination: 'logs.test.child2', where: { always: {} }, status: 'enabled' },
+              ],
+            },
+            failure_store: { inherit: {} },
+          },
+        });
+
+        const deps = createMockDependenciesWithEsClient();
+        const stream = new WiredStream(definition, deps);
+        const desiredState = createMockState(
+          new Map([
+            ['logs', { definition: rootLogsDef }],
+            ['logs.test', { definition }],
+          ])
+        );
+
+        const actions = await (stream as unknown as WiredStreamTestable).doDetermineCreateActions(
+          desiredState
+        );
+
+        const upsertViewAction = actions.find(
+          (a): a is Extract<ElasticsearchAction, { type: 'upsert_esql_view' }> =>
+            a.type === 'upsert_esql_view'
+        );
+        expect(upsertViewAction).toBeDefined();
+        expect(upsertViewAction?.request.name).toBe('$.logs.test');
+        expect(upsertViewAction?.request.query).toBe(
+          'FROM logs.test, $.logs.test.child1, $.logs.test.child2'
+        );
+      });
     });
   });
 });
