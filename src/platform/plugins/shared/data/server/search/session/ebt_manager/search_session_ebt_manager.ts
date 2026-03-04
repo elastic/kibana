@@ -83,7 +83,7 @@ export class SearchSessionEBTManager {
         query_chars_bucket: queryCharsBucket,
         query_lines_bucket: queryLinesBucket,
         error_type: searchStatus.error.message ?? '',
-        http_status: searchStatus.error.code,
+        http_status: searchStatus.error.code ?? 0,
       });
     }
   }

@@ -62,7 +62,7 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
         _meta: { description: 'The error messages returned by the failed background searches.' },
       },
       http_status: {
-        type: 'text',
+        type: 'integer',
         _meta: { description: 'HTTP status code associated with the failed background searches.' },
       },
     },
