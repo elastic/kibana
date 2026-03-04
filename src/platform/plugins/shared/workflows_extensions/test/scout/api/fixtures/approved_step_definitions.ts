@@ -46,7 +46,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.concat',
-    handlerHash: 'd9325a5c13cdd6401d8cf91c8ba3f6b3efbc7b290db1a4b5caea6091d63515d3',
+    handlerHash: '611abd1e703d35528dd7dae76aa178aec0b02201a3a8cb26156ee9d9f03baa13',
   },
   {
     id: 'data.dedupe',
