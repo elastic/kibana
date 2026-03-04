@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { TimeDuration } from './time_duration'; // Update with the actual path to your TimeDuration file
 
 describe('TimeDuration schema', () => {
@@ -118,7 +118,7 @@ describe('TimeDuration schema', () => {
     const result = schema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"Expected string, received number"`
+      `"Invalid input: expected string, received number"`
     );
   });
 

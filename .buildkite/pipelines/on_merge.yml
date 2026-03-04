@@ -371,3 +371,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
