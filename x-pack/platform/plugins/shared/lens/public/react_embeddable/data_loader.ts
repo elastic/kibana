@@ -28,10 +28,12 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   merge,
   pipe,
   skip,
+  take,
   tap,
   type Subscription,
 } from 'rxjs';
@@ -315,10 +317,6 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
-    ),
-    internalApi.containerWidth$.pipe(
-      waitUntilChanged(),
-      map(() => 'containerWidth' as ReloadReason)
     )
   );
 
@@ -328,8 +326,8 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => {
         // For ES|QL queries, defer the first reload until the panel width is measured
-        // so that downsampling can be applied. The containerWidth$ trigger handles
-        // the initial load once the ResizeObserver fires.
+        // so that downsampling can be applied. The containerWidth$ one-shot subscription
+        // handles the initial load once the ResizeObserver fires.
         if (api.isTextBasedLanguage() && internalApi.containerWidth$.getValue() === 0) {
           return;
         }
@@ -344,6 +342,23 @@ export function loadEmbeddableData(
       }
     }),
   ];
+
+  // For ES|QL: trigger exactly once when the panel width is first measured,
+  // so the initial query has the correct maxDataPoints for downsampling.
+  // After this, width changes are picked up passively on the next natural
+  // reload (filter/time change) — no re-query on flyout open or window resize.
+  if (internalApi.containerWidth$.getValue() === 0) {
+    subscriptions.push(
+      internalApi.containerWidth$
+        .pipe(
+          filter((w) => w > 0 && Boolean(api.isTextBasedLanguage())),
+          take(1),
+          debounceTime(0),
+          map(() => 'containerWidth' as ReloadReason)
+        )
+        .subscribe(reload)
+    );
+  }
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation
   // * at runtime => when the expression is running and ES/Kibana server could emit errors)
