@@ -328,6 +328,17 @@ describe('McpClient', () => {
       );
     });
 
+    it('includes error cause in the message when available', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const cause = new Error('unable to get local issuer certificate');
+      const error = new TypeError('fetch failed', { cause });
+      mockClient.connect.mockRejectedValue(error);
+
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
+      );
+    });
+
     it('handles non-Error objects', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       mockClient.connect.mockRejectedValue('String error');

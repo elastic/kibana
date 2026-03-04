@@ -25,6 +25,22 @@ import type {
 import { isTextPart } from './types';
 
 /**
+ * Produces a human-readable error message from a connection error,
+ * surfacing the `cause` that would otherwise be hidden behind
+ * the opaque "fetch failed" message from Node.js.
+ */
+function formatConnectionErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof Error ? error.cause : undefined;
+
+  if (cause instanceof Error) {
+    return `${message} (cause: ${cause.message})`;
+  }
+
+  return message;
+}
+
+/**
  * McpClient is a wrapper around the MCP client SDK.
  * It provides a simple interface for connecting to an MCP client,
  * listing tools, and calling tools.
@@ -91,17 +107,16 @@ export class McpClient {
         this.connected = true;
         this.logger.debug(`Connected to MCP server ${this.name}, ${this.version}`);
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const errorMessage = formatConnectionErrorMessage(error);
         this.logger.error(
-          `Error connecting to MCP server ${this.name}, ${this.version}: ${message}`
+          `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
         if (error instanceof StreamableHTTPError) {
-          // The SDK formats the message as "Streamable HTTP error: Connection failed"
-          throw new Error(`${message}`);
+          throw new Error(errorMessage);
         } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${message}`);
+          throw new Error(`Unauthorized error: ${errorMessage}`);
         } else {
-          throw new Error(`Error connecting to MCP server: ${message}`);
+          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
         }
       }
     }
