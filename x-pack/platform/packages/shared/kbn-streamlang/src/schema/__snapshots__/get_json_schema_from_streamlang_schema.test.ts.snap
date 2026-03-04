@@ -1480,46 +1480,28 @@ Object {
                       "description": "Compare a field value using operators like eq, neq, lt, gt, contains",
                       "properties": Object {
                         "contains": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Contains comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "endsWith": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Ends-with comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "eq": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Equality comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "field": Object {
                           "description": "The document field to filter on.",
@@ -1527,165 +1509,99 @@ Object {
                           "type": "string",
                         },
                         "gt": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Greater-than comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "gte": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Greater-than-or-equal comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "includes": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Checks if multivalue field includes the value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "lt": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Less-than comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "lte": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Less-than-or-equal comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "neq": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Inequality comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "range": Object {
                           "additionalProperties": false,
                           "description": "Range comparison values.",
                           "properties": Object {
                             "gt": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "type": "number",
-                                },
-                                Object {
-                                  "type": "boolean",
-                                },
-                              ],
                               "description": "A value that can be a string, number, or boolean.",
+                              "type": Array [
+                                "string",
+                                "number",
+                                "boolean",
+                              ],
                             },
                             "gte": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "type": "number",
-                                },
-                                Object {
-                                  "type": "boolean",
-                                },
-                              ],
                               "description": "A value that can be a string, number, or boolean.",
+                              "type": Array [
+                                "string",
+                                "number",
+                                "boolean",
+                              ],
                             },
                             "lt": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "type": "number",
-                                },
-                                Object {
-                                  "type": "boolean",
-                                },
-                              ],
                               "description": "A value that can be a string, number, or boolean.",
+                              "type": Array [
+                                "string",
+                                "number",
+                                "boolean",
+                              ],
                             },
                             "lte": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "type": "number",
-                                },
-                                Object {
-                                  "type": "boolean",
-                                },
-                              ],
                               "description": "A value that can be a string, number, or boolean.",
+                              "type": Array [
+                                "string",
+                                "number",
+                                "boolean",
+                              ],
                             },
                           },
                           "type": "object",
                         },
                         "startsWith": Object {
-                          "anyOf": Array [
-                            Object {
-                              "type": "string",
-                            },
-                            Object {
-                              "type": "number",
-                            },
-                            Object {
-                              "type": "boolean",
-                            },
-                          ],
                           "description": "Starts-with comparison value.",
+                          "type": Array [
+                            "string",
+                            "number",
+                            "boolean",
+                          ],
                         },
                         "steps": Object {
                           "items": Object {
@@ -2029,46 +1945,28 @@ Object {
               "description": "A condition that compares a field to a value or range using an operator as the key.",
               "properties": Object {
                 "contains": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Contains comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "endsWith": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Ends-with comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "eq": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Equality comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "field": Object {
                   "description": "The document field to filter on.",
@@ -2076,165 +1974,99 @@ Object {
                   "type": "string",
                 },
                 "gt": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Greater-than comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "gte": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Greater-than-or-equal comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "includes": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Checks if multivalue field includes the value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "lt": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Less-than comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "lte": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Less-than-or-equal comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "neq": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Inequality comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
                 "range": Object {
                   "additionalProperties": false,
                   "description": "Range comparison values.",
                   "properties": Object {
                     "gt": Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "number",
-                        },
-                        Object {
-                          "type": "boolean",
-                        },
-                      ],
                       "description": "A value that can be a string, number, or boolean.",
+                      "type": Array [
+                        "string",
+                        "number",
+                        "boolean",
+                      ],
                     },
                     "gte": Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "number",
-                        },
-                        Object {
-                          "type": "boolean",
-                        },
-                      ],
                       "description": "A value that can be a string, number, or boolean.",
+                      "type": Array [
+                        "string",
+                        "number",
+                        "boolean",
+                      ],
                     },
                     "lt": Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "number",
-                        },
-                        Object {
-                          "type": "boolean",
-                        },
-                      ],
                       "description": "A value that can be a string, number, or boolean.",
+                      "type": Array [
+                        "string",
+                        "number",
+                        "boolean",
+                      ],
                     },
                     "lte": Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "number",
-                        },
-                        Object {
-                          "type": "boolean",
-                        },
-                      ],
                       "description": "A value that can be a string, number, or boolean.",
+                      "type": Array [
+                        "string",
+                        "number",
+                        "boolean",
+                      ],
                     },
                   },
                   "type": "object",
                 },
                 "startsWith": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "number",
-                    },
-                    Object {
-                      "type": "boolean",
-                    },
-                  ],
                   "description": "Starts-with comparison value.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
                 },
               },
               "required": Array [
@@ -2355,7 +2187,1935 @@ Object {
   "properties": Object {
     "steps": Object {
       "items": Object {
-        "$ref": "#/definitions/__schema0",
+        "anyOf": Array [
+          Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "description": "Extract structured data from unstructured text using grok patterns.",
+                "properties": Object {
+                  "action": Object {
+                    "const": "grok",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Source field to parse with grok patterns",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "pattern_definitions": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
+                    "propertyNames": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "patterns": Object {
+                    "description": "Grok patterns applied in order to extract fields",
+                    "items": Object {
+                      "description": "A non-empty string.",
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "patterns",
+                ],
+                "title": "Grok",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Extract structured data using pattern-based tokenization",
+                "properties": Object {
+                  "action": Object {
+                    "const": "dissect",
+                    "type": "string",
+                  },
+                  "append_separator": Object {
+                    "description": "Separator inserted when target fields are concatenated",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Source field to parse with dissect pattern",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "pattern": Object {
+                    "description": "Dissect pattern describing field boundaries",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "pattern",
+                ],
+                "title": "Dissect",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Parse dates from text fields and convert them to an appropriate timestamp",
+                "properties": Object {
+                  "action": Object {
+                    "const": "date",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "formats": Object {
+                    "description": "Accepted input date formats, tried in order",
+                    "items": Object {
+                      "description": "A non-empty string.",
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "from": Object {
+                    "description": "Source field containing the date/time text",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "locale": Object {
+                    "description": "Optional locale for date parsing",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "output_format": Object {
+                    "description": "Optional output format for storing the parsed date as text",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "timezone": Object {
+                    "description": "Optional timezone for date parsing",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "description": "Target field for the parsed date (defaults to source)",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "formats",
+                ],
+                "title": "Date",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Discard the entire document from the pipeline",
+                "properties": Object {
+                  "action": Object {
+                    "const": "drop_document",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                ],
+                "title": "Drop Document",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Evaluate arithmetic and logical expressions to compute derived fields",
+                "properties": Object {
+                  "action": Object {
+                    "const": "math",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "expression": Object {
+                    "description": "A non-empty string.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "expression",
+                  "to",
+                ],
+                "title": "Math",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Rename an existing field to a new name",
+                "properties": Object {
+                  "action": Object {
+                    "const": "rename",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Existing source field to rename or move",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip when source field is missing",
+                    "type": "boolean",
+                  },
+                  "override": Object {
+                    "description": "Allow overwriting the target field if it already exists",
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "description": "New field name or destination path",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "to",
+                ],
+                "title": "Rename",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Assign a value to a field or copy the value from another field",
+                "properties": Object {
+                  "action": Object {
+                    "const": "set",
+                    "type": "string",
+                  },
+                  "copy_from": Object {
+                    "description": "Copy value from another field instead of providing a literal",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "override": Object {
+                    "description": "Allow overwriting an existing target field",
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "description": "Target field to set or create",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "value": Object {
+                    "description": "Literal value to assign to the target field",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "to",
+                ],
+                "title": "Set",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Append one or more values to an existing array field",
+                "properties": Object {
+                  "action": Object {
+                    "const": "append",
+                    "type": "string",
+                  },
+                  "allow_duplicates": Object {
+                    "description": "If true, do not deduplicate appended values",
+                    "type": "boolean",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "description": "Array field to append values to",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "value": Object {
+                    "description": "Values to append (must be literal, no templates)",
+                    "items": Object {},
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "to",
+                  "value",
+                ],
+                "title": "Append",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Remove every field that starts with a particular prefix",
+                "properties": Object {
+                  "action": Object {
+                    "const": "remove_by_prefix",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Field to remove along with all its nested fields",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "Remove by Prefix",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Delete a specific field from the document",
+                "properties": Object {
+                  "action": Object {
+                    "const": "remove",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Field to remove from the document",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "Remove",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Replace text in a field using a regular expression pattern",
+                "properties": Object {
+                  "action": Object {
+                    "const": "replace",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "pattern": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "replacement": Object {
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "pattern",
+                  "replacement",
+                ],
+                "title": "Replace",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Mask sensitive data in a field using Grok patterns to identify and replace PII",
+                "properties": Object {
+                  "action": Object {
+                    "const": "redact",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Source field to redact sensitive data from",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing (defaults to true)",
+                    "type": "boolean",
+                  },
+                  "pattern_definitions": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
+                    "description": "Custom pattern definitions to use in the patterns",
+                    "propertyNames": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "patterns": Object {
+                    "description": "Grok patterns to match sensitive data (for example, \\"%{IP:client}\\", \\"%{EMAILADDRESS:email}\\")",
+                    "items": Object {
+                      "description": "A non-empty string.",
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                  "prefix": Object {
+                    "description": "Prefix to prepend to the redacted pattern name (defaults to \\"<\\")",
+                    "type": "string",
+                  },
+                  "suffix": Object {
+                    "description": "Suffix to append to the redacted pattern name (defaults to \\">\\")",
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "patterns",
+                ],
+                "title": "Redact",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Convert a field to uppercase",
+                "properties": Object {
+                  "action": Object {
+                    "const": "uppercase",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "Uppercase",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Convert a field to lowercase",
+                "properties": Object {
+                  "action": Object {
+                    "const": "lowercase",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "Lowercase",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Trim a field",
+                "properties": Object {
+                  "action": Object {
+                    "const": "trim",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "Trim",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Join fields with a delimiter",
+                "properties": Object {
+                  "action": Object {
+                    "const": "join",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "delimiter": Object {
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "items": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "delimiter",
+                  "to",
+                ],
+                "title": "Join",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Split a string field into an array using a separator",
+                "properties": Object {
+                  "action": Object {
+                    "const": "split",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Source field to split into an array",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "preserve_trailing": Object {
+                    "description": "Preserve empty trailing fields in the split result",
+                    "type": "boolean",
+                  },
+                  "separator": Object {
+                    "description": "Regex separator used to split the field value into an array",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "description": "Target field for the split array (defaults to source)",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "separator",
+                ],
+                "title": "Split",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Sort the elements of an array field in ascending or descending order",
+                "properties": Object {
+                  "action": Object {
+                    "const": "sort",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Array field to sort",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "order": Object {
+                    "description": "Sort order - \\"asc\\" (ascending) or \\"desc\\" (descending). Defaults to \\"asc\\"",
+                    "enum": Array [
+                      "asc",
+                      "desc",
+                    ],
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "description": "Target field for the sorted array (defaults to source)",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "Sort",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Convert field values to another data type",
+                "properties": Object {
+                  "action": Object {
+                    "const": "convert",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Source field to convert to a different data type",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "description": "Target field for the converted value (defaults to source)",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": Object {
+                    "description": "Target data type: integer, long, double, boolean, or string",
+                    "enum": Array [
+                      "integer",
+                      "long",
+                      "double",
+                      "boolean",
+                      "string",
+                    ],
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "type",
+                ],
+                "title": "Convert",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Concatenate one or more fields and literals",
+                "properties": Object {
+                  "action": Object {
+                    "const": "concat",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "items": Object {
+                      "anyOf": Array [
+                        Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "type": Object {
+                              "const": "field",
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "minLength": 1,
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "type",
+                            "value",
+                          ],
+                          "type": "object",
+                        },
+                        Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "type": Object {
+                              "const": "literal",
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "type",
+                            "value",
+                          ],
+                          "type": "object",
+                        },
+                      ],
+                    },
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                  "to",
+                ],
+                "title": "Concat",
+                "type": "object",
+              },
+              Object {
+                "allOf": Array [
+                  Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "action": Object {
+                        "const": "network_direction",
+                        "type": "string",
+                      },
+                      "customIdentifier": Object {
+                        "description": "Custom identifier to correlate this processor across outputs",
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "description": Object {
+                        "description": "Human-readable notes about this processor step",
+                        "type": "string",
+                      },
+                      "destination_ip": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "ignore_failure": Object {
+                        "description": "Continue pipeline execution if this processor fails",
+                        "type": "boolean",
+                      },
+                      "ignore_missing": Object {
+                        "type": "boolean",
+                      },
+                      "source_ip": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "target_field": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "where": Object {
+                        "allOf": Array [
+                          Object {
+                            "$ref": "#/definitions/__schema1",
+                          },
+                        ],
+                        "description": "Conditional expression controlling whether this processor runs",
+                      },
+                    },
+                    "required": Array [
+                      "action",
+                      "source_ip",
+                      "destination_ip",
+                    ],
+                    "type": "object",
+                  },
+                  Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "internal_networks": Object {
+                            "items": Object {
+                              "type": "string",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "required": Array [
+                          "internal_networks",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "internal_networks_field": Object {
+                            "minLength": 1,
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "internal_networks_field",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                ],
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Execute raw Elasticsearch ingest processors directly",
+                "properties": Object {
+                  "action": Object {
+                    "const": "manual_ingest_pipeline",
+                    "description": "Manual ingest pipeline - executes raw Elasticsearch ingest processors",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "on_failure": Object {
+                    "description": "Fallback processors to run when a processor fails",
+                    "items": Object {
+                      "additionalProperties": Object {},
+                      "propertyNames": Object {
+                        "type": "string",
+                      },
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "processors": Object {
+                    "description": "List of raw Elasticsearch ingest processors to run",
+                    "items": Object {},
+                    "type": "array",
+                  },
+                  "tag": Object {
+                    "description": "Optional ingest processor tag for Elasticsearch",
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/__schema1",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "processors",
+                ],
+                "title": "Manual Ingest Pipeline",
+                "type": "object",
+              },
+            ],
+            "properties": Object {
+              "action": Object {
+                "description": "Processor action identifier.",
+                "enum": Array [
+                  "grok",
+                  "dissect",
+                  "date",
+                  "drop_document",
+                  "math",
+                  "rename",
+                  "set",
+                  "append",
+                  "remove_by_prefix",
+                  "remove",
+                  "replace",
+                  "redact",
+                  "uppercase",
+                  "lowercase",
+                  "trim",
+                  "join",
+                  "split",
+                  "sort",
+                  "convert",
+                  "concat",
+                  "manual_ingest_pipeline",
+                ],
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "action",
+            ],
+            "title": "Action step",
+            "type": "object",
+          },
+          Object {
+            "additionalProperties": false,
+            "defaultSnippets": Array [
+              Object {
+                "body": Object {
+                  "condition": Object {
+                    "eq": "\${2:value}",
+                    "field": "\${1:field.name}",
+                    "steps": Array [
+                      "\${3}",
+                    ],
+                  },
+                },
+                "description": "Conditional step execution with field equals condition",
+                "label": "Condition block",
+              },
+              Object {
+                "body": Object {
+                  "condition": Object {
+                    "and": Array [
+                      Object {
+                        "eq": "\${2:value1}",
+                        "field": "\${1:field1.name}",
+                      },
+                      Object {
+                        "eq": "\${4:value2}",
+                        "field": "\${3:field2.name}",
+                      },
+                    ],
+                    "steps": Array [
+                      "\${5}",
+                    ],
+                  },
+                },
+                "description": "Execute steps if all conditions are true",
+                "label": "Condition block (AND)",
+              },
+              Object {
+                "body": Object {
+                  "condition": Object {
+                    "or": Array [
+                      Object {
+                        "eq": "\${2:value1}",
+                        "field": "\${1:field1.name}",
+                      },
+                      Object {
+                        "eq": "\${4:value2}",
+                        "field": "\${3:field2.name}",
+                      },
+                    ],
+                    "steps": Array [
+                      "\${5}",
+                    ],
+                  },
+                },
+                "description": "Execute steps if any condition is true",
+                "label": "Condition block (OR)",
+              },
+            ],
+            "properties": Object {
+              "condition": Object {
+                "anyOf": Array [
+                  Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "defaultSnippets": Array [
+                          Object {
+                            "body": Object {
+                              "eq": "\${2:value}",
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field equals a value",
+                            "label": "Field equals",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "neq": "\${2:value}",
+                            },
+                            "description": "Check if field does not equal a value",
+                            "label": "Field not equals",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "lt": "\${2:value}",
+                            },
+                            "description": "Check if field is less than a value",
+                            "label": "Field less than",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "lte": "\${2:value}",
+                            },
+                            "description": "Check if field is less than or equal to a value",
+                            "label": "Field less than or equal",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "gt": "\${2:value}",
+                            },
+                            "description": "Check if field is greater than a value",
+                            "label": "Field greater than",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "gte": "\${2:value}",
+                            },
+                            "description": "Check if field is greater than or equal to a value",
+                            "label": "Field greater than or equal",
+                          },
+                          Object {
+                            "body": Object {
+                              "contains": "\${2:value}",
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field contains a value",
+                            "label": "Field contains",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "startsWith": "\${2:value}",
+                            },
+                            "description": "Check if field starts with a value",
+                            "label": "Field starts with",
+                          },
+                          Object {
+                            "body": Object {
+                              "endsWith": "\${2:value}",
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field ends with a value",
+                            "label": "Field ends with",
+                          },
+                          Object {
+                            "body": Object {
+                              "exists": true,
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field exists",
+                            "label": "Field exists",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "range": Object {
+                                "gte": "\${2:minValue}",
+                                "lte": "\${3:maxValue}",
+                              },
+                            },
+                            "description": "Check if field is within a range",
+                            "label": "Field range",
+                          },
+                        ],
+                        "description": "Compare a field value using operators like eq, neq, lt, gt, contains",
+                        "properties": Object {
+                          "contains": Object {
+                            "description": "Contains comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "endsWith": Object {
+                            "description": "Ends-with comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "eq": Object {
+                            "description": "Equality comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "field": Object {
+                            "description": "The document field to filter on.",
+                            "minLength": 1,
+                            "type": "string",
+                          },
+                          "gt": Object {
+                            "description": "Greater-than comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "gte": Object {
+                            "description": "Greater-than-or-equal comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "includes": Object {
+                            "description": "Checks if multivalue field includes the value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "lt": Object {
+                            "description": "Less-than comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "lte": Object {
+                            "description": "Less-than-or-equal comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "neq": Object {
+                            "description": "Inequality comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "range": Object {
+                            "additionalProperties": false,
+                            "description": "Range comparison values.",
+                            "properties": Object {
+                              "gt": Object {
+                                "description": "A value that can be a string, number, or boolean.",
+                                "type": Array [
+                                  "string",
+                                  "number",
+                                  "boolean",
+                                ],
+                              },
+                              "gte": Object {
+                                "description": "A value that can be a string, number, or boolean.",
+                                "type": Array [
+                                  "string",
+                                  "number",
+                                  "boolean",
+                                ],
+                              },
+                              "lt": Object {
+                                "description": "A value that can be a string, number, or boolean.",
+                                "type": Array [
+                                  "string",
+                                  "number",
+                                  "boolean",
+                                ],
+                              },
+                              "lte": Object {
+                                "description": "A value that can be a string, number, or boolean.",
+                                "type": Array [
+                                  "string",
+                                  "number",
+                                  "boolean",
+                                ],
+                              },
+                            },
+                            "type": "object",
+                          },
+                          "startsWith": Object {
+                            "description": "Starts-with comparison value.",
+                            "type": Array [
+                              "string",
+                              "number",
+                              "boolean",
+                            ],
+                          },
+                          "steps": Object {
+                            "items": Object {
+                              "$ref": "#/definitions/__schema0",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "required": Array [
+                          "field",
+                          "steps",
+                        ],
+                        "title": "Filter condition",
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "defaultSnippets": Array [
+                          Object {
+                            "body": Object {
+                              "eq": "\${2:value}",
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field equals a value",
+                            "label": "Field equals",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "neq": "\${2:value}",
+                            },
+                            "description": "Check if field does not equal a value",
+                            "label": "Field not equals",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "lt": "\${2:value}",
+                            },
+                            "description": "Check if field is less than a value",
+                            "label": "Field less than",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "lte": "\${2:value}",
+                            },
+                            "description": "Check if field is less than or equal to a value",
+                            "label": "Field less than or equal",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "gt": "\${2:value}",
+                            },
+                            "description": "Check if field is greater than a value",
+                            "label": "Field greater than",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "gte": "\${2:value}",
+                            },
+                            "description": "Check if field is greater than or equal to a value",
+                            "label": "Field greater than or equal",
+                          },
+                          Object {
+                            "body": Object {
+                              "contains": "\${2:value}",
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field contains a value",
+                            "label": "Field contains",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "startsWith": "\${2:value}",
+                            },
+                            "description": "Check if field starts with a value",
+                            "label": "Field starts with",
+                          },
+                          Object {
+                            "body": Object {
+                              "endsWith": "\${2:value}",
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field ends with a value",
+                            "label": "Field ends with",
+                          },
+                          Object {
+                            "body": Object {
+                              "exists": true,
+                              "field": "\${1:field.name}",
+                            },
+                            "description": "Check if field exists",
+                            "label": "Field exists",
+                          },
+                          Object {
+                            "body": Object {
+                              "field": "\${1:field.name}",
+                              "range": Object {
+                                "gte": "\${2:minValue}",
+                                "lte": "\${3:maxValue}",
+                              },
+                            },
+                            "description": "Check if field is within a range",
+                            "label": "Field range",
+                          },
+                        ],
+                        "description": "Compare a field value using operators like eq, neq, lt, gt, contains",
+                        "properties": Object {
+                          "exists": Object {
+                            "description": "Indicates whether the field exists or not.",
+                            "type": "boolean",
+                          },
+                          "field": Object {
+                            "description": "The document field to check.",
+                            "minLength": 1,
+                            "type": "string",
+                          },
+                          "steps": Object {
+                            "items": Object {
+                              "$ref": "#/definitions/__schema0",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "required": Array [
+                          "field",
+                          "steps",
+                        ],
+                        "title": "Filter condition",
+                        "type": "object",
+                      },
+                    ],
+                    "description": "A basic filter condition, either unary or binary.",
+                  },
+                  Object {
+                    "additionalProperties": false,
+                    "defaultSnippets": Array [
+                      Object {
+                        "body": Object {
+                          "and": Array [
+                            Object {
+                              "eq": "\${2:value1}",
+                              "field": "\${1:field1.name}",
+                            },
+                            Object {
+                              "eq": "\${4:value2}",
+                              "field": "\${3:field2.name}",
+                            },
+                          ],
+                        },
+                        "description": "Combine conditions with AND logic",
+                        "label": "AND condition",
+                      },
+                    ],
+                    "description": "All conditions must be true",
+                    "properties": Object {
+                      "and": Object {
+                        "description": "An array of conditions. All sub-conditions must be true for this condition to be true.",
+                        "items": Object {
+                          "$ref": "#/definitions/__schema1",
+                        },
+                        "type": "array",
+                      },
+                      "steps": Object {
+                        "items": Object {
+                          "$ref": "#/definitions/__schema0",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "required": Array [
+                      "and",
+                      "steps",
+                    ],
+                    "title": "AND condition",
+                    "type": "object",
+                  },
+                  Object {
+                    "additionalProperties": false,
+                    "defaultSnippets": Array [
+                      Object {
+                        "body": Object {
+                          "or": Array [
+                            Object {
+                              "eq": "\${2:value1}",
+                              "field": "\${1:field1.name}",
+                            },
+                            Object {
+                              "eq": "\${4:value2}",
+                              "field": "\${3:field2.name}",
+                            },
+                          ],
+                        },
+                        "description": "Combine conditions with OR logic",
+                        "label": "OR condition",
+                      },
+                    ],
+                    "description": "At least one condition must be true",
+                    "properties": Object {
+                      "or": Object {
+                        "description": "An array of conditions. At least one sub-condition must be true for this condition to be true.",
+                        "items": Object {
+                          "$ref": "#/definitions/__schema1",
+                        },
+                        "type": "array",
+                      },
+                      "steps": Object {
+                        "items": Object {
+                          "$ref": "#/definitions/__schema0",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "required": Array [
+                      "or",
+                      "steps",
+                    ],
+                    "title": "OR condition",
+                    "type": "object",
+                  },
+                  Object {
+                    "additionalProperties": false,
+                    "defaultSnippets": Array [
+                      Object {
+                        "body": Object {
+                          "not": Object {
+                            "eq": "\${2:value}",
+                            "field": "\${1:field.name}",
+                          },
+                        },
+                        "description": "Negate a condition",
+                        "label": "NOT condition",
+                      },
+                    ],
+                    "description": "Negate a condition",
+                    "properties": Object {
+                      "not": Object {
+                        "allOf": Array [
+                          Object {
+                            "$ref": "#/definitions/__schema1",
+                          },
+                        ],
+                        "description": "A condition that negates another condition.",
+                      },
+                      "steps": Object {
+                        "items": Object {
+                          "$ref": "#/definitions/__schema0",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "required": Array [
+                      "not",
+                      "steps",
+                    ],
+                    "title": "NOT condition",
+                    "type": "object",
+                  },
+                  Object {
+                    "additionalProperties": false,
+                    "description": "A condition that always evaluates to false.",
+                    "properties": Object {
+                      "never": Object {
+                        "additionalProperties": false,
+                        "description": "An empty object. This condition never matches.",
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "steps": Object {
+                        "items": Object {
+                          "$ref": "#/definitions/__schema0",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "required": Array [
+                      "never",
+                      "steps",
+                    ],
+                    "type": "object",
+                  },
+                  Object {
+                    "additionalProperties": false,
+                    "description": "A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.",
+                    "properties": Object {
+                      "always": Object {
+                        "additionalProperties": false,
+                        "description": "An empty object. This condition always matches.",
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "steps": Object {
+                        "items": Object {
+                          "$ref": "#/definitions/__schema0",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "required": Array [
+                      "always",
+                      "steps",
+                    ],
+                    "type": "object",
+                  },
+                ],
+                "properties": Object {
+                  "steps": Object {
+                    "items": Object {
+                      "$ref": "#/definitions/__schema0",
+                    },
+                    "type": "array",
+                  },
+                },
+                "required": Array [
+                  "steps",
+                ],
+                "type": "object",
+              },
+              "customIdentifier": Object {
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "condition",
+            ],
+            "title": "Condition block",
+            "type": "object",
+          },
+        ],
       },
       "type": "array",
     },

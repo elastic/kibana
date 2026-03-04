@@ -47,6 +47,45 @@ export function getJsonSchemaFromStreamlangSchema(
 }
 
 /**
+ * Inline top-level `$ref` pointers so Monaco YAML can traverse the full schema
+ * tree without needing to resolve references.
+ *
+ * Zod v4's `z.toJSONSchema()` emits `$ref` for recursive/shared schemas (e.g.
+ * `steps.items` and condition `where` clauses). The old `zodToJsonSchema` library
+ * inlined these, allowing Monaco to show hover documentation and autocomplete by
+ * walking the schema tree directly. We replicate that by deep-cloning the
+ * referenced definitions into the referencing locations.
+ *
+ * Only non-recursive references are inlined (we skip refs that would create
+ * infinite expansion by tracking the ref chain).
+ */
+/**
+ * Inline the `steps.items` `$ref` so Monaco YAML can traverse the processor
+ * schemas directly for hover documentation and autocomplete.
+ *
+ * Zod v4's `z.toJSONSchema()` emits `$ref` for reused schemas, while the old
+ * `zodToJsonSchema` library inlined them. Monaco YAML needs inline schemas to
+ * show hover documentation — it cannot resolve `$ref` for that purpose.
+ *
+ * We only inline the `steps.items` pointer (one level). Deeper `$ref`s (e.g.
+ * recursive condition schemas) are kept as-is since they were always references
+ * and inlining them would explode the schema size.
+ */
+function inlineStepsItemsRef(schema: any): void {
+  const stepsItems = schema?.properties?.steps?.items;
+  if (!stepsItems || typeof stepsItems.$ref !== 'string') {
+    return;
+  }
+
+  const resolved = resolveJsonPointer(schema, stepsItems.$ref);
+  if (!resolved) {
+    return;
+  }
+
+  schema.properties.steps.items = JSON.parse(JSON.stringify(resolved));
+}
+
+/**
  * Recursively fix additionalProperties in the schema object
  * This ensures all object schemas have additionalProperties: false for strict validation
  */
@@ -133,7 +172,9 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
   try {
     const fixedSchema = JSON.parse(fixedSchemaString);
     fixAdditionalPropertiesInSchema(fixedSchema);
+    simplifyAnyOfTypeUnions(fixedSchema);
     enhanceStreamlangSchemaForEditor(fixedSchema, streamType);
+    inlineStepsItemsRef(fixedSchema);
     return fixedSchema;
   } catch (parseError) {
     throw new Error('Failed to fix additionalProperties in json schema');
@@ -985,8 +1026,8 @@ export function getConditionMonacoSchemaConfig(): {
 } | null {
   try {
     const jsonSchema = z.toJSONSchema(conditionZodSchema, {
-      name: 'ConditionSchema',
-      target: 'jsonSchema7',
+      target: 'draft-7',
+      unrepresentable: 'any',
     });
 
     const schema = fixConditionSchema(jsonSchema);
@@ -1016,17 +1057,51 @@ function fixConditionSchema(schema: any): any {
     }
   });
 
-  // Rewrite internal $refs that point inside the anyOf structure.
-  // After flattening the anyOf, eq becomes a direct property so the path changes.
-  schemaString = schemaString.replace(
-    /#\/definitions\/ConditionSchema\/anyOf\/\d+\/anyOf\/\d+\/properties\/eq/g,
-    '#/definitions/ConditionSchema/properties/eq'
-  );
-
   const fixedSchema = JSON.parse(schemaString);
   fixAdditionalPropertiesInSchema(fixedSchema);
   flattenConditionOneOf(fixedSchema);
+  simplifyAnyOfTypeUnions(fixedSchema);
   return fixedSchema;
+}
+
+/**
+ * Convert simple `anyOf` type-only unions into the compact `type: [...]` form.
+ *
+ * Zod v4 emits `anyOf: [{type:"string"},{type:"number"},{type:"boolean"}]`
+ * for `z.union([z.string(), z.number(), z.boolean()])`. Monaco YAML renders
+ * this as "||" in autocomplete, hiding the property description. The compact
+ * form `type: ["string","number","boolean"]` (valid in JSON Schema draft-07)
+ * makes Monaco fall back to showing the description instead.
+ */
+function simplifyAnyOfTypeUnions(obj: any, visited = new Set()): void {
+  if (typeof obj !== 'object' || obj === null || visited.has(obj)) {
+    return;
+  }
+  visited.add(obj);
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => simplifyAnyOfTypeUnions(item, visited));
+    return;
+  }
+
+  if (
+    Array.isArray(obj.anyOf) &&
+    obj.anyOf.length > 0 &&
+    obj.anyOf.every(
+      (entry: any) =>
+        entry &&
+        typeof entry === 'object' &&
+        typeof entry.type === 'string' &&
+        Object.keys(entry).length === 1
+    )
+  ) {
+    obj.type = obj.anyOf.map((entry: any) => entry.type);
+    delete obj.anyOf;
+  }
+
+  for (const key of Object.keys(obj)) {
+    simplifyAnyOfTypeUnions(obj[key], visited);
+  }
 }
 
 /**
@@ -1038,12 +1113,15 @@ function fixConditionSchema(schema: any): any {
  * variants before flattening, then collecting their `defaultSnippets`.
  */
 function flattenConditionOneOf(schema: any): void {
-  const definitions = schema.definitions || schema.$defs;
-  if (!definitions?.ConditionSchema?.anyOf) {
+  // Zod v4's z.toJSONSchema produces a flat schema: the condition anyOf lives
+  // at the root rather than nested inside definitions.ConditionSchema (old format).
+  const conditionDef = schema.anyOf
+    ? schema
+    : (schema.definitions || schema.$defs)?.ConditionSchema;
+
+  if (!conditionDef?.anyOf) {
     return;
   }
-
-  const conditionDef = definitions.ConditionSchema;
 
   addFilterConditionSnippets(conditionDef);
 
