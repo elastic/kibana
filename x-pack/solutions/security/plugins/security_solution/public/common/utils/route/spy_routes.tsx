@@ -19,7 +19,6 @@ import type { RouteSpyState } from './types';
 
 type SpyRouteProps = RouteComponentProps<{
   detailName: string | undefined;
-  entityIdentifiers?: string;
   tabName?: string;
   search: string;
   flowTarget: FlowTarget | undefined;
@@ -34,7 +33,7 @@ export const SpyRouteComponent = memo<SpyRouteProps>(
     location: { pathname, search },
     history,
     match: {
-      params: { detailName, entityIdentifiers, tabName, flowTarget },
+      params: { detailName, tabName, flowTarget },
     },
     pageName,
     state,
@@ -65,7 +64,6 @@ export const SpyRouteComponent = memo<SpyRouteProps>(
 
       const newRouteState = {
         detailName,
-        entityIdentifiers,
         flowTarget,
         history,
         pageName,
@@ -91,7 +89,7 @@ export const SpyRouteComponent = memo<SpyRouteProps>(
       });
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, search, pageName, detailName, entityIdentifiers, tabName, flowTarget, state]);
+    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
     return null;
   }
 );

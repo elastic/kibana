@@ -23,8 +23,6 @@ interface UsersDetailsComponentReduxProps {
 interface UserBodyComponentDispatchProps {
   detailName: string;
   usersDetailsPagePath: string;
-  /** When provided (e.g. from URL with entityIdentifiers segment), used for queries and filters */
-  entityIdentifiers?: Record<string, string>;
 }
 
 interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {

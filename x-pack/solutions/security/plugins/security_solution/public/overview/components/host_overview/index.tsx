@@ -311,7 +311,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 render={(ip) =>
                   ip != null ? (
                     <FlyoutLink
-                      entityIdentifiers={{ 'host.ip': ip }}
+                      field={'host.ip'}
+                      value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />

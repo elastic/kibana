@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 
 describe('hosts page helpers', () => {
   describe('getHostDetailsPageFilters', () => {
-    it('correctly constructs pageFilters for entityIdentifiers with host.name', () => {
+    it('correctly constructs pageFilters for the given hostName', () => {
       const expected: Filter[] = [
         {
           meta: {
@@ -34,17 +34,7 @@ describe('hosts page helpers', () => {
           },
         },
       ];
-      expect(getHostDetailsPageFilters({ 'host.name': 'host-1' })).toEqual(expected);
-    });
-
-    it('uses host.entity.id when present (EUID priority)', () => {
-      const result = getHostDetailsPageFilters({
-        'host.entity.id': 'euid-123',
-        'host.name': 'host-1',
-      });
-      expect(result).toHaveLength(1);
-      expect(result[0].meta?.key).toBe('host.entity.id');
-      expect(result[0].meta?.value).toBe('euid-123');
+      expect(getHostDetailsPageFilters('host-1')).toEqual(expected);
     });
   });
 });

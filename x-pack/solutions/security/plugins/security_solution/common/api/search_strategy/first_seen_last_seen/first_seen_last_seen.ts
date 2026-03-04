@@ -18,6 +18,7 @@ export const firstLastSeenRequestOptionsSchema = requestBasicOptionsSchema.exten
   order,
   field: z.string(),
   value: z.string(),
+  hostEntityIdentifiers: z.record(z.string(), z.string()).optional(),
   factoryQueryType: z.literal(FirstLastSeenQuery),
 });
 

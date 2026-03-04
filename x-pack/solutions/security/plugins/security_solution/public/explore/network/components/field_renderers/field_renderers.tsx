@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { euid } from '../../../../../../entity_store/common';
+import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
@@ -106,7 +108,14 @@ export const hostIdRenderer = ({
               <>{id}</>
             ) : (
               <FlyoutLink
-                entityIdentifiers={{ 'host.name': hostName }}
+                field={'host.name'}
+                value={hostName}
+                entityIdentifiers={euid
+                  .getEuidSourceFields('host')
+                  .identitySourceFields.reduce((acc, field) => {
+                    acc[field] = host[field as keyof HostEcs] as string;
+                    return acc;
+                  }, {} as EntityIdentifiers)}
                 scopeId={scopeId}
                 isFlyoutOpen={isFlyoutOpen}
               >
@@ -139,7 +148,14 @@ export const hostNameRenderer = ({
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <CellActionsRenderer field={'host.name'} value={host.name[0]} scopeId={scopeId}>
       <FlyoutLink
-        entityIdentifiers={{ 'host.name': host.name[0] }}
+        field={'host.name'}
+        value={host.name[0]}
+        entityIdentifiers={euid
+          .getEuidSourceFields('host')
+          .identitySourceFields.reduce((acc, field) => {
+            acc[field] = host[field as keyof HostEcs] as string;
+            return acc;
+          }, {} as EntityIdentifiers)}
         scopeId={scopeId}
         isFlyoutOpen={isFlyoutOpen}
       />

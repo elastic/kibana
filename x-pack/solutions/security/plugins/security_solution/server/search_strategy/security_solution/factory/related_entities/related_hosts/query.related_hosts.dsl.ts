@@ -15,7 +15,7 @@ export const buildRelatedHostsQuery = ({
   from,
 }: RelatedHostsRequestOptions): ISearchRequestParams => {
   const now = new Date();
-  const entityFilters = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
   const filter = [
     ...(entityFilters ? [entityFilters] : []),
     { term: { 'event.category': 'authentication' } },

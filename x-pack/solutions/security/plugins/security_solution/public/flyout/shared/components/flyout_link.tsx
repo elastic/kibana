@@ -18,9 +18,17 @@ import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface FlyoutLinkProps {
   /**
+   * Field name
+   */
+  field: string;
+  /**
+   * Value to display in EuiLink
+   */
+  value: string;
+  /**
    * Entity identifiers - key-value pairs of field names and their values
    */
-  entityIdentifiers: EntityIdentifiers;
+  entityIdentifiers?: EntityIdentifiers;
   /**
    * Scope id to use for the preview panel
    */
@@ -53,6 +61,8 @@ interface FlyoutLinkProps {
  * flyout that uses in memory state, use the `isFlyoutOpen` prop.
  */
 export const FlyoutLink: FC<FlyoutLinkProps> = ({
+  field,
+  value,
   entityIdentifiers,
   scopeId,
   isFlyoutOpen = false,
@@ -65,26 +75,14 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const whichFlyout = useWhichFlyout();
   const renderPreview = isFlyoutOpen || whichFlyout !== null;
 
-  // Extract primary field and value from entityIdentifiers
-  // Priority: host.name/user.name > first available field
-  const primaryField = useMemo(() => {
-    if (entityIdentifiers['host.name']) return 'host.name';
-    if (entityIdentifiers['user.name']) return 'user.name';
-    return Object.keys(entityIdentifiers)[0];
-  }, [entityIdentifiers]);
-
-  const primaryValue = useMemo(() => {
-    return primaryField ? entityIdentifiers[primaryField] : '';
-  }, [entityIdentifiers, primaryField]);
-
   const rightPanelParams = useMemo(
     () =>
       getRightPanelParams({
-        entityIdentifiers,
+        entityIdentifiers: entityIdentifiers ?? { [field]: value },
         scopeId,
         ruleId,
       }),
-    [entityIdentifiers, scopeId, ruleId]
+    [entityIdentifiers, field, value, scopeId, ruleId]
   );
 
   const onClick = useCallback(() => {
@@ -106,7 +104,7 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   if (renderPreview) {
     return (
       <PreviewLink
-        entityIdentifiers={entityIdentifiers}
+        entityIdentifiers={entityIdentifiers ?? { [field]: value }}
         scopeId={scopeId}
         data-test-subj={dataTestSubj}
       >
@@ -117,9 +115,9 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
 
   return rightPanelParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj ?? FLYOUT_LINK_TEST_ID}>
-      {children ?? primaryValue}
+      {children ?? field}
     </EuiLink>
   ) : (
-    <>{children ?? primaryValue}</>
+    <>{children ?? value}</>
   );
 };

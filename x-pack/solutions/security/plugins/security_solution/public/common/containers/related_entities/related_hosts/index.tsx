@@ -37,7 +37,7 @@ export const useUserRelatedHosts = ({
   const spaceId = useSpaceId();
   const namespace = spaceId || 'default';
   const entityStoreIndexPattern = useMemo(
-    () => [`.entities.v1.latest.security_user_${namespace}`],
+    () => [`.entities.v2.latest.security_${namespace}`],
     [namespace]
   );
 

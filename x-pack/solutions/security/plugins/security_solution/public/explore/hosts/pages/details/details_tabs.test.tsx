@@ -159,7 +159,6 @@ describe('body', () => {
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}
-              entityIdentifiers={{ 'host.name': 'host-1' }}
               setQuery={jest.fn()}
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}

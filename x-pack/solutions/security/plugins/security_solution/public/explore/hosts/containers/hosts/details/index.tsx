@@ -26,57 +26,23 @@ export interface HostDetailsArgs {
   endDate: string;
 }
 
-interface UseHostDetailsBase {
+interface UseHostDetails {
   endDate: string;
+  hostName: string;
   id?: string;
   indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
 
-interface UseHostDetailsWithHostName extends UseHostDetailsBase {
-  hostName: string;
-  entityIdentifiers?: never;
-}
-
-interface UseHostDetailsWithEntityIdentifiers extends UseHostDetailsBase {
-  entityIdentifiers: Record<string, string>;
-  hostName?: never;
-}
-
-type UseHostDetails = UseHostDetailsWithHostName | UseHostDetailsWithEntityIdentifiers;
-
-const getStableEntityIdentifiersKey = (identifiers: Record<string, string>): string =>
-  JSON.stringify(
-    Object.fromEntries(Object.entries(identifiers).sort(([a], [b]) => a.localeCompare(b)))
-  );
-
-export const useHostDetails = (
-  props: UseHostDetails
-): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
-  const { endDate, indexNames, id = ID, skip = false, startDate } = props;
-
-  const entityIdentifiersKey =
-    'entityIdentifiers' in props &&
-    props.entityIdentifiers &&
-    Object.keys(props.entityIdentifiers).length > 0
-      ? getStableEntityIdentifiersKey(props.entityIdentifiers)
-      : null;
-  const hostNameFromProps = 'hostName' in props ? props.hostName : '';
-
-  const requestEntityIdentifiers = useMemo((): Record<string, string> | null => {
-    if (entityIdentifiersKey !== null) {
-      return JSON.parse(entityIdentifiersKey) as Record<string, string>;
-    }
-    const trimmed = hostNameFromProps?.trim();
-    return trimmed ? { 'host.name': trimmed } : null;
-  }, [entityIdentifiersKey, hostNameFromProps]);
-
-  const hasValidParams = Boolean(
-    requestEntityIdentifiers && Object.keys(requestEntityIdentifiers).length > 0
-  );
-  const effectiveSkip = skip || !hasValidParams;
-
+export const useHostDetails = ({
+  endDate,
+  hostName,
+  indexNames,
+  id = ID,
+  skip = false,
+  startDate,
+}: UseHostDetails): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
   const {
     loading,
     result: response,
@@ -89,7 +55,7 @@ export const useHostDetails = (
       hostDetails: {},
     },
     errorMessage: i18n.FAIL_HOST_OVERVIEW,
-    abort: effectiveSkip,
+    abort: skip,
   });
 
   const hostDetailsResponse = useMemo(
@@ -106,27 +72,24 @@ export const useHostDetails = (
   );
 
   const hostDetailsRequest = useMemo(
-    () =>
-      hasValidParams && requestEntityIdentifiers
-        ? {
-            defaultIndex: indexNames,
-            entityIdentifiers: requestEntityIdentifiers,
-            factoryQueryType: HostsQueries.details,
-            timerange: {
-              interval: '12h',
-              from: startDate,
-              to: endDate,
-            },
-          }
-        : null,
-    [endDate, hasValidParams, indexNames, requestEntityIdentifiers, startDate]
+    () => ({
+      defaultIndex: indexNames,
+      factoryQueryType: HostsQueries.details,
+      hostName,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+    }),
+    [endDate, hostName, indexNames, startDate]
   );
 
   useEffect(() => {
-    if (!effectiveSkip && hostDetailsRequest) {
+    if (!skip) {
       search(hostDetailsRequest);
     }
-  }, [effectiveSkip, hostDetailsRequest, search]);
+  }, [hostDetailsRequest, search, skip]);
 
   return [loading, hostDetailsResponse, refetch];
 };

@@ -170,7 +170,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     id: QUERY_ID,
     endDate: to,
     startDate: from,
-    entityIdentifiers: { 'user.name': detailName },
+    userName: detailName,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -261,14 +261,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <AnomalyTableProvider
-              criteriaFields={getCriteriaFromUsersType(UsersType.details, { 'user.name': detailName })}
+              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
               startDate={from}
               endDate={to}
               skip={isInitializing}
             >
               {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
-                  entityIdentifiers={{ 'user.name': detailName }}
+                  userName={detailName}
                   id={QUERY_ID}
                   isInDetailsSidePanel={false}
                   data={userDetails}
