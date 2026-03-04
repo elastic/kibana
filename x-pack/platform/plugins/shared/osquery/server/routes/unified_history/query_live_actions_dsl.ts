@@ -11,6 +11,7 @@ interface LiveActionsQueryOptions {
   pageSize: number;
   cursor?: string;
   kuery?: string;
+  userIds?: string[];
   spaceId: string;
   startDate?: string;
   endDate?: string;
@@ -20,6 +21,7 @@ export const buildLiveActionsQuery = ({
   pageSize,
   cursor,
   kuery,
+  userIds,
   spaceId,
   startDate,
   endDate,
@@ -66,6 +68,10 @@ export const buildLiveActionsQuery = ({
         analyze_wildcard: true,
       },
     });
+  }
+
+  if (userIds && userIds.length > 0) {
+    filters.push({ terms: { user_id: userIds } });
   }
 
   return {

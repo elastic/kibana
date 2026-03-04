@@ -13,8 +13,7 @@ export interface CursorState {
   scheduledOffset?: number;
 }
 
-export const useCursorPagination = (initialPageSize: number = 20) => {
-  const [pageSize, setPageSize] = useState(initialPageSize);
+export const useCursorPagination = () => {
   const [cursorStack, setCursorStack] = useState<CursorState[]>([]);
 
   const currentCursors = cursorStack.length > 0 ? cursorStack[cursorStack.length - 1] : undefined;
@@ -44,22 +43,15 @@ export const useCursorPagination = (initialPageSize: number = 20) => {
     setCursorStack((prev) => prev.slice(0, -1));
   }, []);
 
-  const handlePageSizeChange = useCallback((newPageSize: number) => {
-    setPageSize(newPageSize);
-    setCursorStack([]);
-  }, []);
-
   const resetCursors = useCallback(() => {
     setCursorStack([]);
   }, []);
 
   return {
-    pageSize,
     pageIndex,
     currentCursors,
     handleNextPage,
     handlePrevPage,
-    handlePageSizeChange,
     resetCursors,
   };
 };

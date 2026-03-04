@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty, pickBy, isNumber } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -13,14 +14,19 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiTextColor,
   EuiToolTip,
   formatDate,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
+import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useRouterNavigate } from '../common/lib/kibana';
+import { RunByColumn } from './components/run_by_column';
 import type { UnifiedHistoryRow } from '../../common/api/unified_history/types';
 
 interface HistoryDetailsButtonProps {
@@ -48,7 +54,19 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
 
 HistoryDetailsButton.displayName = 'HistoryDetailsButton';
 
-export const useUnifiedHistoryColumns = () => {
+interface UseUnifiedHistoryColumnsOptions {
+  permissions: Record<string, boolean | Record<string, boolean>>;
+  existingPackIds: string[];
+  profilesMap: Map<string, UserProfileWithAvatar>;
+  isLoadingProfiles: boolean;
+}
+
+export const useUnifiedHistoryColumns = ({
+  permissions,
+  existingPackIds,
+  profilesMap,
+  isLoadingProfiles,
+}: UseUnifiedHistoryColumnsOptions) => {
   const { push } = useHistory();
 
   const renderQueryColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
@@ -61,7 +79,7 @@ export const useUnifiedHistoryColumns = () => {
           {row.queryName ? (
             content ? (
               <EuiToolTip position="top" content={content}>
-                <span>{row.queryName}</span>
+                <span tabIndex={0}>{row.queryName}</span>
               </EuiToolTip>
             ) : (
               <span>{row.queryName}</span>
@@ -76,7 +94,7 @@ export const useUnifiedHistoryColumns = () => {
           <EuiFlexItem grow={false}>
             {row.rowType === 'live' ? (
               <EuiToolTip position="top" content={row.packName}>
-                <EuiBadge color="hollow" iconType="package" />
+                <EuiBadge tabIndex={0} color="hollow" iconType="package" />
               </EuiToolTip>
             ) : (
               <EuiBadge color="hollow" iconType="package">
@@ -99,15 +117,55 @@ export const useUnifiedHistoryColumns = () => {
     return <EuiBadge color={colorMap[row.source] ?? 'default'}>{row.source}</EuiBadge>;
   }, []);
 
-  const renderAgentsColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <>{row.agentCount}</>,
-    []
-  );
+  const renderAgentsColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
+    if (row.successCount == null) {
+      return <>{row.agentCount}</>;
+    }
 
-  const renderResultsColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <>{row.totalRows ?? '-'}</>,
-    []
-  );
+    if (row.rowType === 'scheduled') {
+      return (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="check" color="success" size="m" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTextColor color="success">{row.agentCount}</EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="check" color="success" size="m" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="success">{row.successCount}</EuiTextColor>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="cross" color="danger" size="m" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="danger">{row.errorCount ?? 0}</EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
+
+  const renderResultsColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
+    if (row.totalRows == null) return <>{'\u2014'}</>;
+
+    if (row.packId && row.queriesTotal != null) {
+      return (
+        <>
+          {row.queriesWithResults ?? 0} of {row.queriesTotal}
+        </>
+      );
+    }
+
+    return <>{row.totalRows}</>;
+  }, []);
 
   const renderTimestampColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => <>{formatDate(row.timestamp)}</>,
@@ -115,8 +173,15 @@ export const useUnifiedHistoryColumns = () => {
   );
 
   const renderRunByColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <>{row.userId ?? '-'}</>,
-    []
+    (_: unknown, row: UnifiedHistoryRow) => (
+      <RunByColumn
+        userId={row.userId}
+        userProfileUid={row.userProfileUid}
+        profilesMap={profilesMap}
+        isLoadingProfiles={isLoadingProfiles}
+      />
+    ),
+    [profilesMap, isLoadingProfiles]
   );
 
   const renderActionsColumn = useCallback(
@@ -124,15 +189,61 @@ export const useUnifiedHistoryColumns = () => {
     []
   );
 
-  const isPlayAvailable = useCallback((row: UnifiedHistoryRow) => row.rowType === 'live', []);
+  const isPlayAvailable = useCallback(
+    (row: UnifiedHistoryRow) => {
+      if (row.rowType !== 'live') return false;
+
+      if (row.packId) {
+        return (
+          existingPackIds.includes(row.packId) &&
+          !!permissions.runSavedQueries &&
+          !!permissions.readPacks
+        );
+      }
+
+      return !!(permissions.runSavedQueries || permissions.writeLiveQueries);
+    },
+    [permissions, existingPackIds]
+  );
 
   const handlePlayClick = useCallback(
     (row: UnifiedHistoryRow) => () => {
-      if (row.actionId) {
-        push('/new', {
-          form: { query: row.queryText },
+      const newQueryPath = '/new';
+
+      if (row.packId) {
+        return push(newQueryPath, {
+          form: pickBy(
+            {
+              packId: row.packId,
+              agentSelection: {
+                agents: row.agentIds,
+                allAgentsSelected: row.agentAll,
+                platformsSelected: row.agentPlatforms,
+                policiesSelected: row.agentPolicyIds,
+              },
+            },
+            (value) => !isEmpty(value)
+          ),
         });
       }
+
+      push(newQueryPath, {
+        form: pickBy(
+          {
+            query: row.queryText,
+            ecs_mapping: row.ecsMapping,
+            savedQueryId: row.savedQueryId,
+            timeout: row.timeout ?? QUERY_TIMEOUT.DEFAULT,
+            agentSelection: {
+              agents: row.agentIds,
+              allAgentsSelected: row.agentAll,
+              platformsSelected: row.agentPlatforms,
+              policiesSelected: row.agentPolicyIds,
+            },
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        ),
+      });
     },
     [push]
   );
@@ -181,7 +292,7 @@ export const useUnifiedHistoryColumns = () => {
         name: i18n.translate('xpack.osquery.unifiedHistory.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        width: '80px',
+        width: '100px',
         render: renderAgentsColumn,
       },
       {

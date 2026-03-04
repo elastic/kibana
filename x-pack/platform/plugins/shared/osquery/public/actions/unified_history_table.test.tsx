@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { UnifiedHistoryTable } from './unified_history_table';
-import { useAllLiveQueries } from './use_all_live_queries';
-import { useBulkGetUserProfiles } from './use_user_profiles';
+import { useUnifiedHistory } from './use_unified_history';
+import { useBulkGetUnifiedHistoryProfiles } from './use_user_profiles';
 import { usePacks } from '../packs/use_packs';
-import * as buildHistoryKueryModule from './utils/build_history_kuery';
 import {
   TestProviders,
-  createMockSearchHit,
-  createMockSearchHitWithResultCounts,
-  createMockPackSearchHitWithResultCounts,
   defaultPermissions,
   noRunPermissions,
   resetMockCounter,
+  createMockUnifiedHistoryRow,
+  createMockPackUnifiedHistoryRow,
+  createMockRuleHistoryRow,
+  createMockScheduledHistoryRow,
 } from './__test_helpers__/mock_data';
+import type { UnifiedHistoryResponse } from '../../common/api/unified_history/types';
 
 const renderWithProviders = (element: React.ReactElement) =>
   render(element, { wrapper: TestProviders });
@@ -45,7 +46,7 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: mockPush }),
 }));
 
-jest.mock('./use_all_live_queries');
+jest.mock('./use_unified_history');
 jest.mock('./use_user_profiles');
 jest.mock('../packs/use_packs');
 jest.mock('../common/use_persisted_page_size', () => ({
@@ -53,13 +54,39 @@ jest.mock('../common/use_persisted_page_size', () => ({
   PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
 }));
 
-const useAllLiveQueriesMock = useAllLiveQueries as jest.MockedFunction<typeof useAllLiveQueries>;
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.MockedFunction<
-  typeof useBulkGetUserProfiles
+jest.mock('./components/history_filters', () => ({
+  HistoryFilters: ({ onFiltersChange, onRefresh }: { onFiltersChange: jest.Mock; onRefresh: jest.Mock }) => (
+    <div data-test-subj="historyFilters">
+      <input
+        data-test-subj="unifiedHistorySearch"
+        onChange={(e) =>
+          onFiltersChange({
+            kuery: e.target.value || undefined,
+            selectedUserIds: [],
+            sourceFilters: undefined,
+            startDate: 'now-24h',
+            endDate: 'now',
+          })
+        }
+      />
+      <button data-test-subj="refreshButton" onClick={onRefresh}>
+        Refresh
+      </button>
+    </div>
+  ),
+  DEFAULT_START_DATE: 'now-24h',
+  DEFAULT_END_DATE: 'now',
+}));
+
+jest.mock('./use_history_users', () => ({
+  useHistoryUsers: () => ({ userOptions: [], isLoading: false }),
+}));
+
+const useUnifiedHistoryMock = useUnifiedHistory as jest.MockedFunction<typeof useUnifiedHistory>;
+const useBulkGetUnifiedHistoryProfilesMock = useBulkGetUnifiedHistoryProfiles as jest.MockedFunction<
+  typeof useBulkGetUnifiedHistoryProfiles
 >;
 const usePacksMock = usePacks as jest.MockedFunction<typeof usePacks>;
-
-const buildHistoryKuerySpy = jest.spyOn(buildHistoryKueryModule, 'buildHistoryKuery');
 
 const mockKibana = (permissions = defaultPermissions) => {
   mockUseKibana.mockReturnValue({
@@ -67,6 +94,7 @@ const mockKibana = (permissions = defaultPermissions) => {
       application: { capabilities: { osquery: permissions } },
       http: { post: jest.fn(), get: jest.fn() },
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      uiSettings: { get: jest.fn().mockReturnValue([]) },
     },
   });
 };
@@ -76,25 +104,35 @@ const mockPacks = (packs: Array<{ id: string }> = []) => {
 };
 
 const mockProfiles = (profilesMap = new Map(), isLoading = false) => {
-  useBulkGetUserProfilesMock.mockReturnValue({ profilesMap, isLoading });
+  useBulkGetUnifiedHistoryProfilesMock.mockReturnValue({ profilesMap, isLoading });
 };
 
-const mockActions = ({
-  items = [],
-  total = items.length,
+const mockUnifiedHistory = ({
+  rows = [] as ReturnType<typeof createMockUnifiedHistoryRow>[],
+  hasMore = false,
   isLoading = false,
   isFetching = false,
 }: {
-  items?: any[];
-  total?: number;
+  rows?: ReturnType<typeof createMockUnifiedHistoryRow>[];
+  hasMore?: boolean;
   isLoading?: boolean;
   isFetching?: boolean;
-}) => {
-  useAllLiveQueriesMock.mockReturnValue({
-    data: { data: { items, total } },
+} = {}) => {
+  const refetch = jest.fn();
+  useUnifiedHistoryMock.mockReturnValue({
+    data: {
+      rows,
+      hasMore,
+      nextActionsCursor: hasMore ? rows[rows.length - 1]?.timestamp : undefined,
+      nextScheduledCursor: undefined,
+      nextScheduledOffset: undefined,
+    } as UnifiedHistoryResponse,
     isLoading,
     isFetching,
+    refetch,
   } as never);
+
+  return { refetch };
 };
 
 describe('UnifiedHistoryTable', () => {
@@ -104,34 +142,29 @@ describe('UnifiedHistoryTable', () => {
     mockKibana();
     mockPacks();
     mockProfiles();
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   it('renders table with data', () => {
-    const items = [createMockSearchHitWithResultCounts(), createMockSearchHitWithResultCounts()];
-    mockActions({ items });
+    const rows = [createMockUnifiedHistoryRow(), createMockUnifiedHistoryRow()];
+    mockUnifiedHistory({ rows });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(screen.getByTestId('liveQueryActionsTable')).toBeInTheDocument();
-    expect(screen.getAllByRole('row')).toHaveLength(items.length + 1);
+    expect(screen.getByTestId('unifiedHistoryTable')).toBeInTheDocument();
+    expect(screen.getAllByRole('row')).toHaveLength(rows.length + 1);
   });
 
   it('shows loading skeleton when isLoading is true', () => {
-    mockActions({ isLoading: true });
+    mockUnifiedHistory({ isLoading: true });
 
     const { container } = renderWithProviders(<UnifiedHistoryTable />);
 
     expect(container.querySelector('.euiSkeletonText')).toBeInTheDocument();
-    expect(screen.queryByTestId('liveQueryActionsTable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unifiedHistoryTable')).not.toBeInTheDocument();
   });
 
   it('renders all history columns', () => {
-    mockActions({ items: [createMockSearchHitWithResultCounts()] });
+    mockUnifiedHistory({ rows: [createMockUnifiedHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
@@ -139,85 +172,59 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('Source')).toBeInTheDocument();
     expect(screen.getByText('Results')).toBeInTheDocument();
     expect(screen.getByText('Agents')).toBeInTheDocument();
-    expect(screen.getByText('Created at')).toBeInTheDocument();
+    expect(screen.getByText('Timestamp')).toBeInTheDocument();
     expect(screen.getAllByText('Run by').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('View details')).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
   });
 
   it('renders HistoryFilters', () => {
-    mockActions({ items: [] });
+    mockUnifiedHistory();
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(screen.getByTestId('history-search-input')).toBeInTheDocument();
+    expect(screen.getByTestId('historyFilters')).toBeInTheDocument();
+    expect(screen.getByTestId('unifiedHistorySearch')).toBeInTheDocument();
   });
 
-  it('fetches data with withResultCounts', () => {
-    mockActions({ items: [] });
+  it('passes rows to useBulkGetUnifiedHistoryProfiles', () => {
+    const rows = [createMockUnifiedHistoryRow()];
+    mockUnifiedHistory({ rows });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(useAllLiveQueriesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ withResultCounts: true })
-    );
+    expect(useBulkGetUnifiedHistoryProfilesMock).toHaveBeenCalledWith(rows);
   });
 
-  it('loads user profiles', () => {
-    const items = [createMockSearchHitWithResultCounts()];
-    mockActions({ items });
-
-    renderWithProviders(<UnifiedHistoryTable />);
-
-    expect(useBulkGetUserProfilesMock).toHaveBeenCalledWith(items);
-  });
-
-  it('agents column shows success/error breakdown when result_counts present', () => {
-    const hit = createMockSearchHitWithResultCounts({
-      _source: {
-        result_counts: {
-          total_rows: 10,
-          responded_agents: 5,
-          successful_agents: 4,
-          error_agents: 1,
-        },
-      },
-    });
-    mockActions({ items: [hit] });
+  it('agents column shows success/error breakdown', () => {
+    const row = createMockUnifiedHistoryRow({ successCount: 4, errorCount: 1, agentCount: 5 });
+    mockUnifiedHistory({ rows: [row] });
 
     const { container } = renderWithProviders(<UnifiedHistoryTable />);
-
-    const agentsCellContent = container.querySelector(
-      '[data-test-subj="tableHeaderCell_agents_3"]'
-    );
-    expect(agentsCellContent).toBeInTheDocument();
 
     const checkIcons = container.querySelectorAll('[data-euiicon-type="check"]');
     const crossIcons = container.querySelectorAll('[data-euiicon-type="cross"]');
     expect(checkIcons.length).toBeGreaterThanOrEqual(1);
     expect(crossIcons.length).toBeGreaterThanOrEqual(1);
-
     expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('agents column falls back to count when no result_counts', () => {
-    const hit = createMockSearchHit({
-      fields: {
-        action_id: ['a1'],
-        agents: ['agent-1', 'agent-2', 'agent-3'],
-        user_id: ['elastic'],
-        '@timestamp': ['2025-06-15T10:00:00.000Z'],
-      },
+  it('agents column falls back to count when no successCount', () => {
+    const row = createMockUnifiedHistoryRow({
+      successCount: undefined,
+      errorCount: undefined,
+      agentCount: 3,
     });
-    mockActions({ items: [hit] });
+    mockUnifiedHistory({ rows: [row] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
-  it('results column shows total_rows for single query actions', () => {
-    const hit = createMockSearchHitWithResultCounts();
-    mockActions({ items: [hit] });
+  it('results column shows totalRows for single query actions', () => {
+    const row = createMockUnifiedHistoryRow({ totalRows: 42 });
+    mockUnifiedHistory({ rows: [row] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
@@ -225,8 +232,8 @@ describe('UnifiedHistoryTable', () => {
   });
 
   it('results column shows X of Y for pack actions', () => {
-    const hit = createMockPackSearchHitWithResultCounts();
-    mockActions({ items: [hit] });
+    const row = createMockPackUnifiedHistoryRow();
+    mockUnifiedHistory({ rows: [row] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
@@ -234,59 +241,61 @@ describe('UnifiedHistoryTable', () => {
   });
 
   it('results column shows em dash when no counts', () => {
-    const hit = createMockSearchHit();
-    mockActions({ items: [hit] });
+    const row = createMockUnifiedHistoryRow({ totalRows: undefined });
+    mockUnifiedHistory({ rows: [row] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('\u2014')).toBeInTheDocument();
   });
 
-  it('source column renders for each row', () => {
-    const hit = createMockSearchHit({
-      fields: {
-        action_id: ['a1'],
-        agents: ['agent-1'],
-        user_id: ['some_user'],
-        '@timestamp': ['2025-06-15T10:00:00.000Z'],
-      },
-    });
-    mockActions({ items: [hit] });
+  it('source column renders Live badge', () => {
+    mockUnifiedHistory({ rows: [createMockUnifiedHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Live')).toBeInTheDocument();
   });
 
-  it('source column shows Rule when no userId', () => {
-    const hit = createMockSearchHit({
-      fields: {
-        action_id: ['a1'],
-        agents: ['agent-1'],
-        user_id: undefined,
-        '@timestamp': ['2025-06-15T10:00:00.000Z'],
-      },
-    });
-    mockActions({ items: [hit] });
+  it('source column renders Rule badge', () => {
+    mockUnifiedHistory({ rows: [createMockRuleHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Rule')).toBeInTheDocument();
   });
 
-  it('details button navigates to history path', () => {
-    const hit = createMockSearchHitWithResultCounts();
-    const actionId = (hit.fields as Record<string, string[]>).action_id[0];
-    mockActions({ items: [hit] });
+  it('source column renders Scheduled badge', () => {
+    mockUnifiedHistory({ rows: [createMockScheduledHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`history/${actionId}`);
+    expect(screen.getByText('Scheduled')).toBeInTheDocument();
+  });
+
+  it('details button navigates to history path for live action', () => {
+    const row = createMockUnifiedHistoryRow();
+    mockUnifiedHistory({ rows: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`history/${row.actionId}`);
+  });
+
+  it('details button navigates to scheduled history path', () => {
+    const row = createMockScheduledHistoryRow();
+    mockUnifiedHistory({ rows: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(mockUseRouterNavigate).toHaveBeenCalledWith(
+      `history/scheduled/${row.scheduleId}/${row.executionCount}`
+    );
   });
 
   it('play button navigates to /new for single query', () => {
-    const hit = createMockSearchHitWithResultCounts();
-    mockActions({ items: [hit] });
+    const row = createMockUnifiedHistoryRow();
+    mockUnifiedHistory({ rows: [row] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
@@ -303,73 +312,128 @@ describe('UnifiedHistoryTable', () => {
     );
   });
 
+  it('play button navigates to /new with packId for pack query', () => {
+    const row = createMockPackUnifiedHistoryRow();
+    mockPacks([{ id: 'pack-1' }]);
+    mockUnifiedHistory({ rows: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    const playButtons = screen.getAllByLabelText('Run query');
+    playButtons[0].click();
+
+    expect(mockPush).toHaveBeenCalledWith(
+      '/new',
+      expect.objectContaining({
+        form: expect.objectContaining({
+          packId: 'pack-1',
+        }),
+      })
+    );
+  });
+
   it('play button not available without permissions', () => {
     mockKibana(noRunPermissions);
-    const hit = createMockSearchHitWithResultCounts();
-    mockActions({ items: [hit] });
+    mockUnifiedHistory({ rows: [createMockUnifiedHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.queryAllByLabelText('Run query')).toHaveLength(0);
   });
 
-  it('search debounces at 400ms', async () => {
-    mockActions({ items: [] });
+  it('play button not available for scheduled rows', () => {
+    mockUnifiedHistory({ rows: [createMockScheduledHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    const searchInput = screen.getByTestId('history-search-input');
-    fireEvent.change(searchInput, { target: { value: 'test-search' } });
-
-    expect(buildHistoryKuerySpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({ searchTerm: '' })
-    );
-
-    act(() => {
-      jest.advanceTimersByTime(400);
-    });
-
-    await waitFor(() => {
-      expect(buildHistoryKuerySpy).toHaveBeenCalledWith(
-        expect.objectContaining({ searchTerm: 'test-search' })
-      );
-    });
+    expect(screen.queryAllByLabelText('Run query')).toHaveLength(0);
   });
 
-  it('kuery uses buildHistoryKuery', () => {
-    mockActions({ items: [] });
-
-    renderWithProviders(<UnifiedHistoryTable />);
-
-    expect(buildHistoryKuerySpy).toHaveBeenCalledWith({
-      searchTerm: '',
-      selectedUserIds: [],
-    });
-  });
-
-  it('query column shows SQL for single query', () => {
-    const hit = createMockSearchHitWithResultCounts();
-    mockActions({ items: [hit] });
+  it('query column shows SQL code for single query', () => {
+    mockUnifiedHistory({ rows: [createMockUnifiedHistoryRow()] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
   });
 
-  it('query column shows pack name for pack query', () => {
-    const hit = createMockPackSearchHitWithResultCounts();
-    mockActions({ items: [hit] });
+  it('query column shows query name when available', () => {
+    mockUnifiedHistory({
+      rows: [createMockPackUnifiedHistoryRow({ queryName: 'uptime-query' })],
+    });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(screen.getByText('My Pack')).toBeInTheDocument();
+    expect(screen.getByText('uptime-query')).toBeInTheDocument();
+  });
+
+  it('query column shows pack badge for scheduled pack queries', () => {
+    mockUnifiedHistory({ rows: [createMockScheduledHistoryRow()] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Compliance Pack')).toBeInTheDocument();
+  });
+
+  it('query column shows pack icon badge for live pack queries', () => {
+    mockUnifiedHistory({ rows: [createMockPackUnifiedHistoryRow()] });
+
+    const { container } = renderWithProviders(<UnifiedHistoryTable />);
+
+    const packageIcon = container.querySelector('[data-euiicon-type="package"]');
+    expect(packageIcon).toBeInTheDocument();
   });
 
   it('shows loading indicator on refetch', () => {
-    mockActions({ items: [createMockSearchHitWithResultCounts()], isFetching: true });
+    mockUnifiedHistory({
+      rows: [createMockUnifiedHistoryRow()],
+      isFetching: true,
+    });
 
     const { container } = renderWithProviders(<UnifiedHistoryTable />);
 
     expect(container.querySelector('.euiBasicTable-loading')).toBeInTheDocument();
+  });
+
+  it('passes filter changes to useUnifiedHistory', () => {
+    mockUnifiedHistory();
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    const searchInput = screen.getByTestId('unifiedHistorySearch');
+    fireEvent.change(searchInput, { target: { value: 'test-search' } });
+
+    expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kuery: 'test-search' })
+    );
+  });
+
+  it('calls refetch on refresh', async () => {
+    const { refetch } = mockUnifiedHistory();
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    fireEvent.click(screen.getByTestId('refreshButton'));
+
+    await waitFor(() => {
+      expect(refetch).toHaveBeenCalled();
+    });
+  });
+
+  it('renders pagination controls', () => {
+    mockUnifiedHistory({ rows: [createMockUnifiedHistoryRow()], hasMore: true });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByTestId('unifiedHistoryPagination')).toBeInTheDocument();
+  });
+
+  it('shows row data-test-subj with row id', () => {
+    const row = createMockUnifiedHistoryRow();
+    mockUnifiedHistory({ rows: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByTestId(`row-${row.id}`)).toBeInTheDocument();
   });
 });

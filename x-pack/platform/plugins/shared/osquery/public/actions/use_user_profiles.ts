@@ -10,22 +10,10 @@ import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '../common/lib/kibana';
 import type { SearchHit } from '../../common/search_strategy';
+import type { UnifiedHistoryRow } from '../../common/api/unified_history/types';
 
-export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
+const useBulkGetProfiles = (uidList: string[]) => {
   const { userProfile } = useKibana().services;
-
-  const uidList = useMemo(() => {
-    const uidSet = new Set<string>();
-
-    for (const item of actionItems) {
-      const uid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
-      if (uid) {
-        uidSet.add(uid);
-      }
-    }
-
-    return Array.from(uidSet).sort();
-  }, [actionItems]);
 
   const { data: userProfiles, isLoading } = useQuery<UserProfileWithAvatar[]>(
     ['useBulkGetUserProfiles', ...uidList],
@@ -45,4 +33,37 @@ export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
   }, [userProfiles]);
 
   return { profilesMap, isLoading: isLoading && uidList.length > 0 };
+};
+
+export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
+  const uidList = useMemo(() => {
+    const uidSet = new Set<string>();
+
+    for (const item of actionItems) {
+      const uid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
+      if (uid) {
+        uidSet.add(uid);
+      }
+    }
+
+    return Array.from(uidSet).sort();
+  }, [actionItems]);
+
+  return useBulkGetProfiles(uidList);
+};
+
+export const useBulkGetUnifiedHistoryProfiles = (rows: UnifiedHistoryRow[]) => {
+  const uidList = useMemo(() => {
+    const uidSet = new Set<string>();
+
+    for (const row of rows) {
+      if (row.userProfileUid) {
+        uidSet.add(row.userProfileUid);
+      }
+    }
+
+    return Array.from(uidSet).sort();
+  }, [rows]);
+
+  return useBulkGetProfiles(uidList);
 };

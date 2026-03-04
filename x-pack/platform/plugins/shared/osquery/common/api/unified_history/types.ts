@@ -22,10 +22,20 @@ export interface UnifiedHistoryRow {
   successCount: number | undefined;
   errorCount: number | undefined;
   totalRows: number | undefined;
+  queriesWithResults?: number;
+  queriesTotal?: number;
   userId?: string;
+  userProfileUid?: string;
   actionId?: string;
   scheduleId?: string;
   executionCount?: number;
+  ecsMapping?: Record<string, unknown>;
+  savedQueryId?: string;
+  timeout?: number;
+  agentIds?: string[];
+  agentAll?: boolean;
+  agentPlatforms?: string[];
+  agentPolicyIds?: string[];
 }
 
 export interface UnifiedHistoryResponse {
