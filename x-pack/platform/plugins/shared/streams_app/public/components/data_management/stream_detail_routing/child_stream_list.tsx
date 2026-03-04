@@ -40,6 +40,7 @@ import {
 import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
+import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
@@ -167,6 +168,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     fetchSuggestions,
     isLoadingSuggestions,
     suggestions,
+    suggestionReason,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -196,6 +198,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 
   // This isRefreshing tracks async gap between operation completion and server data arrival
   const isRefreshing = useStreamsRoutingSelector((snapshot) => snapshot.context.isRefreshing);
+
+  const showAdditionalChargesCallout =
+    !!aiFeatures?.isManagedAIConnector && !aiFeatures?.hasAcknowledgedAdditionalCharges;
 
   const hasData = routing.length > 0 || (aiFeatures?.enabled && suggestions);
 
@@ -230,17 +235,24 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           wrap
         >
           {aiFeatures?.enabled && !isLoadingSuggestions && !suggestions && (
-            <EuiFlexItem grow={false}>
-              <GenerateSuggestionButton
-                size="s"
-                onClick={getSuggestionsForStream}
-                isLoading={isLoadingSuggestions}
-                isDisabled={isEditingOrReorderingStreams}
-                aiFeatures={aiFeatures}
-              >
-                {suggestPartitionsWithAIText}
-              </GenerateSuggestionButton>
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <GenerateSuggestionButton
+                  size="s"
+                  onClick={getSuggestionsForStream}
+                  isLoading={isLoadingSuggestions}
+                  isDisabled={isEditingOrReorderingStreams}
+                  aiFeatures={aiFeatures}
+                >
+                  {suggestPartitionsWithAIText}
+                </GenerateSuggestionButton>
+              </EuiFlexItem>
+              {showAdditionalChargesCallout && (
+                <EuiFlexItem grow={false}>
+                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
+                </EuiFlexItem>
+              )}
+            </>
           )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
@@ -269,15 +281,23 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
       isAiEnabled={!!aiFeatures?.enabled}
     >
       {aiFeatures?.enabled && (
-        <GenerateSuggestionButton
-          size="s"
-          onClick={getSuggestionsForStream}
-          isLoading={isLoadingSuggestions}
-          isDisabled={isEditingOrReorderingStreams}
-          aiFeatures={aiFeatures}
-        >
-          {suggestPartitionsWithAIText}
-        </GenerateSuggestionButton>
+        <>
+          <GenerateSuggestionButton
+            size="s"
+            onClick={getSuggestionsForStream}
+            isLoading={isLoadingSuggestions}
+            isDisabled={isEditingOrReorderingStreams}
+            aiFeatures={aiFeatures}
+          >
+            {suggestPartitionsWithAIText}
+          </GenerateSuggestionButton>
+          {showAdditionalChargesCallout && (
+            <>
+              <EuiSpacer size="s" />
+              <AdditionalChargesCallout aiFeatures={aiFeatures} />
+            </>
+          )}
+        </>
       )}
     </NoDataEmptyPrompt>
   ) : (
@@ -356,6 +376,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   onDismiss={resetForm}
                   onRegenerate={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
+                  reason={suggestionReason}
                 />
               ) : (
                 <ReviewSuggestionsForm

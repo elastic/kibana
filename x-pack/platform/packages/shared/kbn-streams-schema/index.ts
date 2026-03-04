@@ -47,7 +47,14 @@ export {
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
-export { buildEsqlQuery } from './src/helpers/query';
+export {
+  buildMetadataOption,
+  ensureMetadata,
+  extractWhereExpression,
+  getFromSources,
+  normalizeEsqlQuery,
+  rewriteFromSources,
+} from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -89,13 +96,13 @@ export {
 } from './src/fields';
 
 export {
+  type EsqlQuery,
+  esqlQuerySchema,
   type StreamQuery,
-  type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
   streamQuerySchema,
-  streamQueryInputSchema,
 } from './src/queries';
 
 export {
@@ -176,6 +183,8 @@ export {
   COMPUTED_FEATURE_TYPES,
   isFeature,
   isComputedFeature,
+  isDuplicateFeature,
+  hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,
@@ -202,6 +211,25 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult } from './src/api/features';
 
-export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export {
+  type GenerateInsightsResult,
+  type Insight,
+  type InsightCore,
+  type InsightEvidence,
+  type InsightImpactLevel,
+  type InsightImpactLevelNumeric,
+  type InsightUserEvaluation,
+  type InsightMeta,
+  type SaveInsightBody,
+  insightSchema,
+  insightCoreSchema,
+  insightMetaSchema,
+  insightEvidenceSchema,
+  insightImpactLevelSchema,
+  insightImpactLevelNumericSchema,
+  insightUserEvaluationSchema,
+  INSIGHT_IMPACT_LEVEL_MAP,
+  getImpactLevel,
+} from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';

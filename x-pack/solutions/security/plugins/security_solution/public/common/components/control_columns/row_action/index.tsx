@@ -28,6 +28,7 @@ import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/t
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -74,7 +75,10 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-  const { telemetry, overlays } = useKibana().services;
+
+  const { services } = useKibana();
+  const { telemetry, overlays } = services;
+
   const { openFlyout } = useExpandableFlyoutApi();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
 
@@ -102,12 +106,16 @@ const RowActionComponent = ({
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (newFlyoutSystemEnabled && esHitRecord) {
       const hit: DataTableRecord = buildDataTableRecord(esHitRecord);
-      overlays.openSystemFlyout(<OverviewTab hit={hit} />, {
-        // @ts-ignore EUI to fix this typing issue
-        resizable: true,
-        type: 'overlay',
-        ownFocus: false,
-      });
+      overlays.openSystemFlyout(
+        flyoutProviders({ services, children: <OverviewTab hit={hit} /> }),
+        {
+          ownFocus: false,
+          // @ts-ignore EUI to fix this typing issue
+          resizable: true,
+          size: 's',
+          type: 'overlay',
+        }
+      );
     } else {
       openFlyout({
         right: {
@@ -131,6 +139,7 @@ const RowActionComponent = ({
     newFlyoutSystemEnabled,
     openFlyout,
     overlays,
+    services,
     tableId,
     telemetry,
   ]);
