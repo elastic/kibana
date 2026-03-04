@@ -1,5 +1,6 @@
 # Security Project config
 
+xpack.fleet.agentless.customIntegrations.enabled: true
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'security']
 
@@ -22,7 +23,7 @@ xpack.features.overrides:
   maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
-    category: "security"
+    category: 'security'
     order: 1103
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV5:
@@ -55,26 +56,26 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
-        - feature: "visualize_v2"
-          privileges: [ "all" ]
-        - feature: "maps_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
+        - feature: 'dashboard_v2'
+          privileges: ['all']
+        - feature: 'visualize_v2'
+          privileges: ['all']
+        - feature: 'maps_v2'
+          privileges: ['all']
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
-          privileges: [ "read" ]
-        - feature: "visualize_v2"
-          privileges: [ "read" ]
-        - feature: "maps_v2"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'dashboard_v2'
+          privileges: ['read']
+        - feature: 'visualize_v2'
+          privileges: ['read']
+        - feature: 'maps_v2'
+          privileges: ['read']
 
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV3:
@@ -82,26 +83,26 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
-        - feature: "visualize_v2"
-          privileges: [ "all" ]
-        - feature: "maps_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
+        - feature: 'dashboard_v2'
+          privileges: ['all']
+        - feature: 'visualize_v2'
+          privileges: ['all']
+        - feature: 'maps_v2'
+          privileges: ['all']
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
-          privileges: [ "read" ]
-        - feature: "visualize_v2"
-          privileges: [ "read" ]
-        - feature: "maps_v2"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'dashboard_v2'
+          privileges: ['read']
+        - feature: 'visualize_v2'
+          privileges: ['read']
+        - feature: 'maps_v2'
+          privileges: ['read']
 
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV2:
@@ -109,26 +110,26 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
-        - feature: "visualize_v2"
-          privileges: [ "all" ]
-        - feature: "maps_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
+        - feature: 'dashboard_v2'
+          privileges: ['all']
+        - feature: 'visualize_v2'
+          privileges: ['all']
+        - feature: 'maps_v2'
+          privileges: ['all']
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
-          privileges: [ "read" ]
-        - feature: "visualize_v2"
-          privileges: [ "read" ]
-        - feature: "maps_v2"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'dashboard_v2'
+          privileges: ['read']
+        - feature: 'visualize_v2'
+          privileges: ['read']
+        - feature: 'maps_v2'
+          privileges: ['read']
 
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siem:
@@ -136,30 +137,30 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
-        - feature: "visualize_v2"
-          privileges: [ "all" ]
-        - feature: "maps_v2"
-          privileges: [ "all" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
+        - feature: 'dashboard_v2'
+          privileges: ['all']
+        - feature: 'visualize_v2'
+          privileges: ['all']
+        - feature: 'maps_v2'
+          privileges: ['all']
+        - feature: 'savedQueryManagement'
+          privileges: ['all']
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
-          privileges: [ "read" ]
-        - feature: "visualize_v2"
-          privileges: [ "read" ]
-        - feature: "maps_v2"
-          privileges: [ "read" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'dashboard_v2'
+          privileges: ['read']
+        - feature: 'visualize_v2'
+          privileges: ['read']
+        - feature: 'maps_v2'
+          privileges: ['read']
+        - feature: 'savedQueryManagement'
+          privileges: ['read']
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
@@ -174,8 +175,8 @@ xpack.securitySolutionServerless.productTypes:
   ]
 
 xpack.securitySolution.offeringSettings: {
-  ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
-}
+    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+  }
 
 newsfeed.enabled: true
 
@@ -256,7 +257,13 @@ xpack.alerting.rules.run.ruleTypeOverrides:
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled, disable:enableRiskScorePrivmonModifier, disable:kubernetesEnabled, trialCompanionEnabled]
+xpack.securitySolution.enableExperimental:
+  [
+    riskScoreAssistantToolDisabled,
+    disable:enableRiskScorePrivmonModifier,
+    disable:kubernetesEnabled,
+    trialCompanionEnabled,
+  ]
 
 # AI Assistant config
 aiAssistantManagementSelection.preferredAIAssistantType: 'security'

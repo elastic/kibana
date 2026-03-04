@@ -9,3 +9,4 @@ workflowsExecutionEngine.enabled: false
 
 ### Agent Builder should not be enabled in this tier
 xpack.agentBuilder.enabled: false
+xpack.fleet.agentless.customIntegrations.enabled: true
