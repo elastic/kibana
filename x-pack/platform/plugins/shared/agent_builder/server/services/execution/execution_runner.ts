@@ -38,6 +38,7 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
+import type { MeteringService } from '../metering';
 import type { AgentExecution, SerializedExecutionError } from './types';
 import type { AgentExecutionClient } from './persistence';
 
@@ -56,6 +57,7 @@ export interface AgentExecutionDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
+  meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
 }
@@ -92,7 +94,7 @@ export const handleAgentExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService } = deps;
+  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
   // Resolve scoped services
   const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
@@ -168,9 +170,27 @@ export const handleAgentExecution = async ({
             const currentRoundCount = isReplacingRound
               ? conversation.rounds.length
               : (conversation.rounds?.length ?? 0) + 1;
+
+            // metering
+            meteringService
+              .reportExecution({
+                conversationId: effectiveConversationId,
+                executionId: execution.executionId,
+                roundCount: currentRoundCount,
+                agentId,
+                round: event.data.round,
+                modelProvider,
+              })
+              .catch((err) => {
+                logger.warn(`Failed to report execution metering: ${err}`);
+              });
+
+            // snapshot telemetry tracking
             if (effectiveConversationId) {
               trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
             }
+
+            // EBT tracking
             analyticsService?.reportRoundComplete({
               conversationId: effectiveConversationId,
               executionId: execution.executionId,
