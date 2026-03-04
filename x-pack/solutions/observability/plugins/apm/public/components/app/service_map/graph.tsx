@@ -92,6 +92,7 @@ function GraphInner({
     null
   );
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -133,6 +134,23 @@ function GraphInner({
     applyEdgeHighlighting,
     getFitViewOptions,
   ]);
+
+  // Initialize the focused node to the first node when nodes are loaded
+  useEffect(() => {
+    if (nodes.length > 0 && !focusedNodeId) {
+      setFocusedNodeId(nodes[0].id);
+    }
+  }, [nodes, focusedNodeId]);
+
+  // Apply roving tabindex: only the focused node wrapper gets tabIndex={0}
+  useEffect(() => {
+    nodes.forEach((node) => {
+      const el = document.querySelector(`[data-id="${node.id}"]`);
+      if (el instanceof HTMLElement) {
+        el.tabIndex = node.id === focusedNodeId ? 0 : -1;
+      }
+    });
+  }, [nodes, focusedNodeId]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
@@ -232,6 +250,7 @@ function GraphInner({
     onNodeSelect: handleKeyboardNodeSelect,
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
+    onFocusedNodeChange: setFocusedNodeId,
   });
 
   useEffect(() => {
@@ -335,7 +354,7 @@ function GraphInner({
   const screenReaderInstructions = i18n.translate('xpack.apm.serviceMap.screenReaderInstructions', {
     defaultMessage:
       'This is an interactive service map showing application services and their dependencies. ' +
-      'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
+      'Use Arrow keys to navigate between nodes. Press Tab to leave the map. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
       'Press Escape to close the details popover. ' +
       'The zoom controls in the top left allow you to zoom in, zoom out, and fit the view.',
@@ -346,7 +365,6 @@ function GraphInner({
       css={css(containerStyle)}
       data-test-subj="serviceMapGraph"
       role="group"
-      tabIndex={0}
       aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
         defaultMessage: 'Service map with {nodeCount} services and dependencies.',
         values: { nodeCount: nodes.length },
@@ -377,7 +395,7 @@ function GraphInner({
         proOptions={{ hideAttribution: true }}
         nodesDraggable={true}
         nodesConnectable={false}
-        nodesFocusable={true}
+        nodesFocusable={false}
         edgesFocusable={false}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />

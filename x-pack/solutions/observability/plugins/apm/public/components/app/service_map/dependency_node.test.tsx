@@ -108,4 +108,19 @@ describe('DependencyNode', () => {
     renderDependencyNode(createDependencyNodeData({ spanType: undefined }));
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
+
+  describe('accessibility', () => {
+    it('inner diamond does not have tabIndex={0}', () => {
+      renderDependencyNode();
+      const button = screen.getByRole('button');
+      expect(button).not.toHaveAttribute('tabIndex', '0');
+    });
+
+    it('inner diamond retains role, aria-label, and aria-pressed', () => {
+      renderDependencyNode(createDependencyNodeData(), true);
+      const button = screen.getByRole('button');
+      expect(button).toHaveAttribute('aria-label', expect.stringContaining('postgresql:5432'));
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
 });

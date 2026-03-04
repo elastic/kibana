@@ -149,7 +149,7 @@ export const ServiceNode = memo(
           <div
             css={circleStyles}
             role="button"
-            tabIndex={0}
+            tabIndex={-1}
             aria-label={ariaLabel}
             aria-pressed={selected}
           >

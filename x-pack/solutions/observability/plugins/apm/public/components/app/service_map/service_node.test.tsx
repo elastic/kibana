@@ -115,7 +115,20 @@ describe('ServiceNode', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
-  describe('health status styling', () => {
+  describe('accessibility', () => {
+    it('inner circle does not have tabIndex={0}', () => {
+      renderServiceNode();
+      const button = screen.getByRole('button');
+      expect(button).not.toHaveAttribute('tabIndex', '0');
+    });
+
+    it('inner circle retains role, aria-label, and aria-pressed', () => {
+      renderServiceNode(createServiceNodeData(), true);
+      const button = screen.getByRole('button');
+      expect(button).toHaveAttribute('aria-label', expect.stringContaining('Test Service'));
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
     it('renders with warning health status', () => {
       const data = createServiceNodeData({
         serviceAnomalyStats: {

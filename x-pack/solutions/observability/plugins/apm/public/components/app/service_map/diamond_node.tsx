@@ -173,7 +173,7 @@ export const DiamondNode = memo(
           <div
             css={diamondStyles}
             role="button"
-            tabIndex={0}
+            tabIndex={-1}
             aria-label={ariaLabel}
             aria-pressed={selected}
           >
