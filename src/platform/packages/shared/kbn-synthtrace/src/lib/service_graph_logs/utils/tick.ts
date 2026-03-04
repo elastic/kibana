@@ -29,7 +29,7 @@ import { toLogEntries } from './converter';
 import type { MetadataCache } from './metadata';
 import { getOrBuildMetadata } from './metadata';
 import { mulberry32 } from '../placeholders';
-import { resolveEffectiveSeed, serviceStableSeed } from './seed';
+import { probabilisticCount, resolveEffectiveSeed, serviceStableSeed } from './seed';
 import { pickHealthyMessage } from './templates';
 
 export interface GeneratorContext {
@@ -214,16 +214,9 @@ export function collectServiceDocs({
   if (spikeMultiplier === 0) return [];
 
   const baseRate = entryCfg?.rate ?? 1;
-  const exactTraceCount = baseRate * spikeMultiplier;
-  const intPart = Math.floor(exactTraceCount);
-  const fracPart = exactTraceCount - intPart;
-  let traceCount = intPart;
-  if (fracPart > 0) {
-    const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
-    const rng = mulberry32(serviceStableSeed(tickSeed, entryService));
-    if (rng() < fracPart) traceCount += 1;
-  }
-  traceCount = Math.max(0, traceCount);
+  const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
+  const rng = mulberry32(serviceStableSeed(tickSeed, entryService));
+  const traceCount = probabilisticCount(baseRate * spikeMultiplier, rng);
 
   const docs: Array<Partial<LogDocument>> = [];
   for (let m = 0; m < traceCount; m++) {
@@ -268,21 +261,13 @@ export function collectVolumeSkewDocs({
     const effectiveWeight = (svcCfg.rate ?? 1) * spikeMultiplier;
     if (effectiveWeight <= 0) continue;
 
-    const extraCount = (() => {
-      const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
-      const rng = mulberry32(serviceStableSeed(tickSeed, svc.name));
-      if (effectiveWeight < 1) {
-        return rng() < effectiveWeight ? 1 : 0;
-      }
-      const intPart = Math.floor(effectiveWeight);
-      const fractional = effectiveWeight - intPart;
-      return intPart + (rng() < fractional ? 1 : 0);
-    })();
+    const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
+    const rng = mulberry32(serviceStableSeed(tickSeed, svc.name));
+    const extraCount = probabilisticCount(effectiveWeight, rng);
 
     for (let k = 0; k < extraCount; k++) {
       const svcSeed = serviceStableSeed(seed ?? 0, svc.name);
       const metadata = getOrBuildMetadata(svc, svcSeed, metadataCache);
-      const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
       const message = pickHealthyMessage({
         seed: svcSeed,
         tickSeed,
@@ -332,7 +317,10 @@ export function collectInfraDocs({
 
   const spikeMultiplier = resolveSpikes(depCfg?.spikes, timestamp, ctx, svc.name);
   const baseRate = depCfg?.rate ?? 1;
-  const infraCount = Math.max(0, Math.round(baseRate * spikeMultiplier));
+  const rng = mulberry32(
+    serviceStableSeed(resolveEffectiveSeed(seed, currentIndex, timestamp), dep)
+  );
+  const infraCount = probabilisticCount(baseRate * spikeMultiplier, rng);
   if (infraCount === 0) {
     return [];
   }

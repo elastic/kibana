@@ -24,3 +24,15 @@ export function serviceStableSeed(baseSeed: number, serviceName: string): number
   // eslint-disable-next-line no-bitwise
   return (baseSeed ^ hashStr(serviceName)) >>> 0;
 }
+
+/**
+ * Converts a fractional weight into a whole-number doc count deterministically.
+ * The integer part is always emitted; the fractional remainder is resolved to a
+ * probabilistic +1 using one draw from the provided RNG.
+ *
+ * e.g. weight=2.3 → always 2, +1 with 30% probability per tick.
+ */
+export const probabilisticCount = (weight: number, rng: () => number): number => {
+  const intPart = Math.floor(weight);
+  return intPart + (rng() < weight - intPart ? 1 : 0);
+};

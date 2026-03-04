@@ -279,7 +279,6 @@ export function pickInfraMessage({
   timestamp: number;
   serviceName?: string;
 }): string {
-  const level = rawLevel === 'info' ? undefined : rawLevel;
   const categoryData = INFRA[category] as Record<string, InfraPool<string> | undefined> | undefined;
   const techPool =
     (tech ? categoryData?.[tech] : undefined) ?? Object.values(categoryData ?? {})[0];
@@ -290,9 +289,15 @@ export function pickInfraMessage({
   if (Array.isArray(conditionData)) {
     templates = conditionData;
   } else if (conditionData != null) {
-    templates = (level === 'warn' ? conditionData.warn : conditionData.error) ?? [];
+    if (rawLevel === 'warn') {
+      templates = conditionData.warn ?? [];
+    } else if (rawLevel === 'error') {
+      templates = conditionData.error ?? [];
+    } else {
+      templates = Array.isArray(techPool?.healthy) ? techPool.healthy : [];
+    }
   } else {
-    templates = Array.isArray(techPool?.healthy) ? techPool?.healthy : [];
+    templates = Array.isArray(techPool?.healthy) ? techPool.healthy : [];
   }
 
   if (templates.length === 0) {

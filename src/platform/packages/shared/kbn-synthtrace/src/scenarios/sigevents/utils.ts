@@ -238,9 +238,15 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
       merged.volume = volumeMap;
     }
 
-    const noiseSpikes = list.flatMap((r) => r.noise?.volume?.spikes ?? []);
-    if (noiseSpikes.length > 0) {
-      merged.noise = { volume: { spikes: noiseSpikes } };
+    const noiseVolumes = list.map((r) => r.noise?.volume).filter((v) => v !== undefined);
+    if (noiseVolumes.length > 0) {
+      const mergedNoiseVolume = noiseVolumes.reduce((acc, v) => ({
+        rate: acc.rate ?? v.rate,
+        every: acc.every ?? v.every,
+        jitter: acc.jitter ?? v.jitter,
+        spikes: [...(acc.spikes ?? []), ...(v.spikes ?? [])],
+      }));
+      merged.noise = { volume: mergedNoiseVolume };
     }
 
     const seenMessages = new Set<string>();
