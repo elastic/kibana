@@ -19,7 +19,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     kbn: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/lens',
   };
 
-  describe.only('lens in canvas', function () {
+  describe('lens in canvas', function () {
     before(async () => {
       await esArchiver.load(archives.es);
       await kibanaServer.savedObjects.cleanStandardList();
