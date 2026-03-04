@@ -34,9 +34,7 @@ import type {
   OverviewEmbeddableState,
   SingleOverviewCustomState,
 } from '../common/embeddables/overview/types';
-import type {
-  ErrorBudgetEmbeddableState,
-} from '../common/embeddables/error_budget/types';
+import type { ErrorBudgetEmbeddableState } from '../common/embeddables/error_budget/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
