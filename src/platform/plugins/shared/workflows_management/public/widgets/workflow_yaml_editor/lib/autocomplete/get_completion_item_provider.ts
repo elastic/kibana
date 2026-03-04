@@ -118,7 +118,6 @@ export function getCompletionItemProvider(
       if (!shouldUseExclusiveSuggestions) {
         const allYamlProviders = getAllYamlProviders();
 
-
         for (const yamlProvider of allYamlProviders) {
           if (yamlProvider.provideCompletionItems) {
             try {
