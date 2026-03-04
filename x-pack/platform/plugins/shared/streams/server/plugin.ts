@@ -141,24 +141,30 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [attachmentClient, featureClient, systemClient, contentClient, queryClient] =
-        await Promise.all([
-          attachmentService.getClient({
-            soClient,
-            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
-          }),
-          featureService.getClient(),
-          systemService.getClient(),
-          insightService.getInternalClient(),
-          contentService.getClient(),
-          queryService.getClient({
-            soClient,
-            rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-              request,
-              DEFAULT_SPACE_ID
-            ),
-          }),
-        ]);
+      const [
+        attachmentClient,
+        featureClient,
+        systemClient,
+        insightClient,
+        contentClient,
+        queryClient,
+      ] = await Promise.all([
+        attachmentService.getClient({
+          soClient,
+          rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+        }),
+        featureService.getClient(),
+        systemService.getClient(),
+        insightService.getInternalClient(),
+        contentService.getClient(),
+        queryService.getClient({
+          soClient,
+          rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+            request,
+            DEFAULT_SPACE_ID
+          ),
+        }),
+      ]);
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
