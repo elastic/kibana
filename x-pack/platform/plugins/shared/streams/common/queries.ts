@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamQuery, StreamQueryInput } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 
 export interface QueryLink {
   'asset.uuid': string;
@@ -19,9 +19,7 @@ export interface QueryLink {
   rule_id: string;
 }
 
-export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name' | 'query'> & {
-  query: StreamQueryInput;
-};
+export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 

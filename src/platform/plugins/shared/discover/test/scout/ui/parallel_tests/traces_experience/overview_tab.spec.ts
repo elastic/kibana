@@ -109,6 +109,31 @@ spaceTest.describe(
       });
     });
 
+    spaceTest(
+      'should render Trace Summary and Logs sections for documents without errors or span links',
+      async ({ pageObjects }) => {
+        await spaceTest.step('filter for minimal trace transaction', async () => {
+          await pageObjects.discover.writeAndSubmitKqlQuery(
+            `transaction.name: "${MINIMAL_TRACE.TRANSACTION_NAME}"`
+          );
+        });
+
+        await spaceTest.step('open Overview tab', async () => {
+          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+        });
+
+        await spaceTest.step('verify Trace Summary section is visible', async () => {
+          await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible({
+            timeout: 30_000,
+          });
+        });
+
+        await spaceTest.step('verify Logs section is visible', async () => {
+          await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible();
+        });
+      }
+    );
+
     spaceTest('should render Errors section for documents with errors', async ({ pageObjects }) => {
       await spaceTest.step('filter for rich trace transaction', async () => {
         await pageObjects.discover.writeAndSubmitKqlQuery(
