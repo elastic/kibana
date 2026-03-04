@@ -38,18 +38,23 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
 
   const history = useHistory();
-  const { deleteRule } = useDeleteRule();
+  const { mutate: deleteRule } = useDeleteRule();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
   const showDeleteConfirmationModal = () => {
     setShowDeleteConfirmation(true);
   };
 
-  const handleRuleDelete = async () => {
+  const handleRuleDelete = () => {
     setShowDeleteConfirmation(false);
-    deleteRule(rule.id, () => {
-      history.push(`/`);
-    });
+    deleteRule(
+      { id: rule.id },
+      {
+        onSuccess: () => {
+          history.push('/');
+        },
+      }
+    );
   };
 
   const configurationListItems = [

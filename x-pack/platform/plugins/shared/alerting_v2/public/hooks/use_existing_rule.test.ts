@@ -5,19 +5,29 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useExistingRule } from './use_existing_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { useQuery } from '@kbn/react-query';
 import { RulesApi } from '../services/rules_api';
 
 jest.mock('@kbn/core-di-browser');
-jest.mock('@kbn/react-query');
 jest.mock('../services/rules_api');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
-const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>;
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
 
 describe('useExistingRule', () => {
   const mockGetRule = jest.fn();
@@ -39,75 +49,58 @@ describe('useExistingRule', () => {
     });
   });
 
-  it('should return rule data on success', () => {
+  it('should return rule data on success', async () => {
     const mockRuleData = { id: 'rule-1', metadata: { name: 'Test' } };
-    mockUseQuery.mockReturnValue({
-      data: mockRuleData,
-      isLoading: false,
-      error: null,
-    } as any);
+    mockGetRule.mockResolvedValue(mockRuleData);
 
-    const { result } = renderHook(() => useExistingRule('rule-1'));
+    const { result } = renderHook(() => useExistingRule('rule-1'), {
+      wrapper: createWrapper(),
+    });
 
-    expect(result.current.rule).toEqual(mockRuleData);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
+    await waitFor(() => {
+      expect(result.current.rule).toEqual(mockRuleData);
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+    });
   });
 
   it('should return loading state while fetching', () => {
-    mockUseQuery.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: null,
-    } as any);
+    mockGetRule.mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderHook(() => useExistingRule('rule-1'));
+    const { result } = renderHook(() => useExistingRule('rule-1'), {
+      wrapper: createWrapper(),
+    });
 
     expect(result.current.rule).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('should pass the correct queryKey and enabled flag', () => {
-    mockUseQuery.mockReturnValue({ data: undefined, isLoading: false, error: null } as any);
+  it('should call getRule with the correct rule id', async () => {
+    mockGetRule.mockResolvedValue({ id: 'rule-1' });
 
-    renderHook(() => useExistingRule('rule-1'));
+    renderHook(() => useExistingRule('rule-1'), { wrapper: createWrapper() });
 
-    expect(mockUseQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        queryKey: ['rule', 'rule-1'],
-        enabled: true,
-      })
-    );
+    await waitFor(() => {
+      expect(mockGetRule).toHaveBeenCalledWith('rule-1');
+    });
   });
 
-  it('should disable the query when ruleId is empty', () => {
-    mockUseQuery.mockReturnValue({ data: undefined, isLoading: false, error: null } as any);
-
-    renderHook(() => useExistingRule(''));
-
-    expect(mockUseQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
-  });
-
-  it('should call getRule via the queryFn', () => {
-    mockUseQuery.mockImplementation((options: any) => {
-      options.queryFn?.();
-      return { data: undefined, isLoading: false, error: null } as any;
+  it('should not fetch when ruleId is empty', () => {
+    const { result } = renderHook(() => useExistingRule(''), {
+      wrapper: createWrapper(),
     });
 
-    renderHook(() => useExistingRule('rule-1'));
-
-    expect(mockGetRule).toHaveBeenCalledWith('rule-1');
+    expect(mockGetRule).not.toHaveBeenCalled();
   });
 
-  it('should show an error toast via onError', () => {
+  it('should show an error toast when the query fails', async () => {
     const error = new Error('load failed');
-    mockUseQuery.mockImplementation((options: any) => {
-      options.onError?.(error);
-      return { data: undefined, isLoading: false, error } as any;
+    mockGetRule.mockRejectedValue(error);
+
+    renderHook(() => useExistingRule('rule-1'), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalledWith(error, { title: expect.any(String) });
     });
-
-    renderHook(() => useExistingRule('rule-1'));
-
-    expect(mockAddError).toHaveBeenCalledWith(error, { title: expect.any(String) });
   });
 });

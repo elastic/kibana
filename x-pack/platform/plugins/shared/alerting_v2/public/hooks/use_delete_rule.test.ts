@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteRule } from './use_delete_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
@@ -15,6 +17,17 @@ jest.mock('../services/rules_api');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
 
 describe('useDeleteRule', () => {
   const mockDeleteRule = jest.fn();
@@ -39,44 +52,54 @@ describe('useDeleteRule', () => {
 
   it('should delete a rule and show a success toast', async () => {
     mockDeleteRule.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useDeleteRule());
+    const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    await result.current.deleteRule('rule-1');
+    result.current.mutate({ id: 'rule-1' });
 
-    expect(mockDeleteRule).toHaveBeenCalledWith('rule-1');
-    expect(mockAddSuccess).toHaveBeenCalledWith({ title: expect.any(String) });
-    expect(mockAddError).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockDeleteRule).toHaveBeenCalledWith('rule-1');
+      expect(mockAddSuccess).toHaveBeenCalledWith({ title: expect.any(String) });
+      expect(mockAddError).not.toHaveBeenCalled();
+    });
   });
 
-  it('should invoke the onSuccess callback after deletion', async () => {
+  it('should show an error toast when deletion fails', async () => {
+    const error = new Error('delete failed');
+    mockDeleteRule.mockRejectedValue(error);
+    const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ id: 'rule-1' });
+
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalledWith(error, { title: expect.any(String) });
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should invoke per-call onSuccess callback after deletion', async () => {
     mockDeleteRule.mockResolvedValue(undefined);
     const onSuccess = jest.fn();
-    const { result } = renderHook(() => useDeleteRule());
+    const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    await result.current.deleteRule('rule-1', onSuccess);
+    result.current.mutate({ id: 'rule-1' }, { onSuccess });
 
-    expect(onSuccess).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+      expect(mockAddSuccess).toHaveBeenCalled();
+    });
   });
 
-  it('should not invoke onSuccess when deletion fails', async () => {
+  it('should not invoke per-call onSuccess when deletion fails', async () => {
     const error = new Error('delete failed');
     mockDeleteRule.mockRejectedValue(error);
     const onSuccess = jest.fn();
-    const { result } = renderHook(() => useDeleteRule());
+    const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    await result.current.deleteRule('rule-1', onSuccess);
+    result.current.mutate({ id: 'rule-1' }, { onSuccess });
 
-    expect(onSuccess).not.toHaveBeenCalled();
-    expect(mockAddError).toHaveBeenCalledWith(error, { title: expect.any(String) });
-    expect(mockAddSuccess).not.toHaveBeenCalled();
-  });
-
-  it('should work without an onSuccess callback', async () => {
-    mockDeleteRule.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useDeleteRule());
-
-    await result.current.deleteRule('rule-1');
-
-    expect(mockAddSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(mockAddError).toHaveBeenCalled();
+    });
   });
 });

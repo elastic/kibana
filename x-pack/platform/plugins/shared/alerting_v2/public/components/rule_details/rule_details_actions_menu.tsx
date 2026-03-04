@@ -25,9 +25,9 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
-  const { cloneRule } = useCloneRule();
-  const { disableRule } = useDisableRule();
-  const { enableRule } = useEnableRule();
+  const { mutate: cloneRule } = useCloneRule();
+  const { mutate: disableRule } = useDisableRule();
+  const { mutate: enableRule } = useEnableRule();
 
   const deleteButtonStyles = css`
     .ruleDetailsActionsMenu__deleteButton {
@@ -37,12 +37,12 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   const handleDisable = () => {
     setIsPopoverOpen(false);
-    disableRule(rule.id);
+    disableRule({ id: rule.id });
   };
 
   const handleEnable = () => {
     setIsPopoverOpen(false);
-    enableRule(rule.id);
+    enableRule({ id: rule.id });
   };
 
   const handleClone = () => {

@@ -7,31 +7,37 @@
 
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { RulesApi } from '../services/rules_api';
+import { ruleKeys } from './query_key_factory';
 
 export function useDeleteRule() {
   const rulesApi = useService(RulesApi);
   const notifications = useService(CoreStart('notifications'));
+  const queryClient = useQueryClient();
 
-  const deleteRule = async (ruleId: string, onSuccess?: () => void) => {
-    try {
-      await rulesApi.deleteRule(ruleId);
-      notifications?.toasts.addSuccess({
-        title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDeleteSuccess', {
-          defaultMessage: 'Rule deleted',
-        }),
-      });
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (err) {
-      notifications?.toasts.addError(err, {
-        title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDeleteError', {
-          defaultMessage: 'Unable to delete rule',
-        }),
-      });
+  return useMutation(
+    ['deleteRule'],
+    ({ id }: { id: string }) => {
+      return rulesApi.deleteRule(id);
+    },
+    {
+      onError: (error) => {
+        notifications?.toasts.addError(error as Error, {
+          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDeleteError', {
+            defaultMessage: 'Unable to delete rule',
+          }),
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
+        queryClient.invalidateQueries({ queryKey: ruleKeys.details(), exact: false });
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDeleteSuccess', {
+            defaultMessage: 'Rule deleted',
+          }),
+        });
+      },
     }
-  };
-
-  return { deleteRule };
+  );
 }
