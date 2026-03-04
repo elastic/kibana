@@ -116,6 +116,7 @@ function buildInfraDocs({
   dep,
   failingDeps,
   failingServiceErrors,
+  currentFailures,
   depFailingErrorType,
   timestamp,
   metadataCache,
@@ -125,6 +126,7 @@ function buildInfraDocs({
   dep: InfraDependency;
   failingDeps: Set<string>;
   failingServiceErrors: Map<string, ErrorType>;
+  currentFailures: FailureMap | undefined;
   depFailingErrorType: ErrorType | undefined;
   timestamp: number;
   metadataCache: MetadataCache | undefined;
@@ -142,10 +144,14 @@ function buildInfraDocs({
 
   const cachedMeta = metadataCache?.get(svc.name);
   const serviceErrorType = failingServiceErrors.get(svc.name);
-  const k8sErrorType =
-    serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff'
-      ? serviceErrorType
-      : undefined;
+  let k8sErrorType: 'k8s_oom' | 'k8s_crash_loop_backoff' | undefined;
+  if (serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff') {
+    const svcFailureCfg = currentFailures?.services?.[svc.name];
+    const k8sRng = mulberry32(serviceStableSeed(effectiveSeed, svc.name));
+    if (!svcFailureCfg || svcFailureCfg.rate <= 0 || k8sRng() < svcFailureCfg.rate) {
+      k8sErrorType = serviceErrorType;
+    }
+  }
 
   const hostDocs = generateHostSystemLog({
     service: svc,
@@ -315,9 +321,14 @@ export function collectInfraDocs({
     return [];
   }
 
-  const rawDepErrorType = currentFailures?.infra?.[dep]?.errorType;
-  const depFailingErrorType =
-    failingDeps.has(dep) && rawDepErrorType != null ? rawDepErrorType : undefined;
+  const infraFailureCfg = currentFailures?.infra?.[dep];
+  let depFailingErrorType: ErrorType | undefined;
+  if (failingDeps.has(dep) && infraFailureCfg != null) {
+    const { errorType, rate } = infraFailureCfg;
+    if (rate <= 0 || rng() < rate) {
+      depFailingErrorType = errorType;
+    }
+  }
 
   const result: Array<Partial<LogDocument>> = [];
   for (let i = 0; i < infraCount; i++) {
@@ -327,6 +338,7 @@ export function collectInfraDocs({
         dep,
         failingDeps,
         failingServiceErrors,
+        currentFailures,
         depFailingErrorType,
         timestamp,
         metadataCache,
