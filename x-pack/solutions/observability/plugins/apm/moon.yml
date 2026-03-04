@@ -149,7 +149,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/controls-constants'
-  - '@kbn/controls-schemas'
   - '@kbn/agent-builder-plugin'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
