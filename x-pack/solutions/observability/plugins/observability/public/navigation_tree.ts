@@ -650,7 +650,6 @@ export const createDefinition = (
   id: 'oblt',
   title,
   icon: 'logoObservability',
-  homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
@@ -663,5 +662,4 @@ export const createDefinition = (
       })
     )
   ),
-  dataTestSubj: 'observabilitySideNav',
 });

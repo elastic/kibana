@@ -167,6 +167,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     fetchSuggestions,
     isLoadingSuggestions,
     suggestions,
+    suggestionReason,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -356,6 +357,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   onDismiss={resetForm}
                   onRegenerate={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
+                  reason={suggestionReason}
                 />
               ) : (
                 <ReviewSuggestionsForm

@@ -34,10 +34,12 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     openCanvasContext(attachment, isSidebar);
   }, [openCanvasContext, attachment, isSidebar]);
 
-  const updateOrigin = useCallback(async (originId: string) => {
-    // TODO: Implement updateOrigin
-    //   attachmentsService.updateOrigin(conversationId, attachment.id, originId);
-  }, []);
+  const updateOrigin = useCallback(
+    async (origin: unknown) => {
+      return attachmentsService.updateOrigin(conversationId, attachment.id, origin);
+    },
+    [attachmentsService, conversationId, attachment.id]
+  );
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
