@@ -99,7 +99,7 @@ describe('Component template serialization', () => {
       });
     });
 
-    test('migrates deprecated mappings._source.mode to index.mapping.source.mode on deserialize', () => {
+    test('does not migrate deprecated mappings._source.mode to index.mapping.source.mode on deserialize', () => {
       expect(
         deserializeComponentTemplate(
           {
@@ -113,23 +113,15 @@ describe('Component template serialization', () => {
                   },
                 },
               },
-            } as any,
-          } as any,
+            },
+          },
           []
         )
       ).toHaveProperty('template', {
         mappings: {
           _source: {
+            mode: 'stored',
             includes: ['a'],
-          },
-        },
-        settings: {
-          index: {
-            mapping: {
-              source: {
-                mode: 'stored',
-              },
-            },
           },
         },
       });
@@ -148,8 +140,8 @@ describe('Component template serialization', () => {
                   },
                 },
               },
-            } as any,
-          } as any,
+            },
+          },
           []
         )
       ).toHaveProperty('template', {
@@ -243,7 +235,7 @@ describe('Component template serialization', () => {
               },
             },
           },
-        } as any)
+        })
       ).toHaveProperty('template', {
         settings: {
           number_of_shards: 1,
@@ -276,7 +268,7 @@ describe('Component template serialization', () => {
               },
             },
           },
-        } as any)
+        })
       ).toHaveProperty('template', {
         settings: {
           number_of_shards: 1,
@@ -304,7 +296,7 @@ describe('Component template serialization', () => {
               },
             },
           },
-        } as any)
+        })
       ).toHaveProperty('template', {
         ...deserializedComponentTemplate.template,
         mappings: {

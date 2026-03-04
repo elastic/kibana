@@ -57,12 +57,13 @@ export function deserializeComponentTemplate(
 
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
-  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
-  // and strip the deprecated `_source.mode` from mappings.
+  // When deserializing, preferMappingsSourceMode is false by default.
+  // This means _source.mode is not migrated to settings so the flyout shows the raw payload correctly.
   const migratedSettings = buildTemplateSettings(template, undefined);
-  const migratedMappings = buildTemplateMappings(template as any);
+  const migratedMappings = buildTemplateMappings(template);
+  const { mappings: _templateMappings, settings: _templateSettings, ...otherTemplate } = template;
   const migratedTemplate = {
-    ...template,
+    ...otherTemplate,
     ...(migratedMappings ? { mappings: migratedMappings } : {}),
     ...(migratedSettings ? { settings: migratedSettings } : {}),
   };
@@ -114,8 +115,11 @@ export function serializeComponentTemplate(
 
   // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
   // and strip the deprecated `_source.mode` from mappings.
-  const migratedSettings = buildTemplateSettings(template, undefined);
-  const migratedMappings = buildTemplateMappings(template as any);
+  // During serialization, we prefer the source mode from mappings since it represents the latest user choice in the UI.
+  const migratedSettings = buildTemplateSettings(template, undefined, {
+    preferMappingsSourceMode: true,
+  });
+  const migratedMappings = buildTemplateMappings(template, { preferMappingsSourceMode: true });
   const { mappings: _templateMappings, settings: _templateSettings, ...otherTemplate } = template;
 
   // If the existing component template contains data stream options, we need to persist them.

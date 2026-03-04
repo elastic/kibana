@@ -42,9 +42,10 @@ export function serializeTemplate(
     deprecated,
   } = templateDeserialized;
 
-  // Build settings object, properly handling index mode source mode
-  const settings = buildTemplateSettings(template, indexMode);
-  const mappings = buildTemplateMappings(template);
+  // Build settings object, properly handling index mode source mode.
+  // During serialization, we prefer the source mode from mappings since it represents the latest user choice in the UI.
+  const settings = buildTemplateSettings(template, indexMode, { preferMappingsSourceMode: true });
+  const mappings = buildTemplateMappings(template, { preferMappingsSourceMode: true });
 
   // Separate settings and lifecycle from other template properties so we can rebuild template cleanly
   const {
@@ -121,12 +122,13 @@ export function deserializeTemplate(
       ? LOGSDB_INDEX_MODE
       : undefined)) as IndexMode | undefined;
 
-  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
-  // and strip the deprecated `_source.mode` from mappings.
-  const migratedSettings = buildTemplateSettings(template as any, indexMode);
-  const migratedMappings = buildTemplateMappings(template as any);
+  // When deserializing, preferMappingsSourceMode is false by default.
+  // This means _source.mode is not migrated to settings so the flyout shows the raw payload correctly.
+  const migratedSettings = buildTemplateSettings(template, indexMode);
+  const migratedMappings = buildTemplateMappings(template);
+  const { mappings: _templateMappings, settings: _templateSettings, ...otherTemplate } = template;
   const migratedTemplate = {
-    ...template,
+    ...otherTemplate,
     ...(migratedSettings ? { settings: migratedSettings } : {}),
     ...(migratedMappings ? { mappings: migratedMappings } : {}),
   };
@@ -188,14 +190,29 @@ export function serializeLegacyTemplate({
   indexPatterns,
   version,
   order,
+  indexMode,
 }: TemplateDeserialized): LegacyTemplateSerialized {
-  const migratedMappings = buildTemplateMappings(template as any);
+  const migratedTemplatePayload = {
+    settings: template?.settings,
+    mappings: template?.mappings,
+  } as TemplateDeserialized['template'];
+
+  const migratedSettings = buildTemplateSettings(
+    migratedTemplatePayload,
+    (indexMode ?? (template?.settings?.index?.mode as IndexMode | undefined)) as
+      | IndexMode
+      | undefined,
+    { preferMappingsSourceMode: true }
+  );
+  const migratedMappings = buildTemplateMappings(migratedTemplatePayload, {
+    preferMappingsSourceMode: true,
+  });
 
   return {
     version,
     order,
     index_patterns: indexPatterns,
-    settings: template?.settings,
+    settings: migratedSettings,
     aliases: template?.aliases,
     mappings: migratedMappings,
   };
