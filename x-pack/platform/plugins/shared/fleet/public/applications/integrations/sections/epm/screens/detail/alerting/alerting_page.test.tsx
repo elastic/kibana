@@ -366,46 +366,6 @@ describe('AlertingPage', () => {
 
       expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
     });
-
-    it('should show callout for input type package when feature flag is enabled and template is missing', async () => {
-      mockExperimentalFeaturesGet.mockReturnValue({
-        enableIntegrationInactivityAlerting: true,
-      });
-
-      mockUseAlertingAssets.mockReturnValue({
-        alertingAssets: [{ id: 'template-1', type: 'alerting_rule_template' }],
-        alertingAssetsByType: {
-          alerting_rule_template: [{ id: 'template-1', type: 'alerting_rule_template' }],
-        },
-        deferredAlerts: [],
-        assetSavedObjectsByType: {
-          alerting_rule_template: {
-            'template-1': {
-              id: 'template-1',
-              type: 'alerting_rule_template',
-              attributes: { title: '[System] Template' },
-            },
-          },
-        },
-        userCreatedRules: [],
-        isLoading: false,
-        fetchError: undefined,
-        refetch: jest.fn(),
-      });
-
-      const inputPackageInfo = { ...basePackageInfo, type: 'input' as const };
-      renderComponent(inputPackageInfo);
-
-      await waitFor(() => {
-        expect(screen.getByText('Idle data streams alerting available')).toBeInTheDocument();
-      });
-
-      expect(
-        screen.getByText(
-          'Reinstall alerting assets to add an alerting rule template for monitoring idle data streams.'
-        )
-      ).toBeInTheDocument();
-    });
   });
 
   it('should deduplicate Fleet-managed rules from alerting API results', async () => {

@@ -85,13 +85,18 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
   // Detect missing inactivity monitoring template
   const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
   const hasDataStreams = (packageInfo.data_streams?.length ?? 0) > 0;
+  const isIntegrationPackage = packageInfo.type === 'integration';
   const inactivityTemplateId = getInactivityMonitoringTemplateId(name);
   const hasInactivityTemplate = useMemo(
     () => alertingAssets.some((asset) => asset.id === inactivityTemplateId),
     [alertingAssets, inactivityTemplateId]
   );
   const showInactivityCallout =
-    enableIntegrationInactivityAlerting && hasDataStreams && !hasInactivityTemplate && !isLoading;
+    enableIntegrationInactivityAlerting &&
+    isIntegrationPackage &&
+    hasDataStreams &&
+    !hasInactivityTemplate &&
+    !isLoading;
 
   const handleReinstallAlertingAssets = useCallback(async () => {
     setIsReinstalling(true);
