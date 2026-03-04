@@ -25,7 +25,7 @@ function createPaginationLocators(container: Locator): Omit<PaginationLocators, 
   };
 }
 
-export function createPagination(parentContainer: Locator): PaginationLocators {
+export function createGridPagination(parentContainer: Locator): PaginationLocators {
   const container = parentContainer.locator('[data-test-subj="metricsExperienceGridPagination"]');
   return {
     container,

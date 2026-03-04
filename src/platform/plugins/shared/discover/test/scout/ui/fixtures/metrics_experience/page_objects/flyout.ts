@@ -13,14 +13,14 @@ import type { PaginationLocators } from './pagination';
 import { createDimensionsPagination } from './pagination';
 
 export interface FlyoutOverviewTab {
-  readonly tab: Locator;
+  readonly tabButton: Locator;
   readonly descriptionList: Locator;
   readonly dimensionsPagination: PaginationLocators;
   readonly dimensionsListItems: Locator;
 }
 
 export interface FlyoutEsqlQueryTab {
-  readonly tab: Locator;
+  readonly tabButton: Locator;
   readonly codeBlock: Locator;
 }
 
@@ -35,7 +35,7 @@ export function createFlyout(page: ScoutPage): MetricsFlyout {
   return {
     container,
     overview: {
-      tab: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
+      tabButton: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
       descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),
       dimensionsPagination: createDimensionsPagination(container),
       dimensionsListItems: page.testSubj
@@ -43,7 +43,7 @@ export function createFlyout(page: ScoutPage): MetricsFlyout {
         .locator(`[data-test-subj^="${METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ}-"]`),
     },
     esqlQuery: {
-      tab: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryTab'),
+      tabButton: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryTab'),
       codeBlock: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryCodeBlock'),
     },
   };

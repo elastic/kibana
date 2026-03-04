@@ -59,12 +59,12 @@ spaceTest.describe(
       });
 
       await spaceTest.step('switch to ES|QL Query tab and verify content', async () => {
-        await metricsExperience.flyout.esqlQuery.tab.click();
+        await metricsExperience.flyout.esqlQuery.tabButton.click();
         await expect(metricsExperience.flyout.esqlQuery.codeBlock).toBeVisible();
       });
 
       await spaceTest.step('switch back to Overview tab', async () => {
-        await metricsExperience.flyout.overview.tab.click();
+        await metricsExperience.flyout.overview.tabButton.click();
         await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
       });
     });

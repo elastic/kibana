@@ -9,7 +9,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import type { PaginationLocators } from './pagination';
-import { createPagination } from './pagination';
+import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
 import { createFlyout } from './flyout';
 import type { ChartActions } from './chart_actions';
@@ -34,7 +34,7 @@ export class MetricsExperiencePage {
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
     this.cards = this.grid.locator('[data-chart-index]');
-    this.pagination = createPagination(this.container);
+    this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
     this.chartActions = createChartActions(page);
     this.breakdownSelector = createBreakdownSelector(page);
@@ -74,8 +74,8 @@ export class MetricsExperiencePage {
     await this.searchInput.clear();
   }
 
-  public async getVisibleCardCount(): Promise<number> {
-    return this.grid.locator('[data-chart-index]').count();
+  public getVisibleCardCount(): Promise<number> {
+    return this.cards.count();
   }
 
   /**

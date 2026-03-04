@@ -11,11 +11,10 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { EuiSelectableWrapper } from '@kbn/scout';
 
 export interface BreakdownSelector {
-  readonly button: Locator;
-  readonly search: Locator;
+  readonly toggleButton: Locator;
+  readonly searchInput: Locator;
   readonly selectable: Locator;
-  readonly getOption: (dimensionName: string) => Locator;
-  readonly getButtonWithSelectedDimension: (dimensionName: string) => Locator;
+  readonly getToggleWithSelection: (dimensionName: string) => Locator;
   readonly selectDimension: (dimensionName: string) => Promise<void>;
 }
 
@@ -28,12 +27,10 @@ export function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
   const selectable = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable');
 
   return {
-    button,
-    search: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
+    toggleButton: button,
+    searchInput: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
     selectable,
-    getOption: (dimensionName: string) =>
-      page.testSubj.locator(`metricsBreakdownOption-${dimensionName}`),
-    getButtonWithSelectedDimension: (dimensionName: string) =>
+    getToggleWithSelection: (dimensionName: string) =>
       page.locator(
         `[data-test-subj="metricsExperienceBreakdownSelectorButton"][data-selected-value*="${dimensionName}"]`
       ),

@@ -55,6 +55,8 @@ export const spaceTest = spaceBaseTest.extend<
     use: (browserAuth: MetricsExperienceBrowserAuthFixture) => Promise<void>
   ) => {
     const loginAsMetricsViewer = async () => {
+      // Security serverless viewer role lacks index access to test metrics data,
+      // so we use a custom role with explicit read privileges on the test index.
       if (config.serverless && config.projectType === 'security') {
         return browserAuth.loginWithCustomRole(METRICS_EXPERIENCE_VIEWER_ROLE);
       }

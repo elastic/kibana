@@ -128,6 +128,7 @@ spaceTest.describe(
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       }
     );
 
@@ -141,7 +142,7 @@ spaceTest.describe(
         await spaceTest.step('select first dimension as breakdown', async () => {
           await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
           await expect(
-            metricsExperience.breakdownSelector.getButtonWithSelectedDimension(FIRST_DIMENSION)
+            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
           ).toBeVisible();
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
@@ -150,7 +151,7 @@ spaceTest.describe(
         await spaceTest.step('switch to second dimension and verify grid updates', async () => {
           await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
           await expect(
-            metricsExperience.breakdownSelector.getButtonWithSelectedDimension(SECOND_DIMENSION)
+            metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
           ).toBeVisible();
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
