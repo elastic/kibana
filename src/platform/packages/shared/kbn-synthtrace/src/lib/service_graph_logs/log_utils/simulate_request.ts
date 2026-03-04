@@ -40,6 +40,7 @@ const AMBIENT_ERROR_RATE = 0.01;
 
 interface DownstreamOutcome {
   edge: ServiceEdge;
+  targetLabel: string;
   errored: boolean;
   childHttpStatus: number;
   docs: Array<Partial<LogDocument>>;
@@ -89,7 +90,7 @@ function buildOutboundLogs({
   metadata: Metadata;
   rng: () => number;
 }): Array<Partial<LogDocument>> {
-  return outcomes.map(({ edge, errored, childHttpStatus }) => {
+  return outcomes.map(({ edge, targetLabel, errored, childHttpStatus }) => {
     const latency = errored
       ? ERROR_LATENCY_BASE_MS + Math.floor(rng() * ERROR_LATENCY_JITTER_MS)
       : SUCCESS_LATENCY_BASE_MS + Math.floor(rng() * SUCCESS_LATENCY_JITTER_MS);
@@ -98,7 +99,7 @@ function buildOutboundLogs({
       tickSeed: serviceStableSeed(svcTickSeed, edge.target),
       runtime: serviceNode.runtime,
       serviceName: serviceNode.name,
-      targetService: edge.target,
+      targetService: targetLabel,
       protocol: edge.protocol,
       httpStatus: ASYNC_PROTOCOLS.has(edge.protocol) ? 200 : childHttpStatus,
       latencyMs: latency,
@@ -131,7 +132,7 @@ function resolveErrorContext(
   const cascadeOverrides: Record<string, string> =
     cascadeError && failedDownstreams[0]
       ? {
-          upstream_host: failedDownstreams[0].edge.target,
+          upstream_host: failedDownstreams[0].targetLabel,
           upstream_status: String(failedDownstreams[0].childHttpStatus),
         }
       : {};
@@ -198,7 +199,14 @@ export function simulateRequest({
             .filter((e) => e.source === current)
             .map((edge) => {
               const { errored, httpStatus: childHttpStatus, docs } = visit(edge.target);
-              return { edge, errored, childHttpStatus, docs };
+              const targetNode = serviceGraph.services.find((s) => s.name === edge.target);
+              return {
+                edge,
+                targetLabel: targetNode?.displayName ?? edge.target,
+                errored,
+                childHttpStatus,
+                docs,
+              };
             })
         : [];
 

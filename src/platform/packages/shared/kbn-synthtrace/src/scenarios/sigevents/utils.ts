@@ -106,8 +106,10 @@ export function parseOpts(raw: Record<string, unknown> | undefined): {
 } {
   const opts = (raw ?? {}) as ScenarioOpts;
   const seed = opts.seed !== undefined ? Number(opts.seed) : Math.floor(Math.random() * 100000);
-  if (!Number.isFinite(seed)) {
-    throw new Error(`Invalid scenario option "seed": expected a finite number, got "${opts.seed}"`);
+  if (!Number.isFinite(seed) || !Number.isInteger(seed)) {
+    throw new Error(
+      `Invalid scenario option "seed": expected a finite integer, got "${opts.seed}"`
+    );
   }
   const baselineMinutes = opts.baselineMinutes !== undefined ? Number(opts.baselineMinutes) : 0;
   if (!Number.isFinite(baselineMinutes) || baselineMinutes < 0) {
@@ -303,7 +305,6 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
       generate: ({ range, clients: { logsEsClient } }) => {
         const { logger, from } = runOptions;
         const baseRate = parsedBaseRate;
-
         const baselineWindowMs = duration('1m') * baselineMinutes;
 
         const activeScenario = scenarioId ? mockApp.scenarios[scenarioId] : undefined;
