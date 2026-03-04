@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
-import { measurePerformanceAsync } from '@kbn/scout';
+import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout-security';
+import { measurePerformanceAsync } from '@kbn/scout-security';
 
 const TODO_API_URL = '/api/TODO_ENDPOINT';
 
