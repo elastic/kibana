@@ -13,34 +13,8 @@ export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 
 export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
-  properties: {
-    historySnapshot: {
-      properties: {
-        status: { type: 'keyword' },
-        frequency: { type: 'keyword' },
-        lastExecutionTimestamp: { type: 'date' },
-        lastError: {
-          properties: {
-            message: { type: 'text' },
-            timestamp: { type: 'date' },
-          },
-        },
-      },
-    },
-    logsExtraction: {
-      type: 'object',
-      properties: {
-        filter: { type: 'keyword' },
-        additionalIndexPatterns: { type: 'keyword' },
-        fieldHistoryLength: { type: 'integer' },
-        lookbackPeriod: { type: 'keyword' },
-        delay: { type: 'keyword' },
-        docsLimit: { type: 'integer' },
-        timeout: { type: 'keyword' },
-        frequency: { type: 'keyword' },
-      },
-    },
-  },
+  // we are not searching by any fields, so we can keep the mappings empty
+  properties: {},
 };
 
 const historySnapshotSchema = schema.object({

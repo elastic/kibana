@@ -22,7 +22,7 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
     },
     logExtractionState: {
       properties: {
-        // Config fields kept in mappings for migration validation (v1/v2 added them; v3 backfill removes from docs only)
+        // Config fields kept in mappings for migration validation (v1/v2 added them; v3 schema-only stops returning them; v4 data_removal deletes from docs)
         filter: { type: 'keyword' },
         additionalIndexPattern: { type: 'keyword' },
         additionalIndexPatterns: { type: 'keyword' },
@@ -186,21 +186,28 @@ const version2: SavedObjectsFullModelVersion = {
 };
 
 const version3: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV3,
+    forwardCompatibility: engineDescriptorSchemaV3.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const version4: SavedObjectsFullModelVersion = {
   changes: [
     {
-      type: 'data_backfill' as const,
-      backfillFn: (document) => {
-        const { logExtractionState } = document.attributes;
-        return {
-          attributes: {
-            logExtractionState: {
-              paginationTimestamp: logExtractionState?.paginationTimestamp,
-              paginationId: logExtractionState?.paginationId,
-              lastExecutionTimestamp: logExtractionState?.lastExecutionTimestamp,
-            },
-          },
-        };
-      },
+      type: 'data_removal' as const,
+      removedAttributePaths: [
+        'logExtractionState.filter',
+        'logExtractionState.additionalIndexPattern',
+        'logExtractionState.additionalIndexPatterns',
+        'logExtractionState.fieldHistoryLength',
+        'logExtractionState.lookbackPeriod',
+        'logExtractionState.delay',
+        'logExtractionState.docsLimit',
+        'logExtractionState.timeout',
+        'logExtractionState.frequency',
+      ],
     },
   ],
   schemas: {
@@ -214,6 +221,6 @@ export const EngineDescriptorType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
   hiddenFromHttpApis: true,
 };

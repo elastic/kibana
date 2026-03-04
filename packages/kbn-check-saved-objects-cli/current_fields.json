@@ -421,22 +421,6 @@
     "type"
   ],
   "entity-store-global-state": [
-    "historySnapshot",
-    "historySnapshot.frequency",
-    "historySnapshot.lastError",
-    "historySnapshot.lastError.message",
-    "historySnapshot.lastError.timestamp",
-    "historySnapshot.lastExecutionTimestamp",
-    "historySnapshot.status",
-    "logsExtraction",
-    "logsExtraction.additionalIndexPatterns",
-    "logsExtraction.delay",
-    "logsExtraction.docsLimit",
-    "logsExtraction.fieldHistoryLength",
-    "logsExtraction.filter",
-    "logsExtraction.frequency",
-    "logsExtraction.lookbackPeriod",
-    "logsExtraction.timeout"
   ],
   "epm-packages": [
     "additional_spaces_installed_kibana",

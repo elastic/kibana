@@ -1420,58 +1420,6 @@
   "entity-store-global-state": {
     "dynamic": false,
     "properties": {
-      "historySnapshot": {
-        "properties": {
-          "frequency": {
-            "type": "keyword"
-          },
-          "lastError": {
-            "properties": {
-              "message": {
-                "type": "text"
-              },
-              "timestamp": {
-                "type": "date"
-              }
-            }
-          },
-          "lastExecutionTimestamp": {
-            "type": "date"
-          },
-          "status": {
-            "type": "keyword"
-          }
-        }
-      },
-      "logsExtraction": {
-        "properties": {
-          "additionalIndexPatterns": {
-            "type": "keyword"
-          },
-          "delay": {
-            "type": "keyword"
-          },
-          "docsLimit": {
-            "type": "integer"
-          },
-          "fieldHistoryLength": {
-            "type": "integer"
-          },
-          "filter": {
-            "type": "keyword"
-          },
-          "frequency": {
-            "type": "keyword"
-          },
-          "lookbackPeriod": {
-            "type": "keyword"
-          },
-          "timeout": {
-            "type": "keyword"
-          }
-        },
-        "type": "object"
-      }
     }
   },
   "epm-packages": {
