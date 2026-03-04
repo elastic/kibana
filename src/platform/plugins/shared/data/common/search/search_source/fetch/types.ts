@@ -28,12 +28,16 @@ export interface SearchRequestBody {
   fields?: estypes.SearchRequest['fields'] | SearchFieldValue[];
   docvalue_fields?: estypes.SearchRequest['docvalue_fields'];
   script_fields?: estypes.SearchRequest['script_fields'];
+  stored_fields?: estypes.SearchRequest['stored_fields'];
+  runtime_mappings?: estypes.SearchRequest['runtime_mappings'];
   _source?: estypes.SearchRequest['_source'];
   search_after?: estypes.SearchRequest['search_after'];
   sort?: estypes.SearchRequest['sort'];
   track_total_hits?: estypes.SearchRequest['track_total_hits'];
   query?: estypes.QueryDslQueryContainer;
+  highlight?: estypes.SearchRequest['highlight'];
   size?: number;
+  [key: string]: unknown;
 }
 
 export interface SearchRequestCore {

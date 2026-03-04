@@ -99,7 +99,7 @@ import type {
   SearchSourceSearchOptions,
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
-import type { FetchHandlers, StrictSearchRequest } from './fetch';
+import type { FetchHandlers, SearchRequestBody, StrictSearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
@@ -404,8 +404,8 @@ export class SearchSource {
   /**
    * Returns body contents of the search request, often referred as query DSL.
    */
-  getSearchRequestBody(): estypes.SearchRequest {
-    return this.flatten().body as estypes.SearchRequest;
+  getSearchRequestBody(): SearchRequestBody {
+    return this.flatten().body;
   }
 
   /**
@@ -623,8 +623,7 @@ export class SearchSource {
     key: K
   ): false | void {
     if (typeof val === 'function') {
-      const fn = val as unknown as (searchSource?: SearchSource) => SearchSourceFields[K];
-      val = fn.length > 0 ? fn(this) : fn();
+      val = (val as unknown as (searchSource: SearchSource) => SearchSourceFields[K])(this);
     }
     if (val == null || !key) return;
 
@@ -669,7 +668,7 @@ export class SearchSource {
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const nextFieldsFromSource = Array.isArray(val) ? val : [];
+        const nextFieldsFromSource = (Array.isArray(val) ? val : [val]) as SearchFieldValue[];
         const fields = [...new Set((data.fieldsFromSource || []).concat(nextFieldsFromSource))];
         return addToRoot(key, fields);
       case 'index':
