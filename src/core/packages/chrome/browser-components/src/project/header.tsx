@@ -88,10 +88,10 @@ const headerStrings = {
 const LOADING_DEBOUNCE_TIME = 80;
 
 const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
-  const { application, basePath, projectNavigation, loadingCount$, customBranding$ } =
+  const { application, basePath, project, loadingCount$, customBranding$ } =
     useChromeComponentsDeps();
   const loadingCount = useObservable(loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)), 0);
-  const homeHref = useObservable(projectNavigation.homeHref$, '/app/home');
+  const homeHref = useObservable(project.homeHref$, '/app/home');
   const customBranding = useObservable(customBranding$, {});
   const { logo } = customBranding;
 
@@ -167,7 +167,7 @@ export const ProjectHeader = () => {
     breadcrumbsAppendExtensions$,
     helpMenu,
     navControls,
-    projectNavigation,
+    project,
   } = useChromeComponentsDeps();
 
   const { euiTheme } = useEuiTheme();
@@ -189,7 +189,7 @@ export const ProjectHeader = () => {
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <EuiHeaderSectionItem>
                 <HeaderPageAnnouncer
-                  breadcrumbs$={projectNavigation.breadcrumbs$}
+                  breadcrumbs$={project.breadcrumbs$}
                   customBranding$={customBranding$}
                 />
                 <Logo logoCss={logoCss} />
@@ -207,7 +207,7 @@ export const ProjectHeader = () => {
                 <BreadcrumbsWithExtensionsWrapper
                   breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
                 >
-                  <Breadcrumbs breadcrumbs$={projectNavigation.breadcrumbs$} />
+                  <Breadcrumbs breadcrumbs$={project.breadcrumbs$} />
                 </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

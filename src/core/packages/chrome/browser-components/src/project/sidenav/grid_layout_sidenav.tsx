@@ -15,7 +15,7 @@ import { useChromeComponentsDeps } from '../../context';
 import { Navigation } from './navigation';
 
 export const GridLayoutProjectSideNav = () => {
-  const { basePath, application, projectNavigation, navLinks$, sideNav } =
+  const { basePath, application, project, navLinks$, sideNav } =
     useChromeComponentsDeps();
 
   const isCollapsed = useObservable(sideNav.collapsed$, sideNav.initialCollapsed);
@@ -41,7 +41,7 @@ export const GridLayoutProjectSideNav = () => {
         setWidth={setWidth}
         basePath={basePath}
         application={application}
-        navigation$={projectNavigation.navigation$}
+        navigation$={project.navigation$}
         navLinks$={navLinks$}
         onToggleCollapsed={sideNav.onToggleCollapsed}
       />

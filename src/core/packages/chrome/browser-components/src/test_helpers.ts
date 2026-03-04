@@ -47,27 +47,13 @@ export const createMockChromeComponentsDeps = () => {
     basePath: http.basePath,
     docLinks: docLinksServiceMock.createStartContract(),
     loadingCount$: new BehaviorSubject<number>(0),
-    badge$: new BehaviorSubject<ChromeBadge | undefined>(undefined),
-    breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
-    breadcrumbsAppendExtensions$: new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]),
-    customNavLink$: new BehaviorSubject<ChromeNavLink | undefined>(undefined),
-    customBranding$: new BehaviorSubject<CustomBranding>({}),
-    helpMenu: {
-      menuLinks$: new BehaviorSubject<ChromeHelpMenuLink[]>([]),
-      extension$: new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
-      supportUrl$: new BehaviorSubject<string>(''),
-      globalExtensionMenuLinks$: new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>([]),
+    classic: {
+      breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
+      badge$: new BehaviorSubject<ChromeBadge | undefined>(undefined),
+      recentlyAccessed$: new BehaviorSubject<RecentlyAccessedHistoryItem[]>([]),
+      customNavLink$: new BehaviorSubject<ChromeNavLink | undefined>(undefined),
     },
-    navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
-    recentlyAccessed$: new BehaviorSubject<RecentlyAccessedHistoryItem[]>([]),
-    navControls: {
-      left$: new BehaviorSubject<ChromeNavControl[]>([]),
-      center$: new BehaviorSubject<ChromeNavControl[]>([]),
-      right$: new BehaviorSubject<ChromeNavControl[]>([]),
-      extension$: new BehaviorSubject<ChromeNavControl[]>([]),
-    },
-    appMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
-    projectNavigation: {
+    project: {
       breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
       homeHref$: new BehaviorSubject<string>('/'),
       navigation$: new BehaviorSubject<{
@@ -76,6 +62,22 @@ export const createMockChromeComponentsDeps = () => {
         activeNodes: ChromeProjectNavigationNode[][];
       }>(undefined as any),
     },
+    breadcrumbsAppendExtensions$: new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]),
+    customBranding$: new BehaviorSubject<CustomBranding>({}),
+    helpMenu: {
+      menuLinks$: new BehaviorSubject<ChromeHelpMenuLink[]>([]),
+      extension$: new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
+      supportUrl$: new BehaviorSubject<string>(''),
+      globalExtensionMenuLinks$: new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>([]),
+    },
+    navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
+    navControls: {
+      left$: new BehaviorSubject<ChromeNavControl[]>([]),
+      center$: new BehaviorSubject<ChromeNavControl[]>([]),
+      right$: new BehaviorSubject<ChromeNavControl[]>([]),
+      extension$: new BehaviorSubject<ChromeNavControl[]>([]),
+    },
+    appMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
     headerBanner$: new BehaviorSubject<ChromeUserBanner | undefined>(undefined),
     sideNav: {
       collapsed$: new BehaviorSubject<boolean>(false),

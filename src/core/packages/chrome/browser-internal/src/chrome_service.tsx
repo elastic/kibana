@@ -201,7 +201,13 @@ export class ChromeService {
         right$: navControls.getRight$(),
         extension$: navControls.getExtension$(),
       },
-      projectNavigation: {
+      classic: {
+        breadcrumbs$: state.breadcrumbs.classic.$,
+        badge$: state.badge.$,
+        recentlyAccessed$,
+        customNavLink$: state.customNavLink.$,
+      },
+      project: {
         breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
         homeHref$: projectNavigation.getProjectHome$(),
         navigation$,
@@ -214,13 +220,8 @@ export class ChromeService {
         globalExtensionMenuLinks$: state.help.globalMenuLinks.$,
       },
       navLinks$,
-      recentlyAccessed$,
       customBranding$: customBranding.customBranding$,
-      // State observables
-      badge$: state.badge.$,
-      breadcrumbs$: state.breadcrumbs.classic.$,
       breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
-      customNavLink$: state.customNavLink.$,
       appMenu$: state.appMenu.$,
       headerBanner$: state.headerBanner.$,
       sideNav: {

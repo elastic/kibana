@@ -40,14 +40,11 @@ export function ClassicHeader() {
     docLinks,
     loadingCount$,
     navControls,
-    badge$,
-    breadcrumbs$,
+    classic,
     breadcrumbsAppendExtensions$,
-    customNavLink$,
     customBranding$,
     helpMenu,
     navLinks$,
-    recentlyAccessed$,
   } = useChromeComponentsDeps();
 
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -59,7 +56,7 @@ export function ClassicHeader() {
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />;
+  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={classic.breadcrumbs$} />;
 
   return (
     <>
@@ -73,7 +70,7 @@ export function ClassicHeader() {
               {
                 items: [
                   <HeaderPageAnnouncer
-                    breadcrumbs$={breadcrumbs$}
+                    breadcrumbs$={classic.breadcrumbs$}
                     customBranding$={customBranding$}
                   />,
                   <HeaderLogo
@@ -128,7 +125,7 @@ export function ClassicHeader() {
                   appId$={application.currentAppId$}
                   id={navId}
                   navLinks$={navLinks$}
-                  recentlyAccessed$={recentlyAccessed$}
+                  recentlyAccessed$={classic.recentlyAccessed$}
                   isNavOpen={isNavOpen}
                   homeHref={config.homeHref}
                   basePath={basePath}
@@ -137,7 +134,7 @@ export function ClassicHeader() {
                   closeNav={() => {
                     setIsNavOpen(false);
                   }}
-                  customNavLink$={customNavLink$}
+                  customNavLink$={classic.customNavLink$}
                   button={
                     <HeaderMenuButton
                       data-test-subj="toggleNavButton"
@@ -163,7 +160,7 @@ export function ClassicHeader() {
               {Breadcrumbs}
             </BreadcrumbsWithExtensionsWrapper>
 
-            <HeaderBadge badge$={badge$} />
+            <HeaderBadge badge$={classic.badge$} />
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>

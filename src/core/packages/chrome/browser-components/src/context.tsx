@@ -57,7 +57,16 @@ interface NavControlsObservables {
   extension$: Observable<ChromeNavControl[]>;
 }
 
-interface ProjectNavigationObservables {
+interface ClassicChromeObservables {
+  /** User-set breadcrumbs via {@link ChromeStart.setBreadcrumbs}. */
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  badge$: Observable<ChromeBadge | undefined>;
+  recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
+  customNavLink$: Observable<ChromeNavLink | undefined>;
+}
+
+interface ProjectChromeObservables {
+  /** Auto-generated breadcrumbs derived from the active nav tree node. */
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   homeHref$: Observable<string>;
   navigation$: Observable<{
@@ -73,7 +82,10 @@ export interface ChromeComponentsDeps {
   basePath: HttpStart['basePath'];
   docLinks: DocLinksStart;
   navControls: NavControlsObservables;
-  projectNavigation: ProjectNavigationObservables;
+  /** Classic-layout-specific chrome state. */
+  classic: ClassicChromeObservables;
+  /** Project/solution-layout-specific chrome state. */
+  project: ProjectChromeObservables;
   loadingCount$: Observable<number>;
   helpMenu: {
     menuLinks$: Observable<ChromeHelpMenuLink[]>;
@@ -82,12 +94,8 @@ export interface ChromeComponentsDeps {
     globalExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   };
   navLinks$: Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
   customBranding$: Observable<CustomBranding>;
-  badge$: Observable<ChromeBadge | undefined>;
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  customNavLink$: Observable<ChromeNavLink | undefined>;
   appMenu$: Observable<AppMenuConfig | undefined>;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
   sideNav: {

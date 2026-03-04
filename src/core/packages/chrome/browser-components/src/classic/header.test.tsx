@@ -25,7 +25,7 @@ describe('Header', () => {
   it('renders', () => {
     const deps = createMockChromeComponentsDeps();
 
-    deps.breadcrumbs$.next([{ text: 'test' }]);
+    deps.classic.breadcrumbs$.next([{ text: 'test' }]);
     deps.navLinks$.next([
       {
         id: 'kibana',
@@ -36,7 +36,7 @@ describe('Header', () => {
         visibleIn: ['globalSearch' as const],
       },
     ]);
-    deps.customNavLink$.next({
+    deps.classic.customNavLink$.next({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
       baseUrl: '',
@@ -44,7 +44,7 @@ describe('Header', () => {
       href: '',
       visibleIn: ['globalSearch' as const],
     });
-    deps.recentlyAccessed$.next([{ link: '', label: 'dashboard', id: 'dashboard' }]);
+    deps.classic.recentlyAccessed$.next([{ link: '', label: 'dashboard', id: 'dashboard' }]);
 
     const component = mountWithIntl(
       <ChromeComponentsProvider value={deps}>
