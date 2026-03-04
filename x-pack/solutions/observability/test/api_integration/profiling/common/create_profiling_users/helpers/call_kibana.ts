@@ -4,20 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import type { AxiosRequestConfig, AxiosError } from 'axios';
+import axios from 'axios';
 import { once } from 'lodash';
-import { Elasticsearch, Kibana } from '..';
-
-const stripUrlCredentials = (urlString: string): string => {
-  try {
-    const parsed = new URL(urlString);
-    parsed.username = '';
-    parsed.password = '';
-    return parsed.toString().replace(/\/$/, '');
-  } catch {
-    return urlString;
-  }
-};
+import type { Elasticsearch, Kibana } from '..';
 
 export async function callKibana<T>({
   elasticsearch,
@@ -30,17 +20,13 @@ export async function callKibana<T>({
 }): Promise<T> {
   const baseUrl = await getBaseUrl(kibana.hostname);
   const { username, password } = elasticsearch;
-  const basicAuth = Buffer.from(`${username}:${password}`).toString('base64');
 
   const { data } = await axios.request({
     ...options,
-    baseURL: stripUrlCredentials(baseUrl),
+    baseURL: baseUrl,
     allowAbsoluteUrls: false,
-    headers: {
-      'kbn-xsrf': 'true',
-      ...options.headers,
-      Authorization: `Basic ${basicAuth}`,
-    },
+    auth: { username, password },
+    headers: { 'kbn-xsrf': 'true', ...options.headers },
   });
   return data;
 }
