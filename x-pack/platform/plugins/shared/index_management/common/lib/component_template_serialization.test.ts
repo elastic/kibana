@@ -270,6 +270,7 @@ describe('Component template serialization', () => {
           },
         })
       ).toHaveProperty('template', {
+        mappings: {},
         settings: {
           number_of_shards: 1,
           index: {

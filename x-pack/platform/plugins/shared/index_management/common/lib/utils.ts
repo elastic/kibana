@@ -84,8 +84,11 @@ export const buildTemplateSettings = (
     ...(indexSettings && { index: indexSettings }),
   };
 
-  // Return undefined if settings object is empty
-  return Object.keys(settings).length > 0 ? settings : undefined;
+  // Return undefined if settings object is empty, unless the original settings object existed
+  if (Object.keys(settings).length > 0) {
+    return settings;
+  }
+  return template?.settings ? {} : undefined;
 };
 
 export const buildTemplateMappings = (
@@ -116,8 +119,11 @@ export const buildTemplateMappings = (
     ...(sourceMappings && { _source: sourceMappings }),
   };
 
-  // Return undefined if mappings object is empty
-  return Object.keys(mappings).length > 0 ? mappings : undefined;
+  // Return undefined if mappings object is empty, unless the original mappings object existed
+  if (Object.keys(mappings).length > 0) {
+    return mappings;
+  }
+  return template?.mappings ? {} : undefined;
 };
 
 /**
