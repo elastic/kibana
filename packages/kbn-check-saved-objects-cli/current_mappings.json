@@ -1141,6 +1141,14 @@
       }
     }
   },
+  "data_sources_extraction_config": {
+    "dynamic": false,
+    "properties": {
+      "workflowId": {
+        "type": "keyword"
+      }
+    }
+  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
@@ -3046,8 +3054,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text",
-        "index": false
+        "index": false,
+        "type": "text"
       },
       "description": {
         "type": "text"

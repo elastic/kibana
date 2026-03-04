@@ -331,6 +331,9 @@
     "type",
     "workflowIds"
   ],
+  "data_sources_extraction_config": [
+    "workflowId"
+  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
