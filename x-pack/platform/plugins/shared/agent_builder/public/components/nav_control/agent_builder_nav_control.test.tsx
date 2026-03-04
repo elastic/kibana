@@ -33,15 +33,15 @@ describe('AgentBuilderNavControl', () => {
   });
 
   it('toggles the sidebar when the nav button is clicked', () => {
-    const toggleAgentBuilderChat = jest.fn();
+    const toggleChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          toggleAgentBuilderChat,
-          openAgentBuilderChat: jest.fn(),
+          toggleChat,
+          openChat: jest.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
@@ -57,19 +57,19 @@ describe('AgentBuilderNavControl', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Open Agent Builder' }));
-    expect(toggleAgentBuilderChat).toHaveBeenCalledTimes(1);
+    expect(toggleChat).toHaveBeenCalledTimes(1);
   });
 
   it('toggles the sidebar on Cmd/Ctrl+; keyboard shortcut', () => {
-    const toggleAgentBuilderChat = jest.fn();
+    const toggleChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          toggleAgentBuilderChat,
-          openAgentBuilderChat: jest.fn(),
+          toggleChat,
+          openChat: jest.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
@@ -86,12 +86,12 @@ describe('AgentBuilderNavControl', () => {
 
     // Provide both ctrlKey and metaKey so the assertion is platform-independent
     fireEvent.keyDown(window, { key: ';', code: 'Semicolon', ctrlKey: true, metaKey: true });
-    expect(toggleAgentBuilderChat).toHaveBeenCalledTimes(1);
+    expect(toggleChat).toHaveBeenCalledTimes(1);
   });
 
   it('opens the sidebar when openChat$ emits Agent', () => {
-    const toggleAgentBuilderChat = jest.fn();
-    const openAgentBuilderChat = jest.fn();
+    const toggleChat = jest.fn();
+    const openChat = jest.fn();
     const completeOpenChat = jest.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
@@ -99,8 +99,8 @@ describe('AgentBuilderNavControl', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          toggleAgentBuilderChat,
-          openAgentBuilderChat,
+          toggleChat,
+          openChat,
         },
         aiAssistantManagementSelection: {
           openChat$,
@@ -119,7 +119,7 @@ describe('AgentBuilderNavControl', () => {
       openChat$.next(AIChatExperience.Agent);
     });
 
-    expect(openAgentBuilderChat).toHaveBeenCalledTimes(1);
+    expect(openChat).toHaveBeenCalledTimes(1);
     expect(completeOpenChat).toHaveBeenCalledTimes(1);
   });
 });

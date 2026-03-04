@@ -102,7 +102,7 @@ export interface AgentBuilderPluginStart {
    * @example
    * ```tsx
    * // Open a new conversation with close handler
-   * const { chatRef } = plugins.agentBuilder.openAgentBuilderChat({
+   * const { chatRef } = plugins.agentBuilder.openChat({
    *   onClose: () => console.log('Chat closed')
    * });
    *
@@ -110,15 +110,15 @@ export interface AgentBuilderPluginStart {
    * chatRef.close();
    * ```
    */
-  openAgentBuilderChat: (options?: OpenConversationSidebarOptions) => OpenConversationSidebarReturn;
+  openChat: (options?: OpenConversationSidebarOptions) => OpenConversationSidebarReturn;
   /**
    * Toggles the conversation sidebar.
    *
    * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
-  toggleAgentBuilderChat: (options?: OpenConversationSidebarOptions) => void;
-  setAgentBuilderChatConfig: (config: EmbeddableConversationProps) => void;
-  clearAgentBuilderChatConfig: () => void;
+  toggleChat: (options?: OpenConversationSidebarOptions) => void;
+  setChatConfig: (config: EmbeddableConversationProps) => void;
+  clearChatConfig: () => void;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.

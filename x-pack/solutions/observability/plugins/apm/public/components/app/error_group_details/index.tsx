@@ -208,7 +208,7 @@ export function ErrorGroupDetails() {
       return;
     }
 
-    agentBuilder.setAgentBuilderChatConfig({
+    agentBuilder.setChatConfig({
       newConversation: true,
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
@@ -226,7 +226,7 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      agentBuilder.clearAgentBuilderChatConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, errorId, serviceName, environment, start, end]);
 

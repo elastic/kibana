@@ -210,7 +210,7 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.addAttachment(attachment);
         }
       },
-      setAgentBuilderChatConfig: (config: EmbeddableConversationProps) => {
+      setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
         // If there is already an active sidebar, update its props
@@ -219,17 +219,17 @@ export class AgentBuilderPlugin
           return { chatRef: this.activeSidebarRef };
         }
       },
-      clearAgentBuilderChatConfig: () => {
+      clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           // Removes stale browserApiTools from the sidebar
           this.sidebarCallbacks.resetBrowserApiTools();
         }
       },
-      openAgentBuilderChat: (options?: OpenConversationSidebarOptions) => {
+      openChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
-      toggleAgentBuilderChat: (options?: OpenConversationSidebarOptions) => {
+      toggleChat: (options?: OpenConversationSidebarOptions) => {
         if (this.activeSidebarRef) {
           const sidebarRef = this.activeSidebarRef;
           // Be defensive: clear local references immediately in case the sidebar doesn't

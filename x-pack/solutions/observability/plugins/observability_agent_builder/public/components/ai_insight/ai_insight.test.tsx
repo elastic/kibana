@@ -34,7 +34,7 @@ const mockUseStreamingAiInsight = useStreamingAiInsight as jest.Mock;
 const mockCreateStream = jest.fn();
 const AiInsightTest = AiInsight as React.ComponentType<any>;
 
-const mockOpenAgentBuilderChat = jest.fn();
+const mockOpenChat = jest.fn();
 const mockReportEvent = jest.fn();
 
 const mockConnectorInfo = {
@@ -90,7 +90,7 @@ describe('AiInsight', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          openAgentBuilderChat: mockOpenAgentBuilderChat,
+          openChat: mockOpenChat,
         },
         application: {
           capabilities: {
@@ -219,7 +219,7 @@ describe('AiInsight', () => {
       fireEvent.click(startConversationButton!);
 
       expect(buildAttachments).toHaveBeenCalledWith('Hello world', 'context');
-      expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith({
+      expect(mockOpenChat).toHaveBeenCalledWith({
         newConversation: true,
         attachments: [{ type: 'test', data: {} }],
         agentId: OBSERVABILITY_AGENT_ID,

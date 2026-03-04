@@ -44,7 +44,7 @@ export const useAgentBuilderAttachment = ({
   const { agentBuilder } = useKibana().services;
 
   const openAgentBuilderFlyout = useCallback(() => {
-    if (!agentBuilder?.openAgentBuilderChat) {
+    if (!agentBuilder?.openChat) {
       return;
     }
 
@@ -59,7 +59,7 @@ export const useAgentBuilderAttachment = ({
     };
 
     // Open the chat with attachment and prefilled message
-    agentBuilder.openAgentBuilderChat({
+    agentBuilder.openChat({
       autoSendInitialMessage: false,
       newConversation: true,
       initialMessage: attachmentPrompt,

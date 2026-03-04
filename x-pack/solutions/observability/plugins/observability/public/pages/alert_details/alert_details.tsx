@@ -191,7 +191,7 @@ export function AlertDetails() {
       return;
     }
 
-    agentBuilder.setAgentBuilderChatConfig({
+    agentBuilder.setChatConfig({
       newConversation: true,
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
@@ -215,7 +215,7 @@ export function AlertDetails() {
     });
 
     return () => {
-      agentBuilder.clearAgentBuilderChatConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, alertDetail, ruleTypeBreached]);
 

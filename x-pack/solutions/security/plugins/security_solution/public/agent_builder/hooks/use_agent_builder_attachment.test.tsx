@@ -18,12 +18,11 @@ const mockChatRef = {
   close: jest.fn(),
 };
 
-const mockOpenAgentBuilderChat = jest.fn<
-  unknown,
-  Parameters<AgentBuilderPluginStart['openAgentBuilderChat']>
->(() => ({
-  chatRef: mockChatRef,
-}));
+const mockOpenAgentBuilderChat = jest.fn<unknown, Parameters<AgentBuilderPluginStart['openChat']>>(
+  () => ({
+    chatRef: mockChatRef,
+  })
+);
 
 const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
   const mockStartServices = createStartServicesMock();
@@ -39,8 +38,8 @@ const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
 };
 
 const mockAgentBuilderService = agentBuilderMocks.createStart();
-mockAgentBuilderService.openAgentBuilderChat =
-  mockOpenAgentBuilderChat as unknown as (typeof mockAgentBuilderService)['openAgentBuilderChat'];
+mockAgentBuilderService.openChat =
+  mockOpenAgentBuilderChat as unknown as (typeof mockAgentBuilderService)['openChat'];
 
 describe('useAgentBuilderAttachment', () => {
   const defaultParams = {
@@ -121,14 +120,11 @@ describe('useAgentBuilderAttachment', () => {
     expect(mockOpenAgentBuilderChat).not.toHaveBeenCalled();
   });
 
-  it('handles missing openAgentBuilderChat method gracefully', () => {
+  it('handles missing openChat method gracefully', () => {
     const partialAgentBuilderService: Partial<AgentBuilderPluginStart> &
-      Pick<
-        AgentBuilderPluginStart,
-        'tools' | 'setAgentBuilderChatConfig' | 'clearAgentBuilderChatConfig'
-      > = {
+      Pick<AgentBuilderPluginStart, 'tools' | 'setChatConfig' | 'clearChatConfig'> = {
       ...mockAgentBuilderService,
-      openAgentBuilderChat: undefined,
+      openChat: undefined,
     };
 
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {

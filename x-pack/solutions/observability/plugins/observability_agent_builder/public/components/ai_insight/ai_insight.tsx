@@ -97,9 +97,9 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   }, [analytics, connectorInfo, error, insightType, isLoading, summary]);
 
   const handleStartConversation = useCallback(() => {
-    if (!agentBuilder?.openAgentBuilderChat) return;
+    if (!agentBuilder?.openChat) return;
 
-    agentBuilder.openAgentBuilderChat({
+    agentBuilder.openChat({
       newConversation: true,
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),

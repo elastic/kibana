@@ -62,19 +62,17 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     events: {
       chat$: EMPTY,
     },
-    setAgentBuilderChatConfig: jest.fn(),
-    clearAgentBuilderChatConfig: jest.fn(),
-    toggleAgentBuilderChat: jest.fn(),
-    openAgentBuilderChat: jest
-      .fn()
-      .mockImplementation((options: OpenConversationSidebarOptions) => {
-        const mockSidebarRef: ConversationSidebarRef = {
-          close: jest.fn(),
-        };
-        return {
-          chatRef: mockSidebarRef,
-        };
-      }),
+    setChatConfig: jest.fn(),
+    clearChatConfig: jest.fn(),
+    toggleChat: jest.fn(),
+    openChat: jest.fn().mockImplementation((options: OpenConversationSidebarOptions) => {
+      const mockSidebarRef: ConversationSidebarRef = {
+        close: jest.fn(),
+      };
+      return {
+        chatRef: mockSidebarRef,
+      };
+    }),
     addAttachment: jest.fn(),
   };
 };

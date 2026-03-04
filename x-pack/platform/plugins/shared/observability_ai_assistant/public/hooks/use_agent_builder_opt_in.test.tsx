@@ -13,7 +13,7 @@ import * as useKibanaModule from './use_kibana';
 import * as useIsAgentBuilderEnabledModule from './use_is_agent_builder_enabled';
 
 interface AgentBuilderStart {
-  openAgentBuilderChat?: jest.Mock;
+  openChat?: jest.Mock;
 }
 
 interface KibanaServices {
@@ -68,7 +68,7 @@ const createMockServices = (overrides: Partial<KibanaServices> = {}): KibanaServ
     plugins: {
       start: {
         agentBuilder: {
-          openAgentBuilderChat: jest.fn(),
+          openChat: jest.fn(),
         },
         ...(overrides.plugins?.start ?? {}),
       },
@@ -95,7 +95,7 @@ describe('useAgentBuilderOptIn', () => {
       isAgentBuilderEnabled: false,
     });
     (mockServices.application!.capabilities as any).advancedSettings.save = true;
-    (mockServices.plugins.start.agentBuilder as AgentBuilderStart).openAgentBuilderChat =
+    (mockServices.plugins.start.agentBuilder as AgentBuilderStart).openChat =
       jest.fn() as jest.Mock;
   });
 
@@ -192,7 +192,7 @@ describe('useAgentBuilderOptIn', () => {
       { path: '/' }
     );
     expect(
-      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart).openAgentBuilderChat
+      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart).openChat
     ).toHaveBeenCalledWith({ newConversation: true });
   });
 

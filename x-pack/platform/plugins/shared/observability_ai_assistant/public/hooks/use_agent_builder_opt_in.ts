@@ -71,7 +71,7 @@ export const useAgentBuilderOptIn = ({
 
   const showAgentBuilderOptInCta = useMemo(
     () =>
-      Boolean(agentBuilder?.openAgentBuilderChat) &&
+      Boolean(agentBuilder?.openChat) &&
       hasAdvancedSettingsEditPrivilege &&
       hasAgentBuilderAccess &&
       !isAgentChatExperienceEnabled,
@@ -108,7 +108,7 @@ export const useAgentBuilderOptIn = ({
         await application.navigateToApp('observability', { path: '/' });
       }
 
-      agentBuilder.openAgentBuilderChat({ newConversation: true });
+      agentBuilder.openChat({ newConversation: true });
     } catch (error) {
       const toastError = error?.body?.message ? new Error(error.body.message) : error;
 

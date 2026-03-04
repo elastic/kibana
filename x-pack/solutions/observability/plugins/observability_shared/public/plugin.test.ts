@@ -43,8 +43,8 @@ describe('ObservabilitySharedPlugin', () => {
       coreStart.application.applications$ = applications$ as any;
 
       mockAgentBuilder = {
-        setAgentBuilderChatConfig: jest.fn(),
-        clearAgentBuilderChatConfig: jest.fn(),
+        setChatConfig: jest.fn(),
+        clearChatConfig: jest.fn(),
       };
     });
 
@@ -66,7 +66,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('apm');
 
-      expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenCalledWith({
+      expect(mockAgentBuilder.setChatConfig).toHaveBeenCalledWith({
         agentId: OBSERVABILITY_AGENT_ID,
         sessionTag: OBSERVABILITY_SESSION_TAG,
         newConversation: false,
@@ -86,7 +86,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('discover');
 
-      expect(mockAgentBuilder.clearAgentBuilderChatConfig).toHaveBeenCalled();
+      expect(mockAgentBuilder.clearChatConfig).toHaveBeenCalled();
     });
 
     it('does not call agent methods when appId is undefined', () => {
@@ -98,8 +98,8 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next(undefined);
 
-      expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
-      expect(mockAgentBuilder.clearAgentBuilderChatConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.setChatConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.clearChatConfig).not.toHaveBeenCalled();
     });
 
     it('does not throw when agentBuilder is undefined', () => {
@@ -128,7 +128,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('apm');
 
-      expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.setChatConfig).not.toHaveBeenCalled();
     });
 
     it('clears config when app has no category', () => {
@@ -144,7 +144,7 @@ describe('ObservabilitySharedPlugin', () => {
 
       currentAppId$.next('unknownApp');
 
-      expect(mockAgentBuilder.clearAgentBuilderChatConfig).toHaveBeenCalled();
+      expect(mockAgentBuilder.clearChatConfig).toHaveBeenCalled();
     });
 
     it('handles rapid navigation between apps correctly', () => {
@@ -165,7 +165,7 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('discover');
       currentAppId$.next('slo');
 
-      expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenLastCalledWith({
+      expect(mockAgentBuilder.setChatConfig).toHaveBeenLastCalledWith({
         agentId: OBSERVABILITY_AGENT_ID,
         sessionTag: OBSERVABILITY_SESSION_TAG,
         newConversation: false,
@@ -191,8 +191,8 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('infra');
 
       // Should only call setConfig once (for the first navigation to Observability)
-      expect(mockAgentBuilder.setAgentBuilderChatConfig).toHaveBeenCalledTimes(1);
-      expect(mockAgentBuilder.clearAgentBuilderChatConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.clearChatConfig).not.toHaveBeenCalled();
     });
 
     it('skips redundant calls when navigating within non-Observability apps', () => {
@@ -212,8 +212,8 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('dashboard');
 
       // Should only call clearConfig once (for the first navigation to non-Observability)
-      expect(mockAgentBuilder.clearAgentBuilderChatConfig).toHaveBeenCalledTimes(1);
-      expect(mockAgentBuilder.setAgentBuilderChatConfig).not.toHaveBeenCalled();
+      expect(mockAgentBuilder.clearChatConfig).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.setChatConfig).not.toHaveBeenCalled();
     });
   });
 });

@@ -71,7 +71,7 @@ export function SloOverviewDetailsContent({
       return;
     }
 
-    agentBuilder.setAgentBuilderChatConfig({
+    agentBuilder.setChatConfig({
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
@@ -90,7 +90,7 @@ export function SloOverviewDetailsContent({
     });
 
     return () => {
-      agentBuilder.clearAgentBuilderChatConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, slo]);
 
