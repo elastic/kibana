@@ -34,51 +34,6 @@ interface ScenarioOpts {
   baseRate?: string;
 }
 
-export function parseOpts(raw: Record<string, unknown> | undefined): {
-  seed: number;
-  baselineMinutes: number;
-  mockApp: string;
-  scenario: string | undefined;
-  baseRate: number;
-} {
-  const opts = (raw ?? {}) as ScenarioOpts;
-  const seed = opts.seed !== undefined ? Number(opts.seed) : Math.floor(Math.random() * 100000);
-  if (!Number.isFinite(seed)) {
-    throw new Error(`Invalid scenario option "seed": expected a finite number, got "${opts.seed}"`);
-  }
-  const baselineMinutes = opts.baselineMinutes !== undefined ? Number(opts.baselineMinutes) : 0;
-  if (!Number.isFinite(baselineMinutes) || baselineMinutes < 0) {
-    throw new Error(
-      `Invalid scenario option "baselineMinutes": expected a non-negative number of minutes, got "${opts.baselineMinutes}"`
-    );
-  }
-  const baseRate = opts.baseRate !== undefined ? Number(opts.baseRate) : 1;
-  if (!Number.isFinite(baseRate) || baseRate <= 0) {
-    throw new Error(
-      `Invalid scenario option "baseRate": expected a positive number, got "${opts.baseRate}"`
-    );
-  }
-  return {
-    seed,
-    baselineMinutes,
-    mockApp: opts.mockApp ?? 'default',
-    scenario: opts.scenario,
-    baseRate,
-  };
-}
-
-/** Converts a duration string to milliseconds (`'30s'`, `'5m'`, `'1h'`, `'2d'`). */
-export const duration = (s: string): number => {
-  const { intervalAmount, intervalUnit } = parseInterval(s);
-  return moment.duration(intervalAmount, intervalUnit).asMilliseconds();
-};
-
-/** Returns `(offset) => absoluteTimestamp` anchored to the incident start (`'0m'`). */
-export const incidentAt =
-  (from: number, baselineWindowMs: number) =>
-  (offset: string): number =>
-    from + baselineWindowMs + duration(offset);
-
 /** Return value of `ScenarioDefinition.build`; drives log generation for one scenario run. */
 export interface ScenarioBuildResult<TServiceGraph extends ServiceGraph = ServiceGraph> {
   /** Override the service graph; defaults to the mock app's graph. */
@@ -123,6 +78,65 @@ export interface PhaseContext<TServiceGraph extends ServiceGraph = ServiceGraph>
   /** Merges multiple phase fragments into one result. */
   phases: (list: Array<ScenarioBuildResult<TServiceGraph>>) => ScenarioBuildResult<TServiceGraph>;
 }
+
+/** A failure scenario with a `build` factory. */
+export interface ScenarioDefinition<TServiceGraph extends ServiceGraph = ServiceGraph> {
+  /** When set, the scenario loops every N minutes in `--live` mode. Omit for open-ended scenarios. */
+  cycleDurationMinutes?: number;
+  build(ctx: PhaseContext<TServiceGraph>): ScenarioBuildResult<TServiceGraph>;
+}
+
+/** Bundles a service topology, entry service, and failure scenario registry for a mock application. */
+export interface MockAppDefinition<TServiceGraph extends ServiceGraph = ServiceGraph> {
+  serviceGraph: TServiceGraph;
+  entryService: ServiceNamesOf<TServiceGraph>;
+  scenarios: Record<string, ScenarioDefinition<TServiceGraph>>;
+}
+
+export function parseOpts(raw: Record<string, unknown> | undefined): {
+  seed: number;
+  baselineMinutes: number;
+  mockApp: string;
+  scenario: string | undefined;
+  baseRate: number;
+} {
+  const opts = (raw ?? {}) as ScenarioOpts;
+  const seed = opts.seed !== undefined ? Number(opts.seed) : Math.floor(Math.random() * 100000);
+  if (!Number.isFinite(seed)) {
+    throw new Error(`Invalid scenario option "seed": expected a finite number, got "${opts.seed}"`);
+  }
+  const baselineMinutes = opts.baselineMinutes !== undefined ? Number(opts.baselineMinutes) : 0;
+  if (!Number.isFinite(baselineMinutes) || baselineMinutes < 0) {
+    throw new Error(
+      `Invalid scenario option "baselineMinutes": expected a non-negative number of minutes, got "${opts.baselineMinutes}"`
+    );
+  }
+  const baseRate = opts.baseRate !== undefined ? Number(opts.baseRate) : 1;
+  if (!Number.isFinite(baseRate) || baseRate <= 0) {
+    throw new Error(
+      `Invalid scenario option "baseRate": expected a positive number, got "${opts.baseRate}"`
+    );
+  }
+  return {
+    seed,
+    baselineMinutes,
+    mockApp: opts.mockApp ?? 'default',
+    scenario: opts.scenario,
+    baseRate,
+  };
+}
+
+/** Converts a duration string to milliseconds (`'30s'`, `'5m'`, `'1h'`, `'2d'`). */
+export const duration = (s: string): number => {
+  const { intervalAmount, intervalUnit } = parseInterval(s);
+  return moment.duration(intervalAmount, intervalUnit).asMilliseconds();
+};
+
+/** Returns `(offset) => absoluteTimestamp` anchored to the incident start (`'0m'`). */
+export const incidentAt =
+  (from: number, baselineWindowMs: number) =>
+  (offset: string): number =>
+    from + baselineWindowMs + duration(offset);
 
 /** Builds a `PhaseContext` anchored to a given `at` function. */
 export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGraph>(
@@ -234,20 +248,6 @@ export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGra
 
   return { at: atFn, phase, phases };
 };
-
-/** A failure scenario with a `build` factory. */
-export interface ScenarioDefinition<TServiceGraph extends ServiceGraph = ServiceGraph> {
-  /** When set, the scenario loops every N minutes in `--live` mode. Omit for open-ended scenarios. */
-  cycleDurationMinutes?: number;
-  build(ctx: PhaseContext<TServiceGraph>): ScenarioBuildResult<TServiceGraph>;
-}
-
-/** Bundles a service topology, entry service, and failure scenario registry for a mock application. */
-export interface MockAppDefinition<TServiceGraph extends ServiceGraph = ServiceGraph> {
-  serviceGraph: TServiceGraph;
-  entryService: ServiceNamesOf<TServiceGraph>;
-  scenarios: Record<string, ScenarioDefinition<TServiceGraph>>;
-}
 
 /** Identity helper; exists solely for TypeScript inference on `MockAppDefinition`. */
 export const defineMockApp = <TServiceGraph extends ServiceGraph>(
