@@ -17,19 +17,19 @@ export const transformWorkpadIn = (
   attributes: WorkpadAttributes;
   references: SavedObjectReference[];
 } => {
-  try {
-    const references: SavedObjectReference[] = [];
-    const pages = workpad.pages.map((page) => {
-      const elements = page.elements.map((element) => {
-        if (!element.expression.includes('embeddable')) {
-          return element;
-        }
-        const ast = fromExpression(element.expression);
-        ast.chain = ast.chain.map((fn) => {
-          if (fn.function === 'embeddable') {
-            const embeddableConfig = decode(fn.arguments.config[0] as string);
-            const embeddableType = fn.arguments.type[0] as string;
-            const transforms = embeddableService.getTransforms(embeddableType);
+  const references: SavedObjectReference[] = [];
+  const pages = workpad.pages.map((page) => {
+    const elements = page.elements.map((element) => {
+      if (!element.expression.includes('embeddable')) {
+        return element;
+      }
+      const ast = fromExpression(element.expression);
+      ast.chain = ast.chain.map((fn) => {
+        if (fn.function === 'embeddable') {
+          const embeddableConfig = decode(fn.arguments.config[0] as string);
+          const embeddableType = fn.arguments.type[0] as string;
+          const transforms = embeddableService.getTransforms(embeddableType);
+          try {
             if (transforms?.transformIn) {
               const { state, references: panelReferences = [] } =
                 transforms.transformIn(embeddableConfig);
@@ -43,18 +43,19 @@ export const transformWorkpadIn = (
               );
               fn.arguments.config[0] = encode(state);
             }
+          } catch (error) {
+            logger.warn(
+              `Error transforming workpad in: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
           }
-          return fn;
-        });
-        return { ...element, expression: toExpression(ast, { type: 'expression' }) };
+        }
+        return fn;
       });
-      return { ...page, elements };
+      return { ...element, expression: toExpression(ast, { type: 'expression' }) };
     });
-    return { attributes: { ...workpad, pages }, references };
-  } catch (error) {
-    logger.error(
-      `Error transforming workpad in: ${error instanceof Error ? error.message : String(error)}`
-    );
-    throw error;
-  }
+    return { ...page, elements };
+  });
+  return { attributes: { ...workpad, pages }, references };
 };

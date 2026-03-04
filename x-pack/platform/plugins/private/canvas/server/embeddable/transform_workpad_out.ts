@@ -157,7 +157,7 @@ export function transformWorkpadOut(
           }
         } catch (error) {
           logger.warn(
-            `Error transforming workpad out: ${
+            `Error transforming element [${element.id}] out: ${
               error instanceof Error ? error.message : String(error)
             }`
           );

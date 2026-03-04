@@ -27,7 +27,7 @@ jest.mock('../kibana_services', () => ({
     }),
   },
   logger: {
-    error: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
@@ -58,15 +58,20 @@ describe('transformWorkpadIn', () => {
     });
   });
 
-  it('logs and re-throws errors when transformation fails', () => {
-    const error = new Error('Transform failed');
-    (embeddableService.getTransforms as jest.Mock).mockImplementationOnce(() => {
-      throw error;
+  it('logs warnings when transformation fails and returns the original embeddable config', () => {
+    (embeddableService.getTransforms as jest.Mock).mockReturnValue({
+      transformIn: jest.fn(() => {
+        throw new Error('Transform failed');
+      }),
     });
 
-    const workpad = makeWorkpad(`embeddable type="lens" config="${encode({ title: 'Test' })}"`);
-
-    expect(() => transformWorkpadIn(workpad)).toThrow(error);
-    expect(logger.error).toHaveBeenCalledWith('Error transforming workpad in: Transform failed');
+    const workpad = makeWorkpad(
+      `embeddable type="lens" config="${encode({ title: 'Test', savedObjectId: 'test-id' })}"`
+    );
+    const { attributes, references } = transformWorkpadIn(workpad);
+    expect(getDecodedConfig(attributes)).toEqual({
+      title: 'Test',
+      savedObjectId: 'test-id',
+    });
   });
 });
