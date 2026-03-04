@@ -100,8 +100,7 @@ export function ReviewSuggestionsForm({
 
   const { editSuggestion } = useStreamRoutingEvents();
 
-  const allSelected =
-    selectedSuggestionNames.size === suggestions.length && suggestions.length > 0;
+  const allSelected = selectedSuggestionNames.size === suggestions.length && suggestions.length > 0;
   const someSelected =
     selectedSuggestionNames.size > 0 && selectedSuggestionNames.size < suggestions.length;
   const noneSelected = selectedSuggestionNames.size === 0;

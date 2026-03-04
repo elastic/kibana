@@ -304,9 +304,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 
   useEffect(() => {
     if (isBulkForkComplete && !showBulkAcceptModal && bulkForkResults) {
-      const successfulNames = bulkForkResults
-        .filter((r) => r.success)
-        .map((r) => r.name);
+      const successfulNames = bulkForkResults.filter((r) => r.success).map((r) => r.name);
       bulkAcceptSuggestions(successfulNames);
       acknowledgeBulkFork();
     }
