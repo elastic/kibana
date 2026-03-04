@@ -28,7 +28,7 @@ spec:
       cancel_intermediate_builds: true
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
+      pipeline_file: .buildkite/pipelines/pull_request/run_dynamic_pipeline.yml
       provider_settings:
         build_branches: false
         build_pull_requests: true
