@@ -99,12 +99,7 @@ const MinAgeFieldControl = ({
         });
 
   return (
-    <EuiFormRow
-      label={fieldLabel}
-      helpText={isInvalid ? undefined : helpText}
-      isInvalid={isInvalid}
-      error={errorMessage}
-    >
+    <EuiFormRow label={fieldLabel} helpText={helpText} isInvalid={isInvalid} error={errorMessage}>
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
@@ -141,7 +136,7 @@ const MinAgeFieldControl = ({
             compressed
             fullWidth
             aria-label={i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterUnitAriaLabel', {
-              defaultMessage: 'Move after unit',
+              defaultMessage: 'Move data after unit',
             })}
             options={getUnitSelectOptions(timeUnitOptions, currentUnit)}
             value={currentUnit}
@@ -197,7 +192,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
         defaultMessage: 'Delete after data stored',
       })
     : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterLabel', {
-        defaultMessage: 'Move after data stored',
+        defaultMessage: 'Move data after',
       });
 
   const fieldAriaLabel = isDeletePhase
@@ -205,7 +200,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
         defaultMessage: 'Delete after value',
       })
     : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterAriaLabel', {
-        defaultMessage: 'Move after value',
+        defaultMessage: 'Move data after value',
       });
 
   return (

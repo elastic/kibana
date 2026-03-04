@@ -83,11 +83,31 @@ const DownsampleIntervalFieldControl = ({
     unit: currentUnit,
   });
 
+  const showMultipleOfPreviousPhase = lowerBoundMs > 0;
   const helpText =
     upperBoundMs === undefined
-      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBound', {
-          defaultMessage: 'Must be larger than {min} based on current configuration.',
-          values: { min },
+      ? showMultipleOfPreviousPhase
+        ? i18n.translate(
+            'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBoundMultiple',
+            {
+              defaultMessage:
+                'Must be larger than {min} and a multiple of {multipleOf} based on current configuration.',
+              values: { min, multipleOf: min },
+            }
+          )
+        : i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBound', {
+            defaultMessage: 'Must be larger than {min} based on current configuration.',
+            values: { min },
+          })
+      : showMultipleOfPreviousPhase
+      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpRangeMultiple', {
+          defaultMessage:
+            'Must be larger than {min}, smaller than {max}, and a multiple of {multipleOf} based on current configuration.',
+          values: {
+            min,
+            max,
+            multipleOf: min,
+          },
         })
       : i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpRange', {
           defaultMessage:
@@ -103,7 +123,7 @@ const DownsampleIntervalFieldControl = ({
       label={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel', {
         defaultMessage: 'Interval',
       })}
-      helpText={showInvalid ? undefined : helpText}
+      helpText={helpText}
       isInvalid={showInvalid}
       error={showError}
     >

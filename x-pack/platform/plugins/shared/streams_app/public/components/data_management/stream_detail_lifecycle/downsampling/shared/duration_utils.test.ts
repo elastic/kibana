@@ -30,6 +30,7 @@ describe('downsampling/shared/duration_utils', () => {
       expect(toMilliseconds('2', 'm')).toBe(120_000);
       expect(toMilliseconds('3', 'h')).toBe(10_800_000);
       expect(toMilliseconds('4', 'd')).toBe(345_600_000);
+      expect(toMilliseconds('1.5', 'h')).toBe(5_400_000);
       expect(toMilliseconds('1', 'ms')).toBe(1);
       expect(toMilliseconds('1000', 'micros')).toBe(1);
       expect(toMilliseconds('1000000', 'nanos')).toBe(1);
@@ -46,6 +47,7 @@ describe('downsampling/shared/duration_utils', () => {
       expect(parseInterval('20d')).toEqual({ value: '20', unit: 'd' });
       expect(parseInterval('30m')).toEqual({ value: '30', unit: 'm' });
       expect(parseInterval('5s')).toEqual({ value: '5', unit: 's' });
+      expect(parseInterval('1.5h')).toEqual({ value: '1.5', unit: 'h' });
       expect(parseInterval('0ms')).toEqual({ value: '0', unit: 'ms' });
       expect(parseInterval('1500ms')).toEqual({ value: '1500', unit: 'ms' });
       expect(parseInterval('500micros')).toEqual({ value: '500', unit: 'micros' });
@@ -62,7 +64,6 @@ describe('downsampling/shared/duration_utils', () => {
       expect(parseInterval('1.2.3d')).toBeUndefined();
       expect(parseInterval(' 1d')).toBeUndefined();
       expect(parseInterval('1d ')).toBeUndefined();
-      expect(parseInterval('1.5h')).toBeUndefined();
     });
   });
 
