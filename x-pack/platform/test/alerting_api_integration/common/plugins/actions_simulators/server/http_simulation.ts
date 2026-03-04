@@ -50,13 +50,19 @@ function createServerCallback() {
 
     // return the payloads that were posted to be remembered (e.g. from header_as_payload)
     if (request.method === 'GET') {
+      if (request.url?.includes('reset_aborted_count')) {
+        abortedCount = 0;
+        response.statusCode = 200;
+        response.end('OK');
+        return;
+      }
       if (request.url?.includes('aborted_count')) {
         response.statusCode = 200;
         response.setHeader('Content-Type', 'application/json');
         response.end(JSON.stringify({ abortedCount }));
-        abortedCount = 0;
         return;
       }
+
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(payloads, null, 4));
@@ -112,7 +118,7 @@ function createServerCallback() {
       if (delayMatch) {
         const delayMs = parseInt(delayMatch[1], 10);
         let aborted = false;
-        request.on('close', () => {
+        response.on('close', () => {
           if (!response.writableEnded) {
             aborted = true;
             abortedCount++;
@@ -129,8 +135,7 @@ function createServerCallback() {
 
       response.statusCode = 400;
       response.end(`unexpected body ${data}`);
-      // eslint-disable-next-line no-console
-      console.log(`http simulator received unexpected body: ${data}`);
+
       return;
     });
   };
