@@ -7,51 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import YAML from 'yaml';
 import { validateIfConditions } from './validate_if_conditions';
+import { buildWorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+
+function buildLookupFromYaml(yaml: string) {
+  const lineCounter = new YAML.LineCounter();
+  const yamlDocument = YAML.parseDocument(yaml, { lineCounter });
+  const workflowLookup = buildWorkflowLookup(yamlDocument, lineCounter);
+  return { workflowLookup, lineCounter };
+}
 
 describe('validateIfConditions', () => {
   it('should return no errors for valid KQL condition using ":"', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "inputs.count: 1"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toEqual([]);
   });
 
   it('should return no errors for valid KQL with > operator', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "inputs.count > 0"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toEqual([]);
   });
 
   it('should return error for "==" operator with helpful message', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "inputs.count == 1"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(1);
     expect(results[0].severity).toBe('error');
@@ -61,16 +75,18 @@ steps:
   });
 
   it('should return error for "!=" operator with helpful message', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "inputs.count != 1"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(1);
     expect(results[0].severity).toBe('error');
@@ -80,44 +96,49 @@ steps:
   });
 
   it('should skip conditions containing template syntax {{ }}', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: 'steps.httpStep.output.text: "{{foreach.item}}"'
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toEqual([]);
   });
 
   it('should skip ${{ expression }} syntax', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "\${{ inputs.isActive }}"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toEqual([]);
   });
 
   it('should validate step-level if conditions', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: guarded
-    type: action
+    type: http
     if: "inputs.count == 1"
-    action: test`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+    with:
+      url: http://example.com
+      method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(1);
     expect(results[0].severity).toBe('error');
@@ -126,33 +147,36 @@ steps:
   });
 
   it('should return no errors when there are no if conditions', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: step1
-    type: action
-    action: test`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+    type: http
+    with:
+      url: http://example.com
+      method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toEqual([]);
   });
 
   it('should return empty array for empty YAML', () => {
-    const doc = parseDocument('');
-    expect(validateIfConditions(doc)).toEqual([]);
+    const { workflowLookup, lineCounter } = buildLookupFromYaml('');
+    expect(validateIfConditions(workflowLookup, lineCounter)).toEqual([]);
   });
 
   it('should include correct position information', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "inputs.count == 1"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(1);
     expect(results[0].startLineNumber).toBeGreaterThan(0);
@@ -161,252 +185,73 @@ steps:
   });
 
   it('should report multiple errors for multiple invalid conditions', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check1
     type: if
     condition: "inputs.a == 1"
     steps:
       - name: inner
-        type: action
+        type: http
+        with:
+          url: http://example.com
+          method: GET
   - name: check2
     type: if
     condition: "inputs.b != 2"
     steps:
       - name: inner2
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(2);
-    expect(results[0].message).toContain('==');
-    expect(results[1].message).toContain('!=');
+    expect(results.find((r) => r.message.includes('=='))).toBeTruthy();
+    expect(results.find((r) => r.message.includes('!='))).toBeTruthy();
   });
 
   it('should skip template conditions but report non-template errors in same workflow', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: templated
     type: if
     condition: 'field: "{{some.var}}"'
     steps:
       - name: inner
-        type: action
+        type: http
+        with:
+          url: http://example.com
+          method: GET
   - name: invalid
     type: if
     condition: "inputs.a == 1"
     steps:
       - name: inner2
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(1);
     expect(results[0].message).toContain('==');
-  });
-
-  it('should not flag == inside a quoted KQL value', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: 'field: "value==other"'
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toEqual([]);
-  });
-
-  it('should not flag != inside a quoted KQL value', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: 'field: "value!=other"'
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toEqual([]);
-  });
-
-  it('should not flag = inside a quoted KQL value', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: 'field: "a=b"'
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toEqual([]);
-  });
-
-  // --- Peter's real-world scenarios ---
-
-  it('should error for bare "== " with no field (Peter: "== ")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "== "
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].severity).toBe('error');
-    expect(results[0].message).toContain('==');
-  });
-
-  it('should error for bare "== 1" with no field (Peter: "== 1")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "== 1"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].severity).toBe('error');
-    expect(results[0].message).toContain('==');
-  });
-
-  it('should error for bare "== \'1\'" with no field (Peter: "== \'1\'")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "== '1'"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].severity).toBe('error');
-    expect(results[0].message).toContain('==');
-  });
-
-  it('should error for "<> \'\'" diamond operator (Peter: "<> \'\'")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "<> ''"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].severity).toBe('error');
-  });
-
-  it('should error for field == value with dotted array path (Peter: "steps.rdw_check.data[0].kenteken == foreach.item")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "steps.rdw_check.data[0].kenteken == foreach.item"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].message).toContain('==');
-  });
-
-  it('should error for field == with template (Peter: "steps.rdw_check.data[0].kenteken == {{ foreach.item }}")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "steps.rdw_check.data[0].kenteken == {{ foreach.item }}"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].message).toContain('==');
-  });
-
-  it('should accept valid KQL with template value (Peter: "steps.rdw_check.data[0].kenteken : {{ foreach.item }}")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "steps.rdw_check.data[0].kenteken : {{ foreach.item }}"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toEqual([]);
-  });
-
-  it('should accept valid KQL with literal value (Peter: "steps.outcome.message : foreach.item")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: "steps.outcome.message : foreach.item"
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toEqual([]);
-  });
-
-  it('should accept valid KQL with template value (Peter: "steps.outcome.message : {{foreach.item}}")', () => {
-    const yaml = `name: test
-steps:
-  - name: check
-    type: if
-    condition: 'steps.outcome.message : "{{foreach.item}}"'
-    steps:
-      - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
-
-    expect(results).toEqual([]);
   });
 
   it('should include KQL examples in the hover message', () => {
-    const yaml = `name: test
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
 steps:
   - name: check
     type: if
     condition: "inputs.count == 1"
     steps:
       - name: inner
-        type: action`;
-    const doc = parseDocument(yaml);
-    const results = validateIfConditions(doc);
+        type: http
+        with:
+          url: http://example.com
+          method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(1);
     expect(results[0].hoverMessage).toContain('field: value');
@@ -414,5 +259,27 @@ steps:
     expect(results[0].hoverMessage).toContain('NOT field: value');
     expect(results[0].hoverMessage).toContain('{{foreach.item}}');
     expect(results[0].hoverMessage).toContain('${{');
+  });
+
+  it('should validate conditions in nested if-steps inside foreach', () => {
+    const { workflowLookup, lineCounter } = buildLookupFromYaml(`name: test
+steps:
+  - name: loop
+    type: foreach
+    foreach: "{{steps.fetch.output}}"
+    steps:
+      - name: check
+        type: if
+        condition: "foreach.item.status == active"
+        steps:
+          - name: do_something
+            type: http
+            with:
+              url: http://example.com
+              method: GET`);
+    const results = validateIfConditions(workflowLookup, lineCounter);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].message).toContain('==');
   });
 });

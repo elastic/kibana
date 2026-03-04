@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document } from 'yaml';
+import type { LineCounter } from 'yaml';
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { collectIfConditionItems, type IfConditionItem } from './collect_if_condition_items';
+import {
+  getValueFromValueNode,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { YamlValidationResult } from '../model/types';
 
 const CONDITION_VALIDATION_OWNER = 'if-condition-validation' as const;
@@ -27,7 +31,7 @@ const KQL_EXAMPLES_HOVER = [
 ].join('\n\n');
 
 function containsTemplate(condition: string): boolean {
-  return condition.includes('{{');
+  return condition.includes('{{') || condition.includes('${{');
 }
 
 function isExpressionSyntax(condition: string): boolean {
@@ -41,23 +45,12 @@ interface OperatorDetectionResult {
 }
 
 /**
- * Strip quoted string contents so operators inside values (e.g. `field: "a==b"`)
- * don't trigger false positives during regex-based operator detection.
- */
-function stripQuotedContents(condition: string): string {
-  return condition.replace(/"[^"]*"|'[^']*'/g, '""');
-}
-
-/**
  * Detects common invalid operators that KQL doesn't support but users commonly try.
  * KQL treats these as free-text searches rather than throwing errors, so we must
- * detect them explicitly. Runs on content with quoted strings stripped so operators
- * inside values like `field: "a==b"` don't trigger false positives.
+ * detect them explicitly.
  */
 function detectInvalidOperator(condition: string): OperatorDetectionResult | null {
-  const unquoted = stripQuotedContents(condition);
-
-  if (/==/.test(unquoted)) {
+  if (/\S+\s*==\s*\S+/.test(condition)) {
     const message = i18n.translate('workflows.validateIfConditions.invalidEqualityOperator', {
       defaultMessage:
         'Invalid condition syntax: "==" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
@@ -65,7 +58,7 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
     return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
   }
 
-  if (/!=/.test(unquoted)) {
+  if (/\S+\s*!=\s*\S+/.test(condition)) {
     const message = i18n.translate('workflows.validateIfConditions.invalidInequalityOperator', {
       defaultMessage:
         'Invalid condition syntax: "!=" is not a valid KQL operator. Use "NOT field: value" for inequality.',
@@ -73,7 +66,7 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
     return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
   }
 
-  if (/(?<![<>!:])=/.test(unquoted) && !unquoted.includes(':')) {
+  if (/\S+\s*(?<![<>!:])=(?!=)\s*\S+/.test(condition) && !condition.includes(':')) {
     const message = i18n.translate('workflows.validateIfConditions.invalidAssignmentOperator', {
       defaultMessage:
         'Invalid condition syntax: "=" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
@@ -85,40 +78,51 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
 }
 
 function makeResult(
-  item: IfConditionItem,
+  stepId: string,
+  propInfo: StepPropInfo,
+  lineCounter: LineCounter,
   message: string,
   hoverMessage: string
-): YamlValidationResult {
+): YamlValidationResult | null {
+  const valueRange = propInfo.valueNode?.range;
+  if (!valueRange) return null;
+  const startPos = lineCounter.linePos(valueRange[0]);
+  const endPos = lineCounter.linePos(valueRange[1]);
   return {
-    id: `if-condition-${item.startLineNumber}-${item.startColumn}`,
+    id: `if-condition-${stepId}-${startPos.line}-${startPos.col}`,
     owner: CONDITION_VALIDATION_OWNER,
     message,
-    startLineNumber: item.startLineNumber,
-    startColumn: item.startColumn,
-    endLineNumber: item.endLineNumber,
-    endColumn: item.endColumn,
+    startLineNumber: startPos.line,
+    startColumn: startPos.col,
+    endLineNumber: endPos.line,
+    endColumn: endPos.col,
     severity: 'error',
     hoverMessage,
   };
 }
 
-function validateCondition(item: IfConditionItem): YamlValidationResult | null {
-  if (isExpressionSyntax(item.condition)) {
-    return null;
-  }
+function validateCondition(
+  stepId: string,
+  propInfo: StepPropInfo,
+  lineCounter: LineCounter
+): YamlValidationResult | null {
+  const value = getValueFromValueNode(propInfo.valueNode);
+  if (typeof value !== 'string' || !value.trim()) return null;
 
-  const trimmed = item.condition.trim();
+  if (isExpressionSyntax(value)) return null;
+  if (containsTemplate(value)) return null;
 
-  // Operator detection runs before the template skip because ==, !=, and =
-  // are never valid KQL operators regardless of whether the value is a template.
+  const trimmed = value.trim();
+
   const operatorError = detectInvalidOperator(trimmed);
   if (operatorError) {
-    return makeResult(item, operatorError.message, operatorError.hoverMessage);
-  }
-
-  // Templates can't be parsed by the KQL parser, so skip the fallback validation.
-  if (containsTemplate(item.condition)) {
-    return null;
+    return makeResult(
+      stepId,
+      propInfo,
+      lineCounter,
+      operatorError.message,
+      operatorError.hoverMessage
+    );
   }
 
   try {
@@ -126,22 +130,36 @@ function validateCondition(item: IfConditionItem): YamlValidationResult | null {
     return null;
   } catch (error) {
     const errorMessage = (error as Error).message;
-    return makeResult(item, errorMessage, errorMessage + KQL_EXAMPLES_HOVER);
+    return makeResult(
+      stepId,
+      propInfo,
+      lineCounter,
+      errorMessage,
+      errorMessage + KQL_EXAMPLES_HOVER
+    );
   }
 }
 
 /**
  * Validates KQL syntax for if-step conditions and step-level `if` conditions.
- * Returns editor-ready results with line/column positions for Monaco markers.
+ * Uses workflowLookup which already exposes propInfos['condition'] and propInfos['if']
+ * on every step with the value node and range.
  */
-export function validateIfConditions(yamlDocument: Document): YamlValidationResult[] {
-  const items = collectIfConditionItems(yamlDocument);
+export function validateIfConditions(
+  workflowLookup: WorkflowLookup,
+  lineCounter: LineCounter
+): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
-  for (const item of items) {
-    const result = validateCondition(item);
-    if (result) {
-      results.push(result);
+  for (const step of Object.values(workflowLookup.steps)) {
+    const conditionProp = step.stepType === 'if' ? step.propInfos.condition : undefined;
+    const ifProp = step.propInfos.if;
+
+    for (const prop of [conditionProp, ifProp]) {
+      if (prop) {
+        const result = validateCondition(step.stepId, prop, lineCounter);
+        if (result) results.push(result);
+      }
     }
   }
 

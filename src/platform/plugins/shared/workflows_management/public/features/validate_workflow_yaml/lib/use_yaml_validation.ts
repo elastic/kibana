@@ -122,9 +122,11 @@ export function useYamlValidation(
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
-          ? validateWorkflowInputs(workflowLookup, workflows, lineCounter)
+          ? [
+              ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
+              ...validateIfConditions(workflowLookup, lineCounter),
+            ]
           : []),
-        ...validateIfConditions(yamlDocument),
       ];
 
       // Variable and JSON-schema-default validations require a fully parsed
