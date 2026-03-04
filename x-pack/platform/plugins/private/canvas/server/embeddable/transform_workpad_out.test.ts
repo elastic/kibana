@@ -149,13 +149,19 @@ describe('transformWorkpadOut', () => {
     });
   });
 
-  it('uses expressions service to inject references for by-reference embeddables', () => {
+  it('uses expressions service to inject references for legacy by-reference embeddable expressions', () => {
     const expression = 'savedLens id="savedLens.id" title="My Lens"';
     const references = [{ id: 'lens-id', name: 'element-id:savedLens.id', type: 'lens' }];
 
     const transformedWorkpad = transformWorkpadOut(makeWorkpad(expression), references);
 
-    expect(expressionsService.inject).toHaveBeenCalledWith(fromExpression(expression), references);
+    expect(expressionsService.inject).toHaveBeenCalledWith(fromExpression(expression), [
+      {
+        id: 'lens-id',
+        name: 'savedLens.id',
+        type: 'lens',
+      },
+    ]);
     expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
     expect(getDecodedConfig(transformedWorkpad)).toEqual({
       timeRange: DEFAULT_TIME_RANGE,
