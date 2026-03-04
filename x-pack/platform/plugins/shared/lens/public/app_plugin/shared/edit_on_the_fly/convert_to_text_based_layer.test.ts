@@ -10,6 +10,7 @@ import type {
   TypedLensSerializedState,
   DatasourceStates,
   IndexPattern,
+  IndexPatternField,
 } from '@kbn/lens-common';
 import { esql } from '@kbn/esql-language';
 import { createMockFramePublicAPI } from '../../../mocks';
@@ -25,13 +26,38 @@ describe('convertFormBasedToTextBasedLayer', () => {
     name: 'test-index',
     timeFieldName: '@timestamp',
     fields: [
-      { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
-      { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
-    ],
+      {
+        name: '@timestamp',
+        type: 'date',
+        aggregatable: true,
+        searchable: true,
+        displayName: '@timestamp',
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+        displayName: 'bytes',
+      },
+      {
+        displayName: 'Records',
+        customLabel: 'Records',
+        name: 'records',
+        type: 'document',
+        aggregatable: true,
+        searchable: true,
+      },
+    ] satisfies IndexPatternField[],
     getFieldByName: (name: string) =>
       ({
-        '@timestamp': { name: '@timestamp', type: 'date' },
-        bytes: { name: 'bytes', type: 'number' },
+        '@timestamp': { name: '@timestamp', type: 'date', displayName: '@timestamp' },
+        bytes: { name: 'bytes', type: 'number', displayName: 'bytes' },
+        records: {
+          name: 'records',
+          displayName: 'Records',
+          type: 'document',
+        },
       }[name]),
     getFormatterForField: () => ({ id: 'number', params: {} }),
     hasRestrictions: false,
@@ -52,7 +78,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
       },
       col2: {
         operationType: 'count',
-        sourceField: '___records___',
+        sourceField: 'records',
         label: 'Count of records',
         dataType: 'number',
         isBucketed: false,
@@ -129,7 +155,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
       id,
       label,
       operationType: (overrides.operationType as string) ?? 'count',
-      sourceField: (overrides.sourceField as string) ?? '___records___',
+      sourceField: (overrides.sourceField as string) ?? 'records',
       dataType,
       interval: undefined as never,
       ...overrides,
@@ -257,7 +283,10 @@ describe('convertFormBasedToTextBasedLayer', () => {
       [
         'format',
         { format: { id: 'bytes', params: { decimals: 2 } } },
-        { params: { format: { id: 'bytes', params: { decimals: 2 } } } },
+        {
+          params: { format: { id: 'bytes', params: { decimals: 2 } } },
+          label: 'Count of records',
+        },
       ],
       [
         'custom label and format',
