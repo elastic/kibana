@@ -9,6 +9,8 @@ import { Readable } from 'stream';
 import { createFileClientMock, createFileMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
 import { createHapiReadableStreamMock } from '../actions/mocks';
@@ -181,6 +183,21 @@ const applySoClientMocks = (soClient: jest.Mocked<SavedObjectsClientContract>): 
   });
 };
 
+const createRulesClientMock = () => {
+  const rulesClient = rulesClientMock.create();
+
+  rulesClient.find.mockImplementation(async () => {
+    return {
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    };
+  });
+
+  return rulesClient as jest.Mocked<RulesClient>;
+};
+
 export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
@@ -188,5 +205,6 @@ export const ScriptsLibraryMock = Object.freeze({
   generateUpdateScriptBody: generateUpdateScriptBodyMock,
   generateSavedObjectScriptEntry: generateSavedObjectScriptEntryMock,
   createFilesPluginClient: createFilesPluginClientMock,
+  createRulesClient: createRulesClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });

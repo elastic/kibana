@@ -562,7 +562,8 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       throw new ScriptLibraryError(
         `Cannot delete script [${scriptId}] because it is referenced by the following rules:\n${rulesUsingScript.data
           .map((rule) => `${rule.name} (ID: ${rule.id})`)
-          .join('\n')}`
+          .join('\n')}`,
+        400
       );
     }
 

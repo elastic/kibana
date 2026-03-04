@@ -34,6 +34,7 @@ describe('scripts library client', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let scriptsClient: ScriptsLibraryClientInterface;
   let filesPluginClient: ReturnType<typeof createFileClientMock>;
+  let rulesClient: ReturnType<typeof ScriptsLibraryMock.createRulesClient>;
   let fileMock: ReturnType<typeof createFileMock>;
 
   beforeEach(async () => {
@@ -41,6 +42,7 @@ describe('scripts library client', () => {
 
     soClientMock =
       endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
+    rulesClient = ScriptsLibraryMock.createRulesClient();
 
     const filesPluginMocks = ScriptsLibraryMock.createFilesPluginClient({
       hash: { sha256: 'e5441eb2bb' },
@@ -57,6 +59,7 @@ describe('scripts library client', () => {
       spaceId: 'spaceA',
       username: 'elastic',
       endpointService: endpointAppServicesMock,
+      rulesClient,
     });
   });
 
@@ -546,6 +549,37 @@ describe('scripts library client', () => {
 
     it('should return void on successful deletion', async () => {
       await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+    });
+
+    it('should check if script is being used by rules', async () => {
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+
+      expect(rulesClient.find).toHaveBeenCalledWith({
+        options: {
+          fields: undefined,
+          filter:
+            '(alert.attributes.alertTypeId: siem.eqlRule OR alert.attributes.alertTypeId: siem.esqlRule OR alert.attributes.alertTypeId: siem.mlRule OR alert.attributes.alertTypeId: siem.queryRule OR alert.attributes.alertTypeId: siem.savedQueryRule OR alert.attributes.alertTypeId: siem.indicatorRule OR alert.attributes.alertTypeId: siem.thresholdRule OR alert.attributes.alertTypeId: siem.newTermsRule) ' +
+            'AND ' +
+            '(alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (alert.attributes.params.responseActions.params.config.macos.scriptId:("1-2-3") OR alert.attributes.params.responseActions.params.config.windows.scriptId:("1-2-3") OR alert.attributes.params.responseActions.params.config.linux.scriptId:("1-2-3")))',
+          hasReference: undefined,
+          page: undefined,
+          perPage: 1000,
+          sortField: undefined,
+          sortOrder: undefined,
+        },
+      });
+    });
+
+    it('should error if no rules client was provided when ScriptsLibraryClient was initialized', async () => {
+      scriptsClient = new ScriptsLibraryClient({
+        spaceId: 'spaceA',
+        username: 'elastic',
+        endpointService: endpointAppServicesMock,
+      });
+
+      await expect(scriptsClient.delete('1-2-3')).rejects.toThrow(
+        'Unable to query for rules - no Rules client available!'
+      );
     });
 
     it('should throw error when script does not exist', async () => {
