@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -74,26 +74,12 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
   inputRef,
   numberPrependLabel,
 }) => {
-  const [draftUnit, setDraftUnit] = useState<string>('m');
+  const intervalNumber = useMemo(() => getDurationNumberInItsUnit(value || '2m'), [value]);
 
-  const intervalNumber = useMemo(
-    () => (value ? getDurationNumberInItsUnit(value) : undefined),
-    [value]
-  );
-
-  const intervalUnit = useMemo(
-    () => (value ? getDurationUnitValue(value) : draftUnit),
-    [value, draftUnit]
-  );
+  const intervalUnit = useMemo(() => getDurationUnitValue(value || '2m'), [value]);
 
   const onIntervalNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value.trim();
-      if (val === '') {
-        onChange(undefined);
-        return;
-      }
-
       const parsedValue = parsePositiveIntegerInput(e.target.value);
       if (parsedValue != null) {
         onChange(`${parsedValue}${intervalUnit}`);
@@ -104,11 +90,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
 
   const onIntervalUnitChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const nextUnit = e.target.value;
-      setDraftUnit(nextUnit);
-      if (intervalNumber != null) {
-        onChange(`${intervalNumber}${nextUnit}`);
-      }
+      onChange(`${intervalNumber}${e.target.value}`);
     },
     [intervalNumber, onChange]
   );
@@ -125,7 +107,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
         <EuiFieldNumber
           fullWidth
           isInvalid={!!errors}
-          value={intervalNumber ?? ''}
+          value={intervalNumber}
           onChange={onIntervalNumberChange}
           onKeyDown={onKeyDown}
           min={1}
@@ -139,7 +121,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
         <EuiSelect
           fullWidth
           value={intervalUnit}
-          options={getTimeOptions(intervalNumber ?? 2)}
+          options={getTimeOptions(intervalNumber)}
           onChange={onIntervalUnitChange}
           data-test-subj="stateTransitionTimeframeUnitInput"
           aria-label={i18n.translate(

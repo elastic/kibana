@@ -58,16 +58,11 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <EuiFieldNumber
-          value={value ?? ''}
+          value={value ?? DEFAULT_PENDING_COUNT}
           onChange={(e) => {
-            const val = e.target.value.trim();
-            if (val === '') {
-              onChange(undefined);
-            } else {
-              const parsedValue = parsePositiveIntegerInput(e.target.value);
-              if (parsedValue != null && parsedValue <= MAX_PENDING_COUNT) {
-                onChange(parsedValue);
-              }
+            const parsedValue = parsePositiveIntegerInput(e.target.value);
+            if (parsedValue != null && parsedValue <= MAX_PENDING_COUNT) {
+              onChange(parsedValue);
             }
           }}
           onKeyDown={onKeyDown}
