@@ -429,14 +429,14 @@
     "historySnapshot.lastExecutionTimestamp",
     "historySnapshot.status",
     "logsExtraction",
-    "logsExtraction.filter",
     "logsExtraction.additionalIndexPatterns",
-    "logsExtraction.fieldHistoryLength",
-    "logsExtraction.lookbackPeriod",
     "logsExtraction.delay",
     "logsExtraction.docsLimit",
-    "logsExtraction.timeout",
-    "logsExtraction.frequency"
+    "logsExtraction.fieldHistoryLength",
+    "logsExtraction.filter",
+    "logsExtraction.frequency",
+    "logsExtraction.lookbackPeriod",
+    "logsExtraction.timeout"
   ],
   "epm-packages": [
     "additional_spaces_installed_kibana",

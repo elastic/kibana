@@ -1445,16 +1445,7 @@
       },
       "logsExtraction": {
         "properties": {
-          "filter": {
-            "type": "keyword"
-          },
           "additionalIndexPatterns": {
-            "type": "keyword"
-          },
-          "fieldHistoryLength": {
-            "type": "integer"
-          },
-          "lookbackPeriod": {
             "type": "keyword"
           },
           "delay": {
@@ -1463,13 +1454,23 @@
           "docsLimit": {
             "type": "integer"
           },
-          "timeout": {
+          "fieldHistoryLength": {
+            "type": "integer"
+          },
+          "filter": {
             "type": "keyword"
           },
           "frequency": {
             "type": "keyword"
+          },
+          "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "timeout": {
+            "type": "keyword"
           }
-        }
+        },
+        "type": "object"
       }
     }
   },
