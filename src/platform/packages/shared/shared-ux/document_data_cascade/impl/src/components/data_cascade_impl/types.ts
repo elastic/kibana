@@ -21,7 +21,7 @@ import type { SelectionDropdownProps } from './data_cascade_header/group_selecti
  */
 export type CascadeSizing = keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 
-interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
+export interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
   /**
    * The row instance that was interacted with in the group by hierarchy.
    */
@@ -89,6 +89,12 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets collapsed, possibly to clean up any data associated with the leaf node or cancel any pending requests if necessary.
    */
   onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
+  /**
+   * Optional synchronous resolver for leaf data from an external source (e.g. a persisted cache).
+   * When provided and returns a non-null value, the internal store and async fetch via
+   * `onCascadeLeafNodeExpanded` are bypassed, allowing data to be available on the first render.
+   */
+  resolveLeafData?: (args: CascadeGroupNodeUIInteraction<G>) => L[] | null;
   getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
@@ -197,7 +203,7 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowCellPrimitiveProps<G, L>,
-  'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'children'
+  'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'resolveLeafData' | 'children'
 >;
 
 export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<

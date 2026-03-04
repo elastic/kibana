@@ -56,6 +56,7 @@ const ESQLDataCascade = React.memo(
       selectedCascadeGroups,
       esqlVariables,
       viewModeToggle,
+      resolveLeafData,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
@@ -128,6 +129,7 @@ const ESQLDataCascade = React.memo(
           <DataCascadeRowCell
             onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
             onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+            resolveLeafData={resolveLeafData}
           >
             {cascadeLeafRowRenderer}
           </DataCascadeRowCell>

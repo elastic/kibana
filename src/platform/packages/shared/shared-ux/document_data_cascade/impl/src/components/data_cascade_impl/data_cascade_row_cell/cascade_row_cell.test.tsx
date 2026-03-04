@@ -22,9 +22,15 @@ const renderComponent = ({
   getVirtualizer,
   onCascadeLeafNodeExpanded = jest.fn(),
   onCascadeLeafNodeCollapsed,
+  resolveLeafData,
 }: Pick<
   React.ComponentProps<typeof CascadeRowCellPrimitive>,
-  'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'row' | 'children' | 'getVirtualizer'
+  | 'onCascadeLeafNodeExpanded'
+  | 'onCascadeLeafNodeCollapsed'
+  | 'resolveLeafData'
+  | 'row'
+  | 'children'
+  | 'getVirtualizer'
 > &
   Pick<
     React.ComponentProps<typeof DataCascadeProvider>,
@@ -37,6 +43,7 @@ const renderComponent = ({
         size="m"
         onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
         onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+        resolveLeafData={resolveLeafData}
         row={row}
         getVirtualizer={getVirtualizer}
       >
@@ -285,6 +292,80 @@ describe('CascadeRowCellPrimitive', () => {
       });
 
       expect(capturedGetScrollElement!()).toBe(mockScrollElement);
+    });
+  });
+
+  describe('resolveLeafData', () => {
+    const cascadeGroups = ['group1', 'group2'];
+
+    const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
+      id: '1',
+      randomField: 'randomValue',
+    });
+
+    const mockRow = {
+      id: '1',
+      depth: 0,
+      original: rowData,
+      getToggleSelectedHandler: jest.fn(),
+      getToggleExpandedHandler: jest.fn(),
+    } as unknown as Row<any>;
+
+    it('should not invoke onCascadeLeafNodeExpanded when resolveLeafData returns data', async () => {
+      const mockOnCascadeLeafNodeExpanded = jest.fn();
+      const mockResolveLeafData = jest.fn().mockReturnValue([{ id: 'leaf-1' }]);
+
+      renderComponent({
+        cascadeGroups,
+        initialGroupColumn: [cascadeGroups[0]],
+        row: mockRow,
+        children: () => <div>Test Child</div>,
+        onCascadeLeafNodeExpanded: mockOnCascadeLeafNodeExpanded,
+        resolveLeafData: mockResolveLeafData,
+        getVirtualizer: mockVirtualizerGetter,
+      });
+
+      await waitFor(() => {
+        expect(mockResolveLeafData).toHaveBeenCalled();
+      });
+
+      expect(mockOnCascadeLeafNodeExpanded).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to onCascadeLeafNodeExpanded when resolveLeafData returns null', async () => {
+      const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue([{ id: 'leaf-1' }]);
+      const mockResolveLeafData = jest.fn().mockReturnValue(null);
+
+      renderComponent({
+        cascadeGroups,
+        initialGroupColumn: [cascadeGroups[0]],
+        row: mockRow,
+        children: () => <div>Test Child</div>,
+        onCascadeLeafNodeExpanded: mockOnCascadeLeafNodeExpanded,
+        resolveLeafData: mockResolveLeafData,
+        getVirtualizer: mockVirtualizerGetter,
+      });
+
+      await waitFor(() => {
+        expect(mockOnCascadeLeafNodeExpanded).toHaveBeenCalled();
+      });
+    });
+
+    it('should invoke onCascadeLeafNodeExpanded when resolveLeafData is not provided', async () => {
+      const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue([{ id: 'leaf-1' }]);
+
+      renderComponent({
+        cascadeGroups,
+        initialGroupColumn: [cascadeGroups[0]],
+        row: mockRow,
+        children: () => <div>Test Child</div>,
+        onCascadeLeafNodeExpanded: mockOnCascadeLeafNodeExpanded,
+        getVirtualizer: mockVirtualizerGetter,
+      });
+
+      await waitFor(() => {
+        expect(mockOnCascadeLeafNodeExpanded).toHaveBeenCalled();
+      });
     });
   });
 });
