@@ -1168,7 +1168,6 @@ x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-presen
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/slo @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team
-x-pack/solutions/observability/plugins/synthetics/e2e @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/uptime @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/ux @elastic/actionable-obs-team
 x-pack/solutions/observability/test
@@ -2035,6 +2034,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/config* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
+/**/scout/.meta/** @kibanamachine @elastic/appex-qa
+/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -3156,15 +3157,16 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /AGENTS.md @elastic/kibana-tech-leads
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
-/.agent/skills/ @elastic/kibana-tech-leads
+/.agents/skills/ @elastic/kibana-tech-leads
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
-/.agent/skills/ftr-testing/** @elastic/appex-qa
-/.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
-/.agent/skills/scout-create-scaffold/** @elastic/appex-qa
-/.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
-/.agent/skills/scout-testing/** @elastic/appex-qa
+/.agents/skills/ftr-testing/** @elastic/appex-qa
+/.agents/skills/scout-api-testing/** @elastic/appex-qa
+/.agents/skills/scout-best-practices-reviewer/** @elastic/appex-qa
+/.agents/skills/scout-create-scaffold/** @elastic/appex-qa
+/.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
+/.agents/skills/scout-ui-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
