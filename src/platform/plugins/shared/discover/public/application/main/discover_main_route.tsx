@@ -12,6 +12,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -252,7 +253,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }
 
   return (
-    <rootProfileState.AppWrapper>
+    <div className={APP_WRAPPER_CLASS} data-test-subj="kbnAppWrapper visibleChrome">
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         {customizationContext.displayMode === 'standalone' && <GlobalHeaderActionsMount />}
         <DiscoverTopNavMenuProvider customizationContext={customizationContext}>
@@ -287,6 +288,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
           </>
         </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
-    </rootProfileState.AppWrapper>
+    </div>
   );
 };

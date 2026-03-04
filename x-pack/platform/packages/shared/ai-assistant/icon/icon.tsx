@@ -11,6 +11,9 @@ import { EuiIcon } from '@elastic/eui';
 // TODO: can be removed once added to EUI.
 import assistantIcon from './svg/assistant';
 
+/** Fallback when custom icon fails to load (e.g. bundle cache). */
+const FALLBACK_ICON_TYPE = 'sparkles';
+
 /**
  * Props for the AI Assistant icon.
  */
@@ -20,5 +23,6 @@ export type AssistantIconProps = Omit<EuiIconProps, 'type'>;
  * Default Elastic AI Assistant icon.
  */
 export const AssistantIcon = ({ size = 'm', ...rest }: AssistantIconProps) => {
-  return <EuiIcon {...{ type: robotIcon, size, ...rest }} />;
+  const iconType = assistantIcon ?? FALLBACK_ICON_TYPE;
+  return <EuiIcon {...{ type: iconType, size, ...rest }} />;
 };

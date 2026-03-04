@@ -83,9 +83,14 @@ export function getLogsAnomaliesHeaderAppActionsConfig(): ChromeHeaderAppActions
   };
 }
 
+const METRICS_ALERTS_PANEL_ID = 1;
+const METRICS_ALERTS_INFRASTRUCTURE_PANEL_ID = 2;
+const METRICS_ALERTS_METRICS_PANEL_ID = 3;
+
 /**
- * Header app actions config for the Metrics app (Infrastructure inventory, Hosts, Metrics explorer).
- * Overflow menu contains the former app menu items (Feedback, Anomaly detection, Alerts and rules, Add data, Settings).
+ * Shared header app actions config for Infrastructure inventory, Hosts, and Metrics explorer.
+ * Single secondary overflow (•••) with: Add data, Anomaly detection, Alerts (sub-panel), Settings, Feedback.
+ * Alerts opens "Alerts and rules" panel with: Infrastructure (sub-panel), Metrics (sub-panel), Manage rules.
  * POC: all actions are dumb (noop). Set when app mounts; platform clears on app change.
  */
 export function getMetricsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
@@ -96,6 +101,13 @@ export function getMetricsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig
         title: '',
         items: [
           {
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowAddData', {
+              defaultMessage: 'Add data',
+            }),
+            icon: 'plusInCircle',
+            onClick: noop,
+          },
+          {
             name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowAnomalyDetection', {
               defaultMessage: 'Anomaly detection',
             }),
@@ -103,20 +115,13 @@ export function getMetricsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig
             onClick: noop,
           },
           {
-            name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowAlertsAndRules', {
-              defaultMessage: 'Alerts and rules',
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowAlerts', {
+              defaultMessage: 'Alerts',
             }),
             icon: 'bell',
             onClick: noop,
+            panel: METRICS_ALERTS_PANEL_ID,
           },
-          {
-            name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowAddData', {
-              defaultMessage: 'Add data',
-            }),
-            icon: 'plusInCircle',
-            onClick: noop,
-          },
-          { isSeparator: true as const, key: 'sepSettings' },
           {
             name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowSettings', {
               defaultMessage: 'Settings',
@@ -124,12 +129,72 @@ export function getMetricsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig
             icon: 'gear',
             onClick: noop,
           },
-          { isSeparator: true as const, key: 'sepFeedback' },
           {
             name: i18n.translate('xpack.infra.metricsHeaderAppActions.overflowFeedback', {
               defaultMessage: 'Feedback',
             }),
             icon: 'editorComment',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: METRICS_ALERTS_PANEL_ID,
+        title: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelTitle', {
+          defaultMessage: 'Alerts and rules',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelInfrastructure', {
+              defaultMessage: 'Infrastructure',
+            }),
+            icon: 'cluster',
+            onClick: noop,
+            panel: METRICS_ALERTS_INFRASTRUCTURE_PANEL_ID,
+          },
+          {
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelMetrics', {
+              defaultMessage: 'Metrics',
+            }),
+            icon: 'stats',
+            onClick: noop,
+            panel: METRICS_ALERTS_METRICS_PANEL_ID,
+          },
+          {
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelManageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'document',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: METRICS_ALERTS_INFRASTRUCTURE_PANEL_ID,
+        title: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelInfrastructure', {
+          defaultMessage: 'Infrastructure',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelManageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'document',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: METRICS_ALERTS_METRICS_PANEL_ID,
+        title: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelMetrics', {
+          defaultMessage: 'Metrics',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.infra.metricsHeaderAppActions.alertsPanelManageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'document',
             onClick: noop,
           },
         ],

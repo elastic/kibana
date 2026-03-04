@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
@@ -22,7 +22,6 @@ import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getMetricsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 
 const MetricsExplorerPage = dynamic(() =>
@@ -38,15 +37,17 @@ const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.
 
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
-  const { application, chrome } = useKibanaContextForPlugin().services;
+  const { application, chrome } = useKibana().services;
+
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig) {
+      chrome.setHeaderAppActionsConfig(getMetricsHeaderAppActionsConfig());
+    }
+  }, [chrome]);
 
   const uiCapabilities = application?.capabilities;
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
-
-  useEffect(() => {
-    chrome.setHeaderAppActionsConfig(getMetricsHeaderAppActionsConfig());
-  }, [chrome]);
 
   return (
     <KibanaErrorBoundary>
@@ -54,13 +55,6 @@ export const InfrastructurePage = () => {
         <AlertPrefillProvider>
           <ReloadRequestTimeProvider>
             <InfraMLCapabilitiesProvider>
-              <HelpCenterContent
-                feedbackLink="https://discuss.elastic.co/c/metrics"
-                appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                  defaultMessage: 'Metrics',
-                })}
-              />
-
               <Routes enableExecutionContextTracking={true}>
                 <Route path="/inventory" component={SnapshotPage} />
                 {config.featureFlags.metricsExplorerEnabled && (

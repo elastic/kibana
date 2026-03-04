@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
@@ -223,7 +222,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           }}
           color="primary"
           size="s"
-          iconType={AssistantIcon}
+          iconType="productRobot"
           isLoading={chatService.loading}
         >
           {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
