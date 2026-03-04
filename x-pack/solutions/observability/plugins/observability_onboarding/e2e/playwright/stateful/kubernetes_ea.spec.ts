@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
+import { StreamsValidationPage } from './pom/pages/streams_validation.page';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
@@ -63,7 +64,6 @@ test('Kubernetes EA', async ({
     await discoverValidation.assertHitCountGreaterThanZero();
 
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
     const streamsValidation = new StreamsValidationPage(page);
     await streamsValidation.waitForStreamsToLoad();
     await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');

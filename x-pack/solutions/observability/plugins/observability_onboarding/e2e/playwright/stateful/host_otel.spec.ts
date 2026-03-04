@@ -10,6 +10,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
+import { DiscoverValidationPage } from './pom/pages/discover_validation.page';
+import { StreamsValidationPage } from './pom/pages/streams_validation.page';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
@@ -66,14 +68,12 @@ test('Otel Host', async ({
   if (useWiredStreams) {
     await otelHostFlowPage.clickLogsExplorationCTA();
 
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
     const discoverValidation = new DiscoverValidationPage(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
     await discoverValidation.assertHitCountGreaterThanZero();
 
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
     const streamsValidation = new StreamsValidationPage(page);
     await streamsValidation.waitForStreamsToLoad();
     await streamsValidation.assertStreamDocCountGreaterThanZero('logs.otel');
@@ -84,7 +84,6 @@ test('Otel Host', async ({
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
 
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
     const discoverValidation = new DiscoverValidationPage(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();

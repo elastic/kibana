@@ -11,6 +11,7 @@ import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
 import { ApmServiceInventoryPage } from './pom/pages/apm_service_inventory.page';
+import { StreamsValidationPage } from './pom/pages/streams_validation.page';
 
 /**
  * In case you need to run this test locally, you can use https://github.com/elastic/oblt-reference-stack
@@ -103,7 +104,6 @@ test('Otel Kubernetes', async ({
     await discoverValidation.assertHitCountGreaterThanZero();
 
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
     const streamsValidation = new StreamsValidationPage(page);
     await streamsValidation.waitForStreamsToLoad();
     await streamsValidation.assertStreamDocCountGreaterThanZero('logs.otel');

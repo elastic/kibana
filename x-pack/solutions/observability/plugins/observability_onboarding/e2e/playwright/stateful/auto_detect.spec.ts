@@ -9,6 +9,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { HostDetailsPage } from './pom/pages/host_details.page';
+import { DiscoverValidationPage } from './pom/pages/discover_validation.page';
+import { StreamsValidationPage } from './pom/pages/streams_validation.page';
 import { assertEnv } from '../lib/assert_env';
 
 test.beforeEach(async ({ page }) => {
@@ -46,7 +48,11 @@ test('Auto-detect logs and metrics', async ({
    */
   fs.writeFileSync(outputPath, clipboardData);
 
-  await autoDetectFlowPage.assertReceivedDataIndicator();
+  if (useWiredStreams) {
+    await autoDetectFlowPage.assertLogsDataReceivedIndicator();
+  } else {
+    await autoDetectFlowPage.assertReceivedDataIndicator();
+  }
 
   /**
    * Host Details page sometime shows "No Data"
@@ -70,7 +76,6 @@ test('Auto-detect logs and metrics', async ({
     }
 
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const { StreamsValidationPage } = await import('./pom/pages/streams_validation.page');
     const streamsValidation = new StreamsValidationPage(page);
     await streamsValidation.waitForStreamsToLoad();
     await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
@@ -90,7 +95,6 @@ test('Auto-detect logs and metrics', async ({
 
       await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
 
-      const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
       const discoverValidation = new DiscoverValidationPage(page);
       await discoverValidation.waitForDiscoverToLoad();
       await discoverValidation.assertHasAnyLogData();
