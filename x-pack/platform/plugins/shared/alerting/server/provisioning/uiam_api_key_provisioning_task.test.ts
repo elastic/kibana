@@ -118,6 +118,16 @@ describe('UiamApiKeyProvisioningTask', () => {
   const logger = loggingSystemMock.createLogger();
 
   describe('register', () => {
+    it('does not register when not serverless', () => {
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: false });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreMock.createSetup() as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+      expect(taskManager.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
+
     it('registers task definition when serverless', () => {
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
