@@ -15,8 +15,6 @@ import {
   ListEventsInputSchema,
 } from './types';
 import type {
-  CalendarEventShape,
-  CalendarListItemShape,
   SearchEventsInput,
   GetEventInput,
   ListCalendarsInput,
@@ -37,21 +35,6 @@ function rethrowGoogleCalendarError(error: unknown): void {
     throw new Error(`Google Calendar API error (${googleError.code}): ${googleError.message}`);
   }
 }
-
-const mapEvent = (event: CalendarEventShape) => ({
-  id: event.id,
-  summary: event.summary,
-  description: event.description,
-  location: event.location,
-  start: event.start,
-  end: event.end,
-  status: event.status,
-  htmlLink: event.htmlLink,
-  organizer: event.organizer,
-  attendees: event.attendees,
-  created: event.created,
-  updated: event.updated,
-});
 
 export const GoogleCalendar: ConnectorSpec = {
   metadata: {
@@ -94,10 +77,7 @@ export const GoogleCalendar: ConnectorSpec = {
             { params }
           );
 
-          return {
-            events: (response.data.items || []).map(mapEvent),
-            nextPageToken: response.data.nextPageToken,
-          };
+          return response.data;
         } catch (error: unknown) {
           rethrowGoogleCalendarError(error);
           throw error;
@@ -117,27 +97,7 @@ export const GoogleCalendar: ConnectorSpec = {
             `${GOOGLE_CALENDAR_API_BASE}/calendars/${calendarId}/events/${eventId}`
           );
 
-          const event = response.data;
-          return {
-            id: event.id,
-            summary: event.summary,
-            description: event.description,
-            location: event.location,
-            start: event.start,
-            end: event.end,
-            status: event.status,
-            htmlLink: event.htmlLink,
-            organizer: event.organizer,
-            creator: event.creator,
-            attendees: event.attendees,
-            recurrence: event.recurrence,
-            recurringEventId: event.recurringEventId,
-            conferenceData: event.conferenceData,
-            hangoutLink: event.hangoutLink,
-            attachments: event.attachments,
-            created: event.created,
-            updated: event.updated,
-          };
+          return response.data;
         } catch (error: unknown) {
           rethrowGoogleCalendarError(error);
           throw error;
@@ -160,19 +120,7 @@ export const GoogleCalendar: ConnectorSpec = {
             { params }
           );
 
-          const calendars = (response.data.items || []).map((cal: CalendarListItemShape) => ({
-            id: cal.id,
-            summary: cal.summary,
-            description: cal.description,
-            primary: cal.primary,
-            accessRole: cal.accessRole,
-            timeZone: cal.timeZone,
-          }));
-
-          return {
-            calendars,
-            nextPageToken: response.data.nextPageToken,
-          };
+          return response.data;
         } catch (error: unknown) {
           rethrowGoogleCalendarError(error);
           throw error;
@@ -207,10 +155,7 @@ export const GoogleCalendar: ConnectorSpec = {
             { params }
           );
 
-          return {
-            events: (response.data.items || []).map(mapEvent),
-            nextPageToken: response.data.nextPageToken,
-          };
+          return response.data;
         } catch (error: unknown) {
           rethrowGoogleCalendarError(error);
           throw error;
@@ -225,14 +170,11 @@ export const GoogleCalendar: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const response = await ctx.client.get(
-          `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`,
-          {
-            params: {
-              maxResults: 1,
-            },
-          }
-        );
+        const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
+          params: {
+            maxResults: 1,
+          },
+        });
 
         if (response.status !== 200) {
           return { ok: false, message: 'Failed to connect to Google Calendar API' };

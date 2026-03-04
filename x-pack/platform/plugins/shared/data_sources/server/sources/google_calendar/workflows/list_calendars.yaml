@@ -16,3 +16,17 @@ steps:
     connector-id: <%= google_calendar-stack-connector-id %>
     with:
       pageToken: "${{inputs.pageToken}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.list_calendars.output }}
+    with:
+      fields:
+        nextPageToken: "${{ item.nextPageToken }}"
+        calendars:
+          $map: { items: "${{ item.items }}", item: "cal" }
+          id: "${{ cal.id }}"
+          summary: "${{ cal.summary }}"
+          description: "${{ cal.description }}"
+          primary: "${{ cal.primary }}"
+          accessRole: "${{ cal.accessRole }}"
+          timeZone: "${{ cal.timeZone }}"

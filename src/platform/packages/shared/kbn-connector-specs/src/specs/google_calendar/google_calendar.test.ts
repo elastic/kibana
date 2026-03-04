@@ -151,35 +151,16 @@ describe('GoogleCalendar', () => {
       );
     });
 
-    it('should return events mapped to the expected shape', async () => {
-      mockClient.get.mockResolvedValue({
-        data: { items: [mockEvent], nextPageToken: 'token123' },
-      });
+    it('should return raw API response data', async () => {
+      const rawResponse = { items: [mockEvent], nextPageToken: 'token123' };
+      mockClient.get.mockResolvedValue({ data: rawResponse });
 
       const result = await GoogleCalendar.actions.searchEvents.handler(mockContext, {
         query: 'standup',
         calendarId: 'primary',
       });
 
-      expect(result).toEqual({
-        events: [
-          {
-            id: 'evt1',
-            summary: 'Team standup',
-            description: 'Daily sync',
-            location: 'Room A',
-            start: { dateTime: '2024-01-15T10:00:00Z' },
-            end: { dateTime: '2024-01-15T10:30:00Z' },
-            status: 'confirmed',
-            htmlLink: 'https://calendar.google.com/event?eid=evt1',
-            organizer: { email: 'organizer@example.com' },
-            attendees: [{ email: 'user@example.com', responseStatus: 'accepted' }],
-            created: '2024-01-01T00:00:00Z',
-            updated: '2024-01-10T00:00:00Z',
-          },
-        ],
-        nextPageToken: 'token123',
-      });
+      expect(result).toEqual(rawResponse);
     });
 
     it('should cap maxResults at 2500', async () => {
@@ -208,9 +189,7 @@ describe('GoogleCalendar', () => {
         calendarId: 'primary',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        `${API_BASE}/calendars/primary/events/evt1`
-      );
+      expect(mockClient.get).toHaveBeenCalledWith(`${API_BASE}/calendars/primary/events/evt1`);
     });
   });
 
@@ -301,7 +280,10 @@ describe('GoogleCalendar', () => {
 
       const result = await GoogleCalendar.test!.handler(mockContext);
 
-      expect(result).toEqual({ ok: true, message: 'Successfully connected to Google Calendar API' });
+      expect(result).toEqual({
+        ok: true,
+        message: 'Successfully connected to Google Calendar API',
+      });
     });
 
     it('should return ok: false on error', async () => {

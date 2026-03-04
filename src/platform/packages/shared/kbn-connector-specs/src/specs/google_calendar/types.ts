@@ -13,30 +13,6 @@ import { z } from '@kbn/zod/v4';
 // Shared types
 // =============================================================================
 
-export interface CalendarListItemShape {
-  id: string;
-  summary?: string;
-  description?: string;
-  primary?: boolean;
-  accessRole?: string;
-  timeZone?: string;
-}
-
-export interface CalendarEventShape {
-  id: string;
-  summary?: string;
-  description?: string;
-  location?: string;
-  start?: { dateTime?: string; date?: string };
-  end?: { dateTime?: string; date?: string };
-  status?: string;
-  htmlLink?: string;
-  organizer?: { email?: string; displayName?: string };
-  attendees?: Array<{ email?: string; displayName?: string; responseStatus?: string }>;
-  created?: string;
-  updated?: string;
-}
-
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================

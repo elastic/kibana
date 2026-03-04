@@ -45,3 +45,27 @@ steps:
       maxResults: ${{inputs.maxResults}}
       pageToken: "${{inputs.pageToken}}"
       orderBy: "${{inputs.orderBy}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.list_events.output }}
+    with:
+      fields:
+        nextPageToken: "${{ item.nextPageToken }}"
+        events:
+          $map: { items: "${{ item.items }}", item: "event" }
+          id: "${{ event.id }}"
+          summary: "${{ event.summary }}"
+          description: "${{ event.description }}"
+          location: "${{ event.location }}"
+          start: "${{ event.start }}"
+          end: "${{ event.end }}"
+          status: "${{ event.status }}"
+          htmlLink: "${{ event.htmlLink }}"
+          organizer: "${{ event.organizer }}"
+          attendees:
+            $map: { items: "${{ event.attendees }}", item: "att" }
+            email: "${{ att.email }}"
+            displayName: "${{ att.displayName }}"
+            responseStatus: "${{ att.responseStatus }}"
+          created: "${{ event.created }}"
+          updated: "${{ event.updated }}"
