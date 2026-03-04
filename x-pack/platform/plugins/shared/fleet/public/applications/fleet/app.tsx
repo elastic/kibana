@@ -62,7 +62,6 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { CompleteSetupPage } from './sections/cloud_connector/complete_setup_page';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -95,7 +94,9 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
-  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isAddIntegrationsPath =
+    !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy) ||
+    !!useRouteMatch(FLEET_ROUTING_PATHS.complete_integration_setup);
   const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
@@ -444,8 +445,9 @@ export const AppRoutes = memo(
             )}
           </Route>
 
-          <Route path={FLEET_ROUTING_PATHS.cloud_connector_complete}>
-            <CompleteSetupPage />
+          {/* Frictionless integration setup — same form as add-integration, with prefilled Cloud Connector data */}
+          <Route path={FLEET_ROUTING_PATHS.complete_integration_setup}>
+            <CreatePackagePolicyPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}

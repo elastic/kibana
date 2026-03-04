@@ -107,7 +107,6 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
-  COMPLETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/complete`,
 };
 
 // Kubernetes Manifest API routes

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicyConfigRecord } from '../../../../common';
 import {
@@ -30,6 +30,7 @@ import {
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '../constants';
+import type { CloudConnectorPrefillParams } from './use_cloud_connector_prefill';
 
 export interface UseCloudConnectorSetupReturn {
   // State for new connection form
@@ -151,14 +152,27 @@ export const useCloudConnectorSetup = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
   packageInfo: PackageInfo,
-  cloudProvider?: CloudProvider
+  cloudProvider?: CloudProvider,
+  prefill?: CloudConnectorPrefillParams
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
       // Use accessor to get vars from the correct location
       const vars = extractRawCredentialVars(newPolicy, packageInfo) ?? {};
-      return createInitialCredentials(vars);
+      const initialCredentials = createInitialCredentials(vars);
+
+      if (cloudProvider === 'aws' && prefill?.isPrefilled) {
+        const initialAwsCredentials = initialCredentials as AwsCloudConnectorCredentials;
+        return {
+          ...initialAwsCredentials,
+          roleArn: prefill.roleArn ?? initialAwsCredentials.roleArn,
+          externalId: prefill.externalId ?? initialAwsCredentials.externalId,
+          name: prefill.stackName ?? initialAwsCredentials.name,
+        } as AwsCloudConnectorCredentials;
+      }
+
+      return initialCredentials;
     });
 
   // State for existing connection form
@@ -248,6 +262,30 @@ export const useCloudConnectorSetup = (
     },
     [newPolicy, updatePolicy, packageInfo]
   );
+
+  const hasAppliedPrefillRef = useRef(false);
+
+  useEffect(() => {
+    if (cloudProvider !== 'aws' || !prefill?.isPrefilled || hasAppliedPrefillRef.current) {
+      return;
+    }
+
+    hasAppliedPrefillRef.current = true;
+    updatePolicyWithNewCredentials({
+      ...newConnectionCredentials,
+      roleArn: prefill.roleArn ?? newConnectionCredentials.roleArn,
+      externalId: prefill.externalId ?? newConnectionCredentials.externalId,
+      name: prefill.stackName ?? newConnectionCredentials.name,
+    });
+  }, [
+    cloudProvider,
+    newConnectionCredentials,
+    prefill?.externalId,
+    prefill?.isPrefilled,
+    prefill?.roleArn,
+    prefill?.stackName,
+    updatePolicyWithNewCredentials,
+  ]);
 
   return {
     newConnectionCredentials,

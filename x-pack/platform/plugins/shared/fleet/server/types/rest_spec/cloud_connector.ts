@@ -230,60 +230,6 @@ export const GetCloudConnectorUsageRequestSchema = {
   }),
 };
 
-export const CompleteCloudConnectorSetupRequestSchema = {
-  body: schema.object({
-    role_arn: schema.string({
-      minLength: 1,
-      maxLength: 2048,
-      validate: (value: string) => {
-        if (!/^arn:aws:iam::\d{12}:role\//.test(value)) {
-          return 'must be a valid AWS IAM Role ARN (arn:aws:iam::<account-id>:role/<role-name>)';
-        }
-      },
-      meta: { description: 'The ARN of the AWS IAM Role created by CloudFormation.' },
-    }),
-    external_id: schema.string({
-      minLength: 1,
-      maxLength: 1224,
-      meta: { description: 'The External ID used for cross-account trust.' },
-    }),
-    account_type: schema.oneOf(
-      [schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)],
-      {
-        meta: {
-          description: 'The account type: single-account or organization-account.',
-        },
-      }
-    ),
-    integration_type: schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: {
-        description:
-          'The integration package name (e.g., cloud_asset_inventory, cloud_security_posture).',
-      },
-    }),
-    stack_name: schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: { description: 'The CloudFormation stack name.' },
-    }),
-    region: schema.string({
-      minLength: 1,
-      maxLength: 64,
-      meta: { description: 'The AWS region where the CloudFormation stack was deployed.' },
-    }),
-  }),
-};
-
-export const CompleteCloudConnectorSetupResponseSchema = schema.object({
-  cloud_connector_id: schema.string(),
-  cloud_connector_name: schema.string(),
-  package_policy_id: schema.string(),
-  agent_policy_id: schema.string(),
-  redirect_url: schema.string(),
-});
-
 export const GetCloudConnectorUsageResponseSchema = schema.object({
   items: schema.arrayOf(
     schema.object({

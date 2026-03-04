@@ -18,7 +18,7 @@ import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
 export const CreatePackagePolicyPage: React.FC<{}> = () => {
-  const { search } = useLocation();
+  const { search, pathname } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const useMultiPageLayout = useMemo(
@@ -60,6 +60,11 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const from: EditPackagePolicyFrom =
     'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
 
+  const isCompleteSetup = useMemo(
+    () => pathname.includes('complete-integration-setup'),
+    [pathname]
+  );
+
   const pageParams = {
     from,
     queryParamsPolicyId,
@@ -67,6 +72,7 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     pkgName,
     pkgVersion,
     integration: params.integration,
+    isCompleteSetup,
   };
 
   if (useMultiPageLayout) {

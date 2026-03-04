@@ -33,6 +33,7 @@ import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+  CF_PARAM_COMPLETION_BASE_URL,
 } from './constants';
 
 // Cloud connector name validation constants
@@ -150,6 +151,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   accountType,
   iacTemplateUrl,
+  completionBaseUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
@@ -165,9 +167,15 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 
   if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
 
-  return iacTemplateUrl
+  let templateUrl = iacTemplateUrl
     .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
     .replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+
+  if (completionBaseUrl) {
+    templateUrl += `&${CF_PARAM_COMPLETION_BASE_URL}=${encodeURIComponent(completionBaseUrl)}`;
+  }
+
+  return templateUrl;
 };
 
 /**
@@ -192,15 +200,15 @@ export const updateInputVarsWithAwsCredentials = (
         ...updatedInputVars.role_arn,
         value: inputCredentials.roleArn,
       };
-    }
-    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+    } else if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
       updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = {
         ...updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN],
         value: inputCredentials.roleArn,
       };
+    } else {
+      updatedInputVars.role_arn = { value: inputCredentials.roleArn };
     }
   } else {
-    // Clear role_arn fields when roleArn is undefined
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn = { value: undefined };
     }
@@ -213,14 +221,14 @@ export const updateInputVarsWithAwsCredentials = (
   if (inputCredentials?.externalId !== undefined) {
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: inputCredentials.externalId };
-    }
-    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+    } else if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
       updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = {
         value: inputCredentials.externalId,
       };
+    } else {
+      updatedInputVars.external_id = { value: inputCredentials.externalId };
     }
   } else {
-    // Clear external_id fields when externalId is undefined
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: undefined };
     }

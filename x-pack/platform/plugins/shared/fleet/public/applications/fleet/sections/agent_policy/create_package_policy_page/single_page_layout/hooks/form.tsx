@@ -299,6 +299,7 @@ export function useOnSubmit({
   setSelectedPolicyTab,
   isAddIntegrationFlyout,
   defaultPolicyData,
+  isCompleteSetup = false,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -312,6 +313,7 @@ export function useOnSubmit({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
   defaultPolicyData?: Partial<NewPackagePolicy>;
+  isCompleteSetup?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -764,7 +766,7 @@ export function useOnSubmit({
             setFormState('SUBMITTED');
           } else if (hasAzureArmTemplate) {
             setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-          } else if (hasCloudFormation) {
+          } else if (hasCloudFormation && !isCompleteSetup) {
             setFormState('SUBMITTED_CLOUD_FORMATION');
           } else if (hasGoogleCloudShell) {
             setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
@@ -784,7 +786,7 @@ export function useOnSubmit({
             setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
             return;
           }
-          if (promptForAgentEnrollment && hasCloudFormation) {
+          if (promptForAgentEnrollment && hasCloudFormation && !isCompleteSetup) {
             setFormState('SUBMITTED_CLOUD_FORMATION');
             return;
           }
@@ -860,6 +862,7 @@ export function useOnSubmit({
       spaceId,
       onSaveNavigate,
       confirmForceInstall,
+      isCompleteSetup,
     ]
   );
 

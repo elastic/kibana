@@ -6,3 +6,4 @@
  */
 
 export { useGetCloudConnectors } from './use_get_cloud_connectors';
+export { useCompletionBaseUrl } from './use_completion_base_url';

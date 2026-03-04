@@ -22,7 +22,6 @@ export type StaticPage =
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
   | 'settings_create_fleet_proxy'
-  | 'cloud_connector_complete'
   | 'debug';
 
 export type DynamicPage =
@@ -45,6 +44,7 @@ export type DynamicPage =
   | 'integration_policy_copy_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
+  | 'complete_integration_setup'
   | 'edit_integration'
   | 'copy_integration'
   | 'upgrade_package_policy'
@@ -96,10 +96,12 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-  cloud_connector_complete: '/cloud_connector/complete',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
+
+  // Same form as add-integration, but with prefilled Cloud Connector data from CloudFormation callback
+  complete_integration_setup: '/integrations/:pkgkey/complete-integration-setup/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
@@ -278,6 +280,13 @@ export const pagePathGetters: {
       `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
     ];
   },
+  complete_integration_setup: ({ pkgkey, integration }) => {
+    return [
+      FLEET_BASE_PATH,
+      // prettier-ignore
+      `/integrations/${pkgkey}/complete-integration-setup${integration ? `/${integration}` : ''}`,
+    ];
+  },
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
@@ -345,6 +354,5 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     FLEET_ROUTING_PATHS.settings_create_download_sources,
   ],
-  cloud_connector_complete: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.cloud_connector_complete],
   debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
 };

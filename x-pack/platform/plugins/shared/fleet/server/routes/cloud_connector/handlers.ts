@@ -8,13 +8,9 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { AwsCloudConnectorVars } from '../../../common/types';
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
-import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
-import { getInstallation, getPackageInfo } from '../../services/epm/packages';
-import { createSecrets } from '../../services/secrets/common';
 import type {
   GetCloudConnectorsResponse,
   GetOneCloudConnectorResponse,
@@ -25,7 +21,6 @@ import type {
   CreateCloudConnectorRequest,
   GetCloudConnectorUsageResponse,
   CloudConnectorUsageItem,
-  CompleteCloudConnectorSetupResponse,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -34,7 +29,6 @@ import type {
   UpdateCloudConnectorRequestSchema,
   DeleteCloudConnectorRequestSchema,
   GetCloudConnectorUsageRequestSchema,
-  CompleteCloudConnectorSetupRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 export const createCloudConnectorHandler: FleetRequestHandler<
@@ -286,178 +280,3 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
   }
 };
 
-const INTEGRATION_TYPE_TO_POLICY_TEMPLATE: Record<string, string> = {
-  cloud_asset_inventory: 'asset_inventory',
-  cloud_security_posture: 'cspm',
-};
-
-export const completeCloudConnectorSetupHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof CompleteCloudConnectorSetupRequestSchema.body>
-> = async (context, request, response) => {
-  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-  const soClient = fleetContext.internalSoClient;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const logger = appContextService
-    .getLogger()
-    .get('CloudConnectorService completeCloudConnectorSetupHandler');
-
-  const { role_arn, external_id, account_type, integration_type, stack_name, region } =
-    request.body;
-
-  let createdCloudConnectorId: string | undefined;
-
-  try {
-    logger.info(
-      `Starting cloud connector setup completion for stack ${stack_name} in ${region}`
-    );
-
-    // 1. Idempotency: check for existing connector with matching role_arn
-    const existingConnectors = await cloudConnectorService.getList(soClient);
-    const existingConnector = existingConnectors.find(
-      (cc) =>
-        cc.cloudProvider === 'aws' &&
-        (cc.vars as AwsCloudConnectorVars).role_arn?.value === role_arn
-    );
-
-    let cloudConnectorId: string;
-    let cloudConnectorName: string;
-
-    if (existingConnector) {
-      logger.info(
-        `Found existing cloud connector ${existingConnector.id} with matching role_arn`
-      );
-      cloudConnectorId = existingConnector.id;
-      cloudConnectorName = existingConnector.name;
-    } else {
-      // 2. Create ES secret for external_id
-      logger.debug('Creating secret for external_id');
-      const secrets = await createSecrets({ esClient, values: [external_id] });
-      const secretResult = secrets[0];
-      if (Array.isArray(secretResult)) {
-        throw new Error('Unexpected array of secrets for external_id');
-      }
-
-      // 3. Create cloud connector
-      logger.debug('Creating cloud connector');
-      const cloudConnector = await cloudConnectorService.create(soClient, {
-        name: stack_name,
-        cloudProvider: 'aws',
-        accountType: account_type,
-        vars: {
-          role_arn: { type: 'text', value: role_arn },
-          external_id: {
-            type: 'password',
-            value: { id: secretResult.id, isSecretRef: true },
-          },
-        },
-      });
-
-      cloudConnectorId = cloudConnector.id;
-      cloudConnectorName = cloudConnector.name;
-      createdCloudConnectorId = cloudConnector.id;
-      logger.info(`Created cloud connector ${cloudConnectorId}`);
-    }
-
-    // 4. Get installed package info
-    const installation = await getInstallation({
-      savedObjectsClient: soClient,
-      pkgName: integration_type,
-    });
-
-    if (!installation) {
-      throw new Error(
-        `Package ${integration_type} is not installed. Install it before completing setup.`
-      );
-    }
-
-    const pkgInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: integration_type,
-      pkgVersion: installation.version,
-      prerelease: true,
-    });
-
-    // 5. Create agentless policy with cloud connector
-    const policyTemplate =
-      INTEGRATION_TYPE_TO_POLICY_TEMPLATE[integration_type] || integration_type;
-    const inputKey = `${policyTemplate}-aws`;
-
-    const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
-      fleetContext.packagePolicyService.asCurrentUser,
-      soClient,
-      esClient,
-      logger
-    );
-
-    const packagePolicy = await agentlessPoliciesService.createAgentlessPolicy(
-      {
-        name: `${stack_name} - ${integration_type}`,
-        description: `Auto-configured from CloudFormation stack ${stack_name} (${region})`,
-        namespace: 'default',
-        package: {
-          name: integration_type,
-          version: pkgInfo.version,
-        },
-        policy_template: policyTemplate,
-        inputs: {
-          [inputKey]: {
-            enabled: true,
-            vars: {
-              'aws.credentials.type': 'cloud_connector',
-              'aws.role_arn': role_arn,
-              'aws.credentials.external_id': external_id,
-              'aws.account_type': account_type,
-            },
-          },
-        },
-        cloud_connector: {
-          enabled: true,
-          target_csp: 'aws',
-          cloud_connector_id: cloudConnectorId,
-          name: cloudConnectorName,
-        },
-      },
-      context,
-      request
-    );
-
-    const agentPolicyId = packagePolicy.policy_ids?.[0] || '';
-
-    logger.info(
-      `Completed cloud connector setup: connector=${cloudConnectorId}, policy=${packagePolicy.id}, agentPolicy=${agentPolicyId}`
-    );
-
-    const body: CompleteCloudConnectorSetupResponse = {
-      cloud_connector_id: cloudConnectorId,
-      cloud_connector_name: cloudConnectorName,
-      package_policy_id: packagePolicy.id,
-      agent_policy_id: agentPolicyId,
-      redirect_url: `/app/fleet/policies/${agentPolicyId}`,
-    };
-
-    return response.ok({ body });
-  } catch (error) {
-    logger.error(`Failed to complete cloud connector setup: ${error.message}`);
-
-    // Rollback: delete cloud connector if we created it in this request
-    if (createdCloudConnectorId) {
-      logger.debug(`Rolling back: deleting cloud connector ${createdCloudConnectorId}`);
-      await cloudConnectorService
-        .delete(soClient, esClient, createdCloudConnectorId, true)
-        .catch((rollbackErr: Error) => {
-          logger.error(
-            `Failed to rollback cloud connector ${createdCloudConnectorId}: ${rollbackErr.message}`
-          );
-        });
-    }
-
-    return response.customError({
-      statusCode: error.statusCode || 400,
-      body: {
-        message: error.message || 'Failed to complete cloud connector setup',
-      },
-    });
-  }
-};
