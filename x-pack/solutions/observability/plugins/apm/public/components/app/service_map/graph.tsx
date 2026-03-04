@@ -9,6 +9,8 @@ import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import {
   ReactFlow,
   Background,
+  Controls,
+  ControlButton,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -45,42 +47,6 @@ import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
 } from '../../../../common/service_map';
-
-const ZoomInIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 32 32"
-    width="14"
-    height="14"
-    aria-hidden="true"
-  >
-    <path d="M32 18.133H18.133V32h-4.266V18.133H0v-4.266h13.867V0h4.266v13.867H32z" />
-  </svg>
-);
-
-const ZoomOutIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 32 5"
-    width="14"
-    height="14"
-    aria-hidden="true"
-  >
-    <path d="M0 0h32v4.2H0z" />
-  </svg>
-);
-
-const FitViewIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 32 30"
-    width="14"
-    height="14"
-    aria-hidden="true"
-  >
-    <path d="M3.692 4.63c0-.53.4-.938.939-.938h5.215V0H4.631A4.631 4.631 0 0 0 0 4.631v5.216h3.692V4.631zM27.354 0h-5.2v3.692h5.215c.523 0 .939.415.939.938v5.216H32V4.631A4.631 4.631 0 0 0 27.354 0zm.954 24.83c0 .532-.4.94-.939.94h-5.215V29.5h5.215A4.631 4.631 0 0 0 32 24.869V19.654h-3.692v5.215zM4.631 25.77c-.523 0-.939-.415-.939-.939v-5.215H0v5.215A4.631 4.631 0 0 0 4.631 30h5.216v-3.692H4.631z" />
-  </svg>
-);
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -119,7 +85,7 @@ function GraphInner({
   onToggleFullscreen,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
-  const { fitView, zoomIn, zoomOut } = useReactFlow();
+  const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
@@ -287,16 +253,6 @@ function GraphInner({
         defaultMessage: 'Enter fullscreen',
       });
 
-  const zoomInLabel = i18n.translate('xpack.apm.serviceMap.zoomInButton', {
-    defaultMessage: 'Zoom in',
-  });
-  const zoomOutLabel = i18n.translate('xpack.apm.serviceMap.zoomOutButton', {
-    defaultMessage: 'Zoom out',
-  });
-  const fitViewLabel = i18n.translate('xpack.apm.serviceMap.fitViewButton', {
-    defaultMessage: 'Fit view',
-  });
-
   const containerStyle = useMemo(
     () => ({
       height,
@@ -405,28 +361,9 @@ function GraphInner({
       </EuiScreenReaderOnly>
       <EuiScreenReaderLive>{screenReaderAnnouncement}</EuiScreenReaderLive>
       {/* Controls rendered BEFORE ReactFlow so they receive focus before map nodes (WCAG 2.4.3) */}
-      <div
-        role="toolbar"
-        aria-label={i18n.translate('xpack.apm.serviceMap.controls.toolbarLabel', {
-          defaultMessage: 'Map controls',
-        })}
-        css={controlsStyles}
-      >
-        <button onClick={() => zoomIn()} title={zoomInLabel} aria-label={zoomInLabel}>
-          <ZoomInIcon />
-        </button>
-        <button onClick={() => zoomOut()} title={zoomOutLabel} aria-label={zoomOutLabel}>
-          <ZoomOutIcon />
-        </button>
-        <button
-          onClick={() => fitView(getFitViewOptions())}
-          title={fitViewLabel}
-          aria-label={fitViewLabel}
-        >
-          <FitViewIcon />
-        </button>
+      <Controls showInteractive={false} css={controlsStyles}>
         {onToggleFullscreen && (
-          <button
+          <ControlButton
             onClick={onToggleFullscreen}
             title={fullscreenButtonLabel}
             aria-label={fullscreenButtonLabel}
@@ -436,9 +373,9 @@ function GraphInner({
               type={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
               aria-hidden="true"
             />
-          </button>
+          </ControlButton>
         )}
-      </div>
+      </Controls>
       <ReactFlow
         nodes={nodes}
         edges={edges}
