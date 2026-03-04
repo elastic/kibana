@@ -172,6 +172,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
                 isLoading={
                   isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
                 }
+                layoutKey={`${mainCategories.length}:${availableSubCategories.length}`}
               />
             )}
           </EuiFlexItem>

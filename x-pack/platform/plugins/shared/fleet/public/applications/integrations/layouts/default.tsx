@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink, useStartServices } from '../../../hooks';
 import type { Section } from '../sections';
+import { ExperimentalFeaturesService } from '../services';
 
 import { WithHeaderLayout } from '.';
 
@@ -82,6 +83,7 @@ export const DefaultLayout: React.FC<Props> = memo(
         }
         rightColumnGrow={false}
         rightColumn={
+          ExperimentalFeaturesService.get().newBrowseIntegrationUx &&
           Boolean(automaticImportVTwo) ? undefined : CreateIntegrationCardButton ? (
             <EuiFlexItem grow={false}>
               <CreateIntegrationCardButton />
