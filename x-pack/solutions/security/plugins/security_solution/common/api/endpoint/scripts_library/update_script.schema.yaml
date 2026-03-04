@@ -57,8 +57,6 @@ paths:
 components:
   x-codegen-enabled: false
   schemas:
-    ArchivePathToExecutableSchema:
-      $ref: "./common.yaml#/components/schemas/ArchivePathToExecutableSchema"
     PatchUpdateScriptRouteRequestBody:
       type: object
       description: The script entry properties to be updated. At least one property must be provided.
@@ -77,9 +75,9 @@ components:
           format: binary
           description: The script file upload
         fileType:
-          type: string
-          description: The type of the uploaded file, which determines the expected value of `pathToExecutable`. If `fileType` is "script", then `pathToExecutable` should not be included. If `fileType` is "archive", then `pathToExecutable` is required and should specify the path to the executable file within the archive.
-          enum: [script, archive]
+          $ref: './common.yaml#/components/schemas/EndpointScriptFileType'
+        pathToExecutable:
+          $ref: "./common.yaml#/components/schemas/ArchivePathToExecutableSchema"
         tags:
           type: array
           description: Tags to categorize the script
@@ -97,9 +95,7 @@ components:
         requiresInput:
           type: boolean
           description: Whether the script requires input arguments
-        pathToExecutable:
-          oneOf:
-            -  $ref: "#/components/schemas/ArchivePathToExecutableSchema"
+
 
 
 
