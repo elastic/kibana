@@ -37,18 +37,18 @@ import type {
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { HeaderAppMenu } from './header_app_menu';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
-import { HeaderNavControls } from './header_nav_controls';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
-import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
 import { HeaderMenuButton } from './header_menu_button';
-import { HeaderPageAnnouncer } from './header_page_announcer';
-import { useHasAppMenuConfig } from '../use_has_app_menu_config';
+import { HeaderAppMenu } from '../shared/header_app_menu';
+import { HeaderHelpMenu } from '../shared/header_help_menu';
+import { HeaderNavControls } from '../shared/header_nav_controls';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from '../shared/header_action_menu';
+import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
+import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
+import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
 
 export interface HeaderProps {
   kibanaVersion: string;

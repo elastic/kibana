@@ -15,7 +15,12 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
-import { relativeToAbsolute } from '../../services/nav_links/to_nav_link';
+/** Converts a relative URL to an absolute URL using DOM resolution. */
+const relativeToAbsolute = (url: string) => {
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+};
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;

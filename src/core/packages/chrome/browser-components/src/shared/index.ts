@@ -6,3 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+export { LoadingIndicator } from './loading_indicator';
+export type { LoadingIndicatorProps } from './loading_indicator';
+export { HeaderTopBanner } from './header_top_banner';
+export { HeaderBreadcrumbsBadges } from './header_breadcrumbs_badges';

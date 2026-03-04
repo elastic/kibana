@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiCollapsibleNavProps } from '@elastic/eui';
+import type { EuiCollapsibleNavProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiThemeProvider,
   EuiCollapsibleNav,
@@ -18,7 +18,10 @@ import {
   EuiListGroupItem,
   EuiButton,
   useEuiTheme,
+  euiYScroll,
+  mathWithUnits,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useMemo } from 'react';
@@ -34,8 +37,32 @@ import {
   isModifiedOrPrevented,
   createEuiButtonItem,
   createOverviewLink,
-} from './nav_link';
-import { getCollapsibleNavStyles } from './get_collapsible_nav_styles';
+} from '../shared/nav_link';
+const getCollapsibleNavStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
+  const screenHeightBreakpoint = mathWithUnits(euiTheme.size.base, (x) => x * 15);
+  const _euiYScroll = euiYScroll(euiThemeContext);
+
+  return {
+    navCss: css({
+      [`@media (max-height: ${screenHeightBreakpoint})`]: {
+        overflowY: 'auto',
+      },
+    }),
+    navRecentsListGroupCss: [
+      css({ maxHeight: `calc(${euiTheme.size.base} * 10)`, marginRight: `-${euiTheme.size.s}` }),
+      _euiYScroll,
+    ],
+    navSolutions: [
+      _euiYScroll,
+      css({
+        [`@media (max-height: ${screenHeightBreakpoint})`]: { flex: '1 0 auto' },
+      }),
+    ],
+    navSolutionGroupButton: css({ display: 'block', '&:hover': { textDecoration: 'none' } }),
+    navSolutionGroupLink: css({ display: 'block', '&:hover': { textDecoration: 'underline' } }),
+  };
+};
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
