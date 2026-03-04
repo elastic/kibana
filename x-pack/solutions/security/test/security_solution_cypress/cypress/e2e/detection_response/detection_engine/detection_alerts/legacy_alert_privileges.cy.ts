@@ -6,14 +6,7 @@
  */
 
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
-import {
-  MARK_ALERT_ACKNOWLEDGED_BTN,
-  ALERT_ASSIGN_CONTEXT_MENU_ITEM,
-  ALERT_TAGGING_CONTEXT_MENU_ITEM,
-  CLOSE_SELECTED_ALERTS_BTN,
-  TIMELINE_CONTEXT_MENU_BTN,
-  OPEN_ALERT_BTN,
-} from '../../../../screens/alerts';
+import { TIMELINE_CONTEXT_MENU_BTN, TAKE_ACTION_POPOVER_BTN } from '../../../../screens/alerts';
 import {
   addAlertTagToNAlerts,
   closeAlerts,
@@ -23,7 +16,6 @@ import {
   goToClosedAlerts,
   goToAcknowledgedAlerts,
   waitForAlerts,
-  expandBulkActions,
 } from '../../../../tasks/alerts';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -302,13 +294,7 @@ describe('Legacy Alerts Privileges', { tags: ['@ess'] }, () => {
 
     it('should NOT be able to manage alerts via bulk actions', () => {
       selectNumberOfAlerts(2);
-      expandBulkActions();
-
-      cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
-      cy.get(OPEN_ALERT_BTN).should('not.exist');
-      cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).should('not.exist');
-      cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('not.exist');
-      cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).should('not.exist');
+      cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
     });
   });
 });
