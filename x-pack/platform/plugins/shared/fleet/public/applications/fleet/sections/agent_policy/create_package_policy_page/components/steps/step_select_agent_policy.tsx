@@ -23,7 +23,7 @@ import { Error } from '../../../../../components';
 
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
-import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
+import { sendBulkGetAgentPolicies } from '../../../../../hooks';
 import { useIncompatibleAgentVersionStatus } from '../../../../../hooks/use_incompatible_agent_version_status';
 import { useMultipleAgentPolicies } from '../../../../../hooks';
 
@@ -55,8 +55,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   setHasAgentPolicyError,
   initialSelectedAgentPolicyIds,
 }) => {
-  const { isReady: isFleetReady } = useFleetStatus();
-
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -238,7 +236,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               helpText={
-                isFleetReady && selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicies ? (
+                selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicies ? (
                   <span data-test-subj="agentPolicyAgentsDescription">
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
