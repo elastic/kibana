@@ -91,12 +91,11 @@ export const AlertsDetailsTable = memo(
 
     // Extract primary field and value from entityIdentifiers
     // Priority: host.name > user.name > first available field
-    const field =
-      entityIdentifiers[EntityIdentifierFields.hostName]
-        ? EntityIdentifierFields.hostName
-        : entityIdentifiers[EntityIdentifierFields.userName]
-        ? EntityIdentifierFields.userName
-        : Object.keys(entityIdentifiers)[0];
+    const field = entityIdentifiers[EntityIdentifierFields.hostName]
+      ? EntityIdentifierFields.hostName
+      : entityIdentifiers[EntityIdentifierFields.userName]
+      ? EntityIdentifierFields.userName
+      : Object.keys(entityIdentifiers)[0];
     const value = entityIdentifiers[field] || '';
 
     useEffect(() => {
@@ -294,7 +293,7 @@ export const AlertsDetailsTable = memo(
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
           <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
-            <EuiIcon type={'expand'} />
+            <EuiIcon type={'expand'} aria-hidden={true} />
           </EuiLink>
         ),
       },
@@ -374,7 +373,7 @@ export const AlertsDetailsTable = memo(
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
-              <EuiIcon type={'popout'} />
+              <EuiIcon type={'popout'} aria-hidden={true} />
             </h1>
           </EuiLink>
 

@@ -203,7 +203,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       id: userDetailsQueryId,
       startDate: from,
       endDate: to,
-      entityIdentifiers,
+      userName,
       indexNames: selectedPatterns,
       skip: entityStoreV2Enabled || selectedPatterns.length === 0,
     });

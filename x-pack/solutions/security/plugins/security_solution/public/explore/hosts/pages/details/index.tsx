@@ -316,6 +316,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         entityFilter={entityFilter}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
+                        entityIdentifiers={{ 'host.name': detailName }}
+                        isExploreContext
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

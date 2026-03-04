@@ -39,7 +39,7 @@ const sorting = {
 const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   startDate,
   endDate,
-  entityIdentifiers,
+  hostName,
   skip,
   type,
 }) => {
@@ -107,7 +107,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromHostType(type, entityIdentifiers),
+    criteriaFields: getCriteriaFromHostType(type, hostName),
     filterQuery: {
       exists: { field: 'host.name' },
     },
@@ -115,7 +115,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     aggregationInterval: selectedInterval,
   });
 
-  const hosts = convertAnomaliesToHosts(tableData, jobNameById, entityIdentifiers);
+  const hosts = convertAnomaliesToHosts(tableData, jobNameById, hostName);
 
   const columns = getAnomaliesHostTableColumnsCurated(type, startDate, endDate);
   const pagination = {

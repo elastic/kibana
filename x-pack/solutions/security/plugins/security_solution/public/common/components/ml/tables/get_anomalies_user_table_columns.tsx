@@ -20,7 +20,7 @@ export const getAnomaliesUserTableColumns = (
   startDate: string,
   endDate: string
 ): [
-  Columns<AnomaliesByUser['entityIdentifiers'], AnomaliesByUser>,
+  Columns<AnomaliesByUser['userName'], AnomaliesByUser>,
   Columns<Anomaly['severity'], AnomaliesByUser>,
   Columns<Anomaly['jobId'], AnomaliesByUser>,
   Columns<Anomaly['entityValue'], AnomaliesByUser>,
@@ -33,7 +33,7 @@ export const getAnomaliesUserTableColumns = (
     sortable: true,
     render: (userName, anomaliesByUser) =>
       getRowItemsWithActions({
-        values: [anomaliesByUser.entityIdentifiers['user.name']],
+        values: [userName],
         fieldName: 'user.name',
         idPrefix: `anomalies-user-table-userName-${createCompoundAnomalyKey(
           anomaliesByUser.anomaly

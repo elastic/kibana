@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { buildEntityFiltersFromEntityIdentifiers } from '../../../../../entity_store/common';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
@@ -31,6 +32,8 @@ export interface UseAlertCountByRuleByStatusProps {
   statuses: Status[];
   skip?: boolean;
   signalIndexName: string | null;
+  /** When true (e.g. from explore pages), entity store filters are not applied; only user.name or host.name term filter from entityIdentifiers is used */
+  isExploreContext?: boolean;
 }
 export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusProps) => {
   items: AlertCountByRuleByStatusItem[];
@@ -40,6 +43,24 @@ export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusPro
 
 const ALERTS_BY_RULE_AGG = 'alertsByRuleAggregation';
 
+/**
+ * Builds a single term filter from entityIdentifiers for explore context:
+ * uses user.name or host.name (or host.hostname value on host.name) as the filter field.
+ */
+const getExploreEntityNameFilter = (
+  entityIdentifiers: EntityIdentifiers
+): QueryDslQueryContainer[] => {
+  const userName = entityIdentifiers['user.name'];
+  if (userName != null && userName !== '') {
+    return [{ term: { 'user.name': userName } }];
+  }
+  const hostName = entityIdentifiers['host.name'] ?? entityIdentifiers['host.hostname'];
+  if (hostName != null && hostName !== '') {
+    return [{ term: { 'host.name': hostName } }];
+  }
+  return [];
+};
+
 export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   additionalFilters,
   entityIdentifiers,
@@ -47,6 +68,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   statuses,
   skip = false,
   signalIndexName,
+  isExploreContext = false,
 }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
@@ -67,23 +89,44 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       to,
       entityIdentifiers,
       statuses,
+      isExploreContext,
     }),
     skip,
     queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
     indexName: signalIndexName,
   });
 
+  const entityIdentifiersKey = JSON.stringify(entityIdentifiers);
+  const additionalFiltersKey = JSON.stringify(additionalFilters ?? []);
+  const statusesKey = JSON.stringify(statuses);
+
+  const entityIdentifiersRef = useRef(entityIdentifiers);
+  const additionalFiltersRef = useRef(additionalFilters);
+  const statusesRef = useRef(statuses);
+  entityIdentifiersRef.current = entityIdentifiers;
+  additionalFiltersRef.current = additionalFilters;
+  statusesRef.current = statuses;
+
   useEffect(() => {
     setAlertsQuery(
       buildRuleAlertsByEntityQuery({
-        additionalFilters,
+        additionalFilters: additionalFiltersRef.current ?? [],
         from,
         to,
-        entityIdentifiers,
-        statuses,
+        entityIdentifiers: entityIdentifiersRef.current,
+        statuses: statusesRef.current,
+        isExploreContext,
       })
     );
-  }, [setAlertsQuery, from, to, entityIdentifiers, statuses, additionalFilters]);
+  }, [
+    setAlertsQuery,
+    from,
+    to,
+    entityIdentifiersKey,
+    statusesKey,
+    additionalFiltersKey,
+    isExploreContext,
+  ]);
 
   useEffect(() => {
     if (!data) {
@@ -123,15 +166,18 @@ export const buildRuleAlertsByEntityQuery = ({
   to,
   entityIdentifiers,
   statuses,
+  isExploreContext = false,
 }: {
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
   statuses: string[];
   entityIdentifiers: EntityIdentifiers;
+  isExploreContext?: boolean;
 }) => {
-  const entityFilters = buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
-
+  const entityFilters = isExploreContext
+    ? getExploreEntityNameFilter(entityIdentifiers)
+    : buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
   return {
     size: 0,
     _source: false,

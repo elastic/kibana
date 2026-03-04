@@ -17,8 +17,6 @@ interface QueryTabBodyProps {
   filterQuery?: string | ESTermQuery;
 }
 
-export type EntityIdentifiers = Record<string, string>;
-
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   anomaliesFilterQuery?: object;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,5 +28,6 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   skip: boolean;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
-  entityIdentifiers?: EntityIdentifiers;
+  hostName?: string;
+  userName?: string;
 };

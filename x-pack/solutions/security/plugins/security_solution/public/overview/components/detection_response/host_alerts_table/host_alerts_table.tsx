@@ -29,7 +29,7 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HostDetailsLink } from '../../../../common/components/links';
-import type { EntityIdentifiers } from '../../../../common/components/link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 import * as i18n from '../translations';
@@ -120,7 +120,6 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
               columns={columns}
               loading={isLoading}
               data-test-subj="severityHostAlertsTable"
-              tableCaption={i18n.HOST_ALERTS_SECTION_TITLE}
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }
@@ -159,7 +158,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
             content={hostName}
             anchorClassName="eui-textTruncate"
           >
-            <HostDetailsLink hostName={hostName} entityIdentifiers={item.entityIdentifiers} />
+            <HostDetailsLink hostName={hostName} />
           </EuiToolTip>
         ),
       },

@@ -17,6 +17,11 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/component
 import { useNonClosedAlerts } from './use_non_closed_alerts';
 import { useHasRiskScore } from './use_risk_score_data';
 import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
+import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../common/lib/kibana';
+import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../flyout/entity_details/shared/entity_store_risk_utils';
 
 export const useNavigateEntityInsight = ({
   entityIdentifiers,
@@ -49,10 +54,27 @@ export const useNavigateEntityInsight = ({
     return entityIdentifiers[primaryField] || Object.values(entityIdentifiers)[0] || '';
   }, [entityIdentifiers, primaryField]);
 
-  const { hasRiskScore } = useHasRiskScore({
-    field: primaryField,
-    value,
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityType = primaryField === 'host.name' ? 'host' : 'user';
+
+  const entityFromStore = useEntityFromStore({
+    entityIdentifiers,
+    entityType,
+    skip: !entityStoreV2Enabled,
   });
+
+  const hasRiskScoreFromStore = useMemo(() => {
+    const record = entityFromStore.entityRecord;
+    return record ? !!getRiskFromEntityRecord(record)?.calculated_level : false;
+  }, [entityFromStore.entityRecord]);
+
+  const { hasRiskScore: hasRiskScoreFromSearch } = useHasRiskScore({
+    field: primaryField as CloudPostureEntityIdentifier,
+    value,
+    skip: entityStoreV2Enabled,
+  });
+
+  const hasRiskScore = entityStoreV2Enabled ? hasRiskScoreFromStore : hasRiskScoreFromSearch;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { openLeftPanel } = useExpandableFlyoutApi();
 

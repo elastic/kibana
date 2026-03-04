@@ -268,7 +268,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             >
               {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
-                  userName={detailName}
+                  entityIdentifiers={{ 'user.name': detailName }}
                   id={QUERY_ID}
                   isInDetailsSidePanel={false}
                   data={userDetails}
@@ -295,6 +295,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
                       additionalFilters={additionalFilters}
+                      entityIdentifiers={{ 'user.name': detailName }}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -302,6 +303,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
+                      isExploreContext
+                      entityIdentifiers={{ 'user.name': detailName }}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -53,8 +53,7 @@ const renderUseAlertCountByRuleByStatus = (
   renderHook(() =>
     useAlertCountByRuleByStatus({
       skip: false,
-      field: 'test_field',
-      value: 'test_value',
+      entityIdentifiers: { 'host.name': 'test_value' },
       statuses: ['open'],
       queryId: 'queryId',
       signalIndexName: 'signalIndexName',

@@ -19,7 +19,7 @@ export const getAnomaliesHostTableColumns = (
   startDate: string,
   endDate: string
 ): [
-  Columns<AnomaliesByHost['entityIdentifiers'], AnomaliesByHost>,
+  Columns<AnomaliesByHost['hostName'], AnomaliesByHost>,
   Columns<Anomaly['severity'], AnomaliesByHost>,
   Columns<Anomaly['jobId'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
@@ -32,7 +32,7 @@ export const getAnomaliesHostTableColumns = (
     sortable: true,
     render: (hostName, anomaliesByHost) =>
       getRowItemsWithActions({
-        values: [anomaliesByHost.entityIdentifiers['host.name']],
+        values: [hostName],
         fieldName: 'host.name',
         idPrefix: `anomalies-host-table-hostName-${createCompoundAnomalyKey(
           anomaliesByHost.anomaly

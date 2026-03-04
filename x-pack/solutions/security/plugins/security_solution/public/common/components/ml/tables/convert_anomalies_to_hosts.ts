@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import type { Anomalies, AnomaliesByHost, Anomaly, EntityIdentifiers } from '../types';
+import type { Anomalies, AnomaliesByHost, Anomaly } from '../types';
 import { getHostNameFromInfluencers } from '../influencers/get_host_name_from_influencers';
-import type { EntityIdentifiers as QueryTabEntityIdentifiers } from '../../../containers/anomalies/anomalies_query_tab_body/types';
 
 export const convertAnomaliesToHosts = (
   anomalies: Anomalies | null,
   jobNameById: Record<string, string | undefined>,
-  entityIdentifiers?: QueryTabEntityIdentifiers
+  hostName?: string
 ): AnomaliesByHost[] => {
   if (anomalies == null) {
     return [];
   } else {
-    const hostName = entityIdentifiers?.['host.name'] || entityIdentifiers?.['host.hostname'];
     return anomalies.anomalies.reduce<AnomaliesByHost[]>((accum, item) => {
       if (getHostNameFromEntity(item, hostName)) {
-        const hostEntityIdentifiers: EntityIdentifiers = {
-          'host.name': item.entityValue,
-        };
         return [
           ...accum,
           {
-            entityIdentifiers: hostEntityIdentifiers,
+            hostName: item.entityValue,
             jobName: jobNameById[item.jobId] ?? item.jobId,
             anomaly: item,
           },
@@ -34,13 +29,10 @@ export const convertAnomaliesToHosts = (
       } else {
         const hostNameFromInfluencers = getHostNameFromInfluencers(item.influencers, hostName);
         if (hostNameFromInfluencers != null) {
-          const hostEntityIdentifiers: EntityIdentifiers = {
-            'host.name': hostNameFromInfluencers,
-          };
           return [
             ...accum,
             {
-              entityIdentifiers: hostEntityIdentifiers,
+              hostName: hostNameFromInfluencers,
               jobName: jobNameById[item.jobId] ?? item.jobId,
               anomaly: item,
             },

@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { EntityIdentifiers } from '../../../../common/components/link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';

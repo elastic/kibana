@@ -40,6 +40,8 @@ interface AlertCountByStatusProps {
   additionalFilters?: ESBoolQuery[];
   signalIndexName: string | null;
   entityFilter?: Filter;
+  /** When true (e.g. from explore pages), entity store filters are not applied; only user.name or host.name term filter is used */
+  isExploreContext?: boolean;
 }
 
 interface StatusSelection {
@@ -90,8 +92,8 @@ const resolveEntityIdentifiers = (
       typeof entityFilter.value === 'string'
         ? entityFilter.value
         : Array.isArray(entityFilter.value)
-          ? entityFilter.value[0]
-          : '';
+        ? entityFilter.value[0]
+        : '';
     return { [entityFilter.field]: String(value) };
   }
   if (entityIdentifiers != null && Object.keys(entityIdentifiers).length > 0) {
@@ -129,7 +131,13 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
-  ({ entityIdentifiers, signalIndexName, additionalFilters, entityFilter }: AlertCountByStatusProps) => {
+  ({
+    entityIdentifiers,
+    signalIndexName,
+    additionalFilters,
+    entityFilter,
+    isExploreContext = false,
+  }: AlertCountByStatusProps) => {
     const entityIdentifiersResolved = useMemo(
       () => resolveEntityIdentifiers(entityIdentifiers, entityFilter),
       [entityIdentifiers, entityFilter]
@@ -190,6 +198,7 @@ export const AlertCountByRuleByStatus = React.memo(
       statuses: (selectedStatusesByField[entityKey] || ['open']) as Status[],
       skip: !toggleStatus,
       signalIndexName,
+      isExploreContext,
     });
 
     return (

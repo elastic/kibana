@@ -95,8 +95,8 @@ const resolveEntityIdentifiers = (
       typeof entityFilter.value === 'string'
         ? entityFilter.value
         : Array.isArray(entityFilter.value)
-          ? entityFilter.value[0]
-          : '';
+        ? entityFilter.value[0]
+        : '';
     return { [entityFilter.field]: String(value) };
   }
   return undefined;
@@ -147,9 +147,7 @@ export const AlertsByStatus = ({
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: canAccessTimelines && entityIdentifiersResolved
-        ? INVESTIGATE_IN_TIMELINE
-        : VIEW_ALERTS,
+      name: canAccessTimelines && entityIdentifiersResolved ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
       href: canAccessTimelines && entityIdentifiersResolved ? undefined : href,
       onClick:
         canAccessTimelines && entityIdentifiersResolved

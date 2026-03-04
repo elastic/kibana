@@ -29,7 +29,6 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import type { EntityIdentifiers } from '../../containers/anomalies/anomalies_query_tab_body/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
 import type { ReputationLinkSetting, ReputationLinkOverflowProps } from './helpers';
 import {
@@ -65,18 +64,7 @@ const UserDetailsLinkComponent: React.FC<{
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-  /** When provided, used to build the URL with entityIdentifiers segment for precise entity resolution */
-  entityIdentifiers?: EntityIdentifiers;
-}> = ({
-  children,
-  Component,
-  userName,
-  isButton,
-  onClick: onClickParam,
-  title,
-  userTab,
-  entityIdentifiers,
-}) => {
+}> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
   const encodedUserName = encodeURIComponent(userName);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const {
@@ -89,21 +77,21 @@ const UserDetailsLinkComponent: React.FC<{
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
         path: userTab
-          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search, entityIdentifiers)
-          : getUsersDetailsUrl(encodedUserName, search, entityIdentifiers),
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search)
+          : getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [encodedUserName, navigateToApp, search, userTab, entityIdentifiers]
+    [encodedUserName, navigateToApp, search, userTab]
   );
 
   const href = useMemo(
     () =>
       formatUrl(
         userTab
-          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, undefined, entityIdentifiers)
-          : getUsersDetailsUrl(encodedUserName, undefined, entityIdentifiers)
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab)
+          : getUsersDetailsUrl(encodedUserName)
       ),
-    [formatUrl, encodedUserName, userTab, entityIdentifiers]
+    [formatUrl, encodedUserName, userTab]
   );
 
   const onClick = useCallback(
@@ -171,8 +159,6 @@ export interface HostDetailsLinkProps {
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-  /** When provided, used to build the URL with entityIdentifiers segment for precise entity resolution */
-  entityIdentifiers?: EntityIdentifiers;
 }
 const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
   children,
@@ -182,7 +168,6 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
   onClick: onClickParam,
   title,
   hostTab,
-  entityIdentifiers,
 }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const {
@@ -196,20 +181,16 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: hostTab
-          ? getTabsOnHostDetailsUrl(hostName, hostTab, search, entityIdentifiers)
-          : getHostDetailsUrl(hostName, search, entityIdentifiers),
+          ? getTabsOnHostDetailsUrl(hostName, hostTab, search)
+          : getHostDetailsUrl(hostName, search),
       });
     },
-    [hostName, navigateToApp, search, hostTab, entityIdentifiers]
+    [hostName, navigateToApp, search, hostTab]
   );
   const href = useMemo(
     () =>
-      formatUrl(
-        hostTab
-          ? getTabsOnHostDetailsUrl(hostName, hostTab, undefined, entityIdentifiers)
-          : getHostDetailsUrl(hostName, undefined, entityIdentifiers)
-      ),
-    [formatUrl, hostName, hostTab, entityIdentifiers]
+      formatUrl(hostTab ? getTabsOnHostDetailsUrl(hostName, hostTab) : getHostDetailsUrl(hostName)),
+    [formatUrl, hostName, hostTab]
   );
 
   const onClick = useCallback(
@@ -252,34 +233,17 @@ export interface EntityDetailsLinkProps {
   tab?: HostsTableType | UsersTableType;
   title?: string;
   entityType: EntityType;
-  /** When entityType is host or user, used to build the URL with entityIdentifiers segment for precise entity resolution */
-  entityIdentifiers?: EntityIdentifiers;
 }
 export const EntityDetailsLink = ({
   entityType,
   tab,
   entityName,
-  entityIdentifiers,
   ...props
 }: EntityDetailsLinkProps) => {
   if (entityType === EntityType.host) {
-    return (
-      <HostDetailsLink
-        {...props}
-        hostTab={tab as HostsTableType}
-        hostName={entityName}
-        entityIdentifiers={entityIdentifiers}
-      />
-    );
+    return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
   } else if (entityType === EntityType.user) {
-    return (
-      <UserDetailsLink
-        {...props}
-        userTab={tab as UsersTableType}
-        userName={entityName}
-        entityIdentifiers={entityIdentifiers}
-      />
-    );
+    return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
   } else if (entityType === EntityType.service) {
     return <ServiceDetailsLink serviceName={entityName} onClick={props.onClick} />;
   }
