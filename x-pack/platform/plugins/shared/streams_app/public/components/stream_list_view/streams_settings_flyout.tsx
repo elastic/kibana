@@ -175,7 +175,7 @@ export function StreamsSettingsFlyout({
     log_statements:
       - context: resource
         statements:
-          - set(attributes["elasticsearch.index"], "logs")
+          - set(attributes["elasticsearch.index"], "logs.otel")
 
 service:
   pipelines:
@@ -186,7 +186,7 @@ service:
     [`${shipperButtonGroupPrefix}__filebeat`]: `filebeat.inputs:
   - type: filestream
     id: my-filestream-id
-    index: logs
+    index: logs.ecs
     enabled: true  
     paths:
       - /var/log/*.log
@@ -203,16 +203,19 @@ output.elasticsearch:
   elasticsearch {
     hosts => ["<elasticsearch-host>"]
     api_key => "<your-api-key>"
-    index => "logs"
+    index => "logs.ecs"
     action => "create"
   }
 }`,
-    [`${shipperButtonGroupPrefix}__curl`]: `POST /logs/_bulk
-{ "create": {} }
-{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }
-{ "create": {} }
-{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`,
   };
+
+  const curlOtelExample = `POST /logs.otel/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }`;
+
+  const curlEcsExample = `POST /logs.ecs/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`;
 
   return (
     <>
@@ -321,7 +324,7 @@ output.elasticsearch:
                 <p>
                   <FormattedMessage
                     id="xpack.streams.streamsListView.shipperConfigFleetDescription"
-                    defaultMessage="Use the <b>Custom Logs (Filestream)</b> integration to send data to Wired Streams:"
+                    defaultMessage="Use the <b>Custom Logs (Filestream)</b> integration to send ECS data to the <b>logs.ecs</b> wired stream:"
                     values={{
                       b: (chunks) => <b>{chunks}</b>,
                     }}
@@ -351,7 +354,7 @@ output.elasticsearch:
                       'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3',
                       {
                         defaultMessage:
-                          'Enable the \'Use the "logs" data stream\' setting in the integration configuration.',
+                          'Enable the \'Use the "logs.ecs" data stream\' setting in the integration configuration.',
                       }
                     )}
                   </li>
@@ -373,10 +376,22 @@ output.elasticsearch:
                     <p>
                       <FormattedMessage
                         id="xpack.streams.streamsListView.shipperConfigCurlDescription"
-                        defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
+                        defaultMessage="Send data to the {logsOtelEndpoint} or {logsEcsEndpoint} endpoints using the {bulkApiLink}. Refer to the following examples for more information:"
                         values={{
-                          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-                          logsEndpoint: <code>/logs/</code>,
+                          logsOtelEndpoint: (
+                            <code>
+                              {i18n.translate('xpack.streams.streamsListView.logsOtelEndpointPath', {
+                                defaultMessage: '/logs.otel/',
+                              })}
+                            </code>
+                          ),
+                          logsEcsEndpoint: (
+                            <code>
+                              {i18n.translate('xpack.streams.streamsListView.logsEcsEndpointPath', {
+                                defaultMessage: '/logs.ecs/',
+                              })}
+                            </code>
+                          ),
                           bulkApiLink: (
                             <EuiLink
                               href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
@@ -393,14 +408,53 @@ output.elasticsearch:
                     </p>
                   </EuiText>
                 )}
-                <EuiCodeBlock
-                  language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
-                  isCopyable
-                  paddingSize="m"
-                  data-test-subj="streamsShipperConfigExample"
-                >
-                  {shipperConfigExamples[selectedShipperId]}
-                </EuiCodeBlock>
+                {selectedShipperId.endsWith('__curl') ? (
+                  <>
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate(
+                          'xpack.streams.streamsListView.shipperConfigCurlOtelLabel',
+                          {
+                            defaultMessage: 'For logs.otel (OTel format):',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                    <EuiCodeBlock
+                      language="json"
+                      isCopyable
+                      paddingSize="m"
+                      data-test-subj="streamsShipperConfigExampleCurlOtel"
+                    >
+                      {curlOtelExample}
+                    </EuiCodeBlock>
+                    <EuiSpacer size="m" />
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate('xpack.streams.streamsListView.shipperConfigCurlEcsLabel', {
+                          defaultMessage: 'For logs.ecs (ECS format):',
+                        })}
+                      </p>
+                    </EuiText>
+                    <EuiCodeBlock
+                      language="json"
+                      isCopyable
+                      paddingSize="m"
+                      data-test-subj="streamsShipperConfigExampleCurlEcs"
+                    >
+                      {curlEcsExample}
+                    </EuiCodeBlock>
+                  </>
+                ) : (
+                  <EuiCodeBlock
+                    language="yaml"
+                    isCopyable
+                    paddingSize="m"
+                    data-test-subj="streamsShipperConfigExample"
+                  >
+                    {shipperConfigExamples[selectedShipperId]}
+                  </EuiCodeBlock>
+                )}
               </>
             )}
           </EuiFlexGroup>
