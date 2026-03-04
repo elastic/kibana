@@ -132,7 +132,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         {appliedFilterCount, plural, 
           =0 {
             {disabledFilterCount, plural, 
-              zero {0 filters applied} 
+              =0 {0 filters applied} 
               other {# filters disabled}
             }
           } 
