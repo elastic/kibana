@@ -15,8 +15,6 @@ description: >
 
 Migrate Cypress tests to Scout by first validating each test through triage gates, then rewriting using Scout patterns. **Never migrate Cypress tests directly** — validate first, then rewrite following Scout best practices.
 
-**Solution-specific skills may extend this skill** with additional conventions, paths, and API services. Check if one exists for your solution (e.g., Security Solution has one at `<plugin>/.agents/skills/cypress-to-scout-migration/`).
-
 ## Required sub-skills
 
 - **REQUIRED:** scout-create-scaffold (generate Scout directory structure)
@@ -34,10 +32,13 @@ A Cypress E2E test should only become a Scout E2E test if it genuinely tests a u
 ## Tools
 
 - **Scaffold a spec file:** `bash scripts/scaffold_scout_spec.sh --name <name> --domain <path> --plugin-test-dir <path> [--type parallel|sequential]`
-- **Check selector validity:** `bash scripts/extract_selectors.sh <cypress-test-file> [--app-src <path>]`
-- **Templates:** `assets/page_object_template.ts`, `assets/api_service_template.ts`
+- **Check selector validity:** `bash scripts/extract_selectors.sh <cypress-test-file> --app-src <path-to-plugin-source>`
 
 All paths relative to this skill's directory.
+
+## Step 0: Load solution-specific skill `[mandatory]`
+
+Before starting triage or migration, check the References section for a solution-specific extension skill that matches the Cypress test's location. If one exists, **read it immediately** — it overrides general conventions with solution-specific paths, packages, roles, API services, and templates. All subsequent phases must follow the solution-specific conventions when they conflict with this skill.
 
 ## Phase 1: Triage (before touching any code) `[medium freedom]`
 
@@ -144,7 +145,7 @@ bash scripts/scaffold_scout_spec.sh --name <spec_name> --domain <domain_path> \
   --plugin-test-dir <plugin>/test/scout/ui --type parallel
 ```
 
-Use `assets/page_object_template.md` and `assets/api_service_template.md` as starting points for new page objects or API services.
+Use the solution-specific skill's page object and API service templates as starting points (if available).
 
 ### Step 3: Map Cypress patterns to Scout `[medium freedom]`
 
@@ -260,3 +261,9 @@ Open only what you need:
 - Best practices for writing Scout tests (fixtures, page objects, parallelism): `references/migration-best-practices.md`
 - Flakiness risk patterns to scan for during Gate 4b (hard-coded waits, missing cleanup, force clicks, etc.): `references/flakiness-risk-patterns.md`
 - Complete before/after migration example with annotated decisions (Timeline creation): `references/example-migration.md`
+
+### Solution-specific extensions (Step 0)
+
+Load the matching skill when migrating tests from that solution:
+
+- **Security Solution** (tests in `x-pack/solutions/security/`): `x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration/SKILL.md`

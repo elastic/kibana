@@ -80,6 +80,13 @@ All paths relative to `x-pack/solutions/security/`. Also check unit tests co-loc
 
 When in doubt: if the Cypress test primarily calls `cy.request()` for setup and only clicks one button to verify, it likely belongs at the API layer.
 
+## Templates
+
+- **Page object:** `assets/page_object_template.md`
+- **API service:** `assets/api_service_template.md`
+
+All paths relative to this skill's directory.
+
 ## Scaffold shortcut
 
 Use the general skill's scaffold with Security Solution defaults:
@@ -129,7 +136,7 @@ Available in `apiServices` fixture:
 | `cloudConnectorApi` | Cloud connector operations |
 | `timeline` | `createTimeline()`, `createTimelineTemplate()`, `deleteAll()` |
 
-If the API service you need doesn't exist, create one using the template from the general skill (`assets/api_service_template.ts`) and wire it into `@kbn/scout-security`:
+If the API service you need doesn't exist, create one using the template (`assets/api_service_template.md`) and wire it into `@kbn/scout-security`:
 1. Add to `kbn-scout-security/src/playwright/fixtures/worker/apis/`
 2. Export from `kbn-scout-security/src/playwright/fixtures/worker/apis/index.ts`
 3. Add to `SecurityApiServicesFixture` in `kbn-scout-security/src/playwright/fixtures/types.ts`

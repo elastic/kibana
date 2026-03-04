@@ -207,17 +207,7 @@ All fixes must follow team conventions:
 
 ## After completing a fix
 
-Always verify fixes with the Flaky Test Runner before merging. To trigger a flaky test run, post a comment on the GitHub PR with the following format:
-
-```
-/flaky scoutConfig:<path-to-playwright-config>:<number-of-runs>
-```
-
-For example:
-
-```
-/flaky scoutConfig:src/platform/plugins/shared/dashboard/test/scout/ui/parallel.playwright.config.ts:30
-```
+Always verify fixes with the Flaky Test Runner before merging.
 
 When the fix is verified or the PR is ready, end the conversation by requesting feedback:
 

@@ -4,18 +4,39 @@
 #
 # Usage:
 #   bash .agents/skills/cypress-to-scout-migration/scripts/extract_selectors.sh \
-#     path/to/cypress/test.cy.ts
+#     <cypress-test-file> --app-src <path-to-plugin-source>
 #
 # Output: list of selectors with existence status (FOUND / MISSING)
 
 set -euo pipefail
 
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <cypress-test-file>"
+APP_SRC=""
+TEST_FILE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --app-src)
+      APP_SRC="$2"
+      shift 2
+      ;;
+    *)
+      TEST_FILE="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$TEST_FILE" ]]; then
+  echo "Usage: $0 <cypress-test-file> --app-src <path-to-plugin-source>"
+  echo ""
+  echo "  --app-src  Path to the plugin source directory to search for selectors"
   exit 1
 fi
 
-TEST_FILE="$1"
+if [[ -z "$APP_SRC" ]]; then
+  echo "Error: --app-src is required (e.g., --app-src x-pack/solutions/security/plugins/security_solution)"
+  exit 1
+fi
 
 if [[ ! -f "$TEST_FILE" ]]; then
   echo "Error: File not found: $TEST_FILE"
@@ -102,8 +123,6 @@ if [[ -z "$ALL_SELECTORS" ]]; then
   echo "No data-test-subj selectors found in test or its imports."
   exit 0
 fi
-
-APP_SRC="x-pack/solutions/security/plugins/security_solution"
 
 echo "=== Selector Analysis ==="
 echo "Test file: $TEST_FILE"
