@@ -8,7 +8,9 @@
 import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
@@ -26,6 +28,18 @@ import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
+import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+
+export const ANALYZER_PREVIEW_BANNER = {
+  title: i18n.translate(
+    'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
+    {
+      defaultMessage: 'Preview analyzer panel',
+    }
+  ),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+} as const;
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -42,10 +56,10 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
-      showPanelOnClick,
     }: ResolverProps,
     refToForward
   ) {
+    const { openPreviewPanel } = useExpandableFlyoutApi();
     useResolverQueryParamCleaner(resolverComponentInstanceID);
     /**
      * This is responsible for dispatching actions that include any external data.
@@ -107,6 +121,16 @@ export const ResolverWithoutProviders = React.memo(
     );
     const colorMap = useColors();
 
+    const openAnalyzerDetailsPanel = useCallback(() => {
+      openPreviewPanel({
+        id: DocumentDetailsAnalyzerPanelKey,
+        params: {
+          resolverComponentInstanceID,
+          banner: ANALYZER_PREVIEW_BANNER,
+        },
+      });
+    }, [openPreviewPanel, resolverComponentInstanceID]);
+
     return (
       <StyledMapContainer
         className={className}
@@ -163,7 +187,7 @@ export const ResolverWithoutProviders = React.memo(
                     projectionMatrix={projectionMatrix}
                     node={treeNode}
                     timeAtRender={timeAtRender}
-                    onClick={showPanelOnClick}
+                    onClick={openAnalyzerDetailsPanel}
                   />
                 );
               })}
@@ -172,7 +196,7 @@ export const ResolverWithoutProviders = React.memo(
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls id={resolverComponentInstanceID} showPanelOnClick={showPanelOnClick} />
+        <GraphControls id={resolverComponentInstanceID} onShowPanel={openAnalyzerDetailsPanel} />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );

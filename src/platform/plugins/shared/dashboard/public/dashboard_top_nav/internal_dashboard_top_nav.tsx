@@ -371,7 +371,7 @@ export function InternalDashboardTopNav({
     (mountPoint: MountPoint<HTMLElement> | undefined) => {
       if (mountPoint) {
         return coreServices.chrome.setBreadcrumbsAppendExtension({
-          content: mountPoint,
+          mount: mountPoint,
           order: 0,
         });
       }
