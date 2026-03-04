@@ -53,10 +53,16 @@ export const UrlSynchronizer = () => {
           id: urlKey,
         })
       );
+    } else {
+      dispatch(urlChangedAction({ id: urlKey }));
     }
 
     const subscription = urlStorage.change$<FlyoutPanels>(urlKey).subscribe((value) => {
-      dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
+      if (value) {
+        dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
+      } else {
+        dispatch(urlChangedAction({ id: urlKey }));
+      }
     });
 
     return () => subscription.unsubscribe();
