@@ -11,6 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 
 const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
@@ -47,7 +48,13 @@ jest.mock('../../../../../hooks', () => ({
   useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
 }));
 
+import { useGetPackageInstallStatus } from '../../../../../hooks';
+
 import { AlertingPage } from './alerting_page';
+
+const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as jest.MockedFunction<
+  typeof useGetPackageInstallStatus
+>;
 
 describe('AlertingPage', () => {
   const basePackageInfo = {
@@ -88,6 +95,11 @@ describe('AlertingPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+      status: InstallStatus.installed,
+      version: '1.0.0',
+    }));
 
     mockUseAlertingAssets.mockReturnValue({
       alertingAssets: [
@@ -354,6 +366,46 @@ describe('AlertingPage', () => {
 
       expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
     });
+
+    it('should show callout for input type package when feature flag is enabled and template is missing', async () => {
+      mockExperimentalFeaturesGet.mockReturnValue({
+        enableIntegrationInactivityAlerting: true,
+      });
+
+      mockUseAlertingAssets.mockReturnValue({
+        alertingAssets: [{ id: 'template-1', type: 'alerting_rule_template' }],
+        alertingAssetsByType: {
+          alerting_rule_template: [{ id: 'template-1', type: 'alerting_rule_template' }],
+        },
+        deferredAlerts: [],
+        assetSavedObjectsByType: {
+          alerting_rule_template: {
+            'template-1': {
+              id: 'template-1',
+              type: 'alerting_rule_template',
+              attributes: { title: '[System] Template' },
+            },
+          },
+        },
+        userCreatedRules: [],
+        isLoading: false,
+        fetchError: undefined,
+        refetch: jest.fn(),
+      });
+
+      const inputPackageInfo = { ...basePackageInfo, type: 'input' as const };
+      renderComponent(inputPackageInfo);
+
+      await waitFor(() => {
+        expect(screen.getByText('Idle data streams alerting available')).toBeInTheDocument();
+      });
+
+      expect(
+        screen.getByText(
+          'Reinstall alerting assets to add an alerting rule template for monitoring idle data streams.'
+        )
+      ).toBeInTheDocument();
+    });
   });
 
   it('should deduplicate Fleet-managed rules from alerting API results', async () => {
@@ -404,5 +456,16 @@ describe('AlertingPage', () => {
 
     const fleetRuleElements = screen.getAllByText('[System] Fleet rule');
     expect(fleetRuleElements).toHaveLength(1);
+  });
+
+  it('should not redirect to overview when package type is input', async () => {
+    const inputPackageInfo = { ...basePackageInfo, type: 'input' as const };
+    renderComponent(inputPackageInfo);
+
+    await waitFor(() => {
+      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('fleetAlertingReinstallButton')).toBeInTheDocument();
   });
 });

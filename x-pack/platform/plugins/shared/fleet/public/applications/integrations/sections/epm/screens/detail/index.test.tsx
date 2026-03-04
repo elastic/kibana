@@ -85,6 +85,25 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package is input type', () => {
+    beforeEach(async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: { ...baseResponse.item, type: 'input' as const },
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    }, TESTS_TIMEOUT);
+
+    it('should show the Alerting tab', async () => {
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+    });
+  });
+
   function mockGAAndPrereleaseVersions(pkgVersion: string) {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
