@@ -53,7 +53,7 @@ Compare both tests and recommend keeping the better-written one.
 
 ### Duplicate in Scout tests
 
-Scout tests do NOT run on MKI. Only Cypress tests run on MKI.
+Scout now runs on MKI via the [Appex QA Serverless Scout pipeline](https://buildkite.com/elastic/appex-qa-serverless-kibana-scout-tests). Scout tests can replace Cypress tests for MKI coverage.
 
 **Check the test tags:**
 - Cypress test: Does it have `@serverless` tag?
@@ -63,18 +63,13 @@ Scout tests do NOT run on MKI. Only Cypress tests run on MKI.
 
 | Cypress Tags | Scout Tags | Recommendation |
 |--------------|------------|----------------|
-| `@serverless` | `@*-serverless-security_*` | Keep both — Cypress provides MKI coverage |
+| `@serverless` | `@*-serverless-security_*` | Delete Cypress — Scout covers MKI |
 | `@ess` only | `@*-stateful-*` | Delete Cypress — Scout covers ESS |
 | `@ess` only | `@*-serverless-security_*` | Keep Cypress for ESS, Scout for Serverless |
 
-**If both have serverless tags:**
-- Keep both tests
-- Cypress provides MKI coverage that Scout doesn't have
-- Document this as intentional duplicate for MKI environment coverage
-
 **Format:**
-- Keep Cypress: `[path]` — Reason: Provides MKI coverage (has @serverless tag)
-- Or delete Cypress: `[path]` — Reason: ESS-only, Scout covers this environment
+- Delete Cypress: `[path]` — Reason: Scout covers this environment (including MKI)
+- Or keep Cypress: `[path]` — Reason: ESS-only, no Scout stateful coverage yet
 
 ## Step 3: Layer recommendation format
 

@@ -24,7 +24,7 @@
 |--------|---------|-------|
 | ESS | Basic authentication | SAML authentication |
 | Serverless | SAML authentication | SAML authentication |
-| Auth helpers | Custom login tasks | `browserAuth.loginAsAdmin()`, `loginAsViewer()`, `loginWithCustomRole()` |
+| Auth helpers | Custom login tasks | `browserAuth.loginAsAdmin()`, `loginAsViewer()`, `loginAsPrivilegedUser()`, `loginWithCustomRole()` |
 
 Scout uses SAML for both ESS and Serverless, making auth consistent across environments.
 
@@ -41,7 +41,7 @@ Scout uses SAML for both ESS and Serverless, making auth consistent across envir
 
 ## MKI Pipelines
 
-Scout does NOT currently run on MKI. If a Cypress test has a `@serverless` tag, it provides MKI coverage that Scout cannot replace yet. Keep such Cypress tests until Scout MKI pipelines are ready.
+Scout now runs on MKI via the [Appex QA Serverless Scout pipeline](https://buildkite.com/elastic/appex-qa-serverless-kibana-scout-tests). Cypress tests with `@serverless` tags no longer need to be kept solely for MKI coverage — Scout can replace them.
 
 ## Local Test Execution
 

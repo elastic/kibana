@@ -110,6 +110,7 @@ Available Security serverless tiers:
 | Role | Method | Use |
 |------|--------|-----|
 | Platform engineer | `browserAuth.loginAsPlatformEngineer()` | Default for most tests — standard CRUD privileges |
+| Privileged user | `browserAuth.loginAsPrivilegedUser()` | Editor role in serverless security projects |
 | T1 analyst | `browserAuth.loginAsT1Analyst()` | Read-only analyst (RBAC testing) |
 | Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — works for any role in `roles.yml` |
 | Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC testing with inline descriptors |
@@ -153,10 +154,10 @@ Ensure ALL of these are cleaned in `afterAll`/`afterEach`.
 | Aspect | Current State |
 |--------|--------------|
 | Periodic pipeline | Active for Cypress, managed by Security Engineering Productivity |
-| Scout periodic pipeline | Under development, will be managed by Appex QA |
+| Scout periodic pipeline | Active, managed by Appex QA ([pipeline](https://buildkite.com/elastic/appex-qa-serverless-kibana-scout-tests)) |
 | Kibana QA quality gate | Active for Cypress; Scout version under development |
 
-**Keep Cypress tests with `@serverless` tag until Scout MKI pipelines are ready** — they provide MKI coverage Scout cannot replace yet.
+Scout now runs on MKI. Cypress tests with `@serverless` tags no longer need to be kept solely for MKI coverage — Scout can replace them.
 
 ## Review checklist (Security-specific additions)
 
