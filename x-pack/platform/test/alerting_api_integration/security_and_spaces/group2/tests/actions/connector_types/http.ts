@@ -351,6 +351,27 @@ export default function httpTest({ getService }: FtrProviderContext) {
       expect(result.service_message).to.eql('[500] Internal Server Error');
     });
 
+    it('should abort the http request when the execution is cancelled', async () => {
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const executeReq = supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_30000', method: 'POST' } });
+
+      setTimeout(() => executeReq.abort(), 1000);
+
+      try {
+        await executeReq;
+      } catch (err) {
+        // Expected: connection reset due to client abort
+      }
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(1);
+    });
+
     it('sends both config and secret headers in the http request', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')

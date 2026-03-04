@@ -33,6 +33,7 @@ export async function initPlugin() {
 
 function createServerCallback() {
   let payloads: string[] = [];
+  let abortedCount = 0;
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
@@ -49,6 +50,13 @@ function createServerCallback() {
 
     // return the payloads that were posted to be remembered (e.g. from header_as_payload)
     if (request.method === 'GET') {
+      if (request.url?.includes('aborted_count')) {
+        response.statusCode = 200;
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify({ abortedCount }));
+        abortedCount = 0;
+        return;
+      }
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(payloads, null, 4));
@@ -97,6 +105,25 @@ function createServerCallback() {
         payloads.push(match[1]);
         response.statusCode = 200;
         response.end('ok');
+        return;
+      }
+
+      const delayMatch = data.match(/^delay_(\d+)$/);
+      if (delayMatch) {
+        const delayMs = parseInt(delayMatch[1], 10);
+        let aborted = false;
+        request.on('close', () => {
+          if (!response.writableEnded) {
+            aborted = true;
+            abortedCount++;
+          }
+        });
+        setTimeout(() => {
+          if (!aborted) {
+            response.statusCode = 200;
+            response.end('OK');
+          }
+        }, delayMs);
         return;
       }
 
