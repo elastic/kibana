@@ -121,7 +121,8 @@ describe('getDataStreamsCreationDate', () => {
         })) as any;
       });
 
-      mockESClient.cat.indices.mockImplementation(async ({ index }) => {
+      mockESClient.cat.indices.mockImplementation(async (params) => {
+        const index = params?.index;
         const indices = Array.isArray(index) ? index : [index];
         return indices.map((idx) => ({
           'creation.date': '1704067200000',
@@ -150,7 +151,8 @@ describe('getDataStreamsCreationDate', () => {
         })) as any;
       });
 
-      mockESClient.cat.indices.mockImplementation(async ({ index }) => {
+      mockESClient.cat.indices.mockImplementation(async (params) => {
+        const index = params?.index;
         const indices = Array.isArray(index) ? index : [index];
         return indices.map((idx, i) => ({
           'creation.date': String(1704067200000 + i * 86400000),
