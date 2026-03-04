@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAccordion, EuiCallOut, EuiCode, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiCode, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
