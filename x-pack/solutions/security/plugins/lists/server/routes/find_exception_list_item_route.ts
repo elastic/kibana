@@ -43,7 +43,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
         try {
           const exceptionLists = await getExceptionListClient(context);
           const {
-            filter,
+            filter: rawFilter,
             list_id: listId,
             namespace_type: namespaceType,
             page,
@@ -52,6 +52,9 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             sort_field: sortField,
             sort_order: sortOrder,
           } = request.query;
+
+          // Ignore empty filter values
+          const filter = rawFilter.filter((f) => f && f !== '');
 
           if (listId.length !== namespaceType.length) {
             return siemResponse.error({
