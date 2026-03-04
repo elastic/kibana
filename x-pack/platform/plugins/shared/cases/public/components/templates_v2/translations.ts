@@ -44,3 +44,7 @@ export const BACK_TO_TEMPLATES = i18n.translate('xpack.cases.templates.backToTem
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });
+
+export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
+  defaultMessage: 'Saved',
+});

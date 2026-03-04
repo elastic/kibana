@@ -258,6 +258,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesTableState: 'cases.list.state',
   templatesTableState: 'templates.list.state',
+  templatesYamlEditorState: 'templates.yaml.editor.state',
 };
 
 /**
