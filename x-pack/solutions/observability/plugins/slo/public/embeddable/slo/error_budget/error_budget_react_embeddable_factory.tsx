@@ -29,7 +29,7 @@ import { SloErrorBudget } from './error_budget_burn_down';
 import type {
   ErrorBudgetApi,
   ErrorBudgetCustomInput,
-  SloErrorBudgetEmbeddableState,
+  ErrorBudgetEmbeddableState,
 } from './types';
 
 const getErrorBudgetPanelTitle = () =>
@@ -46,7 +46,7 @@ export const getErrorBudgetEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<SloErrorBudgetEmbeddableState, ErrorBudgetApi> = {
+  const factory: EmbeddableFactory<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
