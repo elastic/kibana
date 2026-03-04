@@ -7,7 +7,7 @@
 
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
-import { getFilteredHostNames, getHasDataFromSystemIntegration } from './get_filtered_hosts';
+import { getInfraHostNames } from './get_filtered_hosts';
 import type { GetHostParameters } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
@@ -104,25 +104,15 @@ const getHostNames = async ({
 }) => {
   assertQueryStructure(query);
 
-  const hasSystemIntegrationData = await getHasDataFromSystemIntegration({
-    infraMetricsClient,
-    from,
-    to,
-    query,
-    schema,
-  });
-
-  const [monitoredHosts, apmHosts] = await Promise.all([
-    hasSystemIntegrationData
-      ? getFilteredHostNames({
-          infraMetricsClient,
-          query,
-          from,
-          to,
-          limit,
-          schema,
-        })
-      : undefined,
+  const [{ allHosts, availableHosts }, apmHosts] = await Promise.all([
+    getInfraHostNames({
+      infraMetricsClient,
+      query,
+      from,
+      to,
+      limit,
+      schema,
+    }),
     apmDataAccessServices && apmDocumentSources
       ? getApmHostNames({
           apmDataAccessServices,
@@ -136,5 +126,9 @@ const getHostNames = async ({
       : undefined,
   ]);
 
-  return [...new Set([...(monitoredHosts ?? []), ...(apmHosts ?? [])])];
+  const availableHostsSet = new Set(availableHosts);
+  const hostsToRemove = new Set(allHosts.filter((h) => !availableHostsSet.has(h)));
+  const verifiedApmHosts = (apmHosts ?? []).filter((h) => !hostsToRemove.has(h));
+
+  return [...new Set([...availableHosts, ...verifiedApmHosts])];
 };

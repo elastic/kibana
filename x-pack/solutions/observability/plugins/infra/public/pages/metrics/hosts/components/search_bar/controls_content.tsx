@@ -70,13 +70,15 @@ export const ControlsContent = ({
     }
 
     Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
+      const { fieldName, ...restControl } = replaceable.control;
       current.replacePanel(key, {
         panelType: replaceable.control.type,
         maybePanelId: replaceable.key,
         serializedState: {
           id: replaceable.key,
-          ...replaceable.control,
-          dataViewId: dataView?.id,
+          ...restControl,
+          field_name: fieldName,
+          data_view_id: dataView?.id,
         },
       });
     });

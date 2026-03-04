@@ -57,6 +57,61 @@ export const getFilteredHostNames = async ({
   return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
 };
 
+export const getInfraHostNames = async ({
+  infraMetricsClient,
+  from,
+  to,
+  limit,
+  query,
+  schema,
+}: Required<Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'schema'>> & {
+  query?: estypes.QueryDslQueryContainer;
+}): Promise<{ allHosts: string[]; availableHosts: string[] }> => {
+  const inventoryModel = findInventoryModel('host');
+
+  const response = await infraMetricsClient.search(
+    {
+      allow_no_indices: true,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [...rangeQuery(from, to), ...(inventoryModel.nodeFilter?.({ schema }) ?? [])],
+        },
+      },
+      aggs: {
+        allHosts: {
+          terms: {
+            field: HOST_NAME_FIELD,
+            size: limit,
+            order: { _key: 'asc' },
+          },
+        },
+        availableHosts: {
+          filter: query ?? { match_all: {} },
+          aggs: {
+            names: {
+              terms: {
+                field: HOST_NAME_FIELD,
+                size: limit,
+                order: { _key: 'asc' },
+              },
+            },
+          },
+        },
+      },
+    },
+    'get infra host names'
+  );
+
+  const { allHosts, availableHosts } = response.aggregations ?? {};
+
+  return {
+    allHosts: allHosts?.buckets?.map((p) => p.key as string) ?? [],
+    availableHosts: availableHosts?.names?.buckets?.map((p) => p.key as string) ?? [],
+  };
+};
+
 export const getHasDataFromSystemIntegration = async ({
   infraMetricsClient,
   from,

@@ -28,6 +28,8 @@ const PanelRT = rt.intersection([
     fieldName: rt.string,
     title: rt.union([rt.string, rt.undefined]),
     selectedOptions: rt.array(rt.union([rt.string, rt.number])),
+    exclude: rt.boolean,
+    existsSelected: rt.boolean,
   }),
 ]);
 
@@ -57,24 +59,57 @@ const getVisibleControlPanelsConfig = (
   );
 };
 
+/**
+ * Normalizes panel config keys from camelCase (used in URL state) to snake_case
+ * (expected by the controls plugin's state manager).
+ */
+const normalizePanelConfig = (
+  config: ControlPanels[string]
+): ControlPanels[string] & Record<string, unknown> => {
+  const { fieldName, selectedOptions, existsSelected, ...rest } = config;
+  return {
+    ...rest,
+    ...(fieldName !== undefined && { field_name: fieldName }),
+    ...(selectedOptions !== undefined && { selected_options: selectedOptions }),
+    ...(existsSelected !== undefined && { exists_selected: existsSelected }),
+  };
+};
+
 const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
     return {
       ...acc,
       [key]: {
-        ...controlPanelConfig,
-        dataViewId,
+        ...normalizePanelConfig(controlPanelConfig),
+        data_view_id: dataViewId,
       },
     };
   }, {});
 };
 
+/**
+ * Converts a panel's serialized state (snake_case from the controls plugin) back to
+ * the camelCase keys expected by the PanelRT io-ts codec, and strips data view IDs
+ * so the URL state remains portable across data views.
+ */
 const cleanControlPanels = (controlPanels: ControlPanels) => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
-    const { dataViewId, ...rest } = controlPanelConfig;
+    const {
+      dataViewId,
+      data_view_id: _dataViewId,
+      field_name,
+      selected_options,
+      exists_selected,
+      ...rest
+    } = controlPanelConfig as ControlPanels[string] & Record<string, unknown>;
     return {
       ...acc,
-      [key]: rest,
+      [key]: {
+        ...rest,
+        ...(field_name !== undefined && { fieldName: field_name }),
+        ...(selected_options !== undefined && { selectedOptions: selected_options }),
+        ...(exists_selected !== undefined && { existsSelected: exists_selected }),
+      },
     };
   }, {});
 };
@@ -91,11 +126,20 @@ const mergeDefaultPanelsWithUrlConfig = (
   const existingKeys = Object.keys(visiblePanels);
   const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
+  // Per-property merge: config defaults (e.g. fieldName) are preserved while
+  // URL overrides (e.g. selectedOptions) are applied on top.
+  const merged = existingKeys.reduce((acc, key) => {
+    return {
+      ...acc,
+      [key]: {
+        ...visiblePanels[key],
+        ...(controlPanelsToOverride[key] ?? {}),
+      },
+    };
+  }, {} as ControlPanels);
+
   // Merge default and existing configs and add dataView.id to each of them
-  return addDataViewIdToControlPanels(
-    { ...visiblePanels, ...controlPanelsToOverride },
-    dataView.id
-  );
+  return addDataViewIdToControlPanels(merged, dataView.id);
 };
 
 const encodeUrlState = (value: ControlPanels) => {
