@@ -10,6 +10,7 @@
 import type { Liquid } from 'liquidjs';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
+import { stripYamlCommentLines } from './yaml_comments';
 
 export interface LiquidValidationError {
   message: string;
@@ -43,13 +44,14 @@ function convertOffsetToLineColumn(text: string, offset: number): { line: number
 }
 
 export function validateLiquidTemplate(yamlString: string): LiquidValidationError[] {
+  const strippedYaml = stripYamlCommentLines(yamlString);
   try {
     const liquid = getLiquidInstance();
-    liquid.parse(yamlString);
+    liquid.parse(strippedYaml);
     return [];
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
-    const position = extractLiquidErrorPosition(yamlString, errorMessage);
+    const position = extractLiquidErrorPosition(strippedYaml, errorMessage);
     const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
 
     const startPos = convertOffsetToLineColumn(yamlString, position.start);

@@ -12,6 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getPathAtOffset } from '../../../../common/lib/yaml';
+import { isOffsetInYamlComment } from '../../../../common/lib/yaml_comments';
 import type { VariableItem } from '../model/types';
 
 export function collectAllVariables(
@@ -23,26 +24,27 @@ export function collectAllVariables(
   const variableItems: VariableItem[] = [];
   for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
     const startOffset = match.index ?? 0;
-    const endOffset = startOffset + (match[0].length ?? 0);
-    const startPosition = model.getPositionAt(startOffset);
-    const endPosition = model.getPositionAt(endOffset);
-    const yamlPath = getPathAtOffset(yamlDocument, startOffset);
-    // simple heuristic to determine if it's a foreach configuration variable
-    const type =
-      yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
-    variableItems.push({
-      id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
-        endPosition.lineNumber
-      }-${endPosition.column}`,
-      startLineNumber: startPosition.lineNumber,
-      startColumn: startPosition.column,
-      endLineNumber: endPosition.lineNumber,
-      endColumn: endPosition.column,
-      key: match.groups?.key ?? null,
-      type,
-      yamlPath,
-      offset: startOffset,
-    });
+    if (!isOffsetInYamlComment(yamlString, startOffset)) {
+      const endOffset = startOffset + (match[0].length ?? 0);
+      const startPosition = model.getPositionAt(startOffset);
+      const endPosition = model.getPositionAt(endOffset);
+      const yamlPath = getPathAtOffset(yamlDocument, startOffset);
+      const type =
+        yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
+      variableItems.push({
+        id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
+          endPosition.lineNumber
+        }-${endPosition.column}`,
+        startLineNumber: startPosition.lineNumber,
+        startColumn: startPosition.column,
+        endLineNumber: endPosition.lineNumber,
+        endColumn: endPosition.column,
+        key: match.groups?.key ?? null,
+        type,
+        yamlPath,
+        offset: startOffset,
+      });
+    }
   }
 
   return variableItems;
