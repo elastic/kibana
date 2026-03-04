@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
-import type { EsqlViewDefinition } from '../../../resources/types';
+import type { EsqlViewDefinition } from './types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 
 @injectable()
@@ -20,6 +20,8 @@ export class ESQLViewInitializer {
   ) {}
 
   private async _initialize({ name, query }: EsqlViewDefinition): Promise<void> {
+    this.logger.debug(`EsqlViewInitializer: Initializing view [${name}].`);
+
     await this.esClient.transport.request({
       method: 'PUT',
       path: `/_query/view/${name}`,

@@ -8,14 +8,16 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ESQLViewInitializer } from '../lib/services/esql_views_service/esql_view_initializer';
-import type { EsqlViewDefinition } from './types';
+import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
+import { getAlertEventsViewDefinition } from './alert_events';
+import { getAlertActionsViewDefinition } from './alert_actions';
 
 export interface RegisterViewsOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
 }
 
-export function initializeViews({ esClient, logger }: RegisterViewsOptions): void {
+export function initializeESQLViews({ esClient, logger }: RegisterViewsOptions): void {
   const viewDefinitions = getEsqlViewDefinitions();
   const viewInitializer = new ESQLViewInitializer(logger, esClient);
 
@@ -23,5 +25,5 @@ export function initializeViews({ esClient, logger }: RegisterViewsOptions): voi
 }
 
 function getEsqlViewDefinitions(): EsqlViewDefinition[] {
-  return [];
+  return [getAlertEventsViewDefinition(), getAlertActionsViewDefinition()];
 }
