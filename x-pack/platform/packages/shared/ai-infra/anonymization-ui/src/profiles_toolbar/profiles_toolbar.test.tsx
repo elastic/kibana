@@ -30,4 +30,21 @@ describe('ProfilesToolbar', () => {
 
     expect(onCreateProfile).toHaveBeenCalledTimes(1);
   });
+
+  it('shows combined name or target id filter placeholder', () => {
+    render(
+      React.createElement(ProfilesToolbar, {
+        modeLabel: 'Manage',
+        isManageMode: true,
+        activeSpaceId: 'default',
+        targetType: '',
+        onTargetTypeChange: jest.fn(),
+        targetIdFilter: '',
+        onTargetIdFilterChange: jest.fn(),
+        onCreateProfile: jest.fn(),
+      })
+    );
+
+    expect(screen.getByPlaceholderText('Filter by name or target id')).toBeInTheDocument();
+  });
 });

@@ -17,3 +17,8 @@ export interface UseFindProfilesParams extends UseProfilesParams {
   query: ProfilesListQuery;
   enabled?: boolean;
 }
+
+export interface UseFindAllProfilesParams extends UseProfilesParams {
+  targetType?: ProfilesListQuery['targetType'];
+  enabled?: boolean;
+}

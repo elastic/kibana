@@ -114,10 +114,10 @@ export const ProfilesToolbar = ({
           <EuiFieldText
             fullWidth
             aria-label={i18n.translate('anonymizationUi.profiles.toolbar.targetIdAriaLabel', {
-              defaultMessage: 'Filter anonymization profiles by target id',
+              defaultMessage: 'Filter anonymization profiles by name or target id',
             })}
             placeholder={i18n.translate('anonymizationUi.profiles.toolbar.targetIdPlaceholder', {
-              defaultMessage: 'Filter by target id',
+              defaultMessage: 'Filter by name or target id',
             })}
             value={targetIdFilter}
             onChange={(event) => onTargetIdFilterChange(event.target.value)}

@@ -7,17 +7,14 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 import { act, renderHook } from '@testing-library/react';
-import type {
-  AnonymizationProfile,
-  FindAnonymizationProfilesResponse,
-} from '@kbn/anonymization-common';
+import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { mapProfilesApiError } from '../../common/services/profiles/errors';
-import { useFindProfiles } from '../../common/services/profiles/hooks/use_find_profiles';
+import { useFindAllProfiles } from '../../common/services/profiles/hooks/use_find_all_profiles';
 import { TARGET_TYPE_INDEX } from '../../common/target_types';
 import { useProfilesListView } from './use_profiles_list_view';
 
-jest.mock('../../common/services/profiles/hooks/use_find_profiles', () => ({
-  useFindProfiles: jest.fn(),
+jest.mock('../../common/services/profiles/hooks/use_find_all_profiles', () => ({
+  useFindAllProfiles: jest.fn(),
 }));
 
 const createProfile = (id: string): AnonymizationProfile => ({
@@ -49,17 +46,12 @@ describe('useProfilesListView', () => {
 
   it('exposes default list state and maps query results', () => {
     const refetch = jest.fn();
-    jest.mocked(useFindProfiles).mockReturnValue({
-      data: {
-        page: 1,
-        perPage: 20,
-        total: 1,
-        data: [createProfile('1')],
-      },
+    jest.mocked(useFindAllProfiles).mockReturnValue({
+      data: [createProfile('1')],
       isLoading: false,
       error: undefined,
       refetch,
-    } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>);
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result } = renderHook(() =>
       useProfilesListView({
@@ -68,27 +60,19 @@ describe('useProfilesListView', () => {
       })
     );
 
-    expect(result.current.filters.targetId).toBe('');
+    expect(result.current.filters.queryText).toBe('');
     expect(result.current.pagination).toEqual({ page: 1, perPage: 20 });
     expect(result.current.profiles).toHaveLength(1);
     expect(result.current.total).toBe(1);
   });
 
   it('resets pagination when filter setters are called', () => {
-    jest.mocked(useFindProfiles).mockImplementation(
-      ({ query }) =>
-        ({
-          data: {
-            page: query.page ?? 1,
-            perPage: query.perPage ?? 20,
-            total: 0,
-            data: [],
-          },
-          isLoading: false,
-          error: undefined,
-          refetch: jest.fn(),
-        } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>)
-    );
+    jest.mocked(useFindAllProfiles).mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result } = renderHook(() =>
       useProfilesListView({
@@ -106,17 +90,17 @@ describe('useProfilesListView', () => {
       result.current.setTargetId('host.name');
     });
     expect(result.current.pagination.page).toBe(1);
-    expect(result.current.query.targetId).toBe('host.name');
+    expect(result.current.query.filter).toBe('host.name');
   });
 
   it('forwards refetch', async () => {
     const refetch = jest.fn().mockResolvedValue({ data: undefined });
-    jest.mocked(useFindProfiles).mockReturnValue({
+    jest.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: undefined,
       refetch,
-    } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>);
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result } = renderHook(() =>
       useProfilesListView({
@@ -130,12 +114,12 @@ describe('useProfilesListView', () => {
   });
 
   it('passes enabled flag to the profiles query', () => {
-    jest.mocked(useFindProfiles).mockReturnValue({
+    jest.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
-    } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>);
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     renderHook(() =>
       useProfilesListView({
@@ -145,16 +129,16 @@ describe('useProfilesListView', () => {
       })
     );
 
-    expect(useFindProfiles).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    expect(useFindAllProfiles).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
   });
 
   it('normalizes unknown errors and preserves mapped API errors', () => {
-    jest.mocked(useFindProfiles).mockReturnValue({
+    jest.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('plain'),
       refetch: jest.fn(),
-    } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>);
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
 
     const { result, rerender } = renderHook(() =>
       useProfilesListView({
@@ -165,13 +149,45 @@ describe('useProfilesListView', () => {
     expect(result.current.error?.kind).toBe('unknown');
     expect(result.current.error?.message).toBe('plain');
 
-    jest.mocked(useFindProfiles).mockReturnValue({
+    jest.mocked(useFindAllProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: mapProfilesApiError({ statusCode: 403 }),
       refetch: jest.fn(),
-    } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>);
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
     rerender();
     expect(result.current.error?.kind).toBe('forbidden');
+  });
+
+  it('filters by partial name or target id locally', () => {
+    const profiles = [
+      { ...createProfile('1'), name: 'Global Anonymization Profile', targetId: '__kbn_global__' },
+      { ...createProfile('2'), name: 'test', targetId: 'kibana_sample_data_ecommerce' },
+    ];
+    jest.mocked(useFindAllProfiles).mockReturnValue({
+      data: profiles,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    } as unknown as UseQueryResult<AnonymizationProfile[]>);
+
+    const { result } = renderHook(() =>
+      useProfilesListView({
+        client,
+        context: { spaceId: 'default' },
+      })
+    );
+
+    act(() => {
+      result.current.setTargetId('ecomm');
+    });
+    expect(result.current.total).toBe(1);
+    expect(result.current.profiles[0]?.id).toBe('2');
+
+    act(() => {
+      result.current.setTargetId('global');
+    });
+    expect(result.current.total).toBe(1);
+    expect(result.current.profiles[0]?.id).toBe('1');
   });
 });

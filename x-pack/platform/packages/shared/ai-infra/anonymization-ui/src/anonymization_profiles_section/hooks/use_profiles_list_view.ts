@@ -7,11 +7,10 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
-import { toProfile } from '../../common/services/profiles/adapters';
 import type { AnonymizationProfilesClient } from '../../common/services/profiles/client';
 import { ensureProfilesApiError } from '../../common/services/profiles/errors';
 import type { ProfilesApiError } from '../../common/services/profiles/errors';
-import { useFindProfiles } from '../../common/services/profiles/hooks/use_find_profiles';
+import { useFindAllProfiles } from '../../common/services/profiles/hooks/use_find_all_profiles';
 import type {
   ProfilesListQuery,
   ProfilesQueryContext,
@@ -30,7 +29,7 @@ interface UseProfilesListViewParams {
 
 interface ProfileListFilters {
   targetType: '' | TargetType;
-  targetId: string;
+  queryText: string;
 }
 
 interface ProfileListPagination {
@@ -41,7 +40,7 @@ interface ProfileListPagination {
 interface ProfileListViewState {
   filters: ProfileListFilters;
   pagination: ProfileListPagination;
-  query: ProfilesListQuery;
+  query: Pick<ProfilesListQuery, 'filter' | 'targetType' | 'page' | 'perPage'>;
   profiles: AnonymizationProfile[];
   total: number;
   loading: boolean;
@@ -63,26 +62,31 @@ export const useProfilesListView = ({
   enabled = true,
 }: UseProfilesListViewParams): ProfilesListViewController => {
   const [targetType, setTargetType] = useState<'' | TargetType>('');
-  const [targetId, setTargetId] = useState('');
+  const [queryText, setQueryText] = useState('');
   const [page, setPage] = useState(DEFAULT_PAGE);
   const [perPage, setPerPage] = useState(initialPerPage);
 
-  const query = useMemo(
+  const query = useMemo<ProfileListViewState['query']>(
     () => ({
       targetType: targetType || undefined,
-      targetId: targetId || undefined,
+      filter: queryText.trim() || undefined,
       page,
       perPage,
     }),
-    [targetType, targetId, page, perPage]
+    [targetType, queryText, page, perPage]
   );
 
   const {
-    data: listData,
+    data: allProfilesData,
     isLoading,
     error: queryError,
     refetch: refetchProfiles,
-  } = useFindProfiles({ client, context, query, enabled });
+  } = useFindAllProfiles({
+    client,
+    context,
+    targetType: query.targetType,
+    enabled,
+  });
 
   const error: ProfilesApiError | undefined = useMemo(
     () =>
@@ -92,15 +96,31 @@ export const useProfilesListView = ({
     [queryError]
   );
 
-  const filters = useMemo(() => ({ targetType, targetId }), [targetType, targetId]);
+  const filters = useMemo(() => ({ targetType, queryText }), [targetType, queryText]);
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
-  const profiles: ProfileListViewState['profiles'] = useMemo(
-    () => (listData?.data ?? []).map((profile) => toProfile(profile)),
-    [listData]
+  const filteredProfiles = useMemo(() => {
+    const allProfiles = allProfilesData ?? [];
+    const normalizedQuery = queryText.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return allProfiles;
+    }
+
+    return allProfiles.filter((profile) => {
+      const normalizedName = profile.name.toLowerCase();
+      const normalizedTargetId = profile.targetId.toLowerCase();
+      return (
+        normalizedName.includes(normalizedQuery) || normalizedTargetId.includes(normalizedQuery)
+      );
+    });
+  }, [allProfilesData, queryText]);
+
+  const profiles = useMemo(
+    () => filteredProfiles.slice((page - 1) * perPage, page * perPage),
+    [filteredProfiles, page, perPage]
   );
 
-  const total = listData?.total ?? 0;
+  const total = filteredProfiles.length;
 
   const setTargetTypeValue = useCallback((value: '' | TargetType) => {
     setTargetType(value);
@@ -108,7 +128,7 @@ export const useProfilesListView = ({
   }, []);
 
   const setTargetIdValue = useCallback((value: string) => {
-    setTargetId(value);
+    setQueryText(value);
     setPage(DEFAULT_PAGE);
   }, []);
 

@@ -166,7 +166,7 @@ export const AnonymizationProfilesSection = ({
         activeSpaceId={spaceId}
         targetType={listView.filters.targetType}
         onTargetTypeChange={listView.setTargetType}
-        targetIdFilter={listView.filters.targetId}
+        targetIdFilter={listView.filters.queryText}
         onTargetIdFilterChange={listView.setTargetId}
         onCreateProfile={onCreateProfile}
       />
