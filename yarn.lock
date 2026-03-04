@@ -3475,34 +3475,10 @@
     "@hapi/validate" "^2.0.1"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/hapi@21.4.5":
+"@hapi/hapi@21.4.5", "@hapi/hapi@^21.1.0":
   version "21.4.5"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.5.tgz#ef93ccf1b209905d3703b84d1f7946787975270b"
   integrity sha512-5KU3BJ2/zdy1GR/cV96Idh4dxnStQvSWptUDATPhnIeDS/qP0KI6AxyfJwHCHRHVmzEzYpgR2pJh98MaJ8zcRQ==
-  dependencies:
-    "@hapi/accept" "^6.0.3"
-    "@hapi/ammo" "^6.0.1"
-    "@hapi/boom" "^10.0.1"
-    "@hapi/bounce" "^3.0.2"
-    "@hapi/call" "^9.0.1"
-    "@hapi/catbox" "^12.1.1"
-    "@hapi/catbox-memory" "^6.0.2"
-    "@hapi/heavy" "^8.0.1"
-    "@hapi/hoek" "^11.0.7"
-    "@hapi/mimos" "^7.0.1"
-    "@hapi/podium" "^5.0.2"
-    "@hapi/shot" "^6.0.2"
-    "@hapi/somever" "^4.1.1"
-    "@hapi/statehood" "^8.2.1"
-    "@hapi/subtext" "^8.1.1"
-    "@hapi/teamwork" "^6.0.1"
-    "@hapi/topo" "^6.0.2"
-    "@hapi/validate" "^2.0.1"
-
-"@hapi/hapi@^21.1.0":
-  version "21.4.4"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.4.tgz#89c239135be1ff2adeb586df157dee7a49593291"
-  integrity sha512-vI6JPLR99WZDKI1nriD0qXDPp8sKFkZfNVGrDDZafDQ8jU+3ERMwS0vPac5aGae6yyyoGZGOBiYExw4N8ScSTQ==
   dependencies:
     "@hapi/accept" "^6.0.3"
     "@hapi/ammo" "^6.0.1"
