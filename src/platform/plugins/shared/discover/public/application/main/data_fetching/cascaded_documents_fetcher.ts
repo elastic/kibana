@@ -43,6 +43,10 @@ export class CascadedDocumentsFetcher {
     return this.requestAdapter;
   }
 
+  getCachedDocuments(nodeId: string): DataTableRecord[] | undefined {
+    return this.stateManager.getCascadedDocuments(nodeId);
+  }
+
   async fetchCascadedDocuments({
     nodeId,
     nodeType,

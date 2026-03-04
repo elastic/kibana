@@ -20,6 +20,7 @@ export type {
   DataCascadeRowProps,
   DataCascadeRowCellProps,
   CascadeRowCellNestedVirtualizationAnchorProps,
+  CascadeGroupNodeUIInteraction,
 } from './data_cascade_impl';
 
 type DataCascadeProviderProps = ComponentProps<typeof DataCascadeProvider>;

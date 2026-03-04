@@ -29,6 +29,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   getVirtualizer,
   onCascadeLeafNodeExpanded,
   onCascadeLeafNodeCollapsed,
+  resolveLeafData,
   row,
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
@@ -55,8 +56,14 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   }, [nodePath, nodePathMap, row]);
 
   const leafData = useMemo(() => {
-    return leafNodes.get(leafCacheKey) ?? null;
-  }, [leafCacheKey, leafNodes]);
+    return (
+      // try to resolve leaf data from external source first
+      resolveLeafData?.({ row: row.original, nodePath, nodePathMap }) ??
+      // then try to resolve leaf data from the internal store
+      leafNodes.get(leafCacheKey) ??
+      null
+    );
+  }, [resolveLeafData, row.original, nodePath, nodePathMap, leafNodes, leafCacheKey]);
 
   const fetchGroupLeafData = useCallback(() => {
     const dataFetchFn = async () => {
