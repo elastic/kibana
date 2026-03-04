@@ -43,9 +43,7 @@ describe('BreadcrumbsWithExtensionsWrapper', () => {
       el.setAttribute('data-test-subj', 'mount-extension');
       return () => {};
     };
-    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([
-      { mount },
-    ]);
+    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([{ mount }]);
     render(
       <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>
         <span data-test-subj="breadcrumb-child">Home</span>
