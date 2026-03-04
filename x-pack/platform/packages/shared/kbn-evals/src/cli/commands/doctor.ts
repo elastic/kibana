@@ -7,58 +7,101 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { execFileSync } from 'child_process';
+import { spawn } from 'child_process';
+import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
+import { parseConnectorsFromEnv, isTTY } from '../prompts';
+import { isServiceRunning, readState } from '../services';
+import { safeExec } from '../utils';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
+
+type CheckStatus = 'pass' | 'fail' | 'warn' | 'unknown';
+
+interface CheckResult {
+  label: string;
+  status: CheckStatus;
+  detail?: string;
+  fix?: () => Promise<void>;
+}
 
 export const doctorCmd: Command<void> = {
   name: 'doctor',
   description: `
   Check common prerequisites for running evals locally.
+  When run interactively, offers to fix issues automatically.
 
   Example:
     node scripts/evals doctor
   `,
-  run: ({ log }) => {
-    const issues: string[] = [];
-    const warnings: string[] = [];
-    const runtimeChecks: Array<{ label: string; status: string }> = [];
+  flags: {
+    boolean: ['fix'],
+    default: { fix: false },
+  },
+  run: async ({ log, flagsReader }) => {
+    const repoRoot = process.cwd();
+    const autoFix = flagsReader.boolean('fix');
+    const interactive = isTTY();
+    const checks: CheckResult[] = [];
 
-    const safeExec = (command: string, args: string[]) => {
-      try {
-        return execFileSync(command, args, {
-          encoding: 'utf8',
-          stdio: ['ignore', 'pipe', 'ignore'],
-        })
-          .toString()
-          .trim();
-      } catch (error) {
-        return null;
-      }
-    };
-
-    if (!process.env.EVALUATION_CONNECTOR_ID) {
-      issues.push(
-        'EVALUATION_CONNECTOR_ID is required for LLM-as-a-judge evaluators. Set it via --evaluation-connector-id or env.'
-      );
+    // --- Check: KIBANA_TESTING_AI_CONNECTORS ---
+    const connectors = parseConnectorsFromEnv();
+    if (connectors.length > 0) {
+      checks.push({
+        label: 'KIBANA_TESTING_AI_CONNECTORS',
+        status: 'pass',
+        detail: `${connectors.length} connector(s)`,
+      });
+    } else {
+      checks.push({
+        label: 'KIBANA_TESTING_AI_CONNECTORS',
+        status: 'fail',
+        detail: 'not set',
+        fix: async () => {
+          log.info('Run `node scripts/evals init` to set up connectors.');
+        },
+      });
     }
 
-    if (process.env.KBN_EVALS_EXECUTOR === 'phoenix') {
-      if (!process.env.PHOENIX_BASE_URL) {
-        issues.push('PHOENIX_BASE_URL is required when KBN_EVALS_EXECUTOR=phoenix.');
-      }
-      if (!process.env.PHOENIX_API_KEY) {
-        warnings.push('PHOENIX_API_KEY is missing (required for authenticated Phoenix instances).');
+    // --- Check: Vault auth ---
+    const vaultResult = safeExec('vault', ['token', 'lookup', '-format=json']);
+    if (vaultResult !== null) {
+      checks.push({ label: 'Vault auth', status: 'pass', detail: 'authenticated' });
+    } else {
+      const vaultAvailable = safeExec('vault', ['version']);
+      if (vaultAvailable === null) {
+        checks.push({ label: 'Vault auth', status: 'unknown', detail: 'vault CLI not found' });
+      } else {
+        checks.push({
+          label: 'Vault auth',
+          status: 'warn',
+          detail: 'not authenticated',
+          fix: async () => {
+            log.info('Attempting: vault login --method oidc');
+            const child = spawn('vault', ['login', '--method', 'oidc'], {
+              stdio: 'inherit',
+            });
+            await new Promise<void>((resolve) => child.on('exit', () => resolve()));
+          },
+        });
       }
     }
 
-    if (!process.env.TRACING_ES_URL) {
-      warnings.push(
-        'TRACING_ES_URL not set. Trace-based evaluators will use the Scout test cluster (esClient).'
-      );
+    // --- Check: Docker ---
+    const dockerVersion = safeExec('docker', ['version', '--format', '{{.Server.Version}}']);
+    if (dockerVersion !== null) {
+      checks.push({ label: 'Docker', status: 'pass', detail: `v${dockerVersion}` });
+    } else {
+      const dockerAvailable = safeExec('docker', ['--version']);
+      checks.push({
+        label: 'Docker',
+        status: dockerAvailable ? 'fail' : 'unknown',
+        detail: dockerAvailable ? 'daemon not running' : 'not installed',
+      });
     }
 
+    // --- Check: EDOT collector ---
+    const edotManagedAlive = isServiceRunning(repoRoot, 'edot');
     const dockerPs = safeExec('docker', [
       'ps',
       '--filter',
@@ -66,81 +109,135 @@ export const doctorCmd: Command<void> = {
       '--format',
       '{{.Names}}',
     ]);
-    if (dockerPs === null) {
-      runtimeChecks.push({ label: 'EDOT collector', status: 'unknown (docker not available)' });
-    } else if (dockerPs.length > 0) {
-      runtimeChecks.push({ label: 'EDOT collector', status: 'running' });
+    const edotDockerAlive = dockerPs !== null && dockerPs.length > 0;
+
+    if (edotManagedAlive || edotDockerAlive) {
+      const source = edotManagedAlive ? 'managed' : 'docker';
+      checks.push({ label: 'EDOT collector', status: 'pass', detail: `running (${source})` });
+    } else if (dockerPs === null) {
+      checks.push({ label: 'EDOT collector', status: 'unknown', detail: 'docker not available' });
     } else {
-      runtimeChecks.push({ label: 'EDOT collector', status: 'not running' });
-    }
-
-    const scoutProcesses = safeExec('pgrep', ['-af', 'scripts/scout.js start-server']);
-    const scoutIsRunning = scoutProcesses !== null && scoutProcesses.length > 0;
-
-    if (scoutProcesses === null) {
-      runtimeChecks.push({ label: 'Scout server', status: 'unknown (pgrep not available)' });
-    } else if (scoutIsRunning) {
-      const serverConfigSetMatch = scoutProcesses.match(/--serverConfigSet(?:=|\s+)(\S+)/);
-      const configDir = serverConfigSetMatch?.[1];
-      const targetArch = /--arch(?:=|\s+)stateful/.test(scoutProcesses)
-        ? 'stateful'
-        : /--arch(?:=|\s+)serverless/.test(scoutProcesses)
-        ? 'serverless'
-        : undefined;
-
-      const details = [targetArch, configDir ? `serverConfigSet=${configDir}` : undefined]
-        .filter(Boolean)
-        .join(', ');
-
-      runtimeChecks.push({
-        label: 'Scout server',
-        status: details.length ? `running (${details})` : 'running',
+      checks.push({
+        label: 'EDOT collector',
+        status: 'fail',
+        detail: 'not running',
+        fix: async () => {
+          log.info('EDOT will start automatically with: node scripts/evals start');
+          log.info('Or start it manually: node scripts/edot_collector.js');
+        },
       });
+    }
+
+    // --- Check: Scout server ---
+    const scoutManagedAlive = isServiceRunning(repoRoot, 'scout');
+    const psOutput = safeExec('ps', ['ax', '-o', 'command=']);
+    const scoutProcessLine = psOutput
+      ?.split('\n')
+      .find((line) => line.includes('scripts/scout.js start-server'));
+    const scoutIsRunning = scoutManagedAlive || Boolean(scoutProcessLine);
+
+    if (scoutIsRunning) {
+      let detail = 'running';
+      if (scoutManagedAlive) {
+        const state = readState(repoRoot);
+        detail = `running (managed, PID ${state.scout?.pid})`;
+      } else if (scoutProcessLine) {
+        const configMatch = scoutProcessLine.match(/--serverConfigSet(?:=|\s+)(\S+)/);
+        const archMatch = /--arch(?:=|\s+)(stateful|serverless)/.exec(scoutProcessLine);
+        const parts = [
+          archMatch?.[1],
+          configMatch ? `serverConfigSet=${configMatch[1]}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(', ');
+        detail = parts.length > 0 ? `running (${parts})` : 'running';
+      }
+      checks.push({ label: 'Scout server', status: 'pass', detail });
+    } else if (psOutput === null) {
+      checks.push({ label: 'Scout server', status: 'unknown', detail: 'unable to list processes' });
     } else {
-      runtimeChecks.push({ label: 'Scout server', status: 'not running' });
+      checks.push({
+        label: 'Scout server',
+        status: 'fail',
+        detail: 'not running',
+        fix: async () => {
+          log.info('Scout will start automatically with: node scripts/evals start');
+          log.info('Or start it standalone: node scripts/evals scout');
+        },
+      });
     }
 
-    // Only relevant when you're targeting your own Kibana (not starting via Scout).
-    // If Scout is running, it already owns its own runtime config.
-    const scoutConfigExists = Fs.existsSync(
-      Path.join(process.cwd(), SCOUT_LOCAL_SERVER_CONFIG_PATH)
-    );
-    if (!scoutIsRunning && !scoutConfigExists) {
-      warnings.push(
-        `No ${SCOUT_LOCAL_SERVER_CONFIG_PATH} found. If you want to target a local Kibana instance (instead of starting one via Scout), create it.`
-      );
+    // --- Check: Scout local config ---
+    if (!scoutIsRunning) {
+      const scoutConfigExists = Fs.existsSync(Path.join(repoRoot, SCOUT_LOCAL_SERVER_CONFIG_PATH));
+      if (!scoutConfigExists) {
+        checks.push({
+          label: 'Scout config',
+          status: 'warn',
+          detail: `${SCOUT_LOCAL_SERVER_CONFIG_PATH} not found`,
+        });
+      }
     }
 
-    if (issues.length === 0) {
-      log.info('Doctor check passed.');
+    // --- Print results ---
+    log.info('');
+    log.info('Checking prerequisites...');
+
+    const statusIcons: Record<CheckStatus, string> = {
+      pass: 'pass',
+      fail: 'FAIL',
+      warn: 'warn',
+      unknown: '????',
+    };
+
+    let hasFailures = false;
+    const fixableChecks: CheckResult[] = [];
+
+    for (const check of checks) {
+      const icon = statusIcons[check.status];
+      const detail = check.detail ? ` ${check.detail}` : '';
+      log.info(`  [${icon}] ${check.label}:${detail}`);
+
+      if (check.status === 'fail') {
+        hasFailures = true;
+      }
+      if (check.fix && (check.status === 'fail' || check.status === 'warn')) {
+        fixableChecks.push(check);
+      }
+    }
+
+    log.info('');
+
+    // --- Offer fixes ---
+    if (fixableChecks.length > 0 && (autoFix || interactive)) {
+      for (const check of fixableChecks) {
+        let shouldFix = autoFix;
+
+        if (!shouldFix && interactive) {
+          const { confirm } = await inquirer.prompt<{ confirm: boolean }>({
+            type: 'confirm',
+            name: 'confirm',
+            message: `Fix "${check.label}"?`,
+            default: true,
+          });
+          shouldFix = confirm;
+        }
+
+        if (shouldFix && check.fix) {
+          await check.fix();
+        }
+      }
+      log.info('');
+    }
+
+    if (!hasFailures) {
+      log.info('All critical checks passed! Ready to run evals.');
     } else {
-      log.error('Doctor check found blocking issues:');
-      issues.forEach((issue) => log.error(`- ${issue}`));
+      log.info('Some checks failed. Fix the issues above, then re-run: node scripts/evals doctor');
     }
 
-    if (warnings.length > 0) {
-      log.warning('Additional recommendations:');
-      warnings.forEach((warning) => log.warning(`- ${warning}`));
-    }
-
-    if (runtimeChecks.length > 0) {
-      log.info('Runtime checks:');
-      runtimeChecks.forEach((check) => log.info(`- ${check.label}: ${check.status}`));
-    }
-
-    log.info('Common local flow:');
-    log.info('  1) Start Scout with tracing enabled (recommended):');
-    log.info(
-      '     node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing'
-    );
-    log.info('     # This enables OTLP export to http://localhost:4318/v1/traces');
-    log.info('  2) Run EDOT collector to capture traces (uses kibana.dev.yml by default):');
-    log.info('     node scripts/edot_collector.js');
-    log.info('     # Optional: override ES target for traces');
-    log.info('     # ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js');
-    log.info('  3) Run evals (repeat step 3 for another suite in a new terminal if desired):');
-    log.info(
-      '     node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>'
-    );
+    log.info('');
+    log.info('Quick start:');
+    log.info('  node scripts/evals start --suite <suite-id>');
   },
 };

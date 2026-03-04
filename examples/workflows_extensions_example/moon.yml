@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/i18n'
   - '@kbn/config-schema'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod

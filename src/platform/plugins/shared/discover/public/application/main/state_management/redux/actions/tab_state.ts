@@ -192,6 +192,19 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch) {
+    // Reset the default profile state when transitioning to data view mode
+    dispatch(
+      internalStateSlice.actions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
+      })
+    );
+
     dispatch(
       updateAppState({
         tabId,
@@ -231,6 +244,19 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    // Reset the default profile state when transitioning to ES|QL mode
+    dispatch(
+      internalStateSlice.actions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
+      })
+    );
+
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
