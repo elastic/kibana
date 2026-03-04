@@ -67,7 +67,7 @@ Don't rely on test names — check what the test actually asserts.
 
 If covered at a lower layer → delete Cypress, no migration needed.
 
-If covered in Scout → delete Cypress. Scout now runs on MKI, so Cypress tests are no longer needed for MKI coverage.
+If covered in Scout → delete Cypress. Scout now runs on serverless (MKI), so Cypress tests are no longer needed for serverless (MKI) coverage.
 
 ### Gate 2: Is it at the right layer?
 
