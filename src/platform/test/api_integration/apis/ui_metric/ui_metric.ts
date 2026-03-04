@@ -84,9 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
       expect(
-        ids.includes(
-          `ui-metric:kibana-user_agent:${userAgentMetric.userAgent.replace(/\//g, '-')}`
-        )
+        ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent.replace(/\//g, '-')}`)
       ).to.eql(true);
     });
 
