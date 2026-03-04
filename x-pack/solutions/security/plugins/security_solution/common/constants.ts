@@ -725,3 +725,4 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+export const PCI_COMPLIANCE_AGENT_ID = `${internalNamespaces.security}.pci_compliance_agent`;
