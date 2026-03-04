@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
@@ -81,16 +82,6 @@ export const ListNotificationPoliciesPage = () => {
       ),
     },
     {
-      field: 'description',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.description"
-          defaultMessage="Description"
-        />
-      ),
-      truncateText: true,
-    },
-    {
       field: 'destinations',
       name: (
         <FormattedMessage
@@ -125,6 +116,36 @@ export const ListNotificationPoliciesPage = () => {
         ) : (
           '-'
         ),
+    },
+    {
+      field: 'group_by',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.groupBy"
+          defaultMessage="Group by"
+        />
+      ),
+      render: (groupBy: string[]) => (
+        <EuiFlexGroup responsive={false} gutterSize="s" wrap>
+          {groupBy?.map((group) => (
+            <EuiFlexItem key={group} grow={false}>
+              <EuiBadge color="hollow">{group}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+          {groupBy?.length === 0 ? '-' : null}
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'throttle',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.throttle"
+          defaultMessage="Throttle"
+        />
+      ),
+      render: (throttle: NotificationPolicyResponse['throttle']) =>
+        throttle ? <EuiBadge color="hollow">{throttle.interval}</EuiBadge> : '-',
     },
     {
       field: 'createdAt',
