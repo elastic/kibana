@@ -11,6 +11,8 @@ import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/aler
 import { useAttackTitles } from './use_attack_titles';
 import { useAlertsAggregation } from '../common/use_alerts_aggregation';
 import type { AttacksListAgg, AttacksListBucket, AttacksListItem } from './types';
+import type { SeverityCount } from '../../../../../entity_analytics/components/severity/types';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { getAttacksListAggregations } from './aggregations';
 
 /** The default page size */
@@ -24,6 +26,21 @@ export interface UseAttacksListDataProps {
   /** Optional page size */
   pageSize?: number;
 }
+
+const getSeverityKey = (key: string): RiskSeverity => {
+  switch (key) {
+    case 'critical':
+      return RiskSeverity.Critical;
+    case 'high':
+      return RiskSeverity.High;
+    case 'moderate':
+      return RiskSeverity.Moderate;
+    case 'low':
+      return RiskSeverity.Low;
+    default:
+      return RiskSeverity.Unknown;
+  }
+};
 
 /**
  * Hook for fetching and parsing attacks list data
@@ -64,6 +81,11 @@ export const useAttacksListData = ({
     const items = buckets.map((b: AttacksListBucket) => ({
       id: b.key,
       alertsCount: b.attackRelatedAlerts?.doc_count ?? 0,
+      severityCount: (b.alertsSeverities?.buckets ?? []).reduce<SeverityCount>((acc, curr) => {
+        const severityKey = getSeverityKey(curr.key);
+        acc[severityKey] = curr.doc_count;
+        return acc;
+      }, {} as SeverityCount),
     }));
     const ids = items.map((item) => item.id);
     const totalCount = aggData?.aggregations?.total_attacks?.value ?? 0;

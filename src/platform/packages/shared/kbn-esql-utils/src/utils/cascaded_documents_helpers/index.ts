@@ -17,21 +17,21 @@ import {
   isSubQuery,
   mutate,
   synth,
-  type ESQLCommand,
-  type ESQLFunction,
-  type ESQLAstItem,
-  type ESQLColumn,
   isBinaryExpression,
   Walker,
   isInlineCast,
-} from '@kbn/esql-language';
+} from '@elastic/esql';
 import type {
+  ESQLCommand,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLColumn,
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
   ESQLProperNode,
-} from '@kbn/esql-language/src/types';
+} from '@elastic/esql/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
