@@ -71,10 +71,6 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
         onSuccess: () => {
           notifications.toasts.addInfo({
             title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewDismissedTitle', {
-              defaultMessage: 'Auto-upgrade dismissed for {title} {version}',
-              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
-            }),
-            text: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewDismissedText', {
               defaultMessage: 'Auto-upgrade paused for {title} {version}',
               values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
@@ -131,8 +127,8 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
               isLoading={reviewUpgradeMutation.isLoading}
             >
               <FormattedMessage
-                id="xpack.fleet.integrations.settings.dismissUpgradeButton"
-                defaultMessage="Dismiss"
+                id="xpack.fleet.integrations.settings.pauseUpgradeButton"
+                defaultMessage="Pause upgrade"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -150,6 +146,13 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
 }) => {
   const reviewUpgradeMutation = useReviewUpgradeMutation();
   const { notifications } = useStartServices();
+
+  const resumeUpgradeLabel = (
+    <FormattedMessage
+      id="xpack.fleet.integrations.settings.resumeUpgradeLabel"
+      defaultMessage="Resume upgrade"
+    />
+  );
 
   const handleReEnable = useCallback(() => {
     reviewUpgradeMutation.mutate(
@@ -194,16 +197,15 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
         <p>
           <FormattedMessage
             id="xpack.fleet.integrations.settings.declinedUpgradeReviewDescription"
-            defaultMessage="You previously dismissed the upgrade review. Select {resumeUpgrade} to review the changes and decide whether to accept the upgrade."
-            values={{ resumeUpgrade: <strong>Resume upgrade</strong> }}
+            defaultMessage="You previously paused the upgrade review. Select {resumeUpgrade} to review the changes and decide whether to accept the upgrade."
+            values={{
+              resumeUpgrade: <strong>{resumeUpgradeLabel}</strong>,
+            }}
           />
         </p>
         <EuiSpacer size="s" />
         <EuiButton size="s" onClick={handleReEnable} isLoading={reviewUpgradeMutation.isLoading}>
-          <FormattedMessage
-            id="xpack.fleet.integrations.settings.reEnableUpgradeButton"
-            defaultMessage="Resume upgrade"
-          />
+          {resumeUpgradeLabel}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer size="l" />

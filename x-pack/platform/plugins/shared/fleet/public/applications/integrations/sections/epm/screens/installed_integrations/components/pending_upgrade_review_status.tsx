@@ -88,13 +88,6 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               title: (
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedTitle"
-                  defaultMessage="Auto-upgrade dismissed for {title} {version}"
-                  values={{ title: pkgTitle, version: targetVersion }}
-                />
-              ) as unknown as string,
-              text: (
-                <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedText"
                   defaultMessage="Auto-upgrade paused for {title} {version}"
                   values={{ title: pkgTitle, version: targetVersion }}
                 />
@@ -153,8 +146,8 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
             <EuiModalFooter>
               <EuiButtonEmpty onClick={handleDismiss} isLoading={reviewUpgradeMutation.isLoading}>
                 <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.dismissUpgradeButton"
-                  defaultMessage="Dismiss"
+                  id="xpack.fleet.epmInstalledIntegrations.pauseUpgradeButton"
+                  defaultMessage="Pause upgrade"
                 />
               </EuiButtonEmpty>
               <EuiButton
