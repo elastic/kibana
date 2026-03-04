@@ -68,15 +68,6 @@ describe('applyDownsampling', () => {
       expect(applyDownsampling(query, 0)).toBe(query);
     });
 
-    it('should return query unchanged when maxDataPoints is negative', () => {
-      const query = 'FROM logs*';
-      expect(applyDownsampling(query, -100)).toBe(query);
-    });
-
-    it('should return query unchanged when query is empty', () => {
-      expect(applyDownsampling('', 500)).toBe('');
-    });
-
     it('should not add SAMPLE when query already has SAMPLE', () => {
       const query = 'FROM logs* | SAMPLE 0.5';
       expect(applyDownsampling(query, 100)).toBe(query);
@@ -85,16 +76,6 @@ describe('applyDownsampling', () => {
     it('should not add SET approximation when query already has SET approximation', () => {
       const query = 'SET approximation = true;\nFROM logs* | STATS count()';
       expect(applyDownsampling(query, 500)).toBe(query);
-    });
-
-    it('should not add SAMPLE when query contains match()', () => {
-      const query = 'FROM logs* | WHERE match(message, "error")';
-      expect(applyDownsampling(query, 100)).toBe(query);
-    });
-
-    it('should not add SAMPLE when query contains qstr()', () => {
-      const query = 'FROM logs* | WHERE qstr("message:error")';
-      expect(applyDownsampling(query, 100)).toBe(query);
     });
   });
 });

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, Walker, walk, isAssignment } from '@elastic/esql';
+import { Parser, walk, isAssignment } from '@elastic/esql';
 import type { ESQLFunction } from '@elastic/esql/types';
 
 const MIN_SAMPLE_RATE = 0.001;
 const MAX_SAMPLE_RATE = 1.0;
 const DEFAULT_ESQL_LIMIT = 1000;
-const UNSAMPLABLE_FUNCTIONS = ['match', 'qstr'];
 
 /**
  * Applies automatic downsampling to an ES|QL query based on the available
@@ -25,7 +24,6 @@ const UNSAMPLABLE_FUNCTIONS = ['match', 'qstr'];
  *
  * Skips modification when:
  * - The query already contains SET approximation or a SAMPLE command
- * - The query contains functions incompatible with sampling (match, qstr)
  * - maxDataPoints is not a positive number
  * - The computed sample rate is >= 1 (no downsampling needed)
  */
@@ -59,16 +57,6 @@ export const applyDownsampling = (query: string, maxDataPoints: number): string 
 
   if (root.commands.some(({ name }) => name === 'stats')) {
     return `SET approximation = true;\n${query}`;
-  }
-
-  const hasUnsamplableFunction = UNSAMPLABLE_FUNCTIONS.some(
-    (f) =>
-      Walker.hasFunction(root, f) ||
-      root.commands.some((c) => c.text.toLowerCase().includes(`${f}(`))
-  );
-
-  if (hasUnsamplableFunction) {
-    return query;
   }
 
   const limitCommands = root.commands.filter(({ name }) => name === 'limit');
