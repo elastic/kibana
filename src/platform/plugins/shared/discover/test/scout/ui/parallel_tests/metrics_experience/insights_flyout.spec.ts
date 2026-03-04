@@ -35,7 +35,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsMetricsViewer();
+      await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
     });
 

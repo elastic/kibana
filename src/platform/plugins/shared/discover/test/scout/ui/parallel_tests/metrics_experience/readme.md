@@ -18,9 +18,6 @@ node scripts/scout start-server --arch stateful --domain classic
 
 # Serverless observability
 node scripts/scout start-server --arch serverless --domain observability_complete
-
-# Serverless security
-node scripts/scout start-server --arch serverless --domain security_complete
 ```
 
 ```bash
