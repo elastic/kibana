@@ -11,6 +11,7 @@ import type { monaco } from '@kbn/monaco';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
+import { getValueFromValueNode } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 import { isVariableLineParseResult } from '../../context/parse_line_for_completion';
 
@@ -76,8 +77,8 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   }
   // We only add quotes if there's nothing other than the full key in the value node
   // But NOT if we're already inside {{ }} braces (completing a variable path)
-  const wholePairValue =
-    typeof focusedYamlPair?.valueNode.value === 'string' ? focusedYamlPair?.valueNode.value : '';
+  const rawPairValue = focusedYamlPair ? getValueFromValueNode(focusedYamlPair.valueNode) : '';
+  const wholePairValue = typeof rawPairValue === 'string' ? rawPairValue : '';
   const alreadyInsideBraces = isInsideCurlyBraces(autocompleteContext.lineUpToCursor);
   const shouldBeQuoted =
     !alreadyInsideBraces &&
