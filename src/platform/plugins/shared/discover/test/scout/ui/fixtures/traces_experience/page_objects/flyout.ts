@@ -13,8 +13,6 @@ export interface TracesFlyout {
   readonly overviewTab: Locator;
   readonly aboutSection: Locator;
   readonly similarSpansSection: Locator;
-  readonly similarSpansLatencyChart: Locator;
-  readonly similarSpansDurationDistributionChart: Locator;
   readonly traceSummarySection: Locator;
   readonly traceWaterfallClickArea: Locator;
   readonly traceWaterfallFullScreenButton: Locator;
@@ -28,10 +26,6 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     overviewTab: page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview'),
     aboutSection: page.testSubj.locator('UnifiedDocViewerTableGrid'),
     similarSpansSection: page.testSubj.locator('docViewerSimilarSpansSection'),
-    similarSpansLatencyChart: page.testSubj.locator('docViewerSimilarSpansLatencyChart'),
-    similarSpansDurationDistributionChart: page.testSubj.locator(
-      'docViewerSimilarSpansDurationDistributionChart'
-    ),
     traceSummarySection: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
     traceWaterfallClickArea: page.testSubj.locator(
       'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'

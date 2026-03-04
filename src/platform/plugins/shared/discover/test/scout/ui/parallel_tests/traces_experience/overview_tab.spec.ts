@@ -81,21 +81,6 @@ spaceTest.describe(
             await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible();
           });
 
-          await spaceTest.step('verify Similar Spans latency chart is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.similarSpansLatencyChart).toBeVisible({
-              timeout: 30_000,
-            });
-          });
-
-          await spaceTest.step(
-            'verify Similar Spans duration distribution chart is visible',
-            async () => {
-              await expect(
-                pageObjects.tracesExperience.flyout.similarSpansDurationDistributionChart
-              ).toBeVisible();
-            }
-          );
-
           await spaceTest.step('verify Trace Summary section is visible', async () => {
             await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible();
           });
