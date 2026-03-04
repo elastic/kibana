@@ -95,7 +95,7 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               text: (
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedText"
-                  defaultMessage="Auto-upgrade is paused for {title} {version}"
+                  defaultMessage="Auto-upgrade paused for {title} {version}"
                   values={{ title: pkgTitle, version: targetVersion }}
                 />
               ) as unknown as string,
@@ -127,7 +127,7 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               <EuiModalHeaderTitle id={modalTitleId}>
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewTitle"
-                  defaultMessage="Attached policies will be upgraded to {title} {version}"
+                  defaultMessage="Upgrade the attached policies to {title} {version}"
                   values={{ title: pkgTitle, version: targetVersion }}
                 />
               </EuiModalHeaderTitle>
@@ -136,13 +136,13 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewDescription"
-                  defaultMessage="This version introduces deprecations that may affect your current setup. Please {settingsLink} before upgrading."
+                  defaultMessage="This version introduces deprecations that might affect your current setup. {settingsLink} before upgrading."
                   values={{
                     settingsLink: (
                       <EuiLink href={settingsHref}>
                         <FormattedMessage
                           id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewSettingsLink"
-                          defaultMessage="review the changes"
+                          defaultMessage="Review the changes"
                         />
                       </EuiLink>
                     ),

@@ -75,7 +75,7 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
               values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
             text: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewDismissedText', {
-              defaultMessage: 'Auto-upgrade is paused for {title} {version}',
+              defaultMessage: 'Auto-upgrade paused for {title} {version}',
               values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
           });
@@ -105,7 +105,7 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
       >
         <FormattedMessage
           id="xpack.fleet.integrations.settings.pendingUpgradeReviewDescription"
-          defaultMessage="Version {version} introduces deprecations that may affect your current setup. Please review the changes carefully before upgrading your policies."
+          defaultMessage="Version {version} introduces deprecations that might affect your current setup. Review the changes carefully before upgrading your policies."
           values={{ version: pendingUpgradeReview.target_version }}
         />
         <EuiSpacer size="m" />
@@ -162,7 +162,7 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
         onSuccess: () => {
           notifications.toasts.addSuccess({
             title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewReEnabledTitle', {
-              defaultMessage: 'Upgrade review resumed for {title}{version}',
+              defaultMessage: 'Upgrade review resumed for {title} {version}',
               values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
           });
@@ -194,7 +194,7 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
         <p>
           <FormattedMessage
             id="xpack.fleet.integrations.settings.declinedUpgradeReviewDescription"
-            defaultMessage="You previously dismissed the upgrade review. Click below to resume the upgrade."
+            defaultMessage='You previously dismissed the upgrade review. Select "Resume upgrade" to review the changes and decide whether to accept the upgrade.'
           />
         </p>
         <EuiSpacer size="s" />
