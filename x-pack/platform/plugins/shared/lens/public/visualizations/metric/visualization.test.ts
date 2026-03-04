@@ -581,9 +581,6 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
-                "titleWeight": Array [
-                  "normal",
-                ],
                 "titlesTextAlign": Array [
                   "left",
                 ],
@@ -671,9 +668,6 @@ describe('metric visualization', () => {
                 ],
                 "subtitle": Array [
                   "subtitle",
-                ],
-                "titleWeight": Array [
-                  "normal",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -993,9 +987,6 @@ describe('metric visualization', () => {
               ],
               "subtitle": Array [
                 "subtitle",
-              ],
-              "titleWeight": Array [
-                "normal",
               ],
               "titlesTextAlign": Array [
                 "left",

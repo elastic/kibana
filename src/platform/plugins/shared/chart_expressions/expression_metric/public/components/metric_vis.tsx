@@ -315,23 +315,6 @@ export const MetricVis = ({
       css={[
         styles.layout,
         css`
-          .echMetricText__title span {
-            font-weight: ${euiTheme.font.weight.medium} !important;
-          }
-
-          .echMetricText__subtitle,
-          .echMetricText__extra,
-          .echMetricText__value,
-          .echMetricText__part,
-          .echSecondaryMetric,
-          .echSecondaryMetric__label,
-          .echSecondaryMetric__value,
-          .echBadge__content,
-          .echBadge__text {
-            font-weight: ${euiTheme.font.weight.medium} !important;
-          }
-        `,
-        css`
           height: 100%;
           width: 100%;
           overflow-y: auto;
@@ -361,7 +344,6 @@ export const MetricVis = ({
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
                   valuePosition: config.metric.primaryPosition,
-                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

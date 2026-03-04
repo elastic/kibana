@@ -210,7 +210,6 @@ export const toExpression = (
     iconAlign,
     valueFontSize: state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode,
     primaryPosition: state.primaryPosition ?? LENS_METRIC_STATE_DEFAULTS.primaryPosition,
-    titleWeight: 'normal',
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasMetricIcon ? state.icon : undefined,
     palette:
