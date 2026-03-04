@@ -42,7 +42,10 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
 
   const tickSpreadMs = config.tickSpreadMs ?? config.tickIntervalMs;
 
-  const metadataSeed = seed ?? Date.now();
+  // When no seed is provided, generate a per-run base seed so the entire run
+  // is non-deterministic across invocations but stable within a single
+  // generator instance (metadata identities, template selection, etc.).
+  const effectiveSeed = seed ?? Date.now();
 
   const ctx: GeneratorContext = {
     serviceGraph,
@@ -50,8 +53,8 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
     failures,
     volume,
     noise,
-    seed,
-    metadataCache: buildMetadataCache(serviceGraph, metadataSeed),
+    seed: effectiveSeed,
+    metadataCache: buildMetadataCache(serviceGraph, effectiveSeed),
     allDeps: serviceGraph.services.flatMap((svc) => svc.infraDeps.map((dep) => ({ svc, dep }))),
     tickSpreadMs,
     cycleMs,
@@ -78,7 +81,7 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
       ...collectNoiseDocs({ ctx, tickState, index, timestamp }),
     ];
 
-    return spreadDocs({ docs, timestamp, tickSpreadMs, seed });
+    return spreadDocs({ docs, timestamp, tickSpreadMs, seed: effectiveSeed });
   };
 
   return { generator, manifest };

@@ -191,7 +191,7 @@ export function generateNoiseDocs({
         service: svc,
         level: 'info',
         message: ghost.message,
-        metadata: getOrBuildMetadata(svc, seed, metadataCache),
+        metadata: getOrBuildMetadata(svc, deriveSeed(seed, svc.name), metadataCache),
       })
     );
   }
