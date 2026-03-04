@@ -42,6 +42,8 @@ export class DashboardApp {
   // Save flows
   private readonly savedObjectTitleInput;
   private readonly confirmSaveButton;
+  private readonly quickSaveSecondaryButton;
+  private readonly interactiveSaveMenuItem;
 
   // Library flyout
   private readonly savedObjectsFinderTable;
@@ -52,6 +54,10 @@ export class DashboardApp {
   // Markdown panel
   private readonly markdownEditorApplyButton;
   private readonly markdownRenderer;
+
+  // ES|QL / Visualize editor actions
+  private readonly applyFlyoutButton;
+  private readonly visualizeSaveAndReturnButton;
 
   // Customize panel flyout
   private readonly customizePanelFlyout;
@@ -83,6 +89,10 @@ export class DashboardApp {
     // Save flows
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.quickSaveSecondaryButton = this.page.testSubj.locator(
+      'dashboardQuickSaveMenuItem-secondary-button'
+    );
+    this.interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
 
     // Library flyout
     this.savedObjectsFinderTable = this.page.testSubj.locator('savedObjectsFinderTable');
@@ -95,6 +105,10 @@ export class DashboardApp {
     // Markdown panel
     this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
     this.markdownRenderer = this.page.testSubj.locator('markdownRenderer');
+
+    // ES|QL / Visualize editor actions
+    this.applyFlyoutButton = this.page.testSubj.locator('applyFlyoutButton');
+    this.visualizeSaveAndReturnButton = this.page.testSubj.locator('visualizesaveAndReturnButton');
 
     // Customize panel flyout
     this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
@@ -114,8 +128,10 @@ export class DashboardApp {
     await this.waitForRenderComplete();
   }
 
+  /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
+    await expect(this.addTopNavButton).toBeVisible();
   }
 
   private getSettingsFlyout() {
@@ -878,25 +894,42 @@ export class DashboardApp {
     await this.page.locator(editVisualizationConfigurationSelector).click();
   }
 
+  /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
   async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Custom visualization' | 'Maps' | 'Links') {
-    await this.page.testSubj.click('dashboardAddTopNavButton');
-    await this.page.testSubj.click('dashboardOpenAddPanelFlyoutButton');
+    await this.addTopNavButton.click();
+    await this.openAddPanelFlyoutButton.click();
     await this.page.testSubj.click(`create-action-${panelType}`);
-    await this.page.testSubj.waitForSelector('dashboardPanelSelectionFlyout', { state: 'hidden' });
+    await expect(this.panelSelectionFlyout).toBeHidden();
   }
 
+  /** Clicks "Apply and close" in the ES|QL editor flyout to commit the query to the panel. */
   async applyAndCloseESQLPanel() {
-    await this.page.testSubj.click('applyFlyoutButton');
+    await this.applyFlyoutButton.click();
   }
 
+  /** Clicks the "Save and return" button in the legacy Visualize editor. */
   async clickVisualizeSaveAndReturn() {
-    await this.page.testSubj.click('visualizesaveAndReturnButton');
+    await this.visualizeSaveAndReturnButton.click();
   }
 
+  /** Navigates to a dashboard by clicking its title link on the listing page. */
   async clickDashboardTitleLink(dashboardTitle: string) {
     await this.page.testSubj.click(
       `dashboardListingTitleLink-${dashboardTitle.split(' ').join('-')}`
     );
     await this.waitForRenderComplete();
+  }
+
+  /**
+   * Opens the "Save as..." dialog via the quick-save dropdown,
+   * fills in the new title, and confirms.
+   */
+  async saveDashboardAsCopy(dashboardTitle: string) {
+    await this.quickSaveSecondaryButton.click();
+    await this.interactiveSaveMenuItem.click();
+    await expect(this.savedObjectTitleInput).toBeVisible();
+    await this.savedObjectTitleInput.fill(dashboardTitle);
+    await this.confirmSaveButton.click();
+    await expect(this.confirmSaveButton).toBeHidden();
   }
 }
