@@ -266,7 +266,8 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         }),
         align: 'center',
         render: (agentTools: string[], source: ActiveSource) => {
-          const path = `/tools?search=${encodeURIComponent(source.type)}`;
+          const toolPrefix = `${source.type}.${slugify(source.name)}`;
+          const path = `/tools?search=${encodeURIComponent(toolPrefix)}`;
           const toolsUrl = application.getUrlForApp(AGENT_BUILDER_APP_ID, { path });
           return agentTools.length > 0 ? (
             <EuiLink href={toolsUrl} data-test-subj={`toolsLink-${source.id}`}>
