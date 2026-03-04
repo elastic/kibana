@@ -108,7 +108,6 @@ export function TransactionDetails() {
   }, [
     agentBuilder,
     serviceName,
-    environment,
     transactionName,
     transactionTypeFromUrl,
     traceId,
