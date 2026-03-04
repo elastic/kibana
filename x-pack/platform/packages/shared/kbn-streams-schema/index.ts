@@ -190,8 +190,6 @@ export {
   featureStatusSchema,
 } from './src/feature';
 
-export { type System, systemSchema, isSystem } from './src/system';
-
 export {
   type BaseSimulationError,
   type SimulationError,
