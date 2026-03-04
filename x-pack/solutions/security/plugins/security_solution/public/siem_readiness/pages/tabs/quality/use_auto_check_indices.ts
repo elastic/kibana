@@ -23,14 +23,9 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormatBytes } from '../../../../common/components/formatted_bytes';
 
-const DELAY_AFTER_EVERY_CHECK_COMPLETES = 3000; // ms
-const GET_INDEX_RESULTS_LATEST_QUERY_KEY = ['index-results-latest'] as const;
-const POST_INDEX_RESULTS = '/internal/ecs_data_quality_dashboard/results';
+const INDEX_RESULTS_QUERY_KEY = ['index-results-latest'] as const;
+const SAVE_INDEX_RESULTS_ENDPOINT = '/internal/ecs_data_quality_dashboard/results';
 const INTERNAL_API_VERSION = '1';
-
-async function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 const formatStorageResult = ({
   batchId,
@@ -119,33 +114,45 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
   const { http } = useKibana().services;
   const formatBytes = useFormatBytes();
   const queryClient = useQueryClient();
-  const abortControllerRef = useRef(new AbortController());
-  const hasStartedRef = useRef(false);
+
+  const abortController = useRef(new AbortController());
+  const hasStarted = useRef(false);
+
   const [isChecking, setIsChecking] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [progress, setProgress] = useState({ checked: 0, total: 0 });
   const [currentIndexName, setCurrentIndexName] = useState<string>('');
 
-  const cancelChecks = useCallback(() => {
-    if (!abortControllerRef.current.signal.aborted) {
-      abortControllerRef.current.abort();
-      setIsChecking(false);
-      setIsComplete(false);
-      setProgress({ checked: 0, total: 0 });
-      setCurrentIndexName('');
-    }
+  const resetCheckState = useCallback(() => {
+    setIsChecking(false);
+    setIsComplete(false);
+    setProgress({ checked: 0, total: 0 });
+    setCurrentIndexName('');
   }, []);
 
-  const startChecks = useCallback(async () => {
-    if (indexNames.length === 0 || hasStartedRef.current) {
+  const cancelChecks = useCallback(() => {
+    if (!abortController.current.signal.aborted) {
+      abortController.current.abort();
+      resetCheckState();
+    }
+  }, [resetCheckState]);
+
+  const refreshIndexResults = useCallback(() => {
+    queryClient.invalidateQueries(INDEX_RESULTS_QUERY_KEY, {
+      refetchType: 'active',
+    });
+  }, [queryClient]);
+
+  const runChecks = useCallback(async () => {
+    if (indexNames.length === 0 || hasStarted.current) {
       return;
     }
 
     // Deduplicate index names to avoid checking the same index multiple times
     const uniqueIndexNames = [...new Set(indexNames)];
 
-    hasStartedRef.current = true;
-    abortControllerRef.current = new AbortController();
+    hasStarted.current = true;
+    abortController.current = new AbortController();
     setIsChecking(true);
     setIsComplete(false);
     setProgress({ checked: 0, total: uniqueIndexNames.length });
@@ -153,10 +160,10 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
     const startTime = Date.now();
     const batchId = uuidv4();
     let checked = 0;
-    const savePromises: Array<Promise<void>> = [];
+    const allSavePromises: Array<Promise<void>> = [];
 
     for (let i = 0; i < uniqueIndexNames.length; i++) {
-      if (abortControllerRef.current.signal.aborted) {
+      if (abortController.current.signal.aborted) {
         break;
       }
 
@@ -167,8 +174,11 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       setCurrentIndexName(indexName);
 
       try {
+        // Track the current save promise to wait for it before proceeding to next index
+        let currentSavePromise: Promise<void> | null = null;
+
         await checkIndex({
-          abortController: abortControllerRef.current,
+          abortController: abortController.current,
           batchId,
           checkAllStartTime: startTime,
           formatBytes,
@@ -190,9 +200,9 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
                 sizeInBytes: 0,
               });
 
-              // Track the save promise so we can wait for all saves to complete
+              // Create and track the save promise
               const savePromise = http
-                .fetch(POST_INDEX_RESULTS, {
+                .fetch(SAVE_INDEX_RESULTS_ENDPOINT, {
                   method: 'POST',
                   version: INTERNAL_API_VERSION,
                   body: JSON.stringify(storageResult),
@@ -201,20 +211,23 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
                   // Silently fail - we don't want to stop the checks
                 });
 
-              savePromises.push(savePromise);
+              currentSavePromise = savePromise;
+
+              // Track all save promises to ensure they all complete before query invalidation
+              allSavePromises.push(savePromise);
             }
           },
           pattern: indexName, // Use index name as pattern for simplicity
         });
 
-        if (!abortControllerRef.current.signal.aborted) {
+        // Wait for the current save operation to complete before moving to next index
+        if (currentSavePromise && !abortController.current.signal.aborted) {
+          await currentSavePromise;
+        }
+
+        if (!abortController.current.signal.aborted) {
           checked++;
           setProgress({ checked, total: uniqueIndexNames.length });
-
-          // Add delay between checks (except for the last one)
-          if (!isLastCheck) {
-            await wait(DELAY_AFTER_EVERY_CHECK_COMPLETES);
-          }
         }
       } catch (error) {
         // Continue checking remaining indices even if one fails
@@ -223,40 +236,41 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       }
     }
 
-    // Wait for all save operations to complete before invalidating the query
-    if (savePromises.length > 0 && !abortControllerRef.current.signal.aborted) {
-      await Promise.allSettled(savePromises);
+    // Ensure ALL save operations complete before invalidating the query
+    if (allSavePromises.length > 0 && !abortController.current.signal.aborted) {
+      await Promise.all(allSavePromises);
+
+      // Add 1 second delay to ensure backend has fully committed the data
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    // Invalidate query to refresh results after all checks complete
-    if (!abortControllerRef.current.signal.aborted) {
-      queryClient.invalidateQueries(GET_INDEX_RESULTS_LATEST_QUERY_KEY, {
-        refetchType: 'active',
-      });
+    // Refresh results after all checks and saves complete
+    if (!abortController.current.signal.aborted) {
+      refreshIndexResults();
     }
 
     setIsChecking(false);
     setIsComplete(true);
     // Keep progress and currentIndexName visible for complete state
-  }, [indexNames, formatBytes, http, queryClient]);
+  }, [indexNames, formatBytes, http, refreshIndexResults]);
 
   // Auto-start checks when enabled (only once)
   useEffect(() => {
-    if (enabled && indexNames.length > 0 && !hasStartedRef.current) {
-      startChecks();
+    if (enabled && indexNames.length > 0 && !hasStarted.current) {
+      runChecks();
     }
-  }, [enabled, indexNames.length, startChecks]);
+  }, [enabled, indexNames.length, runChecks]);
 
-  // Reset hasStartedRef when indexNames change
+  // Reset hasStarted when indexNames change
   useEffect(() => {
-    hasStartedRef.current = false;
+    hasStarted.current = false;
   }, [indexNames]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (!abortControllerRef.current.signal.aborted) {
-        abortControllerRef.current.abort();
+      if (!abortController.current.signal.aborted) {
+        abortController.current.abort();
       }
     };
   }, []);
@@ -267,6 +281,6 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
     progress,
     currentIndexName,
     cancelChecks,
-    startChecks,
+    runChecks,
   };
 };

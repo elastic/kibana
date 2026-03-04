@@ -75,7 +75,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   }, [getReadinessCategoriesData?.mainCategoriesMap, activeCategories]);
 
   // Auto-check all indices when tab is visited
-  const { isChecking, isComplete, progress, currentIndexName, cancelChecks } = useAutoCheckIndices({
+  const { isChecking, isComplete, progress, currentIndexName } = useAutoCheckIndices({
     indexNames: allIndexNames,
     enabled: !getReadinessCategories.isLoading && allIndexNames.length > 0,
   });
