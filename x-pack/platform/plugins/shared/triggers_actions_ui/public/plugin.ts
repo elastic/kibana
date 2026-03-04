@@ -24,7 +24,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -296,7 +296,7 @@ export class Plugin
           async mount(params: AppMountParameters) {
             const { cases: casesResponse, security: securityResponse } =
               await core.plugins.onStart<{
-                cases: CasesPublicStart;
+                cases: CasesService;
                 security: SecurityPluginStart;
               }>('cases', 'security');
             const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -354,7 +354,6 @@ export class Plugin
         });
       }
 
-      // $$
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
