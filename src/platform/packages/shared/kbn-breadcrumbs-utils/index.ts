@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EmbeddableStateTransfer } from './embeddable_state_transfer';
-export type { EmbeddableEditorState, EmbeddablePackageState } from './types';
+export { getOriginatingAppBreadcrumbs } from './src/originating_app_breadcrumbs';

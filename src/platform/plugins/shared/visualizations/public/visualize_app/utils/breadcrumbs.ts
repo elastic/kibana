@@ -9,26 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VisualizeConstants } from '@kbn/visualizations-common';
-import { getOriginatingAppBreadcrumbs } from '@kbn/embeddable-plugin/public';
+import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 
 const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
 });
 
-export function getLandingBreadcrumbs() {
-  return [
-    {
-      text: i18n.translate('visualizations.listing.breadcrumb', {
-        defaultMessage: 'Visualize library',
-      }),
-      href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
-    },
-  ];
-}
-
 export function getCreateBreadcrumbs({
-  byValue,
   originatingApp,
   originatingAppName,
   originatingPath,
@@ -36,7 +23,6 @@ export function getCreateBreadcrumbs({
   redirectToOrigin,
   navigateToApp,
 }: {
-  byValue?: boolean;
   originatingApp?: string;
   originatingAppName?: string;
   originatingPath?: string;
@@ -65,7 +51,6 @@ export function getCreateBreadcrumbs({
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
     {
       text: i18n.translate('visualizations.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -98,7 +83,6 @@ export function getCreateServerlessBreadcrumbs({
 
 export function getEditBreadcrumbs(
   {
-    byValue,
     originatingApp,
     originatingAppName,
     originatingPath,
@@ -106,7 +90,6 @@ export function getEditBreadcrumbs(
     redirectToOrigin,
     navigateToApp,
   }: {
-    byValue?: boolean;
     originatingApp?: string;
     originatingAppName?: string;
     originatingPath?: string;
@@ -130,7 +113,6 @@ export function getEditBreadcrumbs(
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
     {
       text: title,
     },

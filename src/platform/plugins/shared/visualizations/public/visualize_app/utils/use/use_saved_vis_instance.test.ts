@@ -192,6 +192,38 @@ describe('useSavedVisInstance', () => {
       });
     });
 
+    test('should pass originating app context to breadcrumbs when navigating from another app', async () => {
+      mockServices.stateTransferService.getAppNameFromId = jest.fn().mockReturnValue('Dashboards');
+
+      const { result } = renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          'dashboards',
+          savedVisId,
+          undefined,
+          '/app/dashboards#/view/abc123',
+          'My Dashboard'
+        )
+      );
+
+      result.current.visEditorRef.current = document.createElement('div');
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(getEditBreadcrumbs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originatingApp: 'dashboards',
+          originatingAppName: 'Dashboards',
+          originatingPath: '/app/dashboards#/view/abc123',
+          breadcrumbTitle: 'My Dashboard',
+          redirectToOrigin: expect.any(Function),
+          navigateToApp: expect.any(Function),
+        }),
+        'Test Vis'
+      );
+    });
+
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {
       const { result, unmount } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, undefined, savedVisId)

@@ -137,7 +137,6 @@ export const useSavedVisInstance = (
           chrome.docTitle.change(savedVis.title);
         } else {
           const createBreadcrumbs = getCreateBreadcrumbs({
-            byValue: Boolean(originatingApp),
             originatingApp,
             originatingAppName,
             originatingPath,

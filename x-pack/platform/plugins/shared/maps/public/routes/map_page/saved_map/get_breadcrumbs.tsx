@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ScopedHistory } from '@kbn/core/public';
-import { getOriginatingAppBreadcrumbs } from '@kbn/embeddable-plugin/public';
+import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 import { APP_NAME } from '../../../../common/constants';
 
