@@ -74,8 +74,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const canReadAgentPolicies = authz.fleet.readAgentPolicies;
   const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
-  const { isPackagePolicyUpgradable, getPackagePolicyUpgradeReview, getKeepPoliciesUpToDate } =
-    useIsPackagePolicyUpgradable();
+  const {
+    isPackagePolicyUpgradable,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+    getUpgradeVersion,
+  } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
@@ -103,6 +107,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           packageTitle: packagePolicy.package?.title ?? '',
           packageVersion: packagePolicy.package?.version ?? '',
           hasUpgrade,
+          upgradeVersion: getUpgradeVersion(packagePolicy),
           pendingUpgradeReview: getPackagePolicyUpgradeReview(packagePolicy),
           keepPoliciesUpToDate: getKeepPoliciesUpToDate(packagePolicy),
         };
@@ -116,6 +121,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   }, [
     originalPackagePolicies,
     isPackagePolicyUpgradable,
+    getUpgradeVersion,
     getPackagePolicyUpgradeReview,
     getKeepPoliciesUpToDate,
   ]);

@@ -66,8 +66,12 @@ export const PackagePoliciesPage = ({
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
 
-  const { isPackagePolicyUpgradable, getPackagePolicyUpgradeReview, getKeepPoliciesUpToDate } =
-    useIsPackagePolicyUpgradable();
+  const {
+    isPackagePolicyUpgradable,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+    getUpgradeVersion,
+  } = useIsPackagePolicyUpgradable();
   const { getAgentlessStatusForPackage } = useAgentless();
   const canHaveAgentlessPolicies = useMemo(
     () => getAgentlessStatusForPackage(packageInfo).isAgentless,
@@ -92,13 +96,20 @@ export const PackagePoliciesPage = ({
             type,
           },
           hasUpgrade: isPackagePolicyUpgradable(packagePolicy),
+          upgradeVersion: getUpgradeVersion(packagePolicy),
           pendingUpgradeReview: getPackagePolicyUpgradeReview(packagePolicy),
           keepPoliciesUpToDate: getKeepPoliciesUpToDate(packagePolicy),
         },
         rowIndex: index,
       };
     },
-    [isPackagePolicyUpgradable, getPackagePolicyUpgradeReview, getKeepPoliciesUpToDate, type]
+    [
+      isPackagePolicyUpgradable,
+      getUpgradeVersion,
+      getPackagePolicyUpgradeReview,
+      getKeepPoliciesUpToDate,
+      type,
+    ]
   );
 
   // States and data for agent-based policies table

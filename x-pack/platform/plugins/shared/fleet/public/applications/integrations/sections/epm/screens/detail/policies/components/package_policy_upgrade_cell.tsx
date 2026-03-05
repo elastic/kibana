@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../../../../../../types';
 import { useLink, useAuthz } from '../../../../../../hooks';
@@ -57,22 +59,39 @@ export const PackagePolicyUpgradeCell: React.FC<{
   }
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        size="s"
-        minWidth="0"
-        href={`${getHref('upgrade_package_policy', {
-          policyId: agentPolicies[0].id,
-          packagePolicyId: packagePolicy.id,
-        })}?from=${from}`}
-        data-test-subj="integrationPolicyUpgradeBtn"
-        isDisabled={!canWriteIntegrationPolicies}
-      >
-        <FormattedMessage
-          id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-          defaultMessage="Upgrade"
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          type="warning"
+          color="warning"
+          content={i18n.translate(
+            'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
+            {
+              defaultMessage: 'Upgrade to {version} available',
+              values: {
+                version: packagePolicy.upgradeVersion ?? '',
+              },
+            }
+          )}
         />
-      </EuiButton>
-    </EuiFlexItem>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          minWidth="0"
+          href={`${getHref('upgrade_package_policy', {
+            policyId: agentPolicies[0].id,
+            packagePolicyId: packagePolicy.id,
+          })}?from=${from}`}
+          data-test-subj="integrationPolicyUpgradeBtn"
+          isDisabled={!canWriteIntegrationPolicies}
+        >
+          <FormattedMessage
+            id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
+            defaultMessage="Upgrade"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </>
   );
 };

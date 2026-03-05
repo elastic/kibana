@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   EuiCallOut,
   EuiButton,
@@ -15,76 +15,20 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
-import { useReviewUpgradeMutation, useStartServices } from '../../../../../hooks';
-import type { Installation } from '../../../../../../../../common/types';
+import type { UpgradeReviewProps } from '../../../../../hooks';
+import { useUpgradeReviewActions } from '../../../../../hooks';
 
-interface ReviewUpgradeCalloutProps {
-  pkgName: string;
-  pkgTitle: string;
-  pendingUpgradeReview: NonNullable<Installation['pending_upgrade_review']>;
-}
-
-export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = ({
+export const PendingUpgradeReviewCallout: React.FC<UpgradeReviewProps> = ({
   pkgName,
   pkgTitle,
   pendingUpgradeReview,
 }) => {
-  const reviewUpgradeMutation = useReviewUpgradeMutation();
-  const { notifications } = useStartServices();
-
-  const handleAccept = useCallback(() => {
-    reviewUpgradeMutation.mutate(
-      {
-        pkgName,
-        action: 'accept',
-        targetVersion: pendingUpgradeReview.target_version,
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addSuccess({
-            title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewAcceptedTitle', {
-              defaultMessage: 'Auto-upgrade accepted for {title} {version}',
-              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
-            }),
-          });
-        },
-      }
-    );
-  }, [
-    reviewUpgradeMutation,
+  const { handleAccept, handleDismiss, isLoading } = useUpgradeReviewActions({
     pkgName,
     pkgTitle,
-    pendingUpgradeReview.target_version,
-    notifications.toasts,
-  ]);
-
-  const handleDismiss = useCallback(() => {
-    reviewUpgradeMutation.mutate(
-      {
-        pkgName,
-        action: 'decline',
-        targetVersion: pendingUpgradeReview.target_version,
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addInfo({
-            title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewDismissedTitle', {
-              defaultMessage: 'Auto-upgrade paused for {title} {version}',
-              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
-            }),
-          });
-        },
-      }
-    );
-  }, [
-    reviewUpgradeMutation,
-    pkgName,
-    pkgTitle,
-    pendingUpgradeReview.target_version,
-    notifications.toasts,
-  ]);
+    targetVersion: pendingUpgradeReview.target_version,
+  });
 
   return (
     <>
@@ -111,8 +55,8 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
               color="warning"
               fill={true}
               size="s"
-              onClick={handleAccept}
-              isLoading={reviewUpgradeMutation.isLoading}
+              onClick={() => handleAccept()}
+              isLoading={isLoading}
             >
               <FormattedMessage
                 id="xpack.fleet.integrations.settings.acceptUpgradeButton"
@@ -121,11 +65,7 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              onClick={handleDismiss}
-              isLoading={reviewUpgradeMutation.isLoading}
-            >
+            <EuiButtonEmpty size="s" onClick={() => handleDismiss()} isLoading={isLoading}>
               <FormattedMessage
                 id="xpack.fleet.integrations.settings.pauseUpgradeButton"
                 defaultMessage="Pause upgrade"
@@ -139,13 +79,16 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
   );
 };
 
-export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = ({
+export const DeclinedUpgradeReviewCallout: React.FC<UpgradeReviewProps> = ({
   pkgName,
   pkgTitle,
   pendingUpgradeReview,
 }) => {
-  const reviewUpgradeMutation = useReviewUpgradeMutation();
-  const { notifications } = useStartServices();
+  const { handleReEnable, isLoading } = useUpgradeReviewActions({
+    pkgName,
+    pkgTitle,
+    targetVersion: pendingUpgradeReview.target_version,
+  });
 
   const resumeUpgradeLabel = (
     <FormattedMessage
@@ -153,32 +96,6 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
       defaultMessage="Resume upgrade"
     />
   );
-
-  const handleReEnable = useCallback(() => {
-    reviewUpgradeMutation.mutate(
-      {
-        pkgName,
-        action: 'pending',
-        targetVersion: pendingUpgradeReview.target_version,
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addSuccess({
-            title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewReEnabledTitle', {
-              defaultMessage: 'Upgrade review resumed for {title} {version}',
-              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
-            }),
-          });
-        },
-      }
-    );
-  }, [
-    reviewUpgradeMutation,
-    pkgName,
-    pkgTitle,
-    pendingUpgradeReview.target_version,
-    notifications.toasts,
-  ]);
 
   return (
     <>
@@ -204,7 +121,7 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
           />
         </p>
         <EuiSpacer size="s" />
-        <EuiButton size="s" onClick={handleReEnable} isLoading={reviewUpgradeMutation.isLoading}>
+        <EuiButton size="s" onClick={() => handleReEnable()} isLoading={isLoading}>
           {resumeUpgradeLabel}
         </EuiButton>
       </EuiCallOut>

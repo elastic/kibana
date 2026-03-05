@@ -26,14 +26,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 
-import { useLink, useReviewUpgradeMutation, useStartServices } from '../../../../../../../hooks';
-import type { Installation } from '../../../../../../../../common/types';
-
-export interface UpgradeReviewProps {
-  pkgName: string;
-  pkgTitle: string;
-  pendingUpgradeReview: NonNullable<Installation['pending_upgrade_review']>;
-}
+import { useLink, useUpgradeReviewActions } from '../../../../../../../hooks';
+import type { UpgradeReviewProps } from '../../../../../../../hooks';
 
 const autoOpenModalForPackages = new Set<string>();
 
@@ -46,8 +40,6 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
       }
       return false;
     });
-    const reviewUpgradeMutation = useReviewUpgradeMutation();
-    const { notifications } = useStartServices();
     const { getHref } = useLink();
 
     const targetVersion = pendingUpgradeReview.target_version;
@@ -58,45 +50,11 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
     const modalTitleId = useGeneratedHtmlId();
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const handleAccept = useCallback(() => {
-      reviewUpgradeMutation.mutate(
-        { pkgName, action: 'accept', targetVersion },
-        {
-          onSuccess: () => {
-            closeModal();
-            notifications.toasts.addSuccess({
-              title: (
-                <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.upgradeReviewAcceptedTitle"
-                  defaultMessage="Auto-upgrade accepted for {title} {version}"
-                  values={{ title: pkgTitle, version: targetVersion }}
-                />
-              ) as unknown as string,
-            });
-          },
-        }
-      );
-    }, [reviewUpgradeMutation, pkgName, pkgTitle, targetVersion, notifications.toasts, closeModal]);
-
-    const handleDismiss = useCallback(() => {
-      reviewUpgradeMutation.mutate(
-        { pkgName, action: 'decline', targetVersion },
-        {
-          onSuccess: () => {
-            closeModal();
-            notifications.toasts.addInfo({
-              title: (
-                <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedTitle"
-                  defaultMessage="Auto-upgrade paused for {title} {version}"
-                  values={{ title: pkgTitle, version: targetVersion }}
-                />
-              ) as unknown as string,
-            });
-          },
-        }
-      );
-    }, [reviewUpgradeMutation, pkgName, pkgTitle, targetVersion, notifications.toasts, closeModal]);
+    const { handleAccept, handleDismiss, isLoading } = useUpgradeReviewActions({
+      pkgName,
+      pkgTitle,
+      targetVersion,
+    });
 
     return (
       <>
@@ -144,7 +102,10 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               </EuiText>
             </EuiModalBody>
             <EuiModalFooter>
-              <EuiButtonEmpty onClick={handleDismiss} isLoading={reviewUpgradeMutation.isLoading}>
+              <EuiButtonEmpty
+                onClick={() => handleDismiss(closeModal)}
+                isLoading={isLoading}
+              >
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.pauseUpgradeButton"
                   defaultMessage="Pause upgrade"
@@ -153,8 +114,8 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               <EuiButton
                 color="warning"
                 fill={true}
-                onClick={handleAccept}
-                isLoading={reviewUpgradeMutation.isLoading}
+                onClick={() => handleAccept(closeModal)}
+                isLoading={isLoading}
               >
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.acceptUpgradeButton"
@@ -170,30 +131,19 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
 );
 
 export const DeclinedUpgradeStatus: React.FunctionComponent<UpgradeReviewProps> = React.memo(
-  ({ pkgName, pendingUpgradeReview }) => {
-    const reviewUpgradeMutation = useReviewUpgradeMutation();
-    const { notifications } = useStartServices();
-
+  ({ pkgName, pkgTitle, pendingUpgradeReview }) => {
     const targetVersion = pendingUpgradeReview.target_version;
 
-    const handleReEnable = useCallback(() => {
+    const { handleReEnable, isLoading } = useUpgradeReviewActions({
+      pkgName,
+      pkgTitle,
+      targetVersion,
+    });
+
+    const onReEnable = useCallback(() => {
       autoOpenModalForPackages.add(pkgName);
-      reviewUpgradeMutation.mutate(
-        { pkgName, action: 'pending', targetVersion },
-        {
-          onSuccess: () => {
-            notifications.toasts.addSuccess({
-              title: (
-                <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.upgradeReviewReEnabledTitle"
-                  defaultMessage="Upgrade review re-enabled"
-                />
-              ) as unknown as string,
-            });
-          },
-        }
-      );
-    }, [reviewUpgradeMutation, pkgName, targetVersion, notifications.toasts]);
+      handleReEnable();
+    }, [pkgName, handleReEnable]);
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -209,7 +159,7 @@ export const DeclinedUpgradeStatus: React.FunctionComponent<UpgradeReviewProps> 
               }
             )}
           >
-            <EuiButton color="primary" onClick={handleReEnable} size="s">
+            <EuiButton color="primary" onClick={onReEnable} size="s" isLoading={isLoading}>
               <FormattedMessage
                 id="xpack.fleet.epmInstalledIntegrations.reEnableUpgradeButton"
                 defaultMessage="Resume upgrade"
