@@ -18,7 +18,7 @@ import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
