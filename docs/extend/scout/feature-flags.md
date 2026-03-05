@@ -9,7 +9,7 @@ Some Kibana features are gated behind feature flags or experimental configuratio
 ## When to use runtime versus server-level flags [scout-feature-flags-when-to-use]
 
 - **Runtime** (`apiServices.core.settings()`): **preferred** for most feature flags. No server restart, flags can be toggled per suite, and your tests keep sharing the default servers with other suites in CI.
-- **Server startup** (custom config `serverArgs`): only when the setting must be present at boot time or is not supported by the runtime settings API.
+- **Test servers startup** (custom config `serverArgs`): only when the setting must be present at boot time or is not supported by the runtime settings API. Reach out to the AppEx QA team first (see below).
 
 ## Enabling feature flags at runtime [scout-feature-flags-runtime]
 
