@@ -198,6 +198,25 @@ describe('McpClient', () => {
       );
     });
 
+    it('creates transport with custom fetch when provided', () => {
+      const customFetch = jest.fn();
+      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'https://example.com/mcp' }),
+        expect.objectContaining({
+          fetch: customFetch,
+        })
+      );
+    });
+
+    it('does not include fetch in transport options when not provided', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
+      expect(transportCallArgs).not.toHaveProperty('fetch');
+    });
+
     it('creates client with correct name and version', () => {
       new McpClient(mockLogger, clientDetails);
 
@@ -306,6 +325,17 @@ describe('McpClient', () => {
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: Generic error'
+      );
+    });
+
+    it('includes error cause in the message when available', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const cause = new Error('unable to get local issuer certificate');
+      const error = new TypeError('fetch failed', { cause });
+      mockClient.connect.mockRejectedValue(error);
+
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
       );
     });
 

@@ -150,7 +150,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
   }
 );
 
-const mosaicStateSchemaESQL = schema.object(
+export const mosaicStateSchemaESQL = schema.object(
   {
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -108,15 +108,16 @@ export const FilterPopover = ({
 
   const hasActiveFilters = activeCount > 0;
 
-  // Build panel CSS from width props. Intentionally not memoized—the object
-  // construction is trivial and `EuiPopover` does not rely on referential equality.
-  const panelCSS =
-    panelWidth || panelMinWidth
-      ? {
-          ...(panelWidth && { width: panelWidth }),
-          ...(panelMinWidth && { minWidth: panelMinWidth }),
-        }
-      : undefined;
+  // Build panel CSS from width props.
+  const panelCSS = useMemo(() => {
+    if (!panelWidth && !panelMinWidth) {
+      return undefined;
+    }
+    return {
+      ...(panelWidth && { width: panelWidth }),
+      ...(panelMinWidth && { minWidth: panelMinWidth }),
+    };
+  }, [panelWidth, panelMinWidth]);
 
   return (
     <EuiPopover
