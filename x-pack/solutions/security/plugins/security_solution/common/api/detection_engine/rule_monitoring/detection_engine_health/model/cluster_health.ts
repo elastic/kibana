@@ -17,7 +17,7 @@ import type {
  */
 export interface ClusterHealthParameters extends HealthParameters {
   /**
-   * Number of fetched top rules by metrics.
+   * Number of fetched top rules by metrics
    */
   num_of_top_rules: number;
 }
@@ -26,10 +26,28 @@ export interface ClusterHealthParameters extends HealthParameters {
  * Health calculation result for the whole cluster.
  */
 export interface ClusterHealthSnapshot extends HealthSnapshot {
+  /**
+   * Health state at the moment of the calculation request.
+   */
   state_at_the_moment: ClusterHealthState;
+
+  /**
+   * Health stats calculated over the interval specified in the health parameters.
+   */
   stats_over_interval: ClusterHealthStats;
+
+  /**
+   * History of change of the same health stats during the interval.
+   */
   history_over_interval: HealthHistory<ClusterHealthStats>;
 }
 
+/**
+ * Health state at the moment of the calculation request.
+ */
 export type ClusterHealthState = HealthOverviewState;
+
+/**
+ * Health stats calculated over a given interval.
+ */
 export type ClusterHealthStats = ClusterHealthOverviewStats;

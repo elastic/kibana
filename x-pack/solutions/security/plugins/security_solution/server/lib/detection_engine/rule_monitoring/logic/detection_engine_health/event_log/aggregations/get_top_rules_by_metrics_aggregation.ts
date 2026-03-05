@@ -6,17 +6,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
 import { RuleExecutionEventTypeEnum } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
-
 import {
   ALERTING_PROVIDER,
   RULE_EXECUTION_LOG_PROVIDER,
 } from '../../../event_log/event_log_constants';
 import * as f from '../../../event_log/event_log_fields';
 import { DEFAULT_BASE_RULE_FIELDS, DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
-
-const RULE_ID_FIELD = 'rule.id';
 
 const executeEventsFilter = {
   bool: {
@@ -44,9 +40,9 @@ const buildTopRulesAggregation = (
 ): estypes.AggregationsAggregationContainer => ({
   filter,
   aggs: {
-    by_rule: {
+    rules: {
       terms: {
-        field: RULE_ID_FIELD,
+        field: 'rule.id',
         size,
         order: { [`percentiles.${DEFAULT_PERCENTILES[1]}`]: 'desc' },
       },
@@ -58,7 +54,7 @@ const buildTopRulesAggregation = (
             percents: DEFAULT_PERCENTILES,
           },
         },
-        rule_metadata: {
+        rule: {
           top_hits: {
             size: 1,
             _source: DEFAULT_BASE_RULE_FIELDS,

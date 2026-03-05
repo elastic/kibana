@@ -105,6 +105,23 @@ export interface TotalEnabledDisabled {
 // TODO: https://github.com/elastic/kibana/issues/125642 Add more data, see health_data.md
 
 /**
+ * Rule's "dynamic" health stats over a specified "health interval". Calculated for a single rule.
+ */
+export type RuleHealthOverviewStats = HealthOverviewStats;
+
+/**
+ * Space's "dynamic" health stats over a specified "health interval". Calculated for a set of rules.
+ */
+export interface SpaceHealthOverviewStats extends HealthOverviewStats {
+  top_rules: TopRulesByMetrics;
+}
+
+/**
+ * Cluster's "dynamic" health stats over a specified "health interval". Calculated for a set of rules.
+ */
+export type ClusterHealthOverviewStats = SpaceHealthOverviewStats;
+
+/**
  * "Dynamic" health stats over a specified "health interval". Can be calculated either
  * for a set of rules or for a single rule.
  */
@@ -259,24 +276,23 @@ export type TopMessages = Array<{
 }>;
 
 /**
- * Rule's "dynamic" health stats over a specified "health interval". Calculated for a single rule.
+ * Basic rule information
  */
-export type RuleHealthOverviewStats = HealthOverviewStats;
-
-/**
- * Space's "dynamic" health stats over a specified "health interval". Calculated for a set of rules.
- */
-export interface SpaceHealthOverviewStats extends HealthOverviewStats {
-  top_rules: TopRulesByMetrics;
+export interface RuleInfo {
+  id: string;
+  name: string;
+  category: string;
 }
 
 /**
- * Cluster's "dynamic" health stats over a specified "health interval". Calculated for a set of rules.
+ * Basic rule information with percentiles. Context for percentiles is defined by the parent aggregation.
  */
-export type ClusterHealthOverviewStats = SpaceHealthOverviewStats;
+export interface RuleInfoWithPercentiles extends RuleInfo {
+  percentiles: Percentiles<number>;
+}
 
 /**
- * Top N rules grouped by different performance metrics.
+ * Top N rules aggregated by metrics
  */
 export interface TopRulesByMetrics {
   by_execution_duration_ms: RuleInfoWithPercentiles[];
@@ -284,18 +300,4 @@ export interface TopRulesByMetrics {
   by_search_duration_ms: RuleInfoWithPercentiles[];
   by_indexing_duration_ms: RuleInfoWithPercentiles[];
   by_enrichment_duration_ms: RuleInfoWithPercentiles[];
-}
-
-/**
- * Basic rule identification info combined with percentile metrics.
- */
-export interface RuleInfoWithPercentiles extends RuleInfo, AggregatedMetric<number> {}
-
-/**
- * Basic rule identification info.
- */
-export interface RuleInfo {
-  id: string;
-  name: string;
-  category: string;
 }

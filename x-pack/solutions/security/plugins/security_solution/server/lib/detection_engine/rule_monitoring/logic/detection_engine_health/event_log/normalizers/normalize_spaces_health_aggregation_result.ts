@@ -16,19 +16,14 @@ import type {
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 import type { RuleExecutionStatsAggregationLevel } from '../aggregations/rule_execution_stats';
+import type { SpaceHealthOverInterval } from '../aggregations/types';
 import { normalizeAggregatedMetric } from './normalize_aggregated_metric';
 import { normalizeRuleExecutionStatsAggregationResult } from './normalize_rule_execution_stats_aggregation_result';
-
-export interface SpacesHealthOverInterval {
-  stats_over_interval: SpaceHealthOverviewStats;
-  history_over_interval: HealthHistory<SpaceHealthOverviewStats>;
-  debug?: Record<string, unknown>;
-}
 
 export const normalizeSpacesHealthAggregationResult = (
   result: AggregateEventsBySavedObjectResult,
   requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-): SpacesHealthOverInterval => {
+): SpaceHealthOverInterval => {
   const aggregations = result.aggregations ?? {};
   return {
     stats_over_interval: normalizeSpacesExecutionStatsAggregationResult(
@@ -80,33 +75,30 @@ const normalizeTopRuleAggregationResult = (
   topRules: RawData,
   metricModifier?: (value: number) => number
 ): RuleInfoWithPercentiles[] | undefined => {
-  // Note: by_rule matches the sub-aggregation name in get_top_rules_by_metrics_aggregation.ts
-  if (!topRules?.by_rule?.buckets) {
+  if (!topRules?.rules?.buckets) {
     return undefined;
   }
 
-  return topRules.by_rule.buckets.map((bucket: RawData) => ({
-    ...normalizeRuleInfo(bucket.rule_metadata),
+  return topRules.rules.buckets.map((bucket: RawData) => ({
+    ...normalizeRuleInfo(bucket.rule),
     ...normalizeAggregatedMetric(bucket.percentiles, metricModifier),
   }));
 };
 
-const normalizeRuleInfo = (ruleBucket: RawData): RuleInfo => {
-  const defaultRuleInfo: RuleInfo = { id: '', name: '', category: '' };
-
+const normalizeRuleInfo = (ruleBucket: RawData): RuleInfo | undefined => {
   if (
     !ruleBucket?.hits?.hits?.[0]?._source?.rule ||
     typeof ruleBucket.hits.hits[0]._source.rule !== 'object'
   ) {
-    return defaultRuleInfo;
+    return undefined;
   }
 
   const ruleData = ruleBucket.hits.hits[0]._source.rule;
 
   return {
-    id: ruleData.id ?? '',
-    name: ruleData.name ?? '',
-    category: ruleData.category ?? '',
+    id: ruleData.id,
+    name: ruleData.name,
+    category: ruleData.category,
   };
 };
 
