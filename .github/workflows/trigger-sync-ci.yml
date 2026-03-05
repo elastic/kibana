@@ -28,4 +28,4 @@ jobs:
           BUILDKITE_TOKEN: ${{secrets.OPS_BUILDKITE_TOKEN}}
         run: |
           npm ci --omit=dev
-          node verify-ci-check ${{github.event.pull_request.number}}
+          node verify-ci-check ${{github.event.issue.number}}
