@@ -16,7 +16,7 @@ describe('getInferenceEndpointById', () => {
     esClient = { inference: { get: mockInferenceGet } };
   });
 
-  it('returns endpoint metadata', async () => {
+  it('returns endpoint metadata and calls correct endpoint', async () => {
     mockInferenceGet.mockResolvedValue({
       endpoints: [
         {
@@ -39,20 +39,6 @@ describe('getInferenceEndpointById', () => {
       service: 'openai',
       serviceSettings: { model_id: 'gpt-4o' },
     });
-  });
-
-  it('calls esClient.inference.get with the correct inference_id', async () => {
-    mockInferenceGet.mockResolvedValue({
-      endpoints: [
-        {
-          inference_id: 'my-endpoint',
-          task_type: 'chat_completion',
-          service: 'openai',
-        },
-      ],
-    });
-
-    await getInferenceEndpointById({ inferenceId: 'my-endpoint', esClient });
 
     expect(mockInferenceGet).toHaveBeenCalledWith({ inference_id: 'my-endpoint' });
   });

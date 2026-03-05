@@ -26,11 +26,15 @@ export class InferenceEndpointIdCache {
   }
 
   async has(id: string, esClient: ElasticsearchClient): Promise<boolean> {
-    await this.ensureFresh(esClient);
+    if (this.knownIds.has(id)) {
+      this.updateCacheIfExpired(esClient); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
+      return true;
+    };
+    await this.updateCacheIfExpired(esClient); // id not in cache, make sure we have latest data before returning
     return this.knownIds.has(id);
   }
 
-  async ensureFresh(esClient: ElasticsearchClient): Promise<void> {
+  async updateCacheIfExpired(esClient: ElasticsearchClient): Promise<void> {
     if (Date.now() - this.lastRefresh < this.ttlMs) return;
     if (!this.refreshPromise) {
       this.refreshPromise = this.refresh(esClient).finally(() => {
