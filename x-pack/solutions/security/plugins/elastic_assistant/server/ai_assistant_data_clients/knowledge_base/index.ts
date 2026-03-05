@@ -920,7 +920,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (results) {
         const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
         const indexPatternFetcher = new IndexPatternsFetcher(esClient);
-        const existingIndices = await indexPatternFetcher.getExistingIndices(map(entries, 'index'));
+        const existingIndices = await indexPatternFetcher.getIndexPatternsWithMatches(
+          map(entries, 'index')
+        );
         return (
           entries
             // Filter out any IndexEntries that don't have an existing index

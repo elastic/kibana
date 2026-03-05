@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstItem, ESQLAstCommand } from '@kbn/esql-language';
-import { Builder } from '@kbn/esql-language';
+import type { ESQLAstItem, ESQLAstCommand } from '@elastic/esql/types';
+import { Builder } from '@elastic/esql';
 import type { JoinProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 
