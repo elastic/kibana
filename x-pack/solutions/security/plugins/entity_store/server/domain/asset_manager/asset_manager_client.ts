@@ -58,6 +58,7 @@ import {
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
 } from '../../telemetry/events';
 import { getErrorMessage } from '../../../common';
+import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -112,9 +113,18 @@ export class AssetManagerClient {
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
-        ...entityTypes.map((type) => this.stopAndRemoveV1(type)),
-        this.stopAndRemoveV1SharedTasks(),
+        ...entityTypes.map((type) => this.initEntity(request, type, logExtractionParams)),
+        ...entityTypes.map((type) =>
+          stopAndRemoveV1({
+            type,
+            namespace: this.namespace,
+            logger: this.logger,
+            esClient: this.esClient,
+            taskManager: this.taskManager,
+            savedObjectsClient: this.savedObjectsClient,
+          })
+        ),
+        stopAndRemoveV1SharedTasks({ namespace: this.namespace, taskManager: this.taskManager }),
 
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
@@ -489,120 +499,5 @@ export class AssetManagerClient {
     }
 
     return ENTITY_STORE_STATUS.RUNNING;
-  }
-
-  private async stopAndRemoveV1(type: EntityType) {
-    const definitionId = `security_${type}_${this.namespace}`;
-    const logger = this.logger.get(type);
-    const transformIds = [
-      `entities-v1-latest-${definitionId}`,
-      `entities-v1-history-${definitionId}`,
-    ];
-    const taskIds = [`entity_store:snapshot:${type}:${this.namespace}:1.0.0`];
-    const ingestPipelineIds = [
-      `entities-v1-latest-${definitionId}`,
-      `entities-v1-history-${definitionId}`,
-      `${definitionId}-latest@platform`,
-    ];
-    const indexTemplateIds = [
-      `entities_v1_reset_${definitionId}_index_template`,
-      `entities_v1_updates_${definitionId}_index_template`,
-    ];
-    const componentTemplateIds = [
-      `${definitionId}-updates@platform`,
-      `${definitionId}-updates@custom`,
-    ];
-    const resetIndex = `.entities.v1.reset.${definitionId}`;
-    const updatesDataStream = `.entities.v1.updates.${definitionId}`;
-    const enrichPolicyName = `entity_store_field_retention_${type}_${this.namespace}_v1.0.0`;
-    const v1EngineDescriptorId = `entity-engine-descriptor-${type}-${this.namespace}`;
-
-    await Promise.all(
-      transformIds.map((transformId) =>
-        this.tryAsBoolean(
-          this.esClient.transform.stopTransform(
-            { transform_id: transformId, wait_for_completion: true, force: true },
-            { ignore: [404, 409] }
-          )
-        )
-      )
-    );
-
-    await Promise.all(
-      taskIds.map((taskId) => this.tryAsBoolean(this.taskManager.removeIfExists(taskId)))
-    );
-
-    await Promise.all([
-      ...transformIds.map((transformId) =>
-        this.tryAsBoolean(
-          this.esClient.transform.deleteTransform(
-            { transform_id: transformId, force: true },
-            { ignore: [404] }
-          )
-        )
-      ),
-      ...ingestPipelineIds.map((pipelineId) =>
-        this.tryAsBoolean(
-          this.esClient.ingest.deletePipeline({ id: pipelineId }, { ignore: [404] })
-        )
-      ),
-      ...indexTemplateIds.map((templateId) =>
-        this.tryAsBoolean(
-          this.esClient.indices.deleteIndexTemplate({ name: templateId }, { ignore: [404] })
-        )
-      ),
-      ...componentTemplateIds.map((componentTemplateId) =>
-        this.tryAsBoolean(
-          this.esClient.cluster.deleteComponentTemplate(
-            { name: componentTemplateId },
-            { ignore: [404] }
-          )
-        )
-      ),
-      this.tryAsBoolean(
-        this.esClient.enrich.deletePolicy({ name: enrichPolicyName }, { ignore: [404] })
-      ),
-      this.tryAsBoolean(this.esClient.indices.delete({ index: resetIndex }, { ignore: [404] })),
-      this.tryAsBoolean(
-        this.esClient.indices.deleteDataStream({ name: updatesDataStream }, { ignore: [404] })
-      ),
-      this.tryAsBoolean(
-        this.savedObjectsClient.delete('entity-definition', definitionId).catch((error) => {
-          if (
-            SavedObjectsErrorHelpers.isNotFoundError(error) ||
-            SavedObjectsErrorHelpers.isForbiddenError(error)
-          ) {
-            return;
-          }
-          throw error;
-        })
-      ),
-      this.tryAsBoolean(
-        this.savedObjectsClient
-          .delete('entity-engine-status', v1EngineDescriptorId)
-          .catch((error) => {
-            if (
-              SavedObjectsErrorHelpers.isNotFoundError(error) ||
-              SavedObjectsErrorHelpers.isForbiddenError(error)
-            ) {
-              return;
-            }
-            throw error;
-          })
-      ),
-    ]);
-
-    logger.debug(`Stopped and removed entity store v1 resources for type: ${type}`);
-  }
-
-  private async stopAndRemoveV1SharedTasks() {
-    const taskIds = [
-      `entity_store:field_retention:enrichment:${this.namespace}:1.0.0`,
-      `entity_store:data_view:refresh:${this.namespace}:1.0.0`,
-      `entity_store:health:${this.namespace}:1.0.0`,
-    ];
-    await Promise.all(
-      taskIds.map((taskId) => this.tryAsBoolean(this.taskManager.removeIfExists(taskId)))
-    );
   }
 }
