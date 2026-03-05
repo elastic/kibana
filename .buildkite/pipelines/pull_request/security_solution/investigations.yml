@@ -23,7 +23,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 13
+    parallelism: 14
     retry:
       automatic:
         - exit_status: '-1'
