@@ -51,5 +51,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group29.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group30.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group31.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group32.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.1.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.2.ts

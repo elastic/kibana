@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens serverless - group 8 part 2', function () {
+  describe('lens serverless - group 8 part 3', function () {
     this.tags(['esGate']);
 
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
@@ -72,6 +72,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('../group8/logsdb_downgrade_2.ts'));
+    loadTestFile(require.resolve('../group8/logsdb_downgrade_3.ts'));
   });
 };
