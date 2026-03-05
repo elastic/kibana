@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { FOCUSABLE_SELECTOR } from './constants';
@@ -202,6 +203,64 @@ describe('DateRangePickerControl', () => {
       const button = screen.getByTestId('dateRangePickerControlButton');
       expect(button).toHaveAttribute('aria-label');
       expect(button).not.toHaveTextContent('Last 20 minutes');
+    });
+  });
+
+  describe('controlled mode (value prop)', () => {
+    const renderPicker = (props: DateRangePickerProps) =>
+      render(<DateRangePicker {...props} />, { wrapper: EuiThemeProvider });
+
+    it('renders with initial value', () => {
+      renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent(
+        'Last 20 minutes'
+      );
+    });
+
+    it('updates displayed text when value changes while idle', async () => {
+      const { rerender } = renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent(
+        'Last 20 minutes'
+      );
+
+      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} />);
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
+      });
+    });
+
+    it('does not overwrite user input when value changes during editing', async () => {
+      const { rerender } = renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      const input = openEditing();
+      fireEvent.change(input, { target: { value: 'last 5 minutes' } });
+      expect(input).toHaveValue('last 5 minutes');
+
+      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} />);
+      await waitFor(() => {
+        expect(input).toHaveValue('last 5 minutes');
+      });
+    });
+
+    it('restores to latest value on cancel after external value change during editing', async () => {
+      const { rerender } = renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      const input = openEditing();
+      fireEvent.change(input, { target: { value: 'something typed' } });
+
+      await act(async () => rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} />));
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
+    });
+
+    it('calls onChange on Enter in controlled mode', () => {
+      const onChange = jest.fn();
+      renderPicker({ value: 'last 20 minutes', onChange });
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
     });
   });
 });
