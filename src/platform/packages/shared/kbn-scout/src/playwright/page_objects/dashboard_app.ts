@@ -31,6 +31,7 @@ export class DashboardApp {
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
   private readonly embeddablePanel;
+  private readonly dashboardPanel;
 
   // Add panel flow
   private readonly addTopNavButton;
@@ -79,6 +80,7 @@ export class DashboardApp {
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
+    this.dashboardPanel = this.page.testSubj.locator('dashboardPanel');
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
@@ -200,6 +202,12 @@ export class DashboardApp {
     await expect(this.editModeButton).toBeHidden();
   }
 
+  async ensureViewMode() {
+    if (!(await this.getIsInViewMode())) {
+      await this.clickCancelOutOfEditMode();
+    }
+  }
+
   /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
@@ -248,6 +256,7 @@ export class DashboardApp {
         }
       );
     }
+    await this.closeLibraryFlyout();
   }
 
   async clickQuickSave() {
@@ -337,13 +346,6 @@ export class DashboardApp {
     // Close "Added successfully" toast
     await this.toasts.closeAll();
   }
-
-  // /**
-  //  * Adds a panel from the library without forcing a type filter.
-  //  */
-  // async addPanelFromLibrary(panelName: string, embeddableType?: string) {
-  //   return this.addEmbeddable(panelName, embeddableType);
-  // }
 
   /**
    * Adds a saved search to the dashboard.
@@ -450,7 +452,7 @@ export class DashboardApp {
    * Gets the count of panels on the dashboard
    */
   async getPanelCount(): Promise<number> {
-    return this.embeddablePanel.count();
+    return this.dashboardPanel.count();
   }
 
   /**
@@ -944,5 +946,96 @@ export class DashboardApp {
     await this.page.testSubj.click(`triggerPicker-${trigger}`);
     await expect(this.drilldownWizardSubmit).toBeEnabled();
     await this.drilldownWizardSubmit.click();
+  }
+
+  // ============================================================
+  // Panel Count
+  // ============================================================
+
+  async expectPanelCount(expectedCount: number) {
+    await expect.poll(() => this.dashboardPanel.count()).toBe(expectedCount);
+  }
+
+  // ============================================================
+  // Dashboard Listing
+  // ============================================================
+
+  getDashboardListingLink(title: string) {
+    return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
+  }
+
+  // ============================================================
+  // Fullscreen
+  // ============================================================
+
+  async enterFullscreen() {
+    await this.page.testSubj.click('dashboardFullScreenMode');
+    await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
+  }
+
+  async exitFullscreen() {
+    await this.page.keyboard.press('Escape');
+    await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeHidden();
+  }
+
+  // ============================================================
+  // Maximize Panel
+  // ============================================================
+
+  async maximizePanel(title?: string) {
+    if (title) {
+      await this.clickPanelAction('embeddablePanelAction-togglePanel', title);
+    } else {
+      const panelWrapper = this.getPanelHoverActionsLocator().first();
+      await panelWrapper.scrollIntoViewIfNeeded();
+      await panelWrapper.hover();
+      const toggleAction = panelWrapper.locator(
+        '[data-test-subj="embeddablePanelAction-togglePanel"]'
+      );
+      if (await toggleAction.isVisible()) {
+        await toggleAction.click();
+      } else {
+        await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+        await this.page.testSubj.click('embeddablePanelAction-togglePanel');
+      }
+    }
+    await expect(this.page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
+  }
+
+  // ============================================================
+  // URL Drilldown
+  // ============================================================
+
+  async createUrlDrilldown(
+    name: string,
+    url: string,
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+  ) {
+    await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
+    await this.page.testSubj.locator('drilldownNameInput').fill(name);
+
+    const selectAll = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
+    const monacoEditor = this.page.locator(
+      '[data-test-subj="url-template-editor-container"] .monaco-editor'
+    );
+    await monacoEditor.click();
+    await this.page.keyboard.press(selectAll);
+    await this.page.keyboard.type(url);
+
+    await this.selectDrilldownTriggerAndSubmit(trigger);
+  }
+
+  // ============================================================
+  // Dashboard Settings Helpers
+  // ============================================================
+
+  async setDashboardTitle(title: string) {
+    const titleInput = this.page.testSubj.locator('dashboardTitleInput');
+    await titleInput.fill(title);
+  }
+
+  async setDashboardDescription(description: string) {
+    const descriptionInput = this.page.testSubj.locator('dashboardDescriptionInput');
+    await descriptionInput.fill(description);
   }
 }

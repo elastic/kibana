@@ -18,8 +18,6 @@ const defaultSettings = {
 // Shared across tests + afterEach cleanup; safe because Playwright runs tests in a file serially
 let downloadedFilePath: string | null = null;
 
-const selectAllKeys = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
-
 // Tracks saved objects created during each test for afterEach cleanup
 const createdArtifacts: Array<{ type: string; title?: string }> = [];
 
@@ -93,7 +91,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await test.step('add Custom visualization panel', async () => {
       await pageObjects.dashboard.addNewPanel('Custom visualization');
       await pageObjects.dashboard.clickVisualizeSaveAndReturn();
-      await expect.poll(async () => await page.testSubj.locator('dashboardPanel').count()).toBe(3);
+      await pageObjects.dashboard.expectPanelCount(3);
     });
 
     await pageObjects.dashboard.saveDashboard(dashboardName);
@@ -102,67 +100,81 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   });
 
   test('should edit existing dashboard and add map and custom visualization panels', async ({
-    page,
     pageObjects,
   }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
-    await expect.poll(async () => await page.locator('.dshDashboardGrid__item').count()).toBe(12);
+    await pageObjects.dashboard.expectPanelCount(12);
 
     await pageObjects.dashboard.switchToEditMode();
 
     await test.step('add a Map panel', async () => {
       await pageObjects.dashboard.addNewPanel('Maps');
       await pageObjects.maps.addDocumentsLayer('Kibana Sample Data Logs');
-      await expect.poll(async () => await page.locator('.dshDashboardGrid__item').count()).toBe(13);
+      await pageObjects.dashboard.expectPanelCount(13);
     });
 
     await test.step('add a Custom visualization panel', async () => {
       await pageObjects.dashboard.addNewPanel('Custom visualization');
       await pageObjects.dashboard.clickVisualizeSaveAndReturn();
-      await expect.poll(async () => await page.locator('.dshDashboardGrid__item').count()).toBe(14);
+      await pageObjects.dashboard.expectPanelCount(14);
     });
 
     await pageObjects.dashboard.saveChangesToExistingDashboard();
   });
 
-  test('should duplicate an existing dashboard and preserve panels', async ({
-    page,
-    pageObjects,
-  }) => {
+  test('should duplicate an existing dashboard and preserve panels', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
     const duplicatedDashboardTitle = `${logsDashboardTitle} (1)`;
     createdArtifacts.push({ type: 'dashboard', title: duplicatedDashboardTitle });
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.ensureViewMode();
 
-    if (!(await pageObjects.dashboard.getIsInViewMode())) {
-      await pageObjects.dashboard.clickCancelOutOfEditMode();
-    }
-
-    const originalPanelCount = await page.locator('.dshDashboardGrid__item').count();
+    const originalPanelCount = await pageObjects.dashboard.getPanelCount();
 
     await pageObjects.dashboard.saveDashboard(duplicatedDashboardTitle);
 
     await pageObjects.dashboard.goto();
 
     await test.step('verify both dashboards exist in listing', async () => {
-      const originalLink = page.testSubj.locator(
-        `dashboardListingTitleLink-${logsDashboardTitle.split(' ').join('-')}`
-      );
-      const duplicatedLink = page.testSubj.locator(
-        `dashboardListingTitleLink-${duplicatedDashboardTitle.split(' ').join('-')}`
-      );
-      await expect(originalLink).toBeVisible();
-      await expect(duplicatedLink).toBeVisible();
+      await expect(pageObjects.dashboard.getDashboardListingLink(logsDashboardTitle)).toBeVisible();
+      await expect(
+        pageObjects.dashboard.getDashboardListingLink(duplicatedDashboardTitle)
+      ).toBeVisible();
     });
 
     await test.step('verify duplicated dashboard has same panels', async () => {
       await pageObjects.dashboard.clickDashboardTitleLink(duplicatedDashboardTitle);
-      await expect
-        .poll(async () => await page.locator('.dshDashboardGrid__item').count())
-        .toBe(originalPanelCount);
+      await pageObjects.dashboard.expectPanelCount(originalPanelCount);
+    });
+  });
+
+  test('should save a copy of a dashboard from edit mode', async ({ pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+    const copiedDashboardTitle = '[Logs] Web Traffic Copy';
+    createdArtifacts.push({ type: 'dashboard', title: copiedDashboardTitle });
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.switchToEditMode();
+
+    const originalPanelCount = await pageObjects.dashboard.getPanelCount();
+
+    await pageObjects.dashboard.saveDashboardAsCopy(copiedDashboardTitle);
+
+    await pageObjects.dashboard.goto();
+
+    await test.step('verify both original and copy exist in listing', async () => {
+      await expect(pageObjects.dashboard.getDashboardListingLink(logsDashboardTitle)).toBeVisible();
+      await expect(
+        pageObjects.dashboard.getDashboardListingLink(copiedDashboardTitle)
+      ).toBeVisible();
+    });
+
+    await test.step('verify copy has same panel count', async () => {
+      await pageObjects.dashboard.clickDashboardTitleLink(copiedDashboardTitle);
+      await pageObjects.dashboard.expectPanelCount(originalPanelCount);
     });
   });
 
@@ -230,25 +242,18 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should enter and exit fullscreen mode', async ({ page, pageObjects }) => {
+  test('should enter and exit fullscreen mode', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
-
-    if (!(await pageObjects.dashboard.getIsInViewMode())) {
-      await pageObjects.dashboard.clickCancelOutOfEditMode();
-    }
+    await pageObjects.dashboard.ensureViewMode();
 
     await test.step('enter fullscreen', async () => {
-      await page.testSubj.click('dashboardFullScreenMode');
-      await expect(page.locator('.dshDashboardViewportWrapper--isFullscreen')).toBeVisible();
-      await expect(page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
+      await pageObjects.dashboard.enterFullscreen();
     });
 
     await test.step('exit fullscreen via Escape', async () => {
-      await page.keyboard.press('Escape');
-      await expect(page.locator('.dshDashboardViewportWrapper--isFullscreen')).toBeHidden();
-      await expect(page.testSubj.locator('exitFullScreenModeButton')).toBeHidden();
+      await pageObjects.dashboard.exitFullscreen();
     });
   });
 
@@ -264,15 +269,15 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     const updatedTitle = '[Logs] Web Traffic Updated';
 
     await test.step('update title', async () => {
-      const titleInput = page.testSubj.locator('dashboardTitleInput');
-      await titleInput.fill(updatedTitle);
-      await expect(titleInput).toHaveValue(updatedTitle);
+      await pageObjects.dashboard.setDashboardTitle(updatedTitle);
+      await expect(page.testSubj.locator('dashboardTitleInput')).toHaveValue(updatedTitle);
     });
 
     await test.step('update description', async () => {
-      const descriptionInput = page.testSubj.locator('dashboardDescriptionInput');
-      await descriptionInput.fill('Updated description for testing');
-      await expect(descriptionInput).toHaveValue('Updated description for testing');
+      await pageObjects.dashboard.setDashboardDescription('Updated description for testing');
+      await expect(page.testSubj.locator('dashboardDescriptionInput')).toHaveValue(
+        'Updated description for testing'
+      );
     });
 
     await test.step('toggle store time with dashboard', async () => {
@@ -308,116 +313,88 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should open a dashboard in view mode and duplicate it', async ({ page, pageObjects }) => {
+  test('should export dashboard as PDF and download the report', async ({ page, pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
-    const duplicatedTitle = '[Logs] Web Traffic Copy';
-    createdArtifacts.push({ type: 'dashboard', title: duplicatedTitle });
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.ensureViewMode();
 
-    if (!(await pageObjects.dashboard.getIsInViewMode())) {
-      await pageObjects.dashboard.clickCancelOutOfEditMode();
-    }
-
-    const originalPanelCount = await page.locator('.dshDashboardGrid__item').count();
-
-    await pageObjects.dashboard.saveDashboard(duplicatedTitle);
-
-    await pageObjects.dashboard.goto();
-
-    await test.step('verify both original and duplicate exist in listing', async () => {
-      const originalLink = page.testSubj.locator(
-        `dashboardListingTitleLink-${logsDashboardTitle.split(' ').join('-')}`
-      );
-      const duplicateLink = page.testSubj.locator(
-        `dashboardListingTitleLink-${duplicatedTitle.split(' ').join('-')}`
-      );
-      await expect(originalLink).toBeVisible();
-      await expect(duplicateLink).toBeVisible();
+    await test.step('trigger PDF export from share menu', async () => {
+      await page.testSubj.click('exportTopNavButton');
+      await expect(page.testSubj.locator('exportMenuItem-PDF')).toBeVisible();
+      await page.testSubj.click('exportMenuItem-PDF');
+      await expect(page.testSubj.locator('exportItemDetailsFlyout')).toBeVisible();
+      await page.testSubj.click('generateReportButton');
     });
 
-    await test.step('verify duplicate has same panel count', async () => {
-      await pageObjects.dashboard.clickDashboardTitleLink(duplicatedTitle);
-      await expect
-        .poll(async () => await page.locator('.dshDashboardGrid__item').count())
-        .toBe(originalPanelCount);
+    await test.step('wait for report to be queued', async () => {
+      await expect(page.testSubj.locator('queueReportSuccess')).toBeVisible({
+        timeout: 60_000,
+      });
+    });
+
+    await test.step('wait for report completion and download', async () => {
+      const downloadButton = page.testSubj.locator('downloadCompletedReportButton');
+      await expect(downloadButton).toBeVisible({ timeout: 120_000 });
+
+      const downloadPromise = page.waitForEvent('download');
+      await downloadButton.click();
+      const download = await downloadPromise;
+
+      downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
+      await download.saveAs(downloadedFilePath);
+
+      expect(fs.existsSync(downloadedFilePath)).toBe(true);
+      const stats = fs.statSync(downloadedFilePath);
+      expect(stats.size).toBeGreaterThan(0);
     });
   });
 
-  for (const format of ['PDF', 'PNG'] as const) {
-    test(`should export dashboard as ${format} and download the report`, async ({
-      page,
-      pageObjects,
-    }) => {
-      const logsDashboardTitle = '[Logs] Web Traffic';
-
-      await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
-
-      if (!(await pageObjects.dashboard.getIsInViewMode())) {
-        await pageObjects.dashboard.clickCancelOutOfEditMode();
-      }
-
-      await test.step(`trigger ${format} export from share menu`, async () => {
-        await page.testSubj.click('exportTopNavButton');
-        await expect(page.testSubj.locator(`exportMenuItem-${format}`)).toBeVisible();
-        await page.testSubj.click(`exportMenuItem-${format}`);
-        await expect(page.testSubj.locator('exportItemDetailsFlyout')).toBeVisible();
-        await page.testSubj.click('generateReportButton');
-      });
-
-      await test.step('wait for report to be queued', async () => {
-        await expect(page.testSubj.locator('queueReportSuccess')).toBeVisible({
-          timeout: 60_000,
-        });
-      });
-
-      await test.step('wait for report completion and download', async () => {
-        const downloadButton = page.testSubj.locator('downloadCompletedReportButton');
-        await expect(downloadButton).toBeVisible({ timeout: 120_000 });
-
-        const downloadPromise = page.waitForEvent('download');
-        await downloadButton.click();
-        const download = await downloadPromise;
-
-        downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
-        await download.saveAs(downloadedFilePath);
-
-        expect(fs.existsSync(downloadedFilePath)).toBe(true);
-        const stats = fs.statSync(downloadedFilePath);
-        expect(stats.size).toBeGreaterThan(0);
-      });
-    });
-  }
-
-  test('should maximize a panel', async ({ page, pageObjects }) => {
+  test('should export dashboard as PNG and download the report', async ({ page, pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.ensureViewMode();
 
-    if (!(await pageObjects.dashboard.getIsInViewMode())) {
-      await pageObjects.dashboard.clickCancelOutOfEditMode();
-    }
+    await test.step('trigger PNG export from share menu', async () => {
+      await page.testSubj.click('exportTopNavButton');
+      await expect(page.testSubj.locator('exportMenuItem-PNG')).toBeVisible();
+      await page.testSubj.click('exportMenuItem-PNG');
+      await expect(page.testSubj.locator('exportItemDetailsFlyout')).toBeVisible();
+      await page.testSubj.click('generateReportButton');
+    });
 
-    const panels = page.locator('.embPanel__hoverActionsAnchor');
-    const panelCount = await panels.count();
-    expect(panelCount).toBeGreaterThan(0);
-    const randomIndex = Math.floor(Math.random() * panelCount);
-    const selectedPanel = panels.nth(randomIndex);
+    await test.step('wait for report to be queued', async () => {
+      await expect(page.testSubj.locator('queueReportSuccess')).toBeVisible({
+        timeout: 60_000,
+      });
+    });
 
-    await test.step('maximize a random panel', async () => {
-      await selectedPanel.scrollIntoViewIfNeeded();
-      await selectedPanel.hover();
-      const toggleAction = selectedPanel.locator(
-        '[data-test-subj="embeddablePanelAction-togglePanel"]'
-      );
-      if (await toggleAction.isVisible()) {
-        await toggleAction.click();
-      } else {
-        const menuIcon = selectedPanel.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
-        await menuIcon.click();
-        await page.testSubj.click('embeddablePanelAction-togglePanel');
-      }
-      await expect(page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
+    await test.step('wait for report completion and download', async () => {
+      const downloadButton = page.testSubj.locator('downloadCompletedReportButton');
+      await expect(downloadButton).toBeVisible({ timeout: 120_000 });
+
+      const downloadPromise = page.waitForEvent('download');
+      await downloadButton.click();
+      const download = await downloadPromise;
+
+      downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
+      await download.saveAs(downloadedFilePath);
+
+      expect(fs.existsSync(downloadedFilePath)).toBe(true);
+      const stats = fs.statSync(downloadedFilePath);
+      expect(stats.size).toBeGreaterThan(0);
+    });
+  });
+
+  test('should maximize a panel', async ({ pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.ensureViewMode();
+
+    await test.step('maximize a panel', async () => {
+      await pageObjects.dashboard.maximizePanel();
     });
   });
 
@@ -442,8 +419,8 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify the new dashboard row shows the creator avatar', async () => {
-      const dashboardRow = page.testSubj
-        .locator(`dashboardListingTitleLink-${dashboardName.split(' ').join('-')}`)
+      const dashboardRow = pageObjects.dashboard
+        .getDashboardListingLink(dashboardName)
         .locator('xpath=ancestor::tr');
       await expect(dashboardRow).toBeVisible();
 
@@ -452,7 +429,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should add panels from library to dashboard', async ({ page, pageObjects }) => {
+  test('should add panels from library to dashboard', async ({ pageObjects }) => {
     createdArtifacts.push({ type: 'lens', title: 'Lib Lens Panel' });
     createdArtifacts.push({ type: 'dashboard', title: 'Dashboard with Library Panels' });
     createdArtifacts.push({ type: 'dashboard', title: 'Dashboard from Library' });
@@ -474,8 +451,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.goto();
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary('Lib Lens Panel');
-      await expect.poll(async () => await page.testSubj.locator('dashboardPanel').count()).toBe(1);
-      await page.testSubj.click('euiFlyoutCloseButton');
+      await pageObjects.dashboard.expectPanelCount(1);
     });
 
     await test.step('verify the panel is linked to the library', async () => {
@@ -514,17 +490,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('create a URL drilldown', async () => {
-      await page.testSubj.click('drilldownFactoryItem-url_drilldown');
-      await page.testSubj.locator('drilldownNameInput').fill('Go to Elastic');
-
-      const monacoEditor = page.locator(
-        '[data-test-subj="url-template-editor-container"] .monaco-editor'
-      );
-      await monacoEditor.click();
-      await page.keyboard.press(selectAllKeys);
-      await page.keyboard.type('https://www.elastic.co');
-
-      await pageObjects.dashboard.selectDrilldownTriggerAndSubmit('on_click_value');
+      await pageObjects.dashboard.createUrlDrilldown('Go to Elastic', 'https://www.elastic.co');
       await expect(page.testSubj.locator('createDrilldownFlyout')).toBeHidden();
     });
   });
