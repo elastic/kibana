@@ -8,16 +8,13 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -27,13 +24,11 @@ import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 
 async function getTestProps({
   query,
-  dataViewsService,
   appState,
   defaultFetchStatus = FetchStatus.PARTIAL,
   resetTheHook,
 }: {
   query: AggregateQuery | Query | undefined;
-  dataViewsService?: DataViewsContract;
   appState?: Partial<DiscoverAppState>;
   defaultFetchStatus?: FetchStatus;
   resetTheHook?: boolean;
@@ -42,12 +37,7 @@ async function getTestProps({
     .spyOn(internalStateActions, 'updateAppStateAndReplaceUrl')
     .mockClear();
 
-  const services = createDiscoverServicesMock();
-  if (dataViewsService) {
-    services.dataViews = dataViewsService;
-  }
-
-  const toolkit = getDiscoverInternalStateMock({ services });
+  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
   await toolkit.initializeTabs();
   const { dataStateContainer: dataState } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
@@ -71,9 +61,6 @@ async function getTestProps({
       },
     })
   );
-  const dataViewList = [dataViewMock as DataViewListItem];
-  jest.spyOn(services.dataViews, 'getIdsWithTitle').mockResolvedValue(dataViewList);
-  await toolkit.internalState.dispatch(internalStateActions.loadDataViewList());
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,
@@ -87,7 +74,6 @@ async function getTestProps({
   }
 
   return {
-    dataViews: services.dataViews,
     toolkit,
     dataState,
     savedSearch: savedSearchMock,
@@ -108,28 +94,17 @@ const msgComplete = {
   query,
 };
 
-const getDataViewsService = (services = createDiscoverServicesMock()) => {
-  const dataViewsCreateMock = services.dataViews.create as jest.Mock;
-  dataViewsCreateMock.mockImplementation(() => ({
-    ...dataViewMock,
-  }));
-  return services.dataViews;
-};
-
 const setupTest = async ({
-  useDataViewsService = false,
   appState,
   defaultFetchStatus,
   resetTheHook,
 }: {
-  useDataViewsService?: boolean;
   appState?: DiscoverAppState;
   defaultFetchStatus?: FetchStatus;
   resetTheHook?: boolean;
 } = {}) => {
   const props = await getTestProps({
     query,
-    dataViewsService: useDataViewsService ? getDataViewsService() : undefined,
     appState,
     defaultFetchStatus,
     resetTheHook,
@@ -148,7 +123,7 @@ const setupTest = async ({
 // since the logic is pretty intertwined with the state management
 describe('buildEsqlFetchSubscribe', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
-    const { replaceUrlState, dataState, tabId } = await setupTest({ useDataViewsService: true });
+    const { replaceUrlState, dataState, tabId } = await setupTest();
 
     replaceUrlState.mockClear();
 
