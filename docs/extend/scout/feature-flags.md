@@ -89,20 +89,22 @@ Scout detects a custom config in two ways:
 
 ### Example [scout-feature-flags-custom-config-example]
 
-The `evals_entity_analytics` config set adds feature flags and UI settings overrides as server arguments:
+The `uiam_local` config set extends the default serverless config to enable UIAM authentication with a mock IdP:
 
 ```ts
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...defaultConfig,
+  esServerlessOptions: { uiam: true },
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...defaultConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
-      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--xpack.security.uiam.enabled=true',
+      '--xpack.security.uiam.url=<mock-idp-url>',
+      // ... additional UIAM-specific args
     ],
   },
 };
@@ -111,5 +113,5 @@ export const servers: ScoutServerConfig = {
 Start the server with the custom config:
 
 ```bash
-node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_entity_analytics
+node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet uiam_local
 ```
