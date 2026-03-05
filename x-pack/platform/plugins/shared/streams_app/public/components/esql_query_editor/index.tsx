@@ -17,7 +17,7 @@ export const StreamsESQLEditor = ({
   prefix,
   errors = [],
   ...props
-}: ESQLEditorProps & { prefix?: string }) => {
+}: ESQLEditorProps & { prefix?: string | string[] }) => {
   const prefixValidation = validatePrefix(props.query.esql, prefix);
 
   const allErrors = prefixValidation.isValid ? errors : [...errors, prefixValidation.error];
@@ -48,10 +48,15 @@ export const StreamsESQLEditor = ({
 // As the normalization is a heavy operation, we memoize it to avoid re-calculating it on every render for static prefixes.
 const memoizedNormalizeEsqlQuery = memoize(normalizeEsqlQuery);
 
-export function validatePrefix(value: string, prefix?: string) {
+export function validatePrefix(value: string, prefix?: string | string[]) {
   const normalizedValue = memoizedNormalizeEsqlQuery(value);
-  const normalizedPrefix = prefix ? memoizedNormalizeEsqlQuery(prefix) : undefined;
-  if (!normalizedPrefix || normalizedValue.startsWith(normalizedPrefix)) {
+  const prefixes = Array.isArray(prefix) ? prefix : prefix ? [prefix] : [];
+  const normalizedPrefixes = prefixes.map(memoizedNormalizeEsqlQuery);
+
+  if (
+    normalizedPrefixes.length === 0 ||
+    normalizedPrefixes.some((p) => normalizedValue.startsWith(p))
+  ) {
     return { isValid: true, error: undefined } as const;
   }
 
@@ -60,7 +65,7 @@ export function validatePrefix(value: string, prefix?: string) {
     error: new Error(
       i18n.translate('xpack.streams.esqlQueryEditor.formFieldQueryPrefixError', {
         defaultMessage: 'The query must start with "{prefix}"',
-        values: { prefix },
+        values: { prefix: prefixes[0] },
       })
     ),
   } as const;
