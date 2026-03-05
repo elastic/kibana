@@ -16,6 +16,7 @@ import { renameCommand } from './rename';
 import { changePointCommand } from './change_point';
 import { completionCommand } from './completion';
 import { dissectCommand } from './dissect';
+import { registeredDomainCommand } from './registered_domain';
 import { enrichCommand } from './enrich';
 import { evalCommand } from './eval';
 import { fromCommand } from './from';
@@ -47,6 +48,7 @@ const baseCommands = [
   changePointCommand,
   completionCommand,
   dissectCommand,
+  registeredDomainCommand,
   enrichCommand,
   evalCommand,
   fromCommand,
