@@ -47,7 +47,12 @@ export interface DateRangePickerPanelConfig {
 }
 
 export interface DateRangePickerProps {
-  /** Initial text representation of the time range */
+  /**
+   * Text representation of the time range (controlled).
+   * When provided, the component is controlled and `value` is the external source of truth.
+   */
+  value?: string;
+  /** Initial text representation of the time range (uncontrolled, ignored when `value` is provided). */
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;

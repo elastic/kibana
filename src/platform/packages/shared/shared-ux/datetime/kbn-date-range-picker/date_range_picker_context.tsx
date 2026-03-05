@@ -11,6 +11,7 @@ import React, {
   createContext,
   useContext,
   useState,
+  useEffect,
   useRef,
   useMemo,
   useCallback,
@@ -118,6 +119,7 @@ export function useDateRangePickerContext(): DateRangePickerInternalContextValue
  */
 export function DateRangePickerProvider({
   children,
+  value,
   defaultValue,
   onChange,
   dateFormat,
@@ -138,7 +140,9 @@ export function DateRangePickerProvider({
   const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => defaultValue ?? '');
+  const isEditingRef = useRef(isEditing);
+  isEditingRef.current = isEditing;
+  const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
   const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
@@ -156,6 +160,12 @@ export function DateRangePickerProvider({
     ? durationToDisplayShortText(duration.startDate, duration.endDate)
     : null;
 
+  useEffect(() => {
+    if (typeof value === 'string' && !isEditingRef.current) {
+      setText(value);
+    }
+  }, [value]);
+
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
       showTimeWindowButtons === false
@@ -171,13 +181,17 @@ export function DateRangePickerProvider({
       if (editing && text) {
         lastValidText.current = text;
       }
-      if (!editing && lastValidText.current) {
-        setText(lastValidText.current);
+      if (!editing) {
+        if (typeof value === 'string') {
+          setText(value);
+        } else if (lastValidText.current) {
+          setText(lastValidText.current);
+        }
         lastValidText.current = '';
       }
       setIsEditing(editing);
     },
-    [text]
+    [text, value]
   );
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
