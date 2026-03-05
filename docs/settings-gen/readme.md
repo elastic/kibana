@@ -38,7 +38,7 @@ groups:
         #
         #   applies_to:
         #     - "stack: ga 9.2"
-        #     - "ess: ga"
+        #     - "ech: ga"
         #     - "self: ga"
         #
         # deprecation_details: "" OPTIONAL
@@ -115,7 +115,7 @@ groups:
             datatype: bool
             default: false
             applies_to:
-              - "ess: unavailable"
+              - "ech: unavailable"
 
       - setting: my.deprecated.setting
         description: |
