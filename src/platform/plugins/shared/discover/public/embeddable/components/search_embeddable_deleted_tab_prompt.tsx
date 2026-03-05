@@ -105,7 +105,7 @@ export const SearchEmbeddableDeletedTabPrompt = ({
       <p>
         <FormattedMessage
           id="discover.embeddable.deletedTab.editModePreEditWarningDescription"
-          defaultMessage="Use Edit {editIcon} to choose a different tab"
+          defaultMessage="Edit {editIcon} this panel to choose a different tab"
           values={{
             editIcon: <EuiIcon aria-hidden={true} type="pencil" size="m" />,
           }}
