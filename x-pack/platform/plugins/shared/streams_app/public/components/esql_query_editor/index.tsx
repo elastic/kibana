@@ -13,11 +13,16 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty, memoize } from 'lodash';
 import { normalizeEsqlQuery } from '@kbn/streams-schema';
 
+export interface ValidPrefixes {
+  primary: string;
+  all: string[];
+}
+
 export const StreamsESQLEditor = ({
   prefix,
   errors = [],
   ...props
-}: ESQLEditorProps & { prefix?: string | string[] }) => {
+}: ESQLEditorProps & { prefix?: ValidPrefixes }) => {
   const prefixValidation = validatePrefix(props.query.esql, prefix);
 
   const allErrors = prefixValidation.isValid ? errors : [...errors, prefixValidation.error];
@@ -48,15 +53,15 @@ export const StreamsESQLEditor = ({
 // As the normalization is a heavy operation, we memoize it to avoid re-calculating it on every render for static prefixes.
 const memoizedNormalizeEsqlQuery = memoize(normalizeEsqlQuery);
 
-export function validatePrefix(value: string, prefix?: string | string[]) {
-  const normalizedValue = memoizedNormalizeEsqlQuery(value);
-  const prefixes = Array.isArray(prefix) ? prefix : prefix ? [prefix] : [];
-  const normalizedPrefixes = prefixes.map(memoizedNormalizeEsqlQuery);
+export function validatePrefix(value: string, prefix?: ValidPrefixes) {
+  if (!prefix || prefix.all.length === 0) {
+    return { isValid: true, error: undefined } as const;
+  }
 
-  if (
-    normalizedPrefixes.length === 0 ||
-    normalizedPrefixes.some((p) => normalizedValue.startsWith(p))
-  ) {
+  const normalizedValue = memoizedNormalizeEsqlQuery(value);
+  const normalizedPrefixes = prefix.all.map(memoizedNormalizeEsqlQuery);
+
+  if (normalizedPrefixes.some((p) => normalizedValue.startsWith(p))) {
     return { isValid: true, error: undefined } as const;
   }
 
@@ -65,7 +70,7 @@ export function validatePrefix(value: string, prefix?: string | string[]) {
     error: new Error(
       i18n.translate('xpack.streams.esqlQueryEditor.formFieldQueryPrefixError', {
         defaultMessage: 'The query must start with "{prefix}"',
-        values: { prefix: prefixes[0] },
+        values: { prefix: prefix.primary },
       })
     ),
   } as const;

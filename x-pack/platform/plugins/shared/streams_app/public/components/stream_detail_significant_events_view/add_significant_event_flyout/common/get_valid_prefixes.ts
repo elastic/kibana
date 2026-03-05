@@ -12,6 +12,7 @@ import {
   getIndexPatternsForStream,
   normalizeEsqlQuery,
 } from '@kbn/streams-schema';
+import type { ValidPrefixes } from '../../../esql_query_editor';
 
 export const getDefaultQueryFrom = (definition: Streams.all.Definition) =>
   BasicPrettyPrinter.print(
@@ -29,9 +30,13 @@ export const getDefaultQueryFrom = (definition: Streams.all.Definition) =>
 export const getValidPrefixes = (
   definition: Streams.all.Definition,
   initialEsql?: string
-): string[] => {
-  const canonicalPrefix = getDefaultQueryFrom(definition);
+): ValidPrefixes => {
+  const primary = getDefaultQueryFrom(definition);
 
+  // Classic streams use "FROM <name>" as the primary prefix, but older significant events
+  // may have been saved with the wired-style pattern "FROM <name>,<name>.*".
+  // When we detect that the initial query uses the wired-style pattern, we accept both
+  // so existing queries remain valid without forcing users to re-edit them.
   if (Streams.ClassicStream.Definition.is(definition) && initialEsql) {
     const wiredStylePrefix = BasicPrettyPrinter.print(
       Builder.expression.query([
@@ -47,9 +52,9 @@ export const getValidPrefixes = (
     const normalizedInitial = normalizeEsqlQuery(initialEsql);
     const normalizedWired = normalizeEsqlQuery(wiredStylePrefix);
     if (normalizedInitial.startsWith(normalizedWired)) {
-      return [canonicalPrefix, wiredStylePrefix];
+      return { primary, all: [primary, wiredStylePrefix] };
     }
   }
 
-  return [canonicalPrefix];
+  return { primary, all: [primary] };
 };

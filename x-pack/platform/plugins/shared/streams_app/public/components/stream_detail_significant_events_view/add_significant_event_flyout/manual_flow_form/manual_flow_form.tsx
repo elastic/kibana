@@ -47,8 +47,7 @@ export function ManualFlowForm({
     [definition]
   );
 
-  const queryFrom = validPrefixes[0];
-  const defaultEsql = query.esql.query || queryFrom;
+  const defaultEsql = query.esql.query || validPrefixes.primary;
 
   const {
     control,

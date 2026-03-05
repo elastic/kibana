@@ -48,45 +48,50 @@ describe('getDefaultQueryFrom', () => {
 
 describe('getValidPrefixes', () => {
   describe('wired stream definitions', () => {
-    it('returns only the canonical prefix', () => {
+    it('returns only the primary prefix', () => {
       const definition = makeWiredDefinition('logs');
-      const prefixes = getValidPrefixes(definition);
-      expect(prefixes).toEqual(['FROM logs,logs.* METADATA _id, _source']);
+      const result = getValidPrefixes(definition);
+      expect(result.primary).toBe('FROM logs,logs.* METADATA _id, _source');
+      expect(result.all).toEqual(['FROM logs,logs.* METADATA _id, _source']);
     });
 
-    it('returns only the canonical prefix even when initialEsql uses wired-style pattern', () => {
+    it('returns only the primary prefix even when initialEsql uses wired-style pattern', () => {
       const definition = makeWiredDefinition('logs');
-      const prefixes = getValidPrefixes(
+      const result = getValidPrefixes(
         definition,
         'FROM logs,logs.* METADATA _id, _source | WHERE severity = "critical"'
       );
-      expect(prefixes).toEqual(['FROM logs,logs.* METADATA _id, _source']);
+      expect(result.primary).toBe('FROM logs,logs.* METADATA _id, _source');
+      expect(result.all).toEqual(['FROM logs,logs.* METADATA _id, _source']);
     });
   });
 
   describe('classic stream definitions', () => {
-    it('returns only the canonical prefix when no initialEsql is provided', () => {
+    it('returns only the primary prefix when no initialEsql is provided', () => {
       const definition = makeClassicDefinition('logs');
-      const prefixes = getValidPrefixes(definition);
-      expect(prefixes).toEqual(['FROM logs METADATA _id, _source']);
+      const result = getValidPrefixes(definition);
+      expect(result.primary).toBe('FROM logs METADATA _id, _source');
+      expect(result.all).toEqual(['FROM logs METADATA _id, _source']);
     });
 
-    it('returns only the canonical prefix when initialEsql uses the canonical pattern', () => {
+    it('returns only the primary prefix when initialEsql uses the primary pattern', () => {
       const definition = makeClassicDefinition('logs');
-      const prefixes = getValidPrefixes(
+      const result = getValidPrefixes(
         definition,
         'FROM logs METADATA _id, _source | WHERE severity = "critical"'
       );
-      expect(prefixes).toEqual(['FROM logs METADATA _id, _source']);
+      expect(result.primary).toBe('FROM logs METADATA _id, _source');
+      expect(result.all).toEqual(['FROM logs METADATA _id, _source']);
     });
 
-    it('returns both canonical and wired-style prefixes when initialEsql uses the wired-style pattern', () => {
+    it('returns both primary and wired-style prefixes when initialEsql uses the wired-style pattern', () => {
       const definition = makeClassicDefinition('logs');
-      const prefixes = getValidPrefixes(
+      const result = getValidPrefixes(
         definition,
         'FROM logs,logs.* METADATA _id, _source | WHERE severity = "critical"'
       );
-      expect(prefixes).toEqual([
+      expect(result.primary).toBe('FROM logs METADATA _id, _source');
+      expect(result.all).toEqual([
         'FROM logs METADATA _id, _source',
         'FROM logs,logs.* METADATA _id, _source',
       ]);
