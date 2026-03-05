@@ -7,7 +7,9 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
-import type { InspectResponse } from '@kbn/observability-shared-plugin/common';
+import type { Request } from '@kbn/inspector-plugin/common';
+
+type InspectResponse = Request[];
 
 export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
