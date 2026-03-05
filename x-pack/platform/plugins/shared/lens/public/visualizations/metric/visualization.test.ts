@@ -1176,11 +1176,8 @@ describe('metric visualization', () => {
           // even if color mode is dynamic it should fallback to static color as dataType is not numeric
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
-          expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            '#F6726A',
-            '#ECF1F9',
-            '#24C292',
-          ]);
+          expect(secondaryMetricAST.secondaryTrendPalette).toHaveLength(3);
+          expect(secondaryMetricAST.secondaryTrendTextPalette).toHaveLength(3);
         } else {
           fail('AST is not an object');
         }

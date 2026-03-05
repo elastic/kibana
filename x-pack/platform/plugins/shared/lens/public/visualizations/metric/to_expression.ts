@@ -26,7 +26,8 @@ import {
   getColorMode,
   getDefaultConfigForMode,
   getSecondaryLabelSelected,
-  getTrendPalette,
+  getSecondaryTrendPalette,
+  getSecondaryTrendTextPalette,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
@@ -191,7 +192,12 @@ export const toExpression = (
       secondaryTrendConfig.type === 'dynamic'
         ? getSecondaryDynamicTrendBaselineValue(isMetricNumeric, secondaryTrendConfig.baselineValue)
         : undefined,
-    secondaryTrendPalette: getTrendPalette(
+    secondaryTrendPalette: getSecondaryTrendPalette(
+      secondaryDynamicColorMode,
+      secondaryTrendConfig,
+      theme.getTheme()
+    ),
+    secondaryTrendTextPalette: getSecondaryTrendTextPalette(
       secondaryDynamicColorMode,
       secondaryTrendConfig,
       theme.getTheme()

@@ -50,6 +50,7 @@ export interface MetricArguments {
   secondaryTrendVisuals?: string;
   secondaryTrendBaseline?: number | string;
   secondaryTrendPalette?: [string, string, string];
+  secondaryTrendTextPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   primaryAlign: MetricStyle['valueTextAlign'];

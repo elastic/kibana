@@ -60,7 +60,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden="true" />;
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -72,7 +72,7 @@ export interface MetricVisComponentProps {
 }
 
 function buildTrendConfig(
-  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  { palette, textPalette, visuals, baseline }: MetricVisParam['secondaryTrend'],
   value: number | string
 ): TrendConfig | undefined {
   if (!palette) return undefined;
@@ -82,6 +82,7 @@ function buildTrendConfig(
     showValue: visuals !== 'icon',
     baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
     palette,
+    textPalette,
     borderColor: undefined,
     compareToPrimary: baseline === 'primary',
   };
@@ -202,6 +203,7 @@ export const MetricVis = ({
         value: secondaryMetricInfo.value,
         label: secondaryMetricInfo.label,
         badgeColor: secondaryMetricInfo.badgeColor,
+        badgeTextColor: secondaryMetricInfo.badgeTextColor,
         ariaDescription: secondaryMetricInfo.description,
         icon: secondaryMetricInfo.icon,
         labelPosition: config.metric.secondaryLabelPosition,
