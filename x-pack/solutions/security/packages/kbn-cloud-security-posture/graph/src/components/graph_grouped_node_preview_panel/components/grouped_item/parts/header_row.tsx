@@ -112,7 +112,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {item.itemType === DOCUMENT_TYPE_ALERT && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warningFilled" size="m" color="danger" />
+          <EuiIcon type="warningFilled" size="m" color="danger" aria-hidden={true} />
         </EuiFlexItem>
       )}
       {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (
@@ -126,6 +126,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
               position: relative;
               top: 1px;
             `}
+            aria-hidden={true}
           />
         </EuiFlexItem>
       )}
