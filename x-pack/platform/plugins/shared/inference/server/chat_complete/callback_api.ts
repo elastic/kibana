@@ -269,7 +269,6 @@ function resolveAndCreatePipeline({
             const endpointMeta = await resolveInferenceEndpoint({
               inferenceId: connectorId,
               esClient,
-              logger,
             });
             const executor = createInferenceEndpointExecutor({
               inferenceId: connectorId,

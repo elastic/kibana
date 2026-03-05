@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import { getInferenceEndpointById } from '../../util/get_inference_endpoint_by_id';
 
@@ -21,17 +20,14 @@ export interface InferenceEndpointMeta {
  * Resolves metadata about an inference endpoint by querying the ES Inference API.
  * This is used to populate tracing spans and telemetry with model information.
  *
- * Throws if the endpoint does not exist. Logs a warning and continues with
- * partial metadata if the endpoint exists but metadata parsing fails.
+ * Throws if the endpoint does not exist. 
  */
 export const resolveInferenceEndpoint = async ({
   inferenceId,
   esClient,
-  logger,
 }: {
   inferenceId: string;
   esClient: ElasticsearchClient;
-  logger: Logger;
 }): Promise<InferenceEndpointMeta> => {
   const endpoint = await getInferenceEndpointById({ inferenceId, esClient });
 

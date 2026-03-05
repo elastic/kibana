@@ -11,7 +11,6 @@ import { resolveInferenceEndpoint } from './resolve_inference_endpoint';
 describe('resolveInferenceEndpoint', () => {
   let mockInferenceGet: jest.Mock;
   let esClient: any;
-  const logger = loggerMock.create();
 
   beforeEach(() => {
     mockInferenceGet = jest.fn();
@@ -35,7 +34,6 @@ describe('resolveInferenceEndpoint', () => {
     const result = await resolveInferenceEndpoint({
       inferenceId: 'my-endpoint',
       esClient,
-      logger,
     });
 
     expect(result).toEqual({
@@ -63,7 +61,6 @@ describe('resolveInferenceEndpoint', () => {
     const result = await resolveInferenceEndpoint({
       inferenceId: 'my-endpoint',
       esClient,
-      logger,
     });
 
     expect(result).toEqual({
@@ -81,7 +78,6 @@ describe('resolveInferenceEndpoint', () => {
       resolveInferenceEndpoint({
         inferenceId: 'missing-endpoint',
         esClient,
-        logger,
       })
     ).rejects.toThrow("Inference endpoint 'missing-endpoint' not found");
   });
@@ -101,7 +97,6 @@ describe('resolveInferenceEndpoint', () => {
       resolveInferenceEndpoint({
         inferenceId: 'my-embedding-endpoint',
         esClient,
-        logger,
       })
     ).rejects.toThrow("expected 'chat_completion'");
   });
@@ -113,7 +108,6 @@ describe('resolveInferenceEndpoint', () => {
       resolveInferenceEndpoint({
         inferenceId: 'bad-endpoint',
         esClient,
-        logger,
       })
     ).rejects.toThrow('Connection refused');
   });
@@ -132,7 +126,6 @@ describe('resolveInferenceEndpoint', () => {
     const result = await resolveInferenceEndpoint({
       inferenceId: 'my-endpoint',
       esClient,
-      logger,
     });
 
     expect(result).toEqual({
