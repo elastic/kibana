@@ -7,11 +7,12 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { setupWiredStreams } from '../synthtrace_data/streams_data';
+import { setupRetentionAtScale } from '../synthtrace_data/streams_data';
 
 export const journey = new Journey({
+  ftrConfigPath: 'x-pack/performance/configs/streams_heavy_config.ts',
   beforeSteps: async ({ kibanaServer, log }) => {
-    await setupWiredStreams(kibanaServer, log);
+    await setupRetentionAtScale(kibanaServer, log);
   },
 })
   .step('Go to stream retention page', async ({ page, kbnUrl }) => {

@@ -27,8 +27,11 @@ export const journey = new Journey({
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await searchBox.type('logs-perf-classic-00001', { delay: inputDelays.TYPING });
-    await page.waitForSelector(subj('streamsTable'));
+    await searchBox.type('logs-perf-classic-00001', {
+      delay: inputDelays.TYPING,
+      timeout: 120000,
+    });
+    await page.waitForSelector(subj('streamsTable'), { timeout: 60000 });
   })
   .step('Clear search and expand all streams', async ({ page }) => {
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
@@ -55,11 +58,20 @@ export const journey = new Journey({
     await collapseAllButton.click();
     await page.waitForSelector(subj('streamsTable'));
   })
-  .step('Navigate to a stream detail page', async ({ page }) => {
-    const logsExpandButton = page.locator(subj('expandButton-logs.otel'));
-    if (await logsExpandButton.isVisible().catch(() => false)) {
-      await logsExpandButton.click();
-    }
+  .step('Navigate to a stream detail page', async ({ page, inputDelays }) => {
+    // logs.otel can be paginated away. Filter to bring it into view.
+    const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
+    await searchBox.waitFor({ state: 'visible', timeout: 60000 });
+    await searchBox.fill('');
+    await searchBox.type('logs.otel', {
+      delay: inputDelays.TYPING,
+      timeout: 60000,
+    });
+
+    const logsOtelExpand = page.locator(subj('expandButton-logs.otel'));
+    await logsOtelExpand.waitFor({ state: 'visible', timeout: 120000 });
+    await logsOtelExpand.click();
+
     const streamLink = page.locator(subj('streamsNameLink-logs.otel.child1'));
     await streamLink.waitFor({ state: 'visible', timeout: 60000 });
     await streamLink.click();

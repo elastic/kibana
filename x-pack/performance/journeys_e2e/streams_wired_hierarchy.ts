@@ -80,4 +80,15 @@ export const journey = new Journey({
     await streamLink.waitFor({ state: 'visible', timeout: 60000 });
     await streamLink.click();
     await page.waitForSelector(subj('wiredStreamBadge'), { timeout: 60000 });
+  })
+  .step('Navigate to root stream partitioning tab', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get('/app/streams/logs.otel/management/partitioning'));
+    await page.waitForSelector(subj('streamsAppStreamDetailRoutingAddRuleButton'), {
+      timeout: 120000,
+    });
+  })
+  .step('Verify routing rules render at scale', async ({ page }) => {
+    await page.waitForSelector(subj('routingRule-logs.otel.perf_child_0001'), {
+      timeout: 60000,
+    });
   });

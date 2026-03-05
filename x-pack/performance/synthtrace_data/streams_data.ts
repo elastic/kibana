@@ -18,12 +18,7 @@ const PUBLIC_API_HEADERS = {
   'elastic-api-version': '2023-10-31',
 };
 
-/**
- * The root wired stream to fork children from.
- * After the logs → logs.otel / logs.ecs split, `enableStreams()` no longer
- * creates a plain `logs` root on fresh installs. Use `logs.otel` which is
- * guaranteed to exist after enablement.
- */
+/** Root wired stream to fork children from (guaranteed after enablement). */
 const WIRED_ROOT_STREAM = 'logs.otel';
 
 const INTERNAL_API_HEADERS = {
@@ -32,8 +27,9 @@ const INTERNAL_API_HEADERS = {
   'elastic-api-version': '1',
 };
 
-/** Batch size for parallel classic stream creation requests */
-const CLASSIC_STREAM_BATCH_SIZE = 5;
+/** Batch size for classic stream creation — serialized because the Streams
+ *  backend uses a global lock, making concurrent requests counterproductive. */
+const CLASSIC_STREAM_BATCH_SIZE = 1;
 
 /** Max retries for transient errors (lock contention) */
 const MAX_RETRIES = 5;
@@ -41,28 +37,22 @@ const MAX_RETRIES = 5;
 /** Base delay between retries in ms */
 const RETRY_BASE_DELAY_MS = 3000;
 
-/**
- * Check if an error is an Axios response error with the given status code.
- */
+function isEsTimeoutError(error: unknown): boolean {
+  const err = error as { name?: string; message?: string };
+  return err?.name === 'TimeoutError' || /request timed out/i.test(err?.message ?? '');
+}
+
 function isConflictError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
   return err?.response?.status === 409;
 }
 
-/**
- * Check if a 409 error indicates a stream "already exists" (as opposed to
- * an optimistic-concurrency version conflict). This happens when a previous
- * content import timed out server-side but actually created the streams.
- * Retrying the same batch will never succeed — the streams are already there.
- */
+/** 409 for "already exists" (content import may have succeeded before timing out). */
 function isAlreadyExistsConflict(error: unknown): boolean {
   const err = error as { response?: { status?: number; data?: { message?: string } } };
   return err?.response?.status === 409 && /already exists/i.test(err.response.data?.message ?? '');
 }
 
-/**
- * Check if an error is a retryable lock contention error (HTTP 422).
- */
 function isLockContentionError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
   return err?.response?.status === 422;
@@ -72,10 +62,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Enable wired streams. Required before creating any wired streams or forking.
- * Idempotent — safe to call if already enabled.
- */
+/** Enable wired streams (idempotent). */
 export async function enableStreams(kibanaServer: KibanaServer, log: ToolingLog) {
   log.info('Enabling wired streams...');
   try {
@@ -95,11 +82,7 @@ export async function enableStreams(kibanaServer: KibanaServer, log: ToolingLog)
   }
 }
 
-/**
- * Create a single classic stream via the internal API.
- * Idempotent — ignores 409 if the stream already exists.
- * Retries on 422 (lock contention) with exponential backoff.
- */
+/** Create a classic stream (ignore 409, retry 422). */
 async function createSingleClassicStream(kibanaServer: KibanaServer, name: string): Promise<void> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -134,10 +117,7 @@ async function createSingleClassicStream(kibanaServer: KibanaServer, name: strin
   }
 }
 
-/**
- * Create multiple classic streams in parallel batches.
- * Uses batching to avoid overwhelming Elasticsearch.
- */
+/** Create classic streams serially to reduce lock contention. */
 export async function createClassicStreams(
   kibanaServer: KibanaServer,
   log: ToolingLog,
@@ -151,8 +131,10 @@ export async function createClassicStreams(
   let created = 0;
   for (let i = 0; i < names.length; i += CLASSIC_STREAM_BATCH_SIZE) {
     const batch = names.slice(i, i + CLASSIC_STREAM_BATCH_SIZE);
-    await Promise.all(batch.map((n) => createSingleClassicStream(kibanaServer, n)));
-    created += batch.length;
+    for (const name of batch) {
+      await createSingleClassicStream(kibanaServer, name);
+      created += 1;
+    }
 
     if (created % 500 === 0 || created === count) {
       log.info(`  Created ${created}/${count} classic streams`);
@@ -167,15 +149,8 @@ export async function createClassicStreams(
 }
 
 /**
- * Create a large number of unmanaged Elasticsearch data streams directly via the ES API.
- * This bypasses the Kibana Streams backend global lock, enabling fast creation of thousands
- * of data streams. The Streams listing page auto-discovers these as unmanaged classic streams.
- *
- * Uses the ES _bulk API to auto-create data streams via indexing. When a bulk request targets
- * a non-existent data stream that matches an index template, ES auto-creates it. Crucially,
- * ES batches auto-create operations within a single bulk call into a single cluster state
- * update, making this dramatically faster than individual createDataStream() calls which each
- * trigger separate cluster state updates and overwhelm the master node.
+ * Create many unmanaged data streams via ES bulk indexing.
+ * Kibana discovers these as unmanaged classic streams.
  */
 export async function createBulkDataStreams(
   es: Client,
@@ -185,8 +160,7 @@ export async function createBulkDataStreams(
 ) {
   log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES bulk API...`);
 
-  // ES 9.x creates 2 shards per data stream (write index + failure store); count * 4
-  // provides headroom for failure stores plus Kibana/ES system indices.
+  // Headroom for failure stores and system indices.
   const maxShardsPerNode = count * 4;
   await es.cluster.putSettings({
     persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
@@ -203,9 +177,9 @@ export async function createBulkDataStreams(
   });
   log.info('  Index template created');
 
-  // Bulk-indexing into non-existent data streams triggers auto-creation; ES batches the
-  // resulting cluster state changes within a single bulk call, avoiding master node congestion.
-  const BULK_BATCH_SIZE = 250;
+  // Keep batch size moderate. Each auto-created stream triggers cluster state work.
+  const BULK_BATCH_SIZE = 100;
+  const BULK_REQUEST_TIMEOUT_MS = 300_000;
   const names = Array.from({ length: count }, (_, i) => `${prefix}-${String(i).padStart(5, '0')}`);
   const timestamp = new Date().toISOString();
 
@@ -217,7 +191,31 @@ export async function createBulkDataStreams(
       { '@timestamp': timestamp, message: 'init' },
     ]);
 
-    const bulkResult = await es.bulk({ operations, refresh: false });
+    let bulkResult: Awaited<ReturnType<Client['bulk']>> | undefined;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        bulkResult = await es.bulk(
+          { operations, refresh: false },
+          { requestTimeout: BULK_REQUEST_TIMEOUT_MS }
+        );
+        lastError = undefined;
+        break;
+      } catch (error) {
+        lastError = error;
+        if (isEsTimeoutError(error) && attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          log.warning(
+            `  Bulk batch offset ${i}: timed out on attempt ${attempt}/${MAX_RETRIES}, retrying in ${delay}ms`
+          );
+          await sleep(delay);
+          continue;
+        }
+        throw error;
+      }
+    }
+    if (!bulkResult) throw lastError ?? new Error(`Bulk batch offset ${i} failed`);
+
     if (bulkResult.errors) {
       const firstFailure = bulkResult.items.find((item) => (item.create?.status ?? 201) !== 201);
       throw new Error(
@@ -267,16 +265,7 @@ async function forkStream(
   }
 }
 
-/**
- * Create a wired stream hierarchy: children forked from the root wired stream.
- * Requires wired streams to be enabled first (call enableStreams).
- *
- * Creates:
- *   logs.otel
- *   ├── logs.otel.child1  (routes on resource.attributes.service.name == 'service-1')
- *   ├── logs.otel.child2  (routes on resource.attributes.service.name == 'service-2')
- *   └── logs.otel.child3  (routes on resource.attributes.service.name == 'service-3')
- */
+/** Create a small wired hierarchy under `logs.otel`. */
 export async function createWiredStreamHierarchy(kibanaServer: KibanaServer, log: ToolingLog) {
   log.info('Creating wired stream hierarchy...');
 
@@ -300,18 +289,14 @@ export async function createWiredStreamHierarchy(kibanaServer: KibanaServer, log
   log.info('Wired stream hierarchy created');
 }
 
-/**
- * Full setup for the streams listing page journey (hybrid approach):
- * - Enable wired streams
- * - Create wired stream hierarchy (1 root + 3 children)
- * - Create 5000 unmanaged data streams via ES API (fast, ~10-30s)
- * - Create ~20 managed classic streams via Streams API (for realistic mix)
- */
+/** Setup for the streams listing page journey. */
 export async function setupListingPageData(
   kibanaServer: KibanaServer,
   es: Client,
   log: ToolingLog
 ) {
+  if (!shouldRunSetup(log)) return;
+
   await enableStreams(kibanaServer, log);
   await createWiredStreamHierarchy(kibanaServer, log);
 
@@ -319,11 +304,6 @@ export async function setupListingPageData(
   await createClassicStreams(kibanaServer, log, 20);
 }
 
-/**
- * Setup for journeys that need a single wired stream with children.
- * - Enable wired streams
- * - Create wired stream hierarchy
- */
 export async function setupWiredStreams(kibanaServer: KibanaServer, log: ToolingLog) {
   await enableStreams(kibanaServer, log);
   await createWiredStreamHierarchy(kibanaServer, log);
@@ -333,11 +313,7 @@ type WiredHierarchyStrategy = 'fork' | 'import';
 
 const DEFAULT_WIRED_HIERARCHY_COUNT = 100;
 
-/**
- * Phase 5A — Create a large wired hierarchy by serially forking children from the root stream.
- * Each fork acquires the global lock, so this is O(N) in lock acquisitions.
- * Practical for up to ~100 children; for 1000+ use the 'import' strategy.
- */
+/** Create many wired children by serial fork (lock-heavy). */
 async function createLargeWiredHierarchyViaFork(
   kibanaServer: KibanaServer,
   log: ToolingLog,
@@ -383,15 +359,8 @@ async function createLargeWiredHierarchyViaFork(
 }
 
 /**
- * Build content pack entries for a batch of wired hierarchy children.
- *
- * The root entry includes routing ONLY for the current batch's children.
- * The content import handler's `asTree()` validates that every routing destination
- * exists within the pack entries, so we cannot use cumulative routing (which
- * would reference children from previous batches that aren't in the current pack).
- *
- * After all batches complete, a separate API call updates the root's routing
- * to include all children.
+ * Build content pack entries for a batch.
+ * Routing can only reference children present in the same batch.
  */
 function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
   const batchRouting = [];
@@ -447,11 +416,7 @@ function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
   return [rootEntry, ...childEntries];
 }
 
-/**
- * Upload a content pack zip to the Kibana Streams content import API.
- * Constructs raw multipart/form-data since KbnClient.request() does not
- * natively support file uploads.
- */
+/** Upload a content pack archive (multipart/form-data). */
 async function uploadContentPack(
   kibanaServer: KibanaServer,
   streamName: string,
@@ -489,13 +454,7 @@ async function uploadContentPack(
   });
 }
 
-/**
- * Update the root stream's routing to include all wired children.
- *
- * After batched content imports, each batch overwrites the root's routing with
- * only that batch's children. This final call sets the complete routing table
- * via `PUT /api/streams/${WIRED_ROOT_STREAM}/_ingest` so all children are routable.
- */
+/** Update root routing after batched imports. */
 async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, count: number) {
   log.info(`Updating root stream routing to include all ${count} children...`);
 
@@ -508,8 +467,7 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     });
   }
 
-  // Root streams cannot use `inherit` for lifecycle/failure_store — fetch current
-  // concrete values so the PUT does not get rejected with 400.
+  // Root streams cannot use `inherit` for lifecycle/failure_store.
   const response = await kibanaServer.request<{ ingest: Record<string, unknown> }>({
     path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
     method: 'GET',
@@ -563,17 +521,8 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
 }
 
 /**
- * Phase 5B — Create a large wired hierarchy via batched content imports.
- *
- * A single content import with 1000+ entries causes Kibana to OOM (the backend's
- * bulkUpsert fires ~5000 concurrent ES requests for index templates, component
- * templates, and data streams). Batching into chunks of IMPORT_BATCH_SIZE keeps
- * each import within proven memory limits.
- *
- * Each batch's root entry only includes routing for that batch's children (the
- * content import handler's `asTree()` requires all routing destinations to exist
- * in the pack entries). After all batches, `updateRootRouting()` sets the complete
- * routing table via the ingest API.
+ * Create many wired children via batched content imports.
+ * One huge import can OOM. Batch to keep memory bounded.
  */
 async function createLargeWiredHierarchyViaImport(
   kibanaServer: KibanaServer,
@@ -691,12 +640,7 @@ export async function createLargeWiredHierarchy(
   }
 }
 
-/**
- * Full setup for the large wired hierarchy journey.
- * In performance runs, guards heavy creation to run only during the ingest
- * phase (WARMUP), since beforeSteps runs in both WARMUP and TEST phases.
- * In regular FTR/CI runs (no performance phase), setup runs normally.
- */
+/** Setup for the large wired hierarchy journey. */
 export async function setupLargeWiredHierarchy(
   kibanaServer: KibanaServer,
   es: Client,
@@ -707,7 +651,6 @@ export async function setupLargeWiredHierarchy(
   const shouldIngest = process.env.TEST_INGEST_ES_DATA === 'true';
 
   // beforeSteps runs in both WARMUP and TEST phases during performance runs.
-  // Only skip in the TEST phase there; run setup normally in non-performance CI/FTR runs.
   if (isPerformanceRun && !shouldIngest) {
     log.info(
       'Skipping large wired hierarchy setup during performance TEST phase (TEST_INGEST_ES_DATA != true)'
@@ -717,4 +660,199 @@ export async function setupLargeWiredHierarchy(
 
   await enableStreams(kibanaServer, log);
   await createLargeWiredHierarchy(kibanaServer, es, log, options);
+}
+
+const CHILD_STREAM = `${WIRED_ROOT_STREAM}.child1`;
+
+/** Skip heavy setup during performance TEST phase. */
+function shouldRunSetup(log: ToolingLog): boolean {
+  const isPerformanceRun = Boolean(process.env.TEST_PERFORMANCE_PHASE);
+  const shouldIngest = process.env.TEST_INGEST_ES_DATA === 'true';
+  if (isPerformanceRun && !shouldIngest) {
+    log.info('Skipping at-scale setup during performance TEST phase');
+    return false;
+  }
+  return true;
+}
+
+interface IngestConfig {
+  processing: { steps: unknown[] };
+  settings: Record<string, unknown>;
+  wired: { fields: Record<string, unknown>; routing: unknown[] };
+  lifecycle: Record<string, unknown>;
+  failure_store: Record<string, unknown>;
+}
+
+/** GET ingest, mutate, PUT back (strip read-only processing.updated_at). */
+async function getAndUpdateIngestConfig(
+  kibanaServer: KibanaServer,
+  streamName: string,
+  mutate: (config: IngestConfig) => void
+) {
+  const response = await kibanaServer.request<{
+    ingest: IngestConfig & { processing: { updated_at?: string } };
+  }>({
+    path: `/api/streams/${streamName}/_ingest`,
+    method: 'GET',
+    headers: PUBLIC_API_HEADERS,
+  });
+
+  const config = response.data.ingest;
+  const { updated_at: _updatedAt, ...processingWithoutTimestamp } = config.processing;
+  config.processing = processingWithoutTimestamp as IngestConfig['processing'];
+
+  mutate(config);
+
+  await kibanaServer.request({
+    path: `/api/streams/${streamName}/_ingest`,
+    method: 'PUT',
+    headers: PUBLIC_API_HEADERS,
+    body: { ingest: config },
+  });
+}
+
+/** Setup for the processing journey at scale. */
+export async function setupProcessingAtScale(kibanaServer: KibanaServer, log: ToolingLog) {
+  if (!shouldRunSetup(log)) return;
+
+  await enableStreams(kibanaServer, log);
+  await createWiredStreamHierarchy(kibanaServer, log);
+
+  const PROCESSOR_COUNT = 30;
+  log.info(`Adding ${PROCESSOR_COUNT} grok processors to ${CHILD_STREAM}...`);
+
+  await getAndUpdateIngestConfig(kibanaServer, CHILD_STREAM, (config) => {
+    const processors = Array.from({ length: PROCESSOR_COUNT }, (_, i) => ({
+      action: 'grok' as const,
+      from: 'body.text',
+      patterns: [`%{WORD:attributes.perf_proc_${String(i + 1).padStart(3, '0')}}`],
+      pattern_definitions: {},
+      ignore_missing: true,
+      ignore_failure: true,
+    }));
+    config.processing.steps = processors;
+  });
+
+  log.info(`${PROCESSOR_COUNT} grok processors added to ${CHILD_STREAM}`);
+}
+
+/** Setup for the data quality journey at scale. */
+export async function setupDataQualityAtScale(
+  kibanaServer: KibanaServer,
+  es: Client,
+  log: ToolingLog
+) {
+  if (!shouldRunSetup(log)) return;
+
+  await enableStreams(kibanaServer, log);
+  await createWiredStreamHierarchy(kibanaServer, log);
+
+  const FIELD_COUNT = 50;
+  const DOC_COUNT = 5000;
+  const LONG_VALUE = 'x'.repeat(1025);
+
+  log.info(`Mapping ${FIELD_COUNT} keyword fields on ${CHILD_STREAM}...`);
+
+  const fields: Record<string, { type: string }> = {};
+  for (let i = 1; i <= FIELD_COUNT; i++) {
+    fields[`attributes.perf_dq_${String(i).padStart(3, '0')}`] = { type: 'keyword' };
+  }
+
+  await getAndUpdateIngestConfig(kibanaServer, CHILD_STREAM, (config) => {
+    config.wired.fields = { ...config.wired.fields, ...fields };
+  });
+
+  log.info(`Mapped ${FIELD_COUNT} keyword fields. Bulk-indexing ${DOC_COUNT} degraded docs...`);
+
+  const BULK_BATCH_SIZE = 500;
+  let indexed = 0;
+  for (let i = 0; i < DOC_COUNT; i += BULK_BATCH_SIZE) {
+    const batchSize = Math.min(BULK_BATCH_SIZE, DOC_COUNT - i);
+    const operations = [];
+    for (let j = 0; j < batchSize; j++) {
+      const doc: Record<string, string> = {
+        '@timestamp': new Date().toISOString(),
+        message: `degraded-doc-${i + j}`,
+      };
+      for (let f = 1; f <= FIELD_COUNT; f++) {
+        doc[`attributes.perf_dq_${String(f).padStart(3, '0')}`] = LONG_VALUE;
+      }
+      operations.push({ create: { _index: CHILD_STREAM } }, doc);
+    }
+
+    const bulkResult = await es.bulk({ operations, refresh: false });
+    if (bulkResult.errors) {
+      const firstFailure = bulkResult.items.find((item) => (item.create?.status ?? 201) !== 201);
+      throw new Error(
+        `Bulk degraded doc indexing failed at offset ${i}. ` +
+          `First error: ${JSON.stringify(firstFailure?.create?.error)}`
+      );
+    }
+    indexed += batchSize;
+    if (indexed % 1000 === 0 || indexed === DOC_COUNT) {
+      log.info(`  Indexed ${indexed}/${DOC_COUNT} degraded docs`);
+    }
+  }
+
+  await es.indices.refresh({ index: CHILD_STREAM });
+  log.info(`${DOC_COUNT} degraded docs indexed into ${CHILD_STREAM}`);
+}
+
+/** Setup for the field mapping journey at scale. */
+export async function setupFieldMappingAtScale(kibanaServer: KibanaServer, log: ToolingLog) {
+  if (!shouldRunSetup(log)) return;
+
+  await enableStreams(kibanaServer, log);
+  await createWiredStreamHierarchy(kibanaServer, log);
+
+  const FIELD_COUNT = 200;
+  const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
+
+  log.info(`Mapping ${FIELD_COUNT} fields on ${CHILD_STREAM}...`);
+
+  const fields: Record<string, { type: string }> = {};
+  for (let i = 1; i <= FIELD_COUNT; i++) {
+    const type = FIELD_TYPES[(i - 1) % FIELD_TYPES.length];
+    fields[`attributes.perf_schema_${String(i).padStart(3, '0')}`] = { type };
+  }
+
+  await getAndUpdateIngestConfig(kibanaServer, CHILD_STREAM, (config) => {
+    config.wired.fields = { ...config.wired.fields, ...fields };
+  });
+
+  log.info(`${FIELD_COUNT} fields mapped on ${CHILD_STREAM}`);
+}
+
+/** Setup for the retention journey at scale. */
+export async function setupRetentionAtScale(kibanaServer: KibanaServer, log: ToolingLog) {
+  if (!shouldRunSetup(log)) return;
+
+  await enableStreams(kibanaServer, log);
+  await createWiredStreamHierarchy(kibanaServer, log);
+
+  log.info(`Setting lifecycle with 10 downsampling steps on ${CHILD_STREAM}...`);
+
+  const downsampleSteps = [
+    { after: '0d', fixed_interval: '1h' },
+    { after: '1d', fixed_interval: '2h' },
+    { after: '3d', fixed_interval: '4h' },
+    { after: '7d', fixed_interval: '8h' },
+    { after: '14d', fixed_interval: '1d' },
+    { after: '30d', fixed_interval: '2d' },
+    { after: '60d', fixed_interval: '4d' },
+    { after: '90d', fixed_interval: '8d' },
+    { after: '180d', fixed_interval: '16d' },
+    { after: '365d', fixed_interval: '32d' },
+  ];
+
+  await getAndUpdateIngestConfig(kibanaServer, CHILD_STREAM, (config) => {
+    config.lifecycle = {
+      dsl: {
+        data_retention: '30d',
+        downsample: downsampleSteps,
+      },
+    };
+  });
+
+  log.info(`Lifecycle with 10 downsampling steps set on ${CHILD_STREAM}`);
 }
