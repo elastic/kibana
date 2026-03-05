@@ -28,7 +28,7 @@ export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
   },
   [EntityStoreTaskType.enum.historySnapshot]: {
     title: 'Entity Store - History Snapshot Task',
-    type: 'entity_store:v2:snapshot_task',
+    type: 'entity_store:v2:history_snapshot_task',
     timeout: '30m',
   },
 };
