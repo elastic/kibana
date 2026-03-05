@@ -31,7 +31,6 @@ import {
  * - `DROP _id` / `DROP _*` / any wildcard DROP — column removed
  * - `RENAME _id AS …` — column exists under a new name
  * - `EVAL _id = …` — metadata value overwritten
- * - `DISSECT` / `GROK` — may create columns unpredictably
  *
  * **Examples:**
  * ```
@@ -42,7 +41,6 @@ import {
  * "FROM logs* METADATA _id"             → "FROM logs* METADATA _id"                    (no-op)
  * "FROM logs* | DROP _id | KEEP host"   → "FROM logs* METADATA _id | DROP _id | KEEP host"
  * "FROM logs* | KEEP agent.*"           → "FROM logs* METADATA _id | KEEP agent.*, _id"
- * "FROM logs* | DISSECT msg … | KEEP x" → "FROM logs* METADATA _id | DISSECT msg … | KEEP x"
  * ```
  *
  * DROP _id is intentionally left untouched — removing a user's explicit DROP
@@ -65,7 +63,7 @@ export const injectMetadataId = (query: string): string => {
  * appended, which is redundant but harmless).
  *
  * Stops at the first command where `_id` may no longer be the original
- * metadata value: DROP _id / wildcard DROP, RENAME _id, EVAL _id, DISSECT, GROK.
+ * metadata value: DROP _id / wildcard DROP, RENAME _id, EVAL _id.
  *
  * Returns early without iterating if no KEEP command exists in the pipeline.
  */
@@ -84,10 +82,6 @@ function addIdToKeepCommands(root: ESQLAstQueryExpression): void {
     }
 
     if (cmd.name === 'eval' && hasAssignmentToId(cmd.args)) {
-      break;
-    }
-
-    if (cmd.name === 'dissect' || cmd.name === 'grok') {
       break;
     }
 

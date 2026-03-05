@@ -156,6 +156,12 @@ describe('injectMetadataId', () => {
         injectMetadataId('FROM logs* | KEEP a, _id | RENAME _id AS my_id | KEEP a, my_id')
       ).toBe('FROM logs* METADATA _id | KEEP a, _id | RENAME _id AS my_id | KEEP a, my_id');
     });
+
+    it('RENAME other_col AS _id does NOT stop KEEP injection (known use case)', () => {
+      expect(injectMetadataId('FROM logs* | RENAME doc_id AS _id | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | RENAME doc_id AS _id | KEEP agent.name, _id'
+      );
+    });
   });
 
   describe('EVAL _id (stops KEEP injection)', () => {
@@ -184,16 +190,16 @@ describe('injectMetadataId', () => {
     });
   });
 
-  describe('DISSECT/GROK (stops KEEP injection)', () => {
-    it('does not inject _id into KEEP after DISSECT', () => {
+  describe('DISSECT/GROK (does not stop KEEP injection)', () => {
+    it('injects _id into KEEP after DISSECT', () => {
       expect(injectMetadataId('FROM logs* | DISSECT message "%{parsed}" | KEEP parsed')).toBe(
-        'FROM logs* METADATA _id | DISSECT message "%{parsed}" | KEEP parsed'
+        'FROM logs* METADATA _id | DISSECT message "%{parsed}" | KEEP parsed, _id'
       );
     });
 
-    it('does not inject _id into KEEP after GROK', () => {
+    it('injects _id into KEEP after GROK', () => {
       expect(injectMetadataId('FROM logs* | GROK message "%{WORD:parsed}" | KEEP parsed')).toBe(
-        'FROM logs* METADATA _id | GROK message "%{WORD:parsed}" | KEEP parsed'
+        'FROM logs* METADATA _id | GROK message "%{WORD:parsed}" | KEEP parsed, _id'
       );
     });
 
