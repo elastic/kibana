@@ -16,18 +16,28 @@ import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
+import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
+import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
 
+const toAuthResponse = (
+  auth: NotificationPolicySavedObjectAttributes['auth']
+): NotificationPolicyResponse['auth'] => {
+  const { apiKey: _, ...rest } = auth;
+  return rest;
+};
+
 @injectable()
 export class NotificationPolicyClient {
   constructor(
     @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract
   ) {}
 
   public async createNotificationPolicy(
@@ -43,8 +53,11 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
+    const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${params.data.name}`);
+
     const attributes: NotificationPolicySavedObjectAttributes = {
       ...parsed.data,
+      auth: apiKeyAttrs,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,
@@ -57,7 +70,7 @@ export class NotificationPolicyClient {
         id: params.options?.id,
       });
 
-      return { id, version, ...attributes };
+      return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
@@ -70,7 +83,12 @@ export class NotificationPolicyClient {
   public async getNotificationPolicy({ id }: { id: string }): Promise<NotificationPolicyResponse> {
     try {
       const doc = await this.notificationPolicySavedObjectService.get(id);
-      return { id, version: doc.version, ...doc.attributes };
+      return {
+        id,
+        version: doc.version,
+        ...omit(doc.attributes, ['auth']),
+        auth: toAuthResponse(doc.attributes.auth),
+      };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Notification policy with id "${id}" not found`);
@@ -95,7 +113,14 @@ export class NotificationPolicyClient {
         return [];
       }
 
-      return [{ id: doc.id, version: doc.version, ...doc.attributes }];
+      return [
+        {
+          id: doc.id,
+          version: doc.version,
+          ...omit(doc.attributes, ['auth']),
+          auth: toAuthResponse(doc.attributes.auth),
+        },
+      ];
     });
   }
 
@@ -116,9 +141,13 @@ export class NotificationPolicyClient {
       id: params.options.id,
     });
 
+    const policyName = parsed.data.name ?? existingPolicy.name;
+    const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
+
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
-      ...omit(existingPolicy, ['id', 'version']),
+      ...omit(existingPolicy, ['id', 'version', 'auth']),
       ...parsed.data,
+      auth: apiKeyAttrs,
       updatedBy: userProfileUid,
       updatedAt: now,
     };
@@ -130,7 +159,12 @@ export class NotificationPolicyClient {
         version: params.options.version,
       });
 
-      return { id: params.options.id, version: updated.version, ...nextAttrs };
+      return {
+        id: params.options.id,
+        version: updated.version,
+        ...omit(nextAttrs, ['auth']),
+        auth: toAuthResponse(nextAttrs.auth),
+      };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(

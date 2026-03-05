@@ -485,6 +485,8 @@ describe('DispatcherService integration tests', () => {
         previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
       });
 
+      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
+
       const actionsResponse = await esClient.search({
         index: ALERT_ACTIONS_DATA_STREAM,
         query: {
@@ -668,6 +670,11 @@ async function seedRulesAndPolicies(
     name: 'Test Policy',
     description: 'Test notification policy',
     destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
+    auth: {
+      apiKey: 'test-api-key',
+      owner: 'elastic',
+      createdByUser: false,
+    },
     createdBy: null,
     updatedBy: null,
     createdAt: '2026-01-20T00:00:00.000Z',
