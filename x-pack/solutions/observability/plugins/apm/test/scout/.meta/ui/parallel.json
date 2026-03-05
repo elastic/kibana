@@ -1,5 +1,5 @@
 {
-  "sha1": "4e645a9e1ebd8d0615712aa4407b0f5968c7ed2f",
+  "sha1": "8aed905c6b9ac14cc304c58dd503b7e78ea4d81a",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 20,
+        "line": 22,
         "column": 16
       }
     },
@@ -576,7 +576,7 @@
     {
       "id": "027a724476bf822-7a5ac6225930c1c",
       "title": "Service map - accessibility axe-core automated accessibility checks pass",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -585,30 +585,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 29,
-        "column": 9
-      }
-    },
-    {
-      "id": "027a724476bf822-3e58cea4efef368",
-      "title": "Service map - accessibility keyboard navigation works correctly",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 67,
+        "line": 24,
         "column": 9
       }
     },
     {
       "id": "027a724476bf822-d188045f3c69eae",
       "title": "Service map - accessibility focus management and visible indicators work correctly",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -617,14 +601,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 114,
+        "line": 41,
         "column": 9
       }
     },
     {
       "id": "027a724476bf822-c5ee877afe0ab0a",
       "title": "Service map - accessibility ARIA attributes are properly set for screen readers",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -633,7 +617,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 141,
+        "line": 68,
         "column": 9
       }
     },
@@ -890,6 +874,38 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
         "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2b5cbd964753d1-a075ca8194c0ad2",
+      "title": "Service Overview - AWS Lambda displays cold start rate chart and not transaction breakdown chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_aws_lambda.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "61abd2418453f25-d9f094b073ce786",
+      "title": "Service Overview - Azure Functions displays cold start rate chart and not transaction breakdown chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_azure_functions.spec.ts",
+        "line": 21,
         "column": 9
       }
     },
@@ -1983,7 +1999,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 29,
+        "line": 31,
         "column": 9
       }
     },
@@ -1999,7 +2015,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 83,
+        "line": 77,
         "column": 9
       }
     },
@@ -2015,7 +2031,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 125,
+        "line": 114,
         "column": 9
       }
     },
@@ -2031,7 +2047,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 159,
+        "line": 151,
         "column": 9
       }
     },
@@ -2047,7 +2063,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 194,
+        "line": 186,
         "column": 9
       }
     },
@@ -2084,6 +2100,22 @@
       }
     },
     {
+      "id": "0ea21a81fd9bb15-e7b2804e4de31d3",
+      "title": "Transaction details Redirects to transaction list when transactionName is missing in URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
       "id": "0ea21a81fd9bb15-025e43f8799c8ae",
       "title": "Transaction details Renders the page with expected content",
       "expectedStatus": "passed",
@@ -2095,7 +2127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 26,
+        "line": 48,
         "column": 9
       }
     },
@@ -2111,7 +2143,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 53,
+        "line": 71,
         "column": 9
       }
     },
@@ -2127,7 +2159,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 75,
+        "line": 93,
         "column": 9
       }
     },

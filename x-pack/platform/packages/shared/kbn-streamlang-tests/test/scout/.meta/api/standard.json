@@ -1,5 +1,5 @@
 {
-  "sha1": "25d4fbc2b145a5dcb8ccd57e5ae68dff8196f317",
+  "sha1": "f00c3da047332598852a28624f812681fbc574cc",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -2208,6 +2208,272 @@
       }
     },
     {
+      "id": "8af300a9a50c513-90785e2196e4575",
+      "title": "Cross-compatibility - Sort Processor should correctly sort an array in ascending order (default)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-f22f14706a08a2e",
+      "title": "Cross-compatibility - Sort Processor should correctly sort an array in descending order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-c99b670df6c448e",
+      "title": "Cross-compatibility - Sort Processor should correctly sort an array to a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-3c385ee6d047479",
+      "title": "Cross-compatibility - Sort Processor should sort numeric arrays",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 102,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-f2ff97af352eb15",
+      "title": "Cross-compatibility - Sort Processor should handle single element array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 129,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-cc9fb516958c141",
+      "title": "Cross-compatibility - Sort Processor should support conditional sort with where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 153,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-2cafe1b77aa71cd",
+      "title": "Cross-compatibility - Sort Processor should handle ignore_missing consistently between transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 201,
+        "column": 10
+      }
+    },
+    {
+      "id": "8af300a9a50c513-5b57190e732dd6d",
+      "title": "Cross-compatibility - Sort Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 262,
+        "column": 12
+      }
+    },
+    {
+      "id": "8af300a9a50c513-cdfb21481f08d44",
+      "title": "Cross-compatibility - Sort Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
+        "line": 262,
+        "column": 12
+      }
+    },
+    {
+      "id": "f55f162e8605edf-8ac0d3deca5a031",
+      "title": "Cross-compatibility - Split Processor should correctly split a string into an array using a simple delimiter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-7e16338192cde2e",
+      "title": "Cross-compatibility - Split Processor should correctly split a string to a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-feeb66923cd0585",
+      "title": "Cross-compatibility - Split Processor should split with different delimiters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-21381cdec6612ee",
+      "title": "Cross-compatibility - Split Processor should handle single value (no delimiter found)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-c5b10ff73c3846d",
+      "title": "Cross-compatibility - Split Processor should support conditional split with where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-c153d569757fe1b",
+      "title": "Cross-compatibility - Split Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 185,
+        "column": 12
+      }
+    },
+    {
+      "id": "f55f162e8605edf-cfe640fdd7bfc68",
+      "title": "Cross-compatibility - Split Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 185,
+        "column": 12
+      }
+    },
+    {
+      "id": "f55f162e8605edf-0fc15dc4b11c9d7",
+      "title": "Cross-compatibility - Split Processor should document regex separator limitation: Ingest Pipeline supports regex, ES|QL only supports single byte delimiters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 213,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-5d9f77bfd047c89",
+      "title": "Cross-compatibility - Split Processor should handle missing field differently between transpilers when ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 250,
+        "column": 10
+      }
+    },
+    {
+      "id": "f55f162e8605edf-7905245044b141b",
+      "title": "Cross-compatibility - Split Processor should handle preserve_trailing option in Ingest Pipeline (not supported in ES|QL)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
+        "line": 282,
+        "column": 10
+      }
+    },
+    {
       "id": "d369ce045586e13-0c4b2805eb36ac5",
       "title": "Cross-compatibility - Trim Processor should trim a field in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
@@ -4110,8 +4376,260 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 225,
+        "line": 215,
         "column": 12
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-8662213d3e8a7c9",
+      "title": "Streamlang to ES|QL - Sort Processor should sort an array field in ascending order with EVAL MV_SORT() (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-defbf1cb7974e87",
+      "title": "Streamlang to ES|QL - Sort Processor should sort an array field in descending order with EVAL MV_SORT()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-d815e83da5810de",
+      "title": "Streamlang to ES|QL - Sort Processor should sort an array field to target field with EVAL MV_SORT()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-b8f2b388e7fdbe1",
+      "title": "Streamlang to ES|QL - Sort Processor should sort numeric arrays",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 101,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-e7684c3f54dbff5",
+      "title": "Streamlang to ES|QL - Sort Processor should handle single element array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-67bfea1f4d885b3",
+      "title": "Streamlang to ES|QL - Sort Processor should sort field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 148,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-2619bbcb9708221",
+      "title": "Streamlang to ES|QL - Sort Processor should sort to target field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 188,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-e5fa4bf7b0c1c9a",
+      "title": "Streamlang to ES|QL - Sort Processor should handle ignore_missing: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 245,
+        "column": 10
+      }
+    },
+    {
+      "id": "8ad10dea21bd38c-2bbf8516f6133fc",
+      "title": "Streamlang to ES|QL - Sort Processor should reject Mustache template syntax {{ and {{{ in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
+        "line": 274,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-833603ae2d2d82c",
+      "title": "Streamlang to ES|QL - Split Processor should split a string field into an array with EVAL SPLIT() (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-5863a549592b2f7",
+      "title": "Streamlang to ES|QL - Split Processor should split a string field to target field with EVAL SPLIT()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-4536ac100967f13",
+      "title": "Streamlang to ES|QL - Split Processor should split using various single byte delimiters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-be05ccc5fc12e30",
+      "title": "Streamlang to ES|QL - Split Processor should handle single value (no delimiter found)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-745f00a9a4d5f1c",
+      "title": "Streamlang to ES|QL - Split Processor should handle ignore_missing: false (default) with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-73168e789a6ee32",
+      "title": "Streamlang to ES|QL - Split Processor should handle ignore_missing: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 153,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-f76588b697125bb",
+      "title": "Streamlang to ES|QL - Split Processor should split field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 183,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-e5ee1428c5e1733",
+      "title": "Streamlang to ES|QL - Split Processor should split to target field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 222,
+        "column": 10
+      }
+    },
+    {
+      "id": "f0b3cfd1ba71861-204b62e04f9e292",
+      "title": "Streamlang to ES|QL - Split Processor should reject Mustache template syntax {{ and {{{ in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
+        "line": 285,
+        "column": 10
       }
     },
     {
@@ -5054,6 +5572,38 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
         "line": 189,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-c2b958c62faf4f0",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should combine parent where condition with nested processor if condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 236,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-e63eed4e6940f3d",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should preserve nested if condition when manual_ingest_pipeline has no where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 292,
         "column": 12
       }
     },
@@ -6227,8 +6777,330 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 177,
+        "line": 167,
         "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-8dcf2fa8889b903",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should sort an array field in ascending order (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-fc00df8646cfd9a",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should sort an array field in descending order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-541cfdb5121ce04",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should sort an array field to a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-af31c9b96b43eb4",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should sort numeric arrays",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-c62cea2dc33b0ac",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should fail if field is missing and ignore_failure is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 120,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-0fb66ca34f4dd5f",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should not fail if field is missing and ignore_failure is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-04c6dbaa79da1cd",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should skip processing when field is missing and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 169,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-d359a3ff5dcbf7d",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should process when field exists and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-e6805e52490bb26",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should sort field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 222,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-a6c25c8f2bea40c",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should sort to target field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 263,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7065a4616b8003-7f11b7ccd74cc78",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 324,
+        "column": 14
+      }
+    },
+    {
+      "id": "b7065a4616b8003-a99b7fa3bb26c04",
+      "title": "Streamlang to Ingest Pipeline - Sort Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
+        "line": 324,
+        "column": 14
+      }
+    },
+    {
+      "id": "0c42de86edf5917-6493d4ff1b24a22",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should split a string field into an array (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-7d29bae6c594543",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should split a string field to a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-17144b639db0aa6",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should split using regex pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-9a9b2c318328396",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-adca83eb43574a3",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 118,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-72f33a8ea116252",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should preserve trailing empty elements when preserve_trailing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-d0f748e480dbbbc",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should discard trailing empty elements when preserve_trailing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 173,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-e3649e8f15201fd",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should split field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 200,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-284b150f6dea8d3",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should split to target field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 241,
+        "column": 12
+      }
+    },
+    {
+      "id": "0c42de86edf5917-329cace932e1b45",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 304,
+        "column": 14
+      }
+    },
+    {
+      "id": "0c42de86edf5917-662ca896b66a626",
+      "title": "Streamlang to Ingest Pipeline - Split Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
+        "line": 304,
+        "column": 14
       }
     },
     {
