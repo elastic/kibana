@@ -31,11 +31,12 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/i18n'
   - '@kbn/std'
-  - '@kbn/esql-language'
+  - '@kbn/esql'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/utility-types'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
+  - '@kbn/esql-language'
 tags:
   - shared-server
   - package

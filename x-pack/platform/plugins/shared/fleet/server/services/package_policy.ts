@@ -51,6 +51,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -3458,6 +3459,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
         })
       );
     }
+  }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
   }
 }
 

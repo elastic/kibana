@@ -6,6 +6,7 @@
  */
 
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { createMemoryHistory } from 'history';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -29,6 +30,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},

@@ -126,6 +126,11 @@ describe('streamToResponse', () => {
           },
         ],
       },
+      metadata: {
+        anonymization: {
+          replacementsId: 'replacements-123',
+        },
+      },
     };
 
     const response = await streamToResponse(
@@ -137,6 +142,7 @@ describe('streamToResponse', () => {
       toolCalls: [],
       deanonymized_input: messageWithDeanonymization.deanonymized_input,
       deanonymized_output: messageWithDeanonymization.deanonymized_output,
+      metadata: messageWithDeanonymization.metadata,
     });
   });
 });

@@ -7,7 +7,12 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import {
+  buildDataTableRecord,
+  type DataTableRecord,
+  type EsHitRecord,
+  getFieldValue,
+} from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
@@ -19,7 +24,6 @@ import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
 import { MitreAttack } from './mitre_attack';
-import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isEcsAllowedValue } from '../utils/event_utils';
@@ -45,26 +49,20 @@ const KEY = 'about';
  */
 export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
-  const {
-    dataFormattedForFieldBrowser,
-    eventId,
-    getFieldsData,
-    indexName,
-    isRulePreview,
-    scopeId,
-    searchHit,
-  } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, eventId, indexName, isRulePreview, scopeId, searchHit } =
+    useDocumentDetailsContext();
   const { rulesPrivileges } = useUserPrivileges();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const eventKind = getField(getFieldsData('event.kind'));
-  const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
   const hit: DataTableRecord = useMemo(
     () => buildDataTableRecord(searchHit as EsHitRecord),
     [searchHit]
   );
+
+  const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
+  const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
