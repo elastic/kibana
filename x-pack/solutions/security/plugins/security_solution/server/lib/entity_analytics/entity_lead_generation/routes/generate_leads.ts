@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type {
   IKibanaResponse,
   Logger,
@@ -32,6 +33,9 @@ import { createTemporalStateModule } from '../observation_modules/temporal_state
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity, Lead } from '../types';
+
+const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
+const ENTITY_PAGE_SIZE = 1000;
 
 const GenerateLeadsRequestBody = z.object({
   connectorId: z.string().optional(),
@@ -71,7 +75,6 @@ export const generateLeadsRoute = (
           const spaceId = getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          // Optionally create an LLM chat model when a connectorId is provided
           let chatModel: InferenceChatModel | undefined;
           const { connectorId, mode } = request.body;
           const generationMode: LeadGenerationMode = mode ?? 'adhoc';
@@ -82,11 +85,7 @@ export const generateLeadsRoute = (
               chatModel = await startPlugins.inference.getChatModel({
                 request,
                 connectorId,
-                chatModelOptions: {
-                  temperature: 0.3,
-                  maxRetries: 1,
-                  disableStreaming: true,
-                },
+                chatModelOptions: { temperature: 0.3, maxRetries: 1, disableStreaming: true },
               });
               logger.debug(
                 `[LeadGeneration] Created LLM chat model with connector "${connectorId}"`
@@ -100,130 +99,125 @@ export const generateLeadsRoute = (
 
           const routeStart = Date.now();
 
-          // Fetch entities from Entity Store V2
           const fetchStart = Date.now();
           const entityRecords = await fetchAllEntityStoreRecords(esClient, spaceId, logger);
-          const fetchMs = Date.now() - fetchStart;
           logger.info(
-            `[LeadGeneration][Telemetry] Entity fetch: ${fetchMs}ms (${entityRecords.length} records)`
+            `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
+              entityRecords.length
+            } records)`
           );
 
           if (entityRecords.length === 0) {
-            return response.ok({
-              body: {
-                leads: [],
-                total: 0,
-              },
-            });
+            return response.ok({ body: { leads: [], total: 0 } });
           }
 
-          // Convert to LeadEntity format
-          const leadEntities: LeadEntity[] = entityRecords.map((record) =>
-            entityRecordToLeadEntity(record)
-          );
+          const leadEntities: LeadEntity[] = entityRecords.map(entityRecordToLeadEntity);
 
-          // Build the engine and register modules
           const engine = createLeadGenerationEngine({ logger });
-
           engine.registerModule(createRiskScoreModule({ esClient, logger, spaceId }));
-
           engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
-
           engine.registerModule(
             createBehavioralAnalysisModule({
               esClient,
               logger,
-              alertsIndexPattern: '.alerts-security.alerts-*',
+              alertsIndexPattern: ALERTS_INDEX_PATTERN,
             })
           );
 
-          // Generate leads (with optional LLM synthesis)
           const generateStart = Date.now();
           const leads = await engine.generateLeads(leadEntities, { chatModel });
-          const generateMs = Date.now() - generateStart;
           logger.info(
-            `[LeadGeneration][Telemetry] Engine pipeline: ${generateMs}ms (${leads.length} leads)`
+            `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
+              leads.length
+            } leads)`
           );
 
-          // Persist leads to ES index for fast retrieval on subsequent page loads
+          // Tag every lead with this run's execution ID so we can delete stale
+          // docs atomically after the new set is visible.
+          const executionId = uuidv4();
+          const formattedLeads = leads.map((lead) => formatLeadForResponse(lead, executionId));
+
           const persistStart = Date.now();
-          const formattedLeads = leads.map((lead) => formatLeadForResponse(lead));
-          await persistLeads(esClient, spaceId, generationMode, formattedLeads, logger);
-          const persistMs = Date.now() - persistStart;
+          await persistLeads(
+            esClient,
+            spaceId,
+            generationMode,
+            formattedLeads,
+            executionId,
+            logger
+          );
           logger.info(
-            `[LeadGeneration][Telemetry] Persistence: ${persistMs}ms (${formattedLeads.length} leads to "${generationMode}" index)`
+            `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
+              formattedLeads.length
+            } leads to "${generationMode}" index)`
           );
 
-          const totalMs = Date.now() - routeStart;
-          logger.info(
-            `[LeadGeneration][Telemetry] Total route: ${totalMs}ms | Fetch: ${fetchMs}ms | Generate: ${generateMs}ms | Persist: ${persistMs}ms`
-          );
+          logger.info(`[LeadGeneration][Telemetry] Total route: ${Date.now() - routeStart}ms`);
 
-          return response.ok({
-            body: {
-              leads: formattedLeads,
-              total: formattedLeads.length,
-            },
-          });
+          return response.ok({ body: { leads: formattedLeads, total: formattedLeads.length } });
         } catch (e) {
           logger.error(`[LeadGeneration] Error generating leads: ${e}`);
           const error = transformError(e);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
+          return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
     );
 };
 
-/**
- * Fetch all entity records from Entity Store V2 indices.
- * Queries both user and host entity indices.
- */
+// ---------------------------------------------------------------------------
+// Entity Store fetching — paginated via search_after to handle large deployments
+// ---------------------------------------------------------------------------
+
 const fetchAllEntityStoreRecords = async (
   esClient: ElasticsearchClient,
   spaceId: string,
   logger: Logger
 ): Promise<Entity[]> => {
   const results: Entity[] = [];
-  const entityTypes = ['user', 'host'];
 
-  for (const entityType of entityTypes) {
-    const indexPattern = `.entities.v1.latest.security_${entityType}_${spaceId}`;
+  for (const entityType of ['user', 'host'] as const) {
+    const index = `.entities.v1.latest.security_${entityType}_${spaceId}`;
+    let searchAfter: unknown[] | undefined;
 
-    try {
-      const resp = await esClient.search<Entity>({
-        index: indexPattern,
-        size: 100,
-        ignore_unavailable: true,
-        query: { match_all: {} },
-        sort: [{ '@timestamp': { order: 'desc' } }],
-      });
+    while (true) {
+      try {
+        const resp = await esClient.search<Entity>({
+          index,
+          size: ENTITY_PAGE_SIZE,
+          ignore_unavailable: true,
+          // _id tiebreaker ensures stable pagination across pages with same timestamp
+          sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+          query: { match_all: {} },
+        });
 
-      for (const hit of resp.hits.hits) {
-        if (hit._source) {
-          results.push(hit._source);
+        const hits = resp.hits.hits;
+        for (const hit of hits) {
+          if (hit._source) results.push(hit._source);
         }
+
+        if (hits.length < ENTITY_PAGE_SIZE) break;
+        searchAfter = hits[hits.length - 1].sort as unknown[];
+      } catch (error) {
+        logger.warn(
+          `[LeadGeneration] Failed to fetch ${entityType} records from "${index}": ${error}`
+        );
+        break;
       }
-    } catch (error) {
-      logger.warn(
-        `[LeadGeneration] Failed to fetch ${entityType} records from index ${indexPattern}: ${error}`
-      );
     }
   }
 
   return results;
 };
 
-/**
- * Convert Entity Store V2 record into a LeadEntity.
- */
+// ---------------------------------------------------------------------------
+// Entity conversion
+// ---------------------------------------------------------------------------
+
 const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
   const entityField = (record as Record<string, unknown>).entity as
     | { name?: string; type?: string }
     | undefined;
-
   return {
     record,
     type: entityField?.type ?? 'unknown',
@@ -231,72 +225,72 @@ const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
   };
 };
 
-/**
- * Format a Lead for the HTTP response body (and persistence).
- */
-const formatLeadForResponse = (lead: Lead) => ({
+// ---------------------------------------------------------------------------
+// Lead formatting
+// ---------------------------------------------------------------------------
+
+const formatLeadForResponse = (lead: Lead, executionId: string) => ({
   id: lead.id,
   title: lead.title,
   byline: lead.byline,
   description: lead.description,
-  entities: lead.entities.map((entity) => ({
-    type: entity.type,
-    name: entity.name,
-  })),
+  entities: lead.entities.map(({ type, name }) => ({ type, name })),
   tags: lead.tags,
   priority: lead.priority,
   staleness: lead.staleness,
   chatRecommendations: lead.chatRecommendations,
-  observations: lead.observations.map((obs) => ({
-    entityId: obs.entityId,
-    type: obs.type,
-    moduleId: obs.moduleId,
-    score: obs.score,
-    severity: obs.severity,
-    confidence: obs.confidence,
-    description: obs.description,
-    metadata: obs.metadata,
-  })),
-  timestamp: new Date().toISOString(),
+  observations: lead.observations.map(
+    ({ entityId, type, moduleId, score, severity, confidence, description, metadata }) => ({
+      entityId,
+      type,
+      moduleId,
+      score,
+      severity,
+      confidence,
+      description,
+      metadata,
+    })
+  ),
+  timestamp: lead.timestamp,
+  executionId,
 });
 
-/**
- * Persist leads into an ES index so the GET route can serve them instantly.
- * Uses a delete-then-bulk-index approach to replace all leads atomically.
- */
+type FormattedLead = ReturnType<typeof formatLeadForResponse>;
+
+// ---------------------------------------------------------------------------
+// Persistence — gap-free replace pattern:
+//   1. Bulk upsert new leads (visible immediately).
+//   2. Delete any docs whose executionId differs (stale from previous runs).
+// ---------------------------------------------------------------------------
+
 const persistLeads = async (
   esClient: ElasticsearchClient,
   spaceId: string,
   mode: LeadGenerationMode,
-  leads: ReturnType<typeof formatLeadForResponse>[],
+  leads: FormattedLead[],
+  executionId: string,
   pLogger: Logger
 ): Promise<void> => {
   const indexName = getLeadsIndexName(spaceId, mode);
 
   try {
-    const indexExists = await esClient.indices.exists({ index: indexName });
-
-    if (indexExists) {
-      await esClient.deleteByQuery({
-        index: indexName,
-        body: { query: { match_all: {} } },
-        refresh: true,
-        conflicts: 'proceed',
-      });
+    if (leads.length > 0) {
+      const bulkBody = leads.flatMap((lead) => [
+        { index: { _index: indexName, _id: lead.id } },
+        lead,
+      ]);
+      await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
+      pLogger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
     }
 
-    if (leads.length === 0) {
-      return;
-    }
-
-    const bulkBody = leads.flatMap((lead) => [
-      { index: { _index: indexName, _id: lead.id } },
-      lead,
-    ]);
-
-    await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
-
-    pLogger.debug(`[LeadGeneration] Persisted ${leads.length} leads to index "${indexName}"`);
+    // Delete leads from previous runs — only after the new ones are searchable
+    await esClient.deleteByQuery({
+      index: indexName,
+      body: { query: { bool: { must_not: [{ term: { executionId } }] } } },
+      refresh: true,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+    });
   } catch (persistError) {
     pLogger.warn(`[LeadGeneration] Failed to persist leads to "${indexName}": ${persistError}`);
   }

@@ -8,3 +8,4 @@
 export { createRiskScoreModule } from './risk_score_module';
 export { createTemporalStateModule } from './temporal_state_module';
 export { createBehavioralAnalysisModule, createAlertAnalysisModule } from './alert_analysis_module';
+export { entityToKey, extractIsPrivileged, groupEntitiesByType, makeObservation } from './utils';

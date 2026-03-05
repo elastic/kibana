@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
+import { makeObservation, getEntityField, groupEntitiesByType } from './utils';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -21,26 +22,96 @@ const LOW_RISK_THRESHOLD = 20;
 const MODERATE_RISK_THRESHOLD = 40;
 const HIGH_RISK_THRESHOLD = 70;
 const CRITICAL_RISK_THRESHOLD = 90;
-/** Delta threshold for 7d/90d escalation (points) */
-const ESCALATION_DELTA_7D_90D = 20;
-/** Delta threshold for 24h escalation (points) — significant short-term spike */
 const ESCALATION_DELTA_24H = 10;
-/** Delta >= 40 over 7d yields critical severity */
-const ESCALATION_CRITICAL_7D = 40;
+const ESCALATION_DELTA_7D_90D = 20;
+/** At or above this delta, the escalation severity bumps up one tier */
+const ESCALATION_CRITICAL_DELTA = 40;
+
+// ---------------------------------------------------------------------------
+// Data-driven tier configurations
+// ---------------------------------------------------------------------------
+
+interface RiskLevelTier {
+  readonly threshold: number;
+  readonly type: string;
+  readonly severity: ObservationSeverity | ((score: number) => ObservationSeverity);
+  readonly confidence: number;
+  readonly descriptionSuffix: string;
+}
+
+/**
+ * Ordered highest → lowest. The first matching tier wins.
+ * Using a function for severity allows the high/critical boundary to be
+ * computed at call time without a separate if/else in collect().
+ */
+const RISK_LEVEL_TIERS: readonly RiskLevelTier[] = [
+  {
+    threshold: HIGH_RISK_THRESHOLD,
+    type: 'high_risk_score',
+    severity: (s) => (s >= CRITICAL_RISK_THRESHOLD ? 'critical' : 'high'),
+    confidence: 0.95,
+    descriptionSuffix: '',
+  },
+  {
+    threshold: MODERATE_RISK_THRESHOLD,
+    type: 'moderate_risk_score',
+    severity: 'medium',
+    confidence: 0.8,
+    descriptionSuffix: ', warranting monitoring',
+  },
+  {
+    threshold: LOW_RISK_THRESHOLD,
+    type: 'low_risk_score',
+    severity: 'low',
+    confidence: 0.6,
+    descriptionSuffix: '',
+  },
+] as const;
+
+interface EscalationWindow {
+  readonly daysBack: number;
+  readonly threshold: number;
+  readonly type: string;
+  /** Severity when delta < ESCALATION_CRITICAL_DELTA */
+  readonly baseSeverity: ObservationSeverity;
+  /** Severity when delta >= ESCALATION_CRITICAL_DELTA */
+  readonly criticalSeverity: ObservationSeverity;
+  readonly label: string;
+}
+
+const ESCALATION_WINDOWS: readonly EscalationWindow[] = [
+  {
+    daysBack: 1,
+    threshold: ESCALATION_DELTA_24H,
+    type: 'risk_escalation_24h',
+    baseSeverity: 'critical',
+    criticalSeverity: 'critical',
+    label: '24 hours',
+  },
+  {
+    daysBack: 7,
+    threshold: ESCALATION_DELTA_7D_90D,
+    type: 'risk_escalation_7d',
+    baseSeverity: 'high',
+    criticalSeverity: 'critical',
+    label: '7 days',
+  },
+  {
+    daysBack: 90,
+    threshold: ESCALATION_DELTA_7D_90D,
+    type: 'risk_escalation_90d',
+    baseSeverity: 'medium',
+    criticalSeverity: 'high',
+    label: '90 days',
+  },
+] as const;
 
 // ---------------------------------------------------------------------------
 // Risk Score Analysis Module
 //
-// Entity Store V2 records already embed risk data in entity.risk:
-//   - calculated_score_norm (0-100)
-//   - calculated_score (raw)
-//   - calculated_level ('Low' | 'Moderate' | 'High' | 'Critical' | 'Unknown')
-//
-// This module reads risk data directly from the entity records passed in,
-// rather than querying a separate risk score index.
-//
-// For escalation detection, we still need to query the time-series risk
-// score index to compare the current score against historical values.
+// Current risk scores are read directly from the Entity Store V2 record
+// (entity.risk.calculated_score_norm). The time-series risk-score index is
+// queried only for escalation detection (24h / 7d / 90d windows).
 // ---------------------------------------------------------------------------
 
 interface RiskScoreModuleDeps {
@@ -53,191 +124,142 @@ export const createRiskScoreModule = ({
   esClient,
   logger,
   spaceId,
-}: RiskScoreModuleDeps): ObservationModule => {
-  return {
-    config: {
-      id: MODULE_ID,
-      name: MODULE_NAME,
-      priority: MODULE_PRIORITY,
-      weight: MODULE_WEIGHT,
-    },
+}: RiskScoreModuleDeps): ObservationModule => ({
+  config: { id: MODULE_ID, name: MODULE_NAME, priority: MODULE_PRIORITY, weight: MODULE_WEIGHT },
 
-    isEnabled(): boolean {
-      return true;
-    },
+  isEnabled: () => true,
 
-    async collect(entities: LeadEntity[]): Promise<Observation[]> {
-      const observations: Observation[] = [];
+  async collect(entities: LeadEntity[]): Promise<Observation[]> {
+    const timeSeriesScores = await fetchTimeSeriesRiskScores(esClient, spaceId, entities, logger);
+    const observations: Observation[] = [];
 
-      // Batch fetch time-series risk scores for escalation detection only.
-      // Current risk scores come from the entity records themselves.
-      const timeSeriesScoresByEntity = await fetchTimeSeriesRiskScores(
-        esClient,
-        spaceId,
-        entities,
-        logger
-      );
+    for (const entity of entities) {
+      const internals = extractEntityInternals(entity);
+      if (internals) {
+        const { scoreNorm, level, isPrivileged } = internals;
+        const historicalScores = timeSeriesScores.get(`${entity.type}:${entity.name}`) ?? [];
 
-      for (const entity of entities) {
-        const entityKey = entityToKey(entity);
-
-        // Read risk data directly from the Entity Store V2 record
-        const riskData = extractRiskData(entity);
-
-        if (riskData) {
-          const { scoreNorm, level } = riskData;
-
-          // Observation 1: Risk level flag (tiered)
-          if (scoreNorm >= HIGH_RISK_THRESHOLD) {
-            observations.push(buildHighRiskObservation(entity, scoreNorm, level));
-          } else if (scoreNorm >= MODERATE_RISK_THRESHOLD) {
-            observations.push(buildModerateRiskObservation(entity, scoreNorm, level));
-          } else if (scoreNorm >= LOW_RISK_THRESHOLD) {
-            observations.push(buildLowRiskObservation(entity, scoreNorm, level));
-          }
-
-          // Observation 2: Risk escalation over 24h, 7d, 90d (requires historical comparison)
-          const historicalScores = timeSeriesScoresByEntity.get(entityKey) ?? [];
-          const escalation24h = detectEscalationInWindow(
-            scoreNorm,
-            historicalScores,
-            1,
-            ESCALATION_DELTA_24H
+        // Observation 1: Current risk level — first matching tier wins
+        const tier = RISK_LEVEL_TIERS.find((t) => scoreNorm >= t.threshold);
+        if (tier) {
+          const severity =
+            typeof tier.severity === 'function' ? tier.severity(scoreNorm) : tier.severity;
+          observations.push(
+            makeObservation(entity, MODULE_ID, {
+              type: tier.type,
+              score: scoreNorm,
+              severity,
+              confidence: tier.confidence,
+              description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(
+                1
+              )}${tier.descriptionSuffix}`,
+              metadata: {
+                calculated_score_norm: scoreNorm,
+                calculated_level: level,
+                entity_type: entity.type,
+              },
+            })
           );
-          if (escalation24h) {
-            observations.push(
-              buildEscalationObservation(
-                entity,
-                scoreNorm,
-                escalation24h,
-                'risk_escalation_24h',
-                'critical',
-                '24 hours'
-              )
-            );
-          }
+        }
 
-          const escalation7d = detectEscalationInWindow(
-            scoreNorm,
-            historicalScores,
-            7,
-            ESCALATION_DELTA_7D_90D
-          );
-          if (escalation7d) {
-            const severity: ObservationSeverity =
-              escalation7d.delta >= ESCALATION_CRITICAL_7D ? 'critical' : 'high';
+        // Observation 2: Risk escalation — one check per time window
+        for (const w of ESCALATION_WINDOWS) {
+          const esc = detectEscalation(scoreNorm, historicalScores, w.daysBack, w.threshold);
+          if (esc) {
+            const severity =
+              esc.delta >= ESCALATION_CRITICAL_DELTA ? w.criticalSeverity : w.baseSeverity;
             observations.push(
-              buildEscalationObservation(
-                entity,
-                scoreNorm,
-                escalation7d,
-                'risk_escalation_7d',
+              makeObservation(entity, MODULE_ID, {
+                type: w.type,
+                score: Math.min(100, esc.delta * 2),
                 severity,
-                '7 days'
-              )
+                confidence: 0.85,
+                description: `Entity ${entity.name} risk score escalated by ${esc.delta.toFixed(
+                  1
+                )} points (from ${esc.previousScore.toFixed(1)} to ${scoreNorm.toFixed(
+                  1
+                )}) in the last ${w.label}`,
+                metadata: {
+                  current_score: scoreNorm,
+                  previous_score: esc.previousScore,
+                  delta: esc.delta,
+                  entity_type: entity.type,
+                  window: w.label,
+                },
+              })
             );
-          }
-
-          const escalation90d = detectEscalationInWindow(
-            scoreNorm,
-            historicalScores,
-            90,
-            ESCALATION_DELTA_7D_90D
-          );
-          if (escalation90d) {
-            const severity: ObservationSeverity =
-              escalation90d.delta >= ESCALATION_CRITICAL_7D ? 'high' : 'medium';
-            observations.push(
-              buildEscalationObservation(
-                entity,
-                scoreNorm,
-                escalation90d,
-                'risk_escalation_90d',
-                severity,
-                '90 days'
-              )
-            );
-          }
-
-          // Observation 3: Privileged entity with elevated risk
-          const isPrivileged = extractIsPrivileged(entity);
-          if (isPrivileged && scoreNorm >= HIGH_RISK_THRESHOLD) {
-            observations.push(buildPrivilegedHighRiskObservation(entity, scoreNorm, level));
           }
         }
+
+        // Observation 3: Privileged entity with elevated risk
+        if (isPrivileged && scoreNorm >= HIGH_RISK_THRESHOLD) {
+          observations.push(
+            makeObservation(entity, MODULE_ID, {
+              type: 'privileged_high_risk',
+              score: Math.min(100, scoreNorm * 1.2),
+              severity: 'critical',
+              confidence: 0.95,
+              description: `Privileged entity ${
+                entity.name
+              } has a ${level} risk score of ${scoreNorm.toFixed(
+                1
+              )} — elevated concern due to privileged access`,
+              metadata: {
+                calculated_score_norm: scoreNorm,
+                calculated_level: level,
+                entity_type: entity.type,
+                is_privileged: true,
+              },
+            })
+          );
+        }
       }
+    }
 
-      logger.debug(
-        `[${MODULE_ID}] Collected ${observations.length} observations from ${entities.length} entities`
-      );
-
-      return observations;
-    },
-  };
-};
+    logger.debug(
+      `[${MODULE_ID}] Collected ${observations.length} observations from ${entities.length} entities`
+    );
+    return observations;
+  },
+});
 
 // ---------------------------------------------------------------------------
 // Entity record accessors
-//
-// Entity Store V2 records are typed as a union (UserEntity | HostEntity |
-// ServiceEntity | GenericEntity). The risk data and attributes live under the
-// nested `entity` field which is common across all entity types.
 // ---------------------------------------------------------------------------
 
-interface ExtractedRisk {
+interface EntityInternals {
   readonly scoreNorm: number;
   readonly level: string;
+  readonly isPrivileged: boolean;
 }
 
-const extractRiskData = (entity: LeadEntity): ExtractedRisk | undefined => {
-  const record = entity.record as Record<string, unknown>;
-
-  // Entity Store V2 places risk data at entity.risk
-  const entityField = record.entity as Record<string, unknown> | undefined;
-  if (!entityField) {
-    return undefined;
-  }
+const extractEntityInternals = (entity: LeadEntity): EntityInternals | undefined => {
+  const entityField = getEntityField(entity);
+  if (!entityField) return undefined;
 
   const risk = entityField.risk as
     | { calculated_score_norm?: unknown; calculated_level?: string }
     | undefined;
-  if (risk?.calculated_score_norm == null) {
-    return undefined;
-  }
+  if (risk?.calculated_score_norm == null) return undefined;
 
   const scoreNorm = Number(risk.calculated_score_norm);
-  if (Number.isNaN(scoreNorm)) {
-    return undefined;
-  }
+  if (Number.isNaN(scoreNorm)) return undefined;
 
+  const attributes = entityField.attributes as { privileged?: boolean } | undefined;
   return {
     scoreNorm,
     level: risk.calculated_level ?? 'Unknown',
+    isPrivileged: attributes?.privileged === true,
   };
-};
-
-const extractIsPrivileged = (entity: LeadEntity): boolean => {
-  const record = entity.record as Record<string, unknown>;
-  const entityField = record.entity as Record<string, unknown> | undefined;
-  if (!entityField) {
-    return false;
-  }
-
-  const attributes = entityField.attributes as { privileged?: boolean } | undefined;
-  return attributes?.privileged === true;
 };
 
 // ---------------------------------------------------------------------------
 // Time-series risk score fetching (for escalation detection)
 //
-// Current risk scores come from the entity record. To detect escalation
-// we still need historical data from the risk score time-series index.
+// Fetches 90-day daily averages per entity, oldest → newest.
+// All escalation windows (24h, 7d, 90d) are derived from this single query.
 // ---------------------------------------------------------------------------
 
-/**
- * Fetches daily average risk scores for the last 90 days per entity.
- * Buckets are ordered oldest to newest so 24h/7d/90d escalation can be derived by window.
- */
 const fetchTimeSeriesRiskScores = async (
   esClient: ElasticsearchClient,
   spaceId: string,
@@ -245,15 +267,15 @@ const fetchTimeSeriesRiskScores = async (
   logger: Logger
 ): Promise<Map<string, number[]>> => {
   const result = new Map<string, number[]>();
-  const entitiesByType = groupEntitiesByType(entities);
 
-  for (const [entityType, entityGroup] of entitiesByType.entries()) {
-    const names = entityGroup.map((e) => e.name);
-
+  for (const [entityType, group] of groupEntitiesByType(entities).entries()) {
+    const names = group.map((e) => e.name);
     try {
       const response = await esClient.search({
         index: `risk-score.risk-score-${spaceId}`,
         size: 0,
+        ignore_unavailable: true,
+        allow_no_indices: true,
         query: {
           bool: {
             filter: [
@@ -267,23 +289,16 @@ const fetchTimeSeriesRiskScores = async (
             terms: { field: `${entityType}.name`, size: names.length },
             aggs: {
               scores_over_time: {
-                date_histogram: {
-                  field: '@timestamp',
-                  calendar_interval: 'day',
-                },
-                aggs: {
-                  avg_score: {
-                    avg: { field: `${entityType}.risk.calculated_score_norm` },
-                  },
-                },
+                date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+                aggs: { avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } } },
               },
             },
           },
         },
       });
 
-      const byEntityAgg = (response.aggregations?.by_entity as Record<string, unknown>) ?? {};
-      const buckets = (byEntityAgg.buckets ?? []) as Array<{
+      const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+        []) as Array<{
         key: string;
         scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
       }>;
@@ -305,177 +320,28 @@ const fetchTimeSeriesRiskScores = async (
 };
 
 // ---------------------------------------------------------------------------
-// Observation builders
+// Escalation detection
+//
+// dailyScores is oldest → newest. daysBack selects the comparison bucket:
+//   daysBack=1  → yesterday's score (last bucket)
+//   daysBack=7  → 7 buckets from the end
+//   daysBack=90 → oldest bucket in the 90-day window
 // ---------------------------------------------------------------------------
-
-const buildHighRiskObservation = (
-  entity: LeadEntity,
-  scoreNorm: number,
-  level: string
-): Observation => {
-  const severity: ObservationSeverity = scoreNorm >= CRITICAL_RISK_THRESHOLD ? 'critical' : 'high';
-
-  return {
-    entityId: entityToKey(entity),
-    moduleId: MODULE_ID,
-    type: 'high_risk_score',
-    score: scoreNorm,
-    severity,
-    confidence: 0.95,
-    description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(1)}`,
-    metadata: {
-      calculated_score_norm: scoreNorm,
-      calculated_level: level,
-      entity_type: entity.type,
-    },
-  };
-};
 
 interface EscalationInfo {
   readonly delta: number;
   readonly previousScore: number;
 }
 
-const buildEscalationObservation = (
-  entity: LeadEntity,
-  currentScore: number,
-  escalation: EscalationInfo,
-  type: string,
-  severity: ObservationSeverity,
-  windowLabel: string
-): Observation => ({
-  entityId: entityToKey(entity),
-  moduleId: MODULE_ID,
-  type,
-  score: Math.min(100, escalation.delta * 2),
-  severity,
-  confidence: 0.85,
-  description: `Entity ${entity.name} risk score escalated by ${escalation.delta.toFixed(
-    1
-  )} points (from ${escalation.previousScore.toFixed(1)} to ${currentScore.toFixed(
-    1
-  )}) in the last ${windowLabel}`,
-  metadata: {
-    current_score: currentScore,
-    previous_score: escalation.previousScore,
-    delta: escalation.delta,
-    entity_type: entity.type,
-    window: windowLabel,
-  },
-});
-
-const buildModerateRiskObservation = (
-  entity: LeadEntity,
-  scoreNorm: number,
-  level: string
-): Observation => {
-  return {
-    entityId: entityToKey(entity),
-    moduleId: MODULE_ID,
-    type: 'moderate_risk_score',
-    score: scoreNorm,
-    severity: 'medium',
-    confidence: 0.8,
-    description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(
-      1
-    )}, warranting monitoring`,
-    metadata: {
-      calculated_score_norm: scoreNorm,
-      calculated_level: level,
-      entity_type: entity.type,
-    },
-  };
-};
-
-const buildLowRiskObservation = (
-  entity: LeadEntity,
-  scoreNorm: number,
-  level: string
-): Observation => {
-  return {
-    entityId: entityToKey(entity),
-    moduleId: MODULE_ID,
-    type: 'low_risk_score',
-    score: scoreNorm,
-    severity: 'low',
-    confidence: 0.6,
-    description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(1)}`,
-    metadata: {
-      calculated_score_norm: scoreNorm,
-      calculated_level: level,
-      entity_type: entity.type,
-    },
-  };
-};
-
-const buildPrivilegedHighRiskObservation = (
-  entity: LeadEntity,
-  scoreNorm: number,
-  level: string
-): Observation => {
-  return {
-    entityId: entityToKey(entity),
-    moduleId: MODULE_ID,
-    type: 'privileged_high_risk',
-    score: Math.min(100, scoreNorm * 1.2),
-    severity: 'critical',
-    confidence: 0.95,
-    description: `Privileged entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(
-      1
-    )} - elevated concern due to privileged access`,
-    metadata: {
-      calculated_score_norm: scoreNorm,
-      calculated_level: level,
-      entity_type: entity.type,
-      is_privileged: true,
-    },
-  };
-};
-
-// ---------------------------------------------------------------------------
-// Utility helpers
-//
-// dailyScores: oldest to newest (from date_histogram). For 24h we use the last
-// bucket as baseline; for 7d the bucket 7 days ago; for 90d the oldest bucket.
-// ---------------------------------------------------------------------------
-
-/**
- * @param baselineOffsetFromEnd 1 = last bucket (24h), 7 = 7 days ago, 0 = use oldest (90d)
- */
-const detectEscalationInWindow = (
+const detectEscalation = (
   currentScore: number,
   dailyScores: number[],
-  baselineOffsetFromEnd: number,
+  daysBack: number,
   deltaThreshold: number
 ): EscalationInfo | undefined => {
-  const need = baselineOffsetFromEnd === 0 ? 2 : baselineOffsetFromEnd;
-  if (dailyScores.length < need) {
-    return undefined;
-  }
-
-  const previousScore =
-    baselineOffsetFromEnd === 0
-      ? dailyScores[0]
-      : dailyScores[dailyScores.length - baselineOffsetFromEnd];
-  if (previousScore == null || Number.isNaN(previousScore)) {
-    return undefined;
-  }
-
+  if (dailyScores.length < daysBack) return undefined;
+  const previousScore = dailyScores[dailyScores.length - daysBack];
+  if (previousScore == null || Number.isNaN(previousScore)) return undefined;
   const delta = currentScore - previousScore;
-  if (delta >= deltaThreshold) {
-    return { delta, previousScore };
-  }
-  return undefined;
-};
-
-const entityToKey = (entity: LeadEntity): string => `${entity.type}:${entity.name}`;
-
-const groupEntitiesByType = (entities: LeadEntity[]): Map<string, LeadEntity[]> => {
-  const grouped = new Map<string, LeadEntity[]>();
-  for (const entity of entities) {
-    const existing = grouped.get(entity.type) ?? [];
-    existing.push(entity);
-    grouped.set(entity.type, existing);
-  }
-  return grouped;
+  return delta >= deltaThreshold ? { delta, previousScore } : undefined;
 };
