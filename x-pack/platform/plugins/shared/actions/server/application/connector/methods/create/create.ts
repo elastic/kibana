@@ -12,7 +12,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
-import { isConnectorDeprecated } from '../../lib';
+import { isConnectorDeprecated, getAuthMode } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
@@ -175,6 +175,6 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
-    ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    authMode: getAuthMode(result.attributes.authMode),
   };
 }
