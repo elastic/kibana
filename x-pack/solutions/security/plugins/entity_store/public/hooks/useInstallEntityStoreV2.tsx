@@ -54,6 +54,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
+        // Install v2 and remove v1 in default namespace AND every namespace where v1 is currently installed
         if (space.id !== 'default' && !(await isEntityStoreV1Installed(services.http))) return;
 
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
