@@ -2,7 +2,7 @@
 
 exports[`DateRangePicker renders 1`] = `
 <div
-  class="css-18zcdzi-containerStyles-DateRangePickerLayout"
+  class="css-1e8rkcj-containerStyles-DateRangePickerLayout"
 >
   <div
     class="euiPopover emotion-euiPopover-inline"
