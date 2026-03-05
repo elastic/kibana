@@ -118,7 +118,7 @@ export class AssetManager {
           request,
           frequency: historySnapshot.frequency,
         }),
-        
+
         installEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
