@@ -22,10 +22,45 @@ interface StopAndRemoveV1Params {
 
 interface StopAndRemoveV1SharedTasksParams {
   namespace: string;
+  logger: Logger;
   taskManager: TaskManagerStartContract;
 }
 
+const RETRY_ON_FAILURE_TIMES = 3;
+
 export async function stopAndRemoveV1({
+  type,
+  namespace,
+  logger,
+  esClient,
+  taskManager,
+  savedObjectsClient,
+}: StopAndRemoveV1Params) {
+  const scopedLogger = logger.get(type);
+  for (let attempt = 1; attempt <= RETRY_ON_FAILURE_TIMES; attempt++) {
+    try {
+      await stopAndRemoveV1Once({
+        type,
+        namespace,
+        logger,
+        esClient,
+        taskManager,
+        savedObjectsClient,
+      });
+      return;
+    } catch (error) {
+      if (attempt === RETRY_ON_FAILURE_TIMES) {
+        throw error;
+      }
+      scopedLogger.warn(
+        `Failed to remove entity store v1 resources for type: ${type}. Retrying (${attempt}/${RETRY_ON_FAILURE_TIMES}).`,
+        error
+      );
+    }
+  }
+}
+
+async function stopAndRemoveV1Once({
   type,
   namespace,
   logger,
@@ -58,7 +93,7 @@ export async function stopAndRemoveV1({
   const enrichPolicyName = `entity_store_field_retention_${type}_${namespace}_v1.0.0`;
   const v1EngineDescriptorId = `entity-engine-descriptor-${type}-${namespace}`;
 
-  await Promise.all(
+  const stoppedTransforms = await Promise.all(
     transformIds.map((transformId) =>
       tryAsBoolean(
         esClient.transform.stopTransform(
@@ -68,10 +103,18 @@ export async function stopAndRemoveV1({
       )
     )
   );
+  if (stoppedTransforms.includes(false)) {
+    throw new Error(`Failed to stop one or more entity store v1 transforms for type: ${type}`);
+  }
 
-  await Promise.all(taskIds.map((taskId) => tryAsBoolean(taskManager.removeIfExists(taskId))));
+  const removedTasks = await Promise.all(
+    taskIds.map((taskId) => tryAsBoolean(taskManager.removeIfExists(taskId)))
+  );
+  if (removedTasks.includes(false)) {
+    throw new Error(`Failed to remove one or more entity store v1 tasks for type: ${type}`);
+  }
 
-  await Promise.all([
+  const removedResources = await Promise.all([
     ...transformIds.map((transformId) =>
       tryAsBoolean(
         esClient.transform.deleteTransform(
@@ -117,11 +160,35 @@ export async function stopAndRemoveV1({
       })
     ),
   ]);
+  if (removedResources.includes(false)) {
+    throw new Error(`Failed to remove one or more entity store v1 resources for type: ${type}`);
+  }
 
   scopedLogger.debug(`Stopped and removed entity store v1 resources for type: ${type}`);
 }
 
 export async function stopAndRemoveV1SharedTasks({
+  namespace,
+  logger,
+  taskManager,
+}: StopAndRemoveV1SharedTasksParams) {
+  for (let attempt = 1; attempt <= RETRY_ON_FAILURE_TIMES; attempt++) {
+    try {
+      await stopAndRemoveV1SharedTasksOnce({ namespace, logger, taskManager });
+      return;
+    } catch (error) {
+      if (attempt === RETRY_ON_FAILURE_TIMES) {
+        throw error;
+      }
+      logger.warn(
+        `Failed to remove shared entity store v1 tasks in namespace: ${namespace}. Retrying (${attempt}/${RETRY_ON_FAILURE_TIMES}).`,
+        error
+      );
+    }
+  }
+}
+
+async function stopAndRemoveV1SharedTasksOnce({
   namespace,
   taskManager,
 }: StopAndRemoveV1SharedTasksParams) {
@@ -130,7 +197,14 @@ export async function stopAndRemoveV1SharedTasks({
     `entity_store:data_view:refresh:${namespace}:1.0.0`,
     `entity_store:health:${namespace}:1.0.0`,
   ];
-  await Promise.all(taskIds.map((taskId) => tryAsBoolean(taskManager.removeIfExists(taskId))));
+  const removedTasks = await Promise.all(
+    taskIds.map((taskId) => tryAsBoolean(taskManager.removeIfExists(taskId)))
+  );
+  if (removedTasks.includes(false)) {
+    throw new Error(
+      `Failed to remove one or more shared entity store v1 tasks in namespace: ${namespace}`
+    );
+  }
 }
 
 async function tryAsBoolean(promise: Promise<unknown>): Promise<boolean> {

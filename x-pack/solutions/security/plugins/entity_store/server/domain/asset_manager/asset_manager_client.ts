@@ -124,7 +124,11 @@ export class AssetManagerClient {
             savedObjectsClient: this.savedObjectsClient,
           })
         ),
-        stopAndRemoveV1SharedTasks({ namespace: this.namespace, taskManager: this.taskManager }),
+        stopAndRemoveV1SharedTasks({
+          namespace: this.namespace,
+          logger: this.logger,
+          taskManager: this.taskManager,
+        }),
 
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
