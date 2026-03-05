@@ -18,10 +18,10 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 
 /** This constant refers to the dashboard panel specific state */
-export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableState>> = [
+export const EDITABLE_PANEL_KEYS = [
   'title', // panel title
   'description', // panel description
   'time_range', // panel custom time range
   'hide_title', // panel hidden title
   'drilldowns', // panel drilldowns
-] as const;
+] as const satisfies ReadonlyArray<keyof SearchEmbeddableState>;

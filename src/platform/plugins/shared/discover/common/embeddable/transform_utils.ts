@@ -27,6 +27,7 @@ import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableState,
+  DiscoverSessionPanelOverrides,
   DiscoverSessionTab,
 } from '../../server';
 import type {
@@ -87,15 +88,7 @@ export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
   } = storedState;
   return {
     ...otherAttrs,
-    ...(sort && { sort: fromStoredSort(sort) }),
-    ...(columns && { columns: fromStoredColumns(columns, grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
-    ...(sampleSize && { sample_size: sampleSize }),
-    ...(rowsPerPage && {
-      rows_per_page: rowsPerPage as DiscoverSessionEmbeddableState['rows_per_page'],
-    }),
-    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
-    ...(density && { density }),
+    ...fromStoredSearchEmbeddableState(storedState),
     discover_session_id: savedObjectRef.id,
     selected_tab_id: undefined, // Waiting on https://github.com/elastic/kibana/pull/252311
   };
@@ -113,10 +106,10 @@ export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
   const {
     sort,
     columns,
-    row_height: rowHeight,
-    sample_size: sampleSize,
-    rows_per_page: rowsPerPage,
-    header_row_height: headerRowHeight,
+    row_height,
+    sample_size,
+    rows_per_page,
+    header_row_height,
     density,
     discover_session_id,
     selected_tab_id,
@@ -124,14 +117,7 @@ export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
   } = apiState;
   const state: StoredSearchEmbeddableByReferenceState = {
     ...otherAttrs,
-    ...(sort && { sort: toStoredSort(sort) }),
-    ...(columns && { columns: toStoredColumns(columns) }),
-    ...(rowHeight && { rowHeight: toStoredHeight(rowHeight) }),
-    ...(sampleSize && { sampleSize }),
-    ...(rowsPerPage && { rowsPerPage }),
-    ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
-    ...(density && { density }),
-    grid: toStoredGrid(columns),
+    ...toStoredSearchEmbeddableState(apiState),
   };
   return {
     state,
@@ -159,15 +145,7 @@ export function byValueSavedSearchToDiscoverSessionEmbeddableState(
   const apiTab = fromStoredTab(tab.attributes, references);
   return {
     ...otherAttrs,
-    ...(sort && { sort: fromStoredSort(sort) }),
-    ...(columns && { columns: fromStoredColumns(columns, grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
-    ...(sampleSize && { sample_size: sampleSize }),
-    ...(rowsPerPage && {
-      rows_per_page: rowsPerPage as DiscoverSessionEmbeddableState['rows_per_page'],
-    }),
-    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
-    ...(density && { density }),
+    ...fromStoredSearchEmbeddableState(storedState),
     tabs: [apiTab],
   };
 }
@@ -179,10 +157,10 @@ export function byValueDiscoverSessionToSavedSearchEmbeddableState(
   const {
     sort,
     columns,
-    row_height: rowHeight,
-    sample_size: sampleSize,
-    rows_per_page: rowsPerPage,
-    header_row_height: headerRowHeight,
+    row_height,
+    sample_size,
+    rows_per_page,
+    header_row_height,
     density,
     tabs: [apiTab],
     ...otherAttrs
@@ -190,14 +168,7 @@ export function byValueDiscoverSessionToSavedSearchEmbeddableState(
   const { state: tabAttributes, references: tabReferences } = toStoredTab(apiTab);
   const state: StoredSearchEmbeddableByValueState = {
     ...otherAttrs,
-    ...(sort && { sort: toStoredSort(sort) }),
-    ...(columns && { columns: toStoredColumns(columns) }),
-    ...(rowHeight && { rowHeight: toStoredHeight(rowHeight) }),
-    ...(sampleSize && { sampleSize }),
-    ...(rowsPerPage && { rowsPerPage }),
-    ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
-    ...(density && { density }),
-    grid: toStoredGrid(columns),
+    ...toStoredSearchEmbeddableState(apiState),
     attributes: {
       ...tabAttributes,
       sort: tabAttributes.sort as SavedSearchAttributes['sort'],
@@ -224,20 +195,16 @@ export function fromStoredTab(
 ): DiscoverSessionTab {
   const {
     sort,
-    columns,
-    rowHeight,
     sampleSize,
     rowsPerPage,
     headerRowHeight,
     density,
-    grid,
     viewMode,
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
   const apiTab = {
+    ...fromStoredSearchEmbeddableState(tab),
     sort: fromStoredSort(sort),
-    ...(columns && { columns: fromStoredColumns(columns, grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
     header_row_height: fromStoredHeight(headerRowHeight)!,
     density: density ?? DataGridDensity.COMPACT,
   };
@@ -262,13 +229,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   state: DiscoverSessionTabAttributes;
   references: SavedObjectReference[];
 } {
-  const {
-    sort,
-    columns,
-    row_height: rowHeight,
-    header_row_height: headerRowHeight,
-    density,
-  } = apiTab;
+  const { sort, columns } = apiTab;
   const searchSourceValues: SerializedSearchSourceFields = {
     query: apiTab.query,
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
@@ -276,17 +237,58 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   };
   const [searchSourceFields, references] = extractReferences(searchSourceValues);
   const state: DiscoverSessionTabAttributes = {
+    ...toStoredSearchEmbeddableState(apiTab),
     sort: toStoredSort(sort),
     columns: toStoredColumns(columns),
-    ...(rowHeight && { rowHeight: toStoredHeight(rowHeight) }),
-    ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
-    ...(density && { density }),
     grid: toStoredGrid(columns),
     hideChart: false,
     isTextBasedQuery: !('dataset' in apiTab),
     kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSourceFields) },
   };
   return { state, references };
+}
+
+export function fromStoredSearchEmbeddableState(
+  storedState: StoredSearchEmbeddableState | DiscoverSessionTabAttributes
+): DiscoverSessionPanelOverrides {
+  const { sort, columns, rowHeight, sampleSize, rowsPerPage, headerRowHeight, density, grid } =
+    storedState;
+  return {
+    ...(sort && { sort: fromStoredSort(sort) }),
+    ...(columns && { columns: fromStoredColumns(columns, grid) }),
+    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
+    ...(sampleSize && { sample_size: sampleSize }),
+    ...(rowsPerPage && {
+      rows_per_page: rowsPerPage as DiscoverSessionEmbeddableState['rows_per_page'],
+    }),
+    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
+    ...(density && { density }),
+  };
+}
+
+export function toStoredSearchEmbeddableState(
+  apiState: DiscoverSessionPanelOverrides
+): StoredSearchEmbeddableState {
+  const {
+    sort,
+    columns,
+    row_height: rowHeight,
+    sample_size: sampleSize,
+    rows_per_page: rowsPerPage,
+    header_row_height: headerRowHeight,
+    density,
+  } = apiState;
+  const grid = toStoredGrid(columns);
+  return {
+    ...(sort && { sort: toStoredSort(sort) }),
+    ...(columns && { columns: toStoredColumns(columns) }),
+    ...(rowHeight && { rowHeight: toStoredHeight(rowHeight) }),
+    ...(sampleSize && { sampleSize }),
+    ...(rowsPerPage && { rowsPerPage }),
+    ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
+    ...(density && { density }),
+    ...(grid && { grid }),
+  };
 }
 
 export function fromStoredColumns(
@@ -311,7 +313,7 @@ export function toStoredGrid(
   const entries = columns
     ?.filter((c) => c.width != null) // Only persist columns with a width defined
     .map(({ name, width }) => [name, { width }]);
-  return { columns: Object.fromEntries(entries) };
+  return entries.length ? { columns: Object.fromEntries(entries) } : {};
 }
 
 export function fromStoredSort(

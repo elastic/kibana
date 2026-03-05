@@ -16,6 +16,7 @@ import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
 } from '../../../server';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity } from '@kbn/discover-utils';
 
@@ -150,7 +151,7 @@ describe('Serialization utils', () => {
         description: 'My description',
         discover_session_id: 'savedSearch',
         selected_tab_id: undefined,
-        sort: [['order_date', 'asc']],
+        sort: [{ name: 'order_date', direction: 'asc' }],
       };
 
       const deserializedState = await deserializeState({
@@ -165,6 +166,7 @@ describe('Serialization utils', () => {
 
   describe('serialize state', () => {
     test('by value', () => {
+      const sort: SortOrder[] = [['order_date', 'desc']];
       const searchSource = createSearchSourceMock({
         index: dataViewMock,
       });
@@ -172,7 +174,7 @@ describe('Serialization utils', () => {
         title: 'test1',
         description: 'description',
         columns: ['_source'],
-        sort: [['order_date', 'desc']],
+        sort,
         grid: {},
         hideChart: false,
         sampleSize: 100,
@@ -210,15 +212,15 @@ describe('Serialization utils', () => {
     });
 
     describe('by reference', () => {
+      const sort: SortOrder[] = [['order_date', 'desc']];
       const searchSource = createSearchSourceMock({
         index: dataViewMock,
       });
-
       const savedSearch = {
         title: 'test1',
         description: 'description',
         columns: ['_source'],
-        sort: [['order_date', 'desc']],
+        sort,
         grid: {},
         hideChart: false,
         sampleSize: 100,
@@ -247,6 +249,7 @@ describe('Serialization utils', () => {
       });
 
       test('overwrite state', () => {
+        const sortOverride: SortOrder[] = [['order_date', 'asc']];
         const serializedState = serializeState({
           uuid,
           initialState: {
@@ -255,7 +258,7 @@ describe('Serialization utils', () => {
           savedSearch: {
             ...savedSearch,
             sampleSize: 500,
-            sort: [['order_date', 'asc']],
+            sort: sortOverride,
           } as Parameters<typeof serializeState>[0]['savedSearch'],
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),

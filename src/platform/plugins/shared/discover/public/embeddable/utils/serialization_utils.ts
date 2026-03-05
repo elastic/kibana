@@ -17,6 +17,7 @@ import {
   byReferenceSavedSearchToDiscoverSessionEmbeddableState,
   byValueDiscoverSessionToSavedSearchEmbeddableState,
   byValueSavedSearchToDiscoverSessionEmbeddableState,
+  toStoredSearchEmbeddableState,
 } from '../../../common/embeddable/transform_utils';
 import { isByReferenceDiscoverSessionEmbeddableState } from '../../../common';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
@@ -38,6 +39,7 @@ export const deserializeState = async ({
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState, EDITABLE_PANEL_KEYS);
+  const savedObjectOverride = toStoredSearchEmbeddableState(serializedState);
 
   if (isByReferenceDiscoverSessionEmbeddableState(serializedState)) {
     // by reference
@@ -45,7 +47,6 @@ export const deserializeState = async ({
     const so = await get(serializedState.discover_session_id, true);
 
     const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
-    const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
     return {
       // ignore the time range from the saved object - only global time range + panel time range matter
       ...omit(so, 'timeRange'),
@@ -73,6 +74,7 @@ export const deserializeState = async ({
     return {
       ...savedSearch,
       ...panelState,
+      ...savedObjectOverride,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
   }

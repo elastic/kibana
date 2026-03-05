@@ -18,6 +18,7 @@ import {
   fromStoredDataset,
   fromStoredHeight,
   fromStoredRuntimeFields,
+  fromStoredSearchEmbeddableState,
   fromStoredSort,
   fromStoredTab,
   isByReferenceDiscoverSessionEmbeddableState,
@@ -29,12 +30,14 @@ import {
   toStoredGrid,
   toStoredHeight,
   toStoredRuntimeFields,
+  toStoredSearchEmbeddableState,
   toStoredSort,
   toStoredTab,
 } from './transform_utils';
 import type {
   StoredSearchEmbeddableByReferenceState,
   StoredSearchEmbeddableByValueState,
+  StoredSearchEmbeddableState,
 } from './types';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
@@ -364,7 +367,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        grid: { columns: {} },
+        grid: {},
       });
     });
   });
@@ -533,12 +536,185 @@ describe('search embeddable transform utils', () => {
       });
     });
 
-    it('returns empty columns object when columns is empty', () => {
-      expect(toStoredGrid([])).toEqual({ columns: {} });
+    it('returns empty object when columns is empty (no columns with width)', () => {
+      expect(toStoredGrid([])).toEqual({});
     });
 
-    it('returns empty columns object when columns is undefined (default)', () => {
-      expect(toStoredGrid()).toEqual({ columns: {} });
+    it('returns empty object when columns is undefined (default)', () => {
+      expect(toStoredGrid()).toEqual({});
+    });
+
+    it('returns empty object when no column has width', () => {
+      const columns = [{ name: 'message' }, { name: '@timestamp' }];
+      expect(toStoredGrid(columns)).toEqual({});
+    });
+  });
+
+  describe('fromStoredSearchEmbeddableState', () => {
+    it('converts stored state with all fields to panel overrides', () => {
+      const storedState: StoredSearchEmbeddableState = {
+        sort: [['@timestamp', 'desc']],
+        columns: ['message', '@timestamp'],
+        rowHeight: -1,
+        sampleSize: 500,
+        rowsPerPage: 100,
+        headerRowHeight: 3,
+        density: DataGridDensity.COMPACT,
+        grid: {
+          columns: {
+            message: { width: 100 },
+            '@timestamp': { width: 200 },
+          },
+        },
+      };
+      const result = fromStoredSearchEmbeddableState(storedState);
+      expect(result).toEqual({
+        sort: [{ name: '@timestamp', direction: 'desc' }],
+        columns: [
+          { name: 'message', width: 100 },
+          { name: '@timestamp', width: 200 },
+        ],
+        row_height: 'auto',
+        sample_size: 500,
+        rows_per_page: 100,
+        header_row_height: 3,
+        density: DataGridDensity.COMPACT,
+      });
+    });
+
+    it('omits undefined/falsy stored fields from result', () => {
+      const storedState: StoredSearchEmbeddableState = {
+        sort: [['@timestamp', 'desc']],
+        columns: ['message'],
+        grid: { columns: {} },
+      };
+      const result = fromStoredSearchEmbeddableState(storedState);
+      expect(result).toEqual({
+        sort: [{ name: '@timestamp', direction: 'desc' }],
+        columns: [{ name: 'message' }],
+      });
+      expect(result.row_height).toBeUndefined();
+      expect(result.sample_size).toBeUndefined();
+      expect(result.rows_per_page).toBeUndefined();
+      expect(result.header_row_height).toBeUndefined();
+      expect(result.density).toBeUndefined();
+    });
+
+    it('converts numeric row heights to API form', () => {
+      const storedState = {
+        rowHeight: 5,
+        headerRowHeight: 2,
+      };
+      const result = fromStoredSearchEmbeddableState(storedState);
+      expect(result.row_height).toBe(5);
+      expect(result.header_row_height).toBe(2);
+    });
+
+    it('converts -1 height to "auto"', () => {
+      const storedState = {
+        rowHeight: -1,
+        headerRowHeight: -1,
+      };
+      const result = fromStoredSearchEmbeddableState(storedState);
+      expect(result.row_height).toBe('auto');
+      expect(result.header_row_height).toBe('auto');
+    });
+  });
+
+  describe('toStoredSearchEmbeddableState', () => {
+    it('converts panel overrides with all fields to stored state', () => {
+      const apiState = {
+        sort: [{ name: '@timestamp', direction: 'desc' as const }],
+        columns: [{ name: 'message' }, { name: '@timestamp', width: 200 }],
+        row_height: 'auto' as const,
+        sample_size: 500,
+        rows_per_page: 100 as const,
+        header_row_height: 3,
+        density: DataGridDensity.COMPACT,
+      };
+      const result = toStoredSearchEmbeddableState(apiState);
+      expect(result).toEqual({
+        sort: [['@timestamp', 'desc']],
+        columns: ['message', '@timestamp'],
+        rowHeight: -1,
+        sampleSize: 500,
+        rowsPerPage: 100,
+        headerRowHeight: 3,
+        density: DataGridDensity.COMPACT,
+        grid: {
+          columns: {
+            '@timestamp': { width: 200 },
+          },
+        },
+      });
+    });
+
+    it('omits undefined/falsy API fields from result', () => {
+      const apiState = {
+        sort: [{ name: '@timestamp', direction: 'desc' as const }],
+        columns: [{ name: 'message' }],
+      };
+      const result = toStoredSearchEmbeddableState(apiState);
+      expect(result).toEqual({
+        sort: [['@timestamp', 'desc']],
+        columns: ['message'],
+        grid: {},
+      });
+      expect(result.rowHeight).toBeUndefined();
+      expect(result.sampleSize).toBeUndefined();
+      expect(result.rowsPerPage).toBeUndefined();
+      expect(result.headerRowHeight).toBeUndefined();
+      expect(result.density).toBeUndefined();
+    });
+
+    it('converts "auto" height to -1 in stored form', () => {
+      const apiState = {
+        row_height: 'auto' as const,
+        header_row_height: 'auto' as const,
+      };
+      const result = toStoredSearchEmbeddableState(apiState);
+      expect(result.rowHeight).toBe(-1);
+      expect(result.headerRowHeight).toBe(-1);
+    });
+
+    it('preserves numeric heights in stored form', () => {
+      const apiState = {
+        row_height: 5,
+        header_row_height: 2,
+      };
+      const result = toStoredSearchEmbeddableState(apiState);
+      expect(result.rowHeight).toBe(5);
+      expect(result.headerRowHeight).toBe(2);
+    });
+
+    it('round-trips with fromStoredSearchEmbeddableState', () => {
+      const storedState: StoredSearchEmbeddableState = {
+        sort: [
+          ['@timestamp', 'desc'],
+          ['message', 'asc'],
+        ],
+        columns: ['message', '@timestamp'],
+        rowHeight: -1,
+        sampleSize: 1000,
+        rowsPerPage: 50,
+        headerRowHeight: 3,
+        density: DataGridDensity.NORMAL,
+        grid: {
+          columns: {
+            '@timestamp': { width: 150 },
+          },
+        },
+      };
+      const overrides = fromStoredSearchEmbeddableState(storedState);
+      const back = toStoredSearchEmbeddableState(overrides);
+      expect(back.sort).toEqual(storedState.sort);
+      expect(back.columns).toEqual(storedState.columns);
+      expect(back.rowHeight).toBe(storedState.rowHeight);
+      expect(back.sampleSize).toBe(storedState.sampleSize);
+      expect(back.rowsPerPage).toBe(storedState.rowsPerPage);
+      expect(back.headerRowHeight).toBe(storedState.headerRowHeight);
+      expect(back.density).toBe(storedState.density);
+      expect(back.grid).toEqual(storedState.grid);
     });
   });
 
@@ -938,10 +1114,7 @@ describe('search embeddable transform utils', () => {
         references
       );
       expect(result.sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
-      expect(result.columns).toEqual([
-        { name: 'message' },
-        { name: '@timestamp', width: 200 },
-      ]);
+      expect(result.columns).toEqual([{ name: 'message' }, { name: '@timestamp', width: 200 }]);
       expect(result.row_height).toBe('auto');
       expect(result.header_row_height).toBe('auto');
       expect(result.density).toBe(DataGridDensity.COMPACT);
