@@ -364,6 +364,7 @@ export class StreamsApp {
 
     // Use Monaco's model API to set value reliably (keyboard interactions can be flaky).
     // There can be multiple Monaco models on the page (e.g. YAML editor), so target the condition model.
+    // Condition editor uses YAML format with a "field:" property.
     const conditionModelIndex = await this.page.evaluate(() => {
       interface MonacoModel {
         getValue(): string;
@@ -381,7 +382,8 @@ export class StreamsApp {
       }
 
       const values: string[] = editorApi.getModels().map((model) => model.getValue());
-      return values.findIndex((value) => value.trim().startsWith('{') && value.includes('"field"'));
+      // YAML condition format has "field:" at the start of a line
+      return values.findIndex((value) => /^field:/m.test(value));
     });
 
     await this.kibanaMonacoEditor.setCodeEditorValue(
@@ -514,7 +516,7 @@ export class StreamsApp {
     ).toBeVisible({ timeout: 30000 });
   }
   async getProcessorPatternText() {
-    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+    return await this.page.getByTestId('streamsAppProcessorDescription').textContent();
   }
 
   async clickSaveProcessor() {
@@ -995,7 +997,7 @@ export class StreamsApp {
   async regenerateSuggestions() {
     const regenerateButton = this.page
       .getByTestId('streamsAppGenerateSuggestionButton')
-      .filter({ hasText: 'Regenerate' });
+      .filter({ hasText: 'Regenerate all' });
     await expect(regenerateButton).toBeVisible();
     await regenerateButton.click();
   }

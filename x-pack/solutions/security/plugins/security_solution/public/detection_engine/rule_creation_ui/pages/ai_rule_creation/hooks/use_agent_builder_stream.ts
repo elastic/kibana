@@ -14,7 +14,7 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-common';
 import { isErrorResult, isOtherResult } from '@kbn/agent-builder-common/tools';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   SecurityAgentBuilderAttachments,
   THREAT_HUNTING_AGENT_ID,

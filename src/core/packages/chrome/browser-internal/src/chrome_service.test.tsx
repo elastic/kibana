@@ -9,6 +9,7 @@
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
@@ -423,6 +424,9 @@ describe('start', () => {
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
 
+      chrome.setChromeStyle('project');
+      chrome.project.initNavigation('es', Rx.of({ body: [] }));
+
       chrome.project.setCloudUrls({
         deploymentUrl: 'my-deployment-url.com',
       });
@@ -461,15 +465,15 @@ describe('start', () => {
       );
 
       const ext1 = chrome.setBreadcrumbsAppendExtension({
-        content: () => () => {},
+        mount: () => () => {},
       });
       chrome.setBreadcrumbsAppendExtension({
         order: 0,
-        content: () => () => {},
+        mount: () => () => {},
       });
       const ext3 = chrome.setBreadcrumbsAppendExtension({
         order: 100,
-        content: () => () => {},
+        mount: () => () => {},
       });
       ext3();
       ext1();
@@ -480,43 +484,43 @@ describe('start', () => {
           Array [],
           Array [
             Object {
-              "content": [Function],
+              "mount": [Function],
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "mount": [Function],
               "order": 0,
             },
             Object {
-              "content": [Function],
+              "mount": [Function],
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "mount": [Function],
               "order": 0,
             },
             Object {
-              "content": [Function],
+              "mount": [Function],
             },
             Object {
-              "content": [Function],
+              "mount": [Function],
               "order": 100,
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "mount": [Function],
               "order": 0,
             },
             Object {
-              "content": [Function],
+              "mount": [Function],
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "mount": [Function],
               "order": 0,
             },
           ],
@@ -573,7 +577,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.hasHeaderBanner$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHeaderBanner({ content: () => () => undefined });
+      chrome.setHeaderBanner({ mount: () => () => undefined });
       chrome.setHeaderBanner(undefined);
       service.stop();
 

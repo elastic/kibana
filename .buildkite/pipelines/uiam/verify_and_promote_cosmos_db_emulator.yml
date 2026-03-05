@@ -33,7 +33,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2-standard-4

@@ -6,6 +6,7 @@
  */
 
 import { Router } from '@kbn/shared-ux-router';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -77,17 +78,19 @@ const AppRoot = React.memo(
       <I18nProvider>
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
-            <Provider store={store}>
-              <Wrapper>
-                <ResolverWithoutProviders
-                  databaseDocumentID=""
-                  resolverComponentInstanceID="test"
-                  indices={[]}
-                  shouldUpdate={false}
-                  filters={{}}
-                />
-              </Wrapper>
-            </Provider>
+            <ExpandableFlyoutProvider>
+              <Provider store={store}>
+                <Wrapper>
+                  <ResolverWithoutProviders
+                    databaseDocumentID=""
+                    resolverComponentInstanceID="test"
+                    indices={[]}
+                    shouldUpdate={false}
+                    filters={{}}
+                  />
+                </Wrapper>
+              </Provider>
+            </ExpandableFlyoutProvider>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>

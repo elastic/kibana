@@ -13,11 +13,13 @@ import { GCS_BUCKET, BASELINE_WAIT_MS, FAILURE_WAIT_MS, SCENARIOS } from './lib/
 import { getConnectionConfig, type ConnectionConfig } from './lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './lib/gcs';
 import { sleep } from './lib/sleep';
+import { ensureLogsIndexTemplate } from '../../src/data_generators/logs_index_template';
 import {
   cleanupSigEventsExtractedFeaturesData,
   disableStreams,
   enableSignificantEvents,
   logSigEventsExtractedFeatures,
+  persistSigEventsExtractedFeaturesForSnapshot,
   triggerSigEventsFeatureExtraction,
   waitForSigEventsFeatureExtraction,
 } from './lib/significant_events_workflow';
@@ -99,7 +101,7 @@ run(
     log.info('');
     log.info('Each snapshot contains:');
     log.info('  logs*                        - OTel Demo log data');
-    log.info('  .kibana_streams_features     - LLM-extracted features');
+    log.info('  sigevents-streams-features-* - Extracted features (inferred + computed)');
     log.info('');
     log.info(`To use in evals, update SIGEVENTS_SNAPSHOT_RUN in replay.ts to "${runId}"`);
   },
@@ -166,7 +168,11 @@ async function processScenario(
   log.info(`SCENARIO: ${scenario.id}${scenario.isFailure ? ' (failure)' : ' (baseline)'}`);
   log.info('='.repeat(70));
 
-  // Step 1 — Deploy OTel Demo (this will also enabled streams)
+  // Step 0 — Ensure the `logs` data stream exists so that feature extraction can run.
+  // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
+  await ensureLogsDataStream(esClient, log);
+
+  // Step 1 — Deploy OTel Demo (this will stream logs into `logs`)
   log.info('[1/7] Deploying OTel Demo...');
   const { child, deployedPromise } = deployOtelDemo(log);
 
@@ -192,16 +198,18 @@ async function processScenario(
       log.info('[4/7] Skipped (healthy baseline)');
     }
 
-    // Step 5 — Run feature extraction (extracted features will be stored as part of the snapshot)
+    // Step 5 — Run feature extraction (the task generates both inferred and computed features)
+    // Extracted features will be stored as part of the snapshot
     log.info('[5/7] Running feature extraction...');
     await enableSignificantEvents(config, log);
     await triggerSigEventsFeatureExtraction(config, log, connectorId);
     await waitForSigEventsFeatureExtraction(config, log);
     await logSigEventsExtractedFeatures(config, log);
+    await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id);
 
     // Step 6 — Create a snapshot of the logs and extracted features
     log.info('[6/7] Creating GCS snapshot...');
-    await createSnapshot(esClient, log, scenario.id, runId);
+    await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
   } finally {
     // Kill the Otel Demo background process (log streamer)
     if (!child.killed) {
@@ -216,4 +224,37 @@ async function processScenario(
   await teardownOtelDemo(log);
 
   log.info(`Scenario "${scenario.id}" — done`);
+}
+
+async function ensureLogsDataStream(esClient: Client, log: ToolingLog): Promise<void> {
+  try {
+    await esClient.indices.getDataStream({ name: 'logs' });
+    return;
+  } catch (err) {
+    const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (statusCode !== 404) {
+      throw err;
+    }
+  }
+
+  log.info('logs data stream not found — creating it for snapshot capture');
+  await ensureLogsIndexTemplate(esClient, log);
+
+  try {
+    await esClient.indices.createDataStream({ name: 'logs' });
+  } catch (err) {
+    // If something already exists at "logs" (e.g. a plain index), try to remove it and retry.
+    log.warning(
+      `Failed to create logs data stream (will attempt cleanup and retry): ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    try {
+      await esClient.indices.deleteDataStream({ name: 'logs' });
+    } catch {
+      // ignore
+    }
+    await esClient.indices.delete({ index: 'logs', ignore_unavailable: true });
+    await esClient.indices.createDataStream({ name: 'logs' });
+  }
 }
