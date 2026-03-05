@@ -41,7 +41,8 @@
     "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-http-router-server-mocks"
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/logging-mocks"
   ],
   "exclude": [
     "target/**/*"
