@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { isEqual } from 'lodash';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
@@ -34,6 +34,7 @@ export const baseFeatureSchema = z.object({
   properties: z.record(z.string(), z.unknown()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()).optional(),
+  evidence_doc_ids: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   meta: z.record(z.string(), z.any()).optional(),
 });
