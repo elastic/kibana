@@ -110,20 +110,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
         });
 
-        it('creates ES|QL views for wired root streams', async () => {
-          for (const streamName of ['logs.otel', 'logs.ecs']) {
-            const response = await esClient.transport.request<{
-              views: Array<{ name: string; query: string }>;
-            }>({
-              method: 'GET',
-              path: `/_query/view/%24.${streamName}`,
-            });
-            expect(response.views).to.have.length(1);
-            expect(response.views[0].name).to.eql(`$.${streamName}`);
-            // Root streams start with no children, so the view query is just the stream itself.
-            expect(response.views[0].query).to.eql(`FROM ${streamName}`);
-          }
-        });
+        // ES|QL views API is not available in serverless
+        if (!isServerless) {
+          it('creates ES|QL views for wired root streams', async () => {
+            for (const streamName of ['logs.otel', 'logs.ecs']) {
+              const response = await esClient.transport.request<{
+                views: Array<{ name: string; query: string }>;
+              }>({
+                method: 'GET',
+                path: `/_query/view/%24.${streamName}`,
+              });
+              expect(response.views).to.have.length(1);
+              expect(response.views[0].name).to.eql(`$.${streamName}`);
+              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+            }
+          });
+        }
 
         it('exposes view_name in the wired stream GET response', async () => {
           const stream = await getStream(apiClient, 'logs.otel');
@@ -207,23 +209,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             expect(wiredStatus['logs.ecs']).to.eql(false);
           });
 
-          it('removes ES|QL views for wired root streams', async () => {
-            for (const streamName of ['logs.otel', 'logs.ecs']) {
-              await esClient.transport
-                .request<{ views: Array<{ name: string; query: string }> }>({
-                  method: 'GET',
-                  path: `/_query/view/%24.${streamName}`,
-                })
-                .then(
-                  () => {
-                    throw new Error(`Expected view $.${streamName} to be deleted`);
-                  },
-                  (err: { statusCode?: number }) => {
-                    expect(err.statusCode).to.eql(404);
-                  }
-                );
-            }
-          });
+          // ES|QL views API is not available in serverless
+          if (!isServerless) {
+            it('removes ES|QL views for wired root streams', async () => {
+              for (const streamName of ['logs.otel', 'logs.ecs']) {
+                await esClient.transport
+                  .request<{ views: Array<{ name: string; query: string }> }>({
+                    method: 'GET',
+                    path: `/_query/view/%24.${streamName}`,
+                  })
+                  .then(
+                    () => {
+                      throw new Error(`Expected view $.${streamName} to be deleted`);
+                    },
+                    (err: { statusCode?: number }) => {
+                      expect(err.statusCode).to.eql(404);
+                    }
+                  );
+              }
+            });
+          }
         });
       });
     });
@@ -304,32 +309,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
       });
 
-      it(`creates ES|QL view $.${rootStream}.nginx for the forked child stream`, async () => {
-        const childStreamName = `${rootStream}.nginx`;
-        const response = await esClient.transport.request<{
-          views: Array<{ name: string; query: string }>;
-        }>({
-          method: 'GET',
-          path: `/_query/view/%24.${childStreamName}`,
+      // ES|QL views API is not available in serverless
+      if (!isServerless) {
+        it(`creates ES|QL view $.${rootStream}.nginx for the forked child stream`, async () => {
+          const childStreamName = `${rootStream}.nginx`;
+          const response = await esClient.transport.request<{
+            views: Array<{ name: string; query: string }>;
+          }>({
+            method: 'GET',
+            path: `/_query/view/%24.${childStreamName}`,
+          });
+          expect(response.views).to.have.length(1);
+          expect(response.views[0].name).to.eql(`$.${childStreamName}`);
+          expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
         });
-        expect(response.views).to.have.length(1);
-        expect(response.views[0].name).to.eql(`$.${childStreamName}`);
-        // Child stream starts with no children of its own, so the view query is just the stream itself.
-        expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
-      });
 
-      it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
-        const response = await esClient.transport.request<{
-          views: Array<{ name: string; query: string }>;
-        }>({
-          method: 'GET',
-          path: `/_query/view/%24.${rootStream}`,
+        it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
+          const response = await esClient.transport.request<{
+            views: Array<{ name: string; query: string }>;
+          }>({
+            method: 'GET',
+            path: `/_query/view/%24.${rootStream}`,
+          });
+          expect(response.views).to.have.length(1);
+          expect(response.views[0].name).to.eql(`$.${rootStream}`);
+          expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
         });
-        expect(response.views).to.have.length(1);
-        expect(response.views[0].name).to.eql(`$.${rootStream}`);
-        // Parent view now includes the child's ES|QL view by its $.name reference.
-        expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
-      });
+      }
 
       it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
         const body = {
