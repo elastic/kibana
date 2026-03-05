@@ -46,13 +46,19 @@ export function DatePicker({
     refreshPaused?: boolean;
     refreshInterval?: number;
   }) {
-    history.push({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...nextQuery,
-      }),
-    });
+    try {
+      history.push({
+        ...location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          ...nextQuery,
+        }),
+      });
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes('fell out of navigation scope'))) {
+        throw error;
+      }
+    }
   }
 
   function onRefreshChange({

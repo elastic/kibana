@@ -32,10 +32,16 @@ export function useDateRangeRedirect() {
       ...query,
     };
 
-    history.replace({
-      ...location,
-      search: qs.stringify(nextQuery),
-    });
+    try {
+      history.replace({
+        ...location,
+        search: qs.stringify(nextQuery),
+      });
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes('fell out of navigation scope'))) {
+        throw error;
+      }
+    }
   };
 
   return {
