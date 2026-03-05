@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 
 const PAGE_URL = 'securitySolutionUI';
-const ALERTS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alerts';
-const DETECTIONS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alert_detections';
-const DETECTIONS_NAV_ITEM_BUTTON_SELECTOR = 'solutionSideNavItemButton-alert_detections';
-const ATTACKS_NAV_PANEL_ITEM_SELECTOR = 'solutionSideNavPanelLink-attacks';
-const ALERTS_NAV_PANEL_ITEM_SELECTOR = 'solutionSideNavPanelLink-alerts';
+const STATEFUL_ALERTS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alerts';
+const STATEFUL_DETECTIONS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alert_detections';
+const STATEFUL_DETECTIONS_NAV_ITEM_BUTTON_SELECTOR = 'solutionSideNavItemButton-alert_detections';
+const STATEFUL_ATTACKS_NAV_PANEL_ITEM_SELECTOR = 'solutionSideNavPanelLink-attacks';
+const STATEFUL_ALERTS_NAV_PANEL_ITEM_SELECTOR = 'solutionSideNavPanelLink-alerts';
+
+const SERVERLESS_ALERTS_NAV_ITEM_DEEP_LINK_ID = 'securitySolutionUI:alerts';
+const SERVERLESS_DETECTIONS_NAV_ITEM_ID = 'securityGroup:alertDetections';
+const SERVERLESS_ATTACKS_NAV_PANEL_ITEM_DEEP_LINK_ID = 'securitySolutionUI:attacks';
+const SERVERLESS_ALERTS_NAV_PANEL_ITEM_DEEP_LINK_ID = 'securitySolutionUI:alerts';
 
 export class DetectionsAttackDiscoveryPage {
   public standaloneAlertsNavItem: Locator;
@@ -21,14 +26,37 @@ export class DetectionsAttackDiscoveryPage {
   public detectionsPanelAttacksNavItem: Locator;
   public detectionsNavItemButton: Locator;
 
-  constructor(private readonly page: ScoutPage) {
-    this.standaloneAlertsNavItem = this.page.testSubj.locator(ALERTS_NAV_ITEM_SELECTOR);
-    this.detectionsNavItem = this.page.testSubj.locator(DETECTIONS_NAV_ITEM_SELECTOR);
-    this.detectionsPanelAlertsNavItem = this.page.testSubj.locator(ALERTS_NAV_PANEL_ITEM_SELECTOR);
-    this.detectionsPanelAttacksNavItem = this.page.testSubj.locator(
-      ATTACKS_NAV_PANEL_ITEM_SELECTOR
+  constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
+    if (_config.serverless) {
+      this.standaloneAlertsNavItem = this.page.testSubj.locator(
+        `~nav-item-deepLinkId-${SERVERLESS_ALERTS_NAV_ITEM_DEEP_LINK_ID}`
+      );
+      this.detectionsNavItem = this.page.testSubj.locator(
+        `~nav-item-id-${SERVERLESS_DETECTIONS_NAV_ITEM_ID}`
+      );
+      this.detectionsPanelAlertsNavItem = this.page.testSubj.locator(
+        `~nav-item-deepLinkId-${SERVERLESS_ALERTS_NAV_PANEL_ITEM_DEEP_LINK_ID}`
+      );
+      this.detectionsPanelAttacksNavItem = this.page.testSubj.locator(
+        `~nav-item-deepLinkId-${SERVERLESS_ATTACKS_NAV_PANEL_ITEM_DEEP_LINK_ID}`
+      );
+      this.detectionsNavItemButton = this.page.testSubj.locator(
+        `~nav-item-id-${SERVERLESS_DETECTIONS_NAV_ITEM_ID}`
+      );
+      return;
+    }
+
+    this.standaloneAlertsNavItem = this.page.testSubj.locator(STATEFUL_ALERTS_NAV_ITEM_SELECTOR);
+    this.detectionsNavItem = this.page.testSubj.locator(STATEFUL_DETECTIONS_NAV_ITEM_SELECTOR);
+    this.detectionsPanelAlertsNavItem = this.page.testSubj.locator(
+      STATEFUL_ALERTS_NAV_PANEL_ITEM_SELECTOR
     );
-    this.detectionsNavItemButton = this.page.testSubj.locator(DETECTIONS_NAV_ITEM_BUTTON_SELECTOR);
+    this.detectionsPanelAttacksNavItem = this.page.testSubj.locator(
+      STATEFUL_ATTACKS_NAV_PANEL_ITEM_SELECTOR
+    );
+    this.detectionsNavItemButton = this.page.testSubj.locator(
+      STATEFUL_DETECTIONS_NAV_ITEM_BUTTON_SELECTOR
+    );
   }
 
   async navigate() {
