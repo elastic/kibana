@@ -978,6 +978,8 @@
     "queries.interval",
     "queries.platform",
     "queries.query",
+    "queries.schedule_id",
+    "queries.start_date",
     "queries.timeout",
     "queries.version",
     "shards",

@@ -3050,8 +3050,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text",
-        "index": false
+        "index": false,
+        "type": "text"
       },
       "description": {
         "type": "text"
@@ -3251,6 +3251,12 @@
           },
           "query": {
             "type": "text"
+          },
+          "schedule_id": {
+            "type": "keyword"
+          },
+          "start_date": {
+            "type": "date"
           },
           "timeout": {
             "type": "short"
