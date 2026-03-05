@@ -76,7 +76,8 @@ export const HostPanelContent = ({
       {isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       )}
-      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
+      {riskScoreState.hasEngineBeenInstalled &&
+        (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
         <>
           <FlyoutRiskSummary
             entityType={EntityType.host}

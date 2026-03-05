@@ -102,18 +102,18 @@ export const UserPanel = ({
     return effectiveUserName ? (buildUserNamesFilter([effectiveUserName]) as ESQuery) : undefined;
   }, [entityStoreV2Enabled, safeEntityIdentifiers, effectiveUserName]);
 
+  const { to, from, setQuery, deleteQuery } = useGlobalTime();
+  const observedUser = useObservedUser(safeEntityIdentifiers, scopeId);
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
     filterQuery: userFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: entityStoreV2Enabled,
+    skip: entityStoreV2Enabled && !!observedUser?.entityRecord,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
-  const { to, from, setQuery, deleteQuery } = useGlobalTime();
-
-  const observedUser = useObservedUser(safeEntityIdentifiers, scopeId);
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;

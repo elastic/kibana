@@ -102,9 +102,18 @@ export const HostPanel = ({
     [entityIdentifiers, effectiveHostName]
   );
 
+  // Risk score index is keyed by host.name; use host name filter so the API finds the host
+  const riskScoreFilterQuery = useMemo(
+    () =>
+      effectiveHostName
+        ? (buildHostNamesFilter([effectiveHostName]) as ESQuery)
+        : (hostFilterQuery as ESQuery),
+    [effectiveHostName, hostFilterQuery]
+  );
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.host,
-    filterQuery: hostFilterQuery as ESQuery,
+    filterQuery: riskScoreFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled,

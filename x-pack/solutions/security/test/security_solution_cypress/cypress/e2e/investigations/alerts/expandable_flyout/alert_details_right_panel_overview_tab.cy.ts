@@ -86,6 +86,7 @@ import {
 import {
   PREVIEW_SECTION,
   PREVIEW_BANNER,
+  PREVIEW_CLOSE_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_preview_panel';
 
 describe(
@@ -262,7 +263,7 @@ describe(
 
         cy.get(userNameCell).click();
         cy.get(PREVIEW_SECTION).should('exist');
-        cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+        cy.contains(PREVIEW_BANNER, 'Preview user details').should('be.visible');
         cy.get(USER_PANEL_HEADER).should('exist');
         cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
 
@@ -324,10 +325,16 @@ describe(
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabInsightsSection();
 
+        // Close preview if still open from a previous test (e.g. host preview)
+        cy.get('body').then(($body) => {
+          if ($body.find(PREVIEW_SECTION).length > 0) {
+            cy.get(PREVIEW_CLOSE_BUTTON).click();
+          }
+        });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK).click();
 
         cy.get(PREVIEW_SECTION).should('exist');
-        cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+        cy.contains(PREVIEW_BANNER, 'Preview user details').should('be.visible');
         cy.get(USER_PANEL_HEADER).should('exist');
         cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
 
