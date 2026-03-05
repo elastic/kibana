@@ -57,6 +57,11 @@ export function TransactionDetails() {
     [apmRouter, path, query, transactionName]
   );
 
+  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
+    'apm.sloCalloutDismissed',
+    false
+  );
+
   // redirect to transaction list when transactionName is missing (e.g. bad URL, encoding issue)
   if (!transactionName || transactionName.trim() === '') {
     const transactionsListPath = routePath?.includes('mobile-services')
@@ -88,10 +93,6 @@ export function TransactionDetails() {
   }
 
   const isServerless = isServerlessAgentName(serverlessType);
-  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
-    'apm.sloCalloutDismissed',
-    false
-  );
 
   return (
     <>
