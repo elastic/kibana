@@ -39,6 +39,7 @@ export function DateRangePickerControl() {
     isEditing,
     setIsEditing,
     compressed,
+    collapsed,
     displayText,
     displayFullFormattedText,
     displayShortDuration,
@@ -190,12 +191,13 @@ export function DateRangePickerControl() {
             <EuiFormControlButton
               data-test-subj="dateRangePickerControlButton"
               buttonRef={buttonRef}
-              value={displayText}
+              aria-label={collapsed ? displayText : undefined}
+              value={collapsed ? '' : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
               compressed={compressed}
             >
-              {displayShortDuration && <EuiBadge>{displayShortDuration}</EuiBadge>}
+              <EuiBadge>{displayShortDuration ?? '--'}</EuiBadge>
             </EuiFormControlButton>
           </EuiToolTip>
         )}
