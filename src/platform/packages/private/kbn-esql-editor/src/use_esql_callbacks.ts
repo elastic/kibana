@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, type MutableRefObject } from 'react';
+import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { ESQLCallbacks, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ILicense } from '@kbn/licensing-types';
@@ -30,6 +30,8 @@ import { clearCacheWhenOld } from './helpers';
 import { getHistoryItems } from './history_local_storage';
 import type { ESQLEditorDeps } from './types';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
+import { useCanCreateLookupIndex } from './lookup_join';
+import { useCanSuggestResourceBrowser } from './resource_browser/use_can_suggest_resource_browser';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -67,10 +69,8 @@ interface UseEsqlCallbacksParams {
   fieldsMetadata?: ESQLEditorDeps['fieldsMetadata'];
   esqlService?: ESQLEditorDeps['esql'];
   histogramBarTarget: number;
-  activeSolutionId?: Parameters<typeof getEditorExtensions>[2];
-  canCreateLookupIndex: ESQLCallbacks['canCreateLookupIndex'];
+  activeSolutionId?: ESQLRegistrySolutionId;
   minimalQueryRef: MutableRefObject<string>;
-  abortControllerRef: MutableRefObject<AbortController>;
   dataSourcesCache: MapCache;
   memoizedSources: MemoizedSources;
   esqlFieldsCache: MapCache;
@@ -79,7 +79,7 @@ interface UseEsqlCallbacksParams {
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
-  isResourceBrowserEnabled: () => Promise<boolean>;
+  enableResourceBrowser: boolean;
 }
 
 export const useEsqlCallbacks = ({
@@ -90,9 +90,7 @@ export const useEsqlCallbacks = ({
   esqlService,
   histogramBarTarget,
   activeSolutionId,
-  canCreateLookupIndex,
   minimalQueryRef,
-  abortControllerRef,
   dataSourcesCache,
   memoizedSources,
   esqlFieldsCache,
@@ -101,8 +99,11 @@ export const useEsqlCallbacks = ({
   memoizedHistoryStarredItems,
   favoritesClient,
   getJoinIndicesCallback,
-  isResourceBrowserEnabled,
+  enableResourceBrowser,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
+  const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
+  const previousColumnsQueryRef = useRef<string | undefined>(undefined);
+
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
     const getLicense = esqlService?.getLicense;
@@ -113,19 +114,38 @@ export const useEsqlCallbacks = ({
   const getColumnsFor = useCallback(
     async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
       if (queryToExecute) {
-        // Check if there's a stale entry and clear it
-        clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
+        // Abort any previous in-flight autocomplete column fetch and
+        // remove its potentially stale cache entry
+        if (columnsAbortControllerRef.current) {
+          columnsAbortControllerRef.current.abort();
+          if (previousColumnsQueryRef.current) {
+            esqlFieldsCache.delete(previousColumnsQueryRef.current);
+          }
+        }
+
+        const controller = new AbortController();
+        columnsAbortControllerRef.current = controller;
+        previousColumnsQueryRef.current = queryToExecute;
+
+        clearCacheWhenOld(esqlFieldsCache, queryToExecute);
         const timeRange = data.query.timefilter.timefilter.getTime();
-        return (
-          (await memoizedFieldsFromESQL({
-            esqlQuery: queryToExecute,
-            search: data.search.search,
-            timeRange,
-            signal: abortControllerRef.current.signal,
-            variables: esqlService?.variablesService?.esqlVariables,
-            dropNullColumns: true,
-          }).result) || []
-        );
+        const result = await memoizedFieldsFromESQL({
+          esqlQuery: queryToExecute,
+          search: data.search.search,
+          timeRange,
+          signal: controller.signal,
+          variables: esqlService?.variablesService?.esqlVariables,
+          dropNullColumns: true,
+        }).result;
+
+        if (controller.signal.aborted) {
+          esqlFieldsCache.delete(queryToExecute);
+          return [];
+        }
+
+        previousColumnsQueryRef.current = undefined;
+
+        return result || [];
       }
       return [];
     },
@@ -134,7 +154,6 @@ export const useEsqlCallbacks = ({
       data.search.search,
       esqlFieldsCache,
       memoizedFieldsFromESQL,
-      abortControllerRef,
       esqlService,
     ]
   );
@@ -212,6 +231,9 @@ export const useEsqlCallbacks = ({
 
   const isServerless = Boolean(esqlService?.isServerless);
 
+  const canCreateLookupIndex = useCanCreateLookupIndex();
+  const canSuggestResourceBrowser = useCanSuggestResourceBrowser(enableResourceBrowser);
+
   const getKqlSuggestions = useCallback(
     async (kqlQuery: string, cursorPositionInKql: number) => {
       const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
@@ -264,7 +286,7 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
-      isResourceBrowserEnabled,
+      canSuggestResourceBrowser,
     }),
     [
       getSources,
@@ -285,7 +307,7 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
-      isResourceBrowserEnabled,
+      canSuggestResourceBrowser,
     ]
   );
 };

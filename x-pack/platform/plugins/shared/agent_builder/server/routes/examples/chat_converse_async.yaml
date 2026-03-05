@@ -31,3 +31,24 @@ responses:
               
               - event: round_complete
                 data: {"data":{"round":{"id":"a5692d54-bc06-4a6e-aea1-412779c73f66","input":{"message":"Hello"},"response":{"message":"Hello! How can I help you today?"}}}}
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/converse/async" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "input": "Hello again let us have an async chat",
+        "agent_id": "elastic-ai-agent",
+        "conversation_id": "<CONVERSATION_ID>"
+      }'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/converse/async
+    {
+      "input": "Hello again let's have an async chat",
+      "agent_id": "elastic-ai-agent",
+      "conversation_id": "<CONVERSATION_ID>"
+    }

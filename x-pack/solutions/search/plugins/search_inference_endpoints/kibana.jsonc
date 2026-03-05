@@ -19,6 +19,7 @@
       "actions",
       "features",
       "licensing",
+      "management",
       "ml",
       "share",
     ],
@@ -26,7 +27,6 @@
       "cloud",
       "console",
       "serverless",
-      "searchNavigation",
     ],
     "requiredBundles": [
       "kibanaReact",

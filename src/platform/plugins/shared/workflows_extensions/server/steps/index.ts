@@ -12,10 +12,15 @@ import { aiClassifyStepDefinition } from './ai/ai_classify_step/step';
 import { aiPromptStepDefinition } from './ai/ai_prompt_step/step';
 import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
 import {
+  dataAggregateStepDefinition,
   dataDedupeStepDefinition,
+  dataFilterStepDefinition,
+  dataFindStepDefinition,
   dataMapStepDefinition,
+  dataParseJsonStepDefinition,
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
+  dataStringifyJsonStepDefinition,
 } from './data';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
@@ -26,8 +31,13 @@ export const registerInternalStepDefinitions = (
 ) => {
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
+  serverStepRegistry.register(dataFilterStepDefinition);
+  serverStepRegistry.register(dataFindStepDefinition);
   serverStepRegistry.register(dataRegexExtractStepDefinition);
   serverStepRegistry.register(dataRegexReplaceStepDefinition);
+  serverStepRegistry.register(dataAggregateStepDefinition);
+  serverStepRegistry.register(dataParseJsonStepDefinition);
+  serverStepRegistry.register(dataStringifyJsonStepDefinition);
   serverStepRegistry.register(aiClassifyStepDefinition(core));
   serverStepRegistry.register(aiPromptStepDefinition(core));
   serverStepRegistry.register(aiSummarizeStepDefinition(core));

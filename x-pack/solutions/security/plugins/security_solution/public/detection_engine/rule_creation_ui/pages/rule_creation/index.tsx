@@ -89,6 +89,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -123,6 +124,7 @@ const CreateRulePageComponent: React.FC<{
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
@@ -819,18 +821,18 @@ const CreateRulePageComponent: React.FC<{
 
   const addToChatButton = useMemo(
     () =>
-      sendToAgentChat ? (
+      isAgentChatExperienceEnabled ? (
         <AddRuleAttachmentToChatButton
           defineStepData={defineStepData}
           aboutStepData={aboutStepData}
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          size="s"
+          pathway="rule_creation"
         />
-      ) : undefined,
+      ) : null,
     [
-      sendToAgentChat,
+      isAgentChatExperienceEnabled,
       defineStepData,
       aboutStepData,
       scheduleStepData,

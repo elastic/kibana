@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
@@ -20,7 +20,7 @@ import type { LogExtractionState } from '../../domain/definitions/saved_objects'
  */
 type LogExtractionStateForV1 = Omit<
   LogExtractionState,
-  'additionalIndexPattern' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
+  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
 >;
 interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
   docsPerSecond: -1;

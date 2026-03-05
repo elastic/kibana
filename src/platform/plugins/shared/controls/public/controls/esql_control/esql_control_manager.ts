@@ -13,6 +13,7 @@ import {
   combineLatest,
   debounceTime,
   filter,
+  from,
   map,
   merge,
   of,
@@ -20,14 +21,18 @@ import {
   switchMap,
 } from 'rxjs';
 
-import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/controls-schemas';
+import type {
+  OptionsListESQLControlState,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { apiHasSections } from '@kbn/presentation-containers';
 import {
   fetch$,
+  apiHasSections,
   type PublishingSubject,
   type StateComparators,
 } from '@kbn/presentation-publishing';
@@ -38,6 +43,7 @@ import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import { castESQLValue } from './utils/esql_type_utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -45,60 +51,64 @@ function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: Optio
 
 export const selectionComparators: StateComparators<
   Pick<
-    ESQLControlState,
-    | 'selectedOptions'
-    | 'availableOptions'
-    | 'variableName'
-    | 'singleSelect'
-    | 'variableType'
-    | 'controlType'
-    | 'esqlQuery'
+    OptionsListESQLControlState,
+    | 'selected_options'
+    | 'available_options'
+    | 'variable_name'
+    | 'single_select'
+    | 'variable_type'
+    | 'control_type'
+    | 'esql_query'
     | 'title'
   >
 > = {
-  selectedOptions: selectedOptionsComparatorFunction,
-  availableOptions: (a, b, lastState, currentState) => {
+  selected_options: selectedOptionsComparatorFunction,
+  available_options: (a, b, lastState, currentState) => {
     // Only compare availableOptions for static values controls; values from query fetch these at runtime
     if (
-      lastState?.controlType === currentState?.controlType &&
-      currentState?.controlType === EsqlControlType.VALUES_FROM_QUERY
+      lastState?.control_type === currentState?.control_type &&
+      currentState?.control_type === EsqlControlType.VALUES_FROM_QUERY
     ) {
       return true;
     }
     return deepEqual(a ?? [], b ?? []);
   },
-  variableName: 'referenceEquality',
-  variableType: 'referenceEquality',
-  controlType: 'referenceEquality',
-  esqlQuery: 'referenceEquality',
+  variable_name: 'referenceEquality',
+  variable_type: 'referenceEquality',
+  control_type: 'referenceEquality',
+  esql_query: 'referenceEquality',
   title: 'referenceEquality',
-  singleSelect: 'referenceEquality',
+  single_select: 'referenceEquality',
 };
 
 export function initializeESQLControlManager(
   uuid: string,
   parentApi: unknown,
-  initialState: ESQLControlState,
+  initialState: OptionsListESQLControlState,
   setDataLoading: (loading: boolean) => void
 ) {
   const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
-  const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
-  const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
+  const availableOptions$ = new BehaviorSubject<string[]>(initialState.available_options ?? []);
+  const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
-  const singleSelect$ = new BehaviorSubject<boolean>(initialState.singleSelect ?? true);
-  const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
+  const singleSelect$ = new BehaviorSubject<boolean>(initialState.single_select ?? true);
+  const variableName$ = new BehaviorSubject<string>(initialState.variable_name ?? '');
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
-    initialState.variableType ?? ESQLVariableType.VALUES
+    (initialState.variable_type as ESQLVariableType) ?? ESQLVariableType.VALUES
   );
-  const controlType$ = new BehaviorSubject<EsqlControlType>(initialState.controlType ?? '');
-  const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
-  const title$ = new BehaviorSubject<string | undefined>(initialState.title);
-  const totalCardinality$ = new BehaviorSubject<number>(initialState.availableOptions?.length ?? 0);
+  const controlType$ = new BehaviorSubject<EsqlControlType>(
+    (initialState.control_type as EsqlControlType) ?? ''
+  );
+  const esqlQuery$ = new BehaviorSubject<string>(initialState.esql_query ?? '');
+  let valuesColumnType: string | undefined;
+  const totalCardinality$ = new BehaviorSubject<number>(
+    initialState.available_options?.length ?? 0
+  );
 
   const searchString$ = new BehaviorSubject<string>('');
   const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(
-    initialState.availableOptions?.map((value) => ({ value })) ?? []
+    initialState.available_options?.map((value) => ({ value })) ?? []
   );
 
   // Use it for incompatible suggestions
@@ -139,6 +149,7 @@ export function initializeESQLControlManager(
   let previousESQLVariables: ESQLControlVariable[] = [];
   let previousTimeRange: TimeRange | undefined;
   let hasInitialFetch = false;
+  let fetchAbortController = new AbortController();
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
@@ -171,21 +182,29 @@ export function initializeESQLControlManager(
 
         return shouldFetch;
       }),
-      switchMap(async ({ timeRange, esqlVariables }) => {
+      switchMap(({ timeRange, esqlVariables }) => {
+        fetchAbortController.abort();
+        fetchAbortController = new AbortController();
+        const { signal } = fetchAbortController;
+
         setDataLoading(true);
         const variablesInParent = esqlVariables || [];
 
-        return await getESQLSingleColumnValues({
-          query: esqlQuery$.getValue(),
-          search: dataService.search.search,
-          timeRange,
-          esqlVariables: variablesInParent,
-        });
+        return from(
+          getESQLSingleColumnValues({
+            query: esqlQuery$.getValue(),
+            search: dataService.search.search,
+            signal,
+            timeRange,
+            esqlVariables: variablesInParent,
+          })
+        );
       })
     )
     .subscribe((result) => {
       setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
+        valuesColumnType = result.columnType;
         const newAvailableOptions = result.values.map((value) => value);
         availableOptions$.next(newAvailableOptions);
 
@@ -220,6 +239,8 @@ export function initializeESQLControlManager(
   const getEsqlVariable = (sectionId?: string) => {
     const isSingleSelect = singleSelect$.value;
     const selectedValues = selectedOptions$.value;
+    const columnType =
+      controlType$.value === EsqlControlType.VALUES_FROM_QUERY ? valuesColumnType : undefined;
 
     // For single select, return the first value; for multi-select, return the array
     let value: ESQLControlVariable['value'];
@@ -228,13 +249,13 @@ export function initializeESQLControlManager(
       // Single select: return the first value or empty string if none selected
       const firstValue = selectedValues[0];
       if (firstValue !== undefined) {
-        value = isNaN(Number(firstValue)) ? firstValue : Number(firstValue);
+        value = castESQLValue(firstValue, columnType);
       } else {
         value = '';
       }
     } else {
-      // Multi-select: return array of all selected values
-      value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
+      // Multi select: return array with numbers converted from strings when possible
+      value = selectedValues.map((val) => castESQLValue(val, columnType));
     }
 
     return {
@@ -267,6 +288,7 @@ export function initializeESQLControlManager(
 
   return {
     cleanup: () => {
+      fetchAbortController.abort();
       variableSubscriptions.unsubscribe();
       fetchSubscription.unsubscribe();
       availableOptionsSearchSubscription.unsubscribe();
@@ -283,42 +305,39 @@ export function initializeESQLControlManager(
       singleSelect$,
       variableType$,
       controlType$,
-      esqlQuery$,
-      title$
+      esqlQuery$
     ).pipe(map(() => undefined)),
-    reinitializeState: (lastSaved?: ESQLControlState) => {
-      setSelectedOptions(lastSaved?.selectedOptions ?? []);
-      availableOptions$.next(lastSaved?.availableOptions ?? []);
-      variableName$.next(lastSaved?.variableName ?? '');
-      singleSelect$.next(lastSaved?.singleSelect ?? true);
-      variableType$.next(lastSaved?.variableType ?? ESQLVariableType.VALUES);
-      if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
-      esqlQuery$.next(lastSaved?.esqlQuery ?? '');
-      title$.next(lastSaved?.title);
+    reinitializeState: (lastSaved?: OptionsListESQLControlState) => {
+      setSelectedOptions(lastSaved?.selected_options ?? []);
+      availableOptions$.next(lastSaved?.available_options ?? []);
+      variableName$.next(lastSaved?.variable_name ?? '');
+      singleSelect$.next(lastSaved?.single_select ?? true);
+      variableType$.next((lastSaved?.variable_type as ESQLVariableType) ?? ESQLVariableType.VALUES);
+      if (lastSaved?.control_type) controlType$.next(lastSaved?.control_type as EsqlControlType);
+      esqlQuery$.next(lastSaved?.esql_query ?? '');
+      valuesColumnType = undefined;
       temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
       previousTimeRange = undefined;
       hasInitialFetch = false;
     },
-    getLatestState: () => {
+    getLatestState: (): OptionsListESQLControlState => {
       return {
-        selectedOptions: selectedOptions$.getValue() ?? [],
+        selected_options: selectedOptions$.getValue() ?? [],
         ...(controlType$.getValue() === EsqlControlType.STATIC_VALUES
-          ? { availableOptions: availableOptions$.getValue() ?? [] }
+          ? { available_options: availableOptions$.getValue() ?? [] }
           : {}),
-        variableName: variableName$.getValue() ?? '',
-        singleSelect: singleSelect$.getValue() ?? true,
-        variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
-        controlType: controlType$.getValue(),
-        esqlQuery: esqlQuery$.getValue() ?? '',
-        title: title$.getValue() ?? '',
+        variable_name: variableName$.getValue() ?? '',
+        single_select: singleSelect$.getValue() ?? true,
+        variable_type: variableType$.getValue() ?? ESQLVariableType.VALUES,
+        control_type: controlType$.getValue(),
+        esql_query: esqlQuery$.getValue() ?? '',
       };
     },
     internalApi: {
       selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
       availableOptions$: displayedAvailableOptions$,
       totalCardinality$,
-      title$,
       setSelectedOptions,
       setSearchString,
       field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
@@ -327,6 +346,7 @@ export function initializeESQLControlManager(
       searchStringValid$: new BehaviorSubject(true),
       invalidSelections$: temporaryStateManager.api.invalidSelections$,
       setInvalidSelections: temporaryStateManager.api.setInvalidSelections,
+      variableName$,
     },
   };
 }
