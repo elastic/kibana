@@ -98,6 +98,8 @@ export function cleanNonGeneratedSection(
     }
   });
 
-  const cleaned = kept.join('\n') + (sectionContent.endsWith('\n') ? '\n' : '');
+  const joined = kept.join('\n');
+  // Not to add an extra \n if the sectionContent already ends with a \n
+  const cleaned = joined + (sectionContent.endsWith('\n') && !joined.endsWith('\n') ? '\n' : '');
   return { cleaned, removed };
 }
