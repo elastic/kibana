@@ -56,9 +56,11 @@ export const useComparisonFields = ({
       // Get field names from data view fields or extract from documents (ES|QL fallback)
       const fieldEntries: Array<{ name: string; displayName: string }> = useDataViewFields
         ? dataViewFields.map((field) => ({ name: field.name, displayName: field.displayName }))
-        : [...new Set([baseDoc, ...comparisonDocs].flatMap((doc) => Object.keys(doc?.flattened ?? {})))].map(
-            (name) => ({ name, displayName: name })
-          );
+        : [
+            ...new Set(
+              [baseDoc, ...comparisonDocs].flatMap((doc) => Object.keys(doc?.flattened ?? {}))
+            ),
+          ].map((name) => ({ name, displayName: name }));
 
       const sortedFields = fieldEntries
         .filter(({ name }) => name !== dataView.timeFieldName && hasFieldValue(name))
