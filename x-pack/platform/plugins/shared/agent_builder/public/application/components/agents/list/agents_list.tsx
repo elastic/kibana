@@ -24,7 +24,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type AgentDefinition } from '@kbn/agent-builder-common';
+import { AgentVisibility, type AgentDefinition } from '@kbn/agent-builder-common';
 import { useQuery } from '@kbn/react-query';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
@@ -42,6 +42,7 @@ import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_ma
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -71,19 +72,19 @@ const actionLabels = {
 };
 
 const getAgentVisibility = (agent: AgentDefinition): NonNullable<AgentDefinition['visibility']> =>
-  agent.visibility ?? 'public';
+  agent.visibility ?? AgentVisibility.Public;
 
 const getVisibilityBadgeLabel = (visibility: NonNullable<AgentDefinition['visibility']>) => {
   switch (visibility) {
-    case 'private':
+    case AgentVisibility.Private:
       return i18n.translate('xpack.agentBuilder.agents.visibility.private', {
         defaultMessage: 'Private',
       });
-    case 'shared':
+    case AgentVisibility.Shared:
       return i18n.translate('xpack.agentBuilder.agents.visibility.shared', {
         defaultMessage: 'Shared',
       });
-    case 'public':
+    case AgentVisibility.Public:
       return i18n.translate('xpack.agentBuilder.agents.visibility.public', {
         defaultMessage: 'Public',
       });
@@ -94,11 +95,11 @@ const getVisibilityBadgeColor = (
   visibility: NonNullable<AgentDefinition['visibility']>
 ): EuiBadgeProps['color'] => {
   switch (visibility) {
-    case 'private':
+    case AgentVisibility.Private:
       return 'hollow';
-    case 'shared':
+    case AgentVisibility.Shared:
       return 'primary';
-    case 'public':
+    case AgentVisibility.Public:
       return 'success';
   }
 };
@@ -131,14 +132,20 @@ const renderAgentVisibilityBadge = (agent: AgentDefinition) => {
 const canCurrentUserEditAgent = ({
   agent,
   manageAgents,
+  experimentalFeaturesEnabled,
   currentUser,
 }: {
   agent: AgentDefinition;
   manageAgents: boolean;
+  experimentalFeaturesEnabled: boolean;
   currentUser?: AgentBuilderCurrentUser;
 }) => {
   if (agent.readonly || !manageAgents) {
     return false;
+  }
+
+  if (!experimentalFeaturesEnabled) {
+    return true;
   }
 
   return canEditAgentByVisibility({
@@ -152,11 +159,13 @@ export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { manageAgents } = useUiPrivileges();
   const { services } = useKibana();
+  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.settings.client);
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { data: currentUser } = useQuery({
     queryKey: ['agentBuilder', 'currentUser'],
     queryFn: async () => services.userProfile.getCurrent(),
+    enabled: experimentalFeaturesEnabled,
   });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
@@ -169,7 +178,12 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
     const canEditAgent = (agent: AgentDefinition) =>
-      canCurrentUserEditAgent({ agent, manageAgents, currentUser });
+      canCurrentUserEditAgent({
+        agent,
+        manageAgents,
+        experimentalFeaturesEnabled,
+        currentUser,
+      });
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
       field: 'name',
@@ -278,8 +292,10 @@ export const AgentsList: React.FC = () => {
       ],
     };
 
-    return [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions];
-  }, [createAgentBuilderUrl, currentUser, deleteAgent, manageAgents]);
+    return experimentalFeaturesEnabled
+      ? [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions]
+      : [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
+  }, [createAgentBuilderUrl, currentUser, deleteAgent, manageAgents, experimentalFeaturesEnabled]);
 
   const errorMessage = useMemo(
     () =>

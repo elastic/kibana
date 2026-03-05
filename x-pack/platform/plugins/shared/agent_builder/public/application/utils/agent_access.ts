@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentVisibility, UserIdAndName } from '@kbn/agent-builder-common';
+import { AgentVisibility, type UserIdAndName } from '@kbn/agent-builder-common';
 
 export interface AgentBuilderCurrentUser {
   uid?: string;
@@ -59,7 +59,7 @@ export const canEditAgentByVisibility = ({
     return true;
   }
 
-  if ((visibility ?? 'public') === 'public') {
+  if ((visibility ?? AgentVisibility.Public) === AgentVisibility.Public) {
     return true;
   }
 

@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
+  AgentVisibility,
   type ToolSelection,
   type UserIdAndName,
   defaultAgentToolIds,
@@ -34,7 +35,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  visibility: 'public',
+  visibility: AgentVisibility.Public,
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -47,10 +48,12 @@ const emptyState = (): AgentEditState => ({
 
 export function useAgentEdit({
   editingAgentId,
+  experimentalFeaturesEnabled,
   onSaveSuccess,
   onSaveError,
 }: {
   editingAgentId?: string;
+  experimentalFeaturesEnabled: boolean;
   onSaveSuccess: (agent: AgentDefinition) => void;
   onSaveError: (err: Error) => void;
 }) {
@@ -102,7 +105,7 @@ export function useAgentEdit({
 
     if (agent) {
       const { type, created_by, ...agentState } = agent;
-      agentState.visibility = agentState.visibility ?? 'public';
+      agentState.visibility = agentState.visibility ?? AgentVisibility.Public;
       if (isClone) {
         agentState.id = duplicateName(agentState.id);
       }
@@ -114,15 +117,18 @@ export function useAgentEdit({
   const submit = useCallback(
     async (data: AgentEditState) => {
       const cleanedData = cleanInvalidToolReferences(data, tools);
+      const requestData = experimentalFeaturesEnabled
+        ? cleanedData
+        : { ...cleanedData, visibility: undefined };
 
       if (editingAgentId) {
-        const { id, ...updatedAgent } = cleanedData;
+        const { id, ...updatedAgent } = requestData;
         await updateMutation.mutateAsync(updatedAgent);
       } else {
-        await createMutation.mutateAsync(cleanedData);
+        await createMutation.mutateAsync(requestData);
       }
     },
-    [editingAgentId, createMutation, updateMutation, tools]
+    [editingAgentId, createMutation, updateMutation, tools, experimentalFeaturesEnabled]
   );
 
   const isLoading = agentId ? agentLoading || toolsLoading : false;
