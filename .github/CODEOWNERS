@@ -1991,6 +1991,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.github/copilot-instructions.md @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
+/.coderabbit.yml @elastic/kibana-operations
 
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
