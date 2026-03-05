@@ -13,6 +13,7 @@ import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server'
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
+import { scheduleHistorySnapshotTasks } from '../tasks/history_snapshot_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import {
   EngineDescriptorTypeName,
@@ -110,6 +111,14 @@ export class AssetManager {
 
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
+        scheduleHistorySnapshotTasks({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+          frequency: historySnapshot.frequency,
+        }),
+        
         installEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
