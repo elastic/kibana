@@ -20,7 +20,7 @@ export interface InferenceEndpointMeta {
  * Resolves metadata about an inference endpoint by querying the ES Inference API.
  * This is used to populate tracing spans and telemetry with model information.
  *
- * Throws if the endpoint does not exist. 
+ * Throws if the endpoint does not exist.
  */
 export const resolveInferenceEndpoint = async ({
   inferenceId,

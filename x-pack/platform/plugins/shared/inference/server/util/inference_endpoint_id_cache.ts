@@ -29,7 +29,7 @@ export class InferenceEndpointIdCache {
     if (this.knownIds.has(id)) {
       this.updateCacheIfExpired(esClient); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
       return true;
-    };
+    }
     await this.updateCacheIfExpired(esClient); // id not in cache, make sure we have latest data before returning
     return this.knownIds.has(id);
   }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { resolveInferenceEndpoint } from './resolve_inference_endpoint';
 
 describe('resolveInferenceEndpoint', () => {
