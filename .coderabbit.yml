@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  auto_review:
+    labels:
+      - reviewer:coderabbit
+      - Team:Search
+      - Team:Operations
+      - Team:QA

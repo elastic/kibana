@@ -11,7 +11,11 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
-import { ALERT_PROPAGATION_TIMEOUT, EXECUTION_TIMEOUT } from '../../fixtures/constants';
+import {
+  ALERT_PROPAGATION_TIMEOUT,
+  ALERT_TRIGGER_TEST_TIMEOUT,
+  EXECUTION_TIMEOUT,
+} from '../../fixtures/constants';
 import {
   getCreateObsAlertRuleWorkflowYaml,
   getCreateSecurityAlertRuleWorkflowYaml,
@@ -34,8 +38,7 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-// FLAKY: https://github.com/elastic/kibana/issues/252959
-test.describe.skip(
+test.describe(
   'Workflow execution - Alert triggers',
   {
     tag: [
@@ -81,6 +84,7 @@ test.describe.skip(
       scoutSpace,
       config,
     }) => {
+      test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
       const getCreateAlertRuleYaml = getCreateAlertRuleWorkflow(config.projectType);
 
       const singleWorkflowName = 'Handle single alert';
@@ -211,6 +215,7 @@ test.describe.skip(
       scoutSpace,
       config,
     }) => {
+      test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
       const getCreateAlertRuleYaml = getCreateAlertRuleWorkflow(config.projectType);
 
       const disabledWorkflowName = 'Disabled alert target';
