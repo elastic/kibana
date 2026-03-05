@@ -12,7 +12,7 @@ import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { groupBy, mapValues, orderBy, sortBy, sumBy } from 'lodash';
 import moment from 'moment';
 import { parseDatemath } from '../../utils/time';
-import { MAX_CELL_VALUE_LENGTH } from './constants';
+import { MAX_FIELD_VALUE_LENGTH } from './constants';
 
 export function getDefaultBucketSize(startMs: number, endMs: number): string {
   const duration = moment.duration(endMs - startMs, 'ms');
@@ -252,7 +252,7 @@ function parseSamples(fork: ESQLSearchResponse | undefined, fields: string[]): L
       fork.columns
         .map((col, i) => [col.name, row[i]] as const)
         .filter(([name, value]) => value != null && fieldsToInclude.has(name))
-        .map(([name, value]) => [name, truncateCellValue(value)])
+        .map(([name, value]) => [name, truncateFieldValue(value)])
     )
   );
 }
@@ -269,9 +269,9 @@ function splitResultByForkId(
   }));
 }
 
-function truncateCellValue(value: unknown): unknown {
-  if (typeof value === 'string' && value.length > MAX_CELL_VALUE_LENGTH) {
-    return value.slice(0, MAX_CELL_VALUE_LENGTH) + '...';
+function truncateFieldValue(value: unknown): unknown {
+  if (typeof value === 'string' && value.length > MAX_FIELD_VALUE_LENGTH) {
+    return value.slice(0, MAX_FIELD_VALUE_LENGTH) + '...';
   }
   return value;
 }

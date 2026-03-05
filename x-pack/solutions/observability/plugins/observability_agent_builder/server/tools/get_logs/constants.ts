@@ -7,12 +7,13 @@
 
 export const OBSERVABILITY_GET_LOGS_TOOL_ID = 'observability.get_logs';
 
-export const MAX_CELL_VALUE_LENGTH = 500;
+export const MAX_FIELD_VALUE_LENGTH = 500;
 
 export const DEFAULT_KEEP_FIELDS = [
   'message',
   'error.message',
   'error.exception.message',
+  'error.exception.type',
   'service.name',
   'container.name',
   'host.name',
