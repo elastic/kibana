@@ -102,10 +102,7 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               </EuiText>
             </EuiModalBody>
             <EuiModalFooter>
-              <EuiButtonEmpty
-                onClick={() => handleDismiss(closeModal)}
-                isLoading={isLoading}
-              >
+              <EuiButtonEmpty onClick={() => handleDismiss(closeModal)} isLoading={isLoading}>
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.pauseUpgradeButton"
                   defaultMessage="Pause upgrade"
