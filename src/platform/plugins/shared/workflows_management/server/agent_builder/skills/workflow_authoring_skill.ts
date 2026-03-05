@@ -119,7 +119,6 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **http**: Make HTTP requests to external APIs
 - **foreach**: Loop over collections with nested steps
 - **if**: Conditional execution with \`condition\` and optional \`else\` block
-- **parallel**: Execute multiple branches concurrently
 - **data.set**: Set variables in workflow context
 - **data.transform**: Transform data using expressions
 - **wait**: Pause execution for a duration
