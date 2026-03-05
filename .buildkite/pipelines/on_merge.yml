@@ -38,6 +38,8 @@ steps:
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
+      zones: us-central1-c,us-central1-a
+      diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
     retry:
