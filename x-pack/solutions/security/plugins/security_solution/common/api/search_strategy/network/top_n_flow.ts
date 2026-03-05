@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
@@ -14,7 +14,7 @@ import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
 export const networkTopNFlowSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip().nullish(),
+  ip: z.ipv4().or(z.ipv6()).nullish(),
   flowTarget,
   sort,
   timerange,
@@ -25,7 +25,7 @@ export type NetworkTopNFlowRequestOptionsInput = z.input<typeof networkTopNFlowS
 export type NetworkTopNFlowRequestOptions = z.infer<typeof networkTopNFlowSchema>;
 
 export const networkTopNFlowCountSchema = requestBasicOptionsSchema.extend({
-  ip: z.string().ip().nullish(),
+  ip: z.ipv4().or(z.ipv6()).nullish(),
   flowTarget,
   timerange,
   factoryQueryType: z.literal(NetworkQueries.topNFlowCount),

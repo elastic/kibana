@@ -126,7 +126,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -145,7 +145,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"projectKey\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at projectKey`,
             });
           });
       });
@@ -191,7 +191,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"email\": Required;\n [2]: Field \"apiToken\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at email\n✖ Invalid input: expected string, received undefined\n  → at apiToken`,
             });
           });
       });
@@ -259,7 +259,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'issueTypes' | 'fieldsByIssueType' | 'issues' | 'issue'`,
+                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -277,7 +277,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -303,7 +303,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.incident.summary\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.incident.summary`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -331,7 +331,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -358,7 +358,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -386,7 +386,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.incident.labels.0\": The label label with spaces cannot contain spaces`,
+                message: `error validating action params: ✖ The label label with spaces cannot contain spaces\n  → at subActionParams.incident.labels[0]`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -421,7 +421,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.incident.otherFields\": A maximum of 20 fields in otherFields can be defined at a time.`,
+                message: `error validating action params: ✖ A maximum of 20 fields in otherFields can be defined at a time.\n  → at subActionParams.incident.otherFields`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -451,7 +451,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.incident.otherFields.summary\": The following properties cannot be defined inside otherFields: summary.`,
+                message: `error validating action params: ✖ The following properties cannot be defined inside otherFields: summary.\n  → at subActionParams.incident.otherFields.summary`,
                 errorSource: TaskErrorSource.USER,
               });
             });
