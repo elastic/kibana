@@ -250,6 +250,7 @@ function isLensStateCategoricalConfigColorMapping(
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
 ): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'colorCode' }> } | {} {
+  console.log('fromUnassignedColorLensStateToAPI', color);
   if (!color || color.type === 'loop') {
     return {};
   }
@@ -276,6 +277,7 @@ export function fromColorMappingLensStateToAPI(
   const unassignedColor = fromUnassignedColorLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
+  console.log({ unassignedColor });
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -361,6 +363,7 @@ function fromAPIMappingToAssignments(
     ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.GradientColor
   >
 > {
+  console.log('fromAPIMappingToAssignments', { colorMapping });
   if (!colorMapping || !colorMapping.mapping) {
     return [];
   }
@@ -394,6 +397,7 @@ export function fromColorMappingAPIToLensState(
       palette: { type: 'palette', name: colorMapping.palette.replace(LEGACY_PALETTE_PREFIX, '') }, // remove the prefix
     };
   }
+  console.log('fromColorMappingAPIToLensState', { before: colorMapping });
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [
@@ -402,10 +406,16 @@ export function fromColorMappingAPIToLensState(
         },
       ],
       color: colorMapping.unassignedColor
-        ? {
-            type: 'colorCode',
-            colorCode: colorMapping.unassignedColor.value,
-          }
+        ? colorMapping.unassignedColor.type === 'from_palette'
+          ? {
+              type: 'categorical',
+              paletteId: colorMapping.unassignedColor.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
+              colorIndex: colorMapping.unassignedColor.index,
+            }
+          : {
+              type: 'colorCode',
+              colorCode: colorMapping.unassignedColor.value,
+            }
         : { type: 'loop' },
       touched: false,
     },

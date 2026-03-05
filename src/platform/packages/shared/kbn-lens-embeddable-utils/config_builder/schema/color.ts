@@ -264,7 +264,7 @@ const gradientColorMappingSchema = schema.object(
       )
     ),
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassignedColor: schema.maybe(colorDefSchema),
   },
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );

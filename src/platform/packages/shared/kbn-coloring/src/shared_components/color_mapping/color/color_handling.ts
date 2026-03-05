@@ -136,6 +136,7 @@ export function getColorFactory(
       const indexIfGradient = (categoryIndex - autoAssignments.length) % totalColorsIfGradient;
 
       const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
+
       // if no auto-assign color rule/color is available then use the color looping palette
       return getAssignmentColor(
         colorMode,

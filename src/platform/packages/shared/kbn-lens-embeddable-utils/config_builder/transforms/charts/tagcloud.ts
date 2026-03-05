@@ -246,9 +246,9 @@ export function fromLensStateToAPI(
   };
   console.log('fromLensStateToAPI', {
     before: config,
-    // beforeStringified: JSON.stringify(config, null, 2),
+    beforeStringified: JSON.stringify(config, null, 2),
     after: visualizationState,
-    // afterStringified: JSON.stringify(visualizationState, null, 2),
+    afterStringified: JSON.stringify(visualizationState, null, 2),
   });
 
   return visualizationState;

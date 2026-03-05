@@ -98,7 +98,6 @@ export const TagCloudChart = ({
   overrides,
   isDarkMode,
 }: TagCloudChartProps) => {
-  console.log({ visData });
   const [warning, setWarning] = useState(false);
   const palettes = useKbnPalettes();
   const chartBaseTheme = useElasticChartsTheme();
@@ -138,7 +137,6 @@ export const TagCloudChart = ({
       const color = colorFromMappingFn
         ? colorFromMappingFn(tagValue)
         : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)';
-      console.log({ tagValue, row, color });
 
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
