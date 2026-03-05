@@ -30,7 +30,6 @@ import { DiscoverSessionSaveModal } from './save_modal';
 
 export interface OnSaveDiscoverSessionParams {
   services: DiscoverServices;
-  tabId: string;
   internalStateStore: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   initialCopyOnSave?: boolean;
@@ -40,13 +39,14 @@ export interface OnSaveDiscoverSessionParams {
 
 export const onSaveDiscoverSession = async ({
   services,
-  tabId,
   internalStateStore,
   runtimeStateManager,
   initialCopyOnSave,
   onClose,
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
+  const internalState = internalStateStore.getState();
+  const tabId = internalState.tabs.unsafeCurrentId;
   if (services.embeddableEditor.isByValueEditor() && onSaveCb) {
     const savedSearch = await selectTabSavedSearch({
       tabId,
@@ -60,7 +60,6 @@ export const onSaveDiscoverSession = async ({
 
     onSaveCb({ ...attributes, references });
   } else {
-    const internalState = internalStateStore.getState();
     const persistedDiscoverSession = internalState.persistedDiscoverSession;
     const allTabs = selectAllTabs(internalState);
 

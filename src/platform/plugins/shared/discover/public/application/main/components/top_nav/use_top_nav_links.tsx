@@ -121,7 +121,6 @@ export const useTopNavLinks = ({
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
-        currentTab,
       });
       items.push(alertsAppMenuItem);
     }
@@ -249,7 +248,6 @@ export const useTopNavLinks = ({
           await onSaveDiscoverSession({
             initialCopyOnSave: true,
             services,
-            tabId: currentTab.id,
             internalStateStore,
             runtimeStateManager,
           });
@@ -277,7 +275,6 @@ export const useTopNavLinks = ({
         run: async () => {
           await onSaveDiscoverSession({
             services,
-            tabId: currentTab.id,
             internalStateStore,
             runtimeStateManager,
             onSaveCb: isEmbeddedEditor ? services.embeddableEditor.transferBackToEditor : undefined,
@@ -360,7 +357,6 @@ export const useTopNavLinks = ({
     isEsqlMode,
     dataView,
     dispatch,
-    currentTab,
     internalStateStore,
     runtimeStateManager,
     hasUnsavedChanges,

@@ -220,7 +220,6 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         onSaveDiscoverSession({
           services,
-          tabId: currentTabId,
           internalStateStore,
           runtimeStateManager,
           onClose: () =>
@@ -237,7 +236,6 @@ export const DiscoverTopNav = ({
       dataView.id,
       dispatch,
       services,
-      currentTabId,
       internalStateStore,
       runtimeStateManager,
       transitionFromESQLToDataView,

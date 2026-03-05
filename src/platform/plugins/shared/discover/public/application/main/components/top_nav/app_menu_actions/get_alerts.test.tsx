@@ -51,7 +51,6 @@ const getAlertsMenuItem = async ({
   return getAlertsAppMenuItem({
     discoverParams: discoverParamsMock,
     services,
-    currentTab: toolkit.getCurrentTab(),
   });
 };
 

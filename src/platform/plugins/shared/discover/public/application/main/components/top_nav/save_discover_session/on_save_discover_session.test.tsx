@@ -152,10 +152,8 @@ const setup = async ({
     saveModal = modal as ReactElement<DiscoverSessionSaveModalProps>;
   });
 
-  const tabId = toolkit.getCurrentTab().id;
   await onSaveDiscoverSession({
     services,
-    tabId,
     internalStateStore: toolkit.internalState,
     runtimeStateManager: toolkit.runtimeStateManager,
     onSaveCb,

@@ -20,7 +20,7 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/d
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
-import type { TabState } from '../../../state_management/redux/types';
+import { useCurrentTabSelector } from '../../../state_management/redux';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -40,8 +40,7 @@ const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   onFinishAction: () => void;
-  currentTab: TabState;
-}> = ({ currentTab, discoverParams, services, onFinishAction = () => {} }) => {
+}> = ({ discoverParams, services, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -51,6 +50,7 @@ const CreateAlertFlyout: React.FC<{
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
+  const currentTab = useCurrentTabSelector((state) => state);
   const timeField = getTimeField(dataView);
   const { query, savedQuery: savedQueryId } = currentTab.appState;
 
@@ -119,11 +119,9 @@ const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
-  currentTab,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  currentTab: TabState;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -168,7 +166,6 @@ export const getAlertsAppMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
-              currentTab={currentTab}
             />
           );
         },
