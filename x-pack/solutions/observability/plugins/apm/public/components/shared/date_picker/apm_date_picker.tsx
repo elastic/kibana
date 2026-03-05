@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSuperUpdateButtonProps } from '@elastic/eui';
 import React from 'react';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { DatePicker } from '.';
@@ -13,7 +14,13 @@ import { toBoolean, toNumber } from '../../../context/url_params_context/helpers
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 
-export function ApmDatePicker({ compressed }: { compressed?: boolean }) {
+export function ApmDatePicker({
+  compressed,
+  updateButtonProps,
+}: {
+  compressed?: boolean;
+  updateButtonProps?: EuiSuperUpdateButtonProps & { needsUpdate?: boolean };
+}) {
   const { query } = useApmParams('/*');
 
   if (!('rangeFrom' in query)) {
@@ -35,6 +42,7 @@ export function ApmDatePicker({ compressed }: { compressed?: boolean }) {
   return (
     <DatePicker
       compressed={compressed}
+      updateButtonProps={updateButtonProps}
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       refreshPaused={refreshPaused}

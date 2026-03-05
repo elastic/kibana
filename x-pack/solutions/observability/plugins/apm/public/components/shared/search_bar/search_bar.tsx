@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ApmDatePicker } from '../date_picker/apm_date_picker';
@@ -36,6 +36,10 @@ export function SearchBar({
   searchBarBoolFilter,
 }: Props) {
   const { isMedium } = useBreakpoints();
+  const [isQueryDirty, setIsQueryDirty] = useState(false);
+  const handleDirtyStateChange = useCallback((isDirty: boolean) => {
+    setIsQueryDirty(isDirty);
+  }, []);
 
   if (hidden) {
     return null;
@@ -68,6 +72,7 @@ export function SearchBar({
               showQueryInput={showQueryInput}
               showDatePicker={false}
               showSubmitButton={false}
+              onDirtyStateChange={handleDirtyStateChange}
             />
           </EuiFlexItem>
         )}
@@ -104,7 +109,13 @@ export function SearchBar({
             )}
 
             <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-              <ApmDatePicker compressed />
+              <ApmDatePicker
+                compressed
+                updateButtonProps={{
+                  'data-test-subj': 'querySubmitButton',
+                  ...(isQueryDirty && { needsUpdate: true, showTooltip: false }),
+                }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

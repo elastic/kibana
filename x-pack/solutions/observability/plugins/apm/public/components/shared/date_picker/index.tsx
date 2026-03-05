@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSuperUpdateButtonProps } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -22,6 +23,7 @@ export function DatePicker({
   refreshInterval,
   onTimeRangeRefresh,
   compressed,
+  updateButtonProps,
 }: {
   rangeFrom?: string;
   rangeTo?: string;
@@ -29,6 +31,7 @@ export function DatePicker({
   refreshInterval?: number;
   onTimeRangeRefresh: () => void;
   compressed?: boolean;
+  updateButtonProps?: EuiSuperUpdateButtonProps & { needsUpdate?: boolean };
 }) {
   const history = useHistory();
   const location = useLocation();
@@ -105,6 +108,7 @@ export function DatePicker({
         onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
       }}
       showUpdateButton={true}
+      updateButtonProps={updateButtonProps}
       commonlyUsedRanges={commonlyUsedRanges}
       width={isMobile ? 'full' : 'auto'}
     />

@@ -117,6 +117,7 @@ export function UnifiedSearchBar({
   showSubmitButton = true,
   isClearable = true,
   boolFilter,
+  onDirtyStateChange,
 }: {
   placeholder?: string;
   value?: string;
@@ -125,6 +126,7 @@ export function UnifiedSearchBar({
   showSubmitButton?: boolean;
   isClearable?: boolean;
   boolFilter?: QueryDslQueryContainer[];
+  onDirtyStateChange?: (isDirty: boolean) => void;
 }) {
   const {
     unifiedSearch: {
@@ -222,6 +224,15 @@ export function UnifiedSearchBar({
       search: fromQuery(updatedQueryParams),
     });
   };
+  const handleQueryChange = useCallback(
+    (payload: { dateRange: TimeRange; query?: Query }) => {
+      const currentUrlKuery = kuery?.query ?? '';
+      const draftKuery = (payload.query?.query as string) ?? '';
+      onDirtyStateChange?.(currentUrlKuery !== draftKuery);
+    },
+    [kuery, onDirtyStateChange]
+  );
+
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
     let action = SearchQueryActions.Submit;
     if (dataView == null) {
@@ -258,6 +269,7 @@ export function UnifiedSearchBar({
         action = SearchQueryActions.Refresh;
         onRefresh();
       }
+      onDirtyStateChange?.(false);
       telemetry.reportSearchQuerySubmitted({
         kueryFields,
         action,
@@ -284,6 +296,7 @@ export function UnifiedSearchBar({
       showSubmitButton={showSubmitButton}
       displayStyle="inPage"
       onQuerySubmit={handleSubmit}
+      onQueryChange={handleQueryChange}
       onRefresh={onRefresh}
       onRefreshChange={onRefreshChange}
       isClearable={isClearable}
