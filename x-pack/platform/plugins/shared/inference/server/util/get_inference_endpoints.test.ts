@@ -86,11 +86,11 @@ describe('getInferenceEndpoints', () => {
     expect(result).toEqual([]);
   });
 
-  it('calls esClient.inference.get with _all', async () => {
+  it('calls esClient.inference.get', async () => {
     mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
     await getInferenceEndpoints({ esClient });
 
-    expect(mockInferenceGet).toHaveBeenCalledWith({ inference_id: '_all' });
+    expect(mockInferenceGet).toHaveBeenCalledWith();
   });
 });

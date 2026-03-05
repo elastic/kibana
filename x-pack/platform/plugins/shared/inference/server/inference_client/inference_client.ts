@@ -35,7 +35,6 @@ export function createInferenceClient({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
-<<<<<<< HEAD
   replacementsEsClient,
   endpointIdCache,
   callbacks,

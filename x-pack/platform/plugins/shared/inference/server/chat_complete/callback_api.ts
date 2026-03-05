@@ -45,6 +45,7 @@ import { addAnonymizationInstruction } from './anonymization/add_anonymization_i
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import { anonymizeMessages } from './anonymization/anonymize_messages';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -134,6 +135,8 @@ export function createChatCompleteCallbackApi({
         callback,
         abortSignal,
         stream,
+        namespace,
+        anonymization
       })
     ).pipe(
       retryWithExponentialBackoff({
@@ -163,6 +166,8 @@ function createChatCompletePipeline({
   callback,
   abortSignal,
   stream,
+  namespace,
+  anonymization,
 }: {
   resolve: () => Promise<ResolvedPipelineContext>;
   esClient: ElasticsearchClient;
@@ -172,6 +177,8 @@ function createChatCompletePipeline({
   callback: ChatCompleteApiWithCallbackCallback;
   abortSignal?: AbortSignal;
   stream?: boolean;
+  namespace: string;
+  anonymization?: InferenceAnonymizationOptions;
 }) {
   return forkJoin({
     context: from(resolve()),
@@ -195,11 +202,30 @@ function createChatCompletePipeline({
       const messages = sanitizeMessages(givenMessages);
 
       return from(
-        anonymizeMessages({ system, messages, anonymizationRules, regexWorker, esClient })
+        prepareAnonymization({
+          namespace,
+          logger,
+          anonymizationRules,
+          regexWorker,
+          esClient,
+          replacementsEsClient: anonymization?.replacements?.esClient,
+          replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+          usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+          requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+          saltPromise: anonymization?.saltPromise,
+          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
+          metadata,
+          system,
+          messages,
+        })
       ).pipe(
-        switchMap((anonymization) => {
-          const systemWithAnonymizationInstructions = anonymization.system
-            ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
+        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+          const systemWithAnonymizationInstructions = preparedAnonymization.system
+            ? addAnonymizationInstruction(
+                preparedAnonymization.system,
+                anonymizationRules,
+                effectivePolicy
+              )
             : system;
 
           const spanModel = getSpanModel(modelName);
@@ -207,7 +233,7 @@ function createChatCompletePipeline({
           return withChatCompleteSpan(
             {
               system: systemWithAnonymizationInstructions,
-              messages: anonymization.messages,
+              messages: preparedAnonymization.messages,
               tools,
               toolChoice,
               ...(spanModel ? { model: spanModel } : {}),
@@ -216,7 +242,7 @@ function createChatCompletePipeline({
             () => {
               return chatComplete({
                 system: systemWithAnonymizationInstructions,
-                messages: anonymization.messages,
+                messages: preparedAnonymization.messages,
                 toolChoice,
                 tools,
                 temperature,
@@ -229,7 +255,7 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage(anonymization));
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
         })
       );
     })
@@ -248,6 +274,8 @@ function resolveAndCreatePipeline({
   callback,
   abortSignal,
   stream,
+  namespace,
+  anonymization,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -260,6 +288,8 @@ function resolveAndCreatePipeline({
   callback: ChatCompleteApiWithCallbackCallback;
   abortSignal?: AbortSignal;
   stream?: boolean;
+  namespace: string;
+  anonymization?: InferenceAnonymizationOptions;
 }) {
   return from(endpointIdCache.has(connectorId, esClient)).pipe(
     switchMap((isInferenceEndpoint) => {
@@ -333,6 +363,8 @@ function resolveAndCreatePipeline({
         callback,
         abortSignal,
         stream,
+        namespace,
+        anonymization,
       }).pipe(
         catchError((error) => {
           if (error?.meta?.status === 404 || error?.statusCode === 404) {
