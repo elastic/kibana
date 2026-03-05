@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils';
