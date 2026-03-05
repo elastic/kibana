@@ -27,10 +27,11 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/constants';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
@@ -38,12 +39,8 @@ import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { EntityIdentifiers } from '../../shared/utils';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import {
-  DefaultFieldRenderer,
-  toFieldRendererItems,
-} from '../../../../timelines/components/field_renderers/default_renderer';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { CellActions } from '../../shared/components/cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -81,7 +78,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import type { EntityIdentifiers } from '../../shared/utils';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -96,9 +93,9 @@ const UserOverviewManage = manageQuery(UserOverview);
 const RelatedHostsManage = manageQuery(InspectButtonContainer);
 
 export interface UserDetailsProps {
-  /**
-   * Entity identifiers for the user (following entity store EUID logic)
-   */
+  /* 
+  EntityIdentifiers - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
+  */
   entityIdentifiers: EntityIdentifiers;
   /**
    * timestamp of alert or event
@@ -108,6 +105,11 @@ export interface UserDetailsProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Whether the panel is expanded on first render. Defaults to true (document details).
+   * Set to false for attack flyout so multiple entity panels start collapsed.
+   */
+  expandedOnFirstRender?: boolean;
 }
 
 /**
@@ -117,6 +119,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   entityIdentifiers,
   timestamp,
   scopeId,
+  expandedOnFirstRender = true,
 }) => {
   // Get the primary field value (first key in priority order, following EUID logic)
   const primaryField = Object.keys(entityIdentifiers)[0] || 'user.name';
@@ -194,11 +197,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const { data: userRisk } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.user,
-    skip: entityStoreV2Enabled,
     timerange,
+    skip: entityStoreV2Enabled,
   });
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-
   const [isUserLoadingFromSearch, { inspect, userDetails: userDetailsFromSearch, refetch }] =
     useObservedUserDetails({
       id: userDetailsQueryId,
@@ -254,6 +256,17 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     contextID: USER_DETAILS_INSIGHTS_ID,
   });
 
+  /*
+  const [isUserLoadingFromDetails, userDetailsArgsFromDetails] = useObservedUserDetails({
+    id: userDetailsQueryId,
+    startDate: from,
+    endDate: to,
+    userName,
+    indexNames: selectedPatterns,
+    skip: entityStoreV2Enabled || selectedPatterns.length === 0,
+  });
+  */
+
   const {
     loading: isRelatedHostLoading,
     inspect: inspectRelatedHosts,
@@ -299,7 +312,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         render: (ips: string[]) => {
           return (
             <DefaultFieldRenderer
-              rowItems={toFieldRendererItems(ips)}
+              rowItems={ips}
               attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
               render={(ip) =>
@@ -378,158 +391,145 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   );
 
   return (
-    <>
-      <EuiTitle size="xs">
-        <h3>
+    <ExpandablePanel
+      header={{
+        title: entityIdentifiers['user.name'],
+        iconType: 'user',
+        headerContent: relatedHostsCount,
+        link: userLink,
+      }}
+      expand={{
+        expandable: true,
+        expandedOnFirstRender,
+      }}
+      data-test-subj={USER_DETAILS_TEST_ID}
+    >
+      <EuiTitle size="xxs">
+        <h4>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
-            defaultMessage="User"
+            id="xpack.securitySolution.flyout.left.insights.entities.userDetailsInfoTitle"
+            defaultMessage="User information"
           />
-        </h3>
+        </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <ExpandablePanel
-        header={{
-          title: userName,
-          iconType: 'user',
-          headerContent: relatedHostsCount,
-          link: userLink,
-        }}
-        expand={{
-          expandable: true,
-          expandedOnFirstRender: true,
-        }}
-        data-test-subj={USER_DETAILS_TEST_ID}
+      <AnomalyTableProvider
+        criteriaFields={hostToCriteria(effectiveUserDetails)}
+        startDate={from}
+        endDate={to}
+        skip={isInitializing}
       >
-        <EuiTitle size="xxs">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.entities.userDetailsInfoTitle"
-              defaultMessage="User information"
-            />
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <AnomalyTableProvider
-          criteriaFields={hostToCriteria(effectiveUserDetails)}
-          startDate={from}
-          endDate={to}
-          skip={isInitializing}
-        >
-          {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
-            <UserOverviewManage
-              id={userDetailsQueryId}
-              isInDetailsSidePanel={false}
-              data={effectiveUserDetails}
-              anomaliesData={anomaliesData}
-              isLoadingAnomaliesData={isLoadingAnomaliesData}
-              loading={isUserLoading}
-              startDate={from}
-              endDate={to}
-              narrowDateRange={narrowDateRange}
-              setQuery={setQuery}
-              refetch={
-                entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch
-              }
-              inspect={inspect}
-              entityIdentifiers={entityIdentifiers}
-              indexPatterns={selectedPatterns}
-              jobNameById={jobNameById}
-              scopeId={scopeId}
-              isFlyoutOpen={true}
-              riskScoreState={userRiskScoreStateFromEntityStore}
-              firstSeenFromEntityStore={
-                entityStoreV2Enabled ? observedUser.firstSeen?.date ?? undefined : undefined
-              }
-              lastSeenFromEntityStore={
-                entityStoreV2Enabled ? observedUser.lastSeen?.date ?? undefined : undefined
-              }
-            />
-          )}
-        </AnomalyTableProvider>
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule margin="s" />
-        <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
-          <AlertCountInsight
-            entityIdentifiers={entityIdentifiers}
-            direction="column"
-            openDetailsPanel={openDetailsPanel}
-            data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
-          />
-          <MisconfigurationsInsight
-            entityIdentifiers={entityIdentifiers}
-            direction="column"
-            openDetailsPanel={openDetailsPanel}
-            data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
-            telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
-          />
-        </EuiFlexGrid>
-        <EuiSpacer size="l" />
-        <EuiPanel hasBorder={true}>
-          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTitle"
-                    defaultMessage="Related hosts"
-                  />
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
-                    defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
-                    values={{ userName: filterValue }}
-                  />
-                }
-                type="info"
-                className="eui-alignTop"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <RelatedHostsManage
-            id={relatedHostsQueryId}
-            inspect={inspectRelatedHosts}
-            loading={isRelatedHostLoading}
+        {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
+          <UserOverviewManage
+            id={userDetailsQueryId}
+            isInDetailsSidePanel={false}
+            data={effectiveUserDetails}
+            anomaliesData={anomaliesData}
+            isLoadingAnomaliesData={isLoadingAnomaliesData}
+            loading={isUserLoading}
+            startDate={from}
+            endDate={to}
+            narrowDateRange={narrowDateRange}
             setQuery={setQuery}
-            deleteQuery={deleteQuery}
-            refetch={refetchRelatedHosts}
-          >
-            <EuiInMemoryTable
-              columns={relatedHostsColumns}
-              items={relatedHosts}
-              loading={isRelatedHostLoading}
-              data-test-subj={USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID}
-              pagination={pagination}
-              tableCaption={i18n.translate(
-                'xpack.securitySolution.flyout.left.insights.entities.relatedHostsCaption',
-                { defaultMessage: "User's related hosts" }
-              )}
-              noItemsMessage={
+            refetch={entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch}
+            inspect={inspect}
+            entityIdentifiers={entityIdentifiers}
+            indexPatterns={selectedPatterns}
+            jobNameById={jobNameById}
+            scopeId={scopeId}
+            isFlyoutOpen={true}
+            riskScoreState={userRiskScoreStateFromEntityStore}
+            firstSeenFromEntityStore={
+              entityStoreV2Enabled ? observedUser.firstSeen?.date ?? undefined : undefined
+            }
+            lastSeenFromEntityStore={
+              entityStoreV2Enabled ? observedUser.lastSeen?.date ?? undefined : undefined
+            }
+          />
+        )}
+      </AnomalyTableProvider>
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+        <AlertCountInsight
+          entityIdentifiers={entityIdentifiers}
+          direction="column"
+          openDetailsPanel={openDetailsPanel}
+          data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
+        />
+        <MisconfigurationsInsight
+          entityIdentifiers={entityIdentifiers}
+          direction="column"
+          openDetailsPanel={openDetailsPanel}
+          data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+          telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
+        />
+      </EuiFlexGrid>
+      <EuiSpacer size="l" />
+      <EuiPanel hasBorder={true}>
+        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h4>
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsNoDataDescription"
-                  defaultMessage="No hosts identified"
-                />
-              }
-            />
-            <InspectButton
-              queryId={relatedHostsQueryId}
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsInspectButtonTitle"
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTitle"
                   defaultMessage="Related hosts"
                 />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
+                  defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
+                  values={{ userName: entityIdentifiers['user.name'] }}
+                />
               }
-              inspectIndex={0}
+              type="info"
+              className="eui-alignTop"
             />
-          </RelatedHostsManage>
-        </EuiPanel>
-      </ExpandablePanel>
-    </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <RelatedHostsManage
+          id={relatedHostsQueryId}
+          inspect={inspectRelatedHosts}
+          loading={isRelatedHostLoading}
+          setQuery={setQuery}
+          deleteQuery={deleteQuery}
+          refetch={refetchRelatedHosts}
+        >
+          <EuiInMemoryTable
+            columns={relatedHostsColumns}
+            items={relatedHosts}
+            loading={isRelatedHostLoading}
+            data-test-subj={USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID}
+            pagination={pagination}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.entities.relatedHostsCaption',
+              { defaultMessage: "User's related hosts" }
+            )}
+            noItemsMessage={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsNoDataDescription"
+                defaultMessage="No hosts identified"
+              />
+            }
+          />
+          <InspectButton
+            queryId={relatedHostsQueryId}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsInspectButtonTitle"
+                defaultMessage="Related hosts"
+              />
+            }
+            inspectIndex={0}
+          />
+        </RelatedHostsManage>
+      </EuiPanel>
+    </ExpandablePanel>
   );
 };

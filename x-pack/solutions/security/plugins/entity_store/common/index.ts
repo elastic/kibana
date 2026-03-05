@@ -51,16 +51,21 @@ export const EntityStoreStatus = z.enum([
   'error',
 ]);
 
+const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
+
 export const ENTITY_STORE_ROUTES = {
-  INSTALL: '/internal/security/entity-store/install',
-  UNINSTALL: '/internal/security/entity-store/uninstall',
-  STATUS: '/internal/security/entity-store/status',
-  START: '/internal/security/entity-store/start',
-  STOP: '/internal/security/entity-store/stop',
-  CRUD_UPSERT: '/internal/security/entity-store/entities/{entityType}',
-  CRUD_UPSERT_BULK: '/internal/security/entity-store/entities/bulk',
-  CRUD_DELETE: '/internal/security/entity-store/entities',
-  FORCE_LOG_EXTRACTION: '/internal/security/entity-store/{entityType}/force-log-extraction',
+  INSTALL: `${ENTITY_STORE_BASE_ROUTE}/install`,
+  UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
+  STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
+  START: `${ENTITY_STORE_BASE_ROUTE}/start`,
+  STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
+  FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
+  CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
+  CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
+  CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
+  ENTITY_MAINTAINERS_START: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/start`,
+  ENTITY_MAINTAINERS_STOP: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/stop`,
+  ENTITY_MAINTAINERS_GET: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers`,
 } as const satisfies Record<string, string>;
 
 export const getErrorMessage = (error: unknown): string => {
