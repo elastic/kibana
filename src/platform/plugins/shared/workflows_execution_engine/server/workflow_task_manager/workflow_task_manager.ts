@@ -34,7 +34,7 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
-        } as ResumeWorkflowExecutionParams,
+        } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
@@ -63,7 +63,7 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: executionId,
           spaceId,
-        } as ResumeWorkflowExecutionParams,
+        } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WORKFLOW_RESUME_TASK_TYPE = 'workflow:resume' as const;
+export const WORKFLOW_RESUME_TASK_TYPE = 'workflow:resume';
 
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
