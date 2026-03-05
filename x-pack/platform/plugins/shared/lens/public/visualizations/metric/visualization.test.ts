@@ -1176,8 +1176,16 @@ describe('metric visualization', () => {
           // even if color mode is dynamic it should fallback to static color as dataType is not numeric
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
-          expect(secondaryMetricAST.secondaryTrendPalette).toHaveLength(3);
-          expect(secondaryMetricAST.secondaryTrendTextPalette).toHaveLength(3);
+          expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
+            euiLightVars.euiColorBackgroundLightDanger,
+            euiLightVars.euiColorBackgroundLightText,
+            euiLightVars.euiColorBackgroundLightSuccess,
+          ]);
+          expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
+            euiLightVars.euiColorTextDanger,
+            euiLightVars.euiColorTextParagraph,
+            euiLightVars.euiColorTextSuccess,
+          ]);
         } else {
           fail('AST is not an object');
         }
