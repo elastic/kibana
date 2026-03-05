@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -14,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const esql = getService('esql');
+  const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover']);
 
   describe('No Data Views: Try ES|QL', () => {
@@ -46,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('tryESQLLink');
 
       await PageObjects.discover.expectOnDiscover();
-      await esql.expectEsqlStatement('FROM logs*');
+      const query = await monacoEditor.getCodeEditorValue();
+      expect(query).to.be('FROM logs*');
     });
   });
 }
