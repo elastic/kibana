@@ -20,10 +20,8 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import {
-  buildEntityFilterFromEntityIdentifiers,
-  buildHostNamesFilter,
-} from '../../../../common/search_strategy';
+import { euid } from '@kbn/entity-store/public';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -98,7 +96,7 @@ export const HostPanel = ({
   });
   const hostFilterQuery = useMemo(
     () =>
-      buildEntityFilterFromEntityIdentifiers(EntityType.host, entityIdentifiers) ??
+      euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers) ??
       (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
     [entityIdentifiers, effectiveHostName]
   );

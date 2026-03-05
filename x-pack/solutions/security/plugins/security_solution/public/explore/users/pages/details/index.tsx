@@ -217,7 +217,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
-    entity,
+    entity: { ...entity, identifiers: { 'user.name': detailName } },
     enabled: canReadAssetCriticality,
     onChange: calculateEntityRiskScore,
   });
@@ -256,7 +256,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 <EuiHorizontalRule margin="m" />
                 <AssetCriticalityTitle />
                 <EuiSpacer size="s" />
-                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                <AssetCriticalitySelector
+                  compressed
+                  criticality={criticality}
+                  entity={{ ...entity, identifiers: { 'user.name': detailName } }}
+                />
                 <EuiHorizontalRule margin="m" />
               </>
             )}

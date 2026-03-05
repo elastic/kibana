@@ -15,9 +15,9 @@ import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { euid } from '@kbn/entity-store/public';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import {
-  buildEntityFilterFromEntityIdentifiers,
   buildHostNamesFilter,
   type HostItem,
 } from '../../../../common/search_strategy';
@@ -114,7 +114,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       [entityIdentifiers]
     );
     const filterQuery = useMemo(() => {
-      const euidFilter = buildEntityFilterFromEntityIdentifiers(EntityType.host, entityIdentifiers);
+      const euidFilter = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
       if (euidFilter) {
         return JSON.stringify(euidFilter);
       }

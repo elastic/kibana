@@ -363,7 +363,7 @@ export class EntityStoreDataClient {
    * When true, CRUD and search use the unified v2 index and updates stream.
    */
   public async isEntityStoreV2Enabled(): Promise<boolean> {
-    return this.uiSettingsClient.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    return (await this.uiSettingsClient.get<boolean>(FF_ENABLE_ENTITY_STORE_V2)) ?? false;
   }
 
   public async status({

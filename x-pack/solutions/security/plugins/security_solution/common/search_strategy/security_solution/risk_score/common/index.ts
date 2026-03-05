@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common';
 import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import {
@@ -27,23 +26,6 @@ export const buildUserNamesFilter = (userNames: string[]) => {
 
 export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: string[]): ESQuery => {
   return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };
-};
-
-/**
- * Builds an Elasticsearch filter for entity queries based on entityIdentifiers.
- * Uses EUID priority from entity_store common (see getEuidDslFilterBasedOnDocument).
- * Supports host and user entity types.
- *
- * @param entityType - The entity type to build the filter for ('host' or 'user')
- * @param entityIdentifiers - Key-value pairs of field names and their values (used as document for EUID)
- * @returns ESQuery filter object, or undefined if no valid identifiers found
- */
-export const buildEntityFilterFromEntityIdentifiers = (
-  entityType: EntityType,
-  entityIdentifiers: Record<string, string>
-): ESQuery | undefined => {
-  const filter = euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers);
-  return filter as ESQuery | undefined;
 };
 
 export { EntityType };
