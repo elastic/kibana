@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { LeafPrinter } from '@elastic/esql';
-import type { ESQLCommand, ESQLAstRegisteredDomainCommand } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLAstUriPartsCommand } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
 import type { ESQLColumnData } from '../types';
 
-export const REGISTERED_DOMAIN_COLUMNS: Array<{ suffix: string; type: SupportedDataType }> = [
+export const URI_PARTS_COLUMNS: Array<{ suffix: string; type: SupportedDataType }> = [
   { suffix: 'domain', type: 'keyword' },
-  { suffix: 'registered_domain', type: 'keyword' },
-  { suffix: 'top_level_domain', type: 'keyword' },
-  { suffix: 'subdomain', type: 'keyword' },
+  { suffix: 'fragment', type: 'keyword' },
+  { suffix: 'path', type: 'keyword' },
+  { suffix: 'extension', type: 'keyword' },
+  { suffix: 'port', type: 'integer' },
+  { suffix: 'query', type: 'keyword' },
+  { suffix: 'scheme', type: 'keyword' },
+  { suffix: 'user_info', type: 'keyword' },
+  { suffix: 'username', type: 'keyword' },
+  { suffix: 'password', type: 'keyword' },
 ];
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[]
 ): ESQLColumnData[] => {
-  const { targetField } = command as ESQLAstRegisteredDomainCommand;
+  const { targetField } = command as ESQLAstUriPartsCommand;
 
   if (!targetField) {
     return previousColumns;
@@ -30,7 +36,7 @@ export const columnsAfter = (
 
   const prefix = LeafPrinter.column(targetField);
 
-  const newColumns: ESQLColumnData[] = REGISTERED_DOMAIN_COLUMNS.map(({ suffix, type }) => ({
+  const newColumns: ESQLColumnData[] = URI_PARTS_COLUMNS.map(({ suffix, type }) => ({
     name: `${prefix}.${suffix}`,
     type,
     userDefined: false,

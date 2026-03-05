@@ -16,7 +16,7 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 
-const registeredDomainExpectSuggestions = (
+const uriPartsExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
@@ -26,13 +26,13 @@ const registeredDomainExpectSuggestions = (
     query,
     expectedSuggestions,
     context,
-    'registered_domain',
+    'uri_parts',
     mockCallbacks,
     autocomplete
   );
 };
 
-describe('REGISTERED_DOMAIN > autocomplete', () => {
+describe('URI_PARTS > autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
 
   beforeEach(() => {
@@ -46,34 +46,22 @@ describe('REGISTERED_DOMAIN > autocomplete', () => {
   });
 
   it('suggests target field after command keyword', async () => {
-    await registeredDomainExpectSuggestions(
-      'FROM index | REGISTERED_DOMAIN ',
-      ['col0 = '],
-      mockCallbacks
-    );
+    await uriPartsExpectSuggestions('FROM index | URI_PARTS ', ['col0 = '], mockCallbacks);
   });
 
   it('suggests assignment operator after target field', async () => {
-    await registeredDomainExpectSuggestions(
-      'FROM index | REGISTERED_DOMAIN prefix ',
-      ['= '],
-      mockCallbacks
-    );
+    await uriPartsExpectSuggestions('FROM index | URI_PARTS prefix ', ['= '], mockCallbacks);
   });
 
   it('suggests string fields after assignment operator', async () => {
-    await registeredDomainExpectSuggestions(
-      'FROM index | REGISTERED_DOMAIN prefix = ',
+    await uriPartsExpectSuggestions(
+      'FROM index | URI_PARTS prefix = ',
       getFieldNamesByType(ESQL_STRING_TYPES).map((fieldName) => `${fieldName} `),
       mockCallbacks
     );
   });
 
   it('suggests pipe after complete command', async () => {
-    await registeredDomainExpectSuggestions(
-      'FROM index | REGISTERED_DOMAIN prefix = host ',
-      ['| '],
-      mockCallbacks
-    );
+    await uriPartsExpectSuggestions('FROM index | URI_PARTS prefix = url ', ['| '], mockCallbacks);
   });
 });

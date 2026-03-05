@@ -8,23 +8,23 @@
  */
 import { synth } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
-import { columnsAfter, REGISTERED_DOMAIN_COLUMNS } from './columns_after';
+import { columnsAfter, URI_PARTS_COLUMNS } from './columns_after';
 
-describe('REGISTERED_DOMAIN > columnsAfter', () => {
+describe('URI_PARTS > columnsAfter', () => {
   const previousColumns: ESQLColumnData[] = [
-    { name: 'host', type: 'keyword', userDefined: false },
+    { name: 'url', type: 'keyword', userDefined: false },
     { name: 'message', type: 'text', userDefined: false },
   ];
-  const command = synth.cmd`REGISTERED_DOMAIN parts = host`;
+  const command = synth.cmd`URI_PARTS parts = url`;
 
-  it('adds 4 prefixed columns from REGISTERED_DOMAIN', () => {
+  it('adds 10 prefixed columns from URI_PARTS', () => {
     const result = columnsAfter(command, previousColumns);
 
-    expect(result).toHaveLength(previousColumns.length + REGISTERED_DOMAIN_COLUMNS.length);
+    expect(result).toHaveLength(previousColumns.length + URI_PARTS_COLUMNS.length);
 
     const newColumns = result.slice(previousColumns.length);
     expect(newColumns).toEqual(
-      REGISTERED_DOMAIN_COLUMNS.map(({ suffix, type }) => ({
+      URI_PARTS_COLUMNS.map(({ suffix, type }) => ({
         name: `parts.${suffix}`,
         type,
         userDefined: false,

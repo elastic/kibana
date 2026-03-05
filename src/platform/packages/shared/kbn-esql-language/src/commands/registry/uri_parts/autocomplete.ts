@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isAssignment } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstRegisteredDomainCommand } from '@elastic/esql/types';
+import type { ESQLAstAllCommands, ESQLAstUriPartsCommand } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import type { ISuggestionItem, ICommandContext, ICommandCallbacks } from '../types';
@@ -25,7 +25,7 @@ export async function autocomplete(
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
-  const { targetField, expression } = command as ESQLAstRegisteredDomainCommand;
+  const { targetField, expression } = command as ESQLAstUriPartsCommand;
 
   const hasAssignment = command.args.some((arg) => !Array.isArray(arg) && isAssignment(arg));
   const hasTargetFieldName = !!targetField?.name?.trim().length;
