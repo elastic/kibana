@@ -95,6 +95,7 @@ export const createRenderAttachmentRenderer = ({
           type: attachment.type,
           data: versionData.data,
           hidden: attachment.hidden,
+          origin: attachment.origin,
         }}
         conversationId={conversationId}
         attachmentsService={attachmentsService}

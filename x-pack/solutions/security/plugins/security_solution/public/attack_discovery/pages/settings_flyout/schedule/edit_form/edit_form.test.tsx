@@ -71,7 +71,8 @@ const renderComponent = async () => {
   });
 };
 
-describe('EditForm', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/255131
+describe.skip('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
