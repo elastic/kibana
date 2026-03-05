@@ -138,7 +138,7 @@ export const policyHasPack = (
   packName: string,
   spaceId: string
 ): boolean =>
-  has(packagePolicy, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`) ||
+  has(packagePolicy, `inputs[0].config.osquery.value.packs.${spaceId}-${packName}`) ||
   has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`);
 
 export const removePackFromPolicy = (
@@ -146,11 +146,11 @@ export const removePackFromPolicy = (
   packName: string,
   spaceId: string
 ): void => {
-  unset(draft, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`);
+  unset(draft, `inputs[0].config.osquery.value.packs.${spaceId}-${packName}`);
   unset(draft, `inputs[0].config.osquery.value.packs.${packName}`);
 };
 
-export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
+export const makePackKey = (packName: string, spaceId: string) => `${spaceId}-${packName}`;
 export const getInitialPolicies = (
   packagePolicies: PackagePolicy[] | never[],
   policyIds: string[] = [],

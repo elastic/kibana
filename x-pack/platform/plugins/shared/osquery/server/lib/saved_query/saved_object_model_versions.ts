@@ -33,6 +33,22 @@ export const packSavedObjectModelVersion1: SavedObjectsModelVersion = {
   ],
 };
 
+export const packSavedObjectModelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        queries: {
+          properties: {
+            schedule_id: { type: 'keyword' },
+            start_date: { type: 'date' },
+          },
+        },
+      },
+    },
+  ],
+};
+
 export const packAssetSavedObjectModelVersion1: SavedObjectsModelVersion = {
   changes: [
     {

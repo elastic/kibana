@@ -170,9 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
-      expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
-        singleLineQuery
-      );
+      expect(
+        inputs[0].config.osquery.value.packs['default-TestPack'].queries.testQuery.query
+      ).to.be(singleLineQuery);
     });
 
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
@@ -195,9 +195,9 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
-      expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
-        singleLineQuery
-      );
+      expect(
+        inputs[0].config.osquery.value.packs['default-TestPack'].queries.testQuery.query
+      ).to.be(singleLineQuery);
     });
   });
 }

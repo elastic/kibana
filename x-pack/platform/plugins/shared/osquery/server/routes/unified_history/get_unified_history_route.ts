@@ -236,8 +236,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             packSOs = bulkResult.saved_objects
               .filter((so) => !so.error)
               .map((so) => ({ id: so.id, attributes: so.attributes }));
-          } else if (scheduledBuckets.length > 0) {
-            packSOs = await loadAllPacks(spaceScopedClient);
           } else {
             packSOs = [];
           }
@@ -307,16 +305,22 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           if (scheduledOnPage.length > 0) {
             const lastPlannedTime = scheduledOnPage[scheduledOnPage.length - 1].plannedTime;
-            const boundaryCount = scheduledOnPage.filter(
-              (r) => r.plannedTime === lastPlannedTime
-            ).length;
 
-            if (lastPlannedTime && lastPlannedTime !== decoded.scheduledCursor) {
-              nextScheduledCursor = lastPlannedTime;
-              nextScheduledOffset = boundaryCount;
-            } else {
-              nextScheduledOffset = scheduledOffset + mergeResult.scheduledConsumedOnPage;
+            if (lastPlannedTime) {
+              const boundaryCount = scheduledOnPage.filter(
+                (r) => r.plannedTime === lastPlannedTime
+              ).length;
+
+              if (lastPlannedTime !== decoded.scheduledCursor) {
+                nextScheduledCursor = lastPlannedTime;
+                nextScheduledOffset = boundaryCount;
+              } else {
+                nextScheduledOffset = scheduledOffset + mergeResult.scheduledConsumedOnPage;
+              }
             }
+            // When lastPlannedTime is undefined (planned_schedule_time absent from docs)
+            // we leave cursor and offset unchanged — the query's range filter excludes
+            // those documents, so no offset advance is needed and the cursor is not corrupted.
           }
 
           let nextPageToken: string | undefined;
@@ -346,38 +350,3 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
       }
     );
 };
-
-async function loadAllPacks(
-  soClient: Pick<
-    ReturnType<typeof createInternalSavedObjectsClientForSpaceId> extends Promise<infer T>
-      ? T
-      : never,
-    'find'
-  >
-): Promise<Array<{ id: string; attributes: PackSavedObject }>> {
-  const perPage = 1000;
-  const firstPage = await soClient.find<PackSavedObject>({
-    type: packSavedObjectType,
-    perPage,
-  });
-  let packSOs = firstPage.saved_objects as Array<{
-    id: string;
-    attributes: PackSavedObject;
-  }>;
-  const totalPages = Math.ceil(firstPage.total / perPage);
-  for (let page = 2; page <= totalPages; page++) {
-    const nextP = await soClient.find<PackSavedObject>({
-      type: packSavedObjectType,
-      perPage,
-      page,
-    });
-    packSOs = packSOs.concat(
-      nextP.saved_objects as Array<{
-        id: string;
-        attributes: PackSavedObject;
-      }>
-    );
-  }
-
-  return packSOs;
-}
