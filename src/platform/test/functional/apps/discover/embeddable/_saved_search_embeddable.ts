@@ -327,8 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('switches to Discover mode if search is saved as new', async () => {
       await addSearchEmbeddableToDashboard();
-      await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
+      await discover.editEmbeddableInDiscover();
       await discover.saveAsSearch('Rendering Test: saved as search');
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
