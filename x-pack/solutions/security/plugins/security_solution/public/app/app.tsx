@@ -32,6 +32,7 @@ import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { InitializationProvider } from '../common/components/initialization';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
 
@@ -62,18 +63,20 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                 <ManageUserInfo>
                   <NavigationProvider core={services}>
                     <ReactQueryClientProvider>
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                      >
-                        <UpsellingProvider upsellingService={upselling}>
-                          <DiscoverInTimelineContextProvider>
-                            <PageRouter history={history}>
-                              <AssistantProvider>{children}</AssistantProvider>
-                              <TrialCompanion />
-                            </PageRouter>
-                          </DiscoverInTimelineContextProvider>
-                        </UpsellingProvider>
-                      </CellActionsProvider>
+                      <InitializationProvider>
+                        <CellActionsProvider
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                        >
+                          <UpsellingProvider upsellingService={upselling}>
+                            <DiscoverInTimelineContextProvider>
+                              <PageRouter history={history}>
+                                <AssistantProvider>{children}</AssistantProvider>
+                                <TrialCompanion />
+                              </PageRouter>
+                            </DiscoverInTimelineContextProvider>
+                          </UpsellingProvider>
+                        </CellActionsProvider>
+                      </InitializationProvider>
                     </ReactQueryClientProvider>
                   </NavigationProvider>
                 </ManageUserInfo>

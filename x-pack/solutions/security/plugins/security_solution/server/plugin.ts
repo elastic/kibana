@@ -158,6 +158,8 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { createInitializationFlowRegistry } from './lib/initialization';
+import type { InitializationFlowRegistry } from './lib/initialization';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -167,6 +169,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly logger: Logger;
   private readonly appClientFactory: AppClientFactory;
   private readonly productFeaturesService: ProductFeaturesService;
+  private readonly initializationFlowRegistry: InitializationFlowRegistry;
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
@@ -236,6 +239,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.logger.debug('plugin initialized');
 
+    this.initializationFlowRegistry = createInitializationFlowRegistry(this.logger);
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
     this.trialCompanionMilestoneService = new TrialCompanionMilestoneServiceImpl(this.logger);
   }
@@ -529,7 +533,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.initializationFlowRegistry
     );
 
     registerEndpointRoutes(router, this.endpointContext);
