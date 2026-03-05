@@ -30,6 +30,7 @@ test.describe(
     });
 
     test('should handle the error message correctly', async ({ page }) => {
+      const previewChart = page.testSubj.locator(previewChartDataTestSubj);
       const customEquation = page.testSubj.locator('customEquation');
       const customEquationField = page.testSubj.locator(
         'thresholdRuleCustomEquationEditorFieldText'
@@ -39,17 +40,28 @@ test.describe(
       );
       const lensFailure = page.testSubj.locator('embeddable-lens-failure');
 
+      // Wait for the chart to finish its initial render before interacting.
+      await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible({
+        timeout: 20_000,
+      });
+
       await test.step('introduce an error and verify failure panel appears', async () => {
         await customEquation.click();
         await customEquationField.click();
         await customEquationField.fill('A +');
         await customEquationPopoverCloseButton.click();
 
+        // The exact error message text varies by Lens version — only assert visibility.
         await expect(lensFailure).toBeVisible({ timeout: 20_000 });
       });
 
       await test.step('fix the error and verify failure panel disappears', async () => {
-        await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+        // Capture the current rendering count so we can wait for the next render cycle
+        // after the equation is fixed, rather than polling for the panel to disappear
+        // without knowing whether Lens has started re-rendering at all.
+        const currentCount = await previewChart
+          .locator('[data-rendering-count]')
+          .getAttribute('data-rendering-count');
 
         await customEquation.click();
         await customEquationField.click();
@@ -57,14 +69,14 @@ test.describe(
         await customEquationPopoverCloseButton.click();
 
         await expect(customEquation).toContainText('A');
-        await expect
-          .poll(
-            async () => {
-              return lensFailure.isVisible();
-            },
-            { timeout: 20_000 }
-          )
-          .toBe(false);
+
+        // Wait for Lens to complete a new render cycle triggered by the fix.
+        const nextCount = String(Number(currentCount) + 1);
+        await expect(previewChart.locator(`[data-rendering-count="${nextCount}"]`)).toBeVisible({
+          timeout: 20_000,
+        });
+
+        await expect(lensFailure).toBeHidden({ timeout: 20_000 });
       });
     });
   }
