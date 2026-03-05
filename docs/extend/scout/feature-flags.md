@@ -6,7 +6,7 @@ navigation_title: Feature flags
 
 Some Kibana features are gated behind feature flags or experimental configuration. Scout provides two ways to enable them: **at runtime** via feature flags (without restarting the server) and **at server startup** (via custom server configurations).
 
-## When to use runtime vs server-level flags [scout-feature-flags-when-to-use]
+## When to use runtime versus server-level flags [scout-feature-flags-when-to-use]
 
 - **Runtime** (`apiServices.core.settings()`): **preferred** for most feature flags. No server restart, flags can be toggled per suite, and your tests keep sharing the default servers with other suites in CI.
 - **Server startup** (custom config `serverArgs`): only when the setting must be present at boot time or is not supported by the runtime settings API.

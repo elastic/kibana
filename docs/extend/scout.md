@@ -86,4 +86,4 @@ Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
-Yes. See [Feature flags](./scout/feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or via custom server configurations.
+Yes. See [Feature flags](./scout/feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or using custom server configurations.
