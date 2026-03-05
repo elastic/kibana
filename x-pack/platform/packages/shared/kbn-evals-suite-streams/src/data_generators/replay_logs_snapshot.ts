@@ -14,6 +14,13 @@ import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 
 const LOGS_STREAM_NAME = 'logs';
+const LOGS_STREAM_WILDCARD = 'logs*';
+// Matches temp indices created by replayIntoManagedStream (query generation) that have ingest
+// pipelines (e.g. logs.ecs@stream.processing) set as their default. If these are left behind by
+// a killed run they must be removed before cleanSignificantEventsDataStreams can delete the
+// parent data streams — otherwise the Streams plugin's disableStreams call fails because ES
+// refuses to delete a pipeline that is still referenced as the default pipeline for an index.
+const REPLAY_TEMP_INDEX_PATTERN = 'sigevents-replay-temp-*';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -52,7 +59,7 @@ export async function replaySignificantEventsSnapshot(
     log,
     repository: createGcsRepository({ bucket: gcs.bucket, basePath }),
     snapshotName,
-    patterns: [LOGS_STREAM_NAME],
+    patterns: [LOGS_STREAM_WILDCARD],
   });
 }
 
@@ -60,9 +67,25 @@ export async function cleanSignificantEventsDataStreams(
   esClient: Client,
   log: ToolingLog
 ): Promise<void> {
+  // Remove any orphaned replay temp indices first. These are created by replayIntoManagedStream
+  // during query generation and may be left behind if the process is killed mid-run. They hold
+  // references to managed ingest pipelines (e.g. logs.ecs@stream.processing), which prevents the
+  // Streams plugin from deleting those pipelines when we subsequently remove the log data streams.
+  try {
+    // expand_wildcards: 'all' is required to match hidden .ds-* backing indices
+    await esClient.indices.delete({
+      index: REPLAY_TEMP_INDEX_PATTERN,
+      ignore_unavailable: true,
+      expand_wildcards: 'all',
+    });
+    log.debug(`Deleted orphaned replay temp indices matching ${REPLAY_TEMP_INDEX_PATTERN}`);
+  } catch (e) {
+    log.debug(`Failed to pre-clean replay temp indices (safe to ignore): ${getErrorMessage(e)}`);
+  }
+
   const [deleteDataStreamResult, deleteIndexResult] = await Promise.allSettled([
-    esClient.indices.deleteDataStream({ name: LOGS_STREAM_NAME }),
-    esClient.indices.delete({ index: LOGS_STREAM_NAME, ignore_unavailable: true }),
+    esClient.indices.deleteDataStream({ name: LOGS_STREAM_WILDCARD }),
+    esClient.indices.delete({ index: LOGS_STREAM_WILDCARD, ignore_unavailable: true }),
   ]);
 
   if (

@@ -99,6 +99,17 @@ const restoreLogsIndicesToTemp = async ({
   logsIndices: string[];
   log: ToolingLog;
 }): Promise<string[]> => {
+  const tempIndices = logsIndices.map((indexName) => `${REPLAY_TEMP_PREFIX}${indexName}`);
+
+  // Pre-clean any orphaned temp indices from previous failed/killed runs to prevent
+  // snapshot_restore_exception when retrying after an unclean shutdown.
+  try {
+    await esClient.indices.delete({ index: tempIndices.join(','), ignore_unavailable: true });
+    log.debug(`Pre-cleaned ${tempIndices.length} orphaned temp indices`);
+  } catch (e) {
+    log.debug(`Pre-cleanup of orphaned temp indices failed (safe to ignore): ${e}`);
+  }
+
   log.debug(`Restoring ${logsIndices.length} indices to temp location`);
 
   await esClient.snapshot.restore({
@@ -111,7 +122,7 @@ const restoreLogsIndicesToTemp = async ({
     rename_replacement: `${REPLAY_TEMP_PREFIX}$1`,
   });
 
-  return logsIndices.map((indexName) => `${REPLAY_TEMP_PREFIX}${indexName}`);
+  return tempIndices;
 };
 
 const getMaxTimestampFromTempIndices = async ({

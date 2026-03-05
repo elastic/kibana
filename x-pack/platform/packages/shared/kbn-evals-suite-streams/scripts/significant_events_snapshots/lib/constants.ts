@@ -21,6 +21,13 @@ export const POD_READY_POLL_INTERVAL_MS = 5_000;
 export const OTEL_DEMO_NAMESPACE = 'otel-demo';
 export const OTEL_DEMO_GCS_BASE_PATH_PREFIX = `${GCS_BUCKET_FOLDER}/${OTEL_DEMO_NAMESPACE}`;
 
+// HTTP Access Logs (OTEL format) namespace
+export const HTTP_ACCESS_SYNTH_NAMESPACE = 'http-access-synth';
+export const HTTP_ACCESS_SYNTH_GCS_BASE_PATH_PREFIX = `${GCS_BUCKET_FOLDER}/${HTTP_ACCESS_SYNTH_NAMESPACE}`;
+
+// Single snapshot name for HTTP access logs dataset
+export const HTTP_ACCESS_SYNTH_SNAPSHOT_NAME = 'http-access-synth';
+
 // OTel Demo scenarios
 export const SCENARIOS = [
   { id: 'healthy-baseline', isFailure: false },
