@@ -29,3 +29,6 @@ export const INSIGHTS_SECTION_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-overview-insights-section` as const;
 export const INSIGHTS_ENTITIES_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-overview-insights-entities` as const;
+export const NOTES_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab` as const;
+export const NOTES_TAB_CONTENT_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab-content` as const;
