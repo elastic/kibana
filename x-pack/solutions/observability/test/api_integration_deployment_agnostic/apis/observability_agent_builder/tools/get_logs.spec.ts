@@ -122,5 +122,62 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(results[0].data.samples).to.have.length(3);
     });
+
+    describe('iterative filtering funnel', () => {
+      let broadCount: number;
+      let afterHealthCheckCount: number;
+      let afterLbCount: number;
+
+      it('starts broad with high totalCount dominated by noise', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+          id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+          params: { start: START, end: END, limit: 20, fields: ['message', 'service.name'] },
+        });
+
+        broadCount = results[0].data.totalCount;
+
+        expect(broadCount).to.be.greaterThan(100);
+      });
+
+      it('reduces totalCount after excluding health checks', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+          id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: 'NOT message: "GET /health 200 OK"',
+            limit: 20,
+            fields: ['message', 'service.name'],
+          },
+        });
+
+        afterHealthCheckCount = results[0].data.totalCount;
+
+        expect(afterHealthCheckCount).to.be.lessThan(broadCount);
+      });
+
+      it('reduces totalCount further after also excluding load-balancer', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+          id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: 'NOT message: "GET /health 200 OK" AND NOT service.name: "load-balancer"',
+            limit: 20,
+            fields: ['message', 'service.name'],
+          },
+        });
+
+        afterLbCount = results[0].data.totalCount;
+
+        expect(afterLbCount).to.be.lessThan(afterHealthCheckCount);
+
+        const errorServices = new Set(
+          results[0].data.samples.map((s) => s['service.name'] as string)
+        );
+
+        expect(errorServices.has('load-balancer')).to.be(false);
+      });
+    });
   });
 }
