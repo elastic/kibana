@@ -17,6 +17,7 @@
     ],
     "influencers": [
       "user.entity.id_computed",
+      "user.name",
       "source.ip",
       "source.geo.country_iso_code"
     ]

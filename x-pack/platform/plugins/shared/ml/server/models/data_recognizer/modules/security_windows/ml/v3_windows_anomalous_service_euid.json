@@ -16,6 +16,7 @@
     ],
     "influencers": [
       "host.entity.id_computed",
+      "host.name",
       "winlog.event_data.ServiceName"
     ]
   },

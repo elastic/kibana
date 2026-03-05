@@ -17,8 +17,10 @@
     "influencers": [
       "process.title",
       "host.entity.id_computed",
+      "host.name",
       "process.working_directory",
-      "user.entity.id_computed"
+      "user.entity.id_computed",
+      "user.name"
     ]
   },
   "allow_lazy_open": true,

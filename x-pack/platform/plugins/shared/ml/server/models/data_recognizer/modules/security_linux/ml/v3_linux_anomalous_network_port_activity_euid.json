@@ -16,8 +16,10 @@
     ],
     "influencers": [
       "host.entity.id_computed",
+      "host.name",
       "process.name",
       "user.entity.id_computed",
+      "user.name",
       "destination.ip"
     ]
   },

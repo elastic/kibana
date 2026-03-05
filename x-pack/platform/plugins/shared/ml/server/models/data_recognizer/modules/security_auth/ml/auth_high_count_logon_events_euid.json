@@ -17,7 +17,9 @@
       "source.ip",
       "winlog.event_data.LogonType",
       "user.entity.id_computed",
-      "host.entity.id_computed"
+      "user.name",
+      "host.entity.id_computed",
+      "host.name"
     ]
   },
   "allow_lazy_open": true,

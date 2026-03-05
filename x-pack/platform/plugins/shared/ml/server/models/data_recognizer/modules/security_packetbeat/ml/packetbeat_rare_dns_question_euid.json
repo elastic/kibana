@@ -15,7 +15,8 @@
       }
     ],
     "influencers": [
-      "host.entity.id_computed"
+      "host.entity.id_computed",
+      "host.name"
     ]
   },
   "allow_lazy_open": true,

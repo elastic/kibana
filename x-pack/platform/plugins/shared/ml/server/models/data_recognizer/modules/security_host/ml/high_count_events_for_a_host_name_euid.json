@@ -16,6 +16,7 @@
     ],
     "influencers": [
       "host.entity.id_computed",
+      "host.name",
       "host.ip",
       "event.dataset",
       "event.action",

@@ -19,6 +19,7 @@
       "source.ip",
       "user.entity.id_computed",
       "host.entity.id_computed",
+      "host.name",
       "user.name"
     ]
   },

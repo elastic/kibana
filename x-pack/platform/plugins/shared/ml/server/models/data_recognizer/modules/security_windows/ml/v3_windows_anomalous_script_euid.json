@@ -17,7 +17,9 @@
     ],
     "influencers": [
       "host.entity.id_computed",
+      "host.name",
       "user.entity.id_computed",
+      "user.name",
       "file.path"
     ]
   },
