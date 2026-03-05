@@ -50,7 +50,8 @@ export function registerStart(router: EntityStorePluginRouter) {
         );
         const toStart = entityTypes.filter((type) => stoppedTypes.has(type));
 
-        await Promise.all(toStart.map((type) => assetManager.start(req, type)));
+        const logsExtraction = await assetManager.getLogExtractionConfig();
+        await Promise.all(toStart.map((type) => assetManager.start(req, type, logsExtraction)));
 
         return res.ok({
           body: {

@@ -7,7 +7,6 @@
 
 import type { FC, MouseEventHandler } from 'react';
 import React, { useRef, useCallback, useEffect, useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { CANVAS } from '../../../i18n';
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
@@ -92,9 +91,4 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
       </div>
     </div>
   );
-};
-
-WorkpadApp.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  deselectElement: PropTypes.func,
 };
