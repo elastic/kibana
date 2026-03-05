@@ -76,9 +76,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       input: z.object({
         limit: z.number().optional(),
         cursor: z.string().optional(),
-        spaceId: z.union(z.string(), z.array(z.string())).optional(),
+        spaceId: z.union([z.string(), z.array(z.string())]).optional(),
         title: z.string().optional(),
-        status: z.union(z.string(), z.array(z.string())).optional(),
+        status: z.union([z.string(), z.array(z.string())]).optional(),
         bodyFormat: z.string().optional(),
       }),
       handler: async (ctx, input) => {
@@ -136,8 +136,8 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       input: z.object({
         limit: z.number().optional(),
         cursor: z.string().optional(),
-        ids: z.union(z.string(), z.array(z.string())).optional(),
-        keys: z.union(z.string(), z.array(z.string())).optional(),
+        ids: z.union([z.string(), z.array(z.string())]).optional(),
+        keys: z.union([z.string(), z.array(z.string())]).optional(),
         type: z.string().optional(),
         status: z.string().optional(),
       }),
