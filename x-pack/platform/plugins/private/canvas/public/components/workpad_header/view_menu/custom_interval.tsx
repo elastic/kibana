@@ -38,7 +38,7 @@ interface Props {
   gutterSize?: EuiFlexGroupGutterSize;
   buttonSize?: EuiButtonSize;
   onSubmit: (interval: number) => void;
-  defaultValue?: any;
+  defaultValue?: string;
 }
 
 export const CustomInterval = ({
