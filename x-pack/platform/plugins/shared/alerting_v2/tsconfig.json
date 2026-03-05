@@ -58,7 +58,9 @@
     "@kbn/eval-kql",
     "@kbn/react-query",
     "@kbn/core-security-server",
-    "@kbn/encrypted-saved-objects-plugin"
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/eval-kql",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
