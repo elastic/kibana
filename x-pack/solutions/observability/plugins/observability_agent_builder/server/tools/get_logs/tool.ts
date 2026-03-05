@@ -15,8 +15,14 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { parseDatemath } from '../../utils/time';
 import { DEFAULT_KEEP_FIELDS, OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
+import type { GetLogsResult } from './handler';
 import { getDefaultBucketSize, getLogsHandler } from './handler';
 import { getLogsIndices } from '../../utils/get_logs_indices';
+
+export interface GetLogsToolResult {
+  type: ToolResultType.other;
+  data: GetLogsResult;
+}
 
 const DEFAULT_TIME_RANGE = {
   start: 'now-1h',

@@ -43,7 +43,7 @@ interface LogSample {
   [key: string]: unknown;
 }
 
-interface GetLogsResult {
+export interface GetLogsResult {
   histogram: HistogramBucket[];
   totalCount: number;
   samples: LogSample[];
