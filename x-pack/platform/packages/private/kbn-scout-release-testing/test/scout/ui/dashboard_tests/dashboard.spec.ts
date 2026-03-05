@@ -503,6 +503,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
 
     await pageObjects.dashboard.saveDashboard(dashboardName);
+    await pageObjects.toasts.closeAll();
 
     await test.step('open drilldown creation flyout', async () => {
       await pageObjects.dashboard.clickPanelAction(
@@ -523,7 +524,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await page.keyboard.press(selectAllKeys);
       await page.keyboard.type('https://www.elastic.co');
 
-      await page.testSubj.click('drilldownWizardSubmit');
+      await pageObjects.dashboard.selectDrilldownTriggerAndSubmit('on_click_value');
       await expect(page.testSubj.locator('createDrilldownFlyout')).toBeHidden();
     });
   });

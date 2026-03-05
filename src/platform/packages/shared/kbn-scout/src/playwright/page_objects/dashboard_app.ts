@@ -59,6 +59,9 @@ export class DashboardApp {
   private readonly applyFlyoutButton;
   private readonly visualizeSaveAndReturnButton;
 
+  // Drilldown wizard
+  private readonly drilldownWizardSubmit;
+
   // Customize panel flyout
   private readonly customizePanelFlyout;
   private readonly customizePanelSaveButton;
@@ -109,6 +112,9 @@ export class DashboardApp {
     // ES|QL / Visualize editor actions
     this.applyFlyoutButton = this.page.testSubj.locator('applyFlyoutButton');
     this.visualizeSaveAndReturnButton = this.page.testSubj.locator('visualizesaveAndReturnButton');
+
+    // Drilldown wizard
+    this.drilldownWizardSubmit = this.page.testSubj.locator('drilldownWizardSubmit');
 
     // Customize panel flyout
     this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
@@ -230,13 +236,11 @@ export class DashboardApp {
     await this.page.testSubj.click('dashboardAddTopNavButton');
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
     for (let i = 0; i < names.length; i++) {
-      // clear search input after the first panel is added
       if (i > 0) {
         await this.page.testSubj.clearInput('savedObjectFinderSearchInput');
       }
       await this.page.testSubj.typeWithDelay('savedObjectFinderSearchInput', names[i]);
       await this.page.testSubj.click(`savedObjectTitle${names[i].replace(/ /g, '-')}`);
-      // wait for the panel to be added
       await this.page.testSubj.waitForSelector(
         `embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`,
         {
@@ -931,5 +935,14 @@ export class DashboardApp {
     await this.savedObjectTitleInput.fill(dashboardTitle);
     await this.confirmSaveButton.click();
     await expect(this.confirmSaveButton).toBeHidden();
+  }
+
+  /** Selects a drilldown trigger and submits the drilldown wizard. */
+  async selectDrilldownTriggerAndSubmit(
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu'
+  ) {
+    await this.page.testSubj.click(`triggerPicker-${trigger}`);
+    await expect(this.drilldownWizardSubmit).toBeEnabled();
+    await this.drilldownWizardSubmit.click();
   }
 }
