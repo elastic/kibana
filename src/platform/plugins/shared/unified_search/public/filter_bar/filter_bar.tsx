@@ -25,9 +25,12 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { i18n } from '@kbn/i18n';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
+import type { IUnifiedSearchPluginServices } from '../types';
 
 const collapseLabel = i18n.translate('unifiedSearch.filter.filterBar.collapseFiltersButtonLabel', {
   defaultMessage: 'Collapse filters',
@@ -37,6 +40,7 @@ const expandLabel = i18n.translate('unifiedSearch.filter.filterBar.expandFilters
 });
 
 export interface Props {
+  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className?: string;
@@ -61,7 +65,10 @@ export interface Props {
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
+const FILTER_BAR_COLLAPSED_SETTING = 'kibana.unifiedSearch.filterBarCollapsed';
+
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
+  const { storage } = props.kibana.services;
   const themeContext = useEuiTheme();
   const styles = filterBarStyles(themeContext, props.afterQueryBar);
 
@@ -77,9 +84,20 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     [disabledFilterCount, filterCount]
   );
 
-  const isExpandable = filterCount > 1;
+  const isCollapsible = filterCount > 1;
   const expandTooltipRef = useRef<EuiToolTip>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+
+  /** isCollapsed initial state should be as follows:
+   * - Expanded by default
+   * - Pull from localStorage ONLY if the filter bar is initially collapsible
+   *   (If the user has not yet added at least 2 filters, we never want to immediately collapse
+   *    the filter bar the moment they add enough filters to make it collapsible. It should only
+   *    collapse in response to the user manually closing it. If the user then refreshes the page,
+   *    localStorage may initialize the filter bar as collasped, which is acceptable)
+   */
+  const [isCollapsed, setIsCollapsed] = useState(
+    isCollapsible ? storage.get(FILTER_BAR_COLLAPSED_SETTING) ?? false : false
+  );
   const expandablePillsId = useGeneratedHtmlId();
 
   const filterPills = (
@@ -108,13 +126,14 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     </EuiFlexGroup>
   );
 
-  const onToggleExpand = useCallback(() => {
-    setIsExpanded(!isExpanded);
+  const onToggleCollapse = useCallback(() => {
+    setIsCollapsed(!isCollapsed);
+    storage.set(FILTER_BAR_COLLAPSED_SETTING, !isCollapsed);
     // Hide the expand button tooltip on click so that it doesn't block the new content
     expandTooltipRef.current?.hideToolTip();
-  }, [isExpanded]);
+  }, [isCollapsed, storage]);
 
-  if (!isExpandable) {
+  if (!isCollapsible) {
     return filterPills;
   }
 
@@ -154,23 +173,23 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   return (
     <EuiFlexGroup
-      css={!isExpanded ? styles.filterBarWrapperCollaped : styles.filterBarWrapperExpanded}
-      alignItems={isExpanded ? 'flexStart' : 'center'}
+      css={isCollapsed ? styles.filterBarWrapperCollaped : styles.filterBarWrapperExpanded}
+      alignItems={!isCollapsed ? 'flexStart' : 'center'}
       gutterSize="xs"
-      wrap={isExpanded}
+      wrap={!isCollapsed}
       responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip
           ref={expandTooltipRef}
-          content={isExpanded ? collapseLabel : expandLabel}
+          content={!isCollapsed ? collapseLabel : expandLabel}
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            aria-label={isExpanded ? collapseLabel : expandLabel}
-            onClick={onToggleExpand}
-            aria-expanded={isExpanded}
+            iconType={!isCollapsed ? 'arrowDown' : 'arrowRight'}
+            aria-label={!isCollapsed ? collapseLabel : expandLabel}
+            onClick={onToggleCollapse}
+            aria-expanded={!isCollapsed}
             aria-controls={expandablePillsId}
             iconSize="s"
           />
@@ -178,16 +197,16 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       </EuiFlexItem>
       {/* For a11y compliance, show and hide filtersAppliedLabel and filterPills using CSS instead of re-renders */}
       <EuiFlexItem
-        css={isExpanded ? css({ display: 'none' }) : null}
-        aria-hidden={isExpanded}
+        css={!isCollapsed ? css({ display: 'none' }) : null}
+        aria-hidden={!isCollapsed}
         grow={false}
       >
         <EuiButtonEmpty
           flush="left"
           type="button"
-          onClick={onToggleExpand}
+          onClick={onToggleCollapse}
           color="text"
-          aria-expanded={isExpanded}
+          aria-expanded={!isCollapsed}
         >
           {filtersAppliedLabel}
         </EuiButtonEmpty>
@@ -195,12 +214,12 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
       <EuiFlexItem
         id={expandablePillsId}
-        aria-hidden={!isExpanded}
+        aria-hidden={isCollapsed}
         grow={true}
         css={[
           css({ minWidth: 0 }),
           styles.pillsScrollContainer,
-          !isExpanded ? css({ blockSize: 0 }) : null,
+          isCollapsed ? css({ blockSize: 0 }) : null,
         ]}
       >
         {filterPills}
@@ -209,4 +228,4 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   );
 });
 
-export const FilterBar = injectI18n(FilterBarUI);
+export const FilterBar = injectI18n(withKibana(FilterBarUI));
