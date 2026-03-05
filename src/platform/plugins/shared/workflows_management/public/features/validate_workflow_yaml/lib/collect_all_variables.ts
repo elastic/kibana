@@ -44,6 +44,9 @@ function getScalarRanges(document: Document): Range[] {
   return ranges;
 }
 
+/*
+  Use binary search to find if the offset is in the YAML content.
+*/
 function isOffsetInYamlContent(ranges: Range[], offset: number): boolean {
   let lo = 0;
   let hi = ranges.length - 1;
