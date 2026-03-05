@@ -43,8 +43,9 @@ export const EntityInsight = <T,>({
   const { euiTheme } = useEuiTheme();
   const insightContent: React.ReactElement[] = [];
 
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } =
-    useHasMisconfigurations(buildEntityFlyoutPreviewCspOptions(entityIdentifiers));
+  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+  );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEntityFlyoutPreviewCspOptions(entityIdentifiers)

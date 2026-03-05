@@ -168,7 +168,11 @@ describe('test helper methods', () => {
             {
               bool: {
                 should: [
-                  { term: { [MISCONFIGURATION_QUERY_FIELD]: { value: 'pass', case_insensitive: true } } },
+                  {
+                    term: {
+                      [MISCONFIGURATION_QUERY_FIELD]: { value: 'pass', case_insensitive: true },
+                    },
+                  },
                 ],
                 minimum_should_match: 1,
               },

@@ -46,9 +46,9 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 import { get } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
@@ -108,9 +108,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       pageSize: 1,
     });
 
-    const { counts } = useHasVulnerabilities(
-      buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
-    );
+    const { counts } = useHasVulnerabilities(buildEntityFlyoutPreviewCspOptions(entityIdentifiers));
 
     const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
 
