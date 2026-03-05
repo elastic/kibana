@@ -14,8 +14,8 @@
  *   version: 1.0.0
  */
 
-import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { AlertIds } from '../../model/alert.gen';
 
