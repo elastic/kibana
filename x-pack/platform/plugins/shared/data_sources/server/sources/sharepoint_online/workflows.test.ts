@@ -5,24 +5,40 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { renderWorkflowTemplate } from '../workflow_test_helpers';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
+import {
+  loadWorkflowsThroughProductionPath,
+  type ProcessedWorkflow,
+} from '../workflow_test_helpers';
+import { sharepointOnlineDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-sharepoint-connector';
 const CONNECTOR_ID = 'fake-sp-connector-uuid';
 
-const loadWorkflow = (file: string): string =>
-  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
-    'sharepoint-online-stack-connector-id': CONNECTOR_NAME,
-  });
-
 describe('sharepoint online workflows', () => {
   let fixture: WorkflowRunFixture;
   let transportRequestMock: jest.Mock;
+  let workflows: ProcessedWorkflow[];
+
+  const getWorkflowYaml = (nameSubstring: string): string => {
+    const wf = workflows.find((w) => w.name.includes(nameSubstring));
+    if (!wf) {
+      throw new Error(
+        `No workflow found matching '${nameSubstring}'. Available: ${workflows
+          .map((w) => w.name)
+          .join(', ')}`
+      );
+    }
+    return wf.yaml;
+  };
+
+  beforeAll(async () => {
+    workflows = await loadWorkflowsThroughProductionPath(sharepointOnlineDataSource, {
+      stackConnectorId: CONNECTOR_NAME,
+    });
+  });
 
   beforeEach(() => {
     fixture = new WorkflowRunFixture();
@@ -51,7 +67,10 @@ describe('sharepoint online workflows', () => {
           return {
             status: 'ok',
             actionId,
-            data: { base64: Buffer.from('pdf binary').toString('base64'), mimeType: 'application/pdf' },
+            data: {
+              base64: Buffer.from('pdf binary').toString('base64'),
+              mimeType: 'application/pdf',
+            },
           };
         case 'getSitePageContents':
           return {
@@ -147,10 +166,19 @@ describe('sharepoint online workflows', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
+  it('all workflows pass production validation without liquid template errors', () => {
+    for (const wf of workflows) {
+      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+        workflow: wf.name,
+        liquidErrors: [],
+      });
+    }
+  });
+
   describe('download workflow', () => {
     it('downloadDriveItem path calls connector with drive and item IDs', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { download_action: 'downloadDriveItem', drive_id: 'drv-1', item_id: 'itm-1' },
       });
 
@@ -171,7 +199,7 @@ describe('sharepoint online workflows', () => {
 
     it('downloadItemFromURL path calls connector then ES extraction with correct data', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { download_action: 'downloadItemFromURL', download_url: 'https://sp/file.pdf' },
       });
 
@@ -192,7 +220,7 @@ describe('sharepoint online workflows', () => {
 
     it('getSitePageContents path calls connector with site and page IDs', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { download_action: 'getSitePageContents', site_id: 'site-1', page_id: 'page-1' },
       });
 
@@ -216,7 +244,7 @@ describe('sharepoint online workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search.yaml'),
+        workflowYaml: getWorkflowYaml('search'),
         inputs: { query: 'quarterly report', entity_types: ['driveItem'], region: 'EUR' },
       });
 
@@ -239,7 +267,7 @@ describe('sharepoint online workflows', () => {
   describe('list workflow', () => {
     it('getAllSites calls connector with no parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('list.yaml'),
+        workflowYaml: getWorkflowYaml('list'),
         inputs: { list_action: 'getAllSites' },
       });
 
@@ -258,7 +286,7 @@ describe('sharepoint online workflows', () => {
 
     it('getSite by ID routes to get-site-by-id with siteId', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('list.yaml'),
+        workflowYaml: getWorkflowYaml('list'),
         inputs: { list_action: 'getSite', site_id: 'site-abc' },
       });
 
@@ -278,7 +306,7 @@ describe('sharepoint online workflows', () => {
 
     it('getSite by relative URL routes to get-site-by-relative-url', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('list.yaml'),
+        workflowYaml: getWorkflowYaml('list'),
         inputs: { list_action: 'getSite', relative_url: '/sites/team' },
       });
 
@@ -298,7 +326,7 @@ describe('sharepoint online workflows', () => {
 
     it('getSitePages calls connector with site ID', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('list.yaml'),
+        workflowYaml: getWorkflowYaml('list'),
         inputs: { list_action: 'getSitePages', site_id: 'site-xyz' },
       });
 
@@ -317,7 +345,7 @@ describe('sharepoint online workflows', () => {
 
     it('getSiteListItems calls connector with site ID and list ID', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('list.yaml'),
+        workflowYaml: getWorkflowYaml('list'),
         inputs: { list_action: 'getSiteListItems', site_id: 'site-1', list_id: 'list-99' },
       });
 
@@ -336,7 +364,7 @@ describe('sharepoint online workflows', () => {
 
     it('getDriveItems calls connector with drive ID and path', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('list.yaml'),
+        workflowYaml: getWorkflowYaml('list'),
         inputs: { list_action: 'getDriveItems', drive_id: 'drv-abc', path: '/Documents' },
       });
 

@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { renderWorkflowTemplate } from '../workflow_test_helpers';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
+import {
+  loadWorkflowsThroughProductionPath,
+  type ProcessedWorkflow,
+} from '../workflow_test_helpers';
+import { googleDriveDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-google-drive-connector';
 const CONNECTOR_ID = 'fake-gd-connector-uuid';
-
-const loadWorkflow = (file: string): string =>
-  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
-    'google_drive-stack-connector-id': CONNECTOR_NAME,
-  });
 
 const fakeDownloadResponse = (fileId: string) => ({
   id: fileId,
@@ -46,6 +43,23 @@ const fakeSimulateResponse = (docs: Array<{ _id: string; _source: Record<string,
 describe('google drive workflows', () => {
   let fixture: WorkflowRunFixture;
   let transportRequestMock: jest.Mock;
+  let workflows: ProcessedWorkflow[];
+
+  const getWorkflowYaml = (nameSubstring: string): string => {
+    const wf = workflows.find((w) => w.name.includes(nameSubstring));
+    if (!wf) {
+      throw new Error(
+        `No workflow found matching '${nameSubstring}'. Available: ${workflows.map((w) => w.name).join(', ')}`
+      );
+    }
+    return wf.yaml;
+  };
+
+  beforeAll(async () => {
+    workflows = await loadWorkflowsThroughProductionPath(googleDriveDataSource, {
+      stackConnectorId: CONNECTOR_NAME,
+    });
+  });
 
   beforeEach(() => {
     fixture = new WorkflowRunFixture();
@@ -122,11 +136,20 @@ describe('google drive workflows', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
+  it('all workflows pass production validation without liquid template errors', () => {
+    for (const wf of workflows) {
+      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+        workflow: wf.name,
+        liquidErrors: [],
+      });
+    }
+  });
+
   describe('download workflow', () => {
     it('N file IDs produce N download actions and N text extractions', async () => {
       const fileIds = ['f1', 'f2', 'f3', 'f4', 'f5'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -140,7 +163,7 @@ describe('google drive workflows', () => {
     it('download output feeds into extraction input for each file', async () => {
       const fileIds = ['alpha', 'beta'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -157,18 +180,20 @@ describe('google drive workflows', () => {
       expect(extractedFileNames).toContain('alpha.pdf');
       expect(extractedFileNames).toContain('beta.pdf');
 
-      simulateCalls.forEach(([req]: [{ body: { docs: Array<{ _source: { data: string; filename: string } }> } }]) => {
-        const doc = req.body.docs[0];
-        const fileId = doc._source.filename.replace('.pdf', '');
-        const expectedBase64 = Buffer.from(`content-of-${fileId}`).toString('base64');
-        expect(doc._source.data).toBe(expectedBase64);
-      });
+      simulateCalls.forEach(
+        ([req]: [{ body: { docs: Array<{ _source: { data: string; filename: string } }> } }]) => {
+          const doc = req.body.docs[0];
+          const fileId = doc._source.filename.replace('.pdf', '');
+          const expectedBase64 = Buffer.from(`content-of-${fileId}`).toString('base64');
+          expect(doc._source.data).toBe(expectedBase64);
+        }
+      );
     });
 
     it('rerank=false stores all results without reranking', async () => {
       const fileIds = ['x1', 'x2'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -199,7 +224,7 @@ describe('google drive workflows', () => {
 
       const fileIds = ['r1', 'r2', 'r3'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml('download'),
         inputs: { fileIds, rerank: true, rerankQuery: 'quarterly report', topK: 2 },
       });
 
@@ -213,7 +238,7 @@ describe('google drive workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search.yaml'),
+        workflowYaml: getWorkflowYaml('search'),
         inputs: { query: "name contains 'budget'", pageSize: 10 },
       });
 
@@ -238,7 +263,7 @@ describe('google drive workflows', () => {
     it('forwards file IDs to the connector', async () => {
       const fileIds = ['meta-1', 'meta-2', 'meta-3'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('metadata.yaml'),
+        workflowYaml: getWorkflowYaml('metadata'),
         inputs: { fileIds },
       });
 

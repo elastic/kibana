@@ -13,7 +13,7 @@ import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import { renderWorkflowTemplate } from '../../workflow_test_helpers';
 
 const CONNECTOR_NAME = 'fake-google-drive-connector';

@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { renderWorkflowTemplate } from '../workflow_test_helpers';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
+import {
+  loadWorkflowsThroughProductionPath,
+  type ProcessedWorkflow,
+} from '../workflow_test_helpers';
+import { notionDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-notion-connector';
 const CONNECTOR_ID = 'fake-notion-connector-uuid';
 
-const loadWorkflow = (file: string): string =>
-  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
-    'notion-stack-connector-id': CONNECTOR_NAME,
-  });
-
 describe('notion workflows', () => {
   let fixture: WorkflowRunFixture;
+  let workflows: ProcessedWorkflow[];
+
+  const getWorkflowYaml = (nameSubstring: string): string => {
+    const wf = workflows.find((w) => w.name.includes(nameSubstring));
+    if (!wf) {
+      throw new Error(
+        `No workflow found matching '${nameSubstring}'. Available: ${workflows
+          .map((w) => w.name)
+          .join(', ')}`
+      );
+    }
+    return wf.yaml;
+  };
+
+  beforeAll(async () => {
+    workflows = await loadWorkflowsThroughProductionPath(notionDataSource, {
+      stackConnectorId: CONNECTOR_NAME,
+    });
+  });
 
   beforeEach(() => {
     fixture = new WorkflowRunFixture();
@@ -83,10 +99,19 @@ describe('notion workflows', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
+  it('all workflows pass production validation without liquid template errors', () => {
+    for (const wf of workflows) {
+      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+        workflow: wf.name,
+        liquidErrors: [],
+      });
+    }
+  });
+
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search.yaml'),
+        workflowYaml: getWorkflowYaml('sources.notion.search'),
         inputs: { query_string: 'meeting notes', query_object: 'page' },
       });
 
@@ -110,7 +135,7 @@ describe('notion workflows', () => {
   describe('get_page workflow', () => {
     it('forwards page ID to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('get_page.yaml'),
+        workflowYaml: getWorkflowYaml('get_page'),
         inputs: { page_id: 'abc-123-def' },
       });
 
@@ -131,7 +156,7 @@ describe('notion workflows', () => {
   describe('query_data_source workflow', () => {
     it('forwards query parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('query_data_source.yaml'),
+        workflowYaml: getWorkflowYaml('query_data_source'),
         inputs: { data_source_id: 'db-456', page_size: 5 },
       });
 
@@ -152,7 +177,7 @@ describe('notion workflows', () => {
   describe('get_data_source workflow', () => {
     it('forwards data source ID to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('get_data_source.yaml'),
+        workflowYaml: getWorkflowYaml('get_data_source'),
         inputs: { data_source_id: 'ds-789' },
       });
 

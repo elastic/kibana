@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { renderWorkflowTemplate } from '../workflow_test_helpers';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
+import {
+  loadWorkflowsThroughProductionPath,
+  type ProcessedWorkflow,
+} from '../workflow_test_helpers';
+import { jiraDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-jira-connector';
 const CONNECTOR_ID = 'fake-jira-connector-uuid';
 
-const loadWorkflow = (file: string): string =>
-  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
-    'jira-cloud-stack-connector-id': CONNECTOR_NAME,
-  });
-
 describe('jira cloud workflows', () => {
   let fixture: WorkflowRunFixture;
+  let workflows: ProcessedWorkflow[];
+
+  const getWorkflowYaml = (nameSubstring: string): string => {
+    const wf = workflows.find((w) => w.name.includes(nameSubstring));
+    if (!wf) {
+      throw new Error(
+        `No workflow found matching '${nameSubstring}'. Available: ${workflows
+          .map((w) => w.name)
+          .join(', ')}`
+      );
+    }
+    return wf.yaml;
+  };
+
+  beforeAll(async () => {
+    workflows = await loadWorkflowsThroughProductionPath(jiraDataSource, {
+      stackConnectorId: CONNECTOR_NAME,
+    });
+  });
 
   beforeEach(() => {
     fixture = new WorkflowRunFixture();
@@ -54,7 +70,11 @@ describe('jira cloud workflows', () => {
           return {
             status: 'ok',
             actionId,
-            data: { id: '10001', key: `PROJ-${subActionParams.issueId}`, fields: { summary: 'Test Issue' } },
+            data: {
+              id: '10001',
+              key: `PROJ-${subActionParams.issueId}`,
+              fields: { summary: 'Test Issue' },
+            },
           };
         case 'getProject':
           return {
@@ -90,10 +110,19 @@ describe('jira cloud workflows', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
+  it('all workflows pass production validation without liquid template errors', () => {
+    for (const wf of workflows) {
+      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+        workflow: wf.name,
+        liquidErrors: [],
+      });
+    }
+  });
+
   describe('search_issues_with_jql workflow', () => {
     it('forwards JQL query to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search_issues_with_jql.yaml'),
+        workflowYaml: getWorkflowYaml('search_issues_with_jql'),
         inputs: { jql: 'project = PROJ AND status = Open', maxResults: 50 },
       });
 
@@ -117,7 +146,7 @@ describe('jira cloud workflows', () => {
   describe('get_resource workflow', () => {
     it('resourceType=issue routes to getIssue connector action', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('get_resource.yaml'),
+        workflowYaml: getWorkflowYaml('get_resource'),
         inputs: { resourceType: 'issue', id: 'PROJ-123' },
       });
 
@@ -137,7 +166,7 @@ describe('jira cloud workflows', () => {
 
     it('resourceType=project routes to getProject connector action', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('get_resource.yaml'),
+        workflowYaml: getWorkflowYaml('get_resource'),
         inputs: { resourceType: 'project', id: '10001' },
       });
 
@@ -159,7 +188,7 @@ describe('jira cloud workflows', () => {
   describe('get_projects workflow', () => {
     it('forwards query parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('get_projects.yaml'),
+        workflowYaml: getWorkflowYaml('get_projects'),
         inputs: { query: 'backend', maxResults: 10 },
       });
 
@@ -180,7 +209,7 @@ describe('jira cloud workflows', () => {
   describe('search_users workflow', () => {
     it('forwards user search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search_users.yaml'),
+        workflowYaml: getWorkflowYaml('search_users'),
         inputs: { query: 'jane', maxResults: 25 },
       });
 
@@ -199,7 +228,7 @@ describe('jira cloud workflows', () => {
 
     it('forwards accountId when searching by specific user', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search_users.yaml'),
+        workflowYaml: getWorkflowYaml('search_users'),
         inputs: { accountId: 'abc-123-def' },
       });
 

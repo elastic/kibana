@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowRunFixture } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/integration_tests/workflow_run_fixture';
-import { renderWorkflowTemplate } from '../workflow_test_helpers';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
+import {
+  loadWorkflowsThroughProductionPath,
+  type ProcessedWorkflow,
+} from '../workflow_test_helpers';
+import { slackDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-slack-connector';
 const CONNECTOR_ID = 'fake-slack-connector-uuid';
 
-const loadWorkflow = (file: string): string =>
-  renderWorkflowTemplate(readFileSync(resolve(__dirname, 'workflows', file), 'utf-8'), {
-    'slack2-stack-connector-id': CONNECTOR_NAME,
-  });
-
 describe('slack workflows', () => {
   let fixture: WorkflowRunFixture;
+  let workflows: ProcessedWorkflow[];
+
+  const getWorkflowYaml = (nameSubstring: string): string => {
+    const wf = workflows.find((w) => w.name.includes(nameSubstring));
+    if (!wf) {
+      throw new Error(
+        `No workflow found matching '${nameSubstring}'. Available: ${workflows
+          .map((w) => w.name)
+          .join(', ')}`
+      );
+    }
+    return wf.yaml;
+  };
+
+  beforeAll(async () => {
+    workflows = await loadWorkflowsThroughProductionPath(slackDataSource, {
+      stackConnectorId: CONNECTOR_NAME,
+    });
+  });
 
   beforeEach(() => {
     fixture = new WorkflowRunFixture();
@@ -64,10 +80,19 @@ describe('slack workflows', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
+  it('all workflows pass production validation without liquid template errors', () => {
+    for (const wf of workflows) {
+      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+        workflow: wf.name,
+        liquidErrors: [],
+      });
+    }
+  });
+
   describe('send_message workflow', () => {
     it('forwards message parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('send_message.yaml'),
+        workflowYaml: getWorkflowYaml('send_message'),
         inputs: { channel: 'C123ABC', text: 'Hello from test', thread_ts: '1234.5678' },
       });
 
@@ -92,7 +117,7 @@ describe('slack workflows', () => {
   describe('search_messages workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('search_messages.yaml'),
+        workflowYaml: getWorkflowYaml('search_messages'),
         inputs: { query: 'deployment update', in_channel: 'engineering', count: 5 },
       });
 
