@@ -1,0 +1,45 @@
+steps:
+  - command: |
+      set -euo pipefail
+      ZONE="$(curl -fsS -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/zone | awk -F/ '{print $4}')"
+      echo "probe succeeded in ${ZONE}"
+      nproc
+      df -h /
+    label: 'Capacity Probe us-central1-b (%n)'
+    agents:
+      machineType: n2d-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-central1-b
+      diskSizeGb: 200
+    timeout_in_minutes: 10
+    parallelism: 20
+
+  - command: |
+      set -euo pipefail
+      ZONE="$(curl -fsS -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/zone | awk -F/ '{print $4}')"
+      echo "probe succeeded in ${ZONE}"
+      nproc
+      df -h /
+    label: 'Capacity Probe us-east1-b (%n)'
+    agents:
+      machineType: n2d-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-east1-b
+      diskSizeGb: 200
+    timeout_in_minutes: 10
+    parallelism: 20
+
+  - command: |
+      set -euo pipefail
+      ZONE="$(curl -fsS -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/zone | awk -F/ '{print $4}')"
+      echo "probe succeeded in ${ZONE}"
+      nproc
+      df -h /
+    label: 'Capacity Probe us-west1-b (%n)'
+    agents:
+      machineType: n2d-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-west1-b
+      diskSizeGb: 200
+    timeout_in_minutes: 10
+    parallelism: 20
