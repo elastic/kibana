@@ -68,7 +68,6 @@ export const updateTestConfigStats: Command<void> = {
 
     const testConfigStats = await ScoutTestConfigStats.fromElasticsearch(es, {
       configPaths: [],
-      testTargets: [],
       lookbackDays,
       buildkite: { branch, pipelineSlug },
     });

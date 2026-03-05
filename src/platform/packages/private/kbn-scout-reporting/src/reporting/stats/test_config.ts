@@ -80,7 +80,6 @@ export class ScoutTestConfigStats {
     es: ESClient,
     options: {
       configPaths: string[];
-      testTargets: ScoutTestTarget[];
       lookbackDays: number;
       buildkite: {
         branch?: string;
@@ -92,6 +91,7 @@ export class ScoutTestConfigStats {
     const whereClauses = [
       `@timestamp >= NOW() - ${options.lookbackDays}day`,
       'event.action == "run-end"',
+      'test_run.target.mode != "unknown"',
     ];
 
     if (options.configPaths.length > 0) {
@@ -100,20 +100,6 @@ export class ScoutTestConfigStats {
           .map((configPath) => `"${configPath}"`)
           .join(', ')})`
       );
-    }
-
-    if (options.testTargets.length > 0) {
-      whereClauses.push(
-        options.testTargets
-          .map(
-            (testTarget) =>
-              `(test_run.target.type == "${testTarget.location}"` +
-              ` AND test_run.target.mode == "${testTarget.tagWithoutLocation}")`
-          )
-          .join(' OR ')
-      );
-    } else {
-      whereClauses.push('test_run.target.mode != "unknown"');
     }
 
     if (options.buildkite.branch) {
