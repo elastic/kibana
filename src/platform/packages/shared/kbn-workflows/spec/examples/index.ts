@@ -129,8 +129,7 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
   {
     id: 'invoke_agent',
     name: 'Invoke an Agent',
-    description:
-      'Triggers an AI agent to triage a security alert via kibana.post_agent_builder_converse',
+    description: 'Triggers an AI agent to triage a security alert via the ai.agent step type',
     category: 'security',
     tags: ['alert', 'agent-builder', 'ai', 'console'],
     filename: 'invoke_agent.yml',

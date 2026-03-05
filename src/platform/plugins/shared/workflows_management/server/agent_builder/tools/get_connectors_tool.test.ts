@@ -67,7 +67,23 @@ describe('registerGetConnectorsTool', () => {
     const result = await invokeHandler(registeredTool, { connectorType: '.slack' }, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(2);
-    expect(data.connectors.every((c: any) => c.type === '.slack')).toBe(true);
+    expect(data.connectors.every((c: any) => c.actionTypeId === '.slack')).toBe(true);
+    expect(data.connectors.every((c: any) => c.stepType === 'slack')).toBe(true);
+  });
+
+  it('filters by actionTypeId', async () => {
+    const result = await invokeHandler(registeredTool, { actionTypeId: '.jira' }, context);
+    const data = result.results[0].data as any;
+    expect(data.count).toBe(1);
+    expect(data.connectors[0].actionTypeId).toBe('.jira');
+    expect(data.connectors[0].stepType).toBe('jira');
+  });
+
+  it('filters by stepType', async () => {
+    const result = await invokeHandler(registeredTool, { stepType: 'slack' }, context);
+    const data = result.results[0].data as any;
+    expect(data.count).toBe(2);
+    expect(data.connectors.every((c: any) => c.stepType === 'slack')).toBe(true);
   });
 
   it('filters by search term', async () => {
@@ -85,7 +101,8 @@ describe('registerGetConnectorsTool', () => {
     for (const connector of data.connectors) {
       expect(connector).toHaveProperty('id');
       expect(connector).toHaveProperty('name');
-      expect(connector).toHaveProperty('type');
+      expect(connector).toHaveProperty('actionTypeId');
+      expect(connector).toHaveProperty('stepType');
     }
   });
 });

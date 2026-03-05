@@ -34,7 +34,7 @@ export function registerGetTriggerDefinitionsTool(
 **When to use:** To learn how to configure the \`triggers\` section of a workflow.
 **When NOT to use:** For step definitions (use get_step_definitions) or connector instances (use get_connectors).
 
-Returns built-in trigger types (manual, scheduled, alert) plus any custom triggers registered by plugins.`,
+Returns built-in trigger types (manual, scheduled, alert).`,
     schema: z.object({
       triggerType: z
         .string()

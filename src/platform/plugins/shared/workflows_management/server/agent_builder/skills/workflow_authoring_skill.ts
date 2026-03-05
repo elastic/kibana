@@ -71,7 +71,10 @@ inputs:
 
 triggers:
   - type: manual
-  # or: type: scheduled, every: "5m"
+  # or:
+  # - type: scheduled
+  #   with:
+  #     every: "5m"
   # or: type: alert
 
 steps:
@@ -96,13 +99,14 @@ Every step (regardless of type) supports these properties. They are NOT repeated
   timeout: "30s"               # optional, step-level timeout
   on-failure:                  # optional, error handling
     retry:
-      max_retries: 3
+      max-attempts: 3
       delay: "5s"
-    steps:                     # fallback steps on failure
+    fallback:                  # fallback steps on failure
       - name: handle_error
         type: console
         with:
           message: "Step failed"
+    continue: true             # optionally continue execution after failure
 \`\`\`
 
 - **\`with\`**: Contains the step's input parameters (listed as \`inputParams\` in tool results)
@@ -122,7 +126,7 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **console**: Log messages to execution output
 - **elasticsearch.search**: Query Elasticsearch indices
 - **elasticsearch.bulk**: Bulk index documents
-- **kibana.post_agent_builder_converse**: Invoke an AI agent
+- **ai.agent**: Invoke an AI agent
 
 #### Connector-Based Step Types (PREFERRED for integrations!)
 
@@ -187,7 +191,7 @@ When the user asks you to fix a validation error:
 1. Always search examples first before writing step YAML
 2. Use unique step names within the workflow
 3. Use 2 spaces per indentation level
-4. Use \`on-failure\` with \`retry\` and \`continue\` options for error handling
+4. Use \`on-failure\` with \`retry\`, \`fallback\`, and (optionally) \`continue\` for error handling
 5. Prefer connector steps over raw HTTP for integrations`,
   getRegistryTools: () => [
     GET_STEP_DEFINITIONS_TOOL_ID,
