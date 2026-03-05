@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { flattenRecord, TaskStatus } from '@kbn/streams-schema';
 import type { TaskResult } from '@kbn/streams-schema';
 import type {

@@ -196,10 +196,11 @@ export function StreamsTreeTable({
     if (!suggestionStatusResult.value) {
       return {};
     }
-    return suggestionStatusResult.value.reduce((acc, item) => {
+    type StatusItem = (typeof suggestionStatusResult.value)[number];
+    return suggestionStatusResult.value.reduce<Record<string, StatusItem>>((acc, item) => {
       acc[item.stream] = item;
       return acc;
-    }, {} as Record<string, (typeof suggestionStatusResult.value)[number]>);
+    }, {});
   }, [suggestionStatusResult]);
 
   const isSuggestionStatusInitialLoading =
