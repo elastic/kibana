@@ -71,7 +71,7 @@ When using `feature_flags.overrides`, the keys must match the feature flag IDs r
 Some settings cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets**.
 
 ::::::{warning}
-Each custom config set requires its own dedicated server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case.
+⚠️ Each custom config set requires its own dedicated server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case.
 ::::::
 
 ### How custom configs work [scout-feature-flags-custom-configs-how]
@@ -81,6 +81,8 @@ By default, Scout starts servers using the `default` configuration set. Custom c
 ```text
 src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<name>/
 ```
+
+Inside that directory, create one config file per architecture + domain combination your tests target. Files follow the naming convention `<domain>.<arch>.config.ts` and must export `servers: ScoutServerConfig`.
 
 Scout detects a custom config in two ways:
 
