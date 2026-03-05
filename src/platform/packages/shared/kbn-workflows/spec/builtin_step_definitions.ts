@@ -133,6 +133,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Execute Workflow',
     description: 'Execute another workflow and wait for it to complete',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WorkflowExecuteStepInputSchema,
     outputSchema: z.unknown(),
     documentation: {
@@ -151,6 +152,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Execute Workflow (Async)',
     description: 'Start another workflow and continue without waiting for completion',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WorkflowExecuteStepInputSchema,
     outputSchema: WorkflowExecuteAsyncStepOutputSchema,
     documentation: {
