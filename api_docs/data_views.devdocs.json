@@ -13749,7 +13749,7 @@
           "\nService keys as type"
         ],
         "signature": [
-          "\"index_pattern\" | \"data_view\""
+          "\"data_view\" | \"index_pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/server/constants.ts",
         "lineNumber": 81,
