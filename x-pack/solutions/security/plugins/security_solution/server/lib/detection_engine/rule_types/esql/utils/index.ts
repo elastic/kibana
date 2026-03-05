@@ -14,3 +14,4 @@ export * from './initiate_excluded_documents';
 export * from './update_excluded_documents';
 export * from './get_transformed_query_from_state';
 export * from './validate_esql_query';
+export * from './check_missing_id_field_warning';

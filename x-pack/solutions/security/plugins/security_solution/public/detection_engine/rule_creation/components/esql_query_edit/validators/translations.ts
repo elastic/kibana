@@ -26,3 +26,11 @@ export const esqlValidationErrorMessage = (message: string) =>
     values: { message },
     defaultMessage: 'Error validating ES|QL: "{message}"',
   });
+
+export const ESQL_MISSING_ID_FIELD_WARNING = i18n.translate(
+  'xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldWarning',
+  {
+    defaultMessage:
+      'ES|QL query does not return the _id metadata field. This may result in duplicate alerts. Try adding "METADATA _id" to your FROM command and ensure _id is not excluded by KEEP or DROP commands.',
+  }
+);

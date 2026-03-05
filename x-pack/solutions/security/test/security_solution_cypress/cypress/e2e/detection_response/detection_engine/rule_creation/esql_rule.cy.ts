@@ -181,6 +181,22 @@ describe(
 
         createRuleWithNonBlockingErrors();
       });
+
+      it('shows confirmation modal when non-aggregating query drops _id', function () {
+        const queryWithDroppedId =
+          'from auditbeat* metadata _id, _version, _index | drop _id | limit 5';
+        selectEsqlRuleType();
+        fillEsqlQueryBar(queryWithDroppedId);
+        getDefineContinueButton().click();
+
+        fillRuleName();
+        fillDescription();
+        getAboutContinueButton().click();
+
+        fillScheduleRuleAndContinue(rule);
+
+        createRuleWithNonBlockingErrors();
+      });
     });
 
     describe('ES|QL investigation fields', () => {

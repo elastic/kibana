@@ -40,7 +40,8 @@ describe('getTransformedQueryFromState', () => {
         isAggregating: true,
       });
 
-      expect(result).toBe(ORIGINAL_QUERY);
+      expect(result.query).toBe(ORIGINAL_QUERY);
+      expect(result.injectionFailureReason).toBeUndefined();
       expect(injectMetadataIdMock).not.toHaveBeenCalled();
       expect(validateEsqlQueryMock).not.toHaveBeenCalled();
     });
@@ -57,12 +58,31 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(TRANSFORMED_QUERY);
+    expect(result.query).toBe(TRANSFORMED_QUERY);
+    expect(result.injectionFailureReason).toBeUndefined();
     expect(injectMetadataIdMock).not.toHaveBeenCalled();
     expect(validateEsqlQueryMock).not.toHaveBeenCalled();
     expect(ruleExecutionLogger.trace).toHaveBeenCalledWith(
       'Using state-based transformed ES|QL query'
     );
+  });
+
+  it('returns cached failure state without re-parsing or re-validating', async () => {
+    const result = await getTransformedQueryFromState({
+      originalQuery: ORIGINAL_QUERY,
+      state: {
+        transformedQuery: ORIGINAL_QUERY,
+        lastQuery: ORIGINAL_QUERY,
+        injectionFailureReason: 'Parse error',
+      },
+      ruleExecutionLogger,
+      isAggregating: false,
+    });
+
+    expect(result.query).toBe(ORIGINAL_QUERY);
+    expect(result.injectionFailureReason).toBe('Parse error');
+    expect(injectMetadataIdMock).not.toHaveBeenCalled();
+    expect(validateEsqlQueryMock).not.toHaveBeenCalled();
   });
 
   it('transforms and validates query on empty state', async () => {
@@ -73,7 +93,8 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(TRANSFORMED_QUERY);
+    expect(result.query).toBe(TRANSFORMED_QUERY);
+    expect(result.injectionFailureReason).toBeUndefined();
     expect(injectMetadataIdMock).toHaveBeenCalledWith(ORIGINAL_QUERY);
     expect(validateEsqlQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({ query: TRANSFORMED_QUERY })
@@ -92,7 +113,7 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(TRANSFORMED_QUERY);
+    expect(result.query).toBe(TRANSFORMED_QUERY);
     expect(injectMetadataIdMock).toHaveBeenCalledWith(ORIGINAL_QUERY);
     expect(validateEsqlQueryMock).toHaveBeenCalled();
   });
@@ -107,12 +128,13 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(ORIGINAL_QUERY);
+    expect(result.query).toBe(ORIGINAL_QUERY);
+    expect(result.injectionFailureReason).toBeUndefined();
     expect(injectMetadataIdMock).toHaveBeenCalledWith(ORIGINAL_QUERY);
     expect(validateEsqlQueryMock).not.toHaveBeenCalled();
   });
 
-  it('falls back to original query when validation fails', async () => {
+  it('falls back to original query with injectionFailureReason when validation fails', async () => {
     validateEsqlQueryMock.mockResolvedValue(false);
 
     const result = await getTransformedQueryFromState({
@@ -122,10 +144,11 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(ORIGINAL_QUERY);
+    expect(result.query).toBe(ORIGINAL_QUERY);
+    expect(result.injectionFailureReason).toBe('Transformed query failed ES|QL validation');
   });
 
-  it('returns original query when injectMetadataId throws', async () => {
+  it('returns original query with injectionFailureReason when injectMetadataId throws', async () => {
     injectMetadataIdMock.mockImplementation(() => {
       throw new Error('Parse error');
     });
@@ -137,7 +160,8 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(ORIGINAL_QUERY);
+    expect(result.query).toBe(ORIGINAL_QUERY);
+    expect(result.injectionFailureReason).toBe('Parse error');
     expect(ruleExecutionLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to inject METADATA _id')
     );
@@ -154,7 +178,7 @@ describe('getTransformedQueryFromState', () => {
       isAggregating: false,
     });
 
-    expect(result).toBe(TRANSFORMED_QUERY);
+    expect(result.query).toBe(TRANSFORMED_QUERY);
     expect(injectMetadataIdMock).toHaveBeenCalled();
     expect(validateEsqlQueryMock).toHaveBeenCalled();
   });

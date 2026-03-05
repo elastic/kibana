@@ -28,6 +28,7 @@ import {
   initiateExcludedDocuments,
   getSourceDocument,
   getTransformedQueryFromState,
+  checkMissingIdFieldWarning,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -46,7 +47,6 @@ import {
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
-  getMissingIdFieldWarning,
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -100,7 +100,7 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
-    const transformedQuery = await getTransformedQueryFromState({
+    const { query: transformedQuery, injectionFailureReason } = await getTransformedQueryFromState({
       originalQuery: ruleParams.query,
       state,
       ruleExecutionLogger,
@@ -178,10 +178,13 @@ export const esqlExecutor = async ({
 
         logClusterShardFailuresEsql({ response, result });
 
-        if (!isRuleAggregating && iteration === 0 && response.values.length > 0) {
-          const hasIdColumn = response.columns.some((col) => col.name === '_id');
-          if (!hasIdColumn) {
-            result.warningMessages.push(getMissingIdFieldWarning());
+        if (!isRuleAggregating && iteration === 0) {
+          const missingIdWarning = checkMissingIdFieldWarning({
+            response,
+            injectionFailureReason,
+          });
+          if (missingIdWarning) {
+            result.warningMessages.push(missingIdWarning);
           }
         }
 
@@ -349,6 +352,7 @@ export const esqlExecutor = async ({
         ...(!isRuleAggregating && {
           lastQuery: ruleParams.query,
           transformedQuery,
+          injectionFailureReason,
         }),
       },
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),

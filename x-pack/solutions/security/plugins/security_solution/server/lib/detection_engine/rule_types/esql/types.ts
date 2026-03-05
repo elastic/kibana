@@ -17,4 +17,5 @@ export interface EsqlState extends RuleTypeState {
   excludedDocuments?: Record<string, ExcludedDocument[]>;
   lastQuery?: string;
   transformedQuery?: string;
+  injectionFailureReason?: string;
 }

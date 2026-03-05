@@ -10,6 +10,11 @@ import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { EsqlState } from '../types';
 import { validateEsqlQuery } from './validate_esql_query';
 
+export interface TransformedQueryResult {
+  query: string;
+  injectionFailureReason?: string;
+}
+
 /**
  * Returns a transformed ES|QL query with `METADATA _id` injected (for deduplication).
  * Uses state-based caching to avoid re-transforming and re-validating on every execution.
@@ -26,14 +31,17 @@ export const getTransformedQueryFromState = async ({
   state: EsqlState;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   isAggregating: boolean;
-}): Promise<string> => {
+}): Promise<TransformedQueryResult> => {
   if (isAggregating) {
-    return originalQuery;
+    return { query: originalQuery };
   }
 
   if (state.lastQuery === originalQuery && state.transformedQuery != null) {
     ruleExecutionLogger.trace('Using state-based transformed ES|QL query');
-    return state.transformedQuery;
+    return {
+      query: state.transformedQuery,
+      injectionFailureReason: state.injectionFailureReason,
+    };
   }
 
   let candidateQuery: string;
@@ -43,12 +51,15 @@ export const getTransformedQueryFromState = async ({
     ruleExecutionLogger.warn(
       `Failed to inject METADATA _id into ES|QL query: ${error?.message}. Using original query.`
     );
-    return originalQuery;
+    return {
+      query: originalQuery,
+      injectionFailureReason: error?.message ?? 'Unknown error',
+    };
   }
 
   // if query not changed return early to avoid unnecessary validation
   if (candidateQuery === originalQuery) {
-    return originalQuery;
+    return { query: originalQuery };
   }
 
   const isValid = await validateEsqlQuery({
@@ -58,8 +69,11 @@ export const getTransformedQueryFromState = async ({
 
   if (isValid) {
     ruleExecutionLogger.trace('Transformed ES|QL query validated');
-    return candidateQuery;
+    return { query: candidateQuery };
   }
 
-  return originalQuery;
+  return {
+    query: originalQuery,
+    injectionFailureReason: 'Transformed query failed ES|QL validation',
+  };
 };

@@ -894,7 +894,11 @@ export const getSuppressionMaxSignalsWarning = (): string => {
 };
 
 export const getMissingIdFieldWarning = (): string => {
-  return `ES|QL query does not return _id metadata field for a non-aggregating query. This may result in duplicate alerts. Consider adding "METADATA _id" to the FROM command and make sure _id is returned in the query results.`;
+  return `ES|QL query does not return _id metadata field for a non-aggregating query. This may result in duplicate alerts. Consider adding "METADATA _id" to the FROM command and make sure _id is not excluded by KEEP or DROP commands.`;
+};
+
+export const getMetadataIdInjectionFailedWarning = (reason: string): string => {
+  return `Failed to automatically inject METADATA _id into ES|QL query: ${reason}. This may result in duplicate alerts. Try manually adding "METADATA _id" to the FROM command and ensure _id is returned in the query results.`;
 };
 
 export const getDisabledActionsWarningText = ({
