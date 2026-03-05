@@ -33,7 +33,7 @@ import type {
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 import type { DeleteDataSourceAndRelatedResourcesResult } from '../../common';
-import { slugify } from '../../common';
+import { getWorkflowPrefix, getToolPrefix } from '../../common';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -164,7 +164,7 @@ export async function createDataSourceAndRelatedResources(
         finalStackConnectorId,
         stackConnectorConfig.importedTools,
         name,
-        `${type}.${slugify(name)}`,
+        getToolPrefix(name, type),
         logger
       );
       toolIds.push(...importedToolIds);
@@ -186,8 +186,7 @@ export async function createDataSourceAndRelatedResources(
       const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
       const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
       const workflowBaseName = originalName.split('.').pop() || originalName;
-      const canonicalName = `source.${type}.${workflowBaseName}`;
-      const prefixedName = `${slugify(name)}.${canonicalName}`;
+      const prefixedName = `${getWorkflowPrefix(name, type)}.${workflowBaseName}`;
       const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
 
       const workflow = await workflowManagement.management.createWorkflow(
@@ -206,9 +205,8 @@ export async function createDataSourceAndRelatedResources(
             ? parsedWorkflow.description
             : `Workflow tool for ${type} data source`;
 
-        // Tool ID structure: type.data_source_name.source.workflow_base_name
         const tool = await toolRegistry.create({
-          id: `${type}.${slugify(name)}.source.${workflowBaseName}`,
+          id: `${getToolPrefix(name, type)}.source.${workflowBaseName}`,
           type: ToolType.workflow,
           description: workflowDescription,
           tags: ['data-source', type],
