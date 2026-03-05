@@ -104,12 +104,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-discovery-api-key": "2350e2ce1b6e913f55aef2cd04971b15604b03e049370ef10949c3eeec38c46f",
         "entity-engine-descriptor-v2": "3f8591c96ffe6b7e3b315702a5a15bfc432cb748431f8fefd9b9d19e3969ba9b",
         "entity-engine-status": "005903620a00737932aa54ae57817b078810b2f71cc42e7715d1c22c5e5b715e",
-<<<<<<< HEAD
-        "epm-packages": "8a91aff1a9bdb09564c99c2f0aeb8bc5b2ff1194a9e93d756b70192b70053667",
-=======
         "entity-store-global-state": "ccf23d3535d949155e1e21e594270789e484e1348fce0a1b2a56f4faeaa6a4ac",
-        "epm-packages": "d3ca1a3ed046e4579a466455e8f4ab4951b73344a02dac44700843e2f928a26e",
->>>>>>> main
+        "epm-packages": "8a91aff1a9bdb09564c99c2f0aeb8bc5b2ff1194a9e93d756b70192b70053667",
         "epm-packages-assets": "1095b56fabdeb3994a60f4da02e87179dfaf57d5bb23b97458129bf14c66b46e",
         "event-annotation-group": "21141aa64bba4d05ee6ebe0b0d75475452bca50e73f902a38800457d0727014d",
         "event_loop_delays_daily": "5f320d1628eebdcfd38969dbef3304ed62d19cdc902c20188892187cff3cbc8b",
@@ -1401,7 +1397,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-discovery-api-key": "10.0.0",
         "entity-engine-descriptor-v2": "10.3.0",
         "entity-engine-status": "10.2.0",
-        "epm-packages": "10.6.0",
         "entity-store-global-state": "10.1.0",
         "epm-packages": "10.6.0",
         "epm-packages-assets": "10.0.0",
@@ -1561,7 +1556,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-discovery-api-key": "0.0.0",
         "entity-engine-descriptor-v2": "10.3.0",
         "entity-engine-status": "10.2.0",
-        "epm-packages": "10.6.0",
         "entity-store-global-state": "10.1.0",
         "epm-packages": "10.6.0",
         "epm-packages-assets": "0.0.0",
