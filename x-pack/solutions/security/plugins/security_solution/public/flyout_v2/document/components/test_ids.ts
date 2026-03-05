@@ -7,6 +7,8 @@
 
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
+/* About */
+
 const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
 export const ALERT_DESCRIPTION_TITLE_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Title` as const;
 export const ALERT_DESCRIPTION_DETAILS_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Details` as const;
@@ -16,3 +18,9 @@ const REASON_TEST_ID = `${PREFIX}Reason` as const;
 export const REASON_TITLE_TEST_ID = `${REASON_TEST_ID}Title` as const;
 export const REASON_DETAILS_TEST_ID = `${REASON_TEST_ID}Details` as const;
 export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewButton` as const;
+
+/* Investigation */
+
+export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;

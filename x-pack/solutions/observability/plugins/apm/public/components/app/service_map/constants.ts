@@ -30,6 +30,9 @@ export const FIT_VIEW_PADDING = 0.2;
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
 
+/** Delay before calling fitView after layout update (ms), to allow React Flow to measure nodes */
+export const FIT_VIEW_DEFER_MS = 50;
+
 /** Size of the default marker */
 export const DEFAULT_MARKER_SIZE = 12;
 

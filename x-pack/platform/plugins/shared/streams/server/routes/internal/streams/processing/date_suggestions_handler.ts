@@ -6,9 +6,8 @@
  */
 
 import { isString, uniq } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { NonEmptyString } from '@kbn/zod-helpers';
 
 export interface ProcessingDateSuggestionsParams {
   path: {
@@ -74,7 +73,15 @@ export const handleProcessingDateSuggestions = async ({
 
 function parseDatesInput(dates: unknown[]): string[] {
   const areValidDates = z
-    .array(z.union([NonEmptyString, z.number()]))
+    .array(
+      z.union([
+        z
+          .string()
+          .nonempty()
+          .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+        z.number(),
+      ])
+    )
     .nonempty()
     .safeParse(dates).success;
 
