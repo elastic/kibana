@@ -70,9 +70,9 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
     if (filteredIssues.length === 0) {
       return {
         success: true,
-        data: parseResult.json as T['_output'],
+        data: parseResult.json,
         document,
-      } satisfies ParseWorkflowYamlToJSONResult<T>;
+      } as ParseWorkflowYamlToJSONResult<T>;
     }
 
     // Use custom error formatter for better user experience
@@ -84,5 +84,5 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
       document,
     };
   }
-  return { ...result, document } satisfies ParseWorkflowYamlToJSONResult<T>;
+  return { ...result, document } as ParseWorkflowYamlToJSONResult<T>;
 }
