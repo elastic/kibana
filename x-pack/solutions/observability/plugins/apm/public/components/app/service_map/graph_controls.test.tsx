@@ -32,11 +32,11 @@ jest.mock('@xyflow/react', () => {
   return {
     ...original,
     ReactFlow: ({ children }: { children: React.ReactNode }) => (
-      <div data-testid="react-flow">{children}</div>
+      <div data-test-subj="react-flow">{children}</div>
     ),
-    Background: () => <div data-testid="react-flow-background" />,
+    Background: () => <div data-test-subj="react-flow-background" />,
     Controls: ({ children }: { children?: React.ReactNode }) => (
-      <div data-testid="react-flow-controls">{children}</div>
+      <div data-test-subj="serviceMapControls">{children}</div>
     ),
     ControlButton: ({
       children,
@@ -122,7 +122,19 @@ function ServiceMapGraphWithFullscreenState(
   );
 }
 
-describe('ServiceMapGraph - Full screen', () => {
+describe('ServiceMapGraph - Controls', () => {
+  it('renders the controls container', () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+
+    const controls = screen.getByTestId('serviceMapControls');
+    expect(controls).toBeInTheDocument();
+    expect(screen.getByTestId('serviceMapGraph')).toContainElement(controls);
+  });
+
   it('does not render full screen button when onToggleFullscreen is not provided', () => {
     render(
       <ReactFlowProvider>
@@ -174,5 +186,49 @@ describe('ServiceMapGraph - Full screen', () => {
         'Enter fullscreen'
       );
     });
+  });
+
+  it('renders "View full service map" button when fullMapHref is provided', () => {
+    const fullMapHref = '/app/apm/service-map?rangeFrom=now-24h&rangeTo=now';
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} fullMapHref={fullMapHref} />
+      </ReactFlowProvider>
+    );
+
+    const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
+    expect(viewFullMapButton).toBeInTheDocument();
+    expect(viewFullMapButton).toHaveAttribute('href', fullMapHref);
+    expect(viewFullMapButton).toHaveAttribute('title', 'View full service map');
+  });
+
+  it('does not render "View full service map" button when fullMapHref is not provided', () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+
+    expect(screen.queryByTestId('serviceMapViewFullMapButton')).not.toBeInTheDocument();
+  });
+
+  it('renders both view full map and fullscreen buttons when both fullMapHref and onToggleFullscreen are provided', () => {
+    const fullMapHref = '/app/apm/service-map?rangeFrom=now-24h&rangeTo=now';
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph
+          {...defaultProps}
+          fullMapHref={fullMapHref}
+          onToggleFullscreen={() => {}}
+        />
+      </ReactFlowProvider>
+    );
+
+    const controls = screen.getByTestId('serviceMapControls');
+    const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
+    const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
+
+    expect(controls).toContainElement(viewFullMapButton);
+    expect(controls).toContainElement(fullscreenButton);
   });
 });
