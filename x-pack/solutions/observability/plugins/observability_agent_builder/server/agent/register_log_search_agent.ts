@@ -68,7 +68,7 @@ function buildLogSearchSystemPrompt(): string {
     You MUST follow this procedure.
 
     ### Phase 1: Initial Peek
-    ALWAYS start here. Call \`get_logs\` with breakdownField="log.level".
+    ALWAYS start here. Call \`get_logs\` with groupBy="log.level".
     If the user mentions a specific service, host, or container, scope the query with a kqlFilter (e.g. \`service.name: "cart-service"\`). Otherwise, use no kqlFilter.
     Read three things:
     - **totalCount**: How many logs match? This is an indicator of noise.
@@ -84,7 +84,7 @@ function buildLogSearchSystemPrompt(): string {
     NOTE: OTel exception events (e.g. gRPC errors, uncaught exceptions) do NOT have \`log.level\`.
     They appear as "unknown" in the breakdown. If you see a large "unknown" bucket but few or no
     error-level logs, call \`get_logs\` with kqlFilter="error.exception.message: *" to
-    check for hidden exceptions. Also use breakdownField="service.name" to see which services
+    check for hidden exceptions. Also use groupBy="service.name" to see which services
     produced them.
 
     ### Phase 2: Analyze at Scale
@@ -119,7 +119,7 @@ function buildLogSearchSystemPrompt(): string {
 
     RULES for this phase:
     - If you see a spike, narrow the time range (start/end) around it to isolate the incident window.
-    - Use breakdownField (e.g. "log.level" or "service.name") to understand the shape of the data.
+    - Use groupBy (e.g. "log.level" or "service.name") to understand the shape of the data.
     - You MUST call get_logs at least 3 times before moving on.
 
     ### Phase 4: Verify (Cross-check)
@@ -159,7 +159,7 @@ function buildLogSearchSystemPrompt(): string {
 
     To find them with \`get_logs\`:
     - Filter: \`error.exception.message: *\` (finds all documents with an exception message)
-    - Breakdown: breakdownField="service.name" to see which services have exceptions
+    - Breakdown: groupBy="service.name" to see which services have exceptions
 
     To analyze them with \`get_log_groups\`:
     - \`get_log_groups\` automatically categorizes exceptions into \`spanException\` and \`logException\` groups.
@@ -195,7 +195,7 @@ function buildLogSearchSystemPrompt(): string {
     **Phase 2**: run_log_rate_analysis(start="2026-02-25T13:50:00Z", end="2026-02-25T14:15:00Z")
     → Significant items: service.name="checkout" (p=0.001), error.message="OOMKilled" (p=0.003). Checkout is correlated with the spike.
 
-    **Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z", breakdownField="log.level")
+    **Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z", groupBy="log.level")
     → totalCount: 320. Histogram shows errors concentrated at 14:07. Samples show OOMKilled events.
 
     **Phase 3**: get_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (ERROR OR WARN)", start="2026-02-25T14:05:00Z", end="2026-02-25T14:10:00Z", bucketSize="1m")
@@ -210,10 +210,10 @@ function buildLogSearchSystemPrompt(): string {
 
     User: "Something is wrong with our microservices"
 
-    **Phase 1**: get_logs(start="now-30m", end="now", breakdownField="log.level")
+    **Phase 1**: get_logs(start="now-30m", end="now", groupBy="log.level")
     → totalCount: 15,000. Breakdown: INFO=12,000, unknown=2,800, WARN=200. No clear spike. The large "unknown" bucket is suspicious — few error-level logs but many unknowns.
 
-    **Phase 1 (follow-up)**: get_logs(start="now-30m", end="now", kqlFilter="error.exception.message: *", breakdownField="service.name")
+    **Phase 1 (follow-up)**: get_logs(start="now-30m", end="now", kqlFilter="error.exception.message: *", groupBy="service.name")
     → totalCount: 180. Breakdown: frontend=120, checkout=55, payment=5. Samples show error.exception.message: "rpc error: code = Unavailable" in checkout and "Error: request failed" in frontend.
 
     **Phase 3**: get_logs(kqlFilter="error.exception.message: * AND service.name: \\"checkout\\"", start="now-30m", end="now")

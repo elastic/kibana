@@ -5,12 +5,20 @@
  * 2.0.
  */
 
+import { calculateAuto } from '@kbn/calculate-auto';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { groupBy, mapValues, orderBy, sortBy, sumBy } from 'lodash';
+import moment from 'moment';
 import { parseDatemath } from '../../utils/time';
 import { MAX_CELL_VALUE_LENGTH } from './constants';
+
+export function getDefaultBucketSize(startMs: number, endMs: number): string {
+  const duration = moment.duration(endMs - startMs, 'ms');
+  const bucketSizeSeconds = Math.max(calculateAuto.near(30, duration)?.asSeconds() ?? 0, 1);
+  return `${bucketSizeSeconds}s`;
+}
 
 interface GetLogsParams {
   start: string;
@@ -19,14 +27,14 @@ interface GetLogsParams {
   kqlFilter?: string;
   limit: number;
   bucketSize: string;
-  breakdownField?: string;
+  groupBy?: string;
   fields: string[];
 }
 
 interface HistogramBucket {
   bucket: string;
   count: number;
-  breakdown?: string;
+  group?: string;
 }
 
 interface LogSample {
@@ -48,7 +56,7 @@ export async function getLogsHandler({
   esClient: ElasticsearchClient;
   params: GetLogsParams;
 }): Promise<GetLogsResult> {
-  const { start, end, index, kqlFilter, limit, bucketSize, breakdownField, fields } = params;
+  const { start, end, index, kqlFilter, limit, bucketSize, groupBy: groupByField, fields } = params;
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end, { roundUp: true });
@@ -63,7 +71,7 @@ export async function getLogsHandler({
     kqlFilter,
     limit,
     bucketSize,
-    breakdownField,
+    groupBy: groupByField,
   });
 
   const result = (await esClient.esql.query({
@@ -71,7 +79,7 @@ export async function getLogsHandler({
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
 
-  return parseForkedResult(result, breakdownField, fields);
+  return parseForkedResult(result, groupByField, fields);
 }
 
 function buildEsqlQuery({
@@ -81,7 +89,7 @@ function buildEsqlQuery({
   kqlFilter,
   limit,
   bucketSize,
-  breakdownField,
+  groupBy: groupByField,
 }: {
   startIso: string;
   endIso: string;
@@ -89,7 +97,7 @@ function buildEsqlQuery({
   kqlFilter?: string;
   limit: number;
   bucketSize: string;
-  breakdownField?: string;
+  groupBy?: string;
 }): string {
   const SAFE_INDEX_PATTERN = /^[a-zA-Z0-9_.*,:\-]+$/;
   if (!SAFE_INDEX_PATTERN.test(index)) {
@@ -102,8 +110,8 @@ function buildEsqlQuery({
     throw new Error(`Invalid bucket size: "${bucketSize}"`);
   }
 
-  const histogramByClause = breakdownField
-    ? `bucket = BUCKET(@timestamp, ${bucketSize}), ${sanitazeESQLInput(breakdownField)}`
+  const histogramByClause = groupByField
+    ? `bucket = BUCKET(@timestamp, ${bucketSize}), ${sanitazeESQLInput(groupByField)}`
     : `bucket = BUCKET(@timestamp, ${bucketSize})`;
 
   const filterClause = kqlFilter ? `| WHERE KQL("""${kqlFilter}""")` : '';
@@ -131,7 +139,7 @@ const EMPTY_RESULT: GetLogsResult = { histogram: [], totalCount: 0, samples: [] 
 
 function parseForkedResult(
   result: ESQLSearchResponse,
-  breakdownField: string | undefined,
+  groupByField: string | undefined,
   fields: string[]
 ): GetLogsResult {
   if (!result.columns?.length || !result.values?.length) {
@@ -145,18 +153,18 @@ function parseForkedResult(
 
   const resultsByForkId = splitResultByForkId(result, forkColumnIndex);
 
-  const histogram = parseHistogram(resultsByForkId[FORK_ID_HISTOGRAM], breakdownField);
+  const histogram = parseHistogram(resultsByForkId[FORK_ID_HISTOGRAM], groupByField);
   const totalCount = parseTotalCount(resultsByForkId[FORK_ID_TOTAL_COUNT]);
   const samples = parseSamples(resultsByForkId[FORK_ID_SAMPLES], fields);
 
   return { histogram, totalCount, samples };
 }
 
-const MAX_BREAKDOWN_VALUES = 10;
+const MAX_GROUP_BY_VALUES = 10;
 
 function parseHistogram(
   fork: ESQLSearchResponse | undefined,
-  breakdownField?: string
+  groupByField?: string
 ): HistogramBucket[] {
   if (!fork?.values.length) {
     return [];
@@ -164,61 +172,57 @@ function parseHistogram(
 
   const countColumnIndex = fork.columns.findIndex((column) => column.name === 'count');
   const bucketColumnIndex = fork.columns.findIndex((column) => column.name === 'bucket');
-  const breakdownColumnIndex = breakdownField
-    ? fork.columns.findIndex((column) => column.name === breakdownField)
+  const groupByColumnIndex = groupByField
+    ? fork.columns.findIndex((column) => column.name === groupByField)
     : -1;
 
   if (countColumnIndex < 0 || bucketColumnIndex < 0) {
     return [];
   }
 
-  if (breakdownColumnIndex < 0) {
+  if (groupByColumnIndex < 0) {
     return fork.values.map((row) => ({
       bucket: String(row[bucketColumnIndex] ?? ''),
       count: Number(row[countColumnIndex]) || 0,
     }));
   }
 
-  const topBreakdownValues = getTopBreakdownValues(
-    fork.values,
-    countColumnIndex,
-    breakdownColumnIndex
-  );
+  const topGroupByValues = getTopGroupByValues(fork.values, countColumnIndex, groupByColumnIndex);
 
   const topEntries = fork.values
-    .filter((row) => topBreakdownValues.has(String(row[breakdownColumnIndex] ?? 'unknown')))
+    .filter((row) => topGroupByValues.has(String(row[groupByColumnIndex] ?? 'unknown')))
     .map((row) => ({
       bucket: String(row[bucketColumnIndex] ?? ''),
       count: Number(row[countColumnIndex]) || 0,
-      breakdown: String(row[breakdownColumnIndex] ?? 'unknown'),
+      group: String(row[groupByColumnIndex] ?? 'unknown'),
     }));
 
   const otherRows = fork.values.filter(
-    (row) => !topBreakdownValues.has(String(row[breakdownColumnIndex] ?? 'unknown'))
+    (row) => !topGroupByValues.has(String(row[groupByColumnIndex] ?? 'unknown'))
   );
   const otherByBucket = groupBy(otherRows, (row) => String(row[bucketColumnIndex] ?? ''));
   const otherEntries = Object.entries(otherByBucket).map(([bucket, rows]) => ({
     bucket,
     count: sumBy(rows, (row) => Number(row[countColumnIndex]) || 0),
-    breakdown: '_other' as const,
+    group: '_other' as const,
   }));
 
   return sortBy([...topEntries, ...otherEntries], 'bucket');
 }
 
-function getTopBreakdownValues(
+function getTopGroupByValues(
   rows: unknown[][],
   countColumnIndex: number,
-  breakdownColumnIndex: number
+  groupByColumnIndex: number
 ): Set<string> {
-  const grouped = groupBy(rows, (row) => String(row[breakdownColumnIndex] ?? 'unknown'));
+  const grouped = groupBy(rows, (row) => String(row[groupByColumnIndex] ?? 'unknown'));
   const totalsByValue = mapValues(grouped, (groupRows) =>
     sumBy(groupRows, (row) => Number(row[countColumnIndex]) || 0)
   );
 
   return new Set(
     orderBy(Object.entries(totalsByValue), ([, total]) => total, 'desc')
-      .slice(0, MAX_BREAKDOWN_VALUES)
+      .slice(0, MAX_GROUP_BY_VALUES)
       .map(([key]) => key)
   );
 }

@@ -13,8 +13,9 @@ import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import { parseDatemath } from '../../utils/time';
 import { DEFAULT_KEEP_FIELDS, OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
-import { getLogsHandler } from './handler';
+import { getDefaultBucketSize, getLogsHandler } from './handler';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 
 const DEFAULT_TIME_RANGE = {
@@ -43,15 +44,16 @@ const getLogsSchema = z.object({
     .describe('Maximum number of log samples to return. Defaults to 10.'),
   bucketSize: z
     .string()
-    .default('5m')
+    .optional()
     .describe(
-      'Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". Defaults to "5m".'
+      'Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". ' +
+        'If not provided, automatically calculated from the time range to produce ~30 buckets.'
     ),
-  breakdownField: z
+  groupBy: z
     .string()
     .optional()
     .describe(
-      'Optional field to break down the histogram by. ' +
+      'Field to group the histogram by. ' +
         'Examples: "log.level", "service.name", "kubernetes.namespace". ' +
         'Adds a second dimension to the trend for richer analysis.'
     ),
@@ -83,7 +85,7 @@ How to use (the "funnel" workflow):
 2. Review the totalCount and samples — identify noise (health checks, cron jobs, verbose info logs)
 3. Call again with NOT clauses added to kqlFilter to exclude noise
 4. Repeat 3-5 times until samples show the root cause
-5. Use breakdownField (e.g. "log.level") to slice the histogram for richer trend analysis
+5. Use groupBy (e.g. "log.level") to slice the histogram for richer trend analysis
 
 When NOT to use:
 - For log pattern grouping/categorization, use get_log_groups
@@ -100,6 +102,11 @@ When NOT to use:
     handler: async (toolParams, { esClient }) => {
       try {
         const logIndexPatterns = await getLogsIndices({ core, logger });
+
+        const startMs = parseDatemath(toolParams.start)!;
+        const endMs = parseDatemath(toolParams.end, { roundUp: true })!;
+        const bucketSize = toolParams.bucketSize ?? getDefaultBucketSize(startMs, endMs);
+
         const result = await getLogsHandler({
           esClient: esClient.asCurrentUser,
           params: {
@@ -108,8 +115,8 @@ When NOT to use:
             index: toolParams.index ?? logIndexPatterns.join(','),
             kqlFilter: toolParams.kqlFilter,
             limit: toolParams.limit,
-            bucketSize: toolParams.bucketSize,
-            breakdownField: toolParams.breakdownField,
+            bucketSize,
+            groupBy: toolParams.groupBy,
             fields: toolParams.fields,
           },
         });
