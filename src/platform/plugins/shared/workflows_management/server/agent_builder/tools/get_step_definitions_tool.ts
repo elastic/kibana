@@ -19,8 +19,9 @@ import {
 } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
-import { getAllConnectors } from '../../../common/schema';
+import { addDynamicConnectorsToCache, getAllConnectors } from '../../../common/schema';
 import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 export const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
@@ -105,7 +106,8 @@ function matchesSearch(search: string, ...fields: Array<string | undefined | nul
 }
 
 export function registerGetStepDefinitionsTool(
-  agentBuilder: AgentBuilderPluginSetupContract
+  agentBuilder: AgentBuilderPluginSetupContract,
+  api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
     id: GET_STEP_DEFINITIONS_TOOL_ID,
@@ -151,8 +153,18 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
       },
       cacheMode: 'space',
     },
-    handler: async ({ stepType, search, category, includeFullSchema }) => {
+    handler: async (
+      { stepType, search, category, includeFullSchema },
+      { spaceId, request }: { spaceId: string; request: unknown }
+    ) => {
       const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
+      const { connectorsByType } = await api.getAvailableConnectors(spaceId, request as never);
+      const enabledConnectorTypes = Object.fromEntries(
+        Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
+      );
+
+      addDynamicConnectorsToCache(enabledConnectorTypes);
+
       const allConnectors = getAllConnectors();
 
       const connectorDefinitions = allConnectors

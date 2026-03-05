@@ -15,6 +15,7 @@ jest.mock('../../../common/schema', () => ({
     const { getElasticsearchConnectors: getEs } = jest.requireActual('@kbn/workflows');
     return getEs();
   },
+  addDynamicConnectorsToCache: jest.fn(),
 }));
 
 const MAX_CHARS_PER_STEP = 5000;
@@ -30,7 +31,11 @@ describe('get_step_definitions output size', () => {
         }),
       },
     } as any;
-    registerGetStepDefinitionsTool(agentBuilder);
+    registerGetStepDefinitionsTool(agentBuilder, {
+      getAvailableConnectors: jest
+        .fn()
+        .mockResolvedValue({ connectorsByType: {}, totalConnectors: 0 }),
+    } as any);
   });
 
   const esStepTypes = ['elasticsearch.search', 'elasticsearch.bulk', 'elasticsearch.index'];
@@ -45,7 +50,10 @@ describe('get_step_definitions output size', () => {
         return;
       }
 
-      const result = await registeredTool.handler({ stepType } as any, {} as any);
+      const result = await registeredTool.handler(
+        { stepType } as any,
+        { spaceId: 'default', request: {} } as any
+      );
       const data = result.results[0].data as any;
       const json = JSON.stringify(data);
 
@@ -56,7 +64,10 @@ describe('get_step_definitions output size', () => {
   it.each(builtInIds)(
     'compact output for built-in step "%s" is under the character threshold',
     async (stepType) => {
-      const result = await registeredTool.handler({ stepType } as any, {} as any);
+      const result = await registeredTool.handler(
+        { stepType } as any,
+        { spaceId: 'default', request: {} } as any
+      );
       const data = result.results[0].data as any;
       const json = JSON.stringify(data);
 
@@ -65,7 +76,10 @@ describe('get_step_definitions output size', () => {
   );
 
   it('compact output for all ES connectors combined (condensed list) is under 5000 chars', async () => {
-    const result = await registeredTool.handler({ category: 'elasticsearch' } as any, {} as any);
+    const result = await registeredTool.handler(
+      { category: 'elasticsearch' } as any,
+      { spaceId: 'default', request: {} } as any
+    );
     const data = result.results[0].data as any;
     const json = JSON.stringify(data);
 

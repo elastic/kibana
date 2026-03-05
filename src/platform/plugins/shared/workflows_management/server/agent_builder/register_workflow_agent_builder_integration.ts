@@ -33,7 +33,7 @@ export function registerWorkflowAgentBuilderIntegration({
   logger.debug('Registering workflow Agent Builder integration components');
 
   registerValidateWorkflowTool(agentBuilder, api);
-  registerGetStepDefinitionsTool(agentBuilder);
+  registerGetStepDefinitionsTool(agentBuilder, api);
   registerGetTriggerDefinitionsTool(agentBuilder);
   registerGetConnectorsTool(agentBuilder, api);
   registerListWorkflowsTool(agentBuilder, api);
