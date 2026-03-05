@@ -30,6 +30,11 @@ interface PanelCommonProps extends PropsWithChildren {
   className?: string;
 }
 
+interface PanelBodyProps extends PanelCommonProps {
+  /** @default s */
+  padding?: 's' | false;
+}
+
 interface PanelSpacingProps {
   /** @default both */
   spacingSide?: 'block' | 'inline' | 'both' | 'none';
@@ -92,11 +97,11 @@ export const SubPanelHeading = ({ className, children }: PanelCommonProps) => {
  * Scrollable body section of a panel. Sits between `PanelHeader` and `PanelFooter`.
  * Will fill the vertical space (flew-grow: 1), and can scroll.
  */
-export const PanelBody = ({ className, children }: PanelCommonProps) => {
+export const PanelBody = ({ className, children, padding = 's' }: PanelBodyProps) => {
   const euiThemeContext = useEuiTheme();
 
   return (
-    <div css={panelBodyStyles(euiThemeContext).root} className={className}>
+    <div css={panelBodyStyles(euiThemeContext, padding).root} className={className}>
       {children}
     </div>
   );

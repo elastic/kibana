@@ -7,36 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+
 import { useHourStyles } from './hour.styles';
 
 interface HourProps {
   children: ReactNode;
   onClick: () => void;
   isSelected?: boolean;
+  /**
+   * When true, the selected slot is a rounded approximation of a more precise time.
+   * Renders with a light primary background instead of a filled one.
+   * @default false
+   */
+  isApproximate?: boolean;
 }
 
-export function Hour({ children, onClick, isSelected = false }: HourProps) {
+export function Hour({ children, onClick, isSelected = false, isApproximate = false }: HourProps) {
   const styles = useHourStyles();
 
-  const commonProps = useMemo(
-    () => ({
-      size: 's' as const,
-      textProps: false as const,
-      onClick,
-    }),
-    [onClick]
-  );
+  if (isSelected && isApproximate) {
+    return (
+      <EuiButton
+        size="s"
+        textProps={false}
+        onClick={onClick}
+        fullWidth={false}
+        color="primary"
+        css={styles.approximateButton}
+        aria-current="true"
+        data-approximate="true"
+      >
+        {children}
+      </EuiButton>
+    );
+  }
 
   if (isSelected) {
     return (
       <EuiButton
-        {...commonProps}
+        size="s"
+        textProps={false}
+        onClick={onClick}
         fill
         fullWidth={false}
         color="primary"
         css={styles.selectedButton}
+        aria-current="true"
       >
         {children}
       </EuiButton>
@@ -44,7 +62,7 @@ export function Hour({ children, onClick, isSelected = false }: HourProps) {
   }
 
   return (
-    <EuiButtonEmpty {...commonProps} css={styles.emptyButton}>
+    <EuiButtonEmpty size="s" textProps={false} onClick={onClick} css={styles.emptyButton}>
       {children}
     </EuiButtonEmpty>
   );

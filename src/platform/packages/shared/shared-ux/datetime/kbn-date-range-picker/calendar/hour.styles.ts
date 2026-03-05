@@ -14,9 +14,9 @@ export const useHourStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const baseButton = css`
-    min-inline-size: 100%;
+    ${useEuiFontSize('xs')}
     min-height: ${euiTheme.size.l};
-    ${useEuiFontSize('s')};
+    min-inline-size: ${euiTheme.size.xxxl};
   `;
 
   const emptyButton = css`
@@ -33,5 +33,13 @@ export const useHourStyles = () => {
     color: ${euiTheme.colors.textInverse};
   `;
 
-  return { baseButton, emptyButton, selectedButton };
+  /** Shown when a half-hour slot is the rounded approximation of a more precise time. */
+  const approximateButton = css`
+    ${baseButton};
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
+    color: ${euiTheme.colors.textPrimary};
+    border: none;
+  `;
+
+  return { baseButton, emptyButton, selectedButton, approximateButton };
 };

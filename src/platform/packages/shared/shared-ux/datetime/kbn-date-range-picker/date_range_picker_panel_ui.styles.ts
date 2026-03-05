@@ -69,13 +69,13 @@ export const subPanelHeadingStyles = ({ euiTheme }: UseEuiTheme) => {
   return { root, button };
 };
 
-export const panelBodyStyles = (euiThemeContext: UseEuiTheme) => {
+export const panelBodyStyles = (euiThemeContext: UseEuiTheme, padding: 's' | false = 's') => {
   const { euiTheme } = euiThemeContext;
   const root = css`
     flex-grow: 1;
     overflow-block: auto;
     ${euiScrollBarStyles(euiThemeContext)}
-    padding-inline: ${euiTheme.size.s};
+    padding-inline: ${padding === 's' ? euiTheme.size.s : 0};
 
     &:not(:first-child) {
       border-block-start: ${euiTheme.border.thin};

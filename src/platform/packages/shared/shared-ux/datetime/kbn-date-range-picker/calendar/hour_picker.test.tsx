@@ -11,25 +11,26 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
-import { HourPicker } from './hour_picker';
+import { HourPicker, HOURS } from './hour_picker';
 
 describe('HourPicker', () => {
-  it('renders 48 half-hour options', () => {
+  it('renders all 48 half-hour options from 00:00 to 23:30', () => {
     renderWithEuiTheme(<HourPicker selectedHour={undefined} onHourChange={() => {}} />);
 
-    expect(screen.getAllByRole('button')).toHaveLength(48);
+    const labels = screen.getAllByRole('button').map((btn) => btn.textContent);
+    expect(labels).toEqual(HOURS);
   });
 
-  it('renders selected hour as primary EuiButton', () => {
-    renderWithEuiTheme(<HourPicker selectedHour="3:30" onHourChange={() => {}} />);
+  it('marks the selected hour with aria-current', () => {
+    renderWithEuiTheme(<HourPicker selectedHour="03:30" onHourChange={() => {}} />);
 
-    expect(screen.getByRole('button', { name: '3:30' }).className).toContain('euiButton');
+    expect(screen.getByRole('button', { name: '03:30' })).toHaveAttribute('aria-current', 'true');
   });
 
-  it('renders non-selected hours as EuiButtonEmpty', () => {
-    renderWithEuiTheme(<HourPicker selectedHour="3:30" onHourChange={() => {}} />);
+  it('does not mark unselected hours with aria-current', () => {
+    renderWithEuiTheme(<HourPicker selectedHour="03:30" onHourChange={() => {}} />);
 
-    expect(screen.getByRole('button', { name: '3:00' }).className).toContain('euiButtonEmpty');
+    expect(screen.getByRole('button', { name: '03:00' })).not.toHaveAttribute('aria-current');
   });
 
   it('calls onHourChange with clicked hour value', () => {
@@ -41,4 +42,3 @@ describe('HourPicker', () => {
     expect(onHourChange).toHaveBeenCalledWith('10:30');
   });
 });
-

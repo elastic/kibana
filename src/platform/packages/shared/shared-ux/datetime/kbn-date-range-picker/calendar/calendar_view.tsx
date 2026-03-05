@@ -7,85 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
-import { useEuiTheme } from '@elastic/eui';
+import 'react-day-picker/style.css';
+
+import { useCalendarViewStyles } from './calendar_view.styles';
 
 interface CalendarViewProps {
+  /** The month to display in the calendar. */
   month: Date;
+  /** The range to display in the calendar. */
   range: DateRange | undefined;
+  /** The function to set the range in the calendar. */
   setRange: (range?: DateRange) => void;
 }
 
+/**
+ * The calendar view component. Displays a calendar with the given month and range.
+ * Based on `react-day-picker`.
+ */
 export function CalendarView({ month, range, setRange }: CalendarViewProps) {
-  const { euiTheme } = useEuiTheme();
-
-  const dayPickerStyles = useMemo(() => {
-    return {
-      root: {
-        width: '100%',
-        padding: '0 24px',
-      },
-      months: {
-        width: '100%',
-      },
-      month: {
-        width: '100%',
-        margin: 0,
-      },
-      month_caption: {
-        position: 'sticky',
-        top: 0,
-        backgroundColor: euiTheme.colors.emptyShade,
-        zIndex: 1,
-        padding: `${euiTheme.size.m} 0`,
-      },
-      caption_label: {
-        fontSize: euiTheme.font.scale.l.fontSize,
-        fontWeight: euiTheme.font.weight.bold,
-        lineHeight: euiTheme.font.scale.l.lineHeight,
-      },
-      weekdays: {
-        marginBottom: euiTheme.size.s,
-      },
-      weekday: {
-        color: euiTheme.colors.subduedText,
-        fontSize: euiTheme.font.scale.s.fontSize,
-        fontWeight: euiTheme.font.weight.regular,
-        textAlign: 'center' as const,
-      },
-      week: {
-        marginBottom: euiTheme.size.xs,
-      },
-      day: {
-        padding: 0,
-      },
-      day_button: {
-        width: '100%',
-        minHeight: euiTheme.size.xxxl,
-        border: 'none',
-        borderRadius: euiTheme.border.radius.medium,
-        transition: `background-color ${euiTheme.animation.fast} ease-in-out`,
-      },
-      range_start: {
-        backgroundColor: euiTheme.colors.primary,
-        color: euiTheme.colors.ghost,
-        borderRadius: `${euiTheme.border.radius.medium} 0 0 ${euiTheme.border.radius.medium}`,
-      },
-      range_end: {
-        backgroundColor: euiTheme.colors.primary,
-        color: euiTheme.colors.ghost,
-        borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0`,
-      },
-      range_middle: {
-        backgroundColor: euiTheme.colors.lightestShade,
-      },
-      today: {
-        border: `2px solid ${euiTheme.colors.primary}`,
-        fontWeight: euiTheme.font.weight.bold,
-      },
-    };
-  }, [euiTheme]);
+  const styles = useCalendarViewStyles();
 
   return (
     <DayPicker
@@ -96,7 +38,7 @@ export function CalendarView({ month, range, setRange }: CalendarViewProps) {
       required={false}
       disableNavigation
       hideNavigation
-      styles={dayPickerStyles}
+      styles={styles.dayPicker}
     />
   );
 }

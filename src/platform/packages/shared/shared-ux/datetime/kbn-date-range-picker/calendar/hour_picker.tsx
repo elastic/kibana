@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { Hour } from './hour';
@@ -16,28 +16,62 @@ import { hourPickerStyles } from './hour_picker.styles';
 interface HourPickerProps {
   selectedHour: string | undefined;
   onHourChange: (hour: string) => void;
+  /** Accessible label for the picker group. @default "Select hour" */
+  'aria-label'?: string;
+  /**
+   * When true, the selected slot is a rounded approximation — renders with a light primary
+   * background to signal the picker is displaying an approximate, not an exact, value.
+   * @default false
+   */
+  isApproximate?: boolean;
 }
 
-const ONE_DIGIT_INDICES = 20;
-const HOURS_IN_DAY = 24;
-const HOURS = Array.from({ length: HOURS_IN_DAY * 2 }, (_, index) => {
-  const prefix = index < ONE_DIGIT_INDICES ? '0' : '';
-  const hour = Math.floor(index / 2);
-  const minute = index % 2 === 0 ? '00' : '30';
-  return `${prefix}${hour}:${minute}`;
+export interface HourPickerHandle {
+  scrollToSelected: () => void;
+}
+
+export const HOURS = Array.from({ length: 48 }, (_, i) => {
+  const hour = Math.floor(i / 2)
+    .toString()
+    .padStart(2, '0');
+  const minute = i % 2 === 0 ? '00' : '30';
+  return `${hour}:${minute}`;
 });
 
-export function HourPicker({ selectedHour, onHourChange }: HourPickerProps) {
+export const HourPicker = forwardRef<HourPickerHandle, HourPickerProps>(function HourPicker(
+  { selectedHour, onHourChange, 'aria-label': ariaLabel = 'Select hour', isApproximate = false },
+  ref
+) {
   const euiThemeContext = useEuiTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
   const styles = hourPickerStyles(euiThemeContext);
 
+  const scrollToSelected = () => {
+    requestAnimationFrame(() => {
+      containerRef.current
+        ?.querySelector<HTMLElement>('[aria-current="true"]')
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  };
+
+  useImperativeHandle(ref, () => ({ scrollToSelected }));
+
+  useEffect(() => {
+    scrollToSelected();
+  }, []);
+
   return (
-    <div css={styles.container}>
+    <div ref={containerRef} css={styles.container} role="group" aria-label={ariaLabel}>
       {HOURS.map((h) => (
-        <Hour key={h} onClick={() => onHourChange(h)} isSelected={h === selectedHour}>
+        <Hour
+          key={h}
+          onClick={() => onHourChange(h)}
+          isSelected={h === selectedHour}
+          isApproximate={isApproximate && h === selectedHour}
+        >
           {h}
         </Hour>
       ))}
     </div>
   );
-}
+});
