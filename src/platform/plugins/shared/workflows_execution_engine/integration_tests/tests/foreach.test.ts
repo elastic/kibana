@@ -285,6 +285,137 @@ steps:
     });
   });
 
+  describe('foreach with native YAML array', () => {
+    it('should resolve foreach.item for each element in a native array', async () => {
+      const yaml = `
+steps:
+  - name: nativeForeach
+    type: foreach
+    foreach:
+      - alpha
+      - beta
+      - gamma
+    steps:
+      - name: childStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Item: {{foreach.item}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      ['alpha', 'beta', 'gamma'].forEach((item) => {
+        expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: FakeConnectors.slack1.id,
+            params: { message: `Item: ${item}` },
+          })
+        );
+      });
+    });
+
+    it('should resolve foreach.item for each element in a native inline array', async () => {
+      const yaml = `
+steps:
+  - name: nativeForeach
+    type: foreach
+    foreach: ["alpha", "beta", "gamma"]
+    steps:
+      - name: childStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Item: {{foreach.item}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      ['alpha', 'beta', 'gamma'].forEach((item) => {
+        expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: FakeConnectors.slack1.id,
+            params: { message: `Item: ${item}` },
+          })
+        );
+      });
+    });
+
+    it('should resolve foreach.index and foreach.total for a native array', async () => {
+      const yaml = `
+steps:
+  - name: nativeForeach
+    type: foreach
+    foreach:
+      - x
+      - y
+    steps:
+      - name: childStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'idx:{{foreach.index}};total:{{foreach.total}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      [0, 1].forEach((index) => {
+        expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: FakeConnectors.slack1.id,
+            params: { message: `idx:${index};total:2` },
+          })
+        );
+      });
+    });
+
+    it('should resolve foreach.index and foreach.total for a native inline array', async () => {
+      const yaml = `
+steps:
+  - name: nativeForeach
+    type: foreach
+      foreach: ["x", "y"]
+    steps:
+      - name: childStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'idx:{{foreach.index}};total:{{foreach.total}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      [0, 1].forEach((index) => {
+        expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: FakeConnectors.slack1.id,
+            params: { message: `idx:${index};total:2` },
+          })
+        );
+      });
+    });
+  });
+
   describe.each(['${{inputs.notExistingInput}}', 'not array', '["broken", json]'])(
     'when invalid array is provided to foreach (%s)',
     (outerArrayTestCase) => {
