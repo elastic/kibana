@@ -31,6 +31,7 @@ export type LlmFeature = Pick<
   | 'evidence'
   | 'tags'
   | 'meta'
+  | 'filter'
 >;
 
 export function resolveFeatureTypeFilters<T extends string>(
