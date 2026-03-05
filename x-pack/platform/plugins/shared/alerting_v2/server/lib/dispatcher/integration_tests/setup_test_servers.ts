@@ -21,7 +21,15 @@ export async function setupTestServers(settings = {}) {
   const esServer = await startES();
 
   const startKibana = async () => {
-    const root = createRootWithCorePlugins(settings, { oss: false });
+    const root = createRootWithCorePlugins(
+      {
+        xpack: {
+          task_manager: { unsafe: { exclude_task_types: ['alerting_v2:dispatcher'] } },
+        },
+        ...settings,
+      },
+      { oss: false }
+    );
 
     await root.preboot();
     const coreSetup = await root.setup();
