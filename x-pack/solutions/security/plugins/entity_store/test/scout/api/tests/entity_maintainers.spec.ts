@@ -70,7 +70,7 @@ const getRoleWithoutSavedObjectCreate = () =>
   buildRoleDescriptor({ withSavedObjectCreate: false });
 
 apiTest.describe(
-  'Entity Store entity maintainers init',
+  'Entity Store entity maintainers',
   { tag: ENTITY_STORE_TAGS },
   () => {
     apiTest.describe('privilege checks', () => {
@@ -173,7 +173,7 @@ apiTest.describe(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
           expect(maintainerBefore).toBeDefined();
-          expect(maintainerBefore.taskStatus).toBe('not_started');
+          expect(maintainerBefore.taskStatus).toBe('never_started');
 
           const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
             headers: defaultHeaders,
@@ -334,6 +334,85 @@ apiTest.describe(
           expect(initResponse.body.message).toBe(
             'Entity store is not installed. Install the entity store first, then initialize entity maintainers.'
           );
+        }
+      );
+    });
+
+    apiTest.describe('run now', () => {
+      let defaultHeaders: Record<string, string>;
+
+      apiTest.beforeAll(async ({ samlAuth }) => {
+        const credentials = await samlAuth.asInteractiveUser('admin');
+        defaultHeaders = {
+          ...credentials.cookieHeader,
+          ...COMMON_HEADERS,
+        };
+      });
+
+      apiTest.beforeEach(async ({ kbnClient }) => {
+        await kbnClient.uiSettings.update({
+          [FF_ENABLE_ENTITY_STORE_V2]: true,
+        });
+      });
+
+      apiTest.afterEach(async ({ apiClient }) => {
+        await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        });
+      });
+
+      apiTest(
+        'Should return 200 and run maintainer immediately after install and init',
+        async ({ apiClient }) => {
+          await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+            headers: defaultHeaders,
+            responseType: 'json',
+            body: {},
+          });
+          await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+            headers: defaultHeaders,
+            responseType: 'json',
+            body: {},
+          });
+
+          const runResponse = await apiClient.post(
+            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN(REGISTERED_MAINTAINER_ID),
+            {
+              headers: defaultHeaders,
+              responseType: 'json',
+              body: {},
+            }
+          );
+
+          expect(runResponse.statusCode).toBe(200);
+          expect(runResponse.body).toMatchObject({ ok: true });
+        }
+      );
+
+      apiTest(
+        'Should return 400 when maintainer id is not found',
+        async ({ apiClient }) => {
+          await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+            headers: defaultHeaders,
+            responseType: 'json',
+            body: {},
+          });
+
+          const runResponse = await apiClient.post(
+            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN('nonexistent-maintainer-id'),
+            {
+              headers: defaultHeaders,
+              responseType: 'json',
+              body: {},
+            }
+          );
+
+          expect(runResponse.statusCode).toBe(400);
+          expect(runResponse.body).toMatchObject({
+            message: 'Entity maintainer not found',
+          });
         }
       );
     });

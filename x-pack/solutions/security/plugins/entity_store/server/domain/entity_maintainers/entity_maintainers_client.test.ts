@@ -81,6 +81,7 @@ function createClient(overrides?: {
 }) {
   const taskManager = {
     get: jest.fn(),
+    runSoon: jest.fn().mockResolvedValue({ id: 'id:default', forced: false }),
     ...overrides?.taskManager,
   } as unknown as TaskManagerStartContract;
 
@@ -136,6 +137,42 @@ describe('EntityMaintainersClient', () => {
       const request = createMockRequest();
 
       await expect(client.start('maintainer-a', request)).rejects.toThrow('start failed');
+    });
+  });
+
+  describe('runNow', () => {
+    it('should return without calling runSoon when id is not in registry', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(false);
+      const runSoonMock = jest.fn().mockResolvedValue({ id: 'id:default', forced: false });
+      const client = createClient({ taskManager: { runSoon: runSoonMock } });
+      const request = createMockRequest();
+
+      await client.runNow('unknown-id', request);
+
+      expect(entityMaintainersRegistry.hasId).toHaveBeenCalledWith('unknown-id');
+      expect(runSoonMock).not.toHaveBeenCalled();
+    });
+
+    it('should call taskManager.runSoon with task id when id is in registry', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const runSoonMock = jest.fn().mockResolvedValue({ id: 'id:default', forced: false });
+      const client = createClient({ taskManager: { runSoon: runSoonMock } });
+      const request = createMockRequest();
+
+      await client.runNow('maintainer-a', request);
+
+      expect(getTaskId).toHaveBeenCalledWith('maintainer-a', 'default');
+      expect(runSoonMock).toHaveBeenCalledWith('maintainer-a:default');
+    });
+
+    it('should propagate error when runSoon throws', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const client = createClient({
+        taskManager: { runSoon: jest.fn().mockRejectedValue(new Error('runSoon failed')) },
+      });
+      const request = createMockRequest();
+
+      await expect(client.runNow('maintainer-a', request)).rejects.toThrow('runSoon failed');
     });
   });
 

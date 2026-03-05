@@ -116,6 +116,20 @@ export class EntityMaintainersClient {
     }
   }
 
+  public async runNow(id: string, _request?: KibanaRequest): Promise<void> {
+    if (!entityMaintainersRegistry.hasId(id)) {
+      return;
+    }
+    this.logger.debug(`Run maintainer now invoked for id: ${id}`);
+    try {
+      const taskId = getTaskId(id, this.namespace);
+      await this.taskManager.runSoon(taskId);
+    } catch (error) {
+      this.logger.error(`Failed to run entity maintainer task: ${id}`, { error });
+      throw error;
+    }
+  }
+
   public async removeAll(): Promise<void> {
     this.logger.debug('Removing all entity maintainer tasks');
     try {
