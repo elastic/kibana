@@ -130,6 +130,10 @@ export const RecoveryBaseAndConditionField: React.FC<RecoveryBaseAndConditionFie
         label={i18n.translate('xpack.alertingV2.ruleForm.recoveryConditionLabel', {
           defaultMessage: 'Recovery condition',
         })}
+        labelTooltip={i18n.translate('xpack.alertingV2.ruleForm.recoveryConditionTooltip', {
+          defaultMessage:
+            'A recovery condition defines when an active alert should be resolved. It is evaluated against the same base query used for evaluation, unless a custom recovery base query is specified.',
+        })}
         helpText={i18n.translate('xpack.alertingV2.ruleForm.recoveryConditionHelpText', {
           defaultMessage:
             'Define a WHERE clause condition that determines when an alert should recover. Applied to the evaluation base query.',

@@ -89,6 +89,10 @@ export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
         label={i18n.translate('xpack.alertingV2.ruleForm.conditionLabel', {
           defaultMessage: 'Trigger condition',
         })}
+        labelTooltip={i18n.translate('xpack.alertingV2.ruleForm.conditionTooltip', {
+          defaultMessage:
+            'A trigger condition filters when alerts are created. If no condition is specified, an alert will be created for every result returned by the base query.',
+        })}
         helpText={
           !baseQuery
             ? i18n.translate('xpack.alertingV2.ruleForm.conditionDisabledHelp', {

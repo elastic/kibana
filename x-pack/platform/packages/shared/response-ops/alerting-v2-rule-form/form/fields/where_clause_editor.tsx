@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiPanel, EuiText } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
 import { suggest, validateQuery } from '@kbn/esql-language';
@@ -28,6 +28,8 @@ type WhereClauseFieldPath = 'evaluation.query.condition' | 'recoveryPolicy.query
 export interface WhereClauseEditorProps {
   name: WhereClauseFieldPath;
   label?: React.ReactNode;
+  /** Optional tooltip content displayed next to the label */
+  labelTooltip?: string;
   helpText?: React.ReactNode;
   fullWidth?: boolean;
   dataTestSubj?: string;
@@ -49,6 +51,7 @@ interface EditorFieldProps {
   value: string;
   onChange: (value: string) => void;
   label?: React.ReactNode;
+  labelTooltip?: string;
   helpText?: React.ReactNode;
   error?: { message?: string };
   fullWidth?: boolean;
@@ -64,6 +67,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
   value,
   onChange,
   label,
+  labelTooltip,
   helpText,
   error,
   fullWidth,
@@ -74,9 +78,21 @@ const EditorField: React.FC<EditorFieldProps> = ({
   baseQuery,
   queryCallbacks,
 }) => {
+  // Build the label element with optional tooltip
+  const labelElement = label ? (
+    labelTooltip ? (
+      <>
+        {label}
+        &nbsp;
+        <EuiIconTip position="right" type="question" content={labelTooltip} />
+      </>
+    ) : (
+      label
+    )
+  ) : undefined;
   // Convert stored value (WHERE x) to display value (| WHERE x)
   // Handle legacy values that might not have the prefix
-  const getDisplayValue = (storedValue: string): string => {
+  const getDisplayValue = useCallback((storedValue: string): string => {
     if (storedValue.startsWith(EDITOR_PREFIX)) {
       return storedValue; // Already has editor prefix
     }
@@ -84,20 +100,30 @@ const EditorField: React.FC<EditorFieldProps> = ({
       return '| ' + storedValue; // Add pipe to stored prefix
     }
     return EDITOR_PREFIX + storedValue; // Add full editor prefix
-  };
+  }, []);
 
   const displayValue = getDisplayValue(value);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const completionProviderDisposableRef = useRef<monaco.IDisposable | null>(null);
-  const eventListenerDisposableRef = useRef<monaco.IDisposable | null>(null);
+  // Flag to prevent re-entrant handleChange calls during prefix restoration
+  const isRestoringRef = useRef(false);
 
-  // Handle changes: convert editor value back to stored format
+  // Handle changes: convert editor value back to stored format.
+  // This is the SOLE protection mechanism for the "| WHERE " prefix.
+  // When the prefix is damaged (via Select All + Delete, Cut, drag-and-drop, etc.),
+  // we directly restore the Monaco model content rather than relying on React
+  // re-renders (which fail silently when the form value doesn't change).
   const handleChange = useCallback(
     (newValue: string) => {
+      // Skip re-entrant calls triggered by our own model restoration below
+      if (isRestoringRef.current) {
+        isRestoringRef.current = false;
+        return;
+      }
+
       if (newValue.startsWith(EDITOR_PREFIX)) {
-        // Strip the pipe to get "WHERE <condition>"
+        // Normal edit - prefix is intact. Extract the condition for storage.
         const storedValue = newValue.slice(2); // Remove "| "
-        // If WHERE clause is empty (just "WHERE " with optional whitespace), store as empty
         const condition = storedValue.replace(STORED_PREFIX, '').trim();
         if (!condition) {
           onChange('');
@@ -105,11 +131,25 @@ const EditorField: React.FC<EditorFieldProps> = ({
           onChange(storedValue);
         }
       } else {
-        // User tried to delete/modify the prefix - restore it
-        onChange(value);
+        // The prefix was damaged (e.g., Select All + Delete, Cut, paste-over).
+        // Directly restore the Monaco model to the last known good state.
+        // We cannot rely on onChange(value) because if the value hasn't changed,
+        // React won't re-render and Monaco stays in the broken state.
+        const editor = editorRef.current;
+        if (editor) {
+          const model = editor.getModel();
+          if (model) {
+            const correctValue = getDisplayValue(value);
+            isRestoringRef.current = true;
+            model.setValue(correctValue);
+            // Place cursor at the end of the prefix (start of editable area)
+            const prefixEnd = model.getPositionAt(EDITOR_PREFIX.length);
+            editor.setPosition(prefixEnd);
+          }
+        }
       }
     },
-    [onChange, value]
+    [onChange, value, getDisplayValue]
   );
 
   // Validate the query and show error markers
@@ -218,7 +258,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
   // Debounced validation trigger - auto-cancels on unmount
   const { run: triggerValidation } = useDebounceFn(handleValidation, { wait: 300 });
 
-  // Set up key event handler to prevent deletion within WHERE prefix
+  // Set up editor: register suggestion provider
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -231,27 +271,6 @@ const EditorField: React.FC<EditorFieldProps> = ({
         );
       }
 
-      // Intercept keyboard events to protect the WHERE prefix
-      eventListenerDisposableRef.current = editor.onKeyDown((e) => {
-        const position = editor.getPosition();
-        if (!position) return;
-
-        const cursorOffset = editor.getModel()?.getOffsetAt(position) ?? 0;
-        const prefixLength = EDITOR_PREFIX.length;
-
-        // Block backspace if cursor is at or before the end of WHERE prefix
-        if (e.keyCode === 1 /* Backspace */ && cursorOffset <= prefixLength) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-
-        // Block delete key if cursor is within the WHERE prefix
-        if (e.keyCode === 2 /* Delete */ && cursorOffset < prefixLength) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      });
-
       // Run initial validation
       triggerValidation();
     },
@@ -261,7 +280,6 @@ const EditorField: React.FC<EditorFieldProps> = ({
   // Clean up on unmount
   useEffect(() => {
     return () => {
-      eventListenerDisposableRef.current?.dispose();
       completionProviderDisposableRef.current?.dispose();
     };
   }, []);
@@ -275,7 +293,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
 
   return (
     <EuiFormRow
-      label={label}
+      label={labelElement}
       labelAppend={
         isOptional ? (
           <EuiText size="xs" color="subdued">
@@ -329,6 +347,9 @@ const EditorField: React.FC<EditorFieldProps> = ({
  *
  * The form stores the full WHERE clause including the prefix (e.g., "WHERE count > 100").
  * The editor ensures the WHERE prefix is always present and protected from deletion.
+ * Protection works by intercepting all content changes in handleChange rather than
+ * guarding individual keyboard events, so it catches Select All + Delete, Cut,
+ * paste-over, drag-and-drop, and all other edit methods.
  *
  * @example
  * ```tsx
@@ -344,6 +365,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
 export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
   name,
   label,
+  labelTooltip,
   helpText,
   fullWidth = true,
   dataTestSubj = 'whereClauseEditor',
@@ -436,14 +458,14 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
 
   // Validation function for form-level error reporting
   const validateWhereClause = useCallback(
-    async (value: string | undefined): Promise<string | boolean> => {
+    async (formValue: string | undefined): Promise<string | boolean> => {
       // Empty value is valid (optional field)
-      if (!value) {
+      if (!formValue) {
         return true;
       }
 
       // Extract the condition from the stored value
-      const condition = value.replace(STORED_PREFIX, '').trim();
+      const condition = formValue.replace(STORED_PREFIX, '').trim();
       if (!condition) {
         return true; // Empty condition is valid
       }
@@ -494,15 +516,15 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
 
     return {
       ...rules,
-      validate: async (value: string | undefined) => {
-        const esqlResult = await validateWhereClause(value);
+      validate: async (formValue: string | undefined) => {
+        const esqlResult = await validateWhereClause(formValue);
         if (esqlResult !== true) {
           return esqlResult;
         }
 
         // Run custom validation if provided
         if (validate) {
-          return validate(value);
+          return validate(formValue);
         }
 
         return true;
@@ -521,6 +543,7 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
             value={(value as string) || ''}
             onChange={onChange}
             label={label}
+            labelTooltip={labelTooltip}
             helpText={helpText}
             error={error}
             fullWidth={fullWidth}
