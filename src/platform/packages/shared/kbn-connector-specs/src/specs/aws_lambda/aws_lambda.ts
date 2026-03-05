@@ -140,6 +140,7 @@ async function signAwsRequest(
   const authorizationHeader = `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
 
   const headers: Record<string, string> = {
+    Host: host,
     'X-Amz-Date': amzDate,
     Authorization: authorizationHeader,
   };
@@ -151,14 +152,20 @@ async function signAwsRequest(
   return headers;
 }
 
+interface LambdaApiResponse {
+  data: unknown;
+  status: number;
+  headers?: Record<string, unknown>;
+}
+
 async function callLambdaApi(
   ctx: ActionContext,
   method: 'GET' | 'POST',
   path: string,
   queryParams: Record<string, string> = {},
-  body?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+  body?: string,
+  extraHeaders?: Record<string, string>
+): Promise<LambdaApiResponse> {
   const { region, accessKeyId, secretAccessKey } = ctx.config as {
     region: string;
     accessKeyId: string;
@@ -177,6 +184,10 @@ async function callLambdaApi(
     body
   );
 
+  if (extraHeaders) {
+    Object.assign(headers, extraHeaders);
+  }
+
   const sortedParams = Object.keys(queryParams).sort();
   const queryString = sortedParams
     .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
@@ -190,7 +201,7 @@ async function callLambdaApi(
         ? await ctx.client.post(url, body, { headers })
         : await ctx.client.get(url, { headers });
 
-    return response.data;
+    return response;
   } catch (error: unknown) {
     const err = error as {
       response?: {
@@ -294,10 +305,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({
         functionName: z.string().min(1).describe('Lambda function name or ARN'),
-        payload: z
-          .record(z.string(), z.unknown())
-          .optional()
-          .describe('JSON payload to send to the function'),
+        payload: z.unknown().optional().describe('JSON payload to send to the function'),
         invocationType: z
           .enum(['RequestResponse', 'Event', 'DryRun'])
           .default('RequestResponse')
@@ -307,7 +315,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as {
           functionName: string;
-          payload?: Record<string, unknown>;
+          payload?: unknown;
           invocationType?: 'RequestResponse' | 'Event' | 'DryRun';
           qualifier?: string;
         };
@@ -320,98 +328,42 @@ export const AwsLambdaConnector: ConnectorSpec = {
           queryParams.Qualifier = typedInput.qualifier;
         }
 
-        const body = typedInput.payload ? JSON.stringify(typedInput.payload) : '{}';
-
-        const { region, accessKeyId, secretAccessKey } = ctx.config as {
-          region: string;
-          accessKeyId: string;
-          secretAccessKey: string;
-        };
-        const host = `lambda.${region}.amazonaws.com`;
-
-        const headers = await signAwsRequest(
-          'POST',
-          host,
-          `/2015-03-31/functions/${encodeURIComponent(typedInput.functionName)}/invocations`,
-          queryParams,
-          accessKeyId,
-          secretAccessKey,
-          region,
-          body
-        );
-
+        const body = typedInput.payload !== undefined ? JSON.stringify(typedInput.payload) : '{}';
         const invocationType = typedInput.invocationType || 'RequestResponse';
-        headers['X-Amz-Invocation-Type'] = invocationType;
-        headers['X-Amz-Log-Type'] = 'Tail';
 
-        const sortedParams = Object.keys(queryParams).sort();
-        const queryString = sortedParams
-          .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
-          .join('&');
+        const response = await callLambdaApi(ctx, 'POST', path, queryParams, body, {
+          'X-Amz-Invocation-Type': invocationType,
+          'X-Amz-Log-Type': 'Tail',
+        });
 
-        const url = `https://${host}${path}${queryString ? `?${queryString}` : ''}`;
+        const logResult = response.headers?.['x-amz-log-result'];
+        const functionError = response.headers?.['x-amz-function-error'];
 
-        try {
-          const response = await ctx.client.post(url, body, { headers });
+        const result: Record<string, unknown> = {
+          statusCode: response.status,
+          functionName: typedInput.functionName,
+          invocationType,
+        };
 
-          const logResult = response.headers?.['x-amz-log-result'];
-          const functionError = response.headers?.['x-amz-function-error'];
-
-          const result: Record<string, unknown> = {
-            statusCode: response.status,
-            functionName: typedInput.functionName,
-            invocationType,
-          };
-
-          if (functionError) {
-            result.functionError = functionError;
-          }
-
-          if (logResult) {
-            try {
-              result.logResult = atob(logResult);
-            } catch {
-              result.logResult = logResult;
-            }
-          }
-
-          if (invocationType === 'Event') {
-            result.message = `Function ${typedInput.functionName} invoked asynchronously`;
-          } else {
-            result.payload = response.data;
-          }
-
-          return result;
-        } catch (error: unknown) {
-          const err = error as {
-            response?: {
-              status?: number;
-              statusText?: string;
-              data?: unknown;
-            };
-          };
-
-          let lambdaError: { type: string; message: string } | null = null;
-          if (err.response?.data && typeof err.response.data === 'object') {
-            const data = err.response.data as Record<string, unknown>;
-            if (data.Type || data.Message || data.message) {
-              lambdaError = {
-                type: (data.Type as string) || 'UnknownError',
-                message:
-                  (data.Message as string) ||
-                  (data.message as string) ||
-                  'An unknown error occurred',
-              };
-            }
-          }
-
-          if (lambdaError) {
-            throw new Error(`AWS Lambda Error [${lambdaError.type}]: ${lambdaError.message}`);
-          }
-          throw new Error(
-            `Lambda invocation failed: ${err.response?.statusText || (error as Error).message}`
-          );
+        if (functionError) {
+          result.functionError = functionError;
         }
+
+        if (logResult && typeof logResult === 'string') {
+          try {
+            result.logResult = atob(logResult);
+          } catch {
+            result.logResult = logResult;
+          }
+        }
+
+        if (invocationType === 'Event') {
+          result.message = `Function ${typedInput.functionName} invoked asynchronously`;
+        } else {
+          result.payload = response.data;
+        }
+
+        return result;
       },
     },
 
@@ -435,20 +387,12 @@ export const AwsLambdaConnector: ConnectorSpec = {
           queryParams.Marker = typedInput.marker;
         }
 
-        const response = await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', queryParams);
+        const { data } = await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', queryParams);
+        const body = data as Record<string, unknown>;
 
         return {
-          functions: (response.Functions || []).map(
-            (fn: {
-              FunctionName: string;
-              FunctionArn: string;
-              Runtime: string;
-              Description: string;
-              LastModified: string;
-              MemorySize: number;
-              Timeout: number;
-              Handler: string;
-            }) => ({
+          functions: ((body.Functions as Array<Record<string, unknown>>) || []).map(
+            (fn: Record<string, unknown>) => ({
               functionName: fn.FunctionName,
               functionArn: fn.FunctionArn,
               runtime: fn.Runtime,
@@ -459,7 +403,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
               handler: fn.Handler,
             })
           ),
-          nextMarker: response.NextMarker || null,
+          nextMarker: body.NextMarker || null,
         };
       },
     },
@@ -482,9 +426,10 @@ export const AwsLambdaConnector: ConnectorSpec = {
           queryParams.Qualifier = typedInput.qualifier;
         }
 
-        const response = await callLambdaApi(ctx, 'GET', path, queryParams);
+        const { data } = await callLambdaApi(ctx, 'GET', path, queryParams);
+        const body = data as Record<string, unknown>;
 
-        const config = response.Configuration || {};
+        const config = (body.Configuration as Record<string, unknown>) || {};
         return {
           functionName: config.FunctionName,
           functionArn: config.FunctionArn,
@@ -511,9 +456,10 @@ export const AwsLambdaConnector: ConnectorSpec = {
           message: 'Successfully connected to AWS Lambda API',
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         return {
           ok: false,
-          message: `Failed to connect: ${error}`,
+          message: `Failed to connect: ${errorMessage}`,
         };
       }
     },

@@ -15,15 +15,19 @@ export const getBaseConnectorType = (fullConnectorType: string): string => {
   } else if (fullConnectorType.startsWith('slack_api')) {
     // use the 'slack' icon for slack_api
     return 'slack';
-  } else {
-    if (fullConnectorType.startsWith('.')) {
-      return fullConnectorType.slice(1);
-    }
-    // For step types like "aws_lambda.invoke" or "virustotal.scanFileHash",
-    // extract the base connector name before the action suffix.
-    if (fullConnectorType.includes('.')) {
-      return fullConnectorType.split('.')[0];
-    }
+  } else if (fullConnectorType.startsWith('data.')) {
+    // data.* is a built-in step type, so we return it as-is
     return fullConnectorType;
+  } else {
+    let normalized = fullConnectorType;
+    if (normalized.startsWith('.')) {
+      normalized = normalized.slice(1);
+    }
+    // For step types like "aws_lambda.invoke", ".aws_lambda.invoke",
+    // or "virustotal.scanFileHash", extract the base connector name.
+    if (normalized.includes('.')) {
+      return normalized.split('.')[0];
+    }
+    return normalized;
   }
 };
