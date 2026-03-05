@@ -19,10 +19,6 @@ import {
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
-jest.mock('../../icons/assistant_icon/assistant_icon', () => ({
-  AssistantIcon: 'assistant-icon',
-}));
-
 describe('AIAssistantHeaderButton', () => {
   const mockCoreStart = coreMock.createStart();
 

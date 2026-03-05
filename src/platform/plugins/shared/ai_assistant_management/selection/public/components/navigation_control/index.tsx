@@ -107,18 +107,52 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     }
   }, [selectedType, applySelection]);
 
+  const AiAssistantHeaderButton = ({
+    children,
+    onClick,
+    'aria-label': ariaLabel,
+  }: React.PropsWithChildren<{
+    'aria-label': string;
+    onClick: () => void;
+  }>) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <AiButton
+          onClick={onClick}
+          iconType="aiAssistantLogo"
+          variant="base"
+          size="s"
+          data-test-subj="aiAssistantHeaderButton"
+        >
+          {children}
+        </AiButton>
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <AiButton
+          iconOnly
+          iconType="aiAssistantLogo"
+          onClick={onClick}
+          aria-label={ariaLabel}
+          variant="base"
+          size="s"
+          data-test-subj="aiAssistantHeaderButtonIcon"
+        />
+      </EuiShowFor>
+    </>
+  );
+
   return (
     <>
-      <AIAssistantButton
+      <AiAssistantHeaderButton
+        onClick={() => setModalOpen(true)}
         aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
           defaultMessage: 'Open the AI Assistant selector',
         })}
-        onClick={() => setModalOpen(true)}
       >
         {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
           defaultMessage: 'AI Assistant',
         })}
-      </AIAssistantButton>
+      </AiAssistantHeaderButton>
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>
@@ -297,36 +331,3 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     </>
   );
 };
-
-const AIAssistantButton = ({
-  children,
-  ...rest
-}: React.PropsWithChildren<{
-  'aria-label': string;
-  onClick: () => void;
-}>) => (
-  <>
-    <EuiShowFor sizes={['m', 'l', 'xl']}>
-      <AiButton
-        {...rest}
-        iconType="aiAssistantLogo"
-        variant="base"
-        size="s"
-        data-test-subj="aiAssistantHeaderButton"
-      >
-        {children}
-      </AiButton>
-    </EuiShowFor>
-    <EuiShowFor sizes={['xs', 's']}>
-      <AiButton
-        iconOnly
-        iconType="aiAssistantLogo"
-        onClick={rest.onClick}
-        aria-label={rest['aria-label']}
-        variant="base"
-        size="s"
-        data-test-subj="aiAssistantHeaderButtonIcon"
-      />
-    </EuiShowFor>
-  </>
-);

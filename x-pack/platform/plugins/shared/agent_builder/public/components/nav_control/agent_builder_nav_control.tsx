@@ -72,6 +72,40 @@ export function AgentBuilderNavControl() {
     </div>
   );
 
+  const AgentBuilderButton = ({
+    children,
+    onClick,
+    'aria-label': ariaLabel,
+  }: React.PropsWithChildren<{
+    'aria-label': string;
+    onClick: () => void;
+  }>) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <AiButton
+          onClick={onClick}
+          iconType="productAgent"
+          variant="base"
+          size="s"
+          data-test-subj="AgentBuilderNavControlButton"
+        >
+          {children}
+        </AiButton>
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <AiButton
+          iconOnly
+          iconType="productAgent"
+          onClick={onClick}
+          aria-label={ariaLabel}
+          size="s"
+          variant="base"
+          data-test-subj="AgentBuilderNavControlButtonIcon"
+        />
+      </EuiShowFor>
+    </>
+  );
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
@@ -91,39 +125,6 @@ export function AgentBuilderNavControl() {
     </>
   );
 }
-
-const AgentBuilderButton = ({
-  children,
-  ...rest
-}: React.PropsWithChildren<{
-  'aria-label': string;
-  onClick: () => void;
-}>) => (
-  <>
-    <EuiShowFor sizes={['m', 'l', 'xl']}>
-      <AiButton
-        {...rest}
-        iconType="productAgent"
-        variant="base"
-        size="s"
-        data-test-subj="AgentBuilderNavControlButton"
-      >
-        {children}
-      </AiButton>
-    </EuiShowFor>
-    <EuiShowFor sizes={['xs', 's']}>
-      <AiButton
-        iconOnly
-        iconType="productAgent"
-        onClick={rest.onClick}
-        aria-label={rest['aria-label']}
-        size="s"
-        variant="base"
-        data-test-subj="AgentBuilderNavControlButtonIcon"
-      />
-    </EuiShowFor>
-  </>
-);
 
 const buttonLabel = i18n.translate(
   'xpack.agentBuilder.navControl.openTheAgentBuilderSidebarLabel',
