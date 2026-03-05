@@ -10,7 +10,6 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import { URL } from 'url';
-import type { Client } from '@elastic/elasticsearch';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import type { Root } from '@kbn/core-root-server-internal';
@@ -247,96 +246,5 @@ describe('SOR - esql API', () => {
         pipeline: '| LIMIT 10',
       })
     ).rejects.toThrow('options.namespaces cannot be an empty array');
-  });
-
-  describe('privilege escalation via ENRICH', () => {
-    // The saved objects client uses the kibana system user, which has elevated
-    // privileges. ENRICH joins each row against an enrich index — data that may
-    // be invisible to the end user but accessible to the system user.
-    //
-    // These tests prove the security hole exists: sensitive data from an enrich
-    // policy is surfaced through the saved objects esql method.
-
-    // Use the superuser ES client to set up the enrich policy (the kibana
-    // system user doesn't have permissions to create arbitrary indices or
-    // enrich policies). esServer.es.getClient() returns a superuser client.
-    let superuserClient: Client;
-
-    beforeAll(async () => {
-      superuserClient = esServer.es.getClient();
-
-      // 1. Create a source index with "sensitive" data that a normal end user
-      //    would not have access to (e.g., salary, SSN).
-      await superuserClient.bulk({
-        index: 'sensitive_employee_data',
-        refresh: true,
-        operations: [
-          { index: {} },
-          { email: 'john.doe@example.com', salary: 150000, ssn: '123-45-6789' },
-          { index: {} },
-          { email: 'jane.doe@example.com', salary: 120000, ssn: '987-65-4321' },
-          { index: {} },
-          { email: 'alice.smith@example.com', salary: 95000, ssn: '555-12-3456' },
-        ],
-      });
-
-      // 2. Create an enrich policy that exposes salary and SSN by email match.
-      await superuserClient.enrich.putPolicy({
-        name: 'sensitive_employee_policy',
-        match: {
-          indices: 'sensitive_employee_data',
-          match_field: 'email',
-          enrich_fields: ['salary', 'ssn'],
-        },
-      });
-
-      // 3. Execute the policy to materialise the enrich index.
-      await superuserClient.enrich.executePolicy({
-        name: 'sensitive_employee_policy',
-        wait_for_completion: true,
-      });
-    });
-
-    afterAll(async () => {
-      await superuserClient.enrich
-        .deletePolicy({ name: 'sensitive_employee_policy' })
-        .catch(() => {});
-      await superuserClient.indices.delete({ index: 'sensitive_employee_data' }).catch(() => {});
-    });
-
-    it('should demonstrate that ENRICH leaks sensitive data through the system user', async () => {
-      // This pipeline enriches saved object rows with data from an external
-      // index. The end user would not normally have access to that index, but
-      // the kibana system user does — so the ENRICH succeeds and the sensitive
-      // columns appear in the response.
-      //
-      // TODO: After US-009 is implemented, this test should be changed to
-      // expect a rejection (BadRequestError) instead of a successful response.
-      const result = await savedObjectsRepository.esql({
-        type: 'esql-test-type',
-        namespaces: ['default'],
-        pipeline:
-          '| ENRICH sensitive_employee_policy ON `esql-test-type.email`' +
-          ' | KEEP `esql-test-type.email`, salary, ssn' +
-          ' | SORT `esql-test-type.email` ASC' +
-          ' | LIMIT 10',
-      });
-
-      // The enrich policy adds salary and ssn columns to the response.
-      const colNames = result.columns.map((c) => c.name);
-      expect(colNames).toContain('salary');
-      expect(colNames).toContain('ssn');
-
-      // Sensitive data is returned — this is the privilege escalation hole.
-      const ssnColIdx = result.columns.findIndex((c) => c.name === 'ssn');
-      const salaryColIdx = result.columns.findIndex((c) => c.name === 'salary');
-      const emailColIdx = result.columns.findIndex((c) => c.name === 'esql-test-type.email');
-
-      // Find the row for john.doe and verify his sensitive data is exposed.
-      const johnRow = result.values.find((row) => row[emailColIdx] === 'john.doe@example.com');
-      expect(johnRow).toBeDefined();
-      expect(johnRow![ssnColIdx]).toBe('123-45-6789');
-      expect(johnRow![salaryColIdx]).toBe(150000);
-    });
   });
 });

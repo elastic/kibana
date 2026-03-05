@@ -125,6 +125,14 @@ const result = await savedObjectsClient.esql({
 
 ## Security model
 
+### Execution context — `kibana_system` user
+
+The ES|QL pipeline executes with the privileges of the `kibana_system` Elasticsearch user, which has elevated access including `manage_enrich` and broad index monitoring permissions. This means the pipeline can access resources that the end user may not be authorized to see.
+
+**Never inject arbitrary or untrusted user input directly into the pipeline string.** If a user can control the full pipeline, they could use commands like `ENRICH` to join against enrich policies whose source data they would not normally have access to — this is a privilege escalation. Always construct the pipeline server-side and use parameterized values (see [Safe pipeline construction](#safe-pipeline-construction-with-esql-tagged-template)) for any user-provided input.
+
+Using `ENRICH` in your pipeline is perfectly fine when you control the pipeline and are enriching from a policy whose data is appropriate for all users who will see the results.
+
 ### Index resolution from types
 
 Like `search` (which passes `index: getIndicesForTypes(types)` internally), the `esql` method resolves the correct Elasticsearch indices from the `type` parameter and auto-generates the `FROM` clause. You never need to know the index name — it is an implementation detail handled by the saved objects system.
