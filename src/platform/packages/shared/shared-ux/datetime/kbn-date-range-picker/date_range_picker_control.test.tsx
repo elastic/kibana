@@ -186,4 +186,22 @@ describe('DateRangePickerControl', () => {
       });
     });
   });
+
+  describe('collapsed prop', () => {
+    it('shows the label and omits aria-label when not collapsed (default)', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).not.toHaveAttribute('aria-label');
+      expect(button).toHaveTextContent('Last 20 minutes');
+    });
+
+    it('hides the label and sets aria-label when collapsed', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveAttribute('aria-label');
+      expect(button).not.toHaveTextContent('Last 20 minutes');
+    });
+  });
 });

@@ -74,6 +74,12 @@ export interface DateRangePickerProps {
    */
   compressed?: boolean;
   /**
+   * When `true`, the idle-state control hides its text label and only shows
+   * the short-duration badge.
+   * @default false
+   */
+  collapsed?: boolean;
+  /**
    * Show time window buttons (previous, zoom out, zoom in, next) beside the control.
    * Pass `true` for defaults, or a config object for fine-grained control.
    * @default false
