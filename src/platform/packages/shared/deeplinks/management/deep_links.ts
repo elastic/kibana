@@ -49,6 +49,7 @@ export type ManagementId =
   | 'license_management'
   | 'index_lifecycle_management'
   | 'index_management'
+  | 'inference_endpoints'
   | 'ingest_pipelines'
   | 'jobsListLink'
   | 'maintenanceWindows'

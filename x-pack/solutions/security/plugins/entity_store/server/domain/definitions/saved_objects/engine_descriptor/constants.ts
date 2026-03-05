@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { TasksConfig } from '../../../../tasks/config';
 import { EntityStoreTaskType } from '../../../../tasks/constants';
 import { EntityType } from '../../../../../common/domain/definitions/entity_schema';
@@ -37,7 +37,7 @@ export const LogExtractionState = z.object({
   frequency: z
     .string()
     .regex(/[smdh]$/)
-    .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval || '30s'),
+    .default(TasksConfig[EntityStoreTaskType.enum.extractEntity].interval || '30s'),
   paginationTimestamp: z.string().optional(),
   paginationId: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
