@@ -22,6 +22,10 @@ const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Pro
 export const createListIndicesInitializationFlow: InitializationFlowDefinition = {
   id: 'create-list-indices',
   provision: async ({ requestHandlerContext, logger }) => {
+    if (!requestHandlerContext) {
+      return { status: 'error', error: 'Lists initialization requires request handler context' };
+    }
+
     const listsContext = await requestHandlerContext.lists;
 
     if (!listsContext) {

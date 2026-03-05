@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
-import type { InitializationFlowRunner } from './flow_registry';
-import { initializeRoute } from './routes';
+import type { StartPlugins } from '../../plugin_contract';
+import type { InitializationFlowRegistry } from './flow_registry';
+import { initializeRoute, statusRoute } from './routes';
 
 export interface InitializationRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
-  initializationFlowRunner: InitializationFlowRunner;
+  flowRegistry: InitializationFlowRegistry;
+  getStartServices: StartServicesAccessor<StartPlugins>;
 }
 
 export const registerInitializationRoutes = ({
   router,
   logger,
-  initializationFlowRunner,
+  flowRegistry,
+  getStartServices,
 }: InitializationRoutesDeps): void => {
-  initializeRoute(router, logger, initializationFlowRunner);
+  initializeRoute(router, logger, flowRegistry, getStartServices);
+  statusRoute(router, logger, flowRegistry);
 };

@@ -59,7 +59,7 @@ import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
-import type { InitializationFlowRunner } from '../lib/initialization';
+import type { InitializationFlowRegistry } from '../lib/initialization';
 import { registerInitializationRoutes } from '../lib/initialization';
 
 export const initRoutes = (
@@ -81,7 +81,7 @@ export const initRoutes = (
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
   enableDataGeneratorRoutes: boolean,
-  initializationFlowRegistry: InitializationFlowRunner
+  initializationFlowRegistry: InitializationFlowRegistry
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -160,7 +160,12 @@ export const initRoutes = (
 
   registerTrialCompanionRoutes(trialCompanionDeps);
 
-  registerInitializationRoutes({ router, logger, initializationFlowRunner: initializationFlowRegistry });
+  registerInitializationRoutes({
+    router,
+    logger,
+    flowRegistry: initializationFlowRegistry,
+    getStartServices,
+  });
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

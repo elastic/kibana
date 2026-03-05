@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export {
-  createInitializationFlowRegistry,
-  InitializationFlowRegistry,
-} from './flow_registry';
-export type { InitializationFlowRunner } from './flow_registry';
+export { createInitializationFlowRegistry, InitializationFlowRegistry } from './flow_registry';
 export { registerInitializationRoutes } from './register_initialization_routes';
+export { registerInitializationTask } from './task/initialization_task';
+export {
+  initializationFlowStateType,
+  INITIALIZATION_FLOW_STATE_SO_TYPE,
+} from './saved_object/initialization_flow_state_type';
 export type { InitializationFlowDefinition, InitializationFlowContext } from './types';

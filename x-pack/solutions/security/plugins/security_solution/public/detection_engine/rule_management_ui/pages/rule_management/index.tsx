@@ -113,7 +113,7 @@ const RulesPageContent = () => {
                 <EuiToolTip
                   position="top"
                   content={
-                    cantCreateNonExistentListIndex
+                    needsListsIndex || !canWriteListsIndex
                       ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
                       : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
                   }

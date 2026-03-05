@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export const INITIALIZE_SECURITY_SOLUTION_URL =
-  '/internal/security_solution/initialize' as const;
+export const INITIALIZE_SECURITY_SOLUTION_URL = '/internal/security_solution/initialize' as const;
+
+export const INITIALIZATION_STATUS_URL = '/internal/security_solution/initialize/status' as const;

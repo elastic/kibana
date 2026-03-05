@@ -9,13 +9,10 @@ import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
   InitializationFlowResult,
-  InitializeSecuritySolutionResponse,
 } from '../../../common/api/initialization';
 import type { InitializationFlowContext, InitializationFlowDefinition } from './types';
 
 type FlowResults = Record<string, InitializationFlowResult>;
-
-export type InitializationFlowRunner = Pick<InitializationFlowRegistry, 'run'>;
 
 export class InitializationFlowRegistry {
   private readonly flows = new Map<InitializationFlowId, InitializationFlowDefinition>();
@@ -36,6 +33,21 @@ export class InitializationFlowRegistry {
     this.logger.debug(`Registered initialization flow: ${definition.id}`);
   }
 
+  getFlow(id: InitializationFlowId): InitializationFlowDefinition | undefined {
+    return this.flows.get(id);
+  }
+
+  getRegisteredFlowIds(): InitializationFlowId[] {
+    return [...this.flows.keys()];
+  }
+
+  /**
+   * Returns the requested flows plus all their transitive dependencies.
+   */
+  resolveWithDependencies(requestedFlows: InitializationFlowId[]): InitializationFlowId[] {
+    return this.collectWithDependencies(requestedFlows);
+  }
+
   /**
    * Runs the requested initialization flows respecting dependency order.
    * Independent flows within the same dependency level run in parallel.
@@ -43,7 +55,7 @@ export class InitializationFlowRegistry {
   async run(
     requestedFlows: InitializationFlowId[],
     context: InitializationFlowContext
-  ): Promise<InitializeSecuritySolutionResponse> {
+  ): Promise<FlowResults> {
     const results: FlowResults = {};
 
     const registeredFlows = requestedFlows.filter((flowId) => {
@@ -83,16 +95,14 @@ export class InitializationFlowRegistry {
       await Promise.all(promises);
     }
 
-    return { flows: results };
+    return results;
   }
 
   private hasDependencyFailure(
     definition: InitializationFlowDefinition,
     results: FlowResults
   ): boolean {
-    return (definition.dependencies ?? []).some(
-      (depId) => results[depId]?.status === 'error'
-    );
+    return (definition.dependencies ?? []).some((depId) => results[depId]?.status === 'error');
   }
 
   /**
@@ -166,9 +176,7 @@ export class InitializationFlowRegistry {
   /**
    * Collects the requested flows plus all their transitive dependencies.
    */
-  private collectWithDependencies(
-    requestedFlows: InitializationFlowId[]
-  ): InitializationFlowId[] {
+  private collectWithDependencies(requestedFlows: InitializationFlowId[]): InitializationFlowId[] {
     const collected = new Set<InitializationFlowId>();
 
     const visit = (id: InitializationFlowId) => {
@@ -191,8 +199,6 @@ export class InitializationFlowRegistry {
   }
 }
 
-export const createInitializationFlowRegistry = (
-  logger: Logger
-): InitializationFlowRegistry => {
+export const createInitializationFlowRegistry = (logger: Logger): InitializationFlowRegistry => {
   return new InitializationFlowRegistry(logger);
 };

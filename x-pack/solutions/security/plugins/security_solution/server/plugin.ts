@@ -158,7 +158,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
-import { createInitializationFlowRegistry } from './lib/initialization';
+import { createInitializationFlowRegistry, registerInitializationTask } from './lib/initialization';
 import type { InitializationFlowRegistry } from './lib/initialization';
 import { createListIndicesInitializationFlow } from './lib/initialization/flows/create_list_indices';
 
@@ -381,6 +381,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures,
       config: this.config,
     });
+
+    if (plugins.taskManager) {
+      registerInitializationTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        getStartServices: core.getStartServices,
+        flowRegistry: this.initializationFlowRegistry,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,

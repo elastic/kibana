@@ -10,7 +10,9 @@ export {
   InitializationFlowStatus,
   InitializeSecuritySolutionRequestBody,
   InitializeSecuritySolutionResponse,
+  InitializeFlowScheduleResult,
   InitializationFlowResult,
+  InitializationStatusResponse,
 } from './model';
 
-export { INITIALIZE_SECURITY_SOLUTION_URL } from './constants';
+export { INITIALIZE_SECURITY_SOLUTION_URL, INITIALIZATION_STATUS_URL } from './constants';

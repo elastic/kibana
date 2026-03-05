@@ -13,7 +13,9 @@ import type { InitializationFlowRegistry } from './flow_registry';
 
 const createMockContext = (): InitializationFlowContext =>
   ({
-    requestHandlerContext: {},
+    esClient: {},
+    soClient: {},
+    spaceId: 'default',
     logger: loggerMock.create(),
   } as unknown as InitializationFlowContext);
 
@@ -35,16 +37,14 @@ describe('InitializationFlowRegistry', () => {
     registry = createInitializationFlowRegistry(logger);
   });
 
-  const flowA = 'create-list-indices'
-  const flowB = 'rule-monitoring-setup'
-  const flowC = 'bootstrap-prebuilt-rules'
+  const flowA = 'create-list-indices';
+  const flowB = 'rule-monitoring-setup';
+  const flowC = 'bootstrap-prebuilt-rules';
 
   describe('register', () => {
     it('registers a flow and logs a debug message', () => {
       registry.register(createFlow(flowA));
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Registered initialization flow: ${flowA}`
-      );
+      expect(logger.debug).toHaveBeenCalledWith(`Registered initialization flow: ${flowA}`);
     });
 
     it('throws when registering a duplicate flow id', () => {
@@ -55,9 +55,7 @@ describe('InitializationFlowRegistry', () => {
     });
 
     it('throws when a flow declares itself as a dependency', () => {
-      expect(() =>
-        registry.register(createFlow(flowA, { dependencies: [flowA] }))
-      ).toThrow(
+      expect(() => registry.register(createFlow(flowA, { dependencies: [flowA] }))).toThrow(
         `Failed to register initialization flow '${flowA}': flow cannot depend on itself`
       );
     });
@@ -71,13 +69,13 @@ describe('InitializationFlowRegistry', () => {
 
       const response = await registry.run([flowA], context);
 
-      expect(response.flows[flowA]).toEqual({ status: 'ready' });
+      expect(response[flowA]).toEqual({ status: 'ready' });
     });
 
     it('returns an error for an unregistered flow', async () => {
       const response = await registry.run([flowA], context);
 
-      expect(response.flows[flowA]).toEqual({
+      expect(response[flowA]).toEqual({
         status: 'error',
         error: `Initialization flow '${flowA}' is not registered`,
       });
@@ -92,7 +90,7 @@ describe('InitializationFlowRegistry', () => {
 
       const response = await registry.run([flowA], context);
 
-      expect(response.flows[flowA]).toEqual({
+      expect(response[flowA]).toEqual({
         status: 'error',
         error: 'ES connection failed',
       });
@@ -105,13 +103,10 @@ describe('InitializationFlowRegistry', () => {
       registry.register(createFlow(flowA));
       registry.register(createFlow(flowB));
 
-      const response = await registry.run(
-        [flowA, flowB],
-        context
-      );
+      const response = await registry.run([flowA, flowB], context);
 
-      expect(response.flows[flowA]).toEqual({ status: 'ready' });
-      expect(response.flows[flowB]).toEqual({ status: 'ready' });
+      expect(response[flowA]).toEqual({ status: 'ready' });
+      expect(response[flowB]).toEqual({ status: 'ready' });
     });
 
     it('allows partial success when one flow fails and another succeeds', async () => {
@@ -122,13 +117,10 @@ describe('InitializationFlowRegistry', () => {
       );
       registry.register(createFlow(flowB));
 
-      const response = await registry.run(
-        [flowA, flowB],
-        context
-      );
+      const response = await registry.run([flowA, flowB], context);
 
-      expect(response.flows[flowA]?.status).toBe('error');
-      expect(response.flows[flowB]?.status).toBe('ready');
+      expect(response[flowA]?.status).toBe('error');
+      expect(response[flowB]?.status).toBe('ready');
     });
 
     it('passes the context to each provision function', async () => {
@@ -231,9 +223,9 @@ describe('InitializationFlowRegistry', () => {
       expect(monitorProvision).toHaveBeenCalled();
       expect(rulesProvision).toHaveBeenCalled();
 
-      expect(response.flows[flowA]?.status).toBe('ready');
-      expect(response.flows[flowB]?.status).toBe('ready');
-      expect(response.flows[flowC]?.status).toBe('ready');
+      expect(response[flowA]?.status).toBe('ready');
+      expect(response[flowB]?.status).toBe('ready');
+      expect(response[flowC]?.status).toBe('ready');
     });
 
     it('runs a full chain in the correct order: A → B → C', async () => {
@@ -270,11 +262,7 @@ describe('InitializationFlowRegistry', () => {
 
       await registry.run([flowC], context);
 
-      expect(executionOrder).toEqual([
-        flowA,
-        flowB,
-        flowC,
-      ]);
+      expect(executionOrder).toEqual([flowA, flowB, flowC]);
     });
 
     it('runs a diamond dependency correctly: C depends on A and B, A and B are independent', async () => {
@@ -337,13 +325,10 @@ describe('InitializationFlowRegistry', () => {
         })
       );
 
-      const response = await registry.run(
-        [flowA, flowB],
-        context
-      );
+      const response = await registry.run([flowA, flowB], context);
 
-      expect(response.flows[flowA]?.status).toBe('error');
-      expect(response.flows[flowB]).toEqual({
+      expect(response[flowA]?.status).toBe('error');
+      expect(response[flowB]).toEqual({
         status: 'error',
         error: 'Skipped due to failed dependency',
       });
@@ -376,9 +361,9 @@ describe('InitializationFlowRegistry', () => {
 
       const response = await registry.run([flowC], context);
 
-      expect(response.flows[flowA]?.status).toBe('error');
-      expect(response.flows[flowB]?.status).toBe('error');
-      expect(response.flows[flowC]?.status).toBe('error');
+      expect(response[flowA]?.status).toBe('error');
+      expect(response[flowB]?.status).toBe('error');
+      expect(response[flowC]?.status).toBe('error');
 
       expect(monitorProvision).not.toHaveBeenCalled();
       expect(rulesProvision).not.toHaveBeenCalled();
@@ -406,14 +391,11 @@ describe('InitializationFlowRegistry', () => {
         })
       );
 
-      const response = await registry.run(
-        [flowC, flowB],
-        context
-      );
+      const response = await registry.run([flowC, flowB], context);
 
-      expect(response.flows[flowA]?.status).toBe('error');
-      expect(response.flows[flowC]?.status).toBe('error');
-      expect(response.flows[flowB]?.status).toBe('ready');
+      expect(response[flowA]?.status).toBe('error');
+      expect(response[flowC]?.status).toBe('error');
+      expect(response[flowB]?.status).toBe('ready');
       expect(monitorProvision).toHaveBeenCalled();
     });
 
@@ -465,10 +447,7 @@ describe('InitializationFlowRegistry', () => {
         })
       );
 
-      await registry.run(
-        [flowC, flowB],
-        context
-      );
+      await registry.run([flowC, flowB], context);
 
       const monitorIdx = executionOrder.indexOf(flowB);
       const listIdx = executionOrder.indexOf(flowA);
@@ -479,9 +458,9 @@ describe('InitializationFlowRegistry', () => {
       expect(monitorIdx).toBeLessThan(rulesIdx);
     });
 
-    it('returns an empty flows object when given an empty array', async () => {
+    it('returns an empty object when given an empty array', async () => {
       const response = await registry.run([], context);
-      expect(response).toEqual({ flows: {} });
+      expect(response).toEqual({});
     });
 
     it('throws at registration time on a direct circular dependency (A → B → A)', () => {
@@ -497,9 +476,9 @@ describe('InitializationFlowRegistry', () => {
       registry.register(createFlow(flowA));
       registry.register(createFlow(flowB, { dependencies: [flowA] }));
 
-      expect(() =>
-        registry.register(createFlow(flowC, { dependencies: [flowB, flowC] }))
-      ).toThrow(/cannot depend on itself/);
+      expect(() => registry.register(createFlow(flowC, { dependencies: [flowB, flowC] }))).toThrow(
+        /cannot depend on itself/
+      );
     });
 
     it('throws at registration time on a transitive cycle (A → B → C → A)', () => {

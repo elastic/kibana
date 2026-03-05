@@ -6,3 +6,4 @@
  */
 
 export { initializeRoute } from './initialize_route';
+export { statusRoute } from './status_route';

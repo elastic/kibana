@@ -6,13 +6,16 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
-import type { InitializationFlowId } from '../../../../common/api/initialization';
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  InitializationFlowId,
+  InitializationFlowStatus,
+} from '../../../../common/api/initialization';
 import { useHttp } from '../../lib/kibana';
-import { initializeSecuritySolution } from './api';
+import { fetchInitializationStatus, initializeSecuritySolution } from './api';
 import type { InitializationState } from './types';
 
-const DEFAULT_MAX_RETRIES = 2;
+const DEFAULT_POLL_INTERVAL_MS = 2000;
 
 interface InitializationContextValue {
   state: InitializationState;
@@ -25,35 +28,87 @@ export const InitializationContext = createContext<InitializationContextValue>({
 });
 
 export interface InitializationProviderProps {
-  maxRetries?: number;
+  pollIntervalMs?: number;
 }
 
 export const InitializationProvider: FC<PropsWithChildren<InitializationProviderProps>> = ({
   children,
-  maxRetries = DEFAULT_MAX_RETRIES,
+  pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
 }) => {
   const http = useHttp();
   const [state, setState] = useState<InitializationState>({});
 
-  const inflightRef = useRef(new Set<InitializationFlowId>());
-  const retryCountRef = useRef(new Map<InitializationFlowId, number>());
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const requestedFlowsRef = useRef(new Set<InitializationFlowId>());
+  const pollingRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const pollStatus = useCallback(async () => {
+    if (pollingRef.current) return;
+    pollingRef.current = true;
+
+    const poll = async () => {
+      while (mountedRef.current) {
+        try {
+          const statusResponse = await fetchInitializationStatus({ http });
+          if (!mountedRef.current) break;
+
+          const flowEntries = Object.entries(statusResponse.flows) as Array<
+            [InitializationFlowId, { status: string; error?: string }]
+          >;
+
+          setState((prev) => {
+            const next = { ...prev };
+            for (const [flowId, flowState] of flowEntries) {
+              if (requestedFlowsRef.current.has(flowId)) {
+                const isInProgress =
+                  flowState.status === 'pending' || flowState.status === 'running';
+                next[flowId] = {
+                  loading: isInProgress,
+                  result: {
+                    status: flowState.status as InitializationFlowStatus,
+                    error: flowState.error,
+                  },
+                  error: null,
+                };
+              }
+            }
+            return next;
+          });
+
+          const hasInProgress = flowEntries.some(
+            ([flowId, flowState]) =>
+              requestedFlowsRef.current.has(flowId) &&
+              (flowState.status === 'pending' || flowState.status === 'running')
+          );
+
+          if (!hasInProgress) break;
+        } catch (err) {
+          if (!mountedRef.current) break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+      }
+
+      pollingRef.current = false;
+    };
+
+    await poll();
+  }, [http, pollIntervalMs]);
 
   const requestInitialization = useCallback(
     async (flows: InitializationFlowId[]) => {
-      const newFlows = flows.filter((id) => {
-        if (inflightRef.current.has(id)) return false;
-        if (stateRef.current[id]?.result) return false;
-        return true;
-      });
+      const newFlows = flows.filter((id) => !requestedFlowsRef.current.has(id));
 
-      if (newFlows.length === 0) {
-        return;
-      }
+      if (newFlows.length === 0) return;
 
       for (const id of newFlows) {
-        inflightRef.current.add(id);
+        requestedFlowsRef.current.add(id);
       }
 
       setState((prev) => {
@@ -65,27 +120,9 @@ export const InitializationProvider: FC<PropsWithChildren<InitializationProvider
       });
 
       try {
-        const response = await initializeSecuritySolution({ http, flows: newFlows });
-
-        setState((prev) => {
-          const next = { ...prev };
-          for (const id of newFlows) {
-            const flowResult = response.flows[id];
-            if (flowResult) {
-              next[id] = { loading: false, result: flowResult, error: null };
-            } else {
-              next[id] = {
-                loading: false,
-                result: null,
-                error: 'No result returned from server',
-              };
-            }
-          }
-          return next;
-        });
+        await initializeSecuritySolution({ http, flows: newFlows });
       } catch (err) {
         const errorMessage = err.body?.message ?? err.message ?? 'Unknown error';
-
         setState((prev) => {
           const next = { ...prev };
           for (const id of newFlows) {
@@ -93,29 +130,12 @@ export const InitializationProvider: FC<PropsWithChildren<InitializationProvider
           }
           return next;
         });
-
-        const retryableFlows = newFlows.filter((id) => {
-          const count = retryCountRef.current.get(id) ?? 0;
-          return count < maxRetries;
-        });
-
-        if (retryableFlows.length > 0) {
-          for (const id of retryableFlows) {
-            retryCountRef.current.set(id, (retryCountRef.current.get(id) ?? 0) + 1);
-          }
-          for (const id of newFlows) {
-            inflightRef.current.delete(id);
-          }
-          requestInitialization(retryableFlows);
-          return;
-        }
-      } finally {
-        for (const id of newFlows) {
-          inflightRef.current.delete(id);
-        }
+        return;
       }
+
+      pollStatus();
     },
-    [http, maxRetries]
+    [http, pollStatus]
   );
 
   const contextValue = useMemo(
@@ -127,8 +147,6 @@ export const InitializationProvider: FC<PropsWithChildren<InitializationProvider
   );
 
   return (
-    <InitializationContext.Provider value={contextValue}>
-      {children}
-    </InitializationContext.Provider>
+    <InitializationContext.Provider value={contextValue}>{children}</InitializationContext.Provider>
   );
 };
