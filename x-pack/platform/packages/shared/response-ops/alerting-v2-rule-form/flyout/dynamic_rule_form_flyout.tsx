@@ -30,7 +30,9 @@ export interface DynamicRuleFormFlyoutProps {
  * Use this for Discover integration where the form needs to react to external
  * query changes while preserving user-modified fields.
  *
- * The time field is automatically derived from the query's available date fields.
+ * The flyout manages its own submission via useCreateRule so it can control
+ * the loading state of its footer buttons. The time field is automatically
+ * derived from the query's available date fields.
  */
 const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   push,

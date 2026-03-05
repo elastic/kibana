@@ -12,14 +12,21 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
-import { RuleFormServicesProvider, type RuleFormServices } from './contexts';
+import { RuleFormServicesProvider, useRuleFormServices, type RuleFormServices } from './contexts';
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
+import { useCreateRule } from './hooks/use_create_rule';
 import { RULE_FORM_ID } from './constants';
 
 export interface RuleFormProps {
   services: RuleFormServices;
-  onSubmit: (values: FormValues) => void;
+  /**
+   * External submit handler. When provided, form submission delegates to this callback.
+   * When omitted and `includeSubmission` is true, the form uses `useCreateRule` internally.
+   */
+  onSubmit?: (values: FormValues) => void;
+  /** Callback invoked after a successful internal submission (useCreateRule). */
+  onSuccess?: () => void;
   onCancel?: () => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
@@ -88,21 +95,40 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
 
 /**
  * Inner content component that renders the appropriate form based on edit mode.
+ *
+ * When an external `onSubmit` is provided, form submission delegates to it.
+ * Otherwise, the component uses `useCreateRule` internally to persist the rule
+ * via the API and calls `onSuccess` after a successful save.
  */
 const RuleFormContent: React.FC<RuleFormProps> = ({
-  services,
-  onSubmit,
+  onSubmit: externalOnSubmit,
+  onSuccess,
   includeQueryEditor = true,
   includeYaml = false,
   isDisabled = false,
-  isSubmitting = false,
+  isSubmitting: externalIsSubmitting = false,
   includeSubmission = false,
   onCancel,
   submitLabel,
   cancelLabel,
 }) => {
   const { reset } = useFormContext<FormValues>();
+  const services = useRuleFormServices();
+  const { http, notifications } = services;
   const [editMode, setEditMode] = useState<EditMode>('form');
+
+  // Internal submission via useCreateRule — always initialised so hooks are stable,
+  // but only used when no external onSubmit is provided.
+  const { createRule, isLoading: isCreating } = useCreateRule({
+    http,
+    notifications,
+    onSuccess,
+  });
+
+  // Resolve the effective submit handler: external callback takes precedence,
+  // otherwise fall back to the internal createRule mutation.
+  const onSubmit = externalOnSubmit ?? createRule;
+  const isSubmitting = externalIsSubmitting || isCreating;
 
   const handleModeChange = useCallback(
     (newMode: EditMode) => {
@@ -170,10 +196,9 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
  * It does not manage form state - that responsibility belongs to the parent component
  * (DynamicRuleForm or StandaloneRuleForm).
  *
- * The parent component is responsible for:
- * - Providing form state via FormProvider
- * - Handling form submission via onSubmit
- * - Managing submission loading state via isSubmitting
+ * When `onSubmit` is provided, form submission is delegated to that callback.
+ * When `onSubmit` is omitted, the form uses `useCreateRule` internally and
+ * calls `onSuccess` after a successful API save.
  *
  * Includes its own QueryClientProvider for react-query hooks used by field components.
  * Services are provided via RuleFormServicesProvider context, eliminating prop drilling.

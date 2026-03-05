@@ -16,7 +16,13 @@ export interface StandaloneRuleFormProps {
   /** Initial query for the rule */
   query: string;
   services: RuleFormServices;
-  onSubmit: (values: FormValues) => void;
+  /**
+   * External submit handler. When provided, form submission delegates to this callback.
+   * When omitted (and `includeSubmission` is true), the form uses `useCreateRule` internally.
+   */
+  onSubmit?: (values: FormValues) => void;
+  /** Callback invoked after a successful internal submission (useCreateRule). */
+  onSuccess?: () => void;
   onCancel?: () => void;
   /** Whether to include YAML editor toggle (default: false). Requires services.application. */
   includeYaml?: boolean;
@@ -36,6 +42,10 @@ export interface StandaloneRuleFormProps {
  * Use this component for a classic flyout experience where the user controls
  * everything from the form after initial mount. External prop changes are ignored.
  *
+ * When `onSubmit` is provided, form submission delegates to that callback.
+ * When `onSubmit` is omitted and `includeSubmission` is true, the form
+ * automatically persists the rule via the API and calls `onSuccess` afterwards.
+ *
  * Uses react-hook-form's `defaultValues` for static initialization.
  * Time field is auto-selected by TimeFieldSelect based on available date fields.
  */
@@ -43,6 +53,7 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   query,
   services,
   onSubmit,
+  onSuccess,
   includeYaml = false,
   isDisabled = false,
   isSubmitting = false,
@@ -63,6 +74,7 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
       <RuleForm
         services={services}
         onSubmit={onSubmit}
+        onSuccess={onSuccess}
         includeYaml={includeYaml}
         isDisabled={isDisabled}
         isSubmitting={isSubmitting}

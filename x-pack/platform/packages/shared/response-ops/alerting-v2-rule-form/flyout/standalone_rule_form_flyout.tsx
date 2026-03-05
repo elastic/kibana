@@ -30,7 +30,9 @@ export interface StandaloneRuleFormFlyoutProps {
  * Use this for a classic flyout experience where the user controls everything
  * from the form after initial mount. External prop changes are ignored.
  *
- * Time field is auto-selected by TimeFieldSelect based on available date fields.
+ * The flyout manages its own submission via useCreateRule so it can control
+ * the loading state of its footer buttons. Time field is auto-selected by
+ * TimeFieldSelect based on available date fields.
  */
 const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = ({
   push,

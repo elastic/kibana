@@ -18,7 +18,13 @@ export interface DynamicRuleFormProps {
   /** The query that drives form values - changes will sync to form state */
   query: string;
   services: RuleFormServices;
-  onSubmit: (values: FormValues) => void;
+  /**
+   * External submit handler. When provided, form submission delegates to this callback.
+   * When omitted, the form uses `useCreateRule` internally.
+   */
+  onSubmit?: (values: FormValues) => void;
+  /** Callback invoked after a successful internal submission (useCreateRule). */
+  onSuccess?: () => void;
   onCancel?: () => void;
   /** Whether to include YAML editor toggle (default: false) */
   includeYaml?: boolean;
@@ -48,6 +54,7 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   query,
   services,
   onSubmit,
+  onSuccess,
   includeYaml = false,
   isDisabled = false,
   isSubmitting = false,
@@ -84,6 +91,7 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
       <RuleForm
         services={services}
         onSubmit={onSubmit}
+        onSuccess={onSuccess}
         includeQueryEditor={false}
         includeYaml={includeYaml}
         isDisabled={isDisabled}
