@@ -34,12 +34,15 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   schema: authSchema,
+  getHeaders: async (_: AuthContext, secret: AuthSchemaType): Promise<Record<string, string>> => {
+    const encoded = Buffer.from(`${secret.username}:${secret.password}`).toString('base64');
+    return { Authorization: `Basic ${encoded}` };
+  },
   configure: async (
     _: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    // set global defaults
     axiosInstance.defaults.auth = {
       username: secret.username,
       password: secret.password,

@@ -44,3 +44,9 @@ export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
 export { formatZodV3Error } from './format_zod_v3_error';
 export { createConnectorTypeFromSpec } from './single_file_connectors/create_connector_from_spec';
 export { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
+export { buildCustomFetch, type FetchLike } from './build_custom_fetch';
+export {
+  getMcpClientFactory,
+  type CreateMcpClientFn,
+  type CreateMcpClientFnOpts,
+} from './get_mcp_client';

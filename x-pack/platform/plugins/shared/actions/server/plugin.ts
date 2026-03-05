@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { McpClient } from '@kbn/mcp-client';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -107,6 +108,8 @@ import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_t
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
+import type { CreateMcpClientFnOpts } from './lib/get_mcp_client';
+import { getMcpClientFactory } from './lib/get_mcp_client';
 
 export interface PluginSetupContract {
   registerType<
@@ -126,6 +129,8 @@ export interface PluginSetupContract {
   ): void;
 
   getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
+
+  createMcpClient(opts: CreateMcpClientFnOpts): Promise<McpClient>;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -429,6 +434,7 @@ export class ActionsPlugin
         subActionFramework.registerConnector(connector);
       },
       getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+      createMcpClient: this.createMcpClientHelper(actionsConfigUtils),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -896,6 +902,18 @@ export class ActionsPlugin
 
     return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
       return await getAxiosInstanceFn(getAxiosParams);
+    };
+  };
+
+  private createMcpClientHelper = (actionsConfigUtils: ActionsConfigurationUtilities) => {
+    const mcpClientFactory = getMcpClientFactory({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+
+    return async (opts: CreateMcpClientFnOpts) => {
+      return await mcpClientFactory(opts);
     };
   };
 

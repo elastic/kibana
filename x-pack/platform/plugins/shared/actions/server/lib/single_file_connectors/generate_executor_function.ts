@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec, McpClientConfig } from '@kbn/connector-specs';
+import type { McpClient } from '@kbn/mcp-client';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+import type { CreateMcpClientFn } from '../get_mcp_client';
 
 type RecordUnknown = Record<string, unknown>;
 
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  mcp,
+  createMcpClient,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  mcp?: McpClientConfig;
+  createMcpClient?: CreateMcpClientFn;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -51,14 +57,33 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
-    const actionContext = {
-      log: logger,
-      client: axiosInstance,
-      secrets,
-      config,
-    };
+    let mcpClient: McpClient | undefined;
+    if (mcp && createMcpClient) {
+      const url = (config as RecordUnknown)?.[mcp.urlField] as string | undefined;
+      if (!url) {
+        throw new Error(
+          `MCP client requires a URL in config field "${mcp.urlField}" but none was provided.`
+        );
+      }
+      mcpClient = await createMcpClient({
+        connectorId,
+        url,
+        secrets,
+        additionalHeaders: globalAuthHeaders,
+        connectorTokenClient,
+      });
+      await mcpClient.connect();
+    }
 
     try {
+      const actionContext = {
+        log: logger,
+        client: axiosInstance,
+        mcpClient,
+        secrets,
+        config,
+      };
+
       let data = {};
       const res = await actions[subAction].handler(actionContext, subActionParams);
 
@@ -75,5 +100,17 @@ export const generateExecutorFunction = ({
         message: errorMessage,
         actionId: connectorId,
       };
+    } finally {
+      if (mcpClient?.isConnected()) {
+        try {
+          await mcpClient.disconnect();
+        } catch (disconnectError) {
+          logger.warn(
+            `Failed to disconnect MCP client for connector ${connectorId}: ${
+              disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
+            }`
+          );
+        }
+      }
     }
   };

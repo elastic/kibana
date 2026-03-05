@@ -38,6 +38,18 @@ type NormalizedAuthSchemaType = Record<string, string>;
 export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_header',
   schema: authSchema,
+  getHeaders: async (
+    _: AuthContext,
+    secret: NormalizedAuthSchemaType
+  ): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = {};
+    Object.keys(secret)
+      .filter((key) => key !== 'authType')
+      .forEach((key) => {
+        headers[key] = secret[key];
+      });
+    return headers;
+  },
   normalizeSchema: (defaults?: Record<string, unknown>) => {
     const existingMeta = authSchema.meta() ?? {};
     const schemaToUse = z.object({

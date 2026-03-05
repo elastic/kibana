@@ -22,6 +22,9 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const NoAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'none',
   schema: authSchema,
+  getHeaders: async (): Promise<Record<string, string>> => {
+    return {};
+  },
   configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
     return axiosInstance;
   },

@@ -97,6 +97,7 @@ export interface AuthTypeSpec<T extends Record<string, unknown>> {
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getHeaders: (ctx: AuthContext, secret: T) => Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -172,6 +173,45 @@ export interface ConnectorPolicies {
 }
 
 // ============================================================================
+// MCP CLIENT
+// ============================================================================
+
+/** Spec-level declaration that a connector requires an MCP client. */
+export interface McpClientConfig {
+  /** The config field name that contains the MCP server URL (e.g. 'serverUrl'). */
+  urlField: string;
+}
+
+/** Tool descriptor returned by an MCP server. */
+export interface McpTool {
+  name: string;
+  description?: string;
+  inputSchema: Record<string, unknown>;
+}
+
+/** Parameters for invoking an MCP tool. */
+export interface McpCallToolParams {
+  name: string;
+  arguments?: Record<string, unknown>;
+}
+
+/** A single content part in an MCP tool response. */
+export interface McpContentPart {
+  type: string;
+  text?: string;
+}
+
+/**
+ * Transport-agnostic MCP client interface exposed to connector action handlers.
+ * Decoupled from the concrete McpClient class so that spec types remain
+ * importable from src/ packages without depending on x-pack.
+ */
+export interface ConnectorMcpClient {
+  listTools(): Promise<{ tools: McpTool[] }>;
+  callTool(params: McpCallToolParams): Promise<{ content: McpContentPart[] }>;
+}
+
+// ============================================================================
 // ACTIONS
 // ============================================================================
 
@@ -188,6 +228,7 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 
 export interface ActionContext {
   client: AxiosInstance;
+  mcpClient?: ConnectorMcpClient;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
@@ -256,6 +297,8 @@ export interface ConnectorSpec {
   };
 
   policies?: ConnectorPolicies;
+
+  mcp?: McpClientConfig;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;

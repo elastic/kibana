@@ -35,6 +35,25 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const OAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_client_credentials',
   schema: authSchema,
+  getHeaders: async (ctx: AuthContext, secret: AuthSchemaType): Promise<Record<string, string>> => {
+    let token;
+    try {
+      token = await ctx.getToken({
+        tokenUrl: secret.tokenUrl,
+        scope: secret.scope,
+        clientId: secret.clientId,
+        clientSecret: secret.clientSecret,
+      });
+    } catch (error) {
+      throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
+    }
+
+    if (!token) {
+      throw new Error(`Unable to retrieve new access token`);
+    }
+
+    return { Authorization: token };
+  },
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,
