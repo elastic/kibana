@@ -190,7 +190,7 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     );
   });
 
-  it('has proper role on service map container', () => {
+  it('marks the service map container as a group without adding it to the tab order', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
@@ -202,7 +202,7 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     expect(serviceMapContainer).not.toHaveAttribute('tabIndex', '0');
   });
 
-  it('instructions describe Arrow key navigation (not Tab-to-node) for nodes', () => {
+  it('tells the user to navigate with Arrow keys and Tab to leave the map', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />

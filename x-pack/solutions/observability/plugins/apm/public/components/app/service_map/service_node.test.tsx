@@ -116,13 +116,13 @@ describe('ServiceNode', () => {
   });
 
   describe('accessibility', () => {
-    it('inner circle does not have tabIndex={0}', () => {
+    it('removes the inner circle from the tab order', () => {
       renderServiceNode();
       const button = screen.getByRole('button');
       expect(button).not.toHaveAttribute('tabIndex', '0');
     });
 
-    it('inner circle retains role, aria-label, and aria-pressed', () => {
+    it('keeps role, aria-label, and aria-pressed on the inner circle', () => {
       renderServiceNode(createServiceNodeData(), true);
       const button = screen.getByRole('button');
       expect(button).toHaveAttribute('aria-label', expect.stringContaining('Test Service'));

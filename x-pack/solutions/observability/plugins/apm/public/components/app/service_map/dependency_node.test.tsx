@@ -110,13 +110,13 @@ describe('DependencyNode', () => {
   });
 
   describe('accessibility', () => {
-    it('inner diamond does not have tabIndex={0}', () => {
+    it('removes the inner diamond from the tab order', () => {
       renderDependencyNode();
       const button = screen.getByRole('button');
       expect(button).not.toHaveAttribute('tabIndex', '0');
     });
 
-    it('inner diamond retains role, aria-label, and aria-pressed', () => {
+    it('keeps role, aria-label, and aria-pressed on the inner diamond', () => {
       renderDependencyNode(createDependencyNodeData(), true);
       const button = screen.getByRole('button');
       expect(button).toHaveAttribute('aria-label', expect.stringContaining('postgresql:5432'));
