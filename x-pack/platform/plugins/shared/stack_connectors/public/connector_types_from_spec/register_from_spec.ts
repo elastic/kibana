@@ -42,11 +42,11 @@ export function registerConnectorTypesFromSpecs({
       '@kbn/connector-specs'
     ),
     import(
-      /* webpackChunkName: "singleFileConnectorBundle" */
+      /* webpackChunkName: "responseOpsFormGenerator" */
       '@kbn/response-ops-form-generator'
     ),
     import(
-      /* webpackChunkName: "singleFileConnectorBundle" */
+      /* webpackChunkName: "generateSchema" */
       './generate_schema'
     ),
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
