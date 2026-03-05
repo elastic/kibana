@@ -81,26 +81,17 @@ export const NotificationPolicyForm = () => {
           <Controller
             name="description"
             control={control}
-            rules={{
-              required: i18n.translate(
-                'xpack.alertingV2.notificationPolicy.form.description.required',
-                { defaultMessage: 'Description is required.' }
-              ),
-            }}
-            render={({ field: { ref, ...field }, fieldState: { error } }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiFormRow
                 label={i18n.translate('xpack.alertingV2.notificationPolicy.form.description', {
                   defaultMessage: 'Description',
                 })}
                 fullWidth
-                isInvalid={!!error}
-                error={error?.message}
               >
                 <EuiTextArea
                   {...field}
                   inputRef={ref}
                   fullWidth
-                  isInvalid={!!error}
                   data-test-subj="descriptionInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.description.placeholder',

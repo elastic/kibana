@@ -41,17 +41,13 @@ const TEST_SUBJ = {
 } as const;
 
 describe('NotificationPolicyForm', () => {
-  it('shows required errors for name and description on blur', async () => {
+  it('shows required errors for name on blur', async () => {
     const user = userEvent.setup();
     renderForm();
 
     await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
     await user.tab();
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
-
-    await user.click(screen.getByTestId(TEST_SUBJ.descriptionInput));
-    await user.tab();
-    expect(await screen.findByText('Description is required.')).toBeInTheDocument();
   });
 
   it('shows throttle interval input only when throttle frequency is selected', async () => {
