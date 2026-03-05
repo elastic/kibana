@@ -29,7 +29,7 @@ import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
-import type { CRUDClient } from './domain/crud_client';
+import type { CRUDClient } from './domain/crud';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {

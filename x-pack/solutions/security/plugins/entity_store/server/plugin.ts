@@ -25,7 +25,7 @@ import {
 } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
-import { CRUDClient } from './domain/crud_client';
+import { CRUDClient } from './domain/crud';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 
 export class EntityStorePlugin
