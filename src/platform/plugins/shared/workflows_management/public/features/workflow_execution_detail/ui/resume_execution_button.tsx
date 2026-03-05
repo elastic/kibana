@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { TestStepModal } from '../../run_workflow/ui/test_step_modal';
 
 interface ResumeExecutionButtonProps {
@@ -29,6 +30,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 }) => {
   const { http, notifications } = useKibana().services;
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { clearResumeParam } = useWorkflowUrlState();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen);
 
   // Honour autoOpen changes (e.g. when navigated to with ?resume=true)
@@ -51,6 +53,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             { defaultMessage: 'Workflow resumed' }
           ),
         });
+        clearResumeParam();
         closeModal();
       } catch (error) {
         notifications?.toasts.addError?.(error, {
@@ -61,7 +64,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         });
       }
     },
-    [executionId, http, notifications, closeModal]
+    [executionId, http, notifications, clearResumeParam, closeModal]
   );
 
   return (

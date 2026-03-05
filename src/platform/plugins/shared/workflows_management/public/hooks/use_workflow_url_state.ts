@@ -109,6 +109,10 @@ export function useWorkflowUrlState() {
     [updateUrlState]
   );
 
+  const clearResumeParam = useCallback(() => {
+    updateUrlState({ resume: undefined });
+  }, [updateUrlState]);
+
   return {
     // Current state
     activeTab: urlState.tab,
@@ -123,5 +127,6 @@ export function useWorkflowUrlState() {
     setSelectedStepExecution,
     setSelectedStep,
     updateUrlState,
+    clearResumeParam,
   };
 }
