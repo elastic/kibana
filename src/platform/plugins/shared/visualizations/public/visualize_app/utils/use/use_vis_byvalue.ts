@@ -63,7 +63,6 @@ export const useVisByValue = (
         : undefined;
 
       const editBreadcrumbs = getEditBreadcrumbs({
-        byValue: true,
         originatingAppName,
         redirectToOrigin,
       });

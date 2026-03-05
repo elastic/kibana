@@ -340,7 +340,10 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: incomingState?.originatingApp,
+            originatingApp:
+              isComingFromContainerView(incomingState) || initialContextIsEmbedded
+                ? incomingState?.originatingApp ?? initialContext?.originatingApp
+                : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
           },
@@ -370,7 +373,9 @@ export function App({
       onAppLeave,
       redirectTo,
       switchDatasource,
-      incomingState?.originatingApp,
+      incomingState,
+      initialContextIsEmbedded,
+      initialContext?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,

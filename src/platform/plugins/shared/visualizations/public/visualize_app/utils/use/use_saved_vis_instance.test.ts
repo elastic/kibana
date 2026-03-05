@@ -86,7 +86,10 @@ describe('useSavedVisInstance', () => {
       ...coreStartMock,
       toastNotifications,
       visEditorsRegistry,
-      stateTransferService: createEmbeddableStateTransferMock(),
+      stateTransferService: {
+        ...createEmbeddableStateTransferMock(),
+        getAppNameFromId: jest.fn(),
+      },
       chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } },
       history: {
         location: {
@@ -141,7 +144,10 @@ describe('useSavedVisInstance', () => {
       });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        expect.objectContaining({ originatingAppName: undefined, redirectToOrigin: undefined }),
+        expect.objectContaining({
+          originatingAppName: undefined,
+          redirectToOrigin: expect.any(Function),
+        }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
@@ -179,7 +185,10 @@ describe('useSavedVisInstance', () => {
       });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        expect.objectContaining({ originatingAppName: undefined, redirectToOrigin: undefined }),
+        expect.objectContaining({
+          originatingAppName: undefined,
+          redirectToOrigin: expect.any(Function),
+        }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
