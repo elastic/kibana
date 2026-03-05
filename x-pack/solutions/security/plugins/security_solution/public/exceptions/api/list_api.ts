@@ -9,9 +9,10 @@ import { fetchExceptionLists, updateExceptionList } from '@kbn/securitysolution-
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { getFilters } from '@kbn/securitysolution-list-utils';
-import type { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { List, ListArray, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { Rule } from '@kbn/securitysolution-exception-list-components';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 import type {
   FetchListById,
@@ -19,8 +20,10 @@ import type {
   UnlinkListFromRules,
   UpdateExceptionList,
 } from './types';
-import { fetchRules, patchRule } from '../../detection_engine/rule_management/api/api';
-import type { Rule } from '../../detection_engine/rule_management/logic';
+import {
+  findRuleExceptionReferences,
+  patchRule,
+} from '../../detection_engine/rule_management/api/api';
 
 export const getListById = async ({ id, http }: FetchListById) => {
   try {
@@ -49,24 +52,38 @@ export const getListById = async ({ id, http }: FetchListById) => {
     throw new Error(error);
   }
 };
-export const getListRules = async (listId: string) => {
+/**
+ * Fetch all rules that have the given listId in their exceptions_list field
+ * @param listId - The id of the list to fetch rules for
+ * @returns An array of rules that have the given listId in their exceptions_list field
+ */
+export const getListRules = async ({
+  id,
+  listId,
+  namespaceType,
+}: {
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+}): Promise<Rule[]> => {
   try {
     const abortCtrl = new AbortController();
-    const { data: rules } = await fetchRules({
+    const { references } = await findRuleExceptionReferences({
+      lists: [{ id, listId, namespaceType }],
       signal: abortCtrl.signal,
-      pagination: {
-        page: 1,
-        perPage: 10000,
-      },
     });
-    abortCtrl.abort();
-    return rules.reduce((acc: Rule[], rule, index) => {
-      const listExceptions = rule.exceptions_list?.find(
-        (exceptionList) => exceptionList.list_id === listId
-      );
-      if (listExceptions) acc.push(rule);
-      return acc;
-    }, []);
+
+    const refRecord = references[0];
+    if (!refRecord || !refRecord[listId]) {
+      return [];
+    }
+
+    return refRecord[listId].referenced_rules.map((rule) => ({
+      name: rule.name,
+      id: rule.id,
+      rule_id: rule.rule_id,
+      exceptions_list: rule.exception_lists,
+    }));
   } catch (error) {
     throw new Error(error);
   }
