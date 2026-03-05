@@ -296,7 +296,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
             }
           });
-
         });
       });
     }
