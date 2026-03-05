@@ -7,31 +7,24 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAttackEntitiesCounts } from './use_attack_entities_counts';
-import { useAttackDetailsContext } from '../context';
+import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 
-jest.mock('../context', () => ({
-  useAttackDetailsContext: jest.fn(),
+jest.mock('./use_original_alert_ids', () => ({
+  useOriginalAlertIds: jest.fn(),
 }));
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  getOriginalAlertIds: jest.fn(({ alertIds }: { alertIds: string[] }) => alertIds),
-}));
-
 describe('useAttackEntitiesCounts', () => {
-  const getFieldsDataMock = jest.fn();
+  const mockUseOriginalAlertIds = jest.mocked(useOriginalAlertIds);
   const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      getFieldsData: getFieldsDataMock,
-    });
+    mockUseOriginalAlertIds.mockReturnValue([]);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
@@ -43,18 +36,10 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('returns zero counts and skips query when alertIds is empty', () => {
-    getFieldsDataMock.mockImplementation((field: string) => {
-      if (field === 'kibana.alert.attack_discovery.alert_ids') return [];
-      if (field === 'kibana.alert.attack_discovery.replacements') return {};
-      return null;
-    });
+    mockUseOriginalAlertIds.mockReturnValue([]);
 
     const { result } = renderHook(() => useAttackEntitiesCounts());
 
-    expect(getOriginalAlertIds).toHaveBeenCalledWith({
-      alertIds: [],
-      replacements: {},
-    });
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: true,
@@ -66,11 +51,7 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('passes query with ids filter and cardinality aggs when alertIds exist', () => {
-    getFieldsDataMock.mockImplementation((field: string) => {
-      if (field === 'kibana.alert.attack_discovery.alert_ids') return ['id1', 'id2'];
-      if (field === 'kibana.alert.attack_discovery.replacements') return {};
-      return null;
-    });
+    mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
 
     renderHook(() => useAttackEntitiesCounts());
 
@@ -90,11 +71,7 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('parses relatedUsers and relatedHosts from aggregations', () => {
-    getFieldsDataMock.mockImplementation((field: string) => {
-      if (field === 'kibana.alert.attack_discovery.alert_ids') return ['id1'];
-      if (field === 'kibana.alert.attack_discovery.replacements') return {};
-      return null;
-    });
+    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -122,11 +99,7 @@ describe('useAttackEntitiesCounts', () => {
   });
 
   it('returns zero when aggregations are missing', () => {
-    getFieldsDataMock.mockImplementation((field: string) => {
-      if (field === 'kibana.alert.attack_discovery.alert_ids') return ['id1'];
-      if (field === 'kibana.alert.attack_discovery.replacements') return {};
-      return null;
-    });
+    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {

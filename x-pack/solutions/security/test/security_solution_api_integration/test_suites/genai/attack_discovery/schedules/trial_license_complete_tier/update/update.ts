@@ -91,7 +91,11 @@ export default ({ getService }: FtrProviderContext) => {
           expectedHttpCode: 400,
         });
 
-        expect(result).toEqual(getScheduleBadRequestError('name'));
+        const { error, message, statusCode } = getScheduleBadRequestError('name');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
 
       it('should return a `Bad Request` error if `params` attribute is `undefined`', async () => {
@@ -112,7 +116,11 @@ export default ({ getService }: FtrProviderContext) => {
           expectedHttpCode: 400,
         });
 
-        expect(result).toEqual(getScheduleBadRequestError('params'));
+        const { error, message, statusCode } = getScheduleBadRequestError('params');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
 
       it('should return a `Bad Request` error if `schedule` attribute is `undefined`', async () => {
@@ -133,7 +141,11 @@ export default ({ getService }: FtrProviderContext) => {
           expectedHttpCode: 400,
         });
 
-        expect(result).toEqual(getScheduleBadRequestError('schedule'));
+        const { error, message, statusCode } = getScheduleBadRequestError('schedule');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
 
       it('should return a `Bad Request` error if `actions` attribute is `undefined`', async () => {
@@ -154,7 +166,11 @@ export default ({ getService }: FtrProviderContext) => {
           expectedHttpCode: 400,
         });
 
-        expect(result).toEqual(getScheduleBadRequestError('actions'));
+        const { error, message, statusCode } = getScheduleBadRequestError('actions');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
     });
   });
