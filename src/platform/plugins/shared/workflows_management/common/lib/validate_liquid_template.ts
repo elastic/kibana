@@ -10,7 +10,7 @@
 import type { Liquid } from 'liquidjs';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
-import { stripYamlCommentLines } from './yaml_comments';
+import { stripYamlComments } from './yaml_comments';
 
 export interface LiquidValidationError {
   message: string;
@@ -44,7 +44,7 @@ function convertOffsetToLineColumn(text: string, offset: number): { line: number
 }
 
 export function validateLiquidTemplate(yamlString: string): LiquidValidationError[] {
-  const strippedYaml = stripYamlCommentLines(yamlString);
+  const strippedYaml = stripYamlComments(yamlString);
   try {
     const liquid = getLiquidInstance();
     liquid.parse(strippedYaml);

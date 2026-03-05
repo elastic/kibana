@@ -12,7 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getPathAtOffset } from '../../../../common/lib/yaml';
-import { isOffsetInYamlComment } from '../../../../common/lib/yaml_comments';
+import { getYamlCommentRanges, isOffsetInYamlComment } from '../../../../common/lib/yaml_comments';
 import type { VariableItem } from '../model/types';
 
 export function collectAllVariables(
@@ -21,10 +21,11 @@ export function collectAllVariables(
   workflowGraph: WorkflowGraph
 ): VariableItem[] {
   const yamlString = model.getValue();
+  const commentRanges = getYamlCommentRanges(yamlString);
   const variableItems: VariableItem[] = [];
   for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
     const startOffset = match.index ?? 0;
-    if (!isOffsetInYamlComment(yamlString, startOffset)) {
+    if (!isOffsetInYamlComment(commentRanges, startOffset)) {
       const endOffset = startOffset + (match[0].length ?? 0);
       const startPosition = model.getPositionAt(startOffset);
       const endPosition = model.getPositionAt(endOffset);

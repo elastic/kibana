@@ -7,83 +7,116 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Finds the character index within a single line where a YAML comment begins,
- * or `-1` if the line contains no comment. Tracks single- and double-quoted
- * regions so that `#` inside strings is not treated as a comment.
- *
- * YAML rule: a `#` preceded by whitespace (or at column 0) that is not inside
- * a quoted scalar starts a comment that extends to end of line.
- */
-export const findInlineCommentStart = (line: string): number => {
-  let inDoubleQuote = false;
-  let inSingleQuote = false;
+import { type CST, Parser } from 'yaml';
 
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
+export interface CommentRange {
+  start: number;
+  end: number;
+}
 
-    if (inDoubleQuote) {
-      if (ch === '\\') {
-        i++;
-      } else if (ch === '"') {
-        inDoubleQuote = false;
-      }
-    } else if (inSingleQuote) {
-      if (ch === "'" && i + 1 < line.length && line[i + 1] === "'") {
-        i++;
-      } else if (ch === "'") {
-        inSingleQuote = false;
-      }
-    } else if (ch === '"') {
-      inDoubleQuote = true;
-    } else if (ch === "'") {
-      inSingleQuote = true;
-    } else if (ch === '#' && (i === 0 || line[i - 1] === ' ' || line[i - 1] === '\t')) {
-      return i;
+const collectSourceTokens = (
+  tokens: CST.SourceToken[] | undefined,
+  ranges: CommentRange[]
+): void => {
+  if (!tokens) return;
+  for (const st of tokens) {
+    if (st.type === 'comment') {
+      ranges.push({ start: st.offset, end: st.offset + st.source.length });
     }
   }
+};
 
-  return -1;
+const collectFromCollectionItem = (item: CST.CollectionItem, ranges: CommentRange[]): void => {
+  collectSourceTokens(item.start, ranges);
+  if (item.key) collectFromToken(item.key, ranges);
+  collectSourceTokens(item.sep, ranges);
+  if (item.value) collectFromToken(item.value, ranges);
 };
 
 /**
- * Checks whether the given offset falls within a YAML comment — either a
- * whole-line comment or an inline comment after a value.
+ * Walks a YAML CST token tree and appends every comment range
+ * (offset-based) to the provided array.
  */
-export const isOffsetInYamlComment = (text: string, offset: number): boolean => {
-  let lineStart = offset;
-  while (lineStart > 0 && text[lineStart - 1] !== '\n') {
-    lineStart--;
-  }
-
-  let lineEnd = offset;
-  while (lineEnd < text.length && text[lineEnd] !== '\n') {
-    lineEnd++;
-  }
-
-  const line = text.slice(lineStart, lineEnd);
-  const commentStart = findInlineCommentStart(line);
-  if (commentStart === -1) {
-    return false;
-  }
-
-  const offsetInLine = offset - lineStart;
-  return offsetInLine >= commentStart;
-};
-
-/**
- * Replaces the content of YAML comments (whole-line and inline) with spaces,
- * preserving string length and line count so that offset-based error positions
- * remain valid.
- */
-export const stripYamlCommentLines = (text: string): string =>
-  text
-    .split('\n')
-    .map((line) => {
-      const commentStart = findInlineCommentStart(line);
-      if (commentStart === -1) {
-        return line;
+const collectFromToken = (token: CST.Token, ranges: CommentRange[]): void => {
+  switch (token.type) {
+    case 'comment':
+      ranges.push({ start: token.offset, end: token.offset + token.source.length });
+      break;
+    case 'document':
+      collectSourceTokens(token.start, ranges);
+      if (token.value) collectFromToken(token.value, ranges);
+      collectSourceTokens(token.end, ranges);
+      break;
+    case 'block-map':
+    case 'block-seq':
+      for (const item of token.items) {
+        collectFromCollectionItem(item, ranges);
       }
-      return line.slice(0, commentStart) + ' '.repeat(line.length - commentStart);
-    })
-    .join('\n');
+      break;
+    case 'flow-collection':
+      for (const item of token.items) {
+        collectFromCollectionItem(item, ranges);
+      }
+      collectSourceTokens(token.end, ranges);
+      break;
+    case 'block-scalar':
+      for (const prop of token.props) {
+        collectFromToken(prop, ranges);
+      }
+      break;
+    case 'doc-end':
+      collectSourceTokens(token.end, ranges);
+      break;
+    case 'alias':
+    case 'scalar':
+    case 'single-quoted-scalar':
+    case 'double-quoted-scalar':
+      collectSourceTokens(token.end, ranges);
+      break;
+    default:
+      break;
+  }
+};
+
+/**
+ * Parses the YAML text at the CST level and returns the offset ranges of
+ * every comment token. The ranges are sorted by start offset.
+ *
+ * Unlike line-by-line `#` scanning, this correctly handles block scalars
+ * (`|`, `>`), flow collections, and other YAML constructs where `#` is
+ * content rather than a comment indicator.
+ */
+export const getYamlCommentRanges = (text: string): CommentRange[] => {
+  const parser = new Parser();
+  const ranges: CommentRange[] = [];
+  for (const token of parser.parse(text)) {
+    collectFromToken(token, ranges);
+  }
+  ranges.sort((a, b) => a.start - b.start);
+  return ranges;
+};
+
+/**
+ * Checks whether the given offset falls within a YAML comment range.
+ * Accepts pre-computed ranges from {@link getYamlCommentRanges} to avoid
+ * re-parsing when checking multiple offsets against the same text.
+ */
+export const isOffsetInYamlComment = (ranges: CommentRange[], offset: number): boolean =>
+  ranges.some((r) => offset >= r.start && offset < r.end);
+
+/**
+ * Replaces the content of YAML comments with spaces, preserving string
+ * length and line count so that offset-based error positions remain valid.
+ */
+export const stripYamlComments = (text: string): string => {
+  const ranges = getYamlCommentRanges(text);
+  const chars = text.split('');
+  for (const { start, end } of ranges) {
+    for (let i = start; i < end; i++) {
+      if (chars[i] !== '\n') {
+        chars[i] = ' ';
+      }
+    }
+  }
+  return chars.join('');
+};
