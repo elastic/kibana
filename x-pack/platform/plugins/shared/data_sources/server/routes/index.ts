@@ -36,8 +36,10 @@ import {
   PAGINATION_ITEMS_PER_PAGE_OPTIONS,
   WORKFLOWS_SCOPE,
   TOOLS_SCOPE,
+  BULK_DELETE_API_ROUTE,
 } from '../../common/constants';
 import { TYPE } from '../tasks/bulk_delete_task';
+import type { BulkDeleteDataSourceResult, BulkDeleteDataSourcesResponse } from '../../common';
 
 function createErrorResponse(
   response: KibanaResponseFactory,
@@ -500,6 +502,83 @@ export function registerRoutes(dependencies: RouteDependencies) {
       } catch (error) {
         logger.error(`Failed to delete data source: ${(error as Error).message}`);
         return createErrorResponse(response, 'Failed to delete data source', error as Error);
+      }
+    }
+  );
+
+  // Bulk delete selected data sources synchronously (inline).
+  // This is intended for the time being until we have a design update for asynchronous bulk deletion.
+  router.post(
+    {
+      path: BULK_DELETE_API_ROUTE,
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 1000 }),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization is delegated to underlying service plugins',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+      const { ids } = request.body;
+
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const [, { actions, agentBuilder }] = await getStartServices();
+        const actionsClient = await actions.getActionsClientWithRequest(request);
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+
+        const bulkGetResult = await savedObjectsClient.bulkGet<DataSourceAttributes>(
+          ids.map((id) => ({ type: DATA_SOURCE_SAVED_OBJECT_TYPE, id }))
+        );
+
+        const deleteResults = await Promise.allSettled(
+          bulkGetResult.saved_objects.map(async (dataSource) => {
+            if (dataSource.error) {
+              throw new Error(dataSource.error.message);
+            }
+            return deleteDataSourceAndRelatedResources({
+              dataSource,
+              savedObjectsClient,
+              actionsClient,
+              toolRegistry,
+              workflowManagement,
+              request,
+              logger,
+            });
+          })
+        );
+
+        const results: BulkDeleteDataSourceResult[] = deleteResults.map((result, index) => {
+          if (result.status !== 'fulfilled') {
+            const errorMessage =
+              result.reason instanceof Error ? result.reason.message : String(result.reason);
+            logger.error(`Failed to delete data source ${ids[index]}: ${errorMessage}`);
+            return {
+              id: ids[index],
+              success: false,
+              fullyDeleted: false,
+              error: errorMessage,
+            };
+          }
+
+          return {
+            id: ids[index],
+            ...result.value,
+          };
+        });
+
+        return response.ok<BulkDeleteDataSourcesResponse>({
+          body: { results },
+        });
+      } catch (error) {
+        logger.error(`Failed to bulk delete data sources: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to bulk delete data sources', error as Error);
       }
     }
   );
