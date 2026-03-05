@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 /**
@@ -26,7 +26,7 @@ export function extractMitreTechniques(rule: Partial<ReferenceRule>): Set<string
 }
 
 /**
- * ES|QL syntax validation using the official @kbn/esql-language parser.
+ * ES|QL syntax validation using the official @elastic/esql parser.
  */
 export function validateEsqlSyntax(query: string): { valid: boolean; error?: string } {
   if (!query || query.trim().length === 0) {
