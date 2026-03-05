@@ -587,22 +587,17 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
-  getInternalStateStore: () => InternalStateStore;
   getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<
-    InternalStateDependencies,
-    'getInternalState$' | 'getInternalStateStore' | 'getCascadedDocumentsStateManager'
-  >
+  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
-    getInternalStateStore: () => internalState,
     getCascadedDocumentsStateManager: (tabId) => {
       return createCascadedDocumentsStateManager({
         internalState,

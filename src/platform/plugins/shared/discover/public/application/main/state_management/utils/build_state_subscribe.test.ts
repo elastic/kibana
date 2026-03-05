@@ -45,7 +45,8 @@ describe('buildStateSubscribe', () => {
   const getSubscribeFn = () => {
     return buildStateSubscribe({
       dataState,
-      internalState: toolkit.internalState,
+      dispatch: toolkit.internalState.dispatch,
+      getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
       getCurrentTab: toolkit.getCurrentTab,

@@ -10,10 +10,11 @@
 import { isEqual } from 'lodash';
 import {
   internalStateActions,
-  type InternalStateStore,
+  type InternalStateDispatch,
   type RuntimeStateManager,
   selectTabRuntimeState,
   type TabState,
+  type DiscoverInternalState,
 } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -36,13 +37,15 @@ import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 export const buildStateSubscribe =
   ({
     dataState,
-    internalState,
+    dispatch,
+    getState,
     runtimeStateManager,
     services,
     getCurrentTab,
   }: {
     dataState: DiscoverDataStateContainer;
-    internalState: InternalStateStore;
+    dispatch: InternalStateDispatch;
+    getState: () => DiscoverInternalState;
     runtimeStateManager: RuntimeStateManager;
     services: DiscoverServices;
     getCurrentTab: () => TabState;
@@ -98,7 +101,7 @@ export const buildStateSubscribe =
           getCurrentTab().id
         )?.currentDataView$.getValue(),
         isEsqlMode,
-        internalState,
+        savedDataViews: getState().savedDataViews,
         runtimeStateManager,
         services,
       });
@@ -106,7 +109,7 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        await internalState.dispatch(
+        await dispatch(
           internalStateActions.updateAppStateAndReplaceUrl({
             tabId: getCurrentTab().id,
             appState: {
@@ -121,7 +124,7 @@ export const buildStateSubscribe =
       }
 
       dataState.reset();
-      internalState.dispatch(
+      dispatch(
         internalStateActions.assignNextDataView({
           tabId: getCurrentTab().id,
           dataView: nextDataView,

@@ -39,7 +39,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
   function initializeAndSyncThunkFn(
     dispatch,
     getState,
-    { services, runtimeStateManager, urlStateStorage, getInternalState$, getInternalStateStore }
+    { services, runtimeStateManager, urlStateStorage, getInternalState$ }
   ) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue();
@@ -210,7 +210,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
         dataState: dataStateContainer,
-        internalState: getInternalStateStore(),
+        dispatch,
+        getState,
         runtimeStateManager,
         services,
         getCurrentTab,

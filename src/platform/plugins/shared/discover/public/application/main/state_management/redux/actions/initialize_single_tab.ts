@@ -195,7 +195,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         currentDataView: persistedTabDataView,
         isEsqlMode,
         services,
-        internalState,
+        savedDataViews: getState().savedDataViews,
         runtimeStateManager,
       });
 
