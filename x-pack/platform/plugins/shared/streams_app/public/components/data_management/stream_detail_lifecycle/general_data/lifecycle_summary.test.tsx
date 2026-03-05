@@ -136,6 +136,7 @@ describe('LifecycleSummary', () => {
         from: isRoot ? name : 'logs',
       },
       effective_settings: {},
+      view_name: `$.${name}`,
       inherited_fields: {},
       data_stream_exists: true,
       dashboards: [],
