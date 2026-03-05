@@ -108,7 +108,6 @@ const apmRoutes = {
           >
             <ApmMainTemplate
               pageTitle={ServiceInventoryTitle}
-              environmentFilter={false}
               showServiceGroupSaveButton={false}
               showServiceGroupsNav
               selectedNavButton="serviceGroups"
