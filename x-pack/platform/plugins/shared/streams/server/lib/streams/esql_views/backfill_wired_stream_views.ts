@@ -105,7 +105,8 @@ export async function backfillWiredStreamViews({
         name: getEsqlViewName(def.name),
         query: getWiredStreamViewQuery(def.name, directChildren),
       });
-    }
+    },
+    { sequential: true }
   );
 
   logger.info('Wired stream ES|QL view backfill completed successfully.');

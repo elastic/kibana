@@ -9,7 +9,8 @@ import { groupBy } from 'lodash';
 
 /**
  * Processes items in depth-descending order: deepest items first, shallowest last.
- * Items at the same depth level are processed in parallel.
+ * Items at the same depth level are processed in parallel by default, or
+ * sequentially when `sequential: true` is passed.
  *
  * This is essential when parent items reference children (e.g. ingest pipelines,
  * ES|QL views) — children must exist before parents are created.
@@ -17,7 +18,8 @@ import { groupBy } from 'lodash';
 export async function processInDepthOrder<T>(
   items: T[],
   getDepth: (item: T) => number,
-  processFn: (item: T) => Promise<unknown>
+  processFn: (item: T) => Promise<unknown>,
+  options?: { sequential?: boolean }
 ): Promise<void> {
   if (items.length === 0) {
     return;
@@ -30,6 +32,12 @@ export async function processInDepthOrder<T>(
     .sort((a, b) => b - a);
 
   for (const depth of depths) {
-    await Promise.all(byDepth[depth].map(({ item }) => processFn(item)));
+    if (options?.sequential) {
+      for (const { item } of byDepth[depth]) {
+        await processFn(item);
+      }
+    } else {
+      await Promise.all(byDepth[depth].map(({ item }) => processFn(item)));
+    }
   }
 }

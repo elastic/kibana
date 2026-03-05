@@ -498,7 +498,8 @@ export class ExecutionPlan {
           logger: this.dependencies.logger,
           name: action.request.name,
           query: action.request.query,
-        })
+        }),
+      { sequential: true }
     );
   }
 

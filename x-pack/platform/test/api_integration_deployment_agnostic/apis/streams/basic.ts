@@ -1063,24 +1063,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           priority: `${MAX_PRIORITY}` as unknown as number,
         });
 
-        await putStream(
-          apiClient,
-          index,
-          {
-            ...emptyAssets,
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: { steps: [] },
-                settings: {},
-                wired: { fields: {}, routing: [] },
-                failure_store: { inherit: {} },
+        try {
+          await putStream(
+            apiClient,
+            index,
+            {
+              ...emptyAssets,
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  wired: { fields: {}, routing: [] },
+                  failure_store: { inherit: {} },
+                },
               },
             },
-          },
-          500
-        );
+            500
+          );
+        } finally {
+          await esClient.indices
+            .deleteIndexTemplate({ name: 'highest_priority_template' })
+            .catch(() => {});
+        }
       });
 
       it('does not allow super deeply nested streams', async () => {
