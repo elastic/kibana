@@ -192,7 +192,9 @@ describe('Lexer rule composition', () => {
   });
 
   it('json_root brace rules do not use @push/@pop', () => {
-    const jsonRoot = (consoleSharedLexerRules.tokenizer as any).json_root as any[];
+    const jsonRoot = (
+      consoleSharedLexerRules.tokenizer as Record<string, monaco.languages.IMonarchLanguageRule[]>
+    ).json_root;
 
     const braceRules = jsonRoot.filter((rule) => {
       const regex = Array.isArray(rule) ? rule[0] : rule?.regex;
@@ -208,7 +210,9 @@ describe('Lexer rule composition', () => {
   });
 
   it('json_root includes the Console-specific closing brace EOL rule', () => {
-    const jsonRoot = (consoleSharedLexerRules.tokenizer as any).json_root as any[];
+    const jsonRoot = (
+      consoleSharedLexerRules.tokenizer as Record<string, monaco.languages.IMonarchLanguageRule[]>
+    ).json_root;
 
     const hasRule = jsonRoot.some((rule) => {
       const regex = Array.isArray(rule) ? rule[0] : rule?.regex;
@@ -216,5 +220,75 @@ describe('Lexer rule composition', () => {
     });
 
     expect(hasRule).toBe(true);
+  });
+
+  it('correctly handles non-ASCII characters and apostrophes in "query" fields', () => {
+    const text = `GET _search
+{
+  "query": "Je cherche des vêtements d'été pour la plage",
+  "query": """Je cherche des vêtements d'été pour la plage""",
+  "query": "поиск"
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+
+    for (const lineTokens of tokenizedLines) {
+      for (const token of lineTokens) {
+        // Assert no 'invalid' tokens are generated for these cases
+        expect(token.type).not.toContain('invalid');
+      }
+    }
+  });
+
+  it('correctly groups mixed alphanumeric words without splitting them into numbers', () => {
+    const text = `GET _search
+{
+  "query": "L 1aB8 cD 6e F3gH0jS5wY xQ9mP 7"
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    const queryLineText = '  "query": "L 1aB8 cD 6e F3gH0jS5wY xQ9mP 7"';
+    const queryLine = getLine(queryLineText);
+
+    const oneAB8Token = queryLine.find(({ offset }) =>
+      queryLineText.substring(offset).startsWith('1aB8')
+    );
+    expect(oneAB8Token).toBeDefined();
+    // It should be treated as an identifier, not a number, so it shouldn't be split
+    expect(oneAB8Token?.type).toContain('identifier');
+
+    // 7 at the end should still be a number because it's just digits
+    const sevenToken = queryLine.find(({ offset }) =>
+      queryLineText.substring(offset).startsWith('7"')
+    );
+    expect(sevenToken).toBeDefined();
+    expect(sevenToken?.type).toContain('number');
+  });
+
+  it('correctly highlights KQL/Lucene syntax inside "query" fields', () => {
+    const text = `GET _search
+{
+  "query": "(information retrieval) OR (artificial intelligence)"
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    const queryLineText = '  "query": "(information retrieval) OR (artificial intelligence)"';
+    const queryLine = getLine(queryLineText);
+
+    const orToken = queryLine.find(({ offset }) =>
+      queryLineText.substring(offset).startsWith('OR')
+    );
+    expect(orToken).toBeDefined();
+    expect(orToken?.type).toContain('keyword'); // OR should be a keyword
+
+    const bracketToken = queryLine.find(({ offset }) =>
+      queryLineText.substring(offset).startsWith('(')
+    );
+    expect(bracketToken).toBeDefined();
+    expect(bracketToken?.type).toContain('paren'); // brackets should be recognized (either paren or bracket type depending on the lexer)
   });
 });
