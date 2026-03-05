@@ -137,7 +137,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-2
+      machineType: n2d-highmem-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105

@@ -5,25 +5,46 @@
  * 2.0.
  */
 
-import type { BaseFeature } from '@kbn/streams-schema';
-import { identifyFeatures } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { get } from 'lodash';
-import { tags } from '@kbn/scout';
+import { selectEvaluators } from '@kbn/evals';
+import type { BaseFeature } from '@kbn/streams-schema';
+import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { evaluate } from '../src/evaluate';
-import type { StreamsEvaluationWorkerFixtures } from '../src/types';
-import type {
-  FeatureIdentificationEvaluationDataset,
-  FeatureIdentificationEvaluationExample,
-  ValidFeatureType,
-} from './features_identification_datasets';
-import {
-  FEATURE_IDENTIFICATION_DATASETS,
-  VALID_FEATURE_TYPES,
-} from './features_identification_datasets';
+import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
 
-evaluate.describe.configure({ timeout: 300_000 });
+export const VALID_FEATURE_TYPES = [
+  'entity',
+  'infrastructure',
+  'technology',
+  'dependency',
+  'schema',
+] as const;
+
+export type ValidFeatureType = (typeof VALID_FEATURE_TYPES)[number];
+
+export interface FeatureExtractionEvaluationExample {
+  input: {
+    sample_documents: Array<SearchHit<Record<string, unknown>>>;
+  };
+  output: {
+    criteria: EvaluationCriterion[];
+    weight?: number;
+    min_features?: number;
+    max_features?: number;
+    max_confidence?: number;
+    required_types?: ValidFeatureType[];
+    forbidden_types?: ValidFeatureType[];
+    expected_ground_truth: string;
+    expected?: string;
+  };
+  metadata: Record<string, unknown> | null;
+}
+
+export interface FeatureIdentificationEvaluationDataset {
+  name: string;
+  description: string;
+  examples: FeatureExtractionEvaluationExample[];
+}
 
 /**
  * Deterministic CODE evaluators that run alongside the LLM-based criteria evaluator.
@@ -31,10 +52,16 @@ evaluate.describe.configure({ timeout: 300_000 });
  */
 
 interface CodeEvaluatorParams {
-  input: FeatureIdentificationEvaluationExample['input'];
-  output: { features: BaseFeature[] };
-  expected: FeatureIdentificationEvaluationExample['output'];
-  metadata: FeatureIdentificationEvaluationExample['metadata'];
+  input: Record<string, unknown>;
+  output: BaseFeature[];
+  expected: {
+    min_features?: number;
+    max_features?: number;
+    max_confidence?: number;
+    required_types?: ValidFeatureType[];
+    forbidden_types?: ValidFeatureType[];
+  };
+  metadata: Record<string, unknown> | null | undefined;
 }
 
 /**
@@ -46,13 +73,13 @@ const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
   evaluate: async ({ output }: CodeEvaluatorParams) => {
-    const features = output?.features ?? [];
+    const features = output ?? [];
     if (features.length === 0) {
       return { score: 1, explanation: 'No features to validate (vacuously valid)' };
     }
 
     const invalidFeatures = features.filter(
-      (f) => !VALID_FEATURE_TYPES.includes(f.type as ValidFeatureType)
+      (feature) => !VALID_FEATURE_TYPES.includes(feature.type as ValidFeatureType)
     );
 
     const score = (features.length - invalidFeatures.length) / features.length;
@@ -91,13 +118,9 @@ function parseKeyValuePairs(evidence: string): Array<{ key: string; value: strin
   return pairs;
 }
 
-function getNestedValue(doc: SearchHit<Record<string, unknown>>, path: string): unknown {
-  if (!doc.fields) {
-    return undefined;
-  }
-
-  if (path in doc.fields) {
-    return doc.fields[path];
+function getNestedValue(doc: Record<string, unknown>, path: string): unknown {
+  if (path in doc) {
+    return doc[path];
   }
 
   return get(doc, path);
@@ -107,7 +130,7 @@ function getNestedValue(doc: SearchHit<Record<string, unknown>>, path: string): 
  * Recursively extracts all string values from a document object,
  * so direct-quote evidence can be matched against any field.
  */
-function getAllStringValues(doc: SearchHit<Record<string, unknown>>): string[] {
+function getAllStringValues(doc: Record<string, unknown>): string[] {
   const values: string[] = [];
 
   const walk = (obj: unknown) => {
@@ -124,7 +147,7 @@ function getAllStringValues(doc: SearchHit<Record<string, unknown>>): string[] {
     }
   };
 
-  walk(doc.fields);
+  walk(doc);
   return values;
 }
 
@@ -136,10 +159,7 @@ function getAllStringValues(doc: SearchHit<Record<string, unknown>>): string[] {
  * 2. Direct quote evidence: checks if the text appears as a substring in any
  *    string value across all document fields.
  */
-function isEvidenceGrounded(
-  evidence: string,
-  documents: Array<SearchHit<Record<string, unknown>>>
-): boolean {
+function isEvidenceGrounded(evidence: string, documents: Array<Record<string, unknown>>): boolean {
   // Direct quote: check against all string values in all documents
   const matchesStringValue = documents.some((doc) => {
     const allValues = getAllStringValues(doc);
@@ -170,17 +190,41 @@ function isEvidenceGrounded(
  * Checks that every evidence string in every feature is grounded in the input
  * documents — either as a `field.path=value` snippet matching a document field,
  * or as a direct quote appearing in any string value.
+ *
+ * When features include `evidence_doc_ids`, additionally validates that:
+ * 1. All referenced `_id`s exist in the input documents.
+ * 2. Evidence strings are grounded in the specific referenced docs, not just
+ *    any input document.
  */
 const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
   evaluate: async ({ input, output }: CodeEvaluatorParams) => {
-    const features = output?.features ?? [];
-    const documents = input.sample_documents;
+    const features = output ?? [];
+    const rawDocs = Array.isArray(input.sample_documents)
+      ? (input.sample_documents as Array<Record<string, unknown>>)
+      : [];
+
+    const docsById = new Map<string, Record<string, unknown>>();
+    const documents = rawDocs.map((doc) => {
+      const id = doc._id as string | undefined;
+      const source = doc._source as Record<string, unknown> | undefined;
+      const resolved = source ?? doc;
+      if (id) {
+        docsById.set(id, resolved);
+      }
+      return resolved;
+    });
 
     let totalEvidence = 0;
     let groundedEvidence = 0;
     const ungroundedItems: string[] = [];
+
+    let totalDocIds = 0;
+    let validDocIds = 0;
+    let totalRefEvidence = 0;
+    let groundedRefEvidence = 0;
+    const docIdIssues: string[] = [];
 
     for (const feature of features) {
       const evidenceList = feature.evidence ?? [];
@@ -190,6 +234,34 @@ const evidenceGroundingEvaluator = {
           groundedEvidence++;
         } else {
           ungroundedItems.push(`Feature "${feature.id}": "${evidence}"`);
+        }
+      }
+
+      const docIds = feature.evidence_doc_ids ?? [];
+      if (docIds.length > 0) {
+        const refDocs: Array<Record<string, unknown>> = [];
+        for (const docId of docIds) {
+          totalDocIds++;
+          const doc = docsById.get(docId);
+          if (doc) {
+            validDocIds++;
+            refDocs.push(doc);
+          } else {
+            docIdIssues.push(`Feature "${feature.id}": unknown doc ID "${docId}"`);
+          }
+        }
+
+        if (refDocs.length > 0) {
+          for (const evidence of evidenceList) {
+            totalRefEvidence++;
+            if (isEvidenceGrounded(evidence, refDocs)) {
+              groundedRefEvidence++;
+            } else {
+              docIdIssues.push(
+                `Feature "${feature.id}": evidence not in referenced docs: "${evidence}"`
+              );
+            }
+          }
         }
       }
     }
@@ -204,18 +276,33 @@ const evidenceGroundingEvaluator = {
       };
     }
 
-    const score = groundedEvidence / totalEvidence;
+    const groundingScore = groundedEvidence / totalEvidence;
+    const docIdScore =
+      totalDocIds > 0
+        ? (validDocIds / totalDocIds +
+            (totalRefEvidence > 0 ? groundedRefEvidence / totalRefEvidence : 1)) /
+          2
+        : 1;
+    const score = totalDocIds > 0 ? (groundingScore + docIdScore) / 2 : groundingScore;
+
+    const allIssues = [...ungroundedItems, ...docIdIssues];
     return {
       score,
       explanation:
-        ungroundedItems.length > 0
-          ? `${
-              ungroundedItems.length
-            }/${totalEvidence} evidence strings not grounded: ${ungroundedItems
-              .slice(0, 3)
-              .join('; ')}`
-          : `All ${totalEvidence} evidence strings are grounded in input documents`,
-      details: { totalEvidence, groundedEvidence, ungroundedItems },
+        allIssues.length > 0
+          ? `${allIssues.slice(0, 5).join('; ')}`
+          : `All ${totalEvidence} evidence strings are grounded` +
+            (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
+      details: {
+        totalEvidence,
+        groundedEvidence,
+        ungroundedItems,
+        totalDocIds,
+        validDocIds,
+        totalRefEvidence,
+        groundedRefEvidence,
+        docIdIssues,
+      },
     };
   },
 };
@@ -228,7 +315,7 @@ const featureCountEvaluator = {
   name: 'feature_count',
   kind: 'CODE' as const,
   evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
-    const count = output?.features?.length ?? 0;
+    const count = output?.length ?? 0;
     const { min_features = -Infinity, max_features = Infinity } = expected;
 
     const issues: string[] = [];
@@ -261,7 +348,7 @@ const confidenceBoundsEvaluator = {
   evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
     const { max_confidence = 100 } = expected;
 
-    const features = output?.features ?? [];
+    const features = output ?? [];
     if (features.length === 0) {
       return {
         score: 1,
@@ -302,7 +389,7 @@ const typeAssertionsEvaluator = {
       return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
-    const features = output?.features ?? [];
+    const features = output ?? [];
     const presentTypes = new Set(features.map((f) => f.type));
     const issues: string[] = [];
     let totalAssertions = 0;
@@ -344,82 +431,28 @@ const typeAssertionsEvaluator = {
   },
 };
 
-const CODE_EVALUATORS = [
-  typeValidationEvaluator,
-  evidenceGroundingEvaluator,
-  featureCountEvaluator,
-  confidenceBoundsEvaluator,
-  typeAssertionsEvaluator,
-];
+export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
+  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
+  criteria: EvaluationCriterion[];
+}) => {
+  const base = selectEvaluators([
+    typeValidationEvaluator,
+    evidenceGroundingEvaluator,
+    featureCountEvaluator,
+    confidenceBoundsEvaluator,
+    typeAssertionsEvaluator,
+  ]);
 
-evaluate.describe(
-  'Streams features identification',
-  { tag: tags.serverless.observability.complete },
-  () => {
-    async function runFeatureIdentificationExperiment(
-      dataset: FeatureIdentificationEvaluationDataset,
-      {
-        executorClient,
-        inferenceClient,
-        logger,
-        evaluators,
-      }: Pick<
-        StreamsEvaluationWorkerFixtures,
-        'executorClient' | 'inferenceClient' | 'logger' | 'evaluators'
-      >
-    ) {
-      await executorClient.runExperiment(
-        {
-          dataset,
-          concurrency: 1,
-          task: async ({ input }: { input: FeatureIdentificationEvaluationExample['input'] }) => {
-            const { features } = await identifyFeatures({
-              streamName: 'test',
-              sampleDocuments: input.sample_documents,
-              systemPrompt: featuresPrompt,
-              inferenceClient,
-              logger,
-              signal: new AbortController().signal,
-            });
-
-            return { features };
-          },
-        },
-        [
-          {
-            name: 'feature_correctness',
-            kind: 'LLM' as const,
-            evaluate: async ({ input, output, expected, metadata }) => {
-              const result = await evaluators.criteria(expected.criteria).evaluate({
-                input,
-                expected,
-                output: output.features,
-                metadata,
-              });
-
-              return result;
-            },
-          },
-          ...CODE_EVALUATORS,
-        ]
-      );
-    }
-
-    // Run evaluation for each dataset
-    FEATURE_IDENTIFICATION_DATASETS.forEach((dataset) => {
-      evaluate.describe(dataset.name, () => {
-        evaluate(
-          'feature identification',
-          async ({ evaluators, inferenceClient, logger, executorClient }) => {
-            await runFeatureIdentificationExperiment(dataset, {
-              inferenceClient,
-              logger,
-              executorClient,
-              evaluators,
-            });
-          }
-        );
-      });
-    });
+  if (!scenarioCriteria) {
+    return base;
   }
-);
+
+  const { criteriaFn, criteria } = scenarioCriteria;
+  return [
+    ...base,
+    createScenarioCriteriaLlmEvaluator({
+      criteriaFn,
+      criteria,
+    }),
+  ];
+};

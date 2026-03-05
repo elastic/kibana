@@ -41,6 +41,8 @@ apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
    * it can only be changed with additive changes.
    */
   apiTest('Registered embeddable schemas have not changed', async ({ apiClient }) => {
+    apiTest.setTimeout(90000); // takes about 70-80 seconds to run
+
     // OAS paths are stored with leading slashes, so we need to use the full path here
     const oasPath = `/${DASHBOARD_API_PATH}`;
     const response = await apiClient.get(
