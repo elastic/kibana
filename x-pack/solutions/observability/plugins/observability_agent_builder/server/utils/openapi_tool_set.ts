@@ -38,37 +38,57 @@ class RestApiTool {
     this.schema = this.getOperationSchema(operation);
     this.handler = this.getOperationHandler(operation);
   }
+  buildHttpRequestFromOperation(
+    operation: OperationObject,
+    args: Record<string, any>
+  ): {
+    path: string;
+    method: string;
+    query: Record<string, string>;
+  } {
+    let path = operation.path;
+    const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
+    const pathParams = parameters.filter((p) => p.in === 'path');
+    for (const p of pathParams) {
+      if (!args[p.name] && p.required) {
+        throw new Error(`Missing required path param: ${p.name}`);
+      }
+      path = path.replace(`{${p.name}}`, encodeURIComponent(args[p.name]));
+    }
+
+    const queryParams = parameters.filter((p) => p.in === 'query');
+    const query: Record<string, string> = {};
+    for (const p of queryParams) {
+      if (args[p.name] != null) query[p.name] = args[p.name];
+    }
+    return {
+      path,
+      method: operation.method,
+      query,
+    };
+  }
+
+  getApiCallConsoleCommand(operation: OperationObject, args: Record<string, any>): string {
+    const { path, method, query } = this.buildHttpRequestFromOperation(operation, args);
+    return `${method.toUpperCase()} ${path}${
+      Object.keys(query).length
+        ? '?' +
+          Object.entries(query)
+            .map(([k, v]) => `${k}=${v}`)
+            .join('&')
+        : ''
+    }`;
+  }
   getOperationHandler(operation: OperationObject): ToolHandler {
     return async (args, esClient) => {
-      let path = operation.path;
-      const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
-      const pathParams = parameters.filter((p) => p.in === 'path');
-      for (const p of pathParams) {
-        if (!args[p.name] && p.required) {
-          throw new Error(`Missing required path param: ${p.name}`);
-        }
-        path = path.replace(`{${p.name}}`, encodeURIComponent(args[p.name]));
-      }
-
-      const queryParams = parameters.filter((p) => p.in === 'query');
-      const query: Record<string, string> = {};
-      for (const p of queryParams) {
-        if (args[p.name] != null) query[p.name] = args[p.name];
-      }
+      const { path, method, query } = this.buildHttpRequestFromOperation(operation, args);
 
       // equivalent command for debugging
-      const consoleCommand = `${operation.method.toUpperCase()} ${path}${
-        Object.keys(query).length
-          ? '?' +
-            Object.entries(query)
-              .map(([k, v]) => `${k}=${v}`)
-              .join('&')
-          : ''
-      }`;
+      const consoleCommand = this.getApiCallConsoleCommand(operation, args);
 
       try {
         const response = await esClient.asCurrentUser.transport.request({
-          method: operation.method,
+          method,
           path,
           querystring: Object.keys(query).length ? query : undefined,
         });
@@ -137,6 +157,9 @@ class RestApiTool {
   getName(): string {
     return this.name;
   }
+  getMethod(): string {
+    return this.operation.method;
+  }
   getHandler(): ToolHandler {
     return this.handler;
   }
@@ -189,7 +212,21 @@ export class OpenAPIToolSet {
     return this.tools.find((tool) => tool.getName() === operationId)?.getOperation();
   }
 
+  getApiCallConsoleCommand(operationId: string, args: Record<string, any>) {
+    const tool = this.tools.find((t) => t.getName() === operationId);
+    if (!tool) {
+      throw new Error(`No tool found for operationId: ${operationId}`);
+    }
+    return tool.getApiCallConsoleCommand(tool.getOperation(), args);
+  }
+
   getToolName(operationId: string): string | undefined {
     return this.tools.find((tool) => tool.getName() === operationId)?.getName();
+  }
+  getToolMethod(operationId: string): string | undefined {
+    return this.tools.find((tool) => tool.getName() === operationId)?.getMethod();
+  }
+  getToolPath(operationId: string): string | undefined {
+    return this.tools.find((tool) => tool.getName() === operationId)?.getOperation().path;
   }
 }

@@ -7,7 +7,12 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type {
+  ModelProvider,
+  ToolEventEmitter,
+  ToolPromptManager,
+  ToolStateManager,
+} from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { createElasticsearchToolGraph } from './graph';
@@ -19,6 +24,8 @@ export const getToolHandler = async ({
   esClient,
   events,
   request,
+  prompts,
+  stateManager,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   nlQuery: string;
@@ -26,6 +33,8 @@ export const getToolHandler = async ({
   esClient: IScopedClusterClient;
   events: ToolEventEmitter;
   request: KibanaRequest;
+  prompts: ToolPromptManager;
+  stateManager: ToolStateManager;
 }) => {
   const toolGraph = await createElasticsearchToolGraph({
     core,
@@ -33,6 +42,8 @@ export const getToolHandler = async ({
     esClient,
     events,
     request,
+    prompts,
+    stateManager,
   });
 
   return withActiveInferenceSpan(
@@ -52,7 +63,7 @@ export const getToolHandler = async ({
         throw new Error(outState.error);
       }
 
-      return outState.results[0];
+      return outState;
     }
   );
 };

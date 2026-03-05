@@ -44,13 +44,14 @@ export interface RetrieveDocumentationParams {
    * - "highlight": Use Elasticsearch semantic highlighter to build a summary (concatenating highlights)
    * - "truncate": Will keep the N first tokens
    * - "summarize": Will call the LLM asking to generate a contextualized summary of the document
+   * - "none": Will not apply any token reduction strategy, and return the full document even if it exceeds the max token limit.
    *
    * Overall, `summarize` is more efficient, but significantly slower, given that an additional
    * LLM call will be performed.
    *
    * Defaults to `highlight`
    */
-  tokenReductionStrategy?: 'highlight' | 'truncate' | 'summarize';
+  tokenReductionStrategy?: 'highlight' | 'truncate' | 'summarize' | 'none';
   /**
    * The request that initiated the task.
    */

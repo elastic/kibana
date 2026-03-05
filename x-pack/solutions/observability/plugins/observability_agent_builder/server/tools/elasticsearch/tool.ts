@@ -16,6 +16,7 @@ import type {
 } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
+
 export const OBSERVABILITY_ELASTICSEARCH_TOOL_ID = 'observability.elasticsearch';
 
 const ElasticsearchSchema = z.object({
@@ -46,22 +47,29 @@ export function createElasticsearchTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ nlQuery }, { modelProvider, esClient, events, request }) => {
+    handler: async (
+      { nlQuery },
+      { modelProvider, esClient, events, request, prompts, stateManager }
+    ) => {
       try {
-        const data = await getToolHandler({
+        const response = await getToolHandler({
           core,
           nlQuery,
           modelProvider,
           esClient,
           events,
           request,
+          prompts,
+          stateManager,
         });
-
+        if (response.prompt) {
+          return response.prompt;
+        }
         return {
           results: [
             {
               type: ToolResultType.other,
-              data,
+              data: response.results[0],
             },
           ],
         };
