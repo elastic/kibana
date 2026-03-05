@@ -15,6 +15,8 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import {
   AGENT_NAME,
   CONTAINER_ID,
@@ -89,10 +91,18 @@ export const apmRuleTypeAlertFieldMap = {
   },
 };
 
-// Defines which alerts-as-data index alerts will use
+const stringAsKeywords: MappingDynamicTemplate = {
+  path_match: `${ALERT_GROUPING}.*`,
+  match_mapping_type: 'string',
+  mapping: { type: 'keyword', ignore_above: 1024 },
+};
+
 export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityApmAlert> = {
   context: APM_RULE_TYPE_ALERT_CONTEXT,
-  mappings: { fieldMap: apmRuleTypeAlertFieldMap },
+  mappings: {
+    fieldMap: apmRuleTypeAlertFieldMap,
+    dynamicTemplates: [{ strings_as_keywords: stringAsKeywords }],
+  },
   useLegacyAlerts: true,
   shouldWrite: true,
 };
