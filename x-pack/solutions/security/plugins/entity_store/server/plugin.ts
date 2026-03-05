@@ -19,7 +19,10 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import { EngineDescriptorType } from './domain/definitions/saved_objects';
+import {
+  EngineDescriptorType,
+  EntityStoreGlobalStateType,
+} from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 import { CRUDClient } from './domain/crud_client';
@@ -74,6 +77,7 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
+    core.savedObjects.registerType(EntityStoreGlobalStateType);
 
     return {
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>

@@ -996,7 +996,7 @@ x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-inf
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-generative-ai
@@ -2466,6 +2466,9 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
 
