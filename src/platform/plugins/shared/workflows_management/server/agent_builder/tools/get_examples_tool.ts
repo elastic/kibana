@@ -7,33 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
-import { dirname, resolve } from 'path';
 import { ToolType } from '@kbn/agent-builder-common';
 import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
+import { loadWorkflowExampleContent } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const GET_EXAMPLES_TOOL_ID = 'platform.workflows.get_examples';
-
-let cachedExamplesDir: string | undefined;
-
-function getExamplesDir(): string {
-  if (!cachedExamplesDir) {
-    const pkgIndex = require.resolve('@kbn/workflows');
-    cachedExamplesDir = resolve(dirname(pkgIndex), 'spec', 'examples');
-  }
-  return cachedExamplesDir;
-}
-
-function loadExampleContent(filename: string): string | undefined {
-  try {
-    return readFileSync(resolve(getExamplesDir(), filename), 'utf-8');
-  } catch {
-    return undefined;
-  }
-}
 
 export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetupContract): void {
   agentBuilder.tools.register({
@@ -80,7 +61,7 @@ Supports keyword search across names, descriptions, and tags.`,
         if (!WORKFLOW_EXAMPLE_IDS.has(entry.id)) {
           return { id: entry.id, name: entry.name, category: entry.category };
         }
-        const yaml = loadExampleContent(entry.filename);
+        const yaml = loadWorkflowExampleContent(entry);
         return {
           id: entry.id,
           name: entry.name,

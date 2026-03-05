@@ -174,3 +174,12 @@ export function getWorkflowExample(id: string): WorkflowExampleEntry | undefined
   if (!WORKFLOW_EXAMPLE_IDS.has(id)) return undefined;
   return WORKFLOW_EXAMPLES.find((e) => e.id === id);
 }
+
+/**
+ * Absolute path to the bundled examples directory.
+ * Works in both dev and production because it uses `__dirname`.
+ * Server-side callers can combine this with `readFileSync` to load YAML content.
+ */
+export function getWorkflowExamplesDir(): string {
+  return __dirname;
+}

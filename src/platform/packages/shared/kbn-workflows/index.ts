@@ -28,6 +28,7 @@ export {
   WORKFLOW_EXAMPLE_IDS,
   getWorkflowExamples,
   getWorkflowExample,
+  getWorkflowExamplesDir,
 } from './spec/examples';
 export type { WorkflowExampleEntry } from './spec/examples';
 export { StepCategory, StepCategories } from './spec/step_definition_types';
