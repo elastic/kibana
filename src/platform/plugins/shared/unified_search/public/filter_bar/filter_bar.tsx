@@ -21,14 +21,13 @@ import type { IntlShape } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import type { ReactNode } from 'react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { i18n } from '@kbn/i18n';
 import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
-import { useUrlState, withUrlState } from '../utils/url_state';
 
 const collapseLabel = i18n.translate('unifiedSearch.filter.filterBar.collapseFiltersButtonLabel', {
   defaultMessage: 'Collapse filters',
@@ -80,7 +79,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   const isExpandable = filterCount > 1;
   const expandTooltipRef = useRef<EuiToolTip>(null);
-  const [isExpanded, setIsExpanded] = useUrlState('filterBarExpanded', true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const expandablePillsId = useGeneratedHtmlId();
 
   const filterPills = (
@@ -113,7 +112,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     setIsExpanded(!isExpanded);
     // Hide the expand button tooltip on click so that it doesn't block the new content
     expandTooltipRef.current?.hideToolTip();
-  }, [isExpanded, setIsExpanded]);
+  }, [isExpanded]);
 
   if (!isExpandable) {
     return filterPills;
@@ -210,4 +209,4 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   );
 });
 
-export const FilterBar = injectI18n(withUrlState(FilterBarUI));
+export const FilterBar = injectI18n(FilterBarUI);
