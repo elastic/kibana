@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StaticToolRegistration } from '@kbn/agent-builder-common';
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerGetWorkflowTool } from './get_workflow_tool';
 
 const mockWorkflow = {
@@ -25,8 +25,11 @@ const mockWorkflow = {
   valid: true,
 };
 
+const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
+  (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
+
 describe('registerGetWorkflowTool', () => {
-  let registeredTool: StaticToolRegistration<ZodObject<ZodRawShape>>;
+  let registeredTool: BuiltinToolDefinition;
   const mockApi = {
     getWorkflow: jest.fn(),
   } as any;
@@ -35,7 +38,7 @@ describe('registerGetWorkflowTool', () => {
     jest.clearAllMocks();
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: StaticToolRegistration<ZodObject<ZodRawShape>>) => {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
@@ -51,7 +54,7 @@ describe('registerGetWorkflowTool', () => {
 
   it('returns workflow details with YAML', async () => {
     mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-    const result = await registeredTool.handler({ workflowId: 'wf-1' } as any, context);
+    const result = await invokeHandler(registeredTool, { workflowId: 'wf-1' }, context);
     const data = result.results[0].data as any;
     expect(data.id).toBe('wf-1');
     expect(data.name).toBe('Alert Triage');
@@ -61,14 +64,14 @@ describe('registerGetWorkflowTool', () => {
 
   it('returns error for non-existent workflow', async () => {
     mockApi.getWorkflow.mockResolvedValue(null);
-    const result = await registeredTool.handler({ workflowId: 'missing' } as any, context);
+    const result = await invokeHandler(registeredTool, { workflowId: 'missing' }, context);
     const data = result.results[0].data as any;
     expect(data.error).toContain('not found');
   });
 
   it('returns results in expected shape', async () => {
     mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-    const result = await registeredTool.handler({ workflowId: 'wf-1' } as any, context);
+    const result = await invokeHandler(registeredTool, { workflowId: 'wf-1' }, context);
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
   });

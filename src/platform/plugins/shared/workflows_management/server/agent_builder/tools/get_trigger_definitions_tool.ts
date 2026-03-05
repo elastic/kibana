@@ -10,15 +10,14 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { builtInTriggerDefinitions } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
-import { z } from '@kbn/zod';
-import { z as zv4 } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const GET_TRIGGER_DEFINITIONS_TOOL_ID = 'platform.workflows.get_trigger_definitions';
 
-function zodToJsonSchemaSafe(schema: zv4.ZodType): unknown {
+function zodToJsonSchemaSafe(schema: z.ZodType): unknown {
   try {
-    return zv4.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
+    return z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
   } catch {
     return undefined;
   }

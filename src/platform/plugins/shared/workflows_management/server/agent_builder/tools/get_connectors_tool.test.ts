@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StaticToolRegistration } from '@kbn/agent-builder-common';
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerGetConnectorsTool } from './get_connectors_tool';
 
 const mockConnectorResponse = {
@@ -28,8 +28,11 @@ const mockConnectorResponse = {
   totalConnectors: 3,
 };
 
+const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
+  (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
+
 describe('registerGetConnectorsTool', () => {
-  let registeredTool: StaticToolRegistration<ZodObject<ZodRawShape>>;
+  let registeredTool: BuiltinToolDefinition;
   const mockApi = {
     getAvailableConnectors: jest.fn().mockResolvedValue(mockConnectorResponse),
   } as any;
@@ -38,7 +41,7 @@ describe('registerGetConnectorsTool', () => {
     jest.clearAllMocks();
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: StaticToolRegistration<ZodObject<ZodRawShape>>) => {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
@@ -53,7 +56,7 @@ describe('registerGetConnectorsTool', () => {
   });
 
   it('returns all connectors without filter', async () => {
-    const result = await registeredTool.handler({} as any, context);
+    const result = await invokeHandler(registeredTool, {}, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(3);
     expect(data.totalAvailable).toBe(3);
@@ -61,21 +64,21 @@ describe('registerGetConnectorsTool', () => {
   });
 
   it('filters by connectorType', async () => {
-    const result = await registeredTool.handler({ connectorType: '.slack' } as any, context);
+    const result = await invokeHandler(registeredTool, { connectorType: '.slack' }, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(2);
     expect(data.connectors.every((c: any) => c.type === '.slack')).toBe(true);
   });
 
   it('filters by search term', async () => {
-    const result = await registeredTool.handler({ search: 'alerts' } as any, context);
+    const result = await invokeHandler(registeredTool, { search: 'alerts' }, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(1);
     expect(data.connectors[0].name).toBe('Slack #alerts');
   });
 
   it('returns results in expected shape', async () => {
-    const result = await registeredTool.handler({} as any, context);
+    const result = await invokeHandler(registeredTool, {}, context);
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
     const data = result.results[0].data as any;

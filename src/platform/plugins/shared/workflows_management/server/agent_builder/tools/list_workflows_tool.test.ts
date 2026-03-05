@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StaticToolRegistration } from '@kbn/agent-builder-common';
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerListWorkflowsTool } from './list_workflows_tool';
 
 const mockWorkflowsResponse = {
@@ -41,8 +41,11 @@ const mockWorkflowsResponse = {
   ],
 };
 
+const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
+  (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
+
 describe('registerListWorkflowsTool', () => {
-  let registeredTool: StaticToolRegistration<ZodObject<ZodRawShape>>;
+  let registeredTool: BuiltinToolDefinition;
   const mockApi = {
     getWorkflows: jest.fn().mockResolvedValue(mockWorkflowsResponse),
   } as any;
@@ -51,7 +54,7 @@ describe('registerListWorkflowsTool', () => {
     jest.clearAllMocks();
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: StaticToolRegistration<ZodObject<ZodRawShape>>) => {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
@@ -66,7 +69,7 @@ describe('registerListWorkflowsTool', () => {
   });
 
   it('returns workflows without filter', async () => {
-    const result = await registeredTool.handler({} as any, context);
+    const result = await invokeHandler(registeredTool, {}, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(2);
     expect(data.total).toBe(2);
@@ -74,8 +77,9 @@ describe('registerListWorkflowsTool', () => {
   });
 
   it('passes query parameters to API', async () => {
-    await registeredTool.handler(
-      { query: 'alert', enabled: true, tags: ['security'], size: 10 } as any,
+    await invokeHandler(
+      registeredTool,
+      { query: 'alert', enabled: true, tags: ['security'], size: 10 },
       context
     );
     expect(mockApi.getWorkflows).toHaveBeenCalledWith(
@@ -91,7 +95,7 @@ describe('registerListWorkflowsTool', () => {
   });
 
   it('uses default size of 20', async () => {
-    await registeredTool.handler({} as any, context);
+    await invokeHandler(registeredTool, {}, context);
     expect(mockApi.getWorkflows).toHaveBeenCalledWith(
       expect.objectContaining({ size: 20 }),
       'default'
@@ -99,7 +103,7 @@ describe('registerListWorkflowsTool', () => {
   });
 
   it('returns results in expected shape', async () => {
-    const result = await registeredTool.handler({} as any, context);
+    const result = await invokeHandler(registeredTool, {}, context);
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
     const data = result.results[0].data as any;

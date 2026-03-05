@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StaticToolRegistration } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { WORKFLOW_EXAMPLES } from '@kbn/workflows';
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
 import { registerGetExamplesTool } from './get_examples_tool';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn(() => 'name: Test Workflow\nenabled: true'),
 }));
 
+const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
+  (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
+
 describe('registerGetExamplesTool', () => {
-  let registeredTool: StaticToolRegistration<ZodObject<ZodRawShape>>;
+  let registeredTool: BuiltinToolDefinition;
 
   beforeEach(() => {
     jest.clearAllMocks();
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: StaticToolRegistration<ZodObject<ZodRawShape>>) => {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
@@ -36,7 +39,7 @@ describe('registerGetExamplesTool', () => {
   });
 
   it('returns examples without filter', async () => {
-    const result = await registeredTool.handler({} as any, {} as any);
+    const result = await invokeHandler(registeredTool, {}, {});
     const data = result.results[0].data as any;
     expect(data.count).toBeGreaterThan(0);
     expect(data.count).toBeLessThanOrEqual(3);
@@ -44,19 +47,19 @@ describe('registerGetExamplesTool', () => {
   });
 
   it('respects default limit of 3', async () => {
-    const result = await registeredTool.handler({} as any, {} as any);
+    const result = await invokeHandler(registeredTool, {}, {});
     const data = result.results[0].data as any;
     expect(data.count).toBeLessThanOrEqual(3);
   });
 
   it('respects custom limit capped at 5', async () => {
-    const result = await registeredTool.handler({ limit: 10 } as any, {} as any);
+    const result = await invokeHandler(registeredTool, { limit: 10 }, {});
     const data = result.results[0].data as any;
     expect(data.count).toBeLessThanOrEqual(5);
   });
 
   it('filters by category', async () => {
-    const result = await registeredTool.handler({ category: 'security' } as any, {} as any);
+    const result = await invokeHandler(registeredTool, { category: 'security' }, {});
     const data = result.results[0].data as any;
     expect(data.count).toBeGreaterThan(0);
     const securityExamples = WORKFLOW_EXAMPLES.filter((e) => e.category === 'security');
@@ -64,20 +67,20 @@ describe('registerGetExamplesTool', () => {
   });
 
   it('filters by search term', async () => {
-    const result = await registeredTool.handler({ search: 'alert' } as any, {} as any);
+    const result = await invokeHandler(registeredTool, { search: 'alert' }, {});
     const data = result.results[0].data as any;
     expect(data.count).toBeGreaterThan(0);
   });
 
   it('includes YAML content in results', async () => {
-    const result = await registeredTool.handler({} as any, {} as any);
+    const result = await invokeHandler(registeredTool, {}, {});
     const data = result.results[0].data as any;
     expect(data.examples[0]).toHaveProperty('yaml');
     expect(data.examples[0].yaml).toContain('Test Workflow');
   });
 
   it('returns results in expected shape', async () => {
-    const result = await registeredTool.handler({} as any, {} as any);
+    const result = await invokeHandler(registeredTool, {}, {});
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
     const data = result.results[0].data as any;

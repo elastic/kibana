@@ -37,7 +37,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
@@ -56,9 +56,9 @@ export interface AgentBuilderPluginSetupContract {
     register: (definition: BuiltInAgentDefinition) => void;
   };
   tools: {
-    register: <RunInput extends ZodObject<ZodRawShape>>(
-      tool: StaticToolRegistration<RunInput>
-    ) => void;
+    // x-pack/platform/plugins/shared/agent_builder/server/services/tools/types.ts
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- any is used by the original type
+    register: <RunInput extends ZodObject<any>>(tool: StaticToolRegistration<RunInput>) => void;
   };
   attachments: {
     registerType: (definition: AttachmentTypeDefinition) => void;

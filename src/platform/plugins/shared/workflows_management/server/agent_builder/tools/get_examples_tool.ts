@@ -12,7 +12,7 @@ import { dirname, resolve } from 'path';
 import { ToolType } from '@kbn/agent-builder-common';
 import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const GET_EXAMPLES_TOOL_ID = 'platform.workflows.get_examples';

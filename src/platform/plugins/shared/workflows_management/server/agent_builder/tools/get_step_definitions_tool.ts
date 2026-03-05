@@ -18,8 +18,7 @@ import {
   StepCategory,
 } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
-import { z } from '@kbn/zod';
-import { z as zv4 } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { getAllConnectors } from '../../../common/schema';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
@@ -45,9 +44,9 @@ function categorizeConnectorType(type: string): StepCategory {
   return StepCategory.External;
 }
 
-function zodToJsonSchemaSafe(schema: zv4.ZodType): unknown {
+function zodToJsonSchemaSafe(schema: z.ZodType): unknown {
   try {
-    return zv4.toJSONSchema(schema, {
+    return z.toJSONSchema(schema, {
       target: 'draft-7',
       unrepresentable: 'any',
       reused: 'ref',
