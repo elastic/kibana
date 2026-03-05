@@ -46,6 +46,7 @@ export const SecondaryMenuItemComponent = ({
   badgeType,
   children,
   hasSubmenu,
+  hiddenByUser,
   href,
   iconType,
   id,

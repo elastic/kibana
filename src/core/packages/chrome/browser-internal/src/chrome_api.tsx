@@ -12,6 +12,7 @@ import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
@@ -25,16 +26,6 @@ type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
 type DocTitleStart = ReturnType<DocTitleService['start']>;
 type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
 
-interface ChromeComponents {
-  getClassicHeader: () => JSX.Element;
-  getProjectHeader: () => JSX.Element;
-  getProjectSideNav: () => JSX.Element;
-  getHeaderBanner: () => JSX.Element;
-  getChromelessHeader: () => JSX.Element;
-  getProjectAppMenu: () => JSX.Element;
-  getSidebar: () => JSX.Element;
-}
-
 export interface ChromeApiDeps {
   state: ChromeState;
   services: {
@@ -44,14 +35,14 @@ export interface ChromeApiDeps {
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
   };
-  components: ChromeComponents;
+  componentDeps: ChromeComponentsDeps;
   sidebar: SidebarStart;
 }
 
 export function createChromeApi({
   state,
   services,
-  components,
+  componentDeps,
   sidebar,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
@@ -89,14 +80,7 @@ export function createChromeApi({
   };
 
   return {
-    // Component factories (deprecated)
-    getClassicHeaderComponent: components.getClassicHeader,
-    getProjectHeaderComponent: components.getProjectHeader,
-    getProjectSideNavComponent: components.getProjectSideNav,
-    getHeaderBanner: components.getHeaderBanner,
-    getChromelessHeader: components.getChromelessHeader,
-    getProjectAppMenuComponent: components.getProjectAppMenu,
-    getSidebarComponent: components.getSidebar,
+    componentDeps,
     withProvider: (children: ReactNode) => {
       return <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>;
     },

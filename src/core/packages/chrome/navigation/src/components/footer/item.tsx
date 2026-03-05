@@ -39,7 +39,7 @@ export interface FooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, M
  */
 export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
   (
-    { badgeType, hasContent, iconType, id, isCurrent, isHighlighted, isNew, label, ...props },
+    { badgeType, hasContent, hiddenByUser, iconType, id, isCurrent, isHighlighted, isNew, label, ...props },
     ref: ForwardedRef<HTMLAnchorElement>
   ) => {
     const { euiTheme } = useEuiTheme();

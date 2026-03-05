@@ -44,6 +44,7 @@ export const PrimaryMenuItem = forwardRef<
       badgeType,
       children,
       hasContent,
+      hiddenByUser,
       href,
       iconType,
       id,

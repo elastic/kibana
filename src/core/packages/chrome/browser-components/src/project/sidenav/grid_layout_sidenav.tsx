@@ -10,19 +10,14 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
-import type { Observable } from 'rxjs';
 import { css, Global } from '@emotion/react';
+import { useChromeComponentsDeps } from '../../context';
 import { Navigation } from './navigation';
-import type { NavigationProps } from './types';
 
-export interface Props {
-  isCollapsed$: Observable<boolean>;
-  initialIsCollapsed: boolean;
-  navProps: NavigationProps;
-}
+export const GridLayoutProjectSideNav = () => {
+  const { basePath, application, project, navLinks$, sideNav } = useChromeComponentsDeps();
 
-export const GridLayoutProjectSideNav = ({ isCollapsed$, initialIsCollapsed, navProps }: Props) => {
-  const isCollapsed = useObservable(isCollapsed$, initialIsCollapsed);
+  const isCollapsed = useObservable(sideNav.collapsed$, sideNav.initialCollapsed);
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
     (width: number) => {
@@ -36,12 +31,20 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, initialIsCollapsed, nav
       <Global
         styles={css`
           :root {
-            // have to provide this fallback to avoid bugs when EuiCollapsibleNavBeta is missing
             --euiCollapsibleNavOffset: 0px;
           }
         `}
       />
-      <Navigation isCollapsed={isCollapsed} setWidth={setWidth} {...navProps} />
+      <Navigation
+        isCollapsed={isCollapsed}
+        setWidth={setWidth}
+        basePath={basePath}
+        application={application}
+        navigation$={project.navigation$}
+        navLinks$={navLinks$}
+        isEditing$={project.isEditing$}
+        onToggleCollapsed={sideNav.onToggleCollapsed}
+      />
     </>
   );
 };
