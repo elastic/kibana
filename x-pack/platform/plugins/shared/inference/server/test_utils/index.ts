@@ -6,6 +6,7 @@
  */
 
 export { chunkEvent, tokensEvent, messageEvent } from './chat_complete_events';
+export { createMask } from './create_mask';
 export { createInferenceConnectorMock } from './inference_connector';
 export { createInferenceConnectorAdapterMock } from './inference_connector_adapter';
 export { createInferenceExecutorMock } from './inference_executor';
