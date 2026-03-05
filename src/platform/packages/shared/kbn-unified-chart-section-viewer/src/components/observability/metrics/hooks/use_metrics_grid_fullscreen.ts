@@ -84,7 +84,6 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         background-color: ${euiTheme.colors.backgroundBasePlain};
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
-        ${logicalCSS('height', '100vh')}
         overflow: hidden;
 
         .euiHeader[data-fixed-header] {

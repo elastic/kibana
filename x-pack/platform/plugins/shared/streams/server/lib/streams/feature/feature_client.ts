@@ -9,8 +9,8 @@ import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { BaseFeature, Feature } from '@kbn/streams-schema';
+import { isDuplicateFeature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import { isEqual } from 'lodash';
 import {
   STREAM_NAME,
   FEATURE_ID,
@@ -27,6 +27,7 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EVIDENCE_DOC_IDS,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -163,12 +164,25 @@ export class FeatureClient {
       return { hits: [], total: 0 };
     }
 
+    const filterClauses: QueryDslQueryContainer[] = [
+      ...termsQuery(STREAM_NAME, streams),
+      {
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
+            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
     const featuresResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: true,
       query: {
         bool: {
-          filter: [{ terms: { [STREAM_NAME]: streams } }],
+          filter: filterClauses,
         },
       },
     });
@@ -214,15 +228,7 @@ export class FeatureClient {
     existingFeatures: Feature[];
     feature: BaseFeature;
   }): Feature | undefined {
-    const normalizedId = feature.id.toLowerCase();
-
-    return existingFeatures.find(
-      (existing) =>
-        (existing.type === feature.type &&
-          existing.subtype === feature.subtype &&
-          isEqual(existing.properties, feature.properties)) ||
-        existing.id.toLowerCase() === normalizedId
-    );
+    return existingFeatures.find((existing) => isDuplicateFeature(existing, feature));
   }
 }
 
@@ -236,6 +242,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [FEATURE_PROPERTIES]: feature.properties,
     [FEATURE_CONFIDENCE]: feature.confidence,
     [FEATURE_EVIDENCE]: feature.evidence,
+    [FEATURE_EVIDENCE_DOC_IDS]: feature.evidence_doc_ids,
     [FEATURE_STATUS]: feature.status,
     [FEATURE_LAST_SEEN]: feature.last_seen,
     [FEATURE_TAGS]: feature.tags,
@@ -257,6 +264,7 @@ function fromStorage(feature: StoredFeature): Feature {
     properties: feature[FEATURE_PROPERTIES],
     confidence: feature[FEATURE_CONFIDENCE],
     evidence: feature[FEATURE_EVIDENCE],
+    evidence_doc_ids: feature[FEATURE_EVIDENCE_DOC_IDS],
     status: feature[FEATURE_STATUS],
     last_seen: feature[FEATURE_LAST_SEEN],
     tags: feature[FEATURE_TAGS],

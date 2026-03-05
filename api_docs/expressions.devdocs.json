@@ -8530,7 +8530,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"pending\" | \"not-started\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "lineNumber": 20,
@@ -9627,7 +9627,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [
-                  "Object with functions to perform side effects. This object\nis created for the duration of the execution of expression and is the\nsame for all functions in expression chain."
+                  "Object with functions to perform side effects. This object"
                 ],
                 "signature": [
                   "Context"
@@ -11310,7 +11310,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
-                "description": [],
+                "description": [
+                  "// This any is for legacy reasons."
+                ],
                 "signature": [
                   "Input"
                 ],
@@ -13064,7 +13066,7 @@
                 "section": "def-public.ExpressionRenderError",
                 "text": "ExpressionRenderError"
               },
-              " | null | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactElement<any, string | React.JSXElementConstructor<any>>[]) | undefined"
+              " | null | undefined) => React.ReactElement<any> | React.ReactElement<any>[]) | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "lineNumber": 24,
@@ -13124,10 +13126,26 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xs\" | undefined"
+              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ReactExpressionRendererProps.paddingTop",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "paddingTop",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13363,7 +13381,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -13627,7 +13645,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
-        "lineNumber": 32,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -14064,7 +14082,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "lineNumber": 25,
@@ -14152,7 +14170,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -21181,7 +21199,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"pending\" | \"not-started\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "lineNumber": 20,
@@ -22243,7 +22261,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [
-                  "Object with functions to perform side effects. This object\nis created for the duration of the execution of expression and is the\nsame for all functions in expression chain."
+                  "Object with functions to perform side effects. This object"
                 ],
                 "signature": [
                   "Context"
@@ -24355,7 +24373,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -24972,7 +24990,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "lineNumber": 25,
@@ -32094,7 +32112,9 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [],
+            "description": [
+              "Optional options, set `allowColumnOverwrite` to true to not raise an exception if the output column exists already"
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/series_calculation_helpers.ts",
             "lineNumber": 39,
             "columnNumber": 12,
@@ -33870,7 +33890,7 @@
               "\nThe Kibana normalized type of the column"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "lineNumber": 69,
@@ -34988,7 +35008,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"pending\" | \"not-started\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "lineNumber": 20,
@@ -36687,7 +36707,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [
-                  "Object with functions to perform side effects. This object\nis created for the duration of the execution of expression and is the\nsame for all functions in expression chain."
+                  "Object with functions to perform side effects. This object"
                 ],
                 "signature": [
                   "Context"
@@ -38580,7 +38600,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
-                "description": [],
+                "description": [
+                  "// This any is for legacy reasons."
+                ],
                 "signature": [
                   "Input"
                 ],
@@ -40794,7 +40816,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -42102,7 +42124,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "lineNumber": 25,

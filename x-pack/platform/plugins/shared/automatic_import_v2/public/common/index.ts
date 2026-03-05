@@ -8,6 +8,7 @@
 export { useKibana } from './hooks/use_kibana';
 export { useFetchIndices } from './hooks/use_fetch_indices';
 export { useGetIntegrationById } from './hooks/use_get_integration_by_id';
+export { useGetAllIntegrations } from './hooks/use_get_all_integrations';
 export { useCreateUpdateIntegration } from './hooks/use_create_update_integration';
 export { useLoadConnectors } from './hooks/use_load_connectors';
 export { useValidateIndex } from './hooks/use_validate_index';
@@ -15,6 +16,7 @@ export { useUploadSamples } from './hooks/use_upload_samples';
 export { useDeleteDataStream } from './hooks/use_delete_data_stream';
 export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
 export { useReanalyzeDataStream } from './hooks/use_reanalyze_data_stream';
+export { useUpdateDataStreamPipeline } from './hooks/use_update_data_stream_pipeline';
 
 export {
   INDEX_VALIDATION_FAILED,
@@ -29,15 +31,21 @@ export {
 export {
   FLEET_PACKAGES_PATH,
   AUTOMATIC_IMPORT_INTEGRATIONS_PATH,
+  runInstallPackage,
   getInstalledPackages,
   createIntegration,
+  getAllIntegrations,
   getIntegrationById,
+  updateDataStreamPipeline,
 } from './lib/api';
+export { getIntegrationNameFromResponse } from './lib/api_parsers';
 
 export type {
+  RequestDeps,
   CreateUpdateIntegrationRequest,
   UploadSamplesRequest,
   GetDataStreamResultsResponse,
+  UpdateDataStreamPipelineRequest,
 } from './lib/api';
 
 export { getLangSmithOptions } from './lib/lang_smith';

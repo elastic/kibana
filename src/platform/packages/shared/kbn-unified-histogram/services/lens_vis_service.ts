@@ -519,7 +519,7 @@ export class LensVisService {
     }
 
     if (
-      dataView.isTimeBased() &&
+      dataView.timeFieldName &&
       timeRange &&
       isOfAggregateQueryType(query) &&
       !hasTransformationalCommand(query.esql)

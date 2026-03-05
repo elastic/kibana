@@ -43,7 +43,7 @@ export const useStyles = ({
 
     const children: CSSObject = {
       position: 'relative',
-      color: colors.ghost,
+      color: colors.textGhost,
       marginLeft: size.base,
       paddingLeft: size.s,
       borderLeft: border.editable,

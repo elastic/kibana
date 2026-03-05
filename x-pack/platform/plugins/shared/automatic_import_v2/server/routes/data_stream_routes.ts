@@ -7,7 +7,8 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
@@ -19,15 +20,37 @@ import {
   ReanalyzeDataStreamRequestBody,
 } from '../../common';
 
+const isSecurityExceptionError = (err: unknown): boolean => {
+  if (!(err instanceof Error)) {
+    return false;
+  }
+
+  const elasticsearchError = err as Error & {
+    meta?: { body?: { error?: { type?: string } } };
+  };
+
+  return (
+    elasticsearchError.meta?.body?.error?.type === 'security_exception' ||
+    err.message.includes('security_exception')
+  );
+};
+
 export const registerDataStreamRoutes = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
   logger: Logger
 ) => {
   uploadSamplesRoute(router, logger);
   deleteDataStreamRoute(router, logger);
+  updateDataStreamPipelineRoute(router, logger);
   getDataStreamResultsRoute(router, logger);
   reanalyzeDataStreamRoute(router, logger);
 };
+
+const UpdateDataStreamPipelineRequestBody = z
+  .object({
+    ingest_pipeline: z.union([z.string(), z.record(z.unknown())]),
+  })
+  .strict();
 
 const uploadSamplesRoute = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
@@ -71,8 +94,14 @@ const uploadSamplesRoute = (
           });
           return response.ok({ body: result });
         } catch (err) {
-          logger.error(`registerDataStreamRoutes: Caught error:`, err);
+          logger.error(`uploadSamplesRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
+          if (isSecurityExceptionError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 403,
+              body: 'Missing required privileges to upload samples. This action requires Elasticsearch cluster privileges to manage index templates (for example: manage_index_templates).',
+            });
+          }
           return automaticImportResponse.error({
             statusCode: 500,
             body: err,
@@ -118,6 +147,62 @@ const deleteDataStreamRoute = (
           return automaticImportResponse.error({
             statusCode: 500,
             body: err,
+          });
+        }
+      }
+    );
+
+const updateDataStreamPipelineRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .patch({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(DeleteDataStreamRequestParams),
+            body: buildRouteValidationWithZod(UpdateDataStreamPipelineRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const { ingest_pipeline: ingestPipeline } = request.body;
+
+          const updatedResults = await automaticImportService.updateDataStreamPipeline({
+            integrationId,
+            dataStreamId,
+            ingestPipeline,
+            esClient: automaticImportv2.esClient,
+          });
+
+          return response.ok({ body: updatedResults });
+        } catch (err) {
+          logger.error(`updateDataStreamPipelineRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          const message = err instanceof Error ? err.message : String(err);
+          const isBadRequestError =
+            message.includes('Invalid ingest pipeline') ||
+            message.includes('No samples found') ||
+            message.includes('Unexpected token');
+
+          return automaticImportResponse.error({
+            statusCode: isBadRequestError ? 400 : 500,
+            body: message,
           });
         }
       }

@@ -161,6 +161,23 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
 
+        // Action 6 rollback (stored as UPGRADE with data.rollback=true, should surface as ROLLBACK)
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENT_ACTIONS_INDEX,
+          document: {
+            type: 'UPGRADE',
+            action_id: 'action6',
+            agents: ['agent1', 'agent2'],
+            '@timestamp': '2022-09-15T10:35:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
+            data: {
+              version: '8.12.0',
+              rollback: true,
+            },
+          },
+        });
+
         // Action 7 failed
         await es.index({
           refresh: 'wait_for',
@@ -290,6 +307,20 @@ export default function (providerContext: FtrProviderContext) {
             revision: 2,
           },
           {
+            actionId: 'action6',
+            nbAgentsActionCreated: 2,
+            nbAgentsAck: 0,
+            version: '8.12.0',
+            type: 'ROLLBACK',
+            nbAgentsActioned: 2,
+            status: 'IN_PROGRESS',
+            expiration: '2099-09-16T10:00:00.000Z',
+            creationTime: '2022-09-15T10:35:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
+          },
+          {
             actionId: 'action7',
             nbAgentsActionCreated: 1,
             nbAgentsAck: 0,
@@ -415,6 +446,20 @@ export default function (providerContext: FtrProviderContext) {
             revision: 2,
           },
           {
+            actionId: 'action6',
+            nbAgentsActionCreated: 2,
+            nbAgentsAck: 0,
+            version: '8.12.0',
+            type: 'ROLLBACK',
+            nbAgentsActioned: 2,
+            status: 'IN_PROGRESS',
+            expiration: '2099-09-16T10:00:00.000Z',
+            creationTime: '2022-09-15T10:35:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
+          },
+          {
             actionId: 'action7',
             nbAgentsActionCreated: 1,
             nbAgentsAck: 0,
@@ -436,6 +481,9 @@ export default function (providerContext: FtrProviderContext) {
               },
             ],
           },
+        ]);
+        res = await supertest.get(`/api/fleet/agents/action_status?page=1&perPage=5`).expect(200);
+        expect(res.body.items).to.eql([
           {
             actionId: 'action5',
             nbAgentsActionCreated: 3,
@@ -451,9 +499,6 @@ export default function (providerContext: FtrProviderContext) {
             cancellationTime: '2022-09-15T11:00:00.000Z',
             latestErrors: [],
           },
-        ]);
-        res = await supertest.get(`/api/fleet/agents/action_status?page=1&perPage=5`).expect(200);
-        expect(res.body.items).to.eql([
           {
             actionId: 'action4',
             nbAgentsActionCreated: 3,

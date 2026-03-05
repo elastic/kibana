@@ -11,16 +11,17 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
+  apiCanPinPanels,
+  apiHasSections,
   apiPublishesViewMode,
   fetch$,
-  useBatchedPublishingSubjects,
-  apiHasSections,
   initializeUnsavedChanges,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,
@@ -209,6 +210,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
@@ -222,6 +225,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value,
             fieldName,
             viewMode,
+            label,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -231,7 +235,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             editorStateManager.api.step$,
             selections.value$,
             dataControlManager.api.fieldName$,
-            viewMode$
+            viewMode$,
+            dataControlManager.api.label$
           );
 
           useEffect(() => {
@@ -241,6 +246,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -258,6 +265,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}
+              isPinned={isPinned}
+              label={label}
             />
           );
         },

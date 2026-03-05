@@ -10,6 +10,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
+import yaml from 'yaml';
 import type { Condition, FilterCondition } from '@kbn/streamlang';
 
 import { ConditionEditor } from './condition_editor';
@@ -41,6 +42,14 @@ jest.mock('../../../hooks/use_kibana', () => ({
       },
     },
   }),
+}));
+
+// Mock the condition YAML service
+jest.mock('./condition_yaml_service', () => ({
+  conditionYamlService: {
+    register: jest.fn().mockResolvedValue(undefined),
+    release: jest.fn().mockResolvedValue(undefined),
+  },
 }));
 
 const renderWithProviders = (ui: React.ReactElement) => {
@@ -116,7 +125,7 @@ describe('ConditionEditor', () => {
       expect(switchButton).toBeDisabled();
     });
 
-    it('does not call onConditionChange on every keystroke; emits on debounce when JSON is valid', async () => {
+    it('does not call onConditionChange on every keystroke; emits on debounce when YAML is valid', async () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -135,7 +144,7 @@ describe('ConditionEditor', () => {
       const textarea = screen.getByTestId(
         'streamsAppConditionEditorCodeEditor'
       ) as HTMLTextAreaElement;
-      const nextValue = JSON.stringify({ field: 'severity_text', eq: 'error' }, null, 2);
+      const nextValue = yaml.stringify({ field: 'severity_text', eq: 'error' });
 
       fireEvent.change(textarea, { target: { value: nextValue } });
       expect(mockOnConditionChange).not.toHaveBeenCalled();
@@ -150,7 +159,7 @@ describe('ConditionEditor', () => {
       jest.useRealTimers();
     });
 
-    it('flushes the last valid JSON immediately on blur', async () => {
+    it('flushes the last valid YAML immediately on blur', async () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -169,7 +178,7 @@ describe('ConditionEditor', () => {
       const textarea = screen.getByTestId(
         'streamsAppConditionEditorCodeEditor'
       ) as HTMLTextAreaElement;
-      const nextValue = JSON.stringify({ field: 'severity_text', eq: 'warn' }, null, 2);
+      const nextValue = yaml.stringify({ field: 'severity_text', eq: 'warn' });
 
       fireEvent.change(textarea, { target: { value: nextValue } });
       expect(mockOnConditionChange).not.toHaveBeenCalled();
@@ -227,7 +236,7 @@ describe('ConditionEditor', () => {
       const textarea = screen.getByTestId(
         'streamsAppConditionEditorCodeEditor'
       ) as HTMLTextAreaElement;
-      const nextValue = JSON.stringify({ field: 'severity_text', eq: 'debug' }, null, 2);
+      const nextValue = yaml.stringify({ field: 'severity_text', eq: 'debug' });
 
       fireEvent.change(textarea, { target: { value: nextValue } });
       expect(mockOnConditionChange).not.toHaveBeenCalled();
@@ -259,7 +268,7 @@ describe('ConditionEditor', () => {
       ).toBeInTheDocument();
     });
 
-    it('should NOT call onConditionChange when JSON parsing fails in syntax editor', async () => {
+    it('should NOT call onConditionChange when YAML parsing fails in syntax editor', async () => {
       const user = userEvent.setup();
       renderWithProviders(
         <ConditionEditor
@@ -279,15 +288,15 @@ describe('ConditionEditor', () => {
 
       const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
-      // Clear the editor to simulate empty/invalid JSON
+      // Clear the editor to simulate empty/invalid YAML
       await user.clear(codeEditor);
 
-      // Verify onConditionChange was NOT called when JSON is invalid
+      // Verify onConditionChange was NOT called when YAML is invalid
       // This prevents overriding user's partial input while typing
       expect(mockOnConditionChange).not.toHaveBeenCalled();
     });
 
-    it('should NOT call onConditionChange when syntax editor contains invalid JSON', async () => {
+    it('should NOT call onConditionChange when syntax editor contains invalid YAML', async () => {
       const user = userEvent.setup();
       renderWithProviders(
         <ConditionEditor
@@ -307,16 +316,15 @@ describe('ConditionEditor', () => {
 
       const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
-      // Type invalid JSON
-      await user.clear(codeEditor);
-      await user.type(codeEditor, '{{invalid');
+      // Set invalid YAML via fireEvent.change (userEvent.type has issues with special chars)
+      fireEvent.change(codeEditor, { target: { value: 'field: [unclosed' } });
 
-      // Verify onConditionChange was NOT called when JSON is invalid
+      // Verify onConditionChange was NOT called when YAML is invalid
       // This prevents overriding user's partial input while typing
       expect(mockOnConditionChange).not.toHaveBeenCalled();
     });
 
-    it('should call onConditionChange when syntax editor contains valid JSON', async () => {
+    it('should call onConditionChange when syntax editor contains valid YAML', async () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderWithProviders(
@@ -337,16 +345,16 @@ describe('ConditionEditor', () => {
 
       const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
-      // Set valid JSON via fireEvent.change (userEvent.type types character by character which is problematic)
-      const validJson = JSON.stringify({ field: 'test', eq: 'value' }, null, 2);
-      fireEvent.change(codeEditor, { target: { value: validJson } });
+      // Set valid YAML via fireEvent.change (userEvent.type types character by character which is problematic)
+      const validYaml = yaml.stringify({ field: 'test', eq: 'value' });
+      fireEvent.change(codeEditor, { target: { value: validYaml } });
 
       // Wait for debounce to complete
       act(() => {
         jest.advanceTimersByTime(400);
       });
 
-      // Verify onConditionChange was called with the parsed JSON
+      // Verify onConditionChange was called with the parsed YAML
       expect(mockOnConditionChange).toHaveBeenCalled();
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'test', eq: 'value' });
 
@@ -481,7 +489,7 @@ describe('ConditionEditor', () => {
   });
 
   describe('Validity plumbing', () => {
-    it('should report invalid JSON without changing the condition', async () => {
+    it('should report invalid YAML without changing the condition', async () => {
       const user = userEvent.setup();
       renderWithProviders(
         <ConditionEditor
@@ -496,13 +504,13 @@ describe('ConditionEditor', () => {
 
       const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
       await user.clear(editor);
-      await user.paste('{');
+      await user.paste('field: [unclosed');
 
       expect(mockOnConditionChange).not.toHaveBeenCalled();
       expect(mockOnValidityChange).toHaveBeenLastCalledWith(false);
     });
 
-    it('should not clobber local syntax text on rerender while JSON is invalid', async () => {
+    it('should not clobber local syntax text on rerender while YAML is invalid', async () => {
       const user = userEvent.setup();
       const { rerender } = renderWithProviders(
         <ConditionEditor
@@ -517,7 +525,7 @@ describe('ConditionEditor', () => {
 
       const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
       await user.clear(editor);
-      await user.paste('{');
+      await user.paste('field: [unclosed');
 
       rerender(
         <I18nProvider>
@@ -530,10 +538,12 @@ describe('ConditionEditor', () => {
         </I18nProvider>
       );
 
-      expect(screen.getByTestId('streamsAppConditionEditorCodeEditor')).toHaveValue('{');
+      expect(screen.getByTestId('streamsAppConditionEditorCodeEditor')).toHaveValue(
+        'field: [unclosed'
+      );
     });
 
-    it('should report valid JSON and update condition on parse', async () => {
+    it('should report valid YAML and update condition on parse', async () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderWithProviders(
@@ -549,9 +559,9 @@ describe('ConditionEditor', () => {
 
       const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
-      // Use fireEvent.change to set valid JSON directly
-      const validJson = '{"field":"severity_text","eq":"warn"}';
-      fireEvent.change(editor, { target: { value: validJson } });
+      // Use fireEvent.change to set valid YAML directly
+      const validYaml = 'field: severity_text\neq: warn\n';
+      fireEvent.change(editor, { target: { value: validYaml } });
 
       // Wait for debounce to complete
       act(() => {

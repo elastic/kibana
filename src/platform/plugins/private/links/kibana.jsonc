@@ -19,7 +19,6 @@
       "kibanaUtils",
       "presentationUtil",
       "uiActions",
-      "uiActionsEnhanced",
       "visualizations"
     ],
     "optionalPlugins": [

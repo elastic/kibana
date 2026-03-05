@@ -521,16 +521,16 @@ describe('#stop', () => {
   });
 });
 
-describe('CPS onRequest handler', () => {
-  it('passes onRequest to ClusterClient in non-serverless mode', async () => {
+describe('CPS onRequestHandlerFactory', () => {
+  it('passes onRequestHandlerFactory to ClusterClient in non-serverless mode', async () => {
     await elasticsearchService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
   });
 
-  it('passes onRequest to ClusterClient in serverless mode when CPS is enabled', async () => {
+  it('passes onRequestHandlerFactory to ClusterClient in serverless mode when CPS is enabled', async () => {
     configService.atPath.mockImplementation((path) => {
       if (path === 'elasticsearch') return mockConfig$;
       if (path === 'cps') return new BehaviorSubject({ cpsEnabled: true });
@@ -549,12 +549,12 @@ describe('CPS onRequest handler', () => {
     await serverlessService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
   });
 
-  it('passes onRequest to ClusterClient in serverless mode when CPS is disabled', async () => {
+  it('passes onRequestHandlerFactory to ClusterClient in serverless mode when CPS is disabled', async () => {
     configService.atPath.mockImplementation((path) => {
       if (path === 'elasticsearch') return mockConfig$;
       if (path === 'cps') return new BehaviorSubject({ cpsEnabled: false });
@@ -573,7 +573,7 @@ describe('CPS onRequest handler', () => {
     await serverlessService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
   });
@@ -597,7 +597,7 @@ describe('CPS onRequest handler', () => {
     await serverlessService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
   });

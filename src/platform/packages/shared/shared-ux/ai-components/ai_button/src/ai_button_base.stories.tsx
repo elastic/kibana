@@ -22,24 +22,29 @@ interface CommonStoryArgs {
   label: string;
   isDisabled: boolean;
   icon: AiIconType;
+  size: EuiButtonEmptySizes;
+  withIcon: boolean;
 }
 
 interface StoryArgs extends CommonStoryArgs {
-  variant: AiButtonVariant;
-  size: EuiButtonEmptySizes;
-  withIcon: boolean;
   iconOnly: boolean;
+  variant: AiButtonVariant;
 }
 
 interface ButtonComponentStoryArgs extends CommonStoryArgs {
-  size: EuiButtonEmptySizes;
-  iconSize?: EuiButtonSize;
-  withIcon: boolean;
+  variant?: 'base' | 'accent';
+  iconOnly: false;
+}
+
+interface EmptyComponentStoryArgs extends CommonStoryArgs {
+  variant: 'empty' | 'outlined';
+  iconOnly: false;
 }
 
 interface IconComponentStoryArgs extends CommonStoryArgs {
-  size: EuiButtonEmptySizes;
   variant: AiButtonVariant;
+  iconSize?: EuiButtonSize;
+  iconOnly: true;
 }
 
 export default {
@@ -58,12 +63,11 @@ export default {
 } as Meta<StoryArgs>;
 
 export const Default: StoryObj<StoryArgs> = {
-  render: (args) => {
-    const { label, variant, size, isDisabled, withIcon, iconOnly, icon } = args;
-
+  render: ({ label, variant, size, isDisabled, withIcon, iconOnly, icon }) => {
     if (iconOnly) {
       return (
-        <AiButtonIcon
+        <AiButton
+          iconOnly
           variant={variant}
           size={size}
           isDisabled={isDisabled}
@@ -86,18 +90,13 @@ export const Default: StoryObj<StoryArgs> = {
       );
     }
 
-    const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
-
-    if (withIcon) {
-      return (
-        <AiButton variant={variant} size={buttonSize} isDisabled={isDisabled} iconType={icon}>
-          {label}
-        </AiButton>
-      );
-    }
-
     return (
-      <AiButton variant={variant} size={buttonSize} isDisabled={isDisabled}>
+      <AiButton
+        variant={variant}
+        size={size}
+        isDisabled={isDisabled}
+        {...(withIcon ? { iconType: icon } : {})}
+      >
         {label}
       </AiButton>
     );
@@ -113,14 +112,19 @@ export const Default: StoryObj<StoryArgs> = {
   },
 };
 
-export const Base: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => {
+export const BaseOrAccent: StoryObj<ButtonComponentStoryArgs> = {
+  argTypes: {
+    variant: { control: 'select', options: ['base', 'accent'] },
+    iconOnly: { control: false },
+  },
+  render: ({ label, size, variant, isDisabled, withIcon, icon }) => {
     const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
     return (
       <AiButtonDefault
+        variant={variant}
         size={buttonSize}
         isDisabled={isDisabled}
-        {...(withIcon ? { iconType: icon, iconSize } : {})}
+        {...(withIcon ? { iconType: icon } : {})}
       >
         {label}
       </AiButtonDefault>
@@ -129,47 +133,28 @@ export const Base: StoryObj<ButtonComponentStoryArgs> = {
   args: {
     label: 'AI Assistant',
     size: 's',
+    variant: 'base',
     isDisabled: false,
     withIcon: false,
     icon: 'aiAssistantLogo',
   },
 };
 
-export const Accent: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => {
-    const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
+export const EmptyOrOutlined: StoryObj<EmptyComponentStoryArgs> = {
+  argTypes: {
+    variant: { control: 'select', options: ['empty', 'outlined'] },
+    iconOnly: { control: false },
+  },
+  render: ({ label, size, variant, isDisabled, withIcon, icon }) => {
     return (
-      <AiButtonDefault
-        variant="accent"
-        size={buttonSize}
-        isDisabled={isDisabled}
-        {...(withIcon ? { iconType: icon, iconSize } : {})}
-      >
+      <AiButtonEmpty size={size} isDisabled={isDisabled} {...(withIcon ? { iconType: icon } : {})}>
         {label}
-      </AiButtonDefault>
+      </AiButtonEmpty>
     );
   },
   args: {
     label: 'AI Assistant',
-    size: 's',
-    isDisabled: false,
-    withIcon: true,
-    icon: 'aiAssistantLogo',
-  },
-};
-
-export const Empty: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
-    <AiButtonEmpty
-      size={size}
-      isDisabled={isDisabled}
-      {...(withIcon ? { iconType: icon, iconSize } : {})}
-    >
-      {label}
-    </AiButtonEmpty>
-  ),
-  args: {
-    label: 'AI Assistant',
+    variant: 'empty',
     size: 's',
     isDisabled: false,
     withIcon: true,
@@ -178,6 +163,11 @@ export const Empty: StoryObj<ButtonComponentStoryArgs> = {
 };
 
 export const Icon: StoryObj<IconComponentStoryArgs> = {
+  argTypes: {
+    label: { name: 'aria-label' },
+    iconOnly: { control: false },
+    withIcon: { control: false },
+  },
   render: ({ label, size, isDisabled, variant, icon }) => (
     <AiButtonIcon
       size={size}

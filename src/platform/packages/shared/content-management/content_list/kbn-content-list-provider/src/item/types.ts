@@ -27,6 +27,8 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
   type?: string;
   /** Last update timestamp. */
   updatedAt?: Date;
+  /** Optional array of tag IDs associated with this item. */
+  tags?: string[];
 };
 
 /**
@@ -63,7 +65,7 @@ export interface ContentListItemConfig {
 
   /**
    * Callback invoked to delete one or more items.
-   * When provided, enables the delete action on rows.
+   * When provided, enables the delete action on rows and the bulk-delete flow.
    * The callback should handle the actual deletion and return a resolved promise on success.
    */
   onDelete?: (items: ContentListItem[]) => Promise<void>;

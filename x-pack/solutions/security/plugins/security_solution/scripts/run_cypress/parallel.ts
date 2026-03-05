@@ -32,8 +32,43 @@ import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations, setDefaultToolingLoggingLevel } from './utils';
+import {
+  orderSpecFilesForLoadBalance,
+  parseTestFileConfig,
+  retrieveIntegrations,
+  setDefaultToolingLoggingLevel,
+} from './utils';
 import { getFTRConfig } from './get_ftr_config';
+import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
+
+const filterCompletedSpecs = async (
+  specFiles: string[],
+  logger: { info: (...args: unknown[]) => void }
+): Promise<{ remaining: string[]; skippedCount: number }> => {
+  const completionStatus = await Promise.all(
+    specFiles.map(async (filePath) => {
+      const completed = await isSpecCompleted(filePath);
+      logger.info(`[cypress-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${filePath}`);
+      return { filePath, completed };
+    })
+  );
+
+  const skipped = completionStatus.filter((s) => s.completed);
+  const remaining = completionStatus.filter((s) => !s.completed).map((s) => s.filePath);
+
+  if (skipped.length > 0) {
+    logger.info(
+      `[cypress-checkpoint] Resumed: skipped ${skipped.length} already-completed, ` +
+        `${remaining.length} remaining`
+    );
+  } else {
+    logger.info(
+      `[cypress-checkpoint] No prior checkpoints found, running all ${remaining.length} specs`
+    );
+  }
+
+  return { remaining, skippedCount: skipped.length };
+};
 
 export const cli = () => {
   run(
@@ -134,7 +169,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               : undefined
           ); // convert the glob pattern to concrete file paths
 
-      let files = retrieveIntegrations(concreteFilePaths);
+      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
+      let files = retrieveIntegrations(orderedFilePaths);
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 
@@ -150,6 +186,23 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
         files = files.slice(0, 3);
+      }
+
+      let checkpointSkippedCount = 0;
+
+      // Checkpoint resume: on Buildkite retry, skip specs that already passed on a previous attempt
+      if (!isOpen && isInBuildkite()) {
+        log.info(
+          `[cypress-checkpoint] Checking ${files.length} specs for prior completion ` +
+            `(step=${process.env.BUILDKITE_STEP_ID || ''}, ` +
+            `job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, ` +
+            `retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`
+        );
+
+        await filterCompletedSpecs(files, log).then((checkpoint) => {
+          files = checkpoint.remaining;
+          checkpointSkippedCount = checkpoint.skippedCount;
+        });
       }
 
       if (!files?.length) {
@@ -331,6 +384,10 @@ ${JSON.stringify(
               let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
+              const esFromEnv = process.env.CYPRESS_ES_FROM;
+              const configEsFrom = config.get('esTestCluster.from');
+              const esFrom = esFromEnv || (configEsFrom === 'serverless' ? 'serverless' : 'docker');
+
               try {
                 shutdownEs = await pRetry(
                   async () =>
@@ -338,7 +395,7 @@ ${JSON.stringify(
                       config,
                       log,
                       name: `ftr-${esPort}`,
-                      esFrom: config.get('esTestCluster')?.from || 'snapshot',
+                      esFrom,
                       onEarlyExit,
                     }),
                   { retries: 2, forever: false }
@@ -466,6 +523,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   });
                   if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     _.pull(failedSpecFilePaths, filePath);
+                    if (!isOpen && isInBuildkite()) {
+                      markSpecCompleted(filePath).catch(() => {});
+                    }
                   }
                 }
               } catch (error) {
@@ -519,6 +579,12 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       ] as CypressCommandLine.CypressRunResult[];
 
       try {
+        if (checkpointSkippedCount > 0) {
+          log.info(
+            `[cypress-checkpoint] ${checkpointSkippedCount} spec(s) were skipped ` +
+              `(completed on a previous attempt)`
+          );
+        }
         renderSummaryTable(finalResults);
       } catch (e) {
         log.error('Failed to render summary table');

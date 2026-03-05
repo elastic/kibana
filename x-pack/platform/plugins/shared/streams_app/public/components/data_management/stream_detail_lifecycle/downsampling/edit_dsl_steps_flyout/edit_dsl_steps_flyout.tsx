@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFlyout,
   useGeneratedHtmlId,
@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 import {
@@ -30,21 +31,13 @@ import {
   createDslStepsFlyoutSerializer,
   type DslStepsFlyoutFormInternal,
   OnStepFieldErrorsChangeProvider,
+  parseInterval,
+  toMilliseconds,
   useDslStepsFlyoutTabErrors,
 } from './form';
 import { DslStepsFlyoutArrayView } from './sections';
 import { useStyles } from './use_styles';
-
-export interface EditDslStepsFlyoutProps {
-  initialSteps: IngestStreamLifecycleDSL;
-  selectedStepIndex: number | undefined;
-  setSelectedStepIndex: (index: number | undefined) => void;
-  onChange: (next: IngestStreamLifecycleDSL) => void;
-  onSave: (next: IngestStreamLifecycleDSL) => void;
-  onClose: () => void;
-  isSaving?: boolean;
-  'data-test-subj'?: string;
-}
+import type { EditDslStepsFlyoutChangeMeta, EditDslStepsFlyoutProps } from './types';
 
 const FragmentFormWrapper = ({ children }: React.PropsWithChildren) => <>{children}</>;
 
@@ -58,6 +51,7 @@ export const EditDslStepsFlyout = ({
   onChange,
   onSave,
   onClose,
+  onChangeDebounceMs = 250,
   isSaving,
   'data-test-subj': dataTestSubjProp,
 }: EditDslStepsFlyoutProps) => {
@@ -73,6 +67,15 @@ export const EditDslStepsFlyout = ({
   const expectedInitialStepsCountRef = useRef<number>(
     initialStepsRef.current.dsl?.downsample?.length ?? 0
   );
+
+  const dataRetentionInfo = useMemo(() => {
+    const retention = initialStepsRef.current.dsl?.data_retention;
+    const parsed = parseInterval(retention);
+    if (!parsed) return;
+    const ms = toMilliseconds(parsed.value, parsed.unit);
+    if (!Number.isFinite(ms) || ms < 0) return;
+    return { ms, esFormat: `${parsed.value}${parsed.unit}` };
+  }, []);
 
   const serializer = useMemo(() => createDslStepsFlyoutSerializer(initialStepsRef.current), []);
   const deserializer = useMemo(() => createDslStepsFlyoutDeserializer(), []);
@@ -93,11 +96,55 @@ export const EditDslStepsFlyout = ({
   }, [onChange]);
 
   const lastEmittedOutputRef = useRef<IngestStreamLifecycleDSL>(initialStepsRef.current);
+  const lastEmittedMetaRef = useRef<EditDslStepsFlyoutChangeMeta>({ invalidStepIndices: [] });
   const hasInitializedSubscriptionRef = useRef(false);
   const pendingOnChangeOutputRef = useRef<IngestStreamLifecycleDSL | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths } = useDslStepsFlyoutTabErrors();
+  const { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths, reindexErrorsAfterRemoval } =
+    useDslStepsFlyoutTabErrors();
+
+  const buildInvalidStepIndices = useCallback(
+    (next: IngestStreamLifecycleDSL): number[] => {
+      const stepCount = next.dsl?.downsample?.length ?? 0;
+      const indices: number[] = [];
+      for (let i = 0; i < stepCount; i++) {
+        const stepPath = `_meta.downsampleSteps[${i}]`;
+        if (tabHasErrors(stepPath)) indices.push(i);
+      }
+      return indices;
+    },
+    [tabHasErrors]
+  );
+
+  const scheduleOnChangeEmit = useCallback(() => {
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+    }
+
+    pendingOnChangeTimeoutRef.current = setTimeout(() => {
+      pendingOnChangeTimeoutRef.current = null;
+      const toEmit = pendingOnChangeOutputRef.current;
+      pendingOnChangeOutputRef.current = null;
+
+      if (!toEmit) return;
+
+      const metaToEmit: EditDslStepsFlyoutChangeMeta = {
+        invalidStepIndices: buildInvalidStepIndices(toEmit),
+      };
+
+      if (
+        isEqual(toEmit, lastEmittedOutputRef.current) &&
+        isEqual(metaToEmit, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
+
+      lastEmittedOutputRef.current = toEmit;
+      lastEmittedMetaRef.current = metaToEmit;
+      onChangeRef.current(toEmit, metaToEmit);
+    }, onChangeDebounceMs);
+  }, [buildInvalidStepIndices, onChangeDebounceMs]);
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
@@ -124,21 +171,19 @@ export const EditDslStepsFlyout = ({
         hasInitializedSubscriptionRef.current = true;
       }
 
-      if (isEqual(next, lastEmittedOutputRef.current)) return;
+      const metaForNext: EditDslStepsFlyoutChangeMeta = {
+        invalidStepIndices: buildInvalidStepIndices(next),
+      };
+
+      if (
+        isEqual(next, lastEmittedOutputRef.current) &&
+        isEqual(metaForNext, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
 
       pendingOnChangeOutputRef.current = next;
-      if (pendingOnChangeTimeoutRef.current) {
-        clearTimeout(pendingOnChangeTimeoutRef.current);
-      }
-      pendingOnChangeTimeoutRef.current = setTimeout(() => {
-        pendingOnChangeTimeoutRef.current = null;
-        const toEmit = pendingOnChangeOutputRef.current;
-        pendingOnChangeOutputRef.current = null;
-        if (!toEmit) return;
-        if (isEqual(toEmit, lastEmittedOutputRef.current)) return;
-        lastEmittedOutputRef.current = toEmit;
-        onChangeRef.current(toEmit);
-      }, 0);
+      scheduleOnChangeEmit();
     });
 
     return () => {
@@ -149,7 +194,47 @@ export const EditDslStepsFlyout = ({
       pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form]);
+  }, [buildInvalidStepIndices, form, onChangeDebounceMs, scheduleOnChangeEmit]);
+
+  useEffect(() => {
+    // Re-emit meta when tab errors change without any DSL change.
+    if (!hasInitializedSubscriptionRef.current) return;
+    if (pendingOnChangeTimeoutRef.current) return;
+    pendingOnChangeOutputRef.current = lastEmittedOutputRef.current;
+    scheduleOnChangeEmit();
+  }, [buildInvalidStepIndices, scheduleOnChangeEmit]);
+
+  const hasFormErrors = form.getErrors().length > 0;
+  const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;
+  const isSaveDisabled = isSaveDisabledDueToInvalid || form.isSubmitting;
+
+  const renderSaveButton = () => {
+    const button = (
+      <EuiButton
+        fill
+        isLoading={Boolean(isSaving) || form.isSubmitting}
+        data-test-subj={`${dataTestSubj}SaveButton`}
+        onClick={() => form.submit()}
+        disabled={isSaveDisabled}
+      >
+        {i18n.translate('xpack.streams.editDslStepsFlyout.save', {
+          defaultMessage: 'Save',
+        })}
+      </EuiButton>
+    );
+
+    return isSaveDisabledDueToInvalid ? (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.editDslStepsFlyout.saveDisabledTooltip', {
+          defaultMessage: 'Fix the form errors before saving.',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  };
 
   return (
     <EuiFlyout
@@ -180,6 +265,9 @@ export const EditDslStepsFlyout = ({
                 setSelectedStepIndex={setSelectedStepIndex}
                 tabHasErrors={tabHasErrors}
                 pruneToStepPaths={pruneToStepPaths}
+                reindexErrorsAfterRemoval={reindexErrorsAfterRemoval}
+                dataRetentionMs={dataRetentionInfo?.ms}
+                dataRetentionEsFormat={dataRetentionInfo?.esFormat}
               />
             )}
           </UseArray>
@@ -204,19 +292,7 @@ export const EditDslStepsFlyout = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={Boolean(isSaving) || form.isSubmitting}
-              data-test-subj={`${dataTestSubj}SaveButton`}
-              onClick={() => form.submit()}
-              disabled={(form.isSubmitted && form.isValid === false) || form.isSubmitting}
-            >
-              {i18n.translate('xpack.streams.editDslStepsFlyout.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

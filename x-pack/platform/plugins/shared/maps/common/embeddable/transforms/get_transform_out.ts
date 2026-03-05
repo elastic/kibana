@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
@@ -23,6 +23,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
   ) {
     const transformsFlow = flow(
       transformTitlesOut<StoredMapEmbeddableState>,
+      transformTimeRangeOut<StoredMapEmbeddableState>,
       (state: StoredMapEmbeddableState) => transformDrilldownsOut(state, panelReferences)
     );
     const state = transformsFlow(storedState);

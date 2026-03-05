@@ -19,6 +19,8 @@ import type {
   CoreSetup,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -38,6 +40,67 @@ import type {
   CreateUpdateIntegrationParams,
 } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
+
+/**
+ * Derives the integration status from its data streams.
+ * - 'approved' if all data streams are completed and there is at least one
+ * - 'completed' if all data streams are completed
+ * - 'failed' if any data stream has failed
+ * - 'processing' if any data stream is processing
+ * - 'pending' otherwise (no data streams or all pending)
+ */
+function deriveIntegrationStatus(
+  integration: IntegrationAttributes,
+  dataStreams: DataStreamAttributes[]
+): TaskStatus {
+  if (dataStreams.length === 0) {
+    return 'pending' as TaskStatus;
+  }
+
+  const statuses = dataStreams.map((ds) => ds.job_info?.status);
+
+  if (statuses.some((s) => s === TASK_STATUSES.failed)) {
+    return 'failed' as TaskStatus;
+  }
+  if (statuses.some((s) => s === TASK_STATUSES.processing)) {
+    return 'processing' as TaskStatus;
+  }
+  if (statuses.every((s) => s === TASK_STATUSES.completed)) {
+    if (integration.status === TASK_STATUSES.approved) {
+      return 'approved' as TaskStatus;
+    }
+    return 'completed' as TaskStatus;
+  }
+  return 'pending' as TaskStatus;
+}
+
+interface ElasticsearchErrorDetails {
+  reason?: string;
+  caused_by?: ElasticsearchErrorDetails;
+  root_cause?: ElasticsearchErrorDetails[];
+}
+
+interface ElasticsearchErrorLike {
+  message?: string;
+  body?: {
+    error?: ElasticsearchErrorDetails;
+  };
+  meta?: {
+    body?: {
+      error?: ElasticsearchErrorDetails;
+    };
+  };
+}
+
+function getElasticsearchErrorReason(error: Error | ElasticsearchErrorLike): string {
+  const errorLike = error as ElasticsearchErrorLike;
+  const esError = errorLike.meta?.body?.error ?? errorLike.body?.error;
+  const rootCauseReason = esError?.root_cause?.[0]?.reason;
+  const causedByReason = esError?.caused_by?.reason;
+  const directReason = esError?.reason;
+
+  return rootCauseReason ?? causedByReason ?? directReason ?? errorLike.message ?? 'Unknown error';
+}
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
 import type { AutomaticImportV2PluginStartDependencies } from '../types';
@@ -99,13 +162,14 @@ export class AutomaticImportService {
         const existing = await this.savedObjectService.getIntegration(
           integrationParams.integrationId
         );
-        const expectedVersion = existing.metadata?.version || '0.0.0';
+        const newVersion = existing.metadata?.version || '0.0.0';
 
         const updateData: IntegrationAttributes = {
           ...existing,
-          status: TASK_STATUSES.pending,
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
+          status:
+            existing.status === TASK_STATUSES.approved ? TASK_STATUSES.completed : existing.status,
           metadata: {
             ...existing.metadata,
             ...(integrationParams.title ? { title: integrationParams.title } : {}),
@@ -116,7 +180,7 @@ export class AutomaticImportService {
           },
         };
 
-        await this.savedObjectService.updateIntegration(updateData, expectedVersion);
+        await this.savedObjectService.updateIntegration(updateData, newVersion);
         this.logger.debug(`Integration ${integrationParams.integrationId} updated successfully`);
       } else {
         throw error;
@@ -146,7 +210,10 @@ export class AutomaticImportService {
       title: integrationSO.metadata.title,
       logo: integrationSO.metadata.logo,
       description: integrationSO.metadata.description,
-      status: integrationSO.status as TaskStatus,
+      version: integrationSO.metadata.version,
+      createdBy: integrationSO.created_by,
+      createdByProfileUid: integrationSO.created_by_profile_uid,
+      status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
       dataStreams: dataStreamsResponses,
     };
     return integrationResponse;
@@ -174,7 +241,10 @@ export class AutomaticImportService {
           title: integration.metadata.title,
           logo: integration.metadata.logo,
           description: integration.metadata.description,
-          status: integration.status as TaskStatus,
+          version: integration.metadata.version,
+          createdBy: integration.created_by,
+          createdByProfileUid: integration.created_by_profile_uid,
+          status: deriveIntegrationStatus(integration, dataStreams),
           dataStreams: dataStreamsResponses,
         };
       })
@@ -216,15 +286,15 @@ export class AutomaticImportService {
 
     const updateData: IntegrationAttributes = {
       ...existing,
-      status: TASK_STATUSES.approved,
       last_updated_by: authenticatedUser.username,
       last_updated_at: new Date().toISOString(),
+      status: TASK_STATUSES.approved,
       metadata: {
         ...existing.metadata,
       },
     };
 
-    // Update integration status and bump semantic version (defaults to patch).
+    // Bump semantic version (defaults to patch) on approval.
     await this.savedObjectService.updateIntegration(updateData, version);
   }
 
@@ -403,6 +473,76 @@ export class AutomaticImportService {
       ingest_pipeline: ingestPipelineObj,
       results,
     };
+  }
+
+  public async updateDataStreamPipeline(params: {
+    integrationId: string;
+    dataStreamId: string;
+    ingestPipeline: string | Record<string, unknown>;
+    esClient: ElasticsearchClient;
+  }): Promise<{
+    ingest_pipeline: Record<string, unknown>;
+    results: Array<Record<string, unknown>>;
+  }> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const { integrationId, dataStreamId, ingestPipeline, esClient } = params;
+
+    let parsedPipeline: Pipeline;
+    try {
+      const pipelineObject =
+        typeof ingestPipeline === 'string'
+          ? (JSON.parse(ingestPipeline) as Record<string, unknown>)
+          : ingestPipeline;
+      parsedPipeline = pipelineObject as unknown as Pipeline;
+    } catch (e) {
+      throw new Error(`Invalid ingest pipeline JSON: ${(e as Error).message}`);
+    }
+
+    if (!Array.isArray(parsedPipeline.processors)) {
+      throw new Error('Invalid ingest pipeline: "processors" must be an array');
+    }
+
+    const samples = await this.samplesIndexService.getSamplesForDataStream(
+      integrationId,
+      dataStreamId,
+      esClient
+    );
+    if (samples.length === 0) {
+      throw new Error(`No samples found for data stream ${dataStreamId}`);
+    }
+
+    let simulateResponse: estypes.IngestSimulateResponse;
+    try {
+      simulateResponse = await esClient.ingest.simulate({
+        pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
+        docs: samples.map((sample) => ({
+          _source: { message: sample },
+        })),
+      });
+    } catch (e) {
+      throw new Error(
+        `Invalid ingest pipeline: ${getElasticsearchErrorReason(
+          e as Error | ElasticsearchErrorLike
+        )}`
+      );
+    }
+
+    const pipelineDocs = (simulateResponse.docs ?? [])
+      .map((doc) => doc?.doc?._source)
+      .filter(
+        (source): source is NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source'] =>
+          source !== undefined
+      );
+
+    await this.savedObjectService.updateDataStreamSavedObjectAttributes({
+      integrationId,
+      dataStreamId,
+      ingestPipeline: parsedPipeline,
+      pipelineDocs,
+      status: TASK_STATUSES.completed,
+    });
+
+    return this.getDataStreamResults(integrationId, dataStreamId);
   }
 
   public stop() {
