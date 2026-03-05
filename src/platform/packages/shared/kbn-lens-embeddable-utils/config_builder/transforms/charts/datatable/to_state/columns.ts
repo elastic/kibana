@@ -8,8 +8,13 @@
  */
 import type { ColumnState } from '@kbn/lens-common';
 import type { DatatableState } from '../../../../schema';
-import { fromColorMappingAPIToLensState, fromColorByValueAPIToLensState } from '../../../coloring';
-import { getAccessorName, isColorByValueColor, isColorMappingColor } from '../helpers';
+import {
+  fromColorMappingAPIToLensState,
+  fromColorByValueAPIToLensState,
+  isColorMappingColor,
+  isColorByValueColor,
+} from '../../../coloring';
+import { getAccessorName } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,

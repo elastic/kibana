@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/management-plugin'
   - '@kbn/serverless'
   - '@kbn/utility-types'
-  - '@kbn/search-navigation'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/licensing-plugin'
   - '@kbn/inference-endpoint-ui-common'
