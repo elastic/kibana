@@ -51,10 +51,6 @@ groups:
         # options:
         #   - option: OPTIONAL
         #     description: "" OPTIONAL
-        # type: OPTIONAL ONe of static/dynamic
-        #   - cloud
-        #   - serverless
-        #   - self-managed
         # settings: OPTIONAL, nested settings list
         #   Child settings inherit applies_to from the parent unless overridden.
         #   - setting: "[n].url"
@@ -78,7 +74,7 @@ page_description: |
   This page demonstrates the full settings documentation schema.
 
   Settings descriptions can include inline applies annotations, for example:
-  {applies_to}`stack: ga 9.2` and {applies_to}`ess: ga`.
+  {applies_to}`stack: ga 9.2` and {applies_to}`ech: ga`.
 
 groups:
   - group: Example group
@@ -100,7 +96,7 @@ groups:
         default: ""
         applies_to:
           stack: ga 9.2
-          ess: ga
+          ech: ga
           self: ga
 
         settings:
@@ -124,7 +120,7 @@ groups:
         default: false
         applies_to:
           - "stack: deprecated 9.3+"
-          - "ess: ga"
+          - "ech: ga"
           - "self: ga"
         deprecation_details: "Deprecated starting in 9.3."
 ---
