@@ -10,22 +10,27 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import {
   type IdentifyFeaturesResult,
   type BaseFeature,
+  type Feature,
   isComputedFeature,
   isDuplicateFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
-import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
+import {
+  identifyFeatures,
+  generateAllComputedFeatures,
+  type IgnoredFeature,
+} from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LogMeta } from '@kbn/logging';
+import type { Logger, LogMeta } from '@kbn/logging';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
-import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
+import { MAX_FEATURE_AGE_MS, type FeatureClient } from '../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 import type { StreamsFeaturesIdentifiedProps } from '../../telemetry';
 
@@ -167,60 +172,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   featureClient.getFeatures(stream.name),
                 ]);
 
-                for (const ignored of ignoredFeatures) {
-                  taskContext.logger.debug(
-                    () =>
-                      `LLM ignored feature "${ignored.feature_id}" (matched deleted "${ignored.deleted_feature_id}"): ${ignored.reason}`
-                  );
-                }
-
-                const nonDeletedInferredFeatures = inferredBaseFeatures.filter((feature) => {
-                  const matchingDeleted = deletedFeatures.find((deleted) =>
-                    isDuplicateFeature(deleted, feature)
-                  );
-                  if (matchingDeleted) {
-                    taskContext.logger.debug(
-                      () =>
-                        `Dropping feature "${feature.id}" — matches soft-deleted feature "${matchingDeleted.id}"`
-                    );
-                    return false;
-                  }
-                  return true;
-                });
-
-                const identifiedFeatures: BaseFeature[] = [
-                  ...nonDeletedInferredFeatures,
-                  ...computedFeatures,
-                ];
-
-                let newFeaturesCount = nonDeletedInferredFeatures.length;
-                const now = Date.now();
-                const features = identifiedFeatures.map((feature) => {
-                  const existing = featureClient.findDuplicateFeature({
-                    existingFeatures,
-                    feature,
-                  });
-                  const isComputed = isComputedFeature(feature);
-                  if (existing && !isComputed) {
-                    newFeaturesCount--;
-                    taskContext.logger.debug(
-                      () =>
-                        `Overwriting feature with id [${
-                          feature.id
-                        }] since it already exists.\nExisting feature: ${JSON.stringify(
-                          existing
-                        )}\nNew feature: ${JSON.stringify(feature)}`
-                    );
-                  }
-                  return {
-                    ...feature,
-                    status: 'active' as const,
-                    last_seen: new Date(now).toISOString(),
-                    expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
-                    uuid: isComputed
-                      ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
-                      : existing?.uuid ?? uuid(),
-                  };
+                const { features, newFeaturesCount, codeIgnoredCount } = reconcileFeatures({
+                  inferredBaseFeatures,
+                  ignoredFeatures,
+                  computedFeatures,
+                  existingFeatures,
+                  deletedFeatures,
+                  featureClient,
+                  logger: taskContext.logger,
+                  streamName,
                 });
 
                 await featureClient.bulk(
@@ -233,9 +193,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { connectorId, start, end, streamName },
                   { features }
                 );
-
-                const codeIgnoredCount =
-                  inferredBaseFeatures.length - nonDeletedInferredFeatures.length;
 
                 taskContext.telemetry.trackFeaturesIdentified({
                   ...telemetryProps,
@@ -305,4 +262,81 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
       },
     },
   } satisfies TaskDefinitionRegistry;
+}
+
+function reconcileFeatures({
+  inferredBaseFeatures,
+  ignoredFeatures,
+  computedFeatures,
+  existingFeatures,
+  deletedFeatures,
+  featureClient,
+  logger,
+  streamName,
+}: {
+  inferredBaseFeatures: BaseFeature[];
+  ignoredFeatures: IgnoredFeature[];
+  computedFeatures: BaseFeature[];
+  existingFeatures: Feature[];
+  deletedFeatures: Feature[];
+  featureClient: FeatureClient;
+  logger: Logger;
+  streamName: string;
+}) {
+  for (const ignored of ignoredFeatures) {
+    logger.debug(
+      () =>
+        `LLM ignored feature "${ignored.feature_id}" (matched deleted "${ignored.deleted_feature_id}"): ${ignored.reason}`
+    );
+  }
+
+  const nonDeletedInferredFeatures = inferredBaseFeatures.filter((feature) => {
+    const matchingDeleted = deletedFeatures.find((deleted) => isDuplicateFeature(deleted, feature));
+    if (matchingDeleted) {
+      logger.debug(
+        () =>
+          `Dropping feature "${feature.id}" — matches soft-deleted feature "${matchingDeleted.id}"`
+      );
+      return false;
+    }
+    return true;
+  });
+
+  const identifiedFeatures: BaseFeature[] = [...nonDeletedInferredFeatures, ...computedFeatures];
+
+  let newFeaturesCount = nonDeletedInferredFeatures.length;
+  const now = Date.now();
+  const features = identifiedFeatures.map((feature) => {
+    const existing = featureClient.findDuplicateFeature({
+      existingFeatures,
+      feature,
+    });
+    const isComputed = isComputedFeature(feature);
+    if (existing && !isComputed) {
+      newFeaturesCount--;
+      logger.debug(
+        () =>
+          `Overwriting feature with id [${
+            feature.id
+          }] since it already exists.\nExisting feature: ${JSON.stringify(
+            existing
+          )}\nNew feature: ${JSON.stringify(feature)}`
+      );
+    }
+    return {
+      ...feature,
+      status: 'active' as const,
+      last_seen: new Date(now).toISOString(),
+      expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
+      uuid: isComputed
+        ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
+        : existing?.uuid ?? uuid(),
+    };
+  });
+
+  return {
+    features,
+    newFeaturesCount,
+    codeIgnoredCount: inferredBaseFeatures.length - nonDeletedInferredFeatures.length,
+  };
 }
