@@ -17,6 +17,7 @@ import type {
   SavedObjectsEsqlOptions,
   SavedObjectsEsqlResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { esql } from '@elastic/esql';
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 
@@ -101,12 +102,14 @@ export async function performEsql(
 
   const filter = mergeUserFilterWithNamespacesBool(esqlOptions.filter, namespacesBoolFilter);
 
-  // Build the full ES|QL query: FROM <indices> [METADATA ...] <pipeline>
+  // Build the FROM clause using the composer for safe construction.
+  // esql.from() parses indices and metadata through the ES|QL parser,
+  // preventing injection via malformed values.
   const indices = helpers.common.getIndicesForTypes(types);
-  let fromClause = `FROM ${indices.join(', ')}`;
-  if (metadata && metadata.length > 0) {
-    fromClause += ` METADATA ${metadata.join(', ')}`;
-  }
+  const fromClause =
+    metadata && metadata.length > 0
+      ? esql.from(indices, metadata).print()
+      : esql.from(indices).print();
   const query = `${fromClause} ${pipeline}`;
 
   const result = await rawClient.esql.query({
