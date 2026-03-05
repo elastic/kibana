@@ -12,7 +12,6 @@ import { doctorCmd } from './commands/doctor';
 import { envCmd } from './commands/env';
 import { ciMapCmd } from './commands/ci_map';
 import { compareCmd } from './commands/compare';
-import { summaryCmd } from './commands/summary';
 import { initCmd } from './commands/init';
 import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
@@ -36,7 +35,6 @@ export async function run() {
       envCmd,
       ciMapCmd,
       compareCmd,
-      summaryCmd,
     ]
   ).execute();
 }
