@@ -420,8 +420,7 @@
     "timestampField",
     "type"
   ],
-  "entity-store-global-state": [
-  ],
+  "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",
