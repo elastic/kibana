@@ -38,19 +38,10 @@ export interface RouteOptions {
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
-  authorizationCodeEnabled: boolean;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const {
-    router,
-    licenseState,
-    actionsConfigUtils,
-    logger,
-    core,
-    oauthRateLimiter,
-    authorizationCodeEnabled,
-  } = opts;
+  const { router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter } = opts;
 
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
@@ -63,12 +54,10 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionKPIRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
-  if (authorizationCodeEnabled) {
-    oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter);
-    oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
-    oauthCallbackScriptRoute(router);
-    oauthDisconnectRoute(router, licenseState, logger, core);
-  }
+  oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter);
+  oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
+  oauthCallbackScriptRoute(router);
+  oauthDisconnectRoute(router, licenseState, logger, core);
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 }

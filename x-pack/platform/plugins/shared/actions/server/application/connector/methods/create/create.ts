@@ -116,15 +116,11 @@ export async function create({
       outcome: 'unknown',
     })
   );
-  const authorizationCodeEnabled = context.authorizationCodeEnabled ?? false;
-
-  const authMode = authorizationCodeEnabled
-    ? inferAuthMode({
-        authTypeRegistry: context.authTypeRegistry,
-        secrets,
-        config,
-      })
-    : undefined;
+  const authMode = inferAuthMode({
+    authTypeRegistry: context.authTypeRegistry,
+    secrets,
+    config,
+  });
 
   const result = await tryCatch(
     async () =>

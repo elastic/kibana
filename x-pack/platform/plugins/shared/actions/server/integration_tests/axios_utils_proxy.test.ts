@@ -600,11 +600,6 @@ const BaseActionsConfig: ActionsConfig = {
     authorize: { lookbackWindow: '1h', limit: 100 },
     callback: { lookbackWindow: '1h', limit: 100 },
   },
-  auth: {
-    oauth_authorization_code: {
-      enabled: false,
-    },
-  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

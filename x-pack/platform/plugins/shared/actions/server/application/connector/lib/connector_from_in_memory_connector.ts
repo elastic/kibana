@@ -15,14 +15,12 @@ export function connectorFromInMemoryConnector({
   id,
   inMemoryConnector,
   actionTypeRegistry,
-  authorizationCodeEnabled,
 }: {
   id: string;
   inMemoryConnector: InMemoryConnector;
   actionTypeRegistry: ActionTypeRegistry;
-  authorizationCodeEnabled: boolean;
 }): Connector {
-  const authMode = getAuthMode(inMemoryConnector.authMode, authorizationCodeEnabled);
+  const authMode = getAuthMode(inMemoryConnector.authMode);
   const connector: Connector = {
     id,
     actionTypeId: inMemoryConnector.actionTypeId,
@@ -31,7 +29,7 @@ export function connectorFromInMemoryConnector({
     isSystemAction: inMemoryConnector.isSystemAction,
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
-    ...(authMode !== undefined ? { authMode } : {}),
+    authMode,
   };
 
   if (inMemoryConnector.exposeConfig) {

@@ -323,7 +323,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -504,7 +503,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -650,7 +648,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -727,7 +724,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -816,7 +812,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -902,7 +897,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -987,7 +981,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -1017,7 +1010,7 @@ describe('getAll()', () => {
       expect(connectorWithoutAuthMode!.authMode).toBe('shared');
     });
 
-    test('omits authMode when authorizationCodeEnabled is false', async () => {
+    test('always includes authMode in results', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
         per_page: 10,
@@ -1073,13 +1066,12 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: false,
       });
 
       const result = await actionsClient.getAll();
 
       result.forEach((connector) => {
-        expect(connector.authMode).toBeUndefined();
+        expect(connector.authMode).toBeDefined();
       });
     });
   });
@@ -1207,7 +1199,6 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAllSystemConnectors();
@@ -1224,7 +1215,7 @@ describe('getAll()', () => {
       ]);
     });
 
-    test('omits authMode from system connectors when authorizationCodeEnabled is false', async () => {
+    test('always includes authMode in system connector results', async () => {
       scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
         {
@@ -1259,13 +1250,12 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
-        authorizationCodeEnabled: false,
       });
 
       const result = await actionsClient.getAllSystemConnectors();
 
       result.forEach((connector) => {
-        expect(connector.authMode).toBeUndefined();
+        expect(connector.authMode).toBeDefined();
       });
     });
   });
@@ -1344,7 +1334,6 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'default',
       connectorTypeRegistry: actionTypeRegistry,
-      authorizationCodeEnabled: true,
     });
 
     expect(result).toContainConnectorsFindResult([
@@ -1513,7 +1502,6 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'custom',
       connectorTypeRegistry: actionTypeRegistry,
-      authorizationCodeEnabled: true,
     });
 
     expect(result).toContainConnectorsFindResult([
@@ -1668,7 +1656,6 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'default',
       connectorTypeRegistry: actionTypeRegistry,
-      authorizationCodeEnabled: true,
     });
 
     expect(result).toContainConnectorsFindResult([
@@ -1698,7 +1685,7 @@ describe('getAllUnsecured()', () => {
     );
   });
 
-  test('omits authMode when authorizationCodeEnabled is false', async () => {
+  test('always includes authMode in results', async () => {
     internalSavedObjectsRepository.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
@@ -1745,11 +1732,10 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'default',
       connectorTypeRegistry: actionTypeRegistry,
-      authorizationCodeEnabled: false,
     });
 
     result.forEach((connector) => {
-      expect(connector.authMode).toBeUndefined();
+      expect(connector.authMode).toBeDefined();
     });
   });
 });

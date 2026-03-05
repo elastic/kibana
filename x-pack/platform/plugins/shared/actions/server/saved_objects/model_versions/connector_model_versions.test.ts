@@ -10,10 +10,7 @@ import type {
   SavedObjectsFullModelVersion,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
-import {
-  connectorModelVersions,
-  connectorModelVersionsWithAuthMode,
-} from './connector_model_versions';
+import { connectorModelVersions } from './connector_model_versions';
 
 describe('Connector Model Versions', () => {
   describe('version 1', () => {
@@ -27,7 +24,7 @@ describe('Connector Model Versions', () => {
   });
 
   describe('version 2', () => {
-    const version2 = connectorModelVersionsWithAuthMode['2'] as SavedObjectsFullModelVersion;
+    const version2 = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
     const context: SavedObjectModelTransformationContext = {
       log: {
         get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),

@@ -47,7 +47,6 @@ const createActionsConfigMock = () => {
     getAwsSesConfig: jest.fn().mockReturnValue(null),
     getEnabledEmailServices: jest.fn().mockReturnValue(['*']),
     getMaxEmailBodyLength: jest.fn().mockReturnValue(DEFAULT_EMAIL_BODY_LENGTH),
-    getActionsAuthTypeConfig: jest.fn().mockReturnValue({ authorizationCodeEnabled: false }),
   };
   return mocked;
 };

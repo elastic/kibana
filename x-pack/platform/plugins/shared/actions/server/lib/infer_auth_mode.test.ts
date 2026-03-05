@@ -10,54 +10,39 @@ import { registerAuthTypes } from '../auth_types/register_auth_types';
 import { inferAuthMode } from './infer_auth_mode';
 
 describe('inferAuthMode', () => {
-  describe('with oAuthAuthorizationCodeEnabled: false (default)', () => {
-    const authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(authTypeRegistry, { authorizationCodeEnabled: false });
+  const authTypeRegistry = new AuthTypeRegistry();
+  registerAuthTypes(authTypeRegistry);
 
-    it('returns undefined when no authType is provided', () => {
-      const result = inferAuthMode({ authTypeRegistry });
-      expect(result).toBeUndefined();
-    });
-
-    it('returns undefined when auth type is not found', () => {
-      const result = inferAuthMode({ authTypeRegistry, secrets: { authType: 'unknown' } });
-      expect(result).toBeUndefined();
-    });
-
-    it('returns undefined for OAuth authorization code when feature is disabled', () => {
-      const result = inferAuthMode({
-        authTypeRegistry,
-        secrets: { authType: 'oauth_authorization_code' },
-      });
-      expect(result).toBeUndefined();
-    });
-
-    it('returns shared for basic auth', () => {
-      const result = inferAuthMode({ authTypeRegistry, secrets: { authType: 'basic' } });
-      expect(result).toBe('shared');
-    });
-
-    it('defaults to shared when authMode is not specified in auth type spec', () => {
-      const result = inferAuthMode({ authTypeRegistry, secrets: { authType: 'bearer' } });
-      expect(result).toBe('shared');
-    });
-
-    it('uses config authType when secrets authType is missing', () => {
-      const result = inferAuthMode({ authTypeRegistry, config: { authType: 'basic' } });
-      expect(result).toBe('shared');
-    });
+  it('returns undefined when no authType is provided', () => {
+    const result = inferAuthMode({ authTypeRegistry });
+    expect(result).toBeUndefined();
   });
 
-  describe('with oAuthAuthorizationCodeEnabled: true', () => {
-    const authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(authTypeRegistry, { authorizationCodeEnabled: true });
+  it('returns undefined when auth type is not found', () => {
+    const result = inferAuthMode({ authTypeRegistry, secrets: { authType: 'unknown' } });
+    expect(result).toBeUndefined();
+  });
 
-    it('returns per-user for OAuth authorization code when feature is enabled', () => {
-      const result = inferAuthMode({
-        authTypeRegistry,
-        secrets: { authType: 'oauth_authorization_code' },
-      });
-      expect(result).toBe('per-user');
+  it('returns per-user for OAuth authorization code', () => {
+    const result = inferAuthMode({
+      authTypeRegistry,
+      secrets: { authType: 'oauth_authorization_code' },
     });
+    expect(result).toBe('per-user');
+  });
+
+  it('returns shared for basic auth', () => {
+    const result = inferAuthMode({ authTypeRegistry, secrets: { authType: 'basic' } });
+    expect(result).toBe('shared');
+  });
+
+  it('defaults to shared when authMode is not specified in auth type spec', () => {
+    const result = inferAuthMode({ authTypeRegistry, secrets: { authType: 'bearer' } });
+    expect(result).toBe('shared');
+  });
+
+  it('uses config authType when secrets authType is missing', () => {
+    const result = inferAuthMode({ authTypeRegistry, config: { authType: 'basic' } });
+    expect(result).toBe('shared');
   });
 });
