@@ -7,13 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useContext, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useRef, useCallback, useEffect } from 'react';
+
+export interface ScrollSyncScrollState {
+  isScrollable: boolean;
+  canScrollLeft: boolean;
+  canScrollRight: boolean;
+}
 
 interface ScrollSyncContextValue {
   register: (el: HTMLDivElement) => void;
   unregister: (el: HTMLDivElement) => void;
   syncScroll: (source: HTMLDivElement) => void;
+  getScrollState: () => ScrollSyncScrollState;
+  notifyHover: (el: HTMLDivElement) => void;
+  notifyHoverEnd: (el: HTMLDivElement) => void;
 }
+
+const DEFAULT_SCROLL_STATE: ScrollSyncScrollState = {
+  isScrollable: false,
+  canScrollLeft: false,
+  canScrollRight: false,
+};
 
 const ScrollSyncContext = createContext<ScrollSyncContextValue | null>(null);
 
@@ -25,10 +40,23 @@ export const useScrollSync = () => {
   return context;
 };
 
+const computeScrollState = (el: HTMLDivElement): ScrollSyncScrollState => {
+  const { scrollLeft, scrollWidth, clientWidth } = el;
+  const isScrollable = scrollWidth > clientWidth;
+  return {
+    isScrollable,
+    canScrollLeft: isScrollable && scrollLeft > 0,
+    canScrollRight: isScrollable && scrollLeft + clientWidth < scrollWidth - 1,
+  };
+};
+
 /**
  * Co-ordinates the scroll position of multiple scrollable elements.
  * Uses a "scroll leader" pattern - only the element actively being scrolled
  * by the user drives the sync, preventing feedback loops.
+ *
+ * Also owns a single shared ResizeObserver that watches whichever row is
+ * currently hovered (or the last-hovered row as a sentinel).
  */
 export const ScrollSyncProvider: React.FC<{
   children: React.ReactNode;
@@ -37,8 +65,13 @@ export const ScrollSyncProvider: React.FC<{
   const containers = useRef<Set<HTMLDivElement>>(new Set());
   const scrollLeader = useRef<HTMLDivElement | null>(null);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Canonical scroll position - always tracked, used to initialize new containers
   const canonicalScrollLeft = useRef(0);
+  const canonicalScrollState = useRef<ScrollSyncScrollState>(DEFAULT_SCROLL_STATE);
+
+  const resizeObserver = useRef<ResizeObserver | null>(null);
+  const observedElement = useRef<HTMLDivElement | null>(null);
+
+  const getScrollState = useCallback(() => canonicalScrollState.current, []);
 
   const register = useCallback((el: HTMLDivElement) => {
     // New containers adopt the canonical scroll position immediately
@@ -51,6 +84,25 @@ export const ScrollSyncProvider: React.FC<{
     if (scrollLeader.current === el) {
       scrollLeader.current = null;
     }
+    if (observedElement.current === el) {
+      resizeObserver.current?.unobserve(el);
+      observedElement.current = null;
+    }
+  }, []);
+
+  const notifyHover = useCallback((el: HTMLDivElement) => {
+    if (observedElement.current === el) return;
+
+    if (observedElement.current) {
+      resizeObserver.current?.unobserve(observedElement.current);
+    }
+
+    observedElement.current = el;
+    resizeObserver.current?.observe(el);
+  }, []);
+
+  const notifyHoverEnd = useCallback((_el: HTMLDivElement) => {
+    // Keep observing the element as a sentinel for resize detection.
   }, []);
 
   const syncScroll = useCallback(
@@ -73,6 +125,7 @@ export const ScrollSyncProvider: React.FC<{
 
       // track the canonical position
       canonicalScrollLeft.current = scrollLeft;
+      canonicalScrollState.current = computeScrollState(source);
 
       // perform the sync
       containers.current.forEach((el) => {
@@ -89,8 +142,23 @@ export const ScrollSyncProvider: React.FC<{
     [disableScrollSync]
   );
 
+  useEffect(() => {
+    resizeObserver.current = new ResizeObserver(() => {
+      if (observedElement.current) {
+        canonicalScrollState.current = computeScrollState(observedElement.current);
+      }
+    });
+
+    return () => {
+      resizeObserver.current?.disconnect();
+      resizeObserver.current = null;
+    };
+  }, []);
+
   return (
-    <ScrollSyncContext.Provider value={{ register, unregister, syncScroll }}>
+    <ScrollSyncContext.Provider
+      value={{ register, unregister, syncScroll, getScrollState, notifyHover, notifyHoverEnd }}
+    >
       {children}
     </ScrollSyncContext.Provider>
   );

@@ -7,102 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 
-export interface ScrollState {
-  isScrollable: boolean;
-  canScrollLeft: boolean;
-  canScrollRight: boolean;
-}
+const getSlotContainerInnerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
-const useSlotContainerInnerStyles = (
-  euiTheme: UseEuiTheme['euiTheme'],
-  scrollState: ScrollState
-) => {
-  // Build gradient mask based on scroll position
-  const maskImage = useMemo(() => {
-    let maskStyle = 'none';
+  [data-can-scroll-left='true'][data-can-scroll-right='true'] > & {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black ${euiTheme.size.m},
+      black calc(100% - ${euiTheme.size.m}),
+      transparent 100%
+    );
+  }
+  [data-can-scroll-left='true']:not([data-can-scroll-right='true']) > & {
+    mask-image: linear-gradient(to right, transparent 0%, black ${euiTheme.size.m});
+  }
+  :not([data-can-scroll-left='true'])[data-can-scroll-right='true'] > & {
+    mask-image: linear-gradient(to right, black calc(100% - ${euiTheme.size.m}), transparent 100%);
+  }
+`;
 
-    if (scrollState.canScrollLeft && scrollState.canScrollRight) {
-      maskStyle = `linear-gradient(
-        to right,
-        transparent 0%,
-        black ${euiTheme.size.m},
-        black calc(100% - ${euiTheme.size.m}),
-        transparent 100%
-      )`;
-    } else if (scrollState.canScrollLeft) {
-      maskStyle = `linear-gradient(
-        to right,
-        transparent 0%,
-        black ${euiTheme.size.m}
-      )`;
-    } else if (scrollState.canScrollRight) {
-      maskStyle = `linear-gradient(
-        to right,
-        black calc(100% - ${euiTheme.size.m}),
-        transparent 100%
-      )`;
-    }
-    return { maskImage: maskStyle };
-  }, [scrollState, euiTheme.size.m]);
-
-  return css([
-    css`
-      overflow-x: auto;
-      scrollbar-width: none;
-      scroll-behavior: smooth;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    `,
-    maskImage,
-  ]);
-};
-
-export const useStyles = (scrollState: ScrollState) => {
+export const useStyles = () => {
   const euiThemeContext = useEuiTheme();
 
-  const slotContainerInnerStyles = useSlotContainerInnerStyles(
-    euiThemeContext.euiTheme,
-    scrollState
-  );
+  const slotContainerInnerStyles = getSlotContainerInnerStyles(euiThemeContext.euiTheme);
 
-  const slotsScrollButtonBaseStyles = css([
-    {
-      label: 'slots-scroll-button-base-styles',
-      display: 'none',
-      position: 'absolute',
-      // raise the button higher than the stacking index of the slot container
-      zIndex: 1,
-      margin: euiThemeContext.euiTheme.size.xxs,
-    },
-  ]);
+  const slotsScrollButtonBaseStyles = css({
+    display: 'none',
+    position: 'absolute',
+    // raise the button higher than the stacking index of the slot container
+    zIndex: 1,
+    margin: euiThemeContext.euiTheme.size.xxs,
+  });
 
   return {
     slotsContainerWrapper: css({
       position: 'relative',
       '&:hover': {
-        // use specified label to target the scroll button base styles
-        // see {@link https://github.com/emotion-js/emotion/issues/1217}
-        '[class*="slots-scroll-button-base-styles"]': {
+        '&[data-can-scroll-left="true"] [class*="slots-scroll-button-left"]': {
+          display: 'block',
+        },
+        '&[data-can-scroll-right="true"] [class*="slots-scroll-button-right"]': {
           display: 'block',
         },
       },
     }),
     slotsLeftScrollButton: css([
       slotsScrollButtonBaseStyles,
-      {
-        left: 0,
-      },
+      { label: 'slots-scroll-button-left', left: 0 },
     ]),
     slotsRightScrollButton: css([
       slotsScrollButtonBaseStyles,
-      {
-        right: 0,
-      },
+      { label: 'slots-scroll-button-right', right: 0 },
     ]),
     slotsContainer: css`
       min-width: 0;
