@@ -65,8 +65,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('network-details')).toBeInTheDocument();
-    expect(screen.getByTestId('network-details')).toHaveTextContent(props.fieldName);
+    expect(screen.getByText(props.value)).toBeInTheDocument();
   });
 
   test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {
