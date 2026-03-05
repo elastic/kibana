@@ -158,6 +158,7 @@ export function ClassicHeader() {
               {Breadcrumbs}
             </BreadcrumbsWithExtensionsWrapper>
 
+            {/* TODO: Remove once setBadge() is consolidated — https://github.com/elastic/kibana/issues/256050 */}
             <HeaderBadge badge$={classic.badge$} />
 
             <EuiHeaderSection side="right">

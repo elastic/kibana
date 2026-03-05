@@ -60,6 +60,7 @@ interface NavControlsObservables {
 interface ClassicChromeObservables {
   /** User-set breadcrumbs via {@link ChromeStart.setBreadcrumbs}. */
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  /** @todo Consolidate into {@link ChromeComponentsDeps.breadcrumbsAppendExtensions$} — see https://github.com/elastic/kibana/issues/256050 */
   badge$: Observable<ChromeBadge | undefined>;
   recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
   customNavLink$: Observable<ChromeNavLink | undefined>;
