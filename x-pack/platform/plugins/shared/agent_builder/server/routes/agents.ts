@@ -186,11 +186,19 @@ export function registerAgentRoutes({
                 )
               ),
               visibility: schema.maybe(
-                schema.oneOf([
-                  schema.literal(AgentVisibility.Public),
-                  schema.literal(AgentVisibility.Shared),
-                  schema.literal(AgentVisibility.Private),
-                ])
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
               ),
               configuration: schema.object(
                 {
@@ -326,11 +334,19 @@ export function registerAgentRoutes({
                 )
               ),
               visibility: schema.maybe(
-                schema.oneOf([
-                  schema.literal(AgentVisibility.Public),
-                  schema.literal(AgentVisibility.Shared),
-                  schema.literal(AgentVisibility.Private),
-                ])
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
               ),
               configuration: schema.maybe(
                 schema.object(
