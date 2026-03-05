@@ -312,7 +312,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 skipExecution = true;
               }
             } catch (exc) {
-              wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
+              wrapperWarnings.push(`Encountered an error validating index patterns: ${exc}`);
             }
 
             if (isThreatParams(params)) {
