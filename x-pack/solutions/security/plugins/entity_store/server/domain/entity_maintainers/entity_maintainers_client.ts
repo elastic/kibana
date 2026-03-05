@@ -160,6 +160,7 @@ export class EntityMaintainersClient {
             state,
           };
         } catch (error) {
+          // NotFound is part of the expected flow, it means the task has been registered but has not been scheduled yet.
           if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
             this.logger.error(`Failed to get task snapshot for entity maintainer: ${id}`, {
               error,
