@@ -19,7 +19,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
   describe('getGlobalExecutionKpi', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     it('should return KPI only from the current space', async () => {
       const startTime = new Date().toISOString();
