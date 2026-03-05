@@ -18,6 +18,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
@@ -74,7 +75,7 @@ export const getOverviewEmbeddableFactory = ({
       Omit<SingleOverviewCustomState, 'overview_mode'>
     >(state as SingleOverviewCustomState, {
       slo_id: '',
-      slo_instance_id: '*',
+      slo_instance_id: ALL_VALUE,
       remote_name: undefined,
     });
     const groupSloManager = initializeStateManager<Omit<GroupOverviewCustomState, 'overview_mode'>>(
