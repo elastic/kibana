@@ -27,7 +27,6 @@ import {
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
   internalStateActions,
-  selectTabRuntimeState,
 } from '../../../state_management/redux';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -131,11 +130,12 @@ const setup = async ({
 
   // Ensure the current tab's data view is set for tests that depend on isTimeBased
   if (dataView) {
-    const tabRuntimeState = selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.getCurrentTab().id
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataView({
+        tabId: toolkit.getCurrentTab().id,
+        dataView,
+      })
     );
-    tabRuntimeState.currentDataView$.next(dataView);
   }
 
   if (dataViewsList) {

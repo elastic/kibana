@@ -34,7 +34,7 @@ import type { SearchBarCustomization } from '../../../../customizations';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 // There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
@@ -244,11 +244,12 @@ async function renderComponent(
     .mockImplementation(() => toolkit.getCurrentTab().appState);
 
   // Set the current data view in runtime state
-  const tabRuntimeState = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
+  toolkit.internalState.dispatch(
+    internalStateActions.setDataView({
+      tabId: toolkit.getCurrentTab().id,
+      dataView: props.selectedDataView,
+    })
   );
-  tabRuntimeState.currentDataView$.next(props.selectedDataView);
 
   const user = userEvent.setup();
   const result = render(
