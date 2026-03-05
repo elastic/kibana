@@ -431,6 +431,73 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
+  it('should generate wildcard query for keyword fields in KQL scope', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '1h',
+          timezone: 'CET',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
+      events: [{ gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' }],
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.create.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    await updateMaintenanceWindow(mockContext, {
+      id: 'test-id',
+      data: {
+        scope: {
+          alerting: {
+            kql: 'kibana.alert.rule.name: *threshold rule',
+            filters: [],
+          },
+        },
+      },
+    });
+
+    const dsl = (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!
+      .dsl;
+    const parsedDsl = JSON.parse(dsl);
+
+    const wildcardClause = parsedDsl.bool.filter[0];
+    expect(wildcardClause).toEqual({
+      bool: {
+        should: [
+          {
+            wildcard: {
+              'kibana.alert.rule.name': {
+                value: '*threshold rule',
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
   it('should remove maintenance window with scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 

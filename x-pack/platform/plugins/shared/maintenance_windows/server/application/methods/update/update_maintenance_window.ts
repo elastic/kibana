@@ -12,6 +12,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../common';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
+import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import type { MaintenanceWindow } from '../../types';
 import {
   generateMaintenanceWindowEvents,
@@ -61,7 +62,7 @@ async function updateWithOCC(
     if (scope?.alerting) {
       const dsl = JSON.stringify(
         buildEsQuery(
-          undefined,
+          getAlertsDataViewBase(),
           [{ query: scope.alerting.kql, language: 'kuery' }],
           scope.alerting.filters as Filter[],
           esQueryConfig
