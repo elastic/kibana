@@ -8430,7 +8430,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-inference-endpoints@link:x-pack/solutions/search/plugins/search_inference_endpoints":
+"@kbn/search-inference-endpoints@link:x-pack/platform/plugins/shared/search_inference_endpoints":
   version "0.0.0"
   uid ""
 

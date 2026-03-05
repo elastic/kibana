@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/plugins/search_inference_endpoints'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/search_inference_endpoints'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_inference_endpoints',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/search_inference_endpoints',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/search/plugins/search_inference_endpoints/{public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/search_inference_endpoints/{public,server}/**/*.{ts,tsx}',
   ],
 };

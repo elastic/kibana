@@ -98,7 +98,7 @@ describe('entity_maintainer task', () => {
           schedule: { interval: '1m' },
           state: {
             namespace: 'default',
-            taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+            taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
           },
           params: {},
         },
@@ -135,7 +135,7 @@ describe('entity_maintainer task', () => {
           schedule: { interval: '1m' },
           state: {
             namespace: 'default',
-            taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+            taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
           },
           params: {},
         },
@@ -149,7 +149,7 @@ describe('entity_maintainer task', () => {
           schedule: { interval: '5m' },
           state: {
             namespace: 'default',
-            taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+            taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
           },
           params: {},
         },

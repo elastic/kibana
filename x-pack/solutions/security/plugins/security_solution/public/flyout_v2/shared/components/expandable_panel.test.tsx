@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 import {
+  EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID,
   EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
-  EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from './test_ids';
-import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { ExpandablePanel } from './expandable_panel';
-import userEvent from '@testing-library/user-event';
 
 const TEST_ID = 'test-id';
 const defaultProps = {
