@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 
@@ -19,6 +20,12 @@ export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) 
       return await handler(context, request, response);
     } catch (e) {
       logger.error(e);
+      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(e)) {
+        return response.customError({
+          statusCode: e.output.statusCode,
+          body: { message: e.message },
+        });
+      }
       if (isKibanaServerError(e)) {
         return response.customError({ statusCode: e.statusCode, body: e.message });
       }

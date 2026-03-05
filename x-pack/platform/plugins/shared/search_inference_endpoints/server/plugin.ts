@@ -14,13 +14,19 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { defineRoutes } from './routes';
+import { createInferenceEndpointSettingsSavedObjectType } from './saved_objects/inference_endpoint_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginSetupDependencies,
   SearchInferenceEndpointsPluginStart,
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
-import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import {
+  INFERENCE_ENDPOINTS_APP_ID,
+  INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+} from '../common/constants';
 
 export class SearchInferenceEndpointsPlugin
   implements
@@ -47,6 +53,8 @@ export class SearchInferenceEndpointsPlugin
     this.logger.debug('searchInferenceEndpoints: Setup');
     const router = core.http.createRouter();
 
+    core.savedObjects.registerType(createInferenceEndpointSettingsSavedObjectType());
+
     defineRoutes({ logger: this.logger, router });
 
     plugins.features.registerKibanaFeature({
@@ -69,7 +77,7 @@ export class SearchInferenceEndpointsPlugin
             ml: [INFERENCE_ENDPOINTS_APP_ID],
           },
           savedObject: {
-            all: [],
+            all: [INFERENCE_ENDPOINT_SETTINGS_SO_TYPE],
             read: [],
           },
           ui: [],
@@ -78,7 +86,7 @@ export class SearchInferenceEndpointsPlugin
           disabled: true,
           savedObject: {
             all: [],
-            read: [],
+            read: [INFERENCE_ENDPOINT_SETTINGS_SO_TYPE],
           },
           ui: [],
         },

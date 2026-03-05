@@ -21,3 +21,10 @@ export const PLUGIN_TITLE = i18n.translate(
 
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
+
+export const INFERENCE_ENDPOINT_SETTINGS_SO_TYPE = 'inference-endpoint-settings';
+export const INFERENCE_ENDPOINT_SETTINGS_ID = 'default';
+
+export enum ROUTE_VERSIONS {
+  v1 = '1',
+}

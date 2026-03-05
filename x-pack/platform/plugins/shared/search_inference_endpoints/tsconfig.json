@@ -39,7 +39,9 @@
     "@kbn/object-utils",
     "@kbn/react-query",
     "@kbn/search-api-panels",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": [
     "target/**/*"
