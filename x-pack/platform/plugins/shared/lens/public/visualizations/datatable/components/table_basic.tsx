@@ -194,7 +194,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       formatters[sortingColumnId]
     );
     const sortedRows = [...firstLocalTable.rows].sort(
-      (a, b) => sortCriteria(a, b, sortingDirection as LensGridDirection) as number
+      (a, b) => sortCriteria(a, b, sortingDirection as 'asc' | 'desc') as number
     );
     return { ...firstLocalTable, rows: sortedRows };
   }, [firstLocalTable, columnConfig, formatters]);
