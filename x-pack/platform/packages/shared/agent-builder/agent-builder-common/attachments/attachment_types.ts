@@ -53,16 +53,26 @@ export interface TextAttachmentData {
   content: string;
 }
 
+export const screenContextTimeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
+
+export interface ScreenContextTimeRange {
+  from: string;
+  to: string;
+}
+
 export const screenContextAttachmentDataSchema = z
   .object({
     url: z.string().optional(),
     app: z.string().optional(),
     description: z.string().optional(),
+    time_range: screenContextTimeRangeSchema.optional(),
     additional_data: z.record(z.string()).optional(),
   })
   .refine((data) => {
-    // at least one of the fields must be present
-    return data.url || data.app || data.description || data.additional_data;
+    return data.url || data.app || data.description || data.time_range || data.additional_data;
   });
 
 /**
@@ -75,6 +85,8 @@ export interface ScreenContextAttachmentData {
   app?: string;
   /** app description */
   description?: string;
+  /** the currently active time range */
+  time_range?: ScreenContextTimeRange;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
 }

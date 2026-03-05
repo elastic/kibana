@@ -33,14 +33,7 @@ export const createVisualizationAttachmentDefinition = ({
       }),
     getIcon: () => 'lensApp',
     renderInlineContent: ({ attachment, screenContext }) => {
-      const screenContextTimeRange =
-        screenContext?.additional_data?.time_from && screenContext?.additional_data?.time_to
-          ? {
-              from: screenContext.additional_data.time_from,
-              to: screenContext.additional_data.time_to,
-            }
-          : undefined;
-      const timeRange = attachment.data.time_range ?? screenContextTimeRange;
+      const timeRange = attachment.data.time_range ?? screenContext?.time_range;
 
       return (
         <Suspense fallback={<EuiLoadingSpinner />}>
