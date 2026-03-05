@@ -8,7 +8,7 @@
 import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
 
 export const getAlertEventsViewDefinition = (): EsqlViewDefinition => ({
-  key: 'view:alert-events',
-  name: 'alerts-events',
-  query: 'FROM .alerts-events',
+  key: 'view:alerting-events',
+  name: '$.alerting-events',
+  query: 'FROM .alerting-events',
 });
