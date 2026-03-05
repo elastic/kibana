@@ -50,11 +50,11 @@ export interface ChromeSetup {
  * ```
  *
  * @example
- * How to set the help dropdown extension:
+ * How to set the help dropdown extension (React-first, preferred):
  * ```tsx
- * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * core.chrome.setHelpExtension({
+ *   appName: 'My App',
+ *   reactContent: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -149,7 +149,19 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Mount an element next to the last breadcrumb
+   * Render an element next to the last breadcrumb.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBadge = dynamic(() => import('./my_badge'));
+   *
+   * const unregister = chrome.setBreadcrumbsAppendExtension({
+   *   content: <LazyBadge />,
+   *   order: 10,
+   * });
+   * ```
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
@@ -214,7 +226,8 @@ export interface ChromeStart {
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
   /**
-   * Override the current set of custom help content
+   * Override the current set of custom help content.
+   * Prefer {@link ChromeHelpExtension.reactContent} over the legacy `content` callback.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
