@@ -210,31 +210,35 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
         <EuiSpacer size="l" />
 
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.runningQueries.flyout.queryLabel', {
-              defaultMessage: 'Query',
-            })}
-          </h3>
-        </EuiTitle>
+        {query.query && (
+          <>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.runningQueries.flyout.queryLabel', {
+                  defaultMessage: 'Query',
+                })}
+              </h3>
+            </EuiTitle>
 
-        <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-        <EuiCodeBlock
-          css={css`
-            .euiCodeBlock__pre {
-              block-size: auto;
-            }
-          `}
-          language={
-            query.queryType === 'ES|QL' ? 'esql' : query.queryType === 'SQL' ? 'sql' : 'json'
-          }
-          lineNumbers
-          overflowHeight="100%"
-          isCopyable
-        >
-          {query.query}
-        </EuiCodeBlock>
+            <EuiCodeBlock
+              css={css`
+                .euiCodeBlock__pre {
+                  block-size: auto;
+                }
+              `}
+              language={
+                query.queryType === 'ES|QL' ? 'esql' : query.queryType === 'SQL' ? 'sql' : 'json'
+              }
+              lineNumbers
+              overflowHeight="100%"
+              isCopyable
+            >
+              {query.query}
+            </EuiCodeBlock>
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
