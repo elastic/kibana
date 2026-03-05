@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { getTime } from '@kbn/data-plugin/common';
@@ -16,6 +16,7 @@ interface BuildEsQueryArgs {
   config?: EsQueryConfig;
   queries?: Query[];
   filters?: Filter[];
+  indexPattern?: DataViewBase;
 }
 
 export function buildEsQuery({
@@ -24,6 +25,7 @@ export function buildEsQuery({
   config = {},
   queries = [],
   filters = [],
+  indexPattern,
 }: BuildEsQueryArgs) {
   const timeFilter =
     timeRange &&
@@ -33,5 +35,5 @@ export function buildEsQuery({
   const filtersToUse: Filter[] = timeFilter ? [timeFilter, ...filters] : filters;
   const kueryFilter = kuery ? [{ query: kuery, language: 'kuery' }] : [];
   const queryToUse = [...kueryFilter, ...queries];
-  return kbnBuildEsQuery(undefined, queryToUse, filtersToUse, config);
+  return kbnBuildEsQuery(indexPattern, queryToUse, filtersToUse, config);
 }

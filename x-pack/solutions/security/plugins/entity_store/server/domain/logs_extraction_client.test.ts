@@ -6,6 +6,7 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
+import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -17,9 +18,22 @@ import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   HASHED_ID_FIELD,
 } from './logs_extraction/logs_extraction_query_builder';
-import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
+import {
+  LogExtractionConfig,
+  type EngineDescriptorClient,
+  type EntityStoreGlobalState,
+  type EntityStoreGlobalStateClient,
+} from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
+
+function createMockCcsLogsExtractionClient(): jest.Mocked<
+  Pick<CcsLogsExtractionClient, 'extractToUpdates'>
+> {
+  return {
+    extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
+  };
+}
 
 jest.mock('../infra/elasticsearch/esql');
 jest.mock('../infra/elasticsearch/ingest');
@@ -31,18 +45,32 @@ function createMockEngineDescriptor(
   type: EntityType = 'user',
   overrides?: Partial<{ lookbackPeriod: string; delay: string; paginationTimestamp: string }>
 ) {
-  const logExtractionState = LogExtractionState.parse({
-    docsLimit: 10000,
-    additionalIndexPatterns: [],
-    lookbackPeriod: overrides?.lookbackPeriod ?? '3h',
-    delay: overrides?.delay ?? '1m',
+  const logExtractionState = {
     paginationTimestamp: overrides?.paginationTimestamp,
-  });
+    paginationId: undefined,
+    lastExecutionTimestamp: undefined,
+  };
   return {
     type,
     status: ENGINE_STATUS.STARTED,
     logExtractionState,
     versionState: { version: 2, state: 'running' as const, isMigratedFromV1: false },
+  };
+}
+
+function createMockGlobalStateClient(
+  logExtractionOverrides?: Partial<{ lookbackPeriod: string; delay: string }>
+): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow'>> {
+  const logsExtraction = LogExtractionConfig.parse({
+    docsLimit: 10000,
+    additionalIndexPatterns: [],
+    lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
+    delay: logExtractionOverrides?.delay ?? '1m',
+  });
+  const state = { logsExtraction } as EntityStoreGlobalState;
+  return {
+    find: jest.fn().mockResolvedValue(state),
+    findOrThrow: jest.fn().mockResolvedValue(state),
   };
 }
 
@@ -54,6 +82,8 @@ describe('LogsExtractionClient', () => {
   let mockEngineDescriptorClient: jest.Mocked<
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
+  let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
+  let mockCcsLogsExtractionClient: ReturnType<typeof createMockCcsLogsExtractionClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,14 +97,18 @@ describe('LogsExtractionClient', () => {
       findOrThrow: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
     };
+    mockGlobalStateClient = createMockGlobalStateClient();
+    mockCcsLogsExtractionClient = createMockCcsLogsExtractionClient();
 
-    client = new LogsExtractionClient(
-      mockLogger,
-      'default',
-      mockEsClient,
-      mockDataViewsService,
-      mockEngineDescriptorClient as unknown as EngineDescriptorClient
-    );
+    client = new LogsExtractionClient({
+      logger: mockLogger,
+      namespace: 'default',
+      esClient: mockEsClient,
+      dataViewsService: mockDataViewsService,
+      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+      globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+      ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+    });
   });
 
   describe('extractLogs', () => {
@@ -147,8 +181,7 @@ describe('LogsExtractionClient', () => {
             paginationId: undefined,
             lastExecutionTimestamp: expect.any(String),
           }),
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -190,8 +223,7 @@ describe('LogsExtractionClient', () => {
             paginationId: undefined,
             lastExecutionTimestamp: expect.any(String),
           }),
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -211,8 +243,13 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
+      const globalStateWithDelay5s = {
+        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+      } as EntityStoreGlobalState;
+      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', { lookbackPeriod: '3h', delay: '5s' }) as Awaited<
+        createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
         >
       );
@@ -481,13 +518,14 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should filter out cross-cluster search (CCS) remote indices', async () => {
+    it('should filter out cross-cluster search (CCS) remote indices from main query and run CCS in parallel', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
           { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'entity.id', type: 'keyword' },
         ],
-        values: [['2024-01-02T10:00:00.000Z', 'hash1']],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'user:u1']],
       };
 
       const mockDataView = {
@@ -508,10 +546,73 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
+      // Main extraction uses local indices only; CCS client (injected) runs in parallel.
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('metrics-*');
-      expect(result.success && result.scannedIndices).not.toContain('remote_cluster:logs-*');
-      expect(result.success && result.scannedIndices).not.toContain('other:filebeat-*');
+      expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
+      expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
+      // Main query runs once; injected CCS client is invoked for remote patterns
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
+      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'user',
+          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
+        })
+      );
+    });
+
+    it('should store CCS errors in the saved object while main execution remains unchanged', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'entity.id', type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'user:u1']],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
+      };
+
+      const ccsError = new Error('CCS connection failed');
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+      mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
+        count: 0,
+        pages: 0,
+        error: ccsError,
+      });
+
+      const result = await client.extractLogs('user');
+
+      // Main execution is unchanged: success, count from main query, ESQL and ingest called once
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(1);
+      expect(result.success && result.scannedIndices).toContain('logs-*');
+      expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+
+      // CCS error is stored in the saved object
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({
+          logExtractionState: expect.objectContaining({
+            paginationTimestamp: undefined,
+            paginationId: undefined,
+            lastExecutionTimestamp: expect.any(String),
+          }),
+          error: { message: ccsError.message, action: 'extractLogs' },
+        })
+      );
     });
 
     it('should fallback to logs-* when data view is not found', async () => {
@@ -580,8 +681,7 @@ describe('LogsExtractionClient', () => {
             paginationId: undefined,
             lastExecutionTimestamp: expect.any(String),
           }),
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -602,6 +702,44 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getLocalAndRemoteIndexPatterns', () => {
+    it('should split local and CCS remote index patterns', async () => {
+      const mockDataView = {
+        getIndexPattern: jest
+          .fn()
+          .mockReturnValue('logs-*,remote_cluster:logs-*,metrics-*,other:filebeat-*'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns, remoteIndexPatterns } =
+        await client.getLocalAndRemoteIndexPatterns(['custom-index']);
+
+      expect(localIndexPatterns).toContain('logs-*');
+      expect(localIndexPatterns).toContain('metrics-*');
+      expect(localIndexPatterns).toContain('custom-index');
+      expect(localIndexPatterns).not.toContain('remote_cluster:logs-*');
+      expect(localIndexPatterns).not.toContain('other:filebeat-*');
+
+      expect(remoteIndexPatterns).toContain('remote_cluster:logs-*');
+      expect(remoteIndexPatterns).toContain('other:filebeat-*');
+      expect(remoteIndexPatterns).not.toContain('logs-*');
+      expect(remoteIndexPatterns).not.toContain('metrics-*');
+    });
+
+    it('should exclude alerts index from both local and remote', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,.alerts-security.alerts-default'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns, remoteIndexPatterns } =
+        await client.getLocalAndRemoteIndexPatterns();
+
+      expect(localIndexPatterns).not.toContain('.alerts-security.alerts-default');
+      expect(remoteIndexPatterns).not.toContain('.alerts-security.alerts-default');
     });
   });
 
@@ -757,7 +895,7 @@ describe('LogsExtractionClient', () => {
       descriptor.logExtractionState = {
         ...descriptor.logExtractionState,
         paginationId: 'recovery-cursor-id',
-      };
+      } as typeof descriptor.logExtractionState;
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(descriptor);
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);

@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "bump-cli": "^2.9.11",
-    "@redocly/cli": "^2.17.0"
+    "@redocly/cli": "^2.18.0"
   },
   "scripts": {
     "bump": "bump",

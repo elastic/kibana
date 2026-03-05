@@ -46,14 +46,6 @@ jest.mock('../../../stream_detail_systems/stream_description/use_stream_descript
 }));
 
 // Mock hooks used by StreamDiscoveryConfiguration
-jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
-  useStreamSystems: () => ({
-    systems: [],
-    refreshSystems: jest.fn(),
-    systemsLoading: false,
-  }),
-}));
-
 jest.mock('../../../../hooks/use_stream_features', () => ({
   useStreamFeatures: () => ({
     features: [],
@@ -76,20 +68,6 @@ jest.mock('../../../../hooks/use_stream_features_api', () => ({
 jest.mock('../../../../hooks/use_ai_features', () => ({
   useAIFeatures: () => ({
     genAiConnectors: { selectedConnector: null },
-  }),
-}));
-
-jest.mock('../../../../hooks/use_stream_systems_api', () => ({
-  useStreamSystemsApi: () => ({
-    identifySystems: jest.fn(),
-    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
-    scheduleSystemIdentificationTask: jest.fn(),
-    cancelSystemIdentificationTask: jest.fn(),
-    acknowledgeSystemIdentificationTask: jest.fn(),
-    addSystemsToStream: jest.fn(),
-    removeSystemsFromStream: jest.fn(),
-    upsertSystem: jest.fn(),
-    abort: jest.fn(),
   }),
 }));
 

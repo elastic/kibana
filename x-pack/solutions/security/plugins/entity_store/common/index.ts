@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as euidModule from './domain/euid';
 
 export const PLUGIN_ID = 'entityStore';
@@ -35,6 +35,7 @@ export const euid = {
 };
 
 export type { EntityType } from './domain/definitions/entity_schema';
+export type { Entity } from './domain/definitions/entity.gen';
 export type { IdentitySourceFields } from './domain/euid';
 export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
 
@@ -60,3 +61,13 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
 } as const satisfies Record<string, string>;
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+};
