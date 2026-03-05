@@ -66,7 +66,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
 When using `feature_flags.overrides`, the keys must match the feature flag IDs registered by the owning plugin in Kibana core.
 
-## Custom server configurations [scout-feature-flags-custom-servers]
+## Custom server configs (reach out to AppEx QA first) [scout-feature-flags-custom-servers]
 
 Some settings cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets**.
 
