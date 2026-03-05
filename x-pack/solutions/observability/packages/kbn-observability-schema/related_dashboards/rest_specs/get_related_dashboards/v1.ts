@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { linkedDashboardSchema, suggestedDashboardSchema } from '../../schema/related_dashboard/v1';
 
 export const getRelatedDashboardsParamsSchema = z.object({
