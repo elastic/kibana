@@ -7,7 +7,7 @@ jobs:
   issue_commented:
     name: sync ci checks on comment
     if: |
-      !github.event.issue.pull_request
+      github.event.issue.pull_request
       && contains(fromJSON('["MEMBER","COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)
       && startsWith(github.event.comment.body, '/sync-ci')
     runs-on: ubuntu-latest
