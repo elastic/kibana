@@ -1399,6 +1399,7 @@ paths:
                   description: Display name for the agent.
                   type: string
                 visibility:
+                  description: '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
                   enum:
                     - public
                     - shared
@@ -1706,6 +1707,7 @@ paths:
                   description: Updated display name for the agent.
                   type: string
                 visibility:
+                  description: '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
                   enum:
                     - public
                     - shared
