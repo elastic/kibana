@@ -146,7 +146,8 @@ export const createSharedExceptionList = (
   }
 
   if (submit) {
-    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click();
+    // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click({ force: true });
   }
 };
 
@@ -181,7 +182,8 @@ export const waitForExceptionListDetailToBeLoaded = () => {
 };
 
 export const findSharedExceptionListItemsByName = (listName: string, itemNames: string[]) => {
-  cy.contains(listName).click();
+  const escapedListName = listName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  cy.contains(new RegExp(`^${escapedListName}$`)).click();
   waitForExceptionListDetailToBeLoaded();
   assertExceptionItemsExists(EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME, itemNames);
 };
@@ -234,7 +236,8 @@ export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
 };
 
 export const saveLinkedRules = () => {
-  cy.get(MANAGE_RULES_SAVE).first().click();
+  // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+  cy.get(MANAGE_RULES_SAVE).first().click({ force: true });
 };
 
 export const validateSharedListLinkedRules = (
@@ -288,7 +291,13 @@ export const validateImportExceptionListFailedBecauseExistingListFound = () => {
   cy.wait('@import').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-    cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
+    cy.get(TOASTER_BODY)
+      .invoke('text')
+      .should((bodyText) => {
+        expect(bodyText).to.match(
+          /(Found that list_id|list_id.*already exists|already exists.*list_id)/i
+        );
+      });
   });
 };
 

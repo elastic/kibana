@@ -19,9 +19,9 @@ describe('downsampling/shared/duration_utils', () => {
       expect(toMilliseconds('   ', 'h')).toBe(-1);
     });
 
-    it('returns NaN for non-numeric values', () => {
-      expect(Number.isNaN(toMilliseconds('abc', 'd'))).toBe(true);
-      expect(Number.isNaN(toMilliseconds('1d', 'd'))).toBe(true);
+    it('returns -1 for invalid values', () => {
+      expect(toMilliseconds('abc', 'd')).toBe(-1);
+      expect(toMilliseconds('1d', 'd')).toBe(-1);
     });
 
     it('converts numeric values using the unit multiplier', () => {
@@ -33,6 +33,11 @@ describe('downsampling/shared/duration_utils', () => {
       expect(toMilliseconds('1', 'ms')).toBe(1);
       expect(toMilliseconds('1000', 'micros')).toBe(1);
       expect(toMilliseconds('1000000', 'nanos')).toBe(1);
+    });
+
+    it('supports negative values', () => {
+      expect(toMilliseconds('-1', 'd')).toBe(-86_400_000);
+      expect(toMilliseconds('-2', 'h')).toBe(-7_200_000);
     });
   });
 
