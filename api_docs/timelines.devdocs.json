@@ -4649,10 +4649,10 @@
           "ZodNumber",
           "; }, ",
           "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
+          ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; dateRangeField?: string | undefined; excludeEcsData?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
-        "lineNumber": 41,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -3893,6 +3893,38 @@
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
@@ -4643,38 +4675,6 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
               },
               {
                 "plugin": "observability",
@@ -7025,6 +7025,22 @@
                 "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/nl_to_esql_route.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -7421,6 +7437,10 @@
                 "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/create.ts"
               },
@@ -7787,18 +7807,6 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "observability",
@@ -8323,6 +8331,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -9421,6 +9433,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_update_route.ts"
               },
@@ -9639,10 +9655,6 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "observability",
@@ -15198,7 +15210,7 @@
           "<P, Q, B>"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 90,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15206,18 +15218,17 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteValidatorConfig.params",
-            "type": "CompoundType",
+            "type": "Any",
             "tags": [],
             "label": "params",
             "description": [
               "\nValidation logic for the URL params"
             ],
             "signature": [
-              "RouteValidationSpec",
-              "<P> | undefined"
+              "any"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 97,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15225,18 +15236,17 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteValidatorConfig.query",
-            "type": "CompoundType",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [
               "\nValidation logic for the Query params"
             ],
             "signature": [
-              "RouteValidationSpec",
-              "<Q> | undefined"
+              "any"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 102,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15244,18 +15254,17 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteValidatorConfig.body",
-            "type": "CompoundType",
+            "type": "Any",
             "tags": [],
             "label": "body",
             "description": [
               "\nValidation logic for the body payload"
             ],
             "signature": [
-              "RouteValidationSpec",
-              "<B> | undefined"
+              "any"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 107,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15276,7 +15285,7 @@
           "\nMap of status codes to response schemas.\n"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 138,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15294,7 +15303,7 @@
               " | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 176,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15310,7 +15319,7 @@
               "{ body?: boolean | undefined; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 187,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15328,7 +15337,7 @@
           "\nAdditional options for the RouteValidator class to modify its default behaviour.\n"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 114,
+        "lineNumber": 110,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15346,7 +15355,7 @@
               "{ params?: boolean | undefined; query?: boolean | undefined; body?: boolean | undefined; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 120,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15368,7 +15377,7 @@
           "<P, Q, B>"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 192,
+        "lineNumber": 188,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15386,7 +15395,7 @@
               "RouteValidatorOptions"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 197,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15405,7 +15414,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
-            "lineNumber": 198,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -16155,11 +16164,31 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/get.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/search.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/get.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/search.ts"
+              },
+              {
+                "plugin": "anonymization",
+                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
+              },
+              {
+                "plugin": "anonymization",
+                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/chat_complete/anonymization/replacements/replacements_routes.ts"
               },
               {
                 "plugin": "maps",
@@ -17546,7 +17575,15 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/update.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/update.ts"
+              },
+              {
+                "plugin": "anonymization",
+                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
               },
               {
                 "plugin": "telemetry",
@@ -17997,7 +18034,19 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/create.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/create.ts"
+              },
+              {
+                "plugin": "anonymization",
+                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/chat_complete/anonymization/replacements/replacements_routes.ts"
               },
               {
                 "plugin": "maps",
@@ -19339,6 +19388,10 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
               },
               {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -19491,7 +19544,15 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/delete.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/delete.ts"
+              },
+              {
+                "plugin": "anonymization",
+                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
               },
               {
                 "plugin": "maps",
@@ -19540,6 +19601,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -20840,26 +20905,10 @@
           "\nA validation schema factory.\n"
         ],
         "signature": [
-          "() => ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<unknown> | ",
-          {
-            "pluginId": "@kbn/zod",
-            "scope": "common",
-            "docId": "kibKbnZodPluginApi",
-            "section": "def-common.ZodEsque",
-            "text": "ZodEsque"
-          },
-          "<unknown>"
+          "() => any"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 219,
+        "lineNumber": 215,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -21966,32 +22015,7 @@
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<any> | ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<T> | ",
-          {
-            "pluginId": "@kbn/zod",
-            "scope": "common",
-            "docId": "kibKbnZodPluginApi",
-            "section": "def-common.ZodEsque",
-            "text": "ZodEsque"
-          },
-          "<T> | ",
-          "RouteValidationFunction",
-          "<T>"
+          "any"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
         "lineNumber": 77,
@@ -22016,7 +22040,7 @@
           "<P, Q, B> & NotRouteValidatorFullConfigRequest)"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 204,
+        "lineNumber": 200,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22037,7 +22061,7 @@
           "RouteValidatorOptions"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
-        "lineNumber": 131,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
