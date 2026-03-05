@@ -8,8 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
-import { LogsExtractionClient } from '../domain/logs_extraction_client';
-import { CcsLogsExtractionClient } from '../domain/ccs_logs_extraction_client';
+import { LogsExtractionClient } from '../domain/logs_extraction';
+import { CcsLogsExtractionClient } from '../domain/logs_extraction';
 import { CRUDClient } from '../domain/crud_client';
 import {
   EngineDescriptorClient,
