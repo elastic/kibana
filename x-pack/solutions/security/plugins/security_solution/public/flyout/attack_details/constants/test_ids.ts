@@ -32,3 +32,15 @@ export const INSIGHTS_ENTITIES_TEST_ID =
 export const NOTES_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab` as const;
 export const NOTES_TAB_CONTENT_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab-content` as const;
+export const HEADER_NOTES_TITLE_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-title` as const;
+export const HEADER_NOTES_ADD_NOTE_BUTTON_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-add-note-button` as const;
+export const HEADER_NOTES_VIEW_NOTES_BUTTON_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-view-notes-button` as const;
+export const HEADER_NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-add-note-icon-button` as const;
+export const HEADER_NOTES_COUNT_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-count` as const;
+export const HEADER_NOTES_LOADING_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-loading` as const;
