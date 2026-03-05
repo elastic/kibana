@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
 import { SloSelector } from '../alerts/slo_selector';
 
@@ -37,11 +36,14 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
     prefix: 'configurationFlyout',
   });
 
-  const onConfirmClick = () =>
-    onCreate({
-      slo_id: selectedSlo?.slo_id ?? '',
-      slo_instance_id: selectedSlo?.slo_instance_id ?? ALL_VALUE,
-    });
+  const onConfirmClick = () => {
+    if (selectedSlo) {
+      onCreate({
+        slo_id: selectedSlo.slo_id,
+        slo_instance_id: selectedSlo.slo_instance_id,
+      });
+    }
+  };
 
   return (
     <EuiFlyout onClose={onCancel} css={{ minWidth: 550 }} aria-labelledby={flyoutTitleId}>
