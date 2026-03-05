@@ -420,31 +420,31 @@ export const getSearchEmbeddableFactory = ({
                     <CellActionsProvider
                       getTriggerCompatibleActions={
                         discoverServices.uiActions.getTriggerCompatibleActions
-                       }
-                     >
-                       <SearchEmbeddableGridComponent
-                         api={{ ...api, fetchWarnings$, fetchContext$ }}
-                         dataView={dataView!}
-                         onAddFilter={
-                           runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                             ? undefined
-                             : onAddFilter
-                         }
-                         enableDocumentViewer={
-                           runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                           undefined
-                             ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                             : true
-                         }
-                         inlineEditing={{
-                           isActive: isInlineEditing,
-                           hasPendingChanges: hasPendingInlineTabChanges,
-                           onApply: inlineEditingApi.applyInlineTabSelection,
-                           onCancel: inlineEditingApi.cancelInlineTabSelection,
-                         }}
-                         stateManager={searchEmbeddable.stateManager}
-                       />
-                     </CellActionsProvider>
+                      }
+                    >
+                      <SearchEmbeddableGridComponent
+                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                        dataView={dataView!}
+                        onAddFilter={
+                          runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                            ? undefined
+                            : onAddFilter
+                        }
+                        enableDocumentViewer={
+                          runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                            : true
+                        }
+                        inlineEditing={{
+                          isActive: isInlineEditing,
+                          hasPendingChanges: hasPendingInlineTabChanges,
+                          onApply: inlineEditingApi.applyInlineTabSelection,
+                          onCancel: inlineEditingApi.cancelInlineTabSelection,
+                        }}
+                        stateManager={searchEmbeddable.stateManager}
+                      />
+                    </CellActionsProvider>
                   )}
                 </ScopedServicesProvider>
               </KibanaContextProvider>
