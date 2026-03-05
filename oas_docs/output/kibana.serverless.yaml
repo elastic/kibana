@@ -61689,6 +61689,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -61718,6 +61720,18 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
+                                              format:
+                                                not: {}
+                                              type:
+                                                not: {}
+                                            required:
+                                              - description
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
@@ -61925,6 +61939,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -61954,6 +61970,8 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
