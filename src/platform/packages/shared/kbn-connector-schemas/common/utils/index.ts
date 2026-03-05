@@ -8,5 +8,9 @@
  */
 
 export { Coerced } from './coerced';
-export { validateRecordMaxKeys, validateKeysAllowed } from './validators';
+export {
+  validateRecordMaxKeys,
+  validateKeysAllowed,
+  validateRecordKeysAllowed,
+} from './validators';
 export { convertTimestamp } from './convert_timestamp';

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_INTERNAL_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { LensSearchResponseBody } from '@kbn/lens-plugin/server';
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     it('should get list of lens visualizations', async () => {
       const response = await supertest
-        .get(LENS_VIS_API_PATH)
+        .get(LENS_INTERNAL_VIS_API_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send();
 
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should filter lens visualizations by title and description', async () => {
       const response = await supertest
-        .get(LENS_VIS_API_PATH)
+        .get(LENS_INTERNAL_VIS_API_PATH)
         .query({ query: '1' })
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send();

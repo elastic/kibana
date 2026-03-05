@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 export function createLargeSchema() {
@@ -29,5 +30,23 @@ export function createLargeSchema() {
     ]),
     uri: z.string().url().default('prototest://something'),
     any: z.any({ description: 'any type' }),
+  });
+}
+
+export function createLargeSchemaV4() {
+  return z4.object({
+    string: z4.string().max(10).min(1),
+    maybeNumber: z4.number().max(1000).min(1).optional(),
+    booleanDefault: z4.boolean().describe('defaults to to true').default(true),
+    ipType: z4.ipv4(),
+    literalType: z4.literal('literallythis'),
+    neverType: z4.never(),
+    record: z4.record(z4.string(), z4.string()),
+    union: z4.union([
+      z4.string().max(1).describe('Union string'),
+      z4.number().min(0).describe('Union number'),
+    ]),
+    uri: z4.string().url().default('prototest://something'),
+    any: z4.any().describe('any type'),
   });
 }
