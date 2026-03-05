@@ -99,13 +99,11 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const {
     isLoading: isCloudConnectStatusLoading,
     isCloudConnected,
-    isCloudConnectEisEnabled,
+    isCloudConnectedWithEisEnabled,
   } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
 
-  const isCloudConnectedWithEis = isCloudConnected && isCloudConnectEisEnabled;
-
   const shouldShowEisUpdateCallout =
-    ((cloud?.isCloudEnabled || isCloudConnectedWithEis) &&
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
       (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
     false;
 

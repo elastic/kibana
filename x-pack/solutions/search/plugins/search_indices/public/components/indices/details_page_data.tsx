@@ -56,15 +56,14 @@ export const IndexDetailsData = ({
   const {
     isLoading: isCloudConnectStatusLoading,
     isCloudConnected,
-    isCloudConnectEisEnabled,
+    isCloudConnectedWithEisEnabled,
   } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const documents = indexDocuments?.results?.data ?? [];
 
-  const isCloudConnectedWithEis = isCloudConnected && isCloudConnectEisEnabled;
   const shouldShowEisUpdateCallout =
-    ((cloud?.isCloudEnabled || isCloudConnectedWithEis) &&
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
       (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
     false;
 

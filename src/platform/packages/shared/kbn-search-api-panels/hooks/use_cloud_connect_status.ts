@@ -13,6 +13,7 @@ export interface CloudConnectStatus {
   isCloudConnected: boolean;
   isCloudConnectEisEnabled: boolean;
   isCloudConnectAutoopsEnabled: boolean;
+  isCloudConnectedWithEisEnabled?: boolean;
   isLoading: boolean;
   error: Error | null;
 }
@@ -23,6 +24,7 @@ const defaultCloudConnectStatusHook: UseCloudConnectStatusHook = () => ({
   isCloudConnected: false,
   isCloudConnectEisEnabled: false,
   isCloudConnectAutoopsEnabled: false,
+  isCloudConnectedWithEisEnabled: false,
   isLoading: false,
   error: null,
 });
@@ -30,5 +32,10 @@ const defaultCloudConnectStatusHook: UseCloudConnectStatusHook = () => ({
 export const useCloudConnectStatus = (hook?: UseCloudConnectStatusHook) => {
   const cloudConnectStatusHook = useMemo(() => hook ?? defaultCloudConnectStatusHook, [hook]);
 
-  return cloudConnectStatusHook();
+  const status = cloudConnectStatusHook();
+
+  return {
+    ...status,
+    isCloudConnectedWithEisEnabled: status.isCloudConnected && status.isCloudConnectEisEnabled,
+  };
 };

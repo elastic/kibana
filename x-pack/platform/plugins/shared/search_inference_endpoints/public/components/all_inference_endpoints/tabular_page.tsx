@@ -87,15 +87,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const {
     services: { cloud, cloudConnect, application },
   } = useKibana();
-  const {
-    isLoading: isCloudConnectStatusLoading,
-    isCloudConnected,
-    isCloudConnectEisEnabled,
-  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
+    cloudConnect?.hooks.useCloudConnectStatus
+  );
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
-  const isCloudConnectedWithEis = isCloudConnected && isCloudConnectEisEnabled;
 
   const {
     showDeleteAction,

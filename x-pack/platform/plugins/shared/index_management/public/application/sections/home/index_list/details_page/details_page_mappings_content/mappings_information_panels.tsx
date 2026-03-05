@@ -57,7 +57,7 @@ export const MappingsInformationPanels = ({
   const {
     isLoading: isCloudConnectStatusLoading,
     isCloudConnected,
-    isCloudConnectEisEnabled,
+    isCloudConnectedWithEisEnabled,
   } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
 
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
@@ -70,9 +70,8 @@ export const MappingsInformationPanels = ({
 
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
-  const isCloudConnectedWithEis = isCloudConnected && isCloudConnectEisEnabled;
   const shouldShowEisUpdateCallout =
-    ((cloud?.isCloudEnabled || isCloudConnectedWithEis) &&
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
       (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
     false;
 
