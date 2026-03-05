@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { LENS_DEFAULT_TIME_FIELD } from '@kbn/lens-common';
+
 export const LENS_LAYER_SUFFIX = `indexpattern-datasource-layer-`;
-export const LENS_DEFAULT_TIME_FIELD = '@timestamp';
 export const INDEX_PATTERN_ID = 'index-pattern';

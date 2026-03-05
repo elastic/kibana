@@ -69,14 +69,18 @@ export const getGridAttrs = async (
     return adHoc.name === indexPattern;
   });
 
-  const dataView = dataViewSpec
-    ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview({
-        dataViewsService: data.dataViews,
-        query: query.esql,
-        options: { skipFetchFields: true },
-        http,
-      });
+  const dataView =
+    dataViewSpec && dataViewSpec.timeFieldName
+      ? await data.dataViews.create(dataViewSpec)
+      : await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: query.esql,
+          options: {
+            skipFetchFields: true,
+            createNewInstanceEvenIfCachedOneAvailable: true,
+          },
+          http,
+        });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
   const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);

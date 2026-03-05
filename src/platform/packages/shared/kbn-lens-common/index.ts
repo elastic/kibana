@@ -298,6 +298,7 @@ export type { NavigateToLensLayer, NavigateToLensContext } from './convert_to_le
 export {
   INDEX_PATTERN_TYPE,
   LENS_DOCUMENT_FIELD_NAME,
+  LENS_DEFAULT_TIME_FIELD,
   LENS_RANGE_MODES,
 } from './datasources/constants';
 export {

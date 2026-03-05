@@ -13,11 +13,12 @@ import type {
   DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import type {
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternMap,
-  IndexPatternRef,
+import {
+  LENS_DEFAULT_TIME_FIELD,
+  type IndexPattern,
+  type IndexPatternField,
+  type IndexPatternMap,
+  type IndexPatternRef,
 } from '@kbn/lens-common';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
@@ -45,7 +46,12 @@ export function convertDataViewIntoLensIndexPattern(
     .map((field) => buildIndexPatternField(field, metaKeys))
     .concat(documentField);
 
-  const { typeMeta, title, name, timeFieldName, fieldFormatMap } = dataView;
+  const { typeMeta, title, name, fieldFormatMap } = dataView;
+  const timeFieldName =
+    dataView.timeFieldName ??
+    (dataView.getFieldByName(LENS_DEFAULT_TIME_FIELD)?.type === 'date'
+      ? LENS_DEFAULT_TIME_FIELD
+      : undefined);
   if (typeMeta?.aggs) {
     const aggs = Object.keys(typeMeta.aggs);
     newFields.forEach((field, index) => {

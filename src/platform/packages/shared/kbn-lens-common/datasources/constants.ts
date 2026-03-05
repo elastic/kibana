@@ -9,6 +9,7 @@
 
 export const INDEX_PATTERN_TYPE = 'index-pattern';
 export const LENS_DOCUMENT_FIELD_NAME = '___records___';
+export const LENS_DEFAULT_TIME_FIELD = '@timestamp';
 
 export const TYPING_DEBOUNCE_TIME = 256;
 // Taken from the Visualize editor
