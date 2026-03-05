@@ -22,7 +22,12 @@ import type { NotificationPolicySavedObjectServiceContract } from '../services/n
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
+import type {
+  CreateNotificationPolicyParams,
+  FindNotificationPoliciesParams,
+  FindNotificationPoliciesResponse,
+  UpdateNotificationPolicyParams,
+} from './types';
 
 const toAuthResponse = (
   auth: NotificationPolicySavedObjectAttributes['auth']
@@ -173,6 +178,26 @@ export class NotificationPolicyClient {
       }
       throw e;
     }
+  }
+
+  public async findNotificationPolicies(
+    params: FindNotificationPoliciesParams = {}
+  ): Promise<FindNotificationPoliciesResponse> {
+    const page = params.page ?? 1;
+    const perPage = params.perPage ?? 20;
+
+    const res = await this.notificationPolicySavedObjectService.find({ page, perPage });
+
+    return {
+      items: res.saved_objects.map((so) => ({
+        id: so.id,
+        version: so.version,
+        ...so.attributes,
+      })),
+      total: res.total,
+      page,
+      perPage,
+    };
   }
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {

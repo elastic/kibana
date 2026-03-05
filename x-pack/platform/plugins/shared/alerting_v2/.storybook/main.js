@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export { NotificationPolicyClient } from './notification_policy_client';
-export type {
-  CreateNotificationPolicyParams,
-  FindNotificationPoliciesParams,
-  FindNotificationPoliciesResponse,
-  UpdateNotificationPolicyParams,
-} from './types';
+module.exports = require('@kbn/storybook').defaultConfig;
