@@ -21,7 +21,7 @@ interface UseKeyboardNavigationOptions {
   onNodeSelect: (node: ServiceMapNode | null) => void;
   onEdgeSelect: (edge: ServiceMapEdge | null) => void;
   onPopoverClose: () => void;
-  onFocusedNodeChange?: (nodeId: string) => void;
+  onMoveFocus: (nodeId: string) => void;
 }
 
 interface UseKeyboardNavigationResult {
@@ -48,7 +48,7 @@ export function useKeyboardNavigation({
   onNodeSelect,
   onEdgeSelect,
   onPopoverClose,
-  onFocusedNodeChange,
+  onMoveFocus,
 }: UseKeyboardNavigationOptions): UseKeyboardNavigationResult {
   const [screenReaderAnnouncement, setScreenReaderAnnouncement] = useState<string>('');
 
@@ -159,18 +159,13 @@ export function useKeyboardNavigation({
           if (!nextNode) return null;
 
           event.preventDefault();
-
-          const nextElement = document.querySelector(`[data-id="${nextNode.id}"]`);
-          if (nextElement instanceof HTMLElement) {
-            nextElement.focus();
-            onFocusedNodeChange?.(nextNode.id);
-            setScreenReaderAnnouncement(
-              i18n.translate('xpack.apm.serviceMap.nodeFocused', {
-                defaultMessage: 'Focused on {nodeLabel}',
-                values: { nodeLabel: nextNode.data.label || nextNode.id },
-              })
-            );
-          }
+          onMoveFocus(nextNode.id);
+          setScreenReaderAnnouncement(
+            i18n.translate('xpack.apm.serviceMap.nodeFocused', {
+              defaultMessage: 'Focused on {nodeLabel}',
+              values: { nodeLabel: nextNode.data.label || nextNode.id },
+            })
+          );
         }
       }
     };
@@ -188,7 +183,7 @@ export function useKeyboardNavigation({
     onNodeSelect,
     onEdgeSelect,
     onPopoverClose,
-    onFocusedNodeChange,
+    onMoveFocus,
     findNodeInDirection,
   ]);
 

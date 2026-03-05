@@ -41,6 +41,7 @@ import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
+import { useRovingTabIndex } from './use_roving_tab_index';
 import { MapPopover } from './popover';
 import type { Environment } from '../../../../common/environment_rt';
 import type {
@@ -92,7 +93,6 @@ function GraphInner({
     null
   );
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
-  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -135,22 +135,7 @@ function GraphInner({
     getFitViewOptions,
   ]);
 
-  // Initialize (or reset) the focused node when nodes change
-  useEffect(() => {
-    if (nodes.length > 0 && (!focusedNodeId || !nodes.find((n) => n.id === focusedNodeId))) {
-      setFocusedNodeId(nodes[0].id);
-    }
-  }, [nodes, focusedNodeId]);
-
-  // Apply roving tabindex: only the focused node wrapper gets tabIndex={0}
-  useEffect(() => {
-    nodes.forEach((node) => {
-      const el = document.querySelector(`[data-id="${node.id}"]`);
-      if (el instanceof HTMLElement) {
-        el.tabIndex = node.id === focusedNodeId ? 0 : -1;
-      }
-    });
-  }, [nodes, focusedNodeId]);
+  const { moveFocus } = useRovingTabIndex(nodes);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
@@ -250,7 +235,7 @@ function GraphInner({
     onNodeSelect: handleKeyboardNodeSelect,
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
-    onFocusedNodeChange: setFocusedNodeId,
+    onMoveFocus: moveFocus,
   });
 
   useEffect(() => {
