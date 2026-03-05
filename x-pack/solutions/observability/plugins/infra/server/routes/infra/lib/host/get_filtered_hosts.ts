@@ -39,8 +39,8 @@ export const getFilteredHostNames = async ({
         aggs: {
           uniqueHostNames: {
             terms: {
-            field: HOST_NAME_FIELD,
-            size: limit,
+              field: HOST_NAME_FIELD,
+              size: limit,
               order: {
                 _key: 'asc',
               },
