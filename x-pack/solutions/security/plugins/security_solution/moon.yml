@@ -276,6 +276,11 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/workflows-ui'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/core-rendering-browser'
 tags:
   - plugin
   - prod
