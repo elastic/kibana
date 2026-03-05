@@ -22,7 +22,7 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import { EngineDescriptorType, EntityStoreGlobalStateType } from './domain/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
-import { CRUDClient } from './domain/crud/crud_client';
+import { CRUDClient } from './domain/crud';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 
 export class EntityStorePlugin

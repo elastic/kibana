@@ -18,7 +18,7 @@ import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
-import { CRUDClient } from './domain/crud/crud_client';
+import { CRUDClient } from './domain/crud';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
