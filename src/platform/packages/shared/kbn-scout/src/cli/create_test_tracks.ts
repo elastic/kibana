@@ -429,6 +429,10 @@ export const createTestTracks: Command<void> = {
       .requiredArrayOfStrings('testTarget')
       .map(ScoutTestTarget.fromTag);
 
+    if (selectedTestTargets.length === 0) {
+      throw createFlagError('No test targets specified');
+    }
+
     selectedTestTargets.forEach((testTarget) => {
       if (!testTargets.all.find((validTarget) => validTarget.tag === testTarget.tag)) {
         throw createFlagError(`${testTarget.tag} is not a valid location/arch/domain combo.`);
