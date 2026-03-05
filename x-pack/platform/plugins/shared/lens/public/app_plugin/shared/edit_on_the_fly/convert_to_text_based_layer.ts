@@ -17,7 +17,7 @@ import type {
   TypedLensSerializedState,
   ValueFormatConfig,
 } from '@kbn/lens-common';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type {

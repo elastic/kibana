@@ -28,7 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 
 import { layerTypes } from '../../..';
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';

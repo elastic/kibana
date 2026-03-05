@@ -20,7 +20,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { memoize } from 'lodash';
 import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,

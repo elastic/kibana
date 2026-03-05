@@ -13,7 +13,7 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,

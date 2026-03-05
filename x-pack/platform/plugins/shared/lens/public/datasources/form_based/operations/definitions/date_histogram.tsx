@@ -250,7 +250,7 @@ export const dateHistogramOperation: OperationDefinition<
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
     const dropPartials = Boolean(
       column.params?.dropPartials &&
-        // Set to false when detached from time picker
+        // set to false when detached from time picker
         (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
     );
 

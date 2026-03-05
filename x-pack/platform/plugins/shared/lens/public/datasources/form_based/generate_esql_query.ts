@@ -250,8 +250,6 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    let metricESQL = rawResult.template;
-
     let filterClause = '';
     if (wrapInFilter && col.filter) {
       const { query, language } = col.filter;
@@ -263,7 +261,8 @@ export function generateEsqlQuery(
       filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
-    metricESQL += filterClause;
+    // metricESQL is the full expression (template + optional filter); same value is used as map key and in STATS
+    const metricESQL = rawResult.template + filterClause;
 
     esAggsIdMap[metricESQL] = createEsAggsIdMapEntry({
       col,

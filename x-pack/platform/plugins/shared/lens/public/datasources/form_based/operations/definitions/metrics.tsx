@@ -33,7 +33,7 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
