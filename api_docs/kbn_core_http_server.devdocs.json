@@ -4898,7 +4898,7 @@
               },
               {
                 "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "searchNotebooks",
@@ -10506,7 +10506,7 @@
               },
               {
                 "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "searchQueryRules",
