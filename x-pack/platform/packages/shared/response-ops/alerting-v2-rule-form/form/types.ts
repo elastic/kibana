@@ -26,6 +26,7 @@ export interface RuleSchedule {
 
 export interface EvaluationQuery {
   base: string;
+  condition?: string;
 }
 
 export interface RuleEvaluation {
@@ -34,6 +35,11 @@ export interface RuleEvaluation {
 
 export interface RuleGrouping {
   fields: string[];
+}
+
+export interface RuleNoData {
+  behavior?: 'no_data' | 'last_status' | 'recover';
+  timeframe?: string;
 }
 
 /**
@@ -48,4 +54,5 @@ export interface FormValues {
   schedule: RuleSchedule;
   evaluation: RuleEvaluation;
   grouping?: RuleGrouping;
+  noData?: RuleNoData;
 }

@@ -44,6 +44,7 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
           base: query,
         },
       },
+      noData: { timeframe: '5m' },
       grouping: defaultGroupBy.length
         ? {
             fields: defaultGroupBy,
