@@ -20,7 +20,7 @@ import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 
 function getTaskType(entityType: EntityType): string {
-  const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+  const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
   return `${config.type}:${entityType}`;
 }
 
@@ -117,7 +117,7 @@ export function registerExtractEntityTasks({
   entityTypes: EntityType[];
 }): void {
   try {
-    const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+    const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
     entityTypes.forEach((type) => {
       const taskType = getTaskType(type);
       taskManager.registerTaskDefinitions({
@@ -162,7 +162,7 @@ export async function scheduleExtractEntityTask({
   try {
     const taskType = getTaskType(type);
     const taskId = getExtractEntityTaskId(type, namespace);
-    const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
+    const interval = frequency ?? TasksConfig[EntityStoreTaskType.enum.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,

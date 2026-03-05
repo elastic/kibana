@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import type { ToolsService } from '../../../../../services';
 
