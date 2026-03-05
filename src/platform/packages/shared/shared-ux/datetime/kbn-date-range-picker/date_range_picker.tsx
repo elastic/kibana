@@ -47,6 +47,8 @@ export interface DateRangePickerPanelConfig {
 }
 
 export interface DateRangePickerProps {
+  /** Passed to the main container. */
+  className?: string;
   /**
    * Text representation of the time range (controlled).
    * When provided, the component is controlled and `value` is the external source of truth.
@@ -129,7 +131,7 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
 /**
  * A date range picker component that accepts natural language and date math input.
  */
-export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps) {
+export function DateRangePicker({ panels = [], className, ...props }: DateRangePickerProps) {
   const defaultPanelId = DEFAULT_PANEL_ID;
   const panelDescriptors: DateRangePickerPanelDescriptor[] = useMemo(
     () => panels.map(({ id, title, icon }) => ({ id, title, icon })),
@@ -138,7 +140,7 @@ export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps)
 
   return (
     <DateRangePickerProvider {...props}>
-      <DateRangePickerLayout>
+      <DateRangePickerLayout className={className}>
         <DateRangePickerDialog>
           <DateRangePickerPanelNavigationProvider
             defaultPanelId={defaultPanelId}
