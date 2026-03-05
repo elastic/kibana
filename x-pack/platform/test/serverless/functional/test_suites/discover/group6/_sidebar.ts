@@ -478,7 +478,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render even when retrieving documents failed with an error', async () => {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
-        await PageObjects.discover.addRuntimeField('_invalid-runtimefield', `emit(‘’);`);
+        await PageObjects.discover.addRuntimeField('_invalid-runtimefield', `emit('');#`);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
 

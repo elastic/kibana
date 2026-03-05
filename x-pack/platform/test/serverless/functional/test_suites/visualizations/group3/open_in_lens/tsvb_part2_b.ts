@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - TSVB Open in Lens (part 2)', function () {
+  describe('lens app - TSVB Open in Lens (part 2b)', function () {
     this.tags(['failsOnMKI']);
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
@@ -69,6 +69,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./tsvb/timeseries'));
+    loadTestFile(require.resolve('./tsvb/top_n'));
   });
 }
