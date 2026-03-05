@@ -57,6 +57,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   const transitionFromESQLToDataView = useCurrentTabAction(
     internalStateActions.transitionFromESQLToDataView
   );
+  const setCommentUiState = useCurrentTabAction(internalStateActions.setCommentUiState);
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (!dimensions) return;
@@ -68,20 +69,18 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>
   >(
     (item) => {
-      if (!services.uiSettings.get(ENABLE_ESQL)) {
-        return [];
-      }
-
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
+      const items: Array<{
+        'data-test-subj': string;
+        name: string;
+        label: string;
+        onClick: () => void;
+      }> = [];
 
-      if (!isCurrentTab || !currentDataView) {
-        return [];
-      }
-
-      if (isDataViewSource(tab.appState.dataSource)) {
-        return [
-          {
+      if (services.uiSettings.get(ENABLE_ESQL) && isCurrentTab && tab && currentDataView) {
+        if (isDataViewSource(tab.appState.dataSource)) {
+          items.push({
             'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
             name: 'switchToESQL',
             label: i18n.translate('discover.localMenu.switchToESQLTitle', {
@@ -91,35 +90,52 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
               dispatch(transitionFromDataViewToESQL({ dataView: currentDataView }));
             },
-          },
-        ];
+          });
+        } else {
+          items.push({
+            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+            name: 'switchToClassic',
+            label: i18n.translate('discover.localMenu.switchToClassicTitle', {
+              defaultMessage: 'Switch to classic',
+            }),
+            onClick: () => {
+              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+              const shouldShowESQLToDataViewTransitionModal =
+                !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
+              if (
+                shouldShowESQLToDataViewTransitionModal &&
+                !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+              ) {
+                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
+              } else {
+                dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
+              }
+            },
+          });
+        }
       }
 
-      return [
-        {
-          'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
-          name: 'switchToClassic',
-          label: i18n.translate('discover.localMenu.switchToClassicTitle', {
-            defaultMessage: 'Switch to classic',
-          }),
+      if (isCurrentTab && tab) {
+        const hasComment = typeof tab.uiState.comment === 'string';
+        items.push({
+          'data-test-subj': hasComment
+            ? 'unifiedTabs_tabMenuItem_removeComment'
+            : 'unifiedTabs_tabMenuItem_addComment',
+          name: hasComment ? 'removeComment' : 'addComment',
+          label: hasComment
+            ? i18n.translate('discover.tabs.removeCommentMenuItem', {
+                defaultMessage: 'Remove comment',
+              })
+            : i18n.translate('discover.tabs.addCommentMenuItem', {
+                defaultMessage: 'Add comment',
+              }),
           onClick: () => {
-            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-
-            // Determine if we should show the ES|QL to Data View transition modal
-            const shouldShowESQLToDataViewTransitionModal =
-              !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
-
-            if (
-              shouldShowESQLToDataViewTransitionModal &&
-              !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-            ) {
-              dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-            } else {
-              dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
-            }
+            dispatch(setCommentUiState({ comment: hasComment ? undefined : '' }));
           },
-        },
-      ];
+        });
+      }
+
+      return items;
     },
     [
       allTabs,
@@ -130,6 +146,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       services,
       transitionFromDataViewToESQL,
       transitionFromESQLToDataView,
+      setCommentUiState,
       unsavedTabIds,
     ]
   );

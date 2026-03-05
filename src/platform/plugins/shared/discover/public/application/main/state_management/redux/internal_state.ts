@@ -393,6 +393,14 @@ export const internalStateSlice = createSlice({
         tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
 
+    setCommentUiState: (
+      state,
+      action: TabAction<{ comment: string | undefined }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.comment = action.payload.comment;
+      }),
+
     setMetricsGridState: (
       state,
       action: TabAction<{ metricsGridState: Partial<TabState['uiState']['metricsGrid']> }>
@@ -518,6 +526,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
+            comment: tab.uiState.comment,
           });
         });
       },
