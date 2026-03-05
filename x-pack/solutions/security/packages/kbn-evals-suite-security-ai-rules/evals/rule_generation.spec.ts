@@ -48,6 +48,15 @@ evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete
   evaluate(
     'handles edge cases and errors gracefully',
     async ({ executorClient, evaluators, chatClient, evaluationInferenceClient, log }) => {
+      const usableCases = hardCases.filter(
+        (c) => c.metadata.difficulty !== 'very-hard' // too slow / rate-limited for CI
+      );
+
+      if (usableCases.length === 0) {
+        log.info('No usable edge cases to evaluate — skipping');
+        return;
+      }
+
       const evaluateDataset = createEvaluateDataset({
         evaluators,
         executorClient,
@@ -56,19 +65,17 @@ evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete
         log,
       });
 
-      log.info('Running edge case evaluation');
+      log.info(`Running edge case evaluation with ${usableCases.length} examples`);
       await evaluateDataset({
         dataset: {
           name: 'security-ai-rules: edge-cases',
           description: 'Tests AI rule generation with edge cases and challenging prompts',
-          examples: hardCases
-            .filter((c) => c.metadata.difficulty !== 'very-hard') // too slow / rate-limited for CI
-            .map((c) => ({
-              id: c.id,
-              input: { prompt: c.prompt },
-              output: c.output,
-              metadata: c.metadata,
-            })),
+          examples: usableCases.map((c) => ({
+            id: c.id,
+            input: { prompt: c.prompt },
+            output: c.output,
+            metadata: c.metadata,
+          })),
         },
       });
       log.info('Edge case evaluation complete');

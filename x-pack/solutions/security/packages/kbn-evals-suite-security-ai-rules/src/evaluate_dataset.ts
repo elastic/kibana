@@ -149,7 +149,7 @@ function createFieldCoverageEvaluator(): Evaluator<RuleExample, RuleGenerationTa
           score: 0,
           metadata: {
             error: 'No rule generated',
-            missing: ['name', 'description', 'query', 'severity', 'tags'],
+            missing: ['name', 'description', 'query', 'severity', 'tags', 'riskScore'],
           },
         };
       }
@@ -434,17 +434,32 @@ export function createEvaluateDataset({
   }: {
     dataset: EvaluationDataset<RuleExample>;
   }): Promise<void> {
+    let totalExamples = 0;
+    let missingIndexFailures = 0;
+    let otherFailures = 0;
+
     await executorClient.runExperiment(
       {
         dataset,
         task: async ({ input, output: expected }) => {
+          totalExamples++;
           const SEP = '═'.repeat(60);
           log.info(`[Task] Prompt: "${input.prompt}"`);
           try {
             const taskResult = await chatClient.generateRule(input.prompt);
 
             if (!taskResult.generatedRule) {
-              log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
+              const isMissingIndex =
+                taskResult.error && /could not discover a suitable index/i.test(taskResult.error);
+              if (isMissingIndex) {
+                missingIndexFailures++;
+                log.warning(
+                  `[Task] Skipped — missing index (all evaluators will return N/A). Error: ${taskResult.error}`
+                );
+              } else {
+                otherFailures++;
+                log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
+              }
               return { error: taskResult.error || 'No rule returned from agent' };
             }
 
@@ -453,7 +468,6 @@ export function createEvaluateDataset({
             log.info(JSON.stringify(taskResult.generatedRule, null, 2));
             log.info(SEP);
 
-            // Vibe checks — mirrors what the evaluators will score
             const genTech = extractMitreTechniques(taskResult.generatedRule);
             const expTech = extractMitreTechniques(expected ?? {});
             log.info(
@@ -482,6 +496,7 @@ export function createEvaluateDataset({
 
             return taskResult;
           } catch (error) {
+            otherFailures++;
             log.error(
               `Error generating rule: ${error instanceof Error ? error.message : String(error)}`
             );
@@ -491,5 +506,18 @@ export function createEvaluateDataset({
       },
       allEvaluators
     );
+
+    const scored = totalExamples - missingIndexFailures;
+    const missingNote =
+      missingIndexFailures > 0 ? ` (${missingIndexFailures} skipped due to missing indices)` : '';
+    const failNote = otherFailures > 0 ? ` (${otherFailures} failed for other reasons)` : '';
+    log.info(
+      `[Summary] ${dataset.name}: ${scored}/${totalExamples} examples scored${missingNote}${failNote}`
+    );
+    if (missingIndexFailures > 0 && scored === 0) {
+      log.warning(
+        `[Summary] All examples in "${dataset.name}" were skipped due to missing indices — no evaluation scores were produced. Ensure the required index patterns exist in Elasticsearch.`
+      );
+    }
   };
 }

@@ -9,15 +9,23 @@ import { Parser } from '@elastic/esql';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 /**
- * Extract MITRE ATT&CK techniques from a rule
+ * Extract MITRE ATT&CK technique IDs from a rule.
+ *
+ * Collects both `technique` and `subtechnique` fields. When a subtechnique is
+ * present it is the more specific identifier (e.g. T1560.001 vs T1560), so
+ * both are included to maximise matching regardless of how the dataset or the
+ * generated rule stores them.
  */
 export function extractMitreTechniques(rule: Partial<ReferenceRule>): Set<string> {
   const techniques = new Set<string>();
 
   if (rule.threat) {
     for (const threat of rule.threat) {
-      if (threat.technique) {
+      if (threat.technique && threat.technique.length > 0) {
         techniques.add(threat.technique);
+      }
+      if (threat.subtechnique && /^T\d{4}(\.\d{3})?$/.test(threat.subtechnique)) {
+        techniques.add(threat.subtechnique);
       }
     }
   }
@@ -125,11 +133,12 @@ export function hasRequiredFields(rule: Partial<ReferenceRule>): {
   const missing: string[] = [];
 
   for (const field of requiredFields) {
-    if (
-      !rule[field as keyof ReferenceRule] ||
-      (Array.isArray(rule[field as keyof ReferenceRule]) &&
-        (rule[field as keyof ReferenceRule] as unknown[]).length === 0)
-    ) {
+    const value = rule[field as keyof ReferenceRule];
+    const isAbsent =
+      value == null ||
+      (typeof value === 'string' && value.length === 0) ||
+      (Array.isArray(value) && value.length === 0);
+    if (isAbsent) {
       missing.push(field);
     }
   }

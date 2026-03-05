@@ -59,6 +59,22 @@ describe('helpers', () => {
         query: 'process where true',
         severity: 'medium',
         tags: ['test'],
+        riskScore: 47,
+      };
+      const result = hasRequiredFields(rule);
+      expect(result.hasAll).toBe(true);
+      expect(result.coverage).toBe(1.0);
+      expect(result.missing).toEqual([]);
+    });
+
+    it('should not treat riskScore=0 as missing', () => {
+      const rule: Partial<ReferenceRule> = {
+        name: 'Test Rule',
+        description: 'Test description',
+        query: 'process where true',
+        severity: 'medium',
+        tags: ['test'],
+        riskScore: 0,
       };
       const result = hasRequiredFields(rule);
       expect(result.hasAll).toBe(true);
@@ -121,6 +137,33 @@ describe('helpers', () => {
       expect(techniques.size).toBe(2);
       expect(techniques.has('T1003.001')).toBe(true);
       expect(techniques.has('T1005')).toBe(true);
+    });
+
+    it('should also extract subtechnique IDs', () => {
+      const rule: Partial<ReferenceRule> = {
+        threat: [{ technique: 'T1560', tactic: 'TA0009', subtechnique: 'T1560.001' }],
+      };
+      const techniques = extractMitreTechniques(rule);
+      expect(techniques.has('T1560')).toBe(true);
+      expect(techniques.has('T1560.001')).toBe(true);
+    });
+
+    it('should ignore empty-string techniques', () => {
+      const rule: Partial<ReferenceRule> = {
+        threat: [{ technique: '', tactic: 'TA0009' }],
+      };
+      const techniques = extractMitreTechniques(rule);
+      expect(techniques.size).toBe(0);
+    });
+
+    it('should ignore non-MITRE-ID subtechnique values', () => {
+      const rule: Partial<ReferenceRule> = {
+        threat: [{ technique: 'T1560.001', tactic: 'TA0009', subtechnique: 'Archive via Utility' }],
+      };
+      const techniques = extractMitreTechniques(rule);
+      expect(techniques.size).toBe(1);
+      expect(techniques.has('T1560.001')).toBe(true);
+      expect(techniques.has('Archive via Utility')).toBe(false);
     });
 
     it('should handle rule without threat', () => {
