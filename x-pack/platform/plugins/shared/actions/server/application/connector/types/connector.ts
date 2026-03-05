@@ -22,6 +22,7 @@ export interface Connector {
   isSystemAction: ConnectorSchemaType['isSystemAction'];
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
   authMode?: ConnectorSchemaType['authMode'];
+  currentUserConnectionStatus: ConnectorSchemaType['currentUserConnectionStatus'];
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

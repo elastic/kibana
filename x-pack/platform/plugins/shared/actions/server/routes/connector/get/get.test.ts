@@ -58,6 +58,7 @@ describe('getConnectorRoute', () => {
           "auth_mode": "per-user",
           "config": Object {},
           "connector_type_id": "2",
+          "current_user_connection_status": "not_applicable",
           "id": "1",
           "is_connector_type_deprecated": false,
           "is_deprecated": false,
@@ -84,6 +85,7 @@ describe('getConnectorRoute', () => {
         is_system_action: false,
         is_connector_type_deprecated: false,
         auth_mode: 'per-user',
+        current_user_connection_status: 'not_applicable',
       },
     });
   });

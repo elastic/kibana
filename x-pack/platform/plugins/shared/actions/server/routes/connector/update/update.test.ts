@@ -67,8 +67,10 @@ describe('updateConnectorRoute', () => {
         config: { foo: true },
         is_preconfigured: false,
         is_deprecated: false,
+        is_missing_secrets: undefined,
         is_system_action: false,
         is_connector_type_deprecated: false,
+        current_user_connection_status: 'not_applicable',
       },
     });
 

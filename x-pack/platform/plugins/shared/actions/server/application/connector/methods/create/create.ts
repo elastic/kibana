@@ -176,6 +176,7 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    currentUserConnectionStatus: 'not_applicable',
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
   };
 }

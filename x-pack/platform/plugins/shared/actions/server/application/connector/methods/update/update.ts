@@ -180,5 +180,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    currentUserConnectionStatus: 'not_applicable',
   };
 }

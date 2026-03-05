@@ -230,4 +230,81 @@ describe('getAllConnectorsRoute', () => {
 
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
+
+  it('passes profileUid from current user to actionsClient.getAll', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([]);
+
+    const getCurrentUser = jest.fn().mockReturnValue({ profile_uid: 'test-profile-uid' });
+    const [context, req, res] = mockHandlerArguments({ actionsClient, getCurrentUser }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(actionsClient.getAll).toHaveBeenCalledWith({ profileUid: 'test-profile-uid' });
+  });
+
+  it('passes undefined profileUid when getCurrentUser returns null', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([]);
+
+    const getCurrentUser = jest.fn().mockReturnValue(null);
+    const [context, req, res] = mockHandlerArguments({ actionsClient, getCurrentUser }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(actionsClient.getAll).toHaveBeenCalledWith({ profileUid: undefined });
+  });
+
+  it('includes current_user_connection_status in response body', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.webhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        authMode: 'per-user',
+        currentUserConnectionStatus: 'connected',
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(result).toMatchObject({
+      body: [
+        expect.objectContaining({
+          id: '1',
+          current_user_connection_status: 'connected',
+        }),
+      ],
+    });
+  });
 });
