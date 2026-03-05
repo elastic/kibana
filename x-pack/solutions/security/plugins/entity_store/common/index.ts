@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as euidModule from './domain/euid';
 
 export const PLUGIN_ID = 'entityStore';

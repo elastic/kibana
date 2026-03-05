@@ -48,7 +48,7 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
@@ -63,7 +63,7 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.running });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.running });
     mockServices.http.post.mockResolvedValue({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -88,7 +88,7 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.running });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.running });
     mockServices.http.post.mockResolvedValue({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -117,7 +117,7 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
     mockServices.http.post.mockResolvedValue({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));

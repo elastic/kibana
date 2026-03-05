@@ -22,7 +22,7 @@ import { entityMaintainersRegistry } from './entity_maintainers_registry';
 import { CRUDClient } from '../../domain/crud_client';
 
 function getTaskType(id: string): string {
-  return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
+  return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
 }
 
 export function getTaskId(id: string, namespace: string): string {
@@ -69,7 +69,7 @@ export function registerEntityMaintainerTask({
   core: EntityStoreCoreSetup;
 }): void {
   logger.debug(`Registering entity maintainer task: ${config.id}`);
-  const { title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
+  const { title } = TasksConfig[EntityStoreTaskType.enum.entityMaintainer];
   const { run, interval, initialState, description, id, setup } = config;
   const type = getTaskType(id);
 

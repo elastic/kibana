@@ -48,7 +48,7 @@ export function registerReadRoute(
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(ctx, req.params.id);
+        const result = await read(ctx, req.params.id, isDashboardAppRequest);
         const { data, warnings } = !isDashboardAppRequest
           ? stripUnmappedKeys(result.data)
           : { data: result.data, warnings: [] };
