@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import moment from 'moment';
 import { convertTimestamp, Coerced } from '../../common/utils';
 
@@ -62,7 +62,7 @@ export const ParamsSchema = z
         const date = moment(convertedTimestamp);
         if (!date.isValid()) {
           ctx.addIssue({
-            code: z.ZodIssueCode.invalid_date,
+            code: 'custom',
             message: i18n.translate(
               'xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage',
               {
@@ -77,7 +77,7 @@ export const ParamsSchema = z
         }
       } catch (err) {
         ctx.addIssue({
-          code: z.ZodIssueCode.invalid_date,
+          code: 'custom',
           message: i18n.translate(
             'xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage',
             {
@@ -93,7 +93,7 @@ export const ParamsSchema = z
     }
     if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: i18n.translate('xpack.stackConnectors.pagerduty.missingDedupkeyErrorMessage', {
           defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
           values: { eventAction },
