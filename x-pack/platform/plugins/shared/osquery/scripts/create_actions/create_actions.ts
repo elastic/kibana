@@ -108,6 +108,12 @@ const argv = yargs(process.argv.slice(2))
     default: 'http://elastic:changeme@127.0.0.1:5601',
     description: 'Kibana URL (for Cases API)',
   })
+  .option('ruleRatio', {
+    alias: 'rr',
+    type: 'number',
+    default: 0.1,
+    description: 'Fraction of actions that are rule-triggered with no user_id (0.0-1.0)',
+  })
   .option('batchSize', {
     alias: 'bs',
     type: 'number',
@@ -126,6 +132,7 @@ const {
   users: usersCount,
   cases: casesCount,
   caseRatio,
+  ruleRatio,
   delete: deleteFirst,
   deleteOnly,
   es: esUrl,
@@ -246,6 +253,7 @@ function generateActionDocument(opts: {
   packIndex: number;
   syntheticCases: SyntheticCase[];
   caseRatioValue: number;
+  ruleRatioValue: number;
 }): { action: ActionDocument; subQueryActionIds: string[] } {
   const actionId = uuidv4();
   const timestamp = randomTimestampInLastDays(30);
@@ -253,7 +261,7 @@ function generateActionDocument(opts: {
   const numAgents = randomInt(opts.minAgentsPerAction, opts.maxAgentsPerAction);
   const agents = selectRandomAgents(opts.agentPool, numAgents);
 
-  const isAutomated = Math.random() < 0.1;
+  const isAutomated = Math.random() < opts.ruleRatioValue;
   const user = isAutomated ? null : randomElement(opts.users);
 
   const numQueries = opts.isPack ? opts.numQueriesPerPack : 1;
@@ -403,35 +411,42 @@ async function deleteSyntheticCases(): Promise<number> {
   let totalDeleted = 0;
 
   for (const owner of owners) {
-    const findRes = await fetch(
-      `${kbnBaseUrl}/api/cases/_find?tags=${SYNTHETIC_TAG}&owner=${owner}&perPage=1000`,
-      {
-        method: 'GET',
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      const findRes = await fetch(
+        `${kbnBaseUrl}/api/cases/_find?tags=${SYNTHETIC_TAG}&owner=${owner}&perPage=100&page=${page}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: kbnAuth,
+            'Elastic-Api-Version': CASES_API_VERSION,
+          },
+        }
+      );
+
+      const findData = await findRes.json();
+      const caseIds: string[] = findData.cases?.map((c: { id: string }) => c.id) || [];
+
+      if (caseIds.length === 0) {
+        break;
+      }
+
+      const idsParam = caseIds.map((id) => `ids=${id}`).join('&');
+      await fetch(`${kbnBaseUrl}/api/cases?${idsParam}`, {
+        method: 'DELETE',
         headers: {
           Authorization: kbnAuth,
+          'kbn-xsrf': 'true',
           'Elastic-Api-Version': CASES_API_VERSION,
         },
-      }
-    );
+      });
 
-    const findData = await findRes.json();
-    const caseIds: string[] = findData.cases?.map((c: { id: string }) => c.id) || [];
-
-    if (caseIds.length === 0) {
-      continue;
+      totalDeleted += caseIds.length;
+      hasMore = caseIds.length === 100;
+      page++;
     }
-
-    const idsParam = caseIds.map((id) => `ids=${id}`).join('&');
-    await fetch(`${kbnBaseUrl}/api/cases?${idsParam}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: kbnAuth,
-        'kbn-xsrf': 'true',
-        'Elastic-Api-Version': CASES_API_VERSION,
-      },
-    });
-
-    totalDeleted += caseIds.length;
   }
 
   return totalDeleted;
@@ -592,6 +607,7 @@ async function generateAndIndex(opts: {
       packIndex: isPack ? packIndex++ : 0,
       syntheticCases,
       caseRatioValue: caseRatio,
+      ruleRatioValue: ruleRatio,
     });
 
     if (action.case_ids && action.case_ids.length > 0) {
@@ -629,6 +645,7 @@ async function run(): Promise<void> {
     }`
   );
   logger.info(`  Error rate: ${(errorRate * 100).toFixed(0)}%`);
+  logger.info(`  Rule ratio: ${(ruleRatio * 100).toFixed(0)}%`);
   logger.info(`  Unique users: ${usersCount}`);
   logger.info(
     `  Cases to create: ${casesCount} (attached to ${(caseRatio * 100).toFixed(0)}% of actions)`

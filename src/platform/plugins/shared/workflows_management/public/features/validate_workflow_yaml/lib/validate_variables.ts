@@ -8,26 +8,53 @@
  */
 
 import type { Document } from 'yaml';
+import type { monaco } from '@kbn/monaco';
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { validateVariable } from './validate_variable';
 import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
+/**
+ * If the variable item has no offset, try to compute it on the fly from the editor model.
+ */
+function fallbackForOffsetValue(
+  variableItem: VariableItem,
+  yamlDocument?: Document | null,
+  model?: monaco.editor.ITextModel
+) {
+  if (yamlDocument && model) {
+    return model?.getOffsetAt({
+      lineNumber: variableItem.startLineNumber,
+      column: variableItem.startColumn,
+    });
+  }
+  return undefined;
+}
+
 export function validateVariables(
   variableItems: VariableItem[],
   workflowGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
-  yamlDocument?: Document | null
+  yamlDocument?: Document | null,
+  model?: monaco.editor.ITextModel
 ): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
 
   for (const variableItem of variableItems) {
-    const { yamlPath: path } = variableItem;
+    const { yamlPath: path, offset } = variableItem;
 
     let context: typeof DynamicStepContextSchema;
     try {
-      context = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
+      const variableOffset = offset ?? fallbackForOffsetValue(variableItem, yamlDocument, model);
+      context = getContextSchemaForPath(
+        workflowDefinition,
+        workflowGraph,
+        path,
+        yamlDocument,
+        variableOffset
+      );
+
       const error = validateVariable(variableItem, context);
       if (error) {
         errors.push(error);

@@ -101,20 +101,20 @@ describe('crud_client utils', () => {
 
   it('assertOnlyNonForcedAttributesInReq: allows updates for allowAPIUpdate fields', () => {
     mockGetEntityDefinition.mockReturnValue(
-      createDefinition('generic', [createField('entity.attributes.privileged', true)])
+      createDefinition('generic', [createField('entity.attributes.watchlists', true)])
     );
 
-    const doc: Entity = {
+    const doc = {
       entity: {
         id: 'entity-allow-update',
         attributes: {
-          privileged: true,
+          watchlists: ['privileged_watchlist_id'],
         },
       },
-    };
+    } as Entity;
     const result = validateAndTransformDocForUpsert('generic', 'default', doc, false);
 
-    expect(result).toHaveProperty('entity.attributes.privileged', true);
+    expect(result).toHaveProperty('entity.attributes.watchlists', ['privileged_watchlist_id']);
   });
 
   it('getFieldDescriptions: throws for fields missing from definition', () => {
@@ -172,5 +172,25 @@ describe('crud_client utils', () => {
     };
 
     expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, true)).not.toThrow();
+  });
+
+  it('validateAndTransformDocForUpsert: accepts flat doc (dot-notation keys) when force=true', () => {
+    mockGetEntityDefinition.mockReturnValue(
+      createDefinition('user', [createField('entity.id'), createField('entity.name')])
+    );
+
+    const flatDoc = {
+      'entity.id': 'user:u1',
+      'entity.name': 'alice',
+    } as unknown as Entity;
+
+    const result = validateAndTransformDocForUpsert('user', 'default', flatDoc, true);
+
+    expect(result).toHaveProperty('@timestamp');
+    expect(typeof result['@timestamp']).toBe('string');
+    expect(result['entity.id']).toBe('user:u1');
+    expect(result['entity.name']).toBe('alice');
+    expect(result).toHaveProperty('user');
+    expect((result.user as Record<string, unknown>).entity).toBeUndefined();
   });
 });

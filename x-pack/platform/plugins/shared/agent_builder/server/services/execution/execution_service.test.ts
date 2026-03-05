@@ -68,6 +68,10 @@ describe('AgentExecutionService', () => {
     getScopedClient: mockGetScopedClient,
   } as any;
 
+  const meteringService = {
+    reportExecution: jest.fn(),
+  } as any;
+
   const attachmentsService: AttachmentServiceStart = {
     validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
     getTypeDefinition: jest.fn(),
@@ -81,9 +85,11 @@ describe('AgentExecutionService', () => {
     inference: {} as any,
     conversationService: {} as any,
     agentService: {} as any,
+    runAgent: jest.fn(),
     attachmentsService,
     uiSettings,
     savedObjects,
+    meteringService,
   });
 
   beforeEach(() => {

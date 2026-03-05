@@ -8,6 +8,7 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Model } from '@kbn/inference-common';
+import { buildRunFilterQuery, buildStatsAggregation, SCORES_SORT_ORDER } from '@kbn/evals-common';
 
 interface BulkDroppedDocument<TDocument> {
   status?: number;
@@ -452,15 +453,10 @@ export class EvaluationScoreRepository {
     options?: { taskModelId?: string; suiteId?: string }
   ): Promise<RunStats | null> {
     try {
-      const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
-      if (options?.taskModelId) {
-        must.push({ term: { 'task.model.id': options.taskModelId } });
-      }
-      if (options?.suiteId) {
-        must.push({ term: { 'suite.id': options.suiteId } });
-      }
-
-      const runQuery = { bool: { must } };
+      const runQuery = buildRunFilterQuery(runId, {
+        modelId: options?.taskModelId,
+        suiteId: options?.suiteId,
+      });
 
       const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_ALIAS,
@@ -468,7 +464,7 @@ export class EvaluationScoreRepository {
         size: 1,
       });
 
-      // Used for metedata for the evaluation run (all score documents capture the same metadata)
+      // Used for metadata for the evaluation run (all score documents capture the same metadata)
       const firstDoc = metadataResponse.hits?.hits[0]?._source;
       if (!firstDoc) {
         return null;
@@ -478,21 +474,7 @@ export class EvaluationScoreRepository {
         index: EVALUATIONS_DATA_STREAM_ALIAS,
         size: 0,
         query: runQuery,
-        aggs: {
-          by_dataset: {
-            terms: { field: 'example.dataset.id', size: 10000 },
-            aggs: {
-              dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
-              by_evaluator: {
-                terms: { field: 'evaluator.name', size: 1000 },
-                aggs: {
-                  score_stats: { extended_stats: { field: 'evaluator.score' } },
-                  score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
-                },
-              },
-            },
-          },
-        },
+        aggs: buildStatsAggregation(),
       });
 
       const aggregations = aggResponse.aggregations as RunStatsAggregations | undefined;
@@ -540,24 +522,15 @@ export class EvaluationScoreRepository {
     options?: { taskModelId?: string; suiteId?: string }
   ): Promise<EvaluationScoreDocument[]> {
     try {
-      const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
-      if (options?.taskModelId) {
-        must.push({ term: { 'task.model.id': options.taskModelId } });
-      }
-      if (options?.suiteId) {
-        must.push({ term: { 'suite.id': options.suiteId } });
-      }
-      const query = { bool: { must } };
+      const query = buildRunFilterQuery(runId, {
+        modelId: options?.taskModelId,
+        suiteId: options?.suiteId,
+      });
 
       const response = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_ALIAS,
         query,
-        sort: [
-          { 'example.dataset.name': { order: 'asc' as const } },
-          { 'example.index': { order: 'asc' as const } },
-          { 'evaluator.name': { order: 'asc' as const } },
-          { 'task.repetition_index': { order: 'asc' as const } },
-        ],
+        sort: SCORES_SORT_ORDER,
         size: 10000,
       });
 

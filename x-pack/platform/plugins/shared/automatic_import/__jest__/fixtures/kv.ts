@@ -16,7 +16,7 @@ export const kvState = {
   jsonSamples: ['{"test1": "test1"}'],
   kvLogMessages: ['{"test1": "test1"}'],
   finalized: false,
-  samplesFormat: { name: SamplesFormatName.Values.structured },
+  samplesFormat: { name: SamplesFormatName.enum.structured },
   header: true,
   ecsVersion: 'testVersion',
   errors: { test: 'testerror' },

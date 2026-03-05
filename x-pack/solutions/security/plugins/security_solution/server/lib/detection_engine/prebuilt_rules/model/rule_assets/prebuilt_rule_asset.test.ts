@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import { PrebuiltRuleAsset } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
@@ -17,7 +17,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 2 more"`
     );
   });
 
@@ -82,7 +82,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 1 more"`
     );
   });
 
@@ -92,6 +92,7 @@ describe('Prebuilt rule asset schema', () => {
       description: 'some description',
       from: 'now-5m',
       to: 'now',
+      max_signals: 100,
       index: ['index-1'],
       name: 'some-name',
       severity: 'low',
@@ -126,6 +127,7 @@ describe('Prebuilt rule asset schema', () => {
       to: 'now',
       index: ['index-1'],
       name: 'some-name',
+      max_signals: 100,
       severity: 'low',
       interval: '5m',
       type: 'query',
@@ -183,7 +185,9 @@ describe('Prebuilt rule asset schema', () => {
 
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_id: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"rule_id: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('references cannot be numbers', () => {
@@ -195,7 +199,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"references.0: Expected string, received number"`
+      `"references.0: Invalid input: expected string, received number"`
     );
   });
 
@@ -208,7 +212,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"index.0: Expected string, received number"`
+      `"index.0: Invalid input: expected string, received number"`
     );
   });
 
@@ -232,7 +236,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"filters: Expected array, received string"`
+      `"filters: Invalid input: expected array, received string"`
     );
   });
 
@@ -267,7 +271,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"`
+      `"language: Invalid option: expected one of \\"kuery\\"|\\"lucene\\""`
     );
   });
 
@@ -280,7 +284,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Number must be greater than or equal to 1"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -293,7 +297,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Number must be greater than or equal to 1"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -328,7 +332,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number"`
+      `"tags.0: Invalid input: expected string, received number, tags.1: Invalid input: expected string, received number, tags.2: Invalid input: expected string, received number"`
     );
   });
 
@@ -357,7 +361,9 @@ describe('Prebuilt rule asset schema', () => {
 
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"threat.0.framework: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.framework: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
@@ -381,7 +387,9 @@ describe('Prebuilt rule asset schema', () => {
 
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"threat.0.tactic: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.tactic: Invalid input: expected object, received undefined"`
+    );
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
@@ -428,7 +436,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"false_positives.0: Expected string, received number, false_positives.1: Expected string, received number"`
+      `"false_positives.0: Invalid input: expected string, received number, false_positives.1: Invalid input: expected string, received number"`
     );
   });
 
@@ -441,7 +449,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"risk_score: Number must be less than or equal to 100"`
+      `"risk_score: Too big: expected number to be <=100"`
     );
   });
 
@@ -454,7 +462,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"risk_score: Number must be greater than or equal to 0"`
+      `"risk_score: Too small: expected number to be >=0"`
     );
   });
 
@@ -501,7 +509,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"`
+      `"severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
     );
   });
 
@@ -539,7 +547,7 @@ describe('Prebuilt rule asset schema', () => {
       const result = PrebuiltRuleAsset.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"note: Expected string, received object"`
+        `"note: Invalid input: expected string, received object"`
       );
     });
 
@@ -549,6 +557,7 @@ describe('Prebuilt rule asset schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
+        max_signals: 100,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -572,6 +581,7 @@ describe('Prebuilt rule asset schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
+        max_signals: 100,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -598,6 +608,7 @@ describe('Prebuilt rule asset schema', () => {
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
+        max_signals: 100,
         interval: '5m',
         type: 'query',
         filters: [],
@@ -633,7 +644,7 @@ describe('Prebuilt rule asset schema', () => {
       const result = PrebuiltRuleAsset.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type'"`
+        `"exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of \\"detection\\"|\\"rule_default\\"|\\"endpoint\\"|\\"endpoint_trusted_apps\\"|\\"endpoint_trusted_devices\\"|\\"endpoint_events\\"|\\"endpoint_host_isolation_exceptions\\"|\\"endpoint_blocklists\\", exceptions_list.0.namespace_type: Invalid option: expected one of \\"agnostic\\"|\\"single\\""`
       );
     });
 
@@ -644,6 +655,7 @@ describe('Prebuilt rule asset schema', () => {
         from: 'now-5m',
         to: 'now',
         index: ['index-1'],
+        max_signals: 100,
         name: 'some-name',
         severity: 'low',
         interval: '5m',

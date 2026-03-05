@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { node } from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
 import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
-import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
@@ -25,6 +21,7 @@ import {
   calculatePipelineSuggestionMetrics,
   type PipelineSuggestionMetrics,
 } from './pipeline_suggestion_metrics';
+import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 /**
  * Pipeline suggestion quality evaluation.
@@ -40,28 +37,6 @@ evaluate.describe.configure({ timeout: 600_000 });
 evaluate.describe('Pipeline suggestion quality evaluation', () => {
   const from = kbnDatemath.parse('now-2m')!;
   const to = kbnDatemath.parse('now')!;
-
-  function getSharedArgs({ config }: { config: ScoutTestConfig }) {
-    const esUrl = new URL(config.hosts.elasticsearch);
-    const kbnUrl = new URL(config.hosts.kibana);
-
-    esUrl.username = config.auth.username;
-    esUrl.password = config.auth.password;
-
-    kbnUrl.username = config.auth.username;
-    kbnUrl.password = config.auth.password;
-
-    return [
-      `--from=${from.toISOString()}`,
-      `--to=${to.toISOString()}`,
-      `--kibana=${kbnUrl.toString()}`,
-      `--target=${esUrl.toString()}`,
-      '--assume-package-version=9.2.0',
-      '--workers=1',
-    ];
-  }
-
-  const synthtraceScript = Path.join(REPO_ROOT, 'scripts/synthtrace.js');
 
   /**
    * Flatten nested objects into dot notation.
@@ -81,23 +56,6 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
     }
 
     return flattened;
-  }
-
-  /**
-   * Index logs for a specific system using synthtrace.
-   */
-  async function indexSystemLogs({ config, system }: { config: ScoutTestConfig; system: string }) {
-    await node(
-      require.resolve(synthtraceScript),
-      [
-        'sample_logs',
-        ...getSharedArgs({ config }),
-        `--scenarioOpts.systems="${system}"`,
-        '--scenarioOpts.rpm=100',
-        '--scenarioOpts.streamType=wired',
-      ],
-      { stdio: 'inherit' }
-    );
   }
 
   /**
@@ -278,7 +236,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
         if (!documents || documents.length === 0) {
           // Check if parent stream has documents
-          const parentDocs = await fetchSampleDocuments(esClient, 'logs', 10);
+          const parentDocs = await fetchSampleDocuments(esClient, 'logs.otel', 10);
           const parentCount = parentDocs.length;
 
           // Get some sample filepaths from parent to help debug routing
@@ -289,7 +247,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
           throw new Error(
             `No documents found in stream ${input.stream_name}. ` +
-              `Parent stream 'logs' has ${parentCount} documents. ` +
+              `Parent stream 'logs.otel' has ${parentCount} documents. ` +
               `Sample filepaths: ${sampleFilepaths.join(', ')}. ` +
               `Expected filepath: ${input.system}.log`
           );
@@ -645,21 +603,25 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               example.input.sample_documents && example.input.sample_documents.length > 0;
 
             if (isInlineMode) {
-              // INLINE MODE: Use parent 'logs' stream directly, pass documents in API call
+              // INLINE MODE: Use parent 'logs.otel' stream directly, pass documents in API call
               // No need to fork or index - documents are passed directly
-              example.input.stream_name = 'logs';
+              example.input.stream_name = 'logs.otel';
             } else {
               // INDEX MODE: Create system-specific stream AND index data
+              // stream_name in dataset must be logs.otel.<system> (child of logs.otel per API)
               // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
-              await apiServices.streams.forkStream('logs', example.input.stream_name, {
+              await apiServices.streams.forkStream('logs.otel', example.input.stream_name, {
                 field: 'attributes.filepath',
                 eq: `${example.input.system}.log`,
               });
 
               // Index logs for this system - this will route to the child stream
-              await indexSystemLogs({
+              await indexSynthtraceScenario({
+                scenario: 'sample_logs',
+                scenarioOpts: { systems: example.input.system, rpm: 100, streamType: 'wired' },
                 config,
-                system: example.input.system,
+                from,
+                to,
               });
 
               // Wait for documents to be indexed and routed
