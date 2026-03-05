@@ -6,11 +6,11 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { INFERENCE_ENDPOINT_SETTINGS_SO_TYPE } from '../../common/constants';
-import { inferenceEndpointSettingsSchemaV1 } from './schema/v1';
+import { INFERENCE_SETTINGS_SO_TYPE } from '../../common/constants';
+import { inferenceSettingsSchemaV1 } from './schema/v1';
 
-export const createInferenceEndpointSettingsSavedObjectType = (): SavedObjectsType => ({
-  name: INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
+export const createInferenceSettingsSavedObjectType = (): SavedObjectsType => ({
+  name: INFERENCE_SETTINGS_SO_TYPE,
   hidden: true,
   hiddenFromHttpApis: true,
   namespaceType: 'multiple-isolated',
@@ -22,8 +22,8 @@ export const createInferenceEndpointSettingsSavedObjectType = (): SavedObjectsTy
     1: {
       changes: [],
       schemas: {
-        forwardCompatibility: inferenceEndpointSettingsSchemaV1.extends({}, { unknowns: 'ignore' }),
-        create: inferenceEndpointSettingsSchemaV1,
+        forwardCompatibility: inferenceSettingsSchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: inferenceSettingsSchemaV1,
       },
     },
   },

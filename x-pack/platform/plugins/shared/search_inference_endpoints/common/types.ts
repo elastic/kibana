@@ -9,8 +9,8 @@ export enum APIRoutes {
   GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
   INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
   GET_INFERENCE_SERVICES = 'internal/inference_endpoints/_inference/_services',
-  GET_INFERENCE_ENDPOINT_SETTINGS = '/internal/search_inference_endpoints/settings',
-  PUT_INFERENCE_ENDPOINT_SETTINGS = '/internal/search_inference_endpoints/settings',
+  GET_INFERENCE_SETTINGS = '/internal/search_inference_endpoints/settings',
+  PUT_INFERENCE_SETTINGS = '/internal/search_inference_endpoints/settings',
 }
 
 export interface SearchInferenceEndpointsConfigType {
@@ -19,20 +19,20 @@ export interface SearchInferenceEndpointsConfigType {
   };
 }
 
-export interface InferenceEndpointFeatureSetting {
+export interface InferenceFeatureSetting {
   feature_id: string;
   endpoint_ids: string[];
 }
 
-export interface InferenceEndpointSettingsAttributes {
-  features: InferenceEndpointFeatureSetting[];
+export interface InferenceSettingsAttributes {
+  features: InferenceFeatureSetting[];
 }
 
-export interface InferenceEndpointSettingsResponse {
+export interface InferenceSettingsResponse {
   _meta: {
     id: string;
     createdAt?: string;
     updatedAt?: string;
   };
-  data: InferenceEndpointSettingsAttributes;
+  data: InferenceSettingsAttributes;
 }

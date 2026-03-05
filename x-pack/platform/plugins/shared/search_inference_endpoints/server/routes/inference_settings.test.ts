@@ -9,15 +9,15 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-  INFERENCE_ENDPOINT_SETTINGS_ID,
+  INFERENCE_SETTINGS_SO_TYPE,
+  INFERENCE_SETTINGS_ID,
   ROUTE_VERSIONS,
 } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
-import { defineInferenceEndpointSettingsRoutes } from './inference_endpoint_settings';
+import { defineInferenceSettingsRoutes } from './inference_settings';
 
-describe('Inference Endpoint Settings API', () => {
+describe('Inference Settings API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
   const mockSOClient = {
@@ -45,10 +45,10 @@ describe('Inference Endpoint Settings API', () => {
       mockRouter = new MockRouter({
         context,
         method: 'get',
-        path: APIRoutes.GET_INFERENCE_ENDPOINT_SETTINGS,
+        path: APIRoutes.GET_INFERENCE_SETTINGS,
         version: ROUTE_VERSIONS.v1,
       });
-      defineInferenceEndpointSettingsRoutes({
+      defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
       });
@@ -56,8 +56,8 @@ describe('Inference Endpoint Settings API', () => {
 
     it('should return settings when they exist', async () => {
       mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_ENDPOINT_SETTINGS_ID,
-        type: INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
         created_at: '2025-01-01T00:00:00Z',
         updated_at: '2025-01-02T00:00:00Z',
         attributes: {
@@ -71,13 +71,13 @@ describe('Inference Endpoint Settings API', () => {
       await mockRouter.callRoute({});
 
       expect(mockSOClient.get).toHaveBeenCalledWith(
-        INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-        INFERENCE_ENDPOINT_SETTINGS_ID
+        INFERENCE_SETTINGS_SO_TYPE,
+        INFERENCE_SETTINGS_ID
       );
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
           _meta: {
-            id: INFERENCE_ENDPOINT_SETTINGS_ID,
+            id: INFERENCE_SETTINGS_ID,
             createdAt: '2025-01-01T00:00:00Z',
             updatedAt: '2025-01-02T00:00:00Z',
           },
@@ -94,8 +94,8 @@ describe('Inference Endpoint Settings API', () => {
     it('should return empty defaults when settings do not exist', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
-          INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-          INFERENCE_ENDPOINT_SETTINGS_ID
+          INFERENCE_SETTINGS_SO_TYPE,
+          INFERENCE_SETTINGS_ID
         )
       );
 
@@ -103,7 +103,7 @@ describe('Inference Endpoint Settings API', () => {
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
-          _meta: { id: INFERENCE_ENDPOINT_SETTINGS_ID },
+          _meta: { id: INFERENCE_SETTINGS_ID },
           data: { features: [] },
         },
         headers: { 'content-type': 'application/json' },
@@ -133,15 +133,15 @@ describe('Inference Endpoint Settings API', () => {
     it('should use hidden types client', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
-          INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-          INFERENCE_ENDPOINT_SETTINGS_ID
+          INFERENCE_SETTINGS_SO_TYPE,
+          INFERENCE_SETTINGS_ID
         )
       );
 
       await mockRouter.callRoute({});
 
       expect(mockCore.savedObjects.getClient).toHaveBeenCalledWith({
-        includedHiddenTypes: [INFERENCE_ENDPOINT_SETTINGS_SO_TYPE],
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
       });
     });
   });
@@ -151,10 +151,10 @@ describe('Inference Endpoint Settings API', () => {
       mockRouter = new MockRouter({
         context,
         method: 'put',
-        path: APIRoutes.PUT_INFERENCE_ENDPOINT_SETTINGS,
+        path: APIRoutes.PUT_INFERENCE_SETTINGS,
         version: ROUTE_VERSIONS.v1,
       });
-      defineInferenceEndpointSettingsRoutes({
+      defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
       });
@@ -166,8 +166,8 @@ describe('Inference Endpoint Settings API', () => {
       };
 
       mockSOClient.create.mockResolvedValue({
-        id: INFERENCE_ENDPOINT_SETTINGS_ID,
-        type: INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
         created_at: '2025-01-01T00:00:00Z',
         updated_at: '2025-01-01T00:00:00Z',
         attributes: settingsAttrs,
@@ -176,15 +176,14 @@ describe('Inference Endpoint Settings API', () => {
 
       await mockRouter.callRoute({ body: settingsAttrs });
 
-      expect(mockSOClient.create).toHaveBeenCalledWith(
-        INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-        settingsAttrs,
-        { id: INFERENCE_ENDPOINT_SETTINGS_ID, overwrite: true }
-      );
+      expect(mockSOClient.create).toHaveBeenCalledWith(INFERENCE_SETTINGS_SO_TYPE, settingsAttrs, {
+        id: INFERENCE_SETTINGS_ID,
+        overwrite: true,
+      });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
           _meta: {
-            id: INFERENCE_ENDPOINT_SETTINGS_ID,
+            id: INFERENCE_SETTINGS_ID,
             createdAt: '2025-01-01T00:00:00Z',
             updatedAt: '2025-01-01T00:00:00Z',
           },
@@ -207,7 +206,7 @@ describe('Inference Endpoint Settings API', () => {
       expect(mockSOClient.create).not.toHaveBeenCalled();
       expect(mockRouter.response.badRequest).toHaveBeenCalledWith({
         body: {
-          message: 'Invalid inference endpoint settings',
+          message: 'Invalid inference settings',
           attributes: {
             errors: expect.arrayContaining([
               expect.stringContaining('Duplicate feature_id values'),

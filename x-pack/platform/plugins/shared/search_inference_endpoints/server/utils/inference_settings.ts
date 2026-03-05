@@ -6,14 +6,11 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type {
-  InferenceEndpointSettingsAttributes,
-  InferenceEndpointSettingsResponse,
-} from '../../common/types';
+import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 
-export const parseInferenceEndpointSettingsSO = (
-  so: SavedObject<InferenceEndpointSettingsAttributes>
-): InferenceEndpointSettingsResponse => {
+export const parseInferenceSettingsSO = (
+  so: SavedObject<InferenceSettingsAttributes>
+): InferenceSettingsResponse => {
   const { id, created_at: createdAt, updated_at: updatedAt, attributes } = so;
 
   return {
@@ -26,9 +23,7 @@ export const parseInferenceEndpointSettingsSO = (
   };
 };
 
-export const validateInferenceEndpointSettings = (
-  attrs: InferenceEndpointSettingsAttributes
-): string[] => {
+export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): string[] => {
   const errors: string[] = [];
 
   const featureIds = attrs.features.map((f) => f.feature_id);

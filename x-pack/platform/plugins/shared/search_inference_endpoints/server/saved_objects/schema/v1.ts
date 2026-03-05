@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const inferenceEndpointSettingsSchemaV1 = schema.object({
+export const inferenceSettingsSchemaV1 = schema.object({
   features: schema.arrayOf(
     schema.object({
       feature_id: schema.string({ minLength: 1 }),

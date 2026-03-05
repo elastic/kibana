@@ -8,29 +8,23 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-  INFERENCE_ENDPOINT_SETTINGS_ID,
+  INFERENCE_SETTINGS_SO_TYPE,
+  INFERENCE_SETTINGS_ID,
   PLUGIN_ID,
   ROUTE_VERSIONS,
 } from '../../common/constants';
-import type {
-  InferenceEndpointSettingsAttributes,
-  InferenceEndpointSettingsResponse,
-} from '../../common/types';
+import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
-import { inferenceEndpointSettingsSchemaV1 } from '../saved_objects/schema/v1';
+import { inferenceSettingsSchemaV1 } from '../saved_objects/schema/v1';
 import { errorHandler } from '../utils/error_handler';
-import {
-  parseInferenceEndpointSettingsSO,
-  validateInferenceEndpointSettings,
-} from '../utils/inference_endpoint_settings';
+import { parseInferenceSettingsSO, validateInferenceSettings } from '../utils/inference_settings';
 
-const EMPTY_SETTINGS: InferenceEndpointSettingsResponse = {
-  _meta: { id: INFERENCE_ENDPOINT_SETTINGS_ID },
+const EMPTY_SETTINGS: InferenceSettingsResponse = {
+  _meta: { id: INFERENCE_SETTINGS_ID },
   data: { features: [] },
 };
 
-export const defineInferenceEndpointSettingsRoutes = ({
+export const defineInferenceSettingsRoutes = ({
   logger,
   router,
 }: {
@@ -40,7 +34,7 @@ export const defineInferenceEndpointSettingsRoutes = ({
   router.versioned
     .get({
       access: 'internal',
-      path: APIRoutes.GET_INFERENCE_ENDPOINT_SETTINGS,
+      path: APIRoutes.GET_INFERENCE_SETTINGS,
       security: {
         authz: {
           requiredPrivileges: [PLUGIN_ID],
@@ -59,15 +53,15 @@ export const defineInferenceEndpointSettingsRoutes = ({
       },
       errorHandler(logger)(async (context, _request, response) => {
         const soClient = (await context.core).savedObjects.getClient({
-          includedHiddenTypes: [INFERENCE_ENDPOINT_SETTINGS_SO_TYPE],
+          includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
         });
 
         try {
-          const so = await soClient.get<InferenceEndpointSettingsAttributes>(
-            INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
-            INFERENCE_ENDPOINT_SETTINGS_ID
+          const so = await soClient.get<InferenceSettingsAttributes>(
+            INFERENCE_SETTINGS_SO_TYPE,
+            INFERENCE_SETTINGS_ID
           );
-          const body: InferenceEndpointSettingsResponse = parseInferenceEndpointSettingsSO(so);
+          const body: InferenceSettingsResponse = parseInferenceSettingsSO(so);
           return response.ok({
             body,
             headers: { 'content-type': 'application/json' },
@@ -87,7 +81,7 @@ export const defineInferenceEndpointSettingsRoutes = ({
   router.versioned
     .put({
       access: 'internal',
-      path: APIRoutes.PUT_INFERENCE_ENDPOINT_SETTINGS,
+      path: APIRoutes.PUT_INFERENCE_SETTINGS,
       security: {
         authz: {
           requiredPrivileges: [PLUGIN_ID],
@@ -103,35 +97,35 @@ export const defineInferenceEndpointSettingsRoutes = ({
         },
         validate: {
           request: {
-            body: inferenceEndpointSettingsSchemaV1,
+            body: inferenceSettingsSchemaV1,
           },
         },
         version: ROUTE_VERSIONS.v1,
       },
       errorHandler(logger)(async (context, request, response) => {
-        const attrs = request.body as InferenceEndpointSettingsAttributes;
+        const attrs = request.body as InferenceSettingsAttributes;
 
-        const validationErrors = validateInferenceEndpointSettings(attrs);
+        const validationErrors = validateInferenceSettings(attrs);
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {
-              message: 'Invalid inference endpoint settings',
+              message: 'Invalid inference settings',
               attributes: { errors: validationErrors },
             },
           });
         }
 
         const soClient = (await context.core).savedObjects.getClient({
-          includedHiddenTypes: [INFERENCE_ENDPOINT_SETTINGS_SO_TYPE],
+          includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
         });
 
-        const so = await soClient.create<InferenceEndpointSettingsAttributes>(
-          INFERENCE_ENDPOINT_SETTINGS_SO_TYPE,
+        const so = await soClient.create<InferenceSettingsAttributes>(
+          INFERENCE_SETTINGS_SO_TYPE,
           attrs,
-          { id: INFERENCE_ENDPOINT_SETTINGS_ID, overwrite: true }
+          { id: INFERENCE_SETTINGS_ID, overwrite: true }
         );
 
-        const body: InferenceEndpointSettingsResponse = parseInferenceEndpointSettingsSO(so);
+        const body: InferenceSettingsResponse = parseInferenceSettingsSO(so);
         return response.ok({
           body,
           headers: { 'content-type': 'application/json' },
