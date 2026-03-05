@@ -13,7 +13,6 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import { setKibanaServices } from './kibana_services';
 
 export class DashboardAgentPlugin
   implements
@@ -36,15 +35,21 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    core: CoreStart,
+    _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    setKibanaServices(core, plugins);
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
+      const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         attachments: plugins.agentBuilder.attachments,
         dashboardLocator,
+        unifiedSearch: plugins.unifiedSearch,
+        doesSavedDashboardExist: async (dashboardId: string) => {
+          const findDashboardsService = await findDashboardsServicePromise;
+          const result = await findDashboardsService.findById(dashboardId);
+          return result.status === 'success';
+        },
       });
     });
 

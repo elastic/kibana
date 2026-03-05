@@ -12,14 +12,19 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 
 export const registerDashboardAttachmentUiDefinition = ({
   attachments,
   dashboardLocator,
+  unifiedSearch,
+  doesSavedDashboardExist,
 }: {
   attachments: AttachmentServiceStartContract;
   dashboardLocator?: DashboardRendererProps['locator'];
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }): (() => void) => {
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
@@ -37,6 +42,8 @@ export const registerDashboardAttachmentUiDefinition = ({
         registerActionButtons={callbacks.registerActionButtons}
         updateOrigin={callbacks.updateOrigin}
         dashboardLocator={dashboardLocator}
+        searchBarComponent={unifiedSearch.ui.SearchBar}
+        doesSavedDashboardExist={doesSavedDashboardExist}
       />
     ),
     getActionButtons: ({ openCanvas }) => {

@@ -36,7 +36,8 @@ import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builde
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { unifiedSearch } from '../kibana_services';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { useLinkedSavedDashboardExists } from './use_linked_saved_dashboard_exists';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 const DEFAULT_PANEL_HEIGHT = 9;
@@ -336,16 +337,24 @@ export const DashboardCanvasContent = ({
   registerActionButtons,
   updateOrigin,
   dashboardLocator,
+  searchBarComponent: SearchBar,
+  doesSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
   dashboardLocator?: DashboardRendererProps['locator'];
+  searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const { euiTheme } = useEuiTheme();
   const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemo(() => getDashboardCanvasContentStyles({ euiTheme }), [euiTheme]);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
+  const linkedSavedDashboardExists = useLinkedSavedDashboardExists({
+    linkedSavedObjectId,
+    doesSavedDashboardExist,
+  });
 
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
 
@@ -413,8 +422,6 @@ export const DashboardCanvasContent = ({
     updateOrigin,
   ]);
 
-  const { SearchBar } = unifiedSearch.ui;
-
   return (
     <div css={styles.root}>
       <div css={styles.searchBar}>
@@ -434,7 +441,7 @@ export const DashboardCanvasContent = ({
           data-test-subj="dashboardCanvasSearchBar"
         />
       </div>
-      {linkedSavedObjectId && (
+      {linkedSavedObjectId && linkedSavedDashboardExists && (
         <EuiCallOut
           css={styles.callout}
           size="s"
