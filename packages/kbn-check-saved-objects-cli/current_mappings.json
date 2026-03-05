@@ -324,6 +324,10 @@
       }
     }
   },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
@@ -1411,6 +1415,11 @@
       "type": {
         "type": "keyword"
       }
+    }
+  },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {
     }
   },
   "epm-packages": {
