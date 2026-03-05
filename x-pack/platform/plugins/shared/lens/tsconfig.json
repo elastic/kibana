@@ -142,6 +142,7 @@
     "@kbn/scout",
     "@kbn/cps-utils",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/esql-language",
   ],
   "exclude": ["target/**/*"]
 }
