@@ -47,7 +47,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/react-query'
   - '@kbn/kql'
-  - '@kbn/entity-store'
 tags:
   - shared-browser
   - package
