@@ -20,7 +20,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/streams/field_mappings'));
     loadTestFile(require.resolve('../../apis/streams/permissions'));
     loadTestFile(require.resolve('../../apis/streams/global_search'));
-    loadTestFile(require.resolve('../../apis/streams/systems'));
     loadTestFile(require.resolve('../../apis/streams/settings'));
     loadTestFile(require.resolve('../../apis/streams/doc_counts'));
     loadTestFile(require.resolve('../../apis/streams/snapshot_restore'));

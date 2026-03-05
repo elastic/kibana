@@ -1660,8 +1660,10 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.2.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.3.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.2.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.3.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.2.ts @elastic/obs-presentation-team
