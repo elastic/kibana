@@ -757,7 +757,7 @@ jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
 const openAiConnector = createMockActionConnector({
   actionTypeId: '.inference',
   name: 'AI Connector',
-  id: '123',
+  id: 'ai-connector',
   config: {
     provider: 'openai',
     taskType: 'completion',

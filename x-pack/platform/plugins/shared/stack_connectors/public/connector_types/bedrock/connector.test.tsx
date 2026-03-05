@@ -29,7 +29,7 @@ const mockDashboard = useGetDashboard as jest.Mock;
 const bedrockConnector = {
   actionTypeId: '.bedrock',
   name: 'bedrock',
-  id: '123',
+  id: 'bedrock',
   config: {
     apiUrl: 'https://bedrockurl.com',
     defaultModel: DEFAULT_MODEL,
@@ -113,7 +113,7 @@ describe('BedrockConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
       fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/bedrock`);
     });
   });
 

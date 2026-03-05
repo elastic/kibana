@@ -23,6 +23,7 @@ const actionConnector = {
   config: { url },
   secrets: { email, token },
   isDeprecated: false,
+  id: 'tines',
 };
 
 describe('TinesConnectorFields renders', () => {
