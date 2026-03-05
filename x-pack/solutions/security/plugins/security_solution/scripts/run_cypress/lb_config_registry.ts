@@ -6,7 +6,6 @@
  */
 
 import type { LoadBalancerConfig } from './utils';
-import { DW_LOAD_BALANCER_CONFIG } from './dw_config';
 import { SECURITY_SOLUTION_LOAD_BALANCER_CONFIG } from './security_solution_config';
 
 /**
@@ -18,8 +17,6 @@ import { SECURITY_SOLUTION_LOAD_BALANCER_CONFIG } from './security_solution_conf
  * sort (counting `it()` calls) with no dynamic runner detection.
  */
 const CONFIG_REGISTRY: Record<string, LoadBalancerConfig> = {
-  'kibana-defend-workflows-cypress': DW_LOAD_BALANCER_CONFIG,
-  'kibana-defend-workflows-serverless-cypress': DW_LOAD_BALANCER_CONFIG,
   'kibana-security-solution-chrome': SECURITY_SOLUTION_LOAD_BALANCER_CONFIG,
 };
 
