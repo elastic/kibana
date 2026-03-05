@@ -38,19 +38,23 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
   });
 };
 
+interface ResponseError {
+  body?: { message?: string };
+}
+
 export const INSTALL_ENTITY_STORE_KEY = ['POST', 'INSTALL_ENTITY_STORE'];
 export const useInstallEntityStoreMutation = () => {
   const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
   const { installEntityStore } = useEntityStoreRoutes();
 
-  return useMutation(
-    (params?: InitEntityStoreRequestBodyInput) => {
+  return useMutation<unknown, ResponseError, InitEntityStoreRequestBodyInput | void>(
+    (params) => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return installEntityStore(params);
+      return installEntityStore(params ?? undefined);
     },
     {
       mutationKey: INSTALL_ENTITY_STORE_KEY,

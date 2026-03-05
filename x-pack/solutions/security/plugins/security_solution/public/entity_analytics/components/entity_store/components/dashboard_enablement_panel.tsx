@@ -98,6 +98,9 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
   const hasToggleErrors = toggleErrors.riskEngine.length > 0 || toggleErrors.entityStore.length > 0;
 
   if (storeEnablement.error) {
+    const errorMessage =
+      storeEnablement.error.body?.message ??
+      (storeEnablement.error instanceof Error ? storeEnablement.error.message : 'Unknown error');
     return (
       <EuiCallOut
         announceOnMount
@@ -110,7 +113,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
         color="danger"
         iconType="error"
       >
-        <p>{storeEnablement.error.body.message}</p>
+        <p>{errorMessage}</p>
       </EuiCallOut>
     );
   }
