@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/embeddable-bwc-migrations'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

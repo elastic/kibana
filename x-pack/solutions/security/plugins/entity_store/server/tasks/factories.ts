@@ -8,8 +8,13 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
-import { LogsExtractionClient } from '../domain/logs_extraction_client';
-import { EngineDescriptorClient } from '../domain/definitions/saved_objects';
+import { LogsExtractionClient } from '../domain/logs_extraction';
+import { CcsLogsExtractionClient } from '../domain/logs_extraction';
+import { CRUDClient } from '../domain/crud_client';
+import {
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+} from '../domain/definitions/saved_objects';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
@@ -37,13 +42,23 @@ export async function createLogsExtractionClient({
     internalUserClient
   );
 
-  const logsExtractionClient = new LogsExtractionClient(
+  const esClient = clusterClient.asCurrentUser;
+  const crudClient = new CRUDClient({
+    logger,
+    esClient,
+    namespace,
+  });
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+
+  const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
-    clusterClient.asCurrentUser,
+    esClient,
     dataViewsService,
-    new EngineDescriptorClient(soClient, namespace, logger)
-  );
+    engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
+    globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
+    ccsLogsExtractionClient,
+  });
 
   return {
     logsExtractionClient,

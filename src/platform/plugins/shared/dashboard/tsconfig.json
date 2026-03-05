@@ -113,6 +113,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/embeddable-bwc-migrations",
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -79,7 +79,8 @@
     "@kbn/visualization-listing-components",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/embeddable-bwc-migrations"
+    "@kbn/embeddable-bwc-migrations",
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }

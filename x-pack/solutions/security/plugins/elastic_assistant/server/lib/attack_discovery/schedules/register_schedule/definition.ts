@@ -46,7 +46,10 @@ export const getAttackDiscoveryScheduleType = ({
       },
     },
     schemas: {
-      params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
+      params: {
+        type: 'zod',
+        schema: AttackDiscoveryScheduleParams,
+      },
     },
     actionVariables: {
       context: [{ name: 'server', description: 'the server' }],

@@ -77,6 +77,7 @@ export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
   | 'observability-overview'
   | 'fleet'
+  | 'slo'
   | 'synthetics'
   | 'profiling'
   | 'observability-onboarding'
