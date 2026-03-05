@@ -9,6 +9,7 @@
 
 import React, { useMemo, type ComponentType } from 'react';
 
+import type { SerializedStyles } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 
 import type { TimeRangeBounds, TimeRangeBoundsOption } from './types';
@@ -47,8 +48,17 @@ export interface DateRangePickerPanelConfig {
 }
 
 export interface DateRangePickerProps {
+  /** Test subject selector added to the outermost container element. */
+  'data-test-subj'?: string;
+  /** Emotion CSS styles added to the outermost container element. */
+  css?: SerializedStyles | SerializedStyles[];
   /** Passed to the main container. */
   className?: string;
+  /**
+   * Shows a loading spinner inside the form control.
+   * @default false
+   */
+  isLoading?: boolean;
   /**
    * Text representation of the time range (controlled).
    * When provided, the component is controlled and `value` is the external source of truth.
@@ -131,7 +141,13 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
 /**
  * A date range picker component that accepts natural language and date math input.
  */
-export function DateRangePicker({ panels = [], className, ...props }: DateRangePickerProps) {
+export function DateRangePicker({
+  panels = [],
+  className,
+  'data-test-subj': dataTestSubj,
+  css: cssStyles,
+  ...props
+}: DateRangePickerProps) {
   const defaultPanelId = DEFAULT_PANEL_ID;
   const panelDescriptors: DateRangePickerPanelDescriptor[] = useMemo(
     () => panels.map(({ id, title, icon }) => ({ id, title, icon })),
@@ -140,7 +156,7 @@ export function DateRangePicker({ panels = [], className, ...props }: DateRangeP
 
   return (
     <DateRangePickerProvider {...props}>
-      <DateRangePickerLayout className={className}>
+      <DateRangePickerLayout className={className} data-test-subj={dataTestSubj} css={cssStyles}>
         <DateRangePickerDialog>
           <DateRangePickerPanelNavigationProvider
             defaultPanelId={defaultPanelId}

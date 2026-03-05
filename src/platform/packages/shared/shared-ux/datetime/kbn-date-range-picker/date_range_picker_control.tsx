@@ -51,6 +51,7 @@ export function DateRangePickerControl() {
     onInputChange,
     width,
     disabled,
+    isLoading,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -160,6 +161,7 @@ export function DateRangePickerControl() {
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
+        isLoading={isLoading}
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
       >
