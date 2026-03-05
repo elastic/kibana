@@ -26,7 +26,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
@@ -247,6 +247,13 @@ export class DiscoverPlugin
         return new ViewSavedSearchAction(core.application, this.locator!);
       }
     );
+
+    plugins.uiActions.registerActionAsync('addDiscoverByValuePanelAction', async () => {
+      const { getAddDiscoverByValuePanelAction } = await import('./plugin_imports/ui_actions');
+      return getAddDiscoverByValuePanelAction(this.locator!, plugins);
+    });
+
+    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addDiscoverByValuePanelAction');
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
