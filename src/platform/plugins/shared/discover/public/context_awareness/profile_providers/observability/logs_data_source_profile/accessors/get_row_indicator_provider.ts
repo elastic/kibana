@@ -19,9 +19,12 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
 export const getRowIndicatorProvider: DataSourceProfileProvider['profile']['getRowIndicatorProvider'] =
 
     () =>
-    ({ dataView }) => {
-      // Check if the data view has any of the log level fields.
-      if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
+    ({ dataView, columnsMeta }) => {
+      // Check if the data view or ES|QL columns have any of the log level fields.
+      const hasLogLevelField = LOG_LEVEL_FIELDS.some(
+        (field) => dataView.getFieldByName(field) || columnsMeta?.[field]
+      );
+      if (!hasLogLevelField) {
         // Otherwise, don't set the row indicator color so the color indicator control column is not added to the grid at all.
         return undefined;
       }

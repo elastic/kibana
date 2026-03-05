@@ -20,10 +20,12 @@ export const getDefaultProfileState = ({
   scopedProfilesManager,
   resetDefaultProfileState,
   dataView,
+  isEsqlMode,
 }: {
   scopedProfilesManager: ScopedProfilesManager;
   resetDefaultProfileState: TabState['resetDefaultProfileState'];
   dataView: DataView;
+  isEsqlMode: boolean;
 }) => {
   const defaultState = getDefaultState(scopedProfilesManager, dataView);
 
@@ -36,12 +38,14 @@ export const getDefaultProfileState = ({
     getPreFetchState: () => {
       const stateUpdate: DiscoverAppState = {};
 
-      if (
-        resetDefaultProfileState.breakdownField &&
-        defaultState.breakdownField !== undefined &&
-        dataView.fields.getByName(defaultState.breakdownField)
-      ) {
-        stateUpdate.breakdownField = defaultState.breakdownField;
+      if (resetDefaultProfileState.breakdownField && defaultState.breakdownField !== undefined) {
+        // In ES|QL mode, we skip validation since the data view may not have fields
+        // (skipFetchFields: true) and columns are determined by the query result
+        const isValidBreakdownField =
+          isEsqlMode || dataView.fields.getByName(defaultState.breakdownField);
+        if (isValidBreakdownField) {
+          stateUpdate.breakdownField = defaultState.breakdownField;
+        }
       }
 
       if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {

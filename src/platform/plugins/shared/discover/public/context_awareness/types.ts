@@ -16,7 +16,7 @@ import type {
   CustomGridColumnsConfiguration,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
+import type { AppMenuRegistry, DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -232,6 +232,10 @@ export interface RowIndicatorExtensionParams {
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The columns metadata from ES|QL query response (optional, only available in ES|QL mode)
+   */
+  columnsMeta: DataTableColumnsMeta | undefined;
 }
 
 /**

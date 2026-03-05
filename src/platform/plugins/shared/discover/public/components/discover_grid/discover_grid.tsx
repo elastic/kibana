@@ -45,11 +45,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     onFullScreenChange,
     ...props
   }) => {
-    const { dataView, setExpandedDoc, renderDocumentView } = props;
+    const { dataView, columnsMeta, setExpandedDoc, renderDocumentView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataView, columnsMeta });
+    }, [getRowIndicatorProvider, dataView, columnsMeta]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'

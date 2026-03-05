@@ -162,6 +162,7 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
+        columnsMeta: undefined,
       });
 
       expect(getRowIndicator).toBeDefined();
@@ -177,6 +178,7 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
+        columnsMeta: undefined,
       });
 
       expect(getRowIndicator).toBeDefined();
@@ -190,9 +192,26 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
+        columnsMeta: undefined,
       });
 
       expect(getRowIndicator).toBeUndefined();
+    });
+
+    it('should set the color indicator handler if columnsMeta has log level field', () => {
+      const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
+      const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+        });
+      const getRowIndicator = getRowIndicatorProvider?.({
+        dataView: dataViewWithoutLogLevel,
+        columnsMeta: { 'log.level': { type: 'string' } },
+      });
+
+      expect(getRowIndicator).toBeDefined();
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#a8caff', label: 'Info' });
     });
   });
 
