@@ -19,6 +19,7 @@ import type {
   StaticColorType,
 } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import type { GradientColorMode } from '../../../../kbn-coloring/src/shared_components/color_mapping/config/types';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
@@ -318,6 +319,7 @@ export function fromColorMappingLensStateToAPI(
         values: fromRulesLensStateToAPI(rules),
       };
     }),
+    sort: (colorMapping.colorMode as GradientColorMode).sort ?? 'desc',
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
     ...unassignedColor,
   };
@@ -430,8 +432,7 @@ export function fromColorMappingAPIToLensState(
             ...step,
             touched: false,
           })),
-          // in the conversion we've lost the actual sort order, so default to "asc"
-          sort: 'asc',
+          sort: colorMapping.sort,
         };
 
   return {

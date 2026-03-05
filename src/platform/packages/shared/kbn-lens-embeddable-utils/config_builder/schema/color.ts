@@ -255,6 +255,7 @@ const gradientColorMappingSchema = schema.object(
     palette: schema.string({
       meta: { description: 'The palette name to use for color assignment.' },
     }),
+    sort: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     mapping: schema.maybe(
       schema.arrayOf(
         schema.object({
