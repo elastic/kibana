@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
+import { DiscoverValidationPage } from './pom/pages/discover_validation.page';
 import { StreamsValidationPage } from './pom/pages/streams_validation.page';
 
 test.beforeEach(async ({ page }) => {
@@ -52,13 +53,26 @@ test('Kubernetes EA', async ({
    */
   fs.writeFileSync(outputPath, clipboardData);
 
-  if (useWiredStreams) {
+  if (useWiredStreams && !isLogsEssentialsMode) {
     await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
 
     await page.waitForTimeout(2 * 60000);
 
     const discoverValidation =
       await kubernetesEAFlowPage.clickExploreLogsAndGetDiscoverValidation();
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+    await discoverValidation.assertHitCountGreaterThanZero();
+
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
+    const streamsValidation = new StreamsValidationPage(page);
+    await streamsValidation.waitForStreamsToLoad();
+    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
+  } else if (useWiredStreams && isLogsEssentialsMode) {
+    await page.waitForTimeout(5 * 60000);
+
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+    const discoverValidation = new DiscoverValidationPage(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
     await discoverValidation.assertHitCountGreaterThanZero();
@@ -87,8 +101,6 @@ test('Kubernetes EA', async ({
     await page.waitForTimeout(5 * 60000);
 
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
-
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
     const discoverValidation = new DiscoverValidationPage(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
