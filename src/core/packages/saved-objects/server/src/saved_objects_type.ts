@@ -211,7 +211,7 @@ export interface SavedObjectsType<Attributes = any> {
 
   /**
    * An optional function that, given a document without a `typeMigrationVersion`, returns an
-   * estimated version string representing the document's current schema state.
+   * estimated version representing the document's current schema state.
    *
    * The deprecated Saved Objects HTTP API allows callers to omit version metadata. When a document
    * reaches the {@link IDocumentMigrator | DocumentMigrator} without a `typeMigrationVersion`, the
@@ -220,31 +220,55 @@ export interface SavedObjectsType<Attributes = any> {
    * properties have been added to the schema after the document was originally created.
    *
    * When `typeVersionGuesser` is provided, it will be called for such versionless documents.
-   * The returned version is used as the effective starting point for migrations, so only the
+   * The returned value is used as the effective starting point for migrations, so only the
    * transforms introduced after that version will be applied, bringing the document up to date.
+   *
+   * The function may return either:
+   * - A **model version number** (e.g. `2`) — automatically converted to the internal virtual
+   *   semver (`10.2.0`). Use this when the type only has `modelVersions` in its history.
+   * - A **semver string** (e.g. `'8.7.0'`) — used as-is. Necessary when the type has legacy
+   *   `migrations` entries in its history, or when a mix of legacy migrations and model versions
+   *   needs to be expressed.
    *
    * If the document already has a `typeMigrationVersion`, this function is never called.
    *
-   * @example
+   * @example Returning a model version number
    * ```ts
    * typeVersionGuesser: (doc) => {
    *   // If the document already has the 'tabs' structure introduced in model version 2,
    *   // treat it as that version; otherwise fall back to version 1.
-   *   return doc.attributes?.tabs != null ? '10.2.0' : '10.1.0';
+   *   return doc.attributes?.tabs != null ? 2 : 1;
    * }
    * ```
+   *
+   * @example Returning a semver (type with legacy migrations in its history)
+   * ```ts
+   * typeVersionGuesser: (doc) => {
+   *   return doc.attributes?.newField != null ? '8.9.0' : '8.7.0';
+   * }
+   * ```
+   *
+   * @deprecated This API exists solely as a compatibility shim for the deprecated Saved Objects
+   * HTTP API, which allows callers to omit version metadata. It should not be used for any other
+   * purpose. This field will be removed once the deprecated SO HTTP API is removed.
    */
   typeVersionGuesser?: SavedObjectTypeVersionGuesser;
 }
 
 /**
  * A function that, given a saved object document that lacks a `typeMigrationVersion`, returns an
- * estimated version string. Used by the {@link IDocumentMigrator | DocumentMigrator} to determine
- * which migrations to apply to documents coming from the deprecated Saved Objects HTTP API.
+ * estimated version. Used by the {@link IDocumentMigrator | DocumentMigrator} to determine which
+ * migrations to apply to documents coming from the deprecated Saved Objects HTTP API.
  *
+ * The return value may be either a **model version number** (e.g. `2`, automatically converted
+ * to the internal virtual semver `10.2.0`) or a **semver string** (e.g. `'8.7.0'`, used as-is).
+ *
+ * @deprecated See {@link SavedObjectsType.typeVersionGuesser}.
  * @public
  */
-export type SavedObjectTypeVersionGuesser = (document: SavedObjectUnsanitizedDoc) => string;
+export type SavedObjectTypeVersionGuesser = (
+  document: SavedObjectUnsanitizedDoc
+) => string | number;
 
 /**
  * If defined, allows a type to run a search query and return a query filter that may match any documents which may

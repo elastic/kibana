@@ -1615,6 +1615,72 @@ describe('DocumentMigrator', () => {
         expect.objectContaining({ attributes: { flag: 'original' } })
       );
     });
+
+    describe('returning a model version number', () => {
+      it('converts the returned number to a virtual semver before applying migrations', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'foo',
+            modelVersions: {
+              1: { changes: [] },
+              2: {
+                changes: [
+                  {
+                    type: 'data_backfill',
+                    backfillFn: (doc) => ({
+                      attributes: {
+                        ...(doc.attributes as Record<string, unknown>),
+                        v2: true,
+                      },
+                    }),
+                  },
+                ],
+              },
+            },
+            typeVersionGuesser: () => 1,
+          }),
+        });
+        migrator.prepareMigrations();
+
+        const result = migrator.migrate({ id: '1', type: 'foo', attributes: {} });
+
+        expect(result).toHaveProperty('typeMigrationVersion', '10.2.0');
+        expect(result.attributes).toEqual({ v2: true });
+      });
+
+      it('skips all model version migrations when the returned number matches the latest', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'foo',
+            modelVersions: {
+              1: { changes: [] },
+              2: {
+                changes: [
+                  {
+                    type: 'data_backfill',
+                    backfillFn: (doc) => ({
+                      attributes: {
+                        ...(doc.attributes as Record<string, unknown>),
+                        v2: true,
+                      },
+                    }),
+                  },
+                ],
+              },
+            },
+            typeVersionGuesser: () => 2,
+          }),
+        });
+        migrator.prepareMigrations();
+
+        const result = migrator.migrate({ id: '1', type: 'foo', attributes: { existing: true } });
+
+        expect(result).toHaveProperty('typeMigrationVersion', '10.2.0');
+        expect(result.attributes).toEqual({ existing: true });
+      });
+    });
   });
 });
 

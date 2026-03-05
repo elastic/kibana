@@ -19,6 +19,7 @@ import type {
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
@@ -173,10 +174,17 @@ export class DocumentMigrator implements IDocumentMigrator {
     // When the document has no typeMigrationVersion (e.g. created via the deprecated SO HTTP API),
     // use the type's version guesser—if one was registered—to synthesize a starting version so
     // that the appropriate migrations are applied rather than skipping all of them.
-    const effectiveDoc =
-      doc.typeMigrationVersion == null && typeMigrations?.typeVersionGuesser
-        ? { ...doc, typeMigrationVersion: typeMigrations.typeVersionGuesser(doc) }
-        : doc;
+    // The guesser may return either a model version number (converted to a virtual semver) or a
+    // semver string directly (required when the type has legacy migrations in its history).
+    const effectiveDoc = (() => {
+      if (doc.typeMigrationVersion != null || !typeMigrations?.typeVersionGuesser) {
+        return doc;
+      }
+      const guessed = typeMigrations.typeVersionGuesser(doc);
+      const typeMigrationVersion =
+        typeof guessed === 'number' ? modelVersionToVirtualVersion(guessed) : guessed;
+      return { ...doc, typeMigrationVersion };
+    })();
 
     if (downgradeRequired(effectiveDoc, typeMigrations?.latestVersion ?? {}, targetTypeVersion)) {
       const currentVersion =
