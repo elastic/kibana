@@ -13,12 +13,14 @@ import {
   GetEventInputSchema,
   ListCalendarsInputSchema,
   ListEventsInputSchema,
+  FreeBusyInputSchema,
 } from './types';
 import type {
   SearchEventsInput,
   GetEventInput,
   ListCalendarsInput,
   ListEventsInput,
+  FreeBusyInput,
 } from './types';
 
 // Google Calendar API constants
@@ -154,6 +156,31 @@ export const GoogleCalendar: ConnectorSpec = {
             `${GOOGLE_CALENDAR_API_BASE}/calendars/${calendarId}/events`,
             { params }
           );
+
+          return response.data;
+        } catch (error: unknown) {
+          rethrowGoogleCalendarError(error);
+          throw error;
+        }
+      },
+    },
+
+    freeBusy: {
+      isTool: true,
+      input: FreeBusyInputSchema,
+      handler: async (ctx, input: FreeBusyInput) => {
+        const body: Record<string, unknown> = {
+          timeMin: input.timeMin,
+          timeMax: input.timeMax,
+          items: input.calendarIds.map((id) => ({ id })),
+        };
+
+        if (input.timeZone) {
+          body.timeZone = input.timeZone;
+        }
+
+        try {
+          const response = await ctx.client.post(`${GOOGLE_CALENDAR_API_BASE}/freeBusy`, body);
 
           return response.data;
         } catch (error: unknown) {

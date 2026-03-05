@@ -31,7 +31,7 @@ The Google Calendar connector has the following actions:
 Search events
 :   Search for events in Google Calendar by keywords. Matches against event summary, description, location, and attendee names.
     - **query** (required): Free text search terms to find events (e.g., "team standup", "budget review", "John Smith").
-    - **calendarId** (optional): Calendar ID to search. Use `primary` for the user's primary calendar. Defaults to `primary`.
+    - **calendarId** (optional): Calendar ID to search. Use `primary` for the user's primary calendar, a specific calendar ID from list calendars, or a person's email address to access their calendar. Defaults to `primary`.
     - **timeMin** (optional): Lower bound (inclusive) for event start time as an RFC3339 timestamp (e.g., `2024-01-01T00:00:00Z`).
     - **timeMax** (optional): Upper bound (exclusive) for event start time as an RFC3339 timestamp (e.g., `2024-12-31T23:59:59Z`).
     - **maxResults** (optional): Maximum number of events to return (1–2500). Defaults to 50.
@@ -39,7 +39,7 @@ Search events
 Get event
 :   Retrieve full details of a specific event by its ID, including recurrence info, conference links, and attachments.
     - **eventId** (required): The ID of the event to retrieve.
-    - **calendarId** (optional): Calendar ID containing the event. Use `primary` for the user's primary calendar. Defaults to `primary`.
+    - **calendarId** (optional): Calendar ID containing the event. Use `primary` for the user's primary calendar, or a person's email address to access their calendar. Defaults to `primary`.
 
 List calendars
 :   List all calendars accessible to the authenticated user, including calendar ID, name, description, access role, and time zone.
@@ -47,12 +47,19 @@ List calendars
 
 List events
 :   List events from a calendar, optionally filtered by time range.
-    - **calendarId** (optional): Calendar ID to list events from. Use `primary` for the user's primary calendar. Defaults to `primary`.
+    - **calendarId** (optional): Calendar ID to list events from. Use `primary` for the user's primary calendar, or a person's email address to access their calendar. Defaults to `primary`.
     - **timeMin** (optional): Lower bound (inclusive) for event start time as an RFC3339 timestamp.
     - **timeMax** (optional): Upper bound (exclusive) for event start time as an RFC3339 timestamp.
     - **maxResults** (optional): Maximum number of events to return (1–2500). Defaults to 50.
     - **pageToken** (optional): Pagination token from a previous response.
     - **orderBy** (optional): Sort order: `startTime` (chronological, default) or `updated` (last modification time).
+
+Free/Busy
+:   Check free/busy availability for one or more people or calendars over a time range. More token-efficient than listing full events when you only need to know if someone is available.
+    - **timeMin** (required): Start of the time interval to check as an RFC3339 timestamp (e.g., `2024-01-15T09:00:00Z`).
+    - **timeMax** (required): End of the time interval to check as an RFC3339 timestamp (e.g., `2024-01-15T18:00:00Z`).
+    - **calendarIds** (required): List of calendar IDs to check availability for. Use `primary` for the user's own calendar, or a person's email address to check their availability.
+    - **timeZone** (optional): Time zone for the query. Defaults to UTC.
 
 ## Connector networking configuration [google-calendar-connector-networking-configuration]
 

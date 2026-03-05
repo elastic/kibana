@@ -15,6 +15,7 @@ const API_BASE = 'https://www.googleapis.com/calendar/v3';
 describe('GoogleCalendar', () => {
   const mockClient = {
     get: jest.fn(),
+    post: jest.fn(),
   };
 
   const mockContext = {
@@ -38,11 +39,12 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.auth?.types).toContain('bearer');
   });
 
-  it('should define all four actions as tools', () => {
+  it('should define all five actions as tools', () => {
     expect(GoogleCalendar.actions.searchEvents.isTool).toBe(true);
     expect(GoogleCalendar.actions.getEvent.isTool).toBe(true);
     expect(GoogleCalendar.actions.listCalendars.isTool).toBe(true);
     expect(GoogleCalendar.actions.listEvents.isTool).toBe(true);
+    expect(GoogleCalendar.actions.freeBusy.isTool).toBe(true);
   });
 
   it('should have a test handler', () => {
@@ -247,6 +249,70 @@ describe('GoogleCalendar', () => {
     });
   });
 
+  describe('freeBusy action', () => {
+    it('should call the freeBusy API with correct body', async () => {
+      const mockResponse = {
+        kind: 'calendar#freeBusy',
+        timeMin: '2024-01-15T09:00:00Z',
+        timeMax: '2024-01-15T18:00:00Z',
+        calendars: {
+          primary: { busy: [{ start: '2024-01-15T10:00:00Z', end: '2024-01-15T11:00:00Z' }] },
+        },
+      };
+      mockClient.post.mockResolvedValue({ data: mockResponse });
+
+      await GoogleCalendar.actions.freeBusy.handler(mockContext, {
+        timeMin: '2024-01-15T09:00:00Z',
+        timeMax: '2024-01-15T18:00:00Z',
+        calendarIds: ['primary', 'colleague@example.com'],
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(`${API_BASE}/freeBusy`, {
+        timeMin: '2024-01-15T09:00:00Z',
+        timeMax: '2024-01-15T18:00:00Z',
+        items: [{ id: 'primary' }, { id: 'colleague@example.com' }],
+      });
+    });
+
+    it('should include timeZone when provided', async () => {
+      mockClient.post.mockResolvedValue({ data: { calendars: {} } });
+
+      await GoogleCalendar.actions.freeBusy.handler(mockContext, {
+        timeMin: '2024-01-15T09:00:00Z',
+        timeMax: '2024-01-15T18:00:00Z',
+        calendarIds: ['primary'],
+        timeZone: 'America/New_York',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(`${API_BASE}/freeBusy`, {
+        timeMin: '2024-01-15T09:00:00Z',
+        timeMax: '2024-01-15T18:00:00Z',
+        items: [{ id: 'primary' }],
+        timeZone: 'America/New_York',
+      });
+    });
+
+    it('should return raw API response data', async () => {
+      const mockResponse = {
+        kind: 'calendar#freeBusy',
+        calendars: {
+          'user@example.com': {
+            busy: [{ start: '2024-01-15T10:00:00Z', end: '2024-01-15T11:00:00Z' }],
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue({ data: mockResponse });
+
+      const result = await GoogleCalendar.actions.freeBusy.handler(mockContext, {
+        timeMin: '2024-01-15T09:00:00Z',
+        timeMax: '2024-01-15T18:00:00Z',
+        calendarIds: ['user@example.com'],
+      });
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   describe('Google API error handling', () => {
     it('should surface a formatted Google API error from a handler', async () => {
       mockClient.get.mockRejectedValue({
@@ -278,7 +344,7 @@ describe('GoogleCalendar', () => {
     it('should return ok: true on successful connection', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
 
-      const result = await GoogleCalendar.test!.handler(mockContext);
+      const result = await GoogleCalendar.test?.handler(mockContext);
 
       expect(result).toEqual({
         ok: true,
@@ -289,7 +355,7 @@ describe('GoogleCalendar', () => {
     it('should return ok: false on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      const result = await GoogleCalendar.test!.handler(mockContext);
+      const result = await GoogleCalendar.test?.handler(mockContext);
 
       expect(result).toMatchObject({ ok: false });
       expect((result as { message: string }).message).toContain('Unauthorized');

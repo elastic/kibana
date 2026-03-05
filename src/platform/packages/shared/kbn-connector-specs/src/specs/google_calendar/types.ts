@@ -29,7 +29,7 @@ export const SearchEventsInputSchema = z.object({
     .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
     .default('primary')
     .describe(
-      "Calendar ID to search. Use 'primary' for the user's primary calendar, or a specific calendar ID from listCalendars."
+      "Calendar ID to search. Use 'primary' for the user's primary calendar, a specific calendar ID from listCalendars, or a person's email address to access their calendar."
     ),
   timeMin: z
     .string()
@@ -64,7 +64,9 @@ export const GetEventInputSchema = z.object({
   calendarId: z
     .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
     .default('primary')
-    .describe("Calendar ID containing the event. Use 'primary' for the user's primary calendar."),
+    .describe(
+      "Calendar ID containing the event. Use 'primary' for the user's primary calendar, or a person's email address to access their calendar."
+    ),
 });
 export type GetEventInput = z.infer<typeof GetEventInputSchema>;
 
@@ -78,7 +80,7 @@ export const ListEventsInputSchema = z.object({
     .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
     .default('primary')
     .describe(
-      "Calendar ID to list events from. Use 'primary' for the user's primary calendar, or a specific calendar ID from listCalendars."
+      "Calendar ID to list events from. Use 'primary' for the user's primary calendar, a specific calendar ID from listCalendars, or a person's email address to access their calendar."
     ),
   timeMin: z
     .string()
@@ -108,3 +110,28 @@ export const ListEventsInputSchema = z.object({
     ),
 });
 export type ListEventsInput = z.infer<typeof ListEventsInputSchema>;
+
+export const FreeBusyInputSchema = z.object({
+  timeMin: z
+    .string()
+    .min(1)
+    .describe(
+      'Start of the time interval to query, as an RFC3339 timestamp. Example: 2024-01-15T09:00:00Z'
+    ),
+  timeMax: z
+    .string()
+    .min(1)
+    .describe(
+      'End of the time interval to query, as an RFC3339 timestamp. Example: 2024-01-15T18:00:00Z'
+    ),
+  calendarIds: z
+    .array(z.string().min(1))
+    .min(1)
+    .describe(
+      "List of calendar IDs to check availability for. Use 'primary' for the user's own calendar, or a person's email address to check their availability. Example: ['primary', 'colleague@company.com']"
+    ),
+  timeZone: z
+    .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
+    .describe('Time zone for the query (optional, defaults to UTC). Example: America/New_York'),
+});
+export type FreeBusyInput = z.infer<typeof FreeBusyInputSchema>;

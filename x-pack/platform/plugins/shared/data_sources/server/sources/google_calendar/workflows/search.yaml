@@ -13,7 +13,7 @@ inputs:
     type: string
     required: false
     default: primary
-    description: "Calendar ID to search. Use 'primary' for the user's primary calendar, or a specific calendar ID from the list_calendars tool."
+    description: "Calendar ID to search. Use 'primary' for the user's primary calendar, a specific calendar ID from the list_calendars tool, or a person's email address to access their calendar."
   - name: timeMin
     type: string
     required: false
