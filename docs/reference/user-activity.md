@@ -25,12 +25,27 @@ user_activity:
       type: console
       layout:
         type: json
+  filters:
+    - policy: keep
+      actions: [user_logged_in]
 ```
 
 - `user_activity.enabled`: Enables or disables emitting user activity events.
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
+- `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
 When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, user, session, ...}`.
+
+### Filters
+
+Filters are evaluated with **AND semantics**: for an activity to be logged, its `event.action` must pass **all** configured filter rules.
+
+Each filter has:
+
+- `policy`: `keep` or `drop`
+- `actions`: list of action IDs (see [Available actions](#available-actions))
+
+`keep` allows only actions listed in `actions`. `drop` excludes actions listed in `actions`. If you don’t configure any filters, all actions are eligible to be logged.
 
 ## Available actions
 
