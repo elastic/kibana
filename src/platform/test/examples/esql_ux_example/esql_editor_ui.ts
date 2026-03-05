@@ -15,10 +15,12 @@ import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const browser = getService('browser');
   const esql = getService('esql');
 
   describe('ES|QL Editor UI', function () {
     beforeEach(async () => {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await esql.setEsqlEditorQuery('');
     });
 
@@ -27,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
         'FROM logstash-* | WHERE bytes > 200 | STATS count = COUNT(*) BY geo.dest'
       );
 
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('ESQLEditor-toggleWordWrap');
       await retry.try(async () => {
         const formattedQuery = await esql.getEsqlEditorQuery();
@@ -40,6 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
       const textarea = await editor.findByCssSelector('textarea');
       await textarea.type([Key.CONTROL, 'k']);
 
+      await retry.try(async () => {
+        expect(await esql.isQuickSearchVisorVisible()).to.be(true);
+      });
+
+      // Dismiss any suggest widget that may have appeared
+      await browser.pressKeys(browser.keys.ESCAPE);
       await retry.try(async () => {
         expect(await esql.isQuickSearchVisorVisible()).to.be(true);
       });
