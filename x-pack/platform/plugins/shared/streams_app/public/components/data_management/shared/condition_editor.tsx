@@ -25,6 +25,7 @@ import {
   getFilterValue,
   isArrayOperator,
   isCondition,
+  isConditionStrict,
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
@@ -194,7 +195,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
     }
     try {
       const parsed = yaml.parse(currentValue);
-      if (!isCondition(parsed)) {
+      if (!isConditionStrict(parsed)) {
         return;
       }
       debouncedEmitConditionChange.cancel();
@@ -280,7 +281,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
             setSyntaxEditorValue(value);
             try {
               const parsed = yaml.parse(value);
-              if (!isCondition(parsed)) {
+              if (!isConditionStrict(parsed)) {
                 reportValidityChange(false);
                 debouncedEmitConditionChange.cancel();
                 return;
