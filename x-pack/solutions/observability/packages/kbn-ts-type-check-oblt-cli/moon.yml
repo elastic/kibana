@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/observability-ui'
   metadata:
-    sourceRoot: packages/kbn-ts-type-check-oblt-cli
+    sourceRoot: x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
