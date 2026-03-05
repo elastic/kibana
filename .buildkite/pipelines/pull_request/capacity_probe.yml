@@ -9,10 +9,10 @@ steps:
     agents:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-b
+      zones: us-central1-a
       diskSizeGb: 200
     timeout_in_minutes: 10
-    parallelism: 20
+    parallelism: 10
 
   - command: |
       set -euo pipefail
@@ -24,10 +24,10 @@ steps:
     agents:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-east4-b
+      zones: us-central1-b
       diskSizeGb: 200
     timeout_in_minutes: 10
-    parallelism: 20
+    parallelism: 10
 
   - command: |
       set -euo pipefail
@@ -39,7 +39,7 @@ steps:
     agents:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-west1-b
+      zones: us-central1-c
       diskSizeGb: 200
     timeout_in_minutes: 10
-    parallelism: 20
+    parallelism: 10
