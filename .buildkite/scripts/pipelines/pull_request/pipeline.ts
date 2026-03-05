@@ -53,6 +53,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
+    if (GITHUB_PR_LABELS.includes('ci:safety-check-only')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/safety_check.yml', false));
+      console.warn('ci:safety-check-only label detected. Running safety check pipeline only.');
+      emitPipeline(pipeline);
+      return;
+    }
+
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
