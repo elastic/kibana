@@ -50,7 +50,7 @@ export function InstallKibanaAssetsButton({
   return (
     <EuiButton
       disabled={!canInstallPackages}
-      iconType="importAction"
+      iconType="download"
       isLoading={isLoading}
       onClick={handleClickInstall}
     >

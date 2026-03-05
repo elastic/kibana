@@ -58,7 +58,7 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
       <EuiCallOut
         size="m"
         color="warning"
-        iconType="alert"
+        iconType="warning"
         title={getDeferredInstallationMsg(deferredInstallations.length, { authz })}
       />
       <EuiSpacer size="l" />

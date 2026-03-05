@@ -41,7 +41,7 @@ export function BackLink({ queryParams, integrationsPath }: Props) {
   return (
     <>
       <EuiButtonEmpty
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         size="xs"
         flush="left"
         onClick={() => {

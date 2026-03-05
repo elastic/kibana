@@ -273,7 +273,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             <EuiCallOut
               announceOnMount={false}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.inputPackage.message"
@@ -290,7 +290,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             <EuiCallOut
               announceOnMount={false}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"

@@ -121,7 +121,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         <EuiCallOut
           announceOnMount
           size="s"
-          iconType="cheer"
+          iconType="popper"
           onDismiss={granularPrivilegesCallout.dismiss}
           title={
             <>

@@ -207,7 +207,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
               title={generateWarningMessage()}
-              iconType="alert"
+              iconType="warning"
               color="warning"
               size="s"
               heading="p"
@@ -515,7 +515,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 <EuiCallOut
                   announceOnMount
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   title={
                     <FormattedMessage

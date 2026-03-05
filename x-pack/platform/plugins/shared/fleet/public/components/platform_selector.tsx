@@ -164,7 +164,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiPopover
               button={
                 <EuiFilterButton
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
@@ -282,7 +282,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 {(copy) => (
                   <EuiButton
                     color="primary"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     size="m"
                     onClick={() => onCopyButtonClick(copy)}
                   >

@@ -61,7 +61,7 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
       zIndex={Number(euiTheme.levels.header) - 1}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsAgentPoliciesFilterOpen(!isAgentPoliciesFilterOpen)}
           isSelected={isAgentPoliciesFilterOpen}
           hasActiveFilters={selectedAgentPolicies.length > 0}

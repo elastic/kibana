@@ -34,7 +34,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       button={
         <EuiFilterButton
           data-test-subj="agentList.logLevelFilterBtn"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           numFilters={options.length}
