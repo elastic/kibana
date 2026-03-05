@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('switches to Discover mode if search is saved as new', async () => {
       await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
-      await dashboardPanelActions.clickEdit();
+      await discover.editEmbeddableInDiscover();
       await header.waitUntilLoadingHasFinished();
       await discover.saveAsSearch('ES|QL Discover Session Saved As');
       await header.waitUntilLoadingHasFinished();
