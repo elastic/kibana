@@ -37,7 +37,6 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { useLinkedSavedDashboardExists } from './use_linked_saved_dashboard_exists';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 const DEFAULT_PANEL_HEIGHT = 9;
@@ -349,12 +348,38 @@ export const DashboardCanvasContent = ({
   const { euiTheme } = useEuiTheme();
   const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
+  const [linkedSavedDashboardExists, setLinkedSavedDashboardExists] = useState(false);
   const styles = useMemo(() => getDashboardCanvasContentStyles({ euiTheme }), [euiTheme]);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
-  const linkedSavedDashboardExists = useLinkedSavedDashboardExists({
-    linkedSavedObjectId,
-    doesSavedDashboardExist,
-  });
+
+  useEffect(
+    function checkLinkedSavedDashboardExists() {
+      let canceled = false;
+
+      if (!linkedSavedObjectId) {
+        setLinkedSavedDashboardExists(false);
+        return;
+      }
+
+      setLinkedSavedDashboardExists(false);
+      doesSavedDashboardExist(linkedSavedObjectId)
+        .then((exists) => {
+          if (!canceled) {
+            setLinkedSavedDashboardExists(exists);
+          }
+        })
+        .catch(() => {
+          if (!canceled) {
+            setLinkedSavedDashboardExists(false);
+          }
+        });
+
+      return () => {
+        canceled = true;
+      };
+    },
+    [linkedSavedObjectId, doesSavedDashboardExist]
+  );
 
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
 
@@ -367,60 +392,66 @@ export const DashboardCanvasContent = ({
     [data.savedObjectId, initialDashboardInput]
   );
 
-  useEffect(() => {
-    if (!dashboardApi) {
-      return;
-    }
-    const buttons: ActionButton[] = [];
-    if (dashboardApi.locator) {
-      const { locator } = dashboardApi;
+  useEffect(
+    function registerActionButtonsEffect() {
+      if (!dashboardApi) {
+        return;
+      }
+      const buttons: ActionButton[] = [];
+      if (dashboardApi.locator) {
+        const { locator } = dashboardApi;
+        buttons.push({
+          label: i18n.translate(
+            'xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel',
+            {
+              defaultMessage: 'Edit',
+            }
+          ),
+          icon: 'pencil',
+          type: ActionButtonType.PRIMARY,
+          handler: async () => {
+            await locator.navigate({
+              dashboardId: data.savedObjectId,
+              title: initialDashboardInput.title,
+              description: initialDashboardInput.description,
+              panels: initialDashboardInput.panels,
+              time_range: initialDashboardInput.time_range,
+              viewMode: 'edit',
+            });
+          },
+        });
+      }
+
       buttons.push({
-        label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel', {
-          defaultMessage: 'Edit',
+        label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
+          defaultMessage: 'Save',
         }),
-        icon: 'pencil',
-        type: ActionButtonType.PRIMARY,
+        icon: 'save',
+        type: ActionButtonType.SECONDARY,
         handler: async () => {
-          await locator.navigate({
-            dashboardId: data.savedObjectId,
-            title: initialDashboardInput.title,
-            description: initialDashboardInput.description,
-            panels: initialDashboardInput.panels,
-            time_range: initialDashboardInput.time_range,
-            viewMode: 'edit',
-          });
+          const result = await dashboardApi.runInteractiveSave();
+          const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
+
+          if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectId) {
+            await updateOrigin({ savedObjectId: nextSavedObjectId });
+          }
         },
       });
-    }
 
-    buttons.push({
-      label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
-        defaultMessage: 'Save',
-      }),
-      icon: 'save',
-      type: ActionButtonType.SECONDARY,
-      handler: async () => {
-        const result = await dashboardApi.runInteractiveSave();
-        const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
-
-        if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectId) {
-          await updateOrigin({ savedObjectId: nextSavedObjectId });
-        }
-      },
-    });
-
-    registerActionButtons(buttons);
-  }, [
-    dashboardApi,
-    initialDashboardInput.description,
-    initialDashboardInput.panels,
-    initialDashboardInput.time_range,
-    initialDashboardInput.title,
-    registerActionButtons,
-    data.savedObjectId,
-    linkedSavedObjectId,
-    updateOrigin,
-  ]);
+      registerActionButtons(buttons);
+    },
+    [
+      dashboardApi,
+      initialDashboardInput.description,
+      initialDashboardInput.panels,
+      initialDashboardInput.time_range,
+      initialDashboardInput.title,
+      registerActionButtons,
+      data.savedObjectId,
+      linkedSavedObjectId,
+      updateOrigin,
+    ]
+  );
 
   return (
     <div css={styles.root}>
