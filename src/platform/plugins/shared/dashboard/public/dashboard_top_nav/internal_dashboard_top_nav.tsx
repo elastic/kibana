@@ -21,7 +21,6 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,7 +28,6 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
-import { MountPointPortal } from '@kbn/react-kibana-mount';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { UI_SETTINGS } from '../../common/constants';
@@ -367,17 +365,12 @@ export function InternalDashboardTopNav({
     };
   }, [badges]);
 
-  const setFavoriteButtonMountPoint = useCallback(
-    (mountPoint: MountPoint<HTMLElement> | undefined) => {
-      if (mountPoint) {
-        return coreServices.chrome.setBreadcrumbsAppendExtension({
-          mount: mountPoint,
-          order: 0,
-        });
-      }
-    },
-    []
-  );
+  useEffect(() => {
+    return coreServices.chrome.setBreadcrumbsAppendExtension({
+      content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
+      order: 0,
+    });
+  }, [lastSavedId]);
 
   return (
     <div css={styles.container}>
@@ -432,9 +425,6 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
-      <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
-        <DashboardFavoriteButton dashboardId={lastSavedId} />
-      </MountPointPortal>
     </div>
   );
 }

@@ -54,7 +54,7 @@ export interface ChromeSetup {
  * ```tsx
  * core.chrome.setHelpExtension({
  *   appName: 'My App',
- *   reactContent: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+   *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -227,7 +227,7 @@ export interface ChromeStart {
 
   /**
    * Override the current set of custom help content.
-   * Prefer {@link ChromeHelpExtension.reactContent} over the legacy `content` callback.
+   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
