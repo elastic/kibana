@@ -9,6 +9,34 @@ import type { Message, Deanonymization, Anonymization } from '@kbn/inference-com
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
+/**
+ * Recursively walks a value and replaces all string leaves using the provided
+ * replacement function, collecting deanonymization metadata from every leaf.
+ */
+function deanonymizeStructure(
+  value: unknown,
+  replaceFn: (s: string) => { output: string; deanonymizations: Deanonymization[] },
+  collectedDeanonymizations: Deanonymization[]
+): unknown {
+  if (typeof value === 'string') {
+    const { output, deanonymizations } = replaceFn(value);
+    collectedDeanonymizations.push(...deanonymizations);
+    return output;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => deanonymizeStructure(item, replaceFn, collectedDeanonymizations));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k,
+        deanonymizeStructure(v, replaceFn, collectedDeanonymizations),
+      ])
+    );
+  }
+  return value;
+}
+
 export function deanonymize<TMessage extends Message>(
   message: TMessage,
   anonymizations: Anonymization[]
@@ -41,31 +69,39 @@ export function deanonymize<TMessage extends Message>(
   }
 
   const anonymized = getAnonymizableMessageParts(message);
+  const allDeanonymizations: Deanonymization[] = [];
 
   if (anonymized.content && typeof anonymized.content === 'string') {
     const { content, ...rest } = anonymized;
 
     const contentDeanonymization = replace(anonymized.content);
+    allDeanonymizations.push(...contentDeanonymization.deanonymizations);
 
-    const unredaction = !isEmpty(rest) ? replace(JSON.stringify(rest)) : undefined;
+    const deanonymizedRest = !isEmpty(rest)
+      ? (deanonymizeStructure(rest, replace, allDeanonymizations) as typeof rest)
+      : undefined;
 
     return {
       message: {
         ...message,
-        ...(unredaction ? (JSON.parse(unredaction.output) as typeof anonymized) : {}),
+        ...(deanonymizedRest ?? {}),
         content: contentDeanonymization.output,
       },
-      deanonymizations: contentDeanonymization.deanonymizations,
+      deanonymizations: allDeanonymizations,
     };
   }
 
-  const unredaction = replace(JSON.stringify(anonymized));
+  const deanonymizedParts = deanonymizeStructure(
+    anonymized,
+    replace,
+    allDeanonymizations
+  ) as typeof anonymized;
 
   return {
     message: {
       ...message,
-      ...(JSON.parse(unredaction.output) as typeof anonymized),
+      ...deanonymizedParts,
     },
-    deanonymizations: [],
+    deanonymizations: allDeanonymizations,
   };
 }
