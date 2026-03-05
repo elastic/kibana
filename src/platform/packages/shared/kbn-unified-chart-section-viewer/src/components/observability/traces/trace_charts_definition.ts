@@ -103,8 +103,9 @@ export function getLatencyChart({
     const esqlQuery = from(metadataDirective ? `${indexes} ${metadataDirective}` : indexes)
       .pipe(
         ...whereClauses,
-        evaluate(`duration_ecs = COALESCE(${TRANSACTION_DURATION}, ${SPAN_DURATION})`),
-        evaluate(`duration_ms_ecs = ROUND(duration_ecs)/1000`), // apm duration is in us
+        evaluate(
+          `duration_ms_ecs = CASE(${TRANSACTION_DURATION} IS NOT NULL, TO_DOUBLE(${TRANSACTION_DURATION})/1000, ${SPAN_DURATION} IS NOT NULL, TO_DOUBLE(${SPAN_DURATION})/1000, null)`
+        ), // apm duration is in us
         evaluate(`duration_ms_otel = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
         evaluate('duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))'), // need to convert both to the same type to make sure the COALESCE works
         stats(`AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)

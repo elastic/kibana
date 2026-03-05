@@ -108,9 +108,8 @@ describe('trace_charts_definition', () => {
         'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
       );
       expect(result?.esqlQuery).toContain(
-        'EVAL duration_ecs = COALESCE(transaction.duration.us, span.duration.us)'
+        'duration_ms_ecs = CASE(transaction.duration.us IS NOT NULL, TO_DOUBLE(transaction.duration.us) / 1000, span.duration.us IS NOT NULL, TO_DOUBLE(span.duration.us) / 1000, NULL)'
       );
-      expect(result?.esqlQuery).toContain('duration_ms_ecs = ROUND(duration_ecs) / 1000');
       expect(result?.esqlQuery).toContain('duration_ms_otel = ROUND(duration) / 1000 / 1000');
       expect(result?.esqlQuery).toContain(
         'duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))'
