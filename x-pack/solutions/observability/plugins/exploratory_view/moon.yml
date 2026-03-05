@@ -69,6 +69,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - public/**/*.json
     - test/scout/**/*
     - '!target/**/*'
