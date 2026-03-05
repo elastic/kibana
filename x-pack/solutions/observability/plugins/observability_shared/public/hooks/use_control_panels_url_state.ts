@@ -128,7 +128,7 @@ const mergeDefaultPanelsWithUrlConfig = (
 
   // Per-property merge: config defaults (e.g. fieldName) are preserved while
   // URL overrides (e.g. selectedOptions) are applied on top.
-  const merged = existingKeys.reduce((acc, key) => {
+  const merged: ControlPanels = existingKeys.reduce((acc, key) => {
     return {
       ...acc,
       [key]: {
@@ -136,7 +136,7 @@ const mergeDefaultPanelsWithUrlConfig = (
         ...(controlPanelsToOverride[key] ?? {}),
       },
     };
-  }, {} as ControlPanels);
+  }, {});
 
   // Merge default and existing configs and add dataView.id to each of them
   return addDataViewIdToControlPanels(merged, dataView.id);
