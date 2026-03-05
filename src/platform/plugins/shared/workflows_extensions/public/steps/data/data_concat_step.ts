@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_dedupe_step';
-export * from './data_filter_step';
-export * from './data_find_step';
-export * from './data_map_step';
-export * from './data_regex_extract_step';
-export * from './data_regex_replace_step';
-export * from './data_aggregate_step';
-export * from './data_concat_step';
-export * from './data_parse_json_step';
-export * from './data_stringify_json_step';
+import React from 'react';
+import { dataConcatStepCommonDefinition } from '../../../common/steps/data';
+import { createPublicStepDefinition } from '../../step_registry/types';
+
+export const dataConcatStepDefinition = createPublicStepDefinition({
+  ...dataConcatStepCommonDefinition,
+  icon: React.lazy(() => import('./concat_icon').then((m) => ({ default: m.ConcatIcon }))),
+});
