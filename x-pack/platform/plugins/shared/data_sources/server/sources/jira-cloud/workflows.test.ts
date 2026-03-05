@@ -159,7 +159,7 @@ describe('jira cloud workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getIssue',
-            subActionParams: expect.objectContaining({ issueId: 'PROJ-123' }),
+            subActionParams: { issueId: 'PROJ-123' },
           }),
         })
       );
@@ -179,7 +179,7 @@ describe('jira cloud workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getProject',
-            subActionParams: expect.objectContaining({ projectId: '10001' }),
+            subActionParams: { projectId: '10001' },
           }),
         })
       );

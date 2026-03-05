@@ -272,9 +272,9 @@ describe('google drive workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getFileMetadata',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               fileIds: ['meta-1', 'meta-2', 'meta-3'],
-            }),
+            },
           }),
         })
       );

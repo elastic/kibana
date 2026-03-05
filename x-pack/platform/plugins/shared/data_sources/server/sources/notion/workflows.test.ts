@@ -122,10 +122,12 @@ describe('notion workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'searchPageOrDSByTitle',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               query: 'meeting notes',
               queryObjectType: 'page',
-            }),
+              startCursor: undefined,
+              pageSize: undefined,
+            },
           }),
         })
       );
@@ -146,7 +148,7 @@ describe('notion workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getPage',
-            subActionParams: expect.objectContaining({ pageId: 'abc-123-def' }),
+            subActionParams: { pageId: 'abc-123-def' },
           }),
         })
       );
@@ -193,7 +195,7 @@ describe('notion workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getDataSource',
-            subActionParams: expect.objectContaining({ dataSourceId: 'ds-789' }),
+            subActionParams: { dataSourceId: 'ds-789' },
           }),
         })
       );

@@ -150,12 +150,12 @@ describe('github workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getDoc',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               owner: 'elastic',
               repo: 'kibana',
               path: 'README.md',
               ref: 'main',
-            }),
+            },
           }),
         })
       );

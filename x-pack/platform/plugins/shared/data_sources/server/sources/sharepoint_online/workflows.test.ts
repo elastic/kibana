@@ -191,7 +191,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'downloadDriveItem',
-            subActionParams: expect.objectContaining({ driveId: 'drv-1', itemId: 'itm-1' }),
+            subActionParams: { driveId: 'drv-1', itemId: 'itm-1' },
           }),
         })
       );
@@ -234,7 +234,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getSitePageContents',
-            subActionParams: expect.objectContaining({ siteId: 'site-1', pageId: 'page-1' }),
+            subActionParams: { siteId: 'site-1', pageId: 'page-1' },
           }),
         })
       );
@@ -300,7 +300,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getSite',
-            subActionParams: expect.objectContaining({ siteId: 'site-abc' }),
+            subActionParams: { siteId: 'site-abc', relativeUrl: undefined },
           }),
         })
       );
@@ -320,7 +320,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getSite',
-            subActionParams: expect.objectContaining({ relativeUrl: '/sites/team' }),
+            subActionParams: { siteId: undefined, relativeUrl: '/sites/team' },
           }),
         })
       );
@@ -339,7 +339,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getSitePages',
-            subActionParams: expect.objectContaining({ siteId: 'site-xyz' }),
+            subActionParams: { siteId: 'site-xyz' },
           }),
         })
       );
@@ -358,7 +358,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getSiteListItems',
-            subActionParams: expect.objectContaining({ siteId: 'site-1', listId: 'list-99' }),
+            subActionParams: { siteId: 'site-1', listId: 'list-99' },
           }),
         })
       );
@@ -378,7 +378,7 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'getDriveItems',
-            subActionParams: expect.objectContaining({ driveId: 'drv-abc', path: '/Documents' }),
+            subActionParams: { driveId: 'drv-abc', path: '/Documents' },
           }),
         })
       );
