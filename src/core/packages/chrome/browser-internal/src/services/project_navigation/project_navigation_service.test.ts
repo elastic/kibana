@@ -8,10 +8,15 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import {
+  firstValueFrom,
+  lastValueFrom,
+  take,
+  map,
+  BehaviorSubject,
+  of,
+  type Observable,
+} from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -20,7 +25,6 @@ import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
-  SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
@@ -73,23 +77,17 @@ const setup = ({
   const projectNavigationService = new ProjectNavigationService(isServerless);
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
-  const application = {
-    ...applicationServiceMock.createInternalStartContract(),
-    history,
-  };
-  application.navigateToUrl.mockImplementation(async (url) => {
-    history.push(url);
-  });
+
   const projectNavigation = projectNavigationService.start({
-    application,
-    navLinksService,
-    http: httpServiceMock.createStartContract(),
-    chromeBreadcrumbs$,
+    history,
+    prependBasePath: (p) => p,
+    navLinks: navLinksService,
+    getUiSettingsHomeRoute: () => undefined,
     logger,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    chromeBreadcrumbs$,
   });
 
-  return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
+  return { projectNavigation, history, chromeBreadcrumbs$, navLinksService };
 };
 
 describe('initNavigation()', () => {
@@ -99,7 +97,12 @@ describe('initNavigation()', () => {
     });
 
     const getNavigationTree = () =>
-      lastValueFrom(projectNavigation.getNavigationTreeUi$().pipe(take(1)));
+      lastValueFrom(
+        projectNavigation.getNavigation$().pipe(
+          take(1),
+          map((nav) => nav.navigationTree)
+        )
+      );
 
     return { projectNavigation, getNavigationTree };
   };
@@ -299,11 +302,16 @@ describe('initNavigation()', () => {
     });
   });
 
-  test('should handle race condition when initNavigation() is called after getNavigationTreeUi$()', async () => {
+  test('should handle race condition when initNavigation() is called after getNavigation$()', async () => {
     const { projectNavigation } = setup({ navLinkIds: ['foo', 'bar'] });
 
-    // 1. getNavigationTreeUi$() is called
-    const promise = lastValueFrom(projectNavigation.getNavigationTreeUi$().pipe(take(1)));
+    // 1. getNavigation$() is called
+    const promise = lastValueFrom(
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
+    );
 
     // 2. initNavigation() is called
     projectNavigation.initNavigation<any>(
@@ -319,7 +327,7 @@ describe('initNavigation()', () => {
       })
     );
 
-    // 3. getNavigationTreeUi$() is resolved
+    // 3. getNavigation$() is resolved
     const treeDefinition = await promise;
     const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node.children![0].title).toBe('FOO');
@@ -355,7 +363,10 @@ describe('initNavigation()', () => {
     );
 
     const treeDefinition = await lastValueFrom(
-      projectNavigation.getNavigationTreeUi$().pipe(take(1))
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
     );
     const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node?.children?.length).toBe(4);
@@ -435,7 +446,10 @@ describe('initNavigation()', () => {
 
     // Verify that billingAndSub link is NOT in the tree (no URL available)
     let treeDefinition = await lastValueFrom(
-      projectNavigation.getNavigationTreeUi$().pipe(take(1))
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
     );
     let [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node?.children?.length).toBe(3); // Only 3 links without billing
@@ -454,7 +468,12 @@ describe('initNavigation()', () => {
     });
 
     // Verify that billingAndSub link IS now in the tree
-    treeDefinition = await lastValueFrom(projectNavigation.getNavigationTreeUi$().pipe(take(1)));
+    treeDefinition = await lastValueFrom(
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
+    );
     [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node?.children?.length).toBe(4); // Now 4 links including billing
 
@@ -739,16 +758,13 @@ describe('breadcrumbs', () => {
   });
 });
 
-describe('getActiveNodes$()', () => {
+describe('getNavigation$() active nodes', () => {
   test('should set the active nodes from history location', async () => {
     const currentLocationPathName = '/app/item1';
     const { projectNavigation } = setup({
       locationPathName: currentLocationPathName,
       navLinkIds: ['item1'],
     });
-
-    let activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
-    expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
       'es',
@@ -768,7 +784,7 @@ describe('getActiveNodes$()', () => {
       })
     );
 
-    activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
+    const { activeNodes } = await lastValueFrom(projectNavigation.getNavigation$().pipe(take(1)));
 
     expect(activeNodes).toEqual([
       [
@@ -803,9 +819,6 @@ describe('getActiveNodes$()', () => {
   test('should set the active nodes from getIsActive() handler', async () => {
     const { projectNavigation } = setup({ navLinkIds: ['item1'] });
 
-    let activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
-    expect(activeNodes).toEqual([]);
-
     projectNavigation.initNavigation<any>(
       'es',
       of({
@@ -825,7 +838,7 @@ describe('getActiveNodes$()', () => {
       })
     );
 
-    activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
+    const { activeNodes } = await lastValueFrom(projectNavigation.getNavigation$().pipe(take(1)));
 
     expect(activeNodes).toEqual([
       [
@@ -859,116 +872,35 @@ describe('getActiveNodes$()', () => {
   });
 });
 
-describe('solution navigations', () => {
-  const solution1: SolutionNavigationDefinition<any> = {
-    id: 'es',
-    title: 'Solution 1',
-    icon: 'logoSolution1',
-    homePage: 'discover',
-    navigationTree$: of({ body: [{ type: 'navItem', link: 'app1' }] }),
-  };
+describe('getActiveSolutionNavId$()', () => {
+  it('should return null initially and update when initNavigation is called', async () => {
+    const { projectNavigation } = setup({ navLinkIds: ['app1', 'app2'] });
 
-  const solution2: SolutionNavigationDefinition<any> = {
-    id: 'oblt',
-    title: 'Solution 2',
-    icon: 'logoSolution2',
-    homePage: 'app2',
-    navigationTree$: of({ body: [{ type: 'navItem', link: 'app2' }] }),
-  };
+    const activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
+    expect(activeId).toBeNull();
 
-  const solution3: SolutionNavigationDefinition<any> = {
-    id: 'security',
-    title: 'Solution 3',
-    icon: 'logoSolution3',
-    homePage: 'discover',
-    navigationTree$: of({ body: [{ type: 'navItem', link: 'app3' }] }),
-  };
+    projectNavigation.initNavigation<any>('es', of({ body: [{ type: 'navItem', link: 'app1' }] }));
 
-  const localStorageGetItem = jest.fn();
-  const originalLocalStorage = window.localStorage;
-
-  beforeAll(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: localStorageGetItem,
-      },
-      writable: true,
-    });
+    const activeIdAfterInit = await lastValueFrom(
+      projectNavigation.getActiveSolutionNavId$().pipe(take(1))
+    );
+    expect(activeIdAfterInit).toBe('es');
   });
 
-  afterAll(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: originalLocalStorage,
-      writable: true,
-    });
-  });
+  it('should update when switching to a different solution', async () => {
+    const { projectNavigation } = setup({ navLinkIds: ['app1', 'app2'] });
 
-  it('should update the solution navigation definition', async () => {
-    const { projectNavigation } = setup();
+    projectNavigation.initNavigation<any>('es', of({ body: [{ type: 'navItem', link: 'app1' }] }));
 
-    {
-      const solutionNavs = await lastValueFrom(
-        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
-      );
-      expect(solutionNavs).toEqual({});
-    }
+    let activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
+    expect(activeId).toBe('es');
 
-    {
-      projectNavigation.updateSolutionNavigations({ es: solution1, oblt: solution2 });
+    projectNavigation.initNavigation<any>(
+      'oblt',
+      of({ body: [{ type: 'navItem', link: 'app2' }] })
+    );
 
-      const solutionNavs = await lastValueFrom(
-        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
-      );
-      expect(solutionNavs).toEqual({ es: solution1, oblt: solution2 });
-    }
-
-    {
-      // Test partial update
-      projectNavigation.updateSolutionNavigations({ security: solution3 }, false);
-      const solutionNavs = await lastValueFrom(
-        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
-      );
-      expect(solutionNavs).toEqual({ es: solution1, oblt: solution2, security: solution3 });
-    }
-
-    {
-      // Test full replacement
-      projectNavigation.updateSolutionNavigations({ security: solution3 }, true);
-      const solutionNavs = await lastValueFrom(
-        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
-      );
-      expect(solutionNavs).toEqual({ security: solution3 });
-    }
-  });
-
-  it('should return the active solution navigation', async () => {
-    const { projectNavigation } = setup();
-
-    {
-      const activeSolution = await lastValueFrom(
-        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
-      );
-      expect(activeSolution).toBeNull();
-    }
-
-    projectNavigation.changeActiveSolutionNavigation('oblt'); // Set **before** the navs are registered
-    projectNavigation.updateSolutionNavigations({ es: solution1, oblt: solution2 });
-
-    {
-      const activeSolution = await lastValueFrom(
-        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
-      );
-      expect(activeSolution).not.toBeNull();
-      expect(activeSolution).toEqual(solution2);
-    }
-
-    projectNavigation.changeActiveSolutionNavigation('es'); // Set **after** the navs are registered
-
-    {
-      const activeSolution = await lastValueFrom(
-        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
-      );
-      expect(activeSolution).toEqual(solution1);
-    }
+    activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
+    expect(activeId).toBe('oblt');
   });
 });

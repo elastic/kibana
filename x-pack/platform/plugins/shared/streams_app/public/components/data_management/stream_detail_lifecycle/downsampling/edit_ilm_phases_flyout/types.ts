@@ -7,11 +7,15 @@
 
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 
+export interface EditIlmPhasesFlyoutChangeMeta {
+  invalidPhases: PhaseName[];
+}
+
 export interface EditIlmPhasesFlyoutProps {
   initialPhases: IlmPolicyPhases;
   selectedPhase: PhaseName | undefined;
   setSelectedPhase: (phase: PhaseName | undefined) => void;
-  onChange: (next: IlmPolicyPhases) => void;
+  onChange: (next: IlmPolicyPhases, meta: EditIlmPhasesFlyoutChangeMeta) => void;
   onSave: (next: IlmPolicyPhases) => void;
   onClose: () => void;
   isMetricsStream: boolean;
