@@ -31,26 +31,20 @@ export const getFilteredHostNames = async ({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [...rangeQuery(from, to), ...(inventoryModel.nodeFilter?.({ schema }) ?? [])],
+          filter: [
+            ...castArray(query),
+            ...rangeQuery(from, to),
+            ...(inventoryModel.nodeFilter?.({ schema }) ?? []),
+          ],
         },
       },
       aggs: {
-        allHosts: {
+        uniqueHostNames: {
           terms: {
             field: HOST_NAME_FIELD,
             size: limit,
-            order: { _key: 'asc' },
-          },
-        },
-        availableHosts: {
-          filter: query ?? { match_all: {} },
-          aggs: {
-            names: {
-              terms: {
-                field: HOST_NAME_FIELD,
-                size: limit,
-                order: { _key: 'asc' },
-              },
+            order: {
+              _key: 'asc',
             },
           },
         },
@@ -58,13 +52,9 @@ export const getFilteredHostNames = async ({
     },
     'get filtered host names'
   );
-  const { allHosts, availableHosts } = response.aggregations ?? {};
 
-  // Return all hosts, and those that match the filter so we can filter them out later
-  return {
-    allHosts: allHosts?.buckets?.map((p) => p.key as string) ?? [],
-    availableHosts: availableHosts?.names?.buckets?.map((p) => p.key as string) ?? [],
-  };
+  const { uniqueHostNames } = response.aggregations ?? {};
+  return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
 };
 
 export const getHasDataFromSystemIntegration = async ({

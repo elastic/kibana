@@ -12,9 +12,6 @@ import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metri
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { assertQueryStructure } from '../utils';
 import { getDocumentsFilter } from '../helpers/query';
-import { getFilteredHostNames } from './get_filtered_hosts';
-
-const HOSTS_LIMIT = 10000;
 
 export async function getHostsCount({
   infraMetricsClient,
@@ -34,26 +31,13 @@ export async function getHostsCount({
     end: to,
   });
 
-  const [{ allHosts, availableHosts }, documentsFilter] = await Promise.all([
-    getFilteredHostNames({
-      infraMetricsClient,
-      query,
-      from,
-      to,
-      limit: HOSTS_LIMIT,
-      schema,
-    }),
-    getDocumentsFilter({
-      apmDataAccessServices,
-      apmDocumentSources,
-      from,
-      to,
-      schema,
-    }),
-  ]);
-
-  const availableHostsSet = new Set(availableHosts);
-  const hostsToFilterOut = allHosts.filter((h) => !availableHostsSet.has(h));
+  const documentsFilter = await getDocumentsFilter({
+    apmDataAccessServices,
+    apmDocumentSources,
+    from,
+    to,
+    schema,
+  });
 
   const response = await infraMetricsClient.search(
     {
@@ -71,10 +55,6 @@ export async function getHostsCount({
               },
             },
           ],
-          // Filter out hosts that match the filter but the APM Integration could retrieve them anyway
-          ...(hostsToFilterOut.length > 0 && {
-            must_not: [{ terms: { [HOST_NAME_FIELD]: hostsToFilterOut } }],
-          }),
         },
       },
       aggs: {
