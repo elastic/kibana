@@ -19,7 +19,15 @@ import { getCalculatedStats } from '../helpers/get_calculated_stats';
 import { getAggregations } from './use_ingestion_rate';
 import { formatBytes } from '../helpers/format_bytes';
 
-export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number];
+export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
+  /**
+   * The number of distinct time series when the underlying data stream is in
+   * `time_series` mode.
+   *
+   * Computed via ES|QL `TS_INFO` on the stream.
+   */
+  timeSeriesCount?: number;
+};
 
 export type EnhancedDataStreamStats = DataStreamStats & CalculatedStats;
 export type EnhancedFailureStoreStats = FailureStoreStatsResponse & CalculatedStats;
@@ -45,11 +53,17 @@ export const useDataStreamStats = ({
   const statsFetch = useStreamsAppFetch(
     async ({ signal }) => {
       const client = await dataStreamsClient;
+      const shouldFetchTimeSeriesCount =
+        // If the stream detail API tells us the index mode and it's not time_series,
+        // skip the request entirely. If we don't know the index mode, fall back to
+        // attempting the count request and let the server decide.
+        definition.index_mode === undefined || definition.index_mode === 'time_series';
       const [
         {
           dataStreamsStats: [dsStats],
         },
         failureStore,
+        timeSeriesCountResponse,
       ] = await Promise.all([
         client.getDataStreamsStats({
           datasetQuery: definition.stream.name,
@@ -62,11 +76,27 @@ export const useDataStreamStats = ({
             path: { name: definition.stream.name },
           },
         }),
+
+        shouldFetchTimeSeriesCount
+          ? streamsRepositoryClient
+              .fetch('GET /internal/streams/{name}/time_series/_count', {
+                signal,
+                params: {
+                  path: { name: definition.stream.name },
+                },
+              })
+              .catch(() => ({ timeSeriesCount: null }))
+          : Promise.resolve({ timeSeriesCount: null }),
       ]);
 
       if (!dsStats || !dsStats.creationDate) {
         return undefined;
       }
+
+      const timeSeriesCount =
+        typeof timeSeriesCountResponse?.timeSeriesCount === 'number'
+          ? timeSeriesCountResponse.timeSeriesCount
+          : undefined;
 
       const [dsAggregations, fsAggregations] = await Promise.all([
         getAggregations({ definition, timeState, core, search, signal }),
@@ -84,6 +114,7 @@ export const useDataStreamStats = ({
         ds: {
           stats: {
             ...dsStats,
+            ...(timeSeriesCount !== undefined ? { timeSeriesCount } : {}),
             sizeBytes: dsSizeWithoutFs,
             size: formatBytes(dsSizeWithoutFs),
             ...getCalculatedStats({

@@ -118,7 +118,17 @@ beforeEach(() => {
     dataStreamsStats: [mockDataStreamStats],
   });
 
-  mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFailureStoreStats);
+  mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+    if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+      return Promise.resolve(mockFailureStoreStats);
+    }
+
+    if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+      return Promise.resolve({ timeSeriesCount: null });
+    }
+
+    return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+  });
 
   mockDataSearch.search.mockReturnValue(
     of({
@@ -175,6 +185,68 @@ describe('useDataStreamStats', () => {
       expect(typeof result.current.refresh).toBe('function');
     });
 
+    it('includes time series count when available', async () => {
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve(mockFailureStoreStats);
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.resolve({ timeSeriesCount: 12 });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+      });
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: mockDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+
+      expect(result.current.stats?.ds.stats.timeSeriesCount).toBe(12);
+    });
+
+    it('does not request time series count when index mode is not time_series', async () => {
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve(mockFailureStoreStats);
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.reject(new Error('time series count should not be requested'));
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+      });
+
+      const nonTimeSeriesDefinition = {
+        ...mockDefinition,
+        index_mode: 'standard',
+      };
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: nonTimeSeriesDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+
+      expect(result.current.stats?.ds.stats.timeSeriesCount).toBeUndefined();
+      expect(
+        mockStreamsRepositoryClient.fetch.mock.calls.map(([endpoint]) => endpoint)
+      ).not.toContain('GET /internal/streams/{name}/time_series/_count');
+    });
+
     it('should handle zero documents gracefully', async () => {
       const statsWithZeroDocs = {
         ...mockDataStreamStats,
@@ -186,9 +258,19 @@ describe('useDataStreamStats', () => {
         dataStreamsStats: [statsWithZeroDocs],
       });
 
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        ...mockFailureStoreStats,
-        stats: { ...mockFailureStoreStats.stats, count: 0, size: 0 },
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve({
+            ...mockFailureStoreStats,
+            stats: { ...mockFailureStoreStats.stats, count: 0, size: 0 },
+          });
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.resolve({ timeSeriesCount: null });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
       });
 
       mockDataSearch.search.mockReturnValue(
@@ -240,8 +322,16 @@ describe('useDataStreamStats', () => {
     });
 
     it('should handles disabled failure store', async () => {
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        stats: null,
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve({ stats: null });
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.resolve({ timeSeriesCount: null });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
       });
 
       const definitionWithDisabledFS = {

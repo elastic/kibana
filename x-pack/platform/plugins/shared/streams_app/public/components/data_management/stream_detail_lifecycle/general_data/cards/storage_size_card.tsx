@@ -39,15 +39,29 @@ export const StorageSizeCard = ({
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: hasMonitorPrivileges
-        ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
-            defaultMessage: '{totalDocs} documents',
-            values: {
-              totalDocs:
-                statsError || !stats || stats.totalDocs === undefined
-                  ? '-'
-                  : formatNumber(stats.totalDocs, '0,0'),
-            },
-          })
+        ? typeof stats?.timeSeriesCount === 'number'
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docsAndTimeSeries', {
+              defaultMessage: '{totalDocs} documents · {timeSeriesCount} time series',
+              values: {
+                totalDocs:
+                  statsError || !stats || stats.totalDocs === undefined
+                    ? '-'
+                    : formatNumber(stats.totalDocs, '0,0'),
+                timeSeriesCount:
+                  statsError || !stats || stats.timeSeriesCount === undefined
+                    ? '-'
+                    : formatNumber(stats.timeSeriesCount, '0,0'),
+              },
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
+              defaultMessage: '{totalDocs} documents',
+              values: {
+                totalDocs:
+                  statsError || !stats || stats.totalDocs === undefined
+                    ? '-'
+                    : formatNumber(stats.totalDocs, '0,0'),
+              },
+            })
         : null,
       'data-test-subj': 'storageSize',
     },

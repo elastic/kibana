@@ -13,7 +13,8 @@ import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
 
 const createMockStats = (
   totalDocs: number | undefined,
-  sizeBytes: number = 1000000 // 1MB
+  sizeBytes: number = 1000000, // 1MB
+  timeSeriesCount?: number
 ): DataStreamStats => ({
   name: 'test-stream',
   userPrivileges: {
@@ -22,6 +23,7 @@ const createMockStats = (
     canManageFailureStore: true,
   },
   totalDocs,
+  timeSeriesCount,
   sizeBytes,
   creationDate: 1672531200000,
   size: '1.0 MB',
@@ -40,6 +42,16 @@ describe('StorageSizeCard', () => {
       expect(screen.getByTestId('storageSize-title')).toBeInTheDocument();
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent(/2\.0\s?MB/);
       expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('500 documents');
+    });
+
+    it('renders document and time series counts when available', () => {
+      const stats = createMockStats(500, 2048576, 12);
+
+      renderWithI18n(<StorageSizeCard hasMonitorPrivileges={true} stats={stats} />);
+
+      expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent(
+        '500 documents · 12 time series'
+      );
     });
 
     it('falls back to dash when there is a stats error', () => {
