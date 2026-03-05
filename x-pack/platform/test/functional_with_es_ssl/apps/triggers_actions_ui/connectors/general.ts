@@ -78,6 +78,82 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       objectRemover.add(connector.id, 'connector', 'actions');
     });
 
+    it('should create a connector with a custom user-defined ID', async () => {
+      const connectorName = generateUniqueKey();
+      const customConnectorId = `custom-${generateUniqueKey()}`;
+
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+      await testSubjects.click('.slack-card');
+
+      await testSubjects.setValue('nameInput', connectorName);
+
+      // Set custom connector ID
+      await testSubjects.setValue('connectorIdInput', customConnectorId);
+
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+
+      await find.clickByCssSelector(
+        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
+      );
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created '${connectorName}'`);
+
+      // Verify the connector was created with the custom ID
+      const connector = await getConnectorByName(connectorName, supertest);
+      expect(connector.id).to.eql(customConnectorId);
+      objectRemover.add(connector.id, 'connector', 'actions');
+    });
+
+    it('should auto-populate connector ID from name', async () => {
+      const connectorName = 'My Test Connector';
+
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+      await testSubjects.click('.slack-card');
+
+      await testSubjects.setValue('nameInput', connectorName);
+
+      // Verify the connector ID was auto-populated
+      const connectorIdInput = await testSubjects.find('connectorIdInput');
+      const autoPopulatedId = await connectorIdInput.getAttribute('value');
+      expect(autoPopulatedId).to.eql('my-test-connector');
+
+      // Close without saving
+      await testSubjects.click('create-connector-flyout-close-btn');
+    });
+
+    it('should show connector ID as disabled when editing an existing connector', async () => {
+      const connectorName = generateUniqueKey();
+      const createdConnector = await createSlackConnector({
+        name: connectorName,
+        getService,
+      });
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
+      await browser.refresh();
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+      await retry.try(async () => {
+        const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResults.length).to.eql(1);
+      });
+
+      // Open edit flyout
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      // Verify connector ID field is disabled
+      const connectorIdInput = await testSubjects.find('connectorIdInput');
+      const isDisabled = await connectorIdInput.getAttribute('disabled');
+      expect(isDisabled).to.eql('true');
+
+      // Verify it shows the actual connector ID
+      const connectorIdValue = await connectorIdInput.getAttribute('value');
+      expect(connectorIdValue).to.eql(createdConnector.id);
+
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;

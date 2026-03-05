@@ -27,7 +27,7 @@ describe('ConnectorFormFieldsGlobal', () => {
   it('submits correctly', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
-        <ConnectorFormFieldsGlobal canSave={true} />
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
       </FormTestProvider>
     );
 
@@ -57,7 +57,7 @@ describe('ConnectorFormFieldsGlobal', () => {
        * is empty.
        */
       <FormTestProvider onSubmit={onSubmit}>
-        <ConnectorFormFieldsGlobal canSave={true} />
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
       </FormTestProvider>
     );
 

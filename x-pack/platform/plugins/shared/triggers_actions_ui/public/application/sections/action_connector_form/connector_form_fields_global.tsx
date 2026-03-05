@@ -16,14 +16,11 @@ import {
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
-import {
-  toConnectorIdentifier,
-  isValidConnectorIdentifier,
-} from '../../lib/connector_identifier_utils';
+import { toSlugIdentifier, isValidSlugIdentifier } from '@kbn/std';
 
 interface ConnectorFormData {
   name: string;
-  id?: string;
+  id: string;
 }
 
 interface ConnectorFormFieldsProps {
@@ -60,14 +57,23 @@ const idConfig = (isEdit: boolean): FieldConfig<{ id: string }, ConnectorFormDat
         defaultMessage: 'The connector ID cannot be changed after creation.',
       })
     : i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldHelpText', {
-        defaultMessage:
-          'A unique identifier for this connector. If left empty, an ID will be generated automatically.',
+        defaultMessage: 'A unique identifier for this connector.',
       }),
   validations: [
     {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredIdText',
+          {
+            defaultMessage: 'Connector ID is required.',
+          }
+        )
+      ),
+    },
+    {
       validator: ({ value }) => {
         if (!value || typeof value !== 'string') return;
-        if (!isValidConnectorIdentifier(value)) {
+        if (!isValidSlugIdentifier(value)) {
           return {
             message: i18n.translate(
               'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidIdFormat',
@@ -89,18 +95,18 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
 }) => {
   const { setFieldValue } = useFormContext();
   const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name'] });
-  const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false); // for changes made by the user
+  const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
 
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
-      setFieldValue('id', toConnectorIdentifier(name));
+      setFieldValue('id', toSlugIdentifier(name));
     }
   }, [name, isEdit, setFieldValue, usingCustomIdentifier]);
 
   const handleIdChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
-      const expectedValue = toConnectorIdentifier(name || '');
+      const expectedValue = toSlugIdentifier(name || '');
       setUsingCustomIdentifier(newValue !== expectedValue);
       setFieldValue('id', newValue);
     },
@@ -131,14 +137,6 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
             fullWidth: true,
             onChange: handleIdChange,
           },
-          // labelAppend: !isEdit ? (
-          //   <EuiText color="subdued" size="xs">
-          //     <FormattedMessage
-          //       id="xpack.triggersActionsUI.sections.actionConnectorForm.optionalLabel"
-          //       defaultMessage="Optional"
-          //     />
-          //   </EuiText>
-          // ) : undefined,
         }}
       />
     </>

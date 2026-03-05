@@ -94,6 +94,7 @@
     "@kbn/kql",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/deeplinks-observability",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

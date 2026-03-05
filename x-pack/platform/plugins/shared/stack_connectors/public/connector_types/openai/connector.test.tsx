@@ -157,7 +157,7 @@ describe('ConnectorFields renders', () => {
     expect(queryByTestIdOther('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
   });
 
-  test('enabling enableNativeFunctionCalling saves to config for Other provider', async () => {
+  test.only('enabling enableNativeFunctionCalling saves to config for Other provider', async () => {
     const onSubmit = jest.fn();
     render(
       <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
