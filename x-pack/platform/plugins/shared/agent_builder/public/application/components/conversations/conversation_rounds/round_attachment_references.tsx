@@ -168,7 +168,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   return (
     <EuiFlexGroup
       gutterSize="s"
-      wrap
+      direction="column"
       responsive={false}
       justifyContent={justifyContent}
       role="list"

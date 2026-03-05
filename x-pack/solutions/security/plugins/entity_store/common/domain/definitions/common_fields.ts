@@ -28,6 +28,24 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.environment' }),
   newestValue({ source: 'asset.criticality' }),
   newestValue({ source: 'asset.business_unit' }),
+  newestValue({
+    source: `${ecsField}.risk.calculated_level`,
+    destination: 'entity.risk.calculated_level',
+  }),
+  newestValue({
+    source: `${ecsField}.risk.calculated_score`,
+    destination: 'entity.risk.calculated_score',
+    mapping: {
+      type: 'float',
+    },
+  }),
+  newestValue({
+    source: `${ecsField}.risk.calculated_score_norm`,
+    destination: 'entity.risk.calculated_score_norm',
+    mapping: {
+      type: 'float',
+    },
+  }),
 ];
 
 export const getEntityFieldsDescriptions = (rootField?: EntityType) => {

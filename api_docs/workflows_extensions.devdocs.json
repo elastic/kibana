@@ -102,39 +102,6 @@
         "children": [
           {
             "parentPluginId": "workflowsExtensions",
-            "id": "def-public.PublicStepDefinition.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [
-              "\nUser-facing label/title for this step type.\nDisplayed in the UI when selecting or viewing steps."
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 40,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-public.PublicStepDefinition.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [
-              "\nUser-facing description of what this step does.\nDisplayed as help text or in tooltips."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 46,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
             "id": "def-public.PublicStepDefinition.icon",
             "type": "CompoundType",
             "tags": [],
@@ -146,57 +113,7 @@
               "React.ComponentType | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 52,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-public.PublicStepDefinition.documentation",
-            "type": "Object",
-            "tags": [],
-            "label": "documentation",
-            "description": [
-              "\nDocumentation for the step, including details, and examples."
-            ],
-            "signature": [
-              {
-                "pluginId": "workflowsExtensions",
-                "scope": "public",
-                "docId": "kibWorkflowsExtensionsPluginApi",
-                "section": "def-public.StepDocumentation",
-                "text": "StepDocumentation"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 60,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-public.PublicStepDefinition.actionsMenuGroup",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "actionsMenuGroup",
-            "description": [
-              "\nThe catalog under which the step is displayed in the actions menu\nDefault value is `kibana`"
-            ],
-            "signature": [
-              {
-                "pluginId": "workflowsExtensions",
-                "scope": "public",
-                "docId": "kibWorkflowsExtensionsPluginApi",
-                "section": "def-public.ActionsMenuGroup",
-                "text": "ActionsMenuGroup"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -215,7 +132,7 @@
               "<Input, Output, Config> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -366,8 +283,8 @@
         "description": [
           "\nDocumentation information for a workflow step."
         ],
-        "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-        "lineNumber": 131,
+        "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -384,8 +301,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 135,
+            "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -402,8 +319,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 141,
+            "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -420,8 +337,8 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 147,
+            "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -520,24 +437,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "workflowsExtensions",
-        "id": "def-public.ActionsMenuGroup",
-        "type": "Enum",
-        "tags": [],
-        "label": "ActionsMenuGroup",
-        "description": [
-          "\nThe catalog under which the step is displayed in the actions menu"
-        ],
-        "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-        "lineNumber": 120,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [],
     "objects": [],
     "setup": {
@@ -550,7 +450,7 @@
         "\nPublic-side plugin setup contract.\nExposes methods for other plugins to register public-side step and trigger definitions."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 15,
+      "lineNumber": 23,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -568,17 +468,11 @@
           ],
           "signature": [
             "<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = z.ZodType, Config extends z.ZodObject = z.ZodObject>(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "public",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-public.PublicStepDefinition",
-              "text": "PublicStepDefinition"
-            },
+            "PublicStepDefinitionOrLoader",
             "<Input, Output, Config>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 21,
+          "lineNumber": 28,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -586,24 +480,18 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-public.WorkflowsExtensionsPublicPluginSetup.registerStepDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
-                "- The public-side step definition"
+                "- The public-side step definition, or a function that returns a promise of the definition (e.g. for dynamic imports)"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "public",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-public.PublicStepDefinition",
-                  "text": "PublicStepDefinition"
-                },
+                "PublicStepDefinitionOrLoader",
                 "<Input, Output, Config>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 33,
+              "lineNumber": 40,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -635,7 +523,7 @@
             "<EventSchema>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-          "lineNumber": 36,
+          "lineNumber": 43,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -660,7 +548,7 @@
                 "<EventSchema>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-              "lineNumber": 45,
+              "lineNumber": 52,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -693,10 +581,11 @@
           "text": "PublicStepDefinition"
         },
         "<z.ZodType, z.ZodType, z.ZodObject>> & ",
-        "TriggerRegistryStartContract"
+        "TriggerRegistryStartContract",
+        " & { isReady(): Promise<void>; }"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
-      "lineNumber": 58,
+      "lineNumber": 65,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -954,7 +843,7 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 60,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -977,7 +866,7 @@
               "<Input, Output, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1075,12 +964,37 @@
                   "<Input, Config>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-                "lineNumber": 100,
+                "lineNumber": 112,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.ServerStepDefinition.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [
+              "\nOptional cancellation cleanup handler.\n\nCalled after the step's abort signal fires and `run()` completes, giving the\nstep a guaranteed cleanup entry point (e.g. cancelling spawned child operations).\nOnly invoked when the workflow is being cancelled — normal completions skip it.\n\nImplementations must be idempotent. Errors thrown here are logged but do not\ndisrupt the cancellation flow."
+            ],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.OnCancelHandler",
+                "text": "OnCancelHandler"
+              },
+              "<Input, Config> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1105,7 +1019,7 @@
           "<TInput, TConfig>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 102,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1123,7 +1037,7 @@
               "z.infer<TInput>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1141,7 +1055,7 @@
               "z.infer<TConfig>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1159,7 +1073,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 117,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1177,7 +1091,7 @@
               "ContextManager"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1195,7 +1109,7 @@
               "{ debug(message: string, meta?: object | undefined): void; info(message: string, meta?: object | undefined): void; warn(message: string, meta?: object | undefined): void; error(message: string, error?: Error | undefined): void; }"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 128,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1213,7 +1127,7 @@
               "AbortSignal"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1228,7 +1142,7 @@
               "\nCurrent step's ID"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 143,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1243,7 +1157,7 @@
               "\nCurrent step's type"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 148,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1271,7 +1185,7 @@
           "<TOutput>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 181,
+        "lineNumber": 203,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1289,7 +1203,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 185,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1307,7 +1221,7 @@
               "Error | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 190,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1399,6 +1313,59 @@
     "misc": [
       {
         "parentPluginId": "workflowsExtensions",
+        "id": "def-server.OnCancelHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "OnCancelHandler",
+        "description": [
+          "\nCancellation cleanup handler for custom workflow steps.\nReceives the same context as the main handler so it has access to input,\nconfig, and runtime services needed for cleanup."
+        ],
+        "signature": [
+          "(context: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.StepHandlerContext",
+            "text": "StepHandlerContext"
+          },
+          "<Input, Config>) => void | Promise<void>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.OnCancelHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.StepHandlerContext",
+                "text": "StepHandlerContext"
+              },
+              "<Input, Config>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 6,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
         "id": "def-server.ServerTriggerDefinition",
         "type": "Type",
         "tags": [],
@@ -1452,7 +1419,7 @@
           "<Output>>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 89,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1480,7 +1447,7 @@
               "<Input, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 112,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
@@ -1660,103 +1627,6 @@
     "interfaces": [
       {
         "parentPluginId": "workflowsExtensions",
-        "id": "def-common.CommonStepDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "CommonStepDefinition",
-        "description": [
-          "\nCommon step definition fields shared between server and public.\nInput and output types are automatically inferred from the schemas."
-        ],
-        "signature": [
-          {
-            "pluginId": "workflowsExtensions",
-            "scope": "common",
-            "docId": "kibWorkflowsExtensionsPluginApi",
-            "section": "def-common.CommonStepDefinition",
-            "text": "CommonStepDefinition"
-          },
-          "<InputSchema, OutputSchema, ConfigSchema>"
-        ],
-        "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-        "lineNumber": 12,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-common.CommonStepDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nUnique identifier for this step type.\nShould follow a namespaced format (e.g., \"custom.myStep\", \"plugin.feature.step\")."
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-common.CommonStepDefinition.inputSchema",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "inputSchema",
-            "description": [
-              "\nZod schema for validating step input.\nDefines the structure and validation rules for the step's input parameters.\nThe input type is automatically inferred from this schema."
-            ],
-            "signature": [
-              "InputSchema"
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-            "lineNumber": 27,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-common.CommonStepDefinition.outputSchema",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "outputSchema",
-            "description": [
-              "\nZod schema for validating step output.\nDefines the structure and validation rules for the step's output.\nThe output type is automatically inferred from this schema."
-            ],
-            "signature": [
-              "OutputSchema"
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-            "lineNumber": 34,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsExtensions",
-            "id": "def-common.CommonStepDefinition.configSchema",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "configSchema",
-            "description": [
-              "\nZod schema for validating step config properties.\nDefines config properties that appear at the step level (outside the `with` block).\nExample: `agent-id` for agent.call step."
-            ],
-            "signature": [
-              "ConfigSchema | undefined"
-            ],
-            "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
-            "lineNumber": 41,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsExtensions",
         "id": "def-common.CommonTriggerDefinition",
         "type": "Interface",
         "tags": [],
@@ -1821,6 +1691,32 @@
     "misc": [
       {
         "parentPluginId": "workflowsExtensions",
+        "id": "def-common.CommonStepDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "CommonStepDefinition",
+        "description": [
+          "\nCommon step definition fields shared between server and public.\nExtends BaseStepDefinition from @kbn/workflows with the same generic schema triple.\nInput and output types are automatically inferred from the schemas."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.BaseStepDefinition",
+            "text": "BaseStepDefinition"
+          },
+          "<InputSchema, OutputSchema, ConfigSchema>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
         "id": "def-common.DataMapStepTypeId",
         "type": "string",
         "tags": [],
@@ -1830,7 +1726,7 @@
           "\"data.map\""
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/common/steps/data/data_map_step.ts",
-        "lineNumber": 13,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

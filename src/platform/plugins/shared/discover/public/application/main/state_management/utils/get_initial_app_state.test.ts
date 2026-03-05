@@ -75,6 +75,7 @@ describe('getInitialAppState', () => {
         },
       }),
       services,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -120,6 +121,7 @@ describe('getInitialAppState', () => {
         },
       }),
       services,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -175,7 +177,10 @@ describe('getInitialAppState', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -217,7 +222,10 @@ describe('getInitialAppState', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -232,6 +240,7 @@ describe('getInitialAppState', () => {
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
+      currentDataView: undefined,
     });
 
   test('should set view mode correctly', () => {

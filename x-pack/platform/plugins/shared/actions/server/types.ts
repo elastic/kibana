@@ -97,6 +97,7 @@ export interface ActionTypeExecutorOptions<
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
+  signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
 }

@@ -33,6 +33,7 @@ export const generateExecutorFunction = ({
       params,
       secrets,
       logger,
+      signal,
       authMode,
       profileUid,
     } = execOptions;
@@ -43,6 +44,7 @@ export const generateExecutorFunction = ({
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
       secrets,
+      signal,
       authMode,
       profileUid,
     });
