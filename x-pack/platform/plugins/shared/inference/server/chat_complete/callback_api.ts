@@ -136,7 +136,7 @@ export function createChatCompleteCallbackApi({
         abortSignal,
         stream,
         namespace,
-        anonymization
+        anonymization,
       })
     ).pipe(
       retryWithExponentialBackoff({
