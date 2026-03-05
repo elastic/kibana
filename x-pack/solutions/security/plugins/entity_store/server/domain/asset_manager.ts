@@ -199,7 +199,7 @@ export class AssetManager {
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
       const engines = await this.engineDescriptorClient.getAll();
-      const status = this.calculateEntityStoreStatus(engines);
+      const status = getEntityStoreStatus(engines);
 
       if (withComponents) {
         const enginesWithComponents = await Promise.all(
@@ -440,18 +440,19 @@ export class AssetManager {
       return false;
     }
   }
-
-  private calculateEntityStoreStatus(engines: EngineDescriptor[]): EntityStoreStatus {
-    if (engines.length === 0) {
-      return ENTITY_STORE_STATUS.NOT_INSTALLED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
-      return ENTITY_STORE_STATUS.ERROR;
-    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
-      return ENTITY_STORE_STATUS.STOPPED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
-      return ENTITY_STORE_STATUS.INSTALLING;
-    }
-
-    return ENTITY_STORE_STATUS.RUNNING;
-  }
 }
+
+export const getEntityStoreStatus = (engines: EngineDescriptor[]): EntityStoreStatus => {
+  if (engines.length === 0) return ENTITY_STORE_STATUS.NOT_INSTALLED;
+
+  const hasStatus = (s: EngineDescriptor['status']) => engines.some(({ status }) => status === s);
+  const allStatus = (s: EngineDescriptor['status']) => engines.every(({ status }) => status === s);
+
+  if (hasStatus(ENGINE_STATUS.ERROR)) return ENTITY_STORE_STATUS.ERROR;
+
+  if (hasStatus(ENGINE_STATUS.INSTALLING)) return ENTITY_STORE_STATUS.INSTALLING;
+
+  if (allStatus(ENGINE_STATUS.STOPPED)) return ENTITY_STORE_STATUS.STOPPED;
+
+  return ENTITY_STORE_STATUS.RUNNING;
+};

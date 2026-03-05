@@ -15,6 +15,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
@@ -35,6 +36,7 @@ export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EntityStoreStartPlugins {
