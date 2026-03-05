@@ -47,7 +47,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isConnectorTypeDeprecated: boolean;
   source?: ActionTypeSource;
   authMode?: 'shared' | 'per-user';
-  currentUserConnectionStatus: 'connected' | 'not_connected' | 'not_applicable';
+  currentUserConnectionStatus?: 'connected' | 'not_connected' | 'not_applicable';
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
