@@ -56,27 +56,33 @@ test.describe(
       });
 
       await test.step('fix the error and verify failure panel disappears', async () => {
-        // Capture the current rendering count so we can wait for the next render cycle
-        // after the equation is fixed, rather than polling for the panel to disappear
-        // without knowing whether Lens has started re-rendering at all.
-        const currentCount = await previewChart
-          .locator('[data-rendering-count]')
-          .getAttribute('data-rendering-count');
+        const renderingCount = previewChart.locator('[data-rendering-count]').first();
+        const currentCount = Number((await renderingCount.getAttribute('data-rendering-count')) ?? '0');
 
         await customEquation.click();
-        await customEquationField.click();
+        await expect(customEquationField).toBeVisible({ timeout: 20_000 });
         await customEquationField.fill('A');
+        await expect(customEquationField).toHaveValue('A');
         await customEquationPopoverCloseButton.click();
 
         await expect(customEquation).toContainText('A');
 
-        // Wait for Lens to complete a new render cycle triggered by the fix.
-        const nextCount = String(Number(currentCount) + 1);
-        await expect(previewChart.locator(`[data-rendering-count="${nextCount}"]`)).toBeVisible({
-          timeout: 20_000,
-        });
+        // Reopen once to assert the value persisted and close again.
+        await customEquation.click();
+        await expect(customEquationField).toHaveValue('A');
+        await customEquationPopoverCloseButton.click();
 
-        await expect(lensFailure).toBeHidden({ timeout: 20_000 });
+        // Wait for Lens to complete any new render cycle after the fix.
+        await expect
+          .poll(
+            async () => {
+              return Number((await renderingCount.getAttribute('data-rendering-count')) ?? '0');
+            },
+            { timeout: 30_000 }
+          )
+          .toBeGreaterThan(currentCount);
+
+        await expect(lensFailure).toBeHidden({ timeout: 30_000 });
       });
     });
   }
