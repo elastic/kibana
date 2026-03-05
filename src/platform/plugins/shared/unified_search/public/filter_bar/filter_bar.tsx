@@ -207,6 +207,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onClick={onToggleCollapse}
           color="text"
           aria-expanded={!isCollapsed}
+          size="xs"
         >
           {filtersAppliedLabel}
         </EuiButtonEmpty>

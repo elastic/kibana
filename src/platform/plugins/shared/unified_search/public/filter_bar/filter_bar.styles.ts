@@ -14,6 +14,7 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
   return {
     filterBarWrapperCollaped: css`
       margin-bottom: -${euiTheme.size.s};
+      padding: ${euiTheme.size.xs} 0;
     `,
     filterBarWrapperExpanded: css`
       & .euiButtonIcon {
