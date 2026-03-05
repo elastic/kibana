@@ -61,7 +61,7 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ position = 'fixed' }
       <HeaderExtension
         containerClassName="header__topBannerContainer"
         display="block"
-        extension={headerBanner.content}
+        extension={headerBanner.content ?? headerBanner.mount}
       />
     </div>
   );

@@ -58,13 +58,13 @@ describe('Header', () => {
     act(() => {
       deps.breadcrumbsAppendExtensions$.next([
         {
-          content: (root: HTMLDivElement) => {
+          mount: (root: HTMLDivElement) => {
             root.innerHTML = '<div class="my-extension1">__render__</div>';
             return () => (root.innerHTML = '');
           },
         } as ChromeBreadcrumbsAppendExtension,
         {
-          content: (root: HTMLDivElement) => {
+          mount: (root: HTMLDivElement) => {
             root.innerHTML = '<div class="my-extension2">__render__</div>';
             return () => (root.innerHTML = '');
           },
