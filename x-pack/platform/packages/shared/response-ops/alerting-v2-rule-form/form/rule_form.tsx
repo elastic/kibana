@@ -13,6 +13,7 @@ import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_gro
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RuleFormServicesProvider, type RuleFormServices } from './contexts';
+import { AttacmentRunbookGroup } from './field_groups/attachment_runbook_group';
 
 export type { RuleFormServices } from './contexts';
 
@@ -44,6 +45,8 @@ export const RuleForm: React.FC<RuleFormProps> = ({ formId, services, onSubmit }
         <RuleDetailsFieldGroup />
         <EuiSpacer size="m" />
         <RuleExecutionFieldGroup />
+        <EuiSpacer size="m" />
+        <AttacmentRunbookGroup />
       </EuiForm>
     </RuleFormServicesProvider>
   );
