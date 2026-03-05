@@ -13,12 +13,17 @@ import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-inter
 import { map } from 'rxjs';
 import { AsyncLocalStorage } from 'async_hooks';
 import type { TrackUserActionParams } from '@kbn/core-user-activity-server';
-import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
+import {
+  config as userActivityConfig,
+  type UserActivityConfigType,
+  type UserActivityFiltersType,
+} from './user_activity_config';
 import type {
   InjectedContext,
   InternalUserActivityServiceSetup,
   InternalUserActivityServiceStart,
 } from './types';
+import { shouldLog } from './user_activity_filters';
 
 /** @internal */
 interface UserActivitySetupDeps {
@@ -35,6 +40,7 @@ export class UserActivityService
 {
   private readonly logger: Logger;
   private enabled = false;
+  private filters: UserActivityFiltersType = [];
   private readonly injectedContextAsyncStorage: AsyncLocalStorage<InjectedContext>;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -49,6 +55,7 @@ export class UserActivityService
 
     config$.subscribe((config) => {
       this.enabled = config.enabled;
+      this.filters = config.filters;
     });
 
     logging.configure(
@@ -85,7 +92,7 @@ export class UserActivityService
   }
 
   private trackUserAction = ({ message, event, object }: TrackUserActionParams) => {
-    if (!this.enabled) return;
+    if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
 

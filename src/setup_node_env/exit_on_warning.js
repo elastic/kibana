@@ -54,6 +54,13 @@ var IGNORE_WARNINGS = [
     message:
       'The URL https://github.com:crypto-browserify/browserify-rsa.git is invalid. Future versions of Node.js will throw an error.',
   },
+  // cliui has a malformed repository URL in its package.json
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0170',
+    message:
+      'The URL git+ssh://git@github.com:isaacs/cliui is invalid. Future versions of Node.js will throw an error.',
+  },
   // supertest in HTTP2 mode uses 0.0.0.0 as the server's name
   {
     name: 'DeprecationWarning',

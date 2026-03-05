@@ -35,6 +35,14 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
+    '.pagerduty-v2',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
+    '.pagerduty',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
     '.brave-search',
     lazy(
       () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
@@ -56,6 +64,10 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
         )
     ),
+  ],
+  [
+    '.salesforce',
+    lazy(() => import(/* webpackChunkName: "connectorIconSalesforce" */ './specs/salesforce/icon')),
   ],
   [
     '.abuseipdb',
@@ -95,6 +107,11 @@ export const ConnectorIconsMap: Map<
     '.azure-blob',
     lazy(() => import(/* webpackChunkName: "connectorIconazureblob" */ './specs/azure_blob/icon')),
   ],
+  [
+    '.firecrawl',
+    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
+  ],
+  ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
     '.zendesk',
     lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
