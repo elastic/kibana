@@ -159,11 +159,8 @@ const getPreviewDataObservable = (
 
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
 
-  return combineLatest([
-    tabRuntimeState.dataStateContainer$,
-    tabRuntimeState.currentDataView$,
-  ]).pipe(
-    switchMap(([dataStateContainer]) => {
+  return tabRuntimeState.dataStateContainer$.pipe(
+    switchMap((dataStateContainer) => {
       if (!dataStateContainer) {
         const derivedDataViewName = getDataViewNameFromInitialInternalState(
           tabState.initialInternalState,

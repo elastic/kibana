@@ -44,14 +44,13 @@ import { defaultCustomizationContext } from './defaults';
 
 const customizationContext = createContext(createCustomizationService());
 
-const discoverCustomizationContextContext = createContext<DiscoverCustomizationContext>(
+const discoverCustomizationCtx = createContext<DiscoverCustomizationContext>(
   defaultCustomizationContext
 );
 
-export const DiscoverCustomizationContextProvider = discoverCustomizationContextContext.Provider;
+export const DiscoverCustomizationContextProvider = discoverCustomizationCtx.Provider;
 
-export const useDiscoverCustomizationContext = () =>
-  useContext(discoverCustomizationContextContext);
+export const useDiscoverCustomizationContext = () => useContext(discoverCustomizationCtx);
 
 export const DiscoverCustomizationProvider = customizationContext.Provider;
 
@@ -123,7 +122,7 @@ export const getExtendedDiscoverStateContainer = ({
     });
   },
   getCurrentTabDataView$: () =>
-    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataView$,
+    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataView$.asObservable(),
   internalActions: {
     setAppState: internalStateActions.setAppState,
     updateGlobalState: internalStateActions.updateGlobalState,

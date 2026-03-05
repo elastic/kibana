@@ -203,7 +203,9 @@ export const useCurrentTabDataStateContainer = () => {
   );
 
   if (!dataStateContainer) {
-    throw new Error('dataStateContainer not initialized');
+    throw new Error(
+      `dataStateContainer not initialized for tab "${currentTabId}". Did you call initializeSingleTab?`
+    );
   }
 
   return dataStateContainer;

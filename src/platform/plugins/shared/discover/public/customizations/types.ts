@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -60,9 +60,9 @@ export interface ExtendedDiscoverStateContainer {
    */
   getSavedSearchFromCurrentTab: () => Promise<SavedSearch>;
   /**
-   * Returns the BehaviorSubject for the current tab's data view
+   * Returns an observable for the current tab's data view (read-only)
    */
-  getCurrentTabDataView$: () => BehaviorSubject<DataView | undefined>;
+  getCurrentTabDataView$: () => Observable<DataView | undefined>;
   /**
    * A selection of provided Redux actions from the internal state
    */

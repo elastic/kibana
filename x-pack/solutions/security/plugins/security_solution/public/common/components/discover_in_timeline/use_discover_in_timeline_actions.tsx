@@ -122,9 +122,19 @@ export const useDiscoverInTimelineActions = (
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          const discoverDispatch = discoverStateContainer.current?.internalState.dispatch;
-          const injectCurrentTab = discoverStateContainer.current?.injectCurrentTab;
-          const internalActions = discoverStateContainer.current?.internalActions;
+          const currentContainer = discoverStateContainer.current;
+
+          if (
+            !currentContainer?.internalState?.dispatch ||
+            !currentContainer?.injectCurrentTab ||
+            !currentContainer?.internalActions
+          ) {
+            return;
+          }
+
+          const discoverDispatch = currentContainer.internalState.dispatch;
+          const injectCurrentTab = currentContainer.injectCurrentTab;
+          const internalActions = currentContainer.internalActions;
 
           discoverDispatch(injectCurrentTab(internalActions.stopSyncing)());
           discoverDispatch(injectCurrentTab(internalActions.initializeAndSync)());
