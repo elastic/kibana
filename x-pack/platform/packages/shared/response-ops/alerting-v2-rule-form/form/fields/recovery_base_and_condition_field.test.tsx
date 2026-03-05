@@ -13,41 +13,20 @@ import type { UseFormReturn } from 'react-hook-form';
 import { RecoveryBaseAndConditionField } from './recovery_base_and_condition_field';
 import { createFormWrapper } from '../../test_utils';
 import type { FormValues } from '../types';
+import type { useRecoveryValidation } from '../hooks/use_recovery_validation';
 
 // Capture the latest props passed to WhereClauseEditor
-let capturedWhereClauseRules:
-  | { validate?: (value: string | undefined) => string | boolean }
-  | undefined;
-let capturedWhereClauseBaseQuery: string | undefined;
+let capturedWhereClauseProps: Record<string, unknown> | undefined;
 
 jest.mock('./where_clause_editor', () => ({
-  WhereClauseEditor: (props: {
-    dataTestSubj?: string;
-    name: string;
-    baseQuery?: string;
-    rules?: { validate?: (value: string | undefined) => string | boolean };
-  }) => {
-    capturedWhereClauseRules = props.rules;
-    capturedWhereClauseBaseQuery = props.baseQuery;
+  WhereClauseEditor: (props: Record<string, unknown>) => {
+    capturedWhereClauseProps = props;
     return (
-      <div data-test-subj={props.dataTestSubj ?? 'mockWhereClauseEditor'}>
-        Where Clause Editor ({props.name})
+      <div data-test-subj={(props.dataTestSubj as string) ?? 'mockWhereClauseEditor'}>
+        Where Clause Editor ({props.name as string})
       </div>
     );
   },
-}));
-
-// Mock useRecoveryQueryValidation for grouping validation
-let mockGroupingValidationError: string | undefined;
-jest.mock('../hooks/use_recovery_query_validation', () => ({
-  useRecoveryQueryValidation: () => ({
-    validationError: mockGroupingValidationError,
-    missingColumns: [],
-    isValidating: false,
-    queryColumns: [],
-    queryError: undefined,
-    recoveryColumns: [],
-  }),
 }));
 
 // Capture props passed to RecoveryBaseQueryField (used for the optional base query editor)
@@ -72,16 +51,34 @@ const FormRefCapture: React.FC = () => {
   return null;
 };
 
+const createMockValidation = (
+  overrides: Partial<ReturnType<typeof useRecoveryValidation>> = {}
+): ReturnType<typeof useRecoveryValidation> => ({
+  hasEvaluationCondition: true,
+  effectiveBaseQuery: 'FROM logs | STATS count() BY host',
+  assembledEvaluationQuery: 'FROM logs | STATS count() BY host | WHERE count > 100',
+  assembledRecoveryQuery: '',
+  recoveryMatchesEvaluation: false,
+  evaluationBaseQuery: 'FROM logs | STATS count() BY host',
+  evaluationCondition: 'WHERE count > 100',
+  recoveryBaseQuery: undefined,
+  recoveryCondition: undefined,
+  groupingValidationError: undefined,
+  fullBaseQueryRules: { required: 'Recovery query is required.', validate: () => true },
+  splitBaseQueryRules: { validate: () => true },
+  conditionRules: { validate: () => true },
+  ...overrides,
+});
+
 describe('RecoveryBaseAndConditionField', () => {
   beforeEach(() => {
-    capturedWhereClauseRules = undefined;
-    capturedWhereClauseBaseQuery = undefined;
-    mockGroupingValidationError = undefined;
+    capturedWhereClauseProps = undefined;
     capturedRecoveryBaseQueryFieldProps = undefined;
     formRef = undefined;
   });
 
   it('renders the WHERE clause editor targeting recoveryPolicy.query.condition', () => {
+    const validation = createMockValidation();
     const Wrapper = createFormWrapper({
       recoveryPolicy: { type: 'query' },
       evaluation: {
@@ -94,7 +91,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
     render(
       <Wrapper>
-        <RecoveryBaseAndConditionField />
+        <RecoveryBaseAndConditionField validation={validation} />
       </Wrapper>
     );
 
@@ -104,8 +101,12 @@ describe('RecoveryBaseAndConditionField', () => {
     ).toBeInTheDocument();
   });
 
-  describe('Add base recovery query button', () => {
-    it('shows "+ Add base recovery query" button when no recovery base query is set', () => {
+  describe('prop pass-through', () => {
+    it('passes conditionRules to WhereClauseEditor', () => {
+      const mockValidate = jest.fn(() => true as const);
+      const validation = createMockValidation({
+        conditionRules: { validate: mockValidate },
+      });
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -118,7 +119,88 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
+        </Wrapper>
+      );
+
+      const rules = capturedWhereClauseProps?.rules as { validate?: Function };
+      expect(rules?.validate).toBe(mockValidate);
+    });
+
+    it('passes effectiveBaseQuery to WhereClauseEditor as baseQuery', () => {
+      const validation = createMockValidation({
+        effectiveBaseQuery: 'FROM custom-index | STATS avg(val) BY key',
+      });
+      const Wrapper = createFormWrapper({
+        recoveryPolicy: { type: 'query' },
+        evaluation: {
+          query: {
+            base: 'FROM logs | STATS count() BY host',
+            condition: 'WHERE count > 100',
+          },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <RecoveryBaseAndConditionField validation={validation} />
+        </Wrapper>
+      );
+
+      expect(capturedWhereClauseProps?.baseQuery).toBe('FROM custom-index | STATS avg(val) BY key');
+    });
+
+    it('passes splitBaseQueryRules to RecoveryBaseQueryField when base query is visible', async () => {
+      const user = userEvent.setup();
+      const mockValidate = jest.fn(() => true as const);
+      const validation = createMockValidation({
+        splitBaseQueryRules: { validate: mockValidate },
+      });
+      const Wrapper = createFormWrapper({
+        recoveryPolicy: { type: 'query' },
+        evaluation: {
+          query: {
+            base: 'FROM logs | STATS count() BY host',
+            condition: 'WHERE count > 100',
+          },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <RecoveryBaseAndConditionField validation={validation} />
+        </Wrapper>
+      );
+
+      await user.click(screen.getByTestId('addRecoveryBaseQueryButton'));
+
+      expect(capturedRecoveryBaseQueryFieldProps).toEqual(
+        expect.objectContaining({
+          dataTestSubj: 'recoveryBaseQueryField',
+        })
+      );
+      const rules = capturedRecoveryBaseQueryFieldProps?.rules as { validate?: Function };
+      expect(rules?.validate).toBe(mockValidate);
+      expect(capturedRecoveryBaseQueryFieldProps?.labelTooltip).toBeDefined();
+    });
+  });
+
+  describe('Add base recovery query button', () => {
+    it('shows "+ Add base recovery query" button when no recovery base query is set', () => {
+      const validation = createMockValidation();
+      const Wrapper = createFormWrapper({
+        recoveryPolicy: { type: 'query' },
+        evaluation: {
+          query: {
+            base: 'FROM logs | STATS count() BY host',
+            condition: 'WHERE count > 100',
+          },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
@@ -129,6 +211,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
     it('reveals the recovery base query editor when button is clicked', async () => {
       const user = userEvent.setup();
+      const validation = createMockValidation();
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -141,7 +224,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
@@ -154,6 +237,7 @@ describe('RecoveryBaseAndConditionField', () => {
     it('pre-fills the recovery base query with the evaluation query when button is clicked', async () => {
       const user = userEvent.setup();
       const evaluationBase = 'FROM logs | STATS count() BY host';
+      const validation = createMockValidation();
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -166,7 +250,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
           <FormRefCapture />
         </Wrapper>
       );
@@ -179,6 +263,9 @@ describe('RecoveryBaseAndConditionField', () => {
     });
 
     it('shows the recovery base query editor immediately when form has a pre-filled recovery base query', () => {
+      const validation = createMockValidation({
+        recoveryBaseQuery: 'FROM logs | STATS count() BY host | WHERE count < 5',
+      });
       const Wrapper = createFormWrapper({
         recoveryPolicy: {
           type: 'query',
@@ -197,7 +284,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
@@ -206,6 +293,9 @@ describe('RecoveryBaseAndConditionField', () => {
     });
 
     it('shows remove button when base query editor is visible', () => {
+      const validation = createMockValidation({
+        recoveryBaseQuery: 'FROM logs | STATS count() BY host',
+      });
       const Wrapper = createFormWrapper({
         recoveryPolicy: {
           type: 'query',
@@ -224,7 +314,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
@@ -233,6 +323,7 @@ describe('RecoveryBaseAndConditionField', () => {
     });
 
     it('does not show remove button when base query editor is hidden', () => {
+      const validation = createMockValidation();
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -245,15 +336,18 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
       expect(screen.queryByTestId('removeRecoveryBaseQueryButton')).not.toBeInTheDocument();
     });
 
-    it('hides the base query editor and clears the value when remove button is clicked', async () => {
+    it('clears the form value when remove button is clicked', async () => {
       const user = userEvent.setup();
+      const validation = createMockValidation({
+        recoveryBaseQuery: 'FROM logs | STATS count() BY host',
+      });
       const Wrapper = createFormWrapper({
         recoveryPolicy: {
           type: 'query',
@@ -272,7 +366,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
           <FormRefCapture />
         </Wrapper>
       );
@@ -282,23 +376,48 @@ describe('RecoveryBaseAndConditionField', () => {
 
       await user.click(screen.getByTestId('removeRecoveryBaseQueryButton'));
 
-      // Base query editor should be hidden and form value cleared
+      // Form value should be cleared
+      expect(formRef?.getValues('recoveryPolicy.query.base')).toBeUndefined();
+    });
+
+    it('hides the base query editor when remove is clicked and validation reflects removal', async () => {
+      const user = userEvent.setup();
+      // Start with add button visible so clicking add → remove cycle works
+      const validation = createMockValidation();
+      const Wrapper = createFormWrapper({
+        recoveryPolicy: { type: 'query' },
+        evaluation: {
+          query: {
+            base: 'FROM logs | STATS count() BY host',
+            condition: 'WHERE count > 100',
+          },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <RecoveryBaseAndConditionField validation={validation} />
+        </Wrapper>
+      );
+
+      // Click add (shows editor)
+      await user.click(screen.getByTestId('addRecoveryBaseQueryButton'));
+      expect(screen.getByTestId('recoveryBaseQueryField')).toBeInTheDocument();
+
+      // Click remove (hides editor) — validation.recoveryBaseQuery is already undefined
+      // so the useEffect won't re-show it
+      await user.click(screen.getByTestId('removeRecoveryBaseQueryButton'));
       expect(screen.queryByTestId('recoveryBaseQueryField')).not.toBeInTheDocument();
       expect(screen.getByTestId('addRecoveryBaseQueryButton')).toBeInTheDocument();
-      expect(formRef?.getValues('recoveryPolicy.query.base')).toBeUndefined();
     });
 
     it('allows re-adding the base query after removing it', async () => {
       const user = userEvent.setup();
       const evaluationBase = 'FROM logs | STATS count() BY host';
+      // Start with no recovery base query so we can do a clean add → remove → re-add cycle
+      const validation = createMockValidation();
       const Wrapper = createFormWrapper({
-        recoveryPolicy: {
-          type: 'query',
-          query: {
-            base: 'FROM custom | STATS avg(val) BY key',
-            condition: 'WHERE count <= 50',
-          },
-        },
+        recoveryPolicy: { type: 'query' },
         evaluation: {
           query: {
             base: evaluationBase,
@@ -309,16 +428,19 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
           <FormRefCapture />
         </Wrapper>
       );
 
-      // Remove the base query
+      // Add, then remove
+      await user.click(screen.getByTestId('addRecoveryBaseQueryButton'));
+      expect(screen.getByTestId('recoveryBaseQueryField')).toBeInTheDocument();
+
       await user.click(screen.getByTestId('removeRecoveryBaseQueryButton'));
       expect(screen.queryByTestId('recoveryBaseQueryField')).not.toBeInTheDocument();
 
-      // Re-add it — should pre-fill with evaluation base query
+      // Re-add — should pre-fill with evaluation base query
       await user.click(screen.getByTestId('addRecoveryBaseQueryButton'));
       expect(screen.getByTestId('recoveryBaseQueryField')).toBeInTheDocument();
 
@@ -326,118 +448,13 @@ describe('RecoveryBaseAndConditionField', () => {
         expect(formRef?.getValues('recoveryPolicy.query.base')).toBe(evaluationBase);
       });
     });
-
-    it('passes correct props to RecoveryBaseQueryField for the base query editor', async () => {
-      const user = userEvent.setup();
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      await user.click(screen.getByTestId('addRecoveryBaseQueryButton'));
-
-      expect(capturedRecoveryBaseQueryFieldProps).toEqual(
-        expect.objectContaining({
-          required: false,
-          seedFromEvaluation: false,
-          validateGrouping: false,
-          dataTestSubj: 'recoveryBaseQueryField',
-        })
-      );
-      expect(capturedRecoveryBaseQueryFieldProps?.labelTooltip).toBeDefined();
-    });
-  });
-
-  describe('baseQuery resolution', () => {
-    it('passes evaluation base query to WhereClauseEditor when no recovery base query is set', () => {
-      const evaluationBase = 'FROM logs | STATS count() BY host';
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: evaluationBase,
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      expect(capturedWhereClauseBaseQuery).toBe(evaluationBase);
-    });
-
-    it('passes recovery base query to WhereClauseEditor when it is defined', () => {
-      const recoveryBase = 'FROM logs | STATS max(count) BY host';
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: {
-          type: 'query',
-          query: {
-            base: recoveryBase,
-            condition: 'WHERE max_count <= 50',
-          },
-        },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      expect(capturedWhereClauseBaseQuery).toBe(recoveryBase);
-    });
-
-    it('falls back to evaluation base query when recovery base query is only whitespace', () => {
-      const evaluationBase = 'FROM logs | STATS count() BY host';
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: {
-          type: 'query',
-          query: {
-            base: '   ',
-            condition: 'WHERE count <= 50',
-          },
-        },
-        evaluation: {
-          query: {
-            base: evaluationBase,
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      expect(capturedWhereClauseBaseQuery).toBe(evaluationBase);
-    });
   });
 
   describe('condition seeding', () => {
     it('seeds the recovery condition with the evaluation condition on mount when empty', async () => {
+      const validation = createMockValidation({
+        evaluationCondition: 'WHERE count > 100',
+      });
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -450,7 +467,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
           <FormRefCapture />
         </Wrapper>
       );
@@ -461,6 +478,9 @@ describe('RecoveryBaseAndConditionField', () => {
     });
 
     it('does not overwrite an existing recovery condition on mount', async () => {
+      const validation = createMockValidation({
+        evaluationCondition: 'WHERE count > 100',
+      });
       const Wrapper = createFormWrapper({
         recoveryPolicy: {
           type: 'query',
@@ -476,7 +496,7 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
           <FormRefCapture />
         </Wrapper>
       );
@@ -489,8 +509,9 @@ describe('RecoveryBaseAndConditionField', () => {
     });
   });
 
-  describe('validation', () => {
-    it('passes a validate rule to the WHERE clause editor', () => {
+  describe('optional label', () => {
+    it('does not mark the WHERE clause as optional when only the condition is shown', () => {
+      const validation = createMockValidation();
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -503,15 +524,17 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
-      expect(capturedWhereClauseRules).toBeDefined();
-      expect(capturedWhereClauseRules?.validate).toBeInstanceOf(Function);
+      // Base query editor is not visible, so condition is required (isOptional = false)
+      expect(capturedWhereClauseProps?.isOptional).toBe(false);
     });
 
-    it('returns an error when recovery condition matches the evaluation condition exactly', () => {
+    it('marks the WHERE clause as optional once the base query editor is shown', async () => {
+      const user = userEvent.setup();
+      const validation = createMockValidation();
       const Wrapper = createFormWrapper({
         recoveryPolicy: { type: 'query' },
         evaluation: {
@@ -524,109 +547,31 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
-      const result = capturedWhereClauseRules?.validate?.('WHERE count > 100');
-      expect(result).toBe(
-        'Recovery condition must differ from the evaluation condition. The same condition would never recover.'
-      );
+      // Initially not optional
+      expect(capturedWhereClauseProps?.isOptional).toBe(false);
+
+      // Add base query
+      await user.click(screen.getByTestId('addRecoveryBaseQueryButton'));
+
+      // Now condition is optional since the base query can fulfil the requirement
+      expect(capturedWhereClauseProps?.isOptional).toBe(true);
     });
 
-    it('returns an error when conditions match with different casing', () => {
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
+    it('marks the WHERE clause as optional when a pre-filled base query is present', () => {
+      const validation = createMockValidation({
+        recoveryBaseQuery: 'FROM logs | STATS max(count) BY host',
       });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.('WHERE COUNT > 100');
-      expect(result).toBe(
-        'Recovery condition must differ from the evaluation condition. The same condition would never recover.'
-      );
-    });
-
-    it('returns an error when conditions match with extra whitespace', () => {
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.('  WHERE count > 100  ');
-      expect(result).toBe(
-        'Recovery condition must differ from the evaluation condition. The same condition would never recover.'
-      );
-    });
-
-    it('passes validation when recovery condition differs from evaluation condition', () => {
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.('WHERE count <= 50');
-      expect(result).toBe(true);
-    });
-
-    it('returns an error when both recovery condition and base query are empty', () => {
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.(undefined);
-      expect(result).toBe('Either a recovery base query or recovery condition must be specified.');
-    });
-
-    it('passes validation when condition is empty but recovery base query is provided', () => {
       const Wrapper = createFormWrapper({
         recoveryPolicy: {
           type: 'query',
-          query: { base: 'FROM logs | STATS max(count) BY host' },
+          query: {
+            base: 'FROM logs | STATS max(count) BY host',
+            condition: 'WHERE max_count <= 50',
+          },
         },
         evaluation: {
           query: {
@@ -638,80 +583,12 @@ describe('RecoveryBaseAndConditionField', () => {
 
       render(
         <Wrapper>
-          <RecoveryBaseAndConditionField />
+          <RecoveryBaseAndConditionField validation={validation} />
         </Wrapper>
       );
 
-      const result = capturedWhereClauseRules?.validate?.(undefined);
-      expect(result).toBe(true);
-    });
-
-    it('passes validation when condition is provided but no recovery base query', () => {
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.('WHERE count <= 50');
-      expect(result).toBe(true);
-    });
-
-    it('returns grouping validation error when grouping fields are missing from recovery query', () => {
-      mockGroupingValidationError =
-        'Recovery query is missing columns used for grouping: host. The recovery query must include these columns to properly identify which alerts should recover.';
-
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.('WHERE count <= 50');
-      expect(result).toBe(mockGroupingValidationError);
-    });
-
-    it('passes validation when there is no grouping validation error', () => {
-      mockGroupingValidationError = undefined;
-
-      const Wrapper = createFormWrapper({
-        recoveryPolicy: { type: 'query' },
-        evaluation: {
-          query: {
-            base: 'FROM logs | STATS count() BY host',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      render(
-        <Wrapper>
-          <RecoveryBaseAndConditionField />
-        </Wrapper>
-      );
-
-      const result = capturedWhereClauseRules?.validate?.('WHERE count <= 50');
-      expect(result).toBe(true);
+      // Base query editor is visible due to pre-filled value, so condition is optional
+      expect(capturedWhereClauseProps?.isOptional).toBe(true);
     });
   });
 });

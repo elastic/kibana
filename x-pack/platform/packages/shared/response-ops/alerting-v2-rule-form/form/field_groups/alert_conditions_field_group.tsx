@@ -14,6 +14,8 @@ import { FieldGroup } from './field_group';
 import { RecoveryTypeField } from '../fields/recovery_type_field';
 import { RecoveryBaseQueryOnlyField } from '../fields/recovery_base_query_only_field';
 import { RecoveryBaseAndConditionField } from '../fields/recovery_base_and_condition_field';
+import { useRuleFormServices } from '../contexts';
+import { useRecoveryValidation } from '../hooks/use_recovery_validation';
 
 /**
  * Alert conditions field group for configuring recovery policy.
@@ -28,10 +30,12 @@ import { RecoveryBaseAndConditionField } from '../fields/recovery_base_and_condi
  */
 export const AlertConditionsFieldGroup: React.FC = () => {
   const { control } = useFormContext<FormValues>();
+  const { data } = useRuleFormServices();
   const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
-  const evaluationCondition = useWatch({ control, name: 'evaluation.query.condition' });
 
-  const hasEvaluationCondition = Boolean(evaluationCondition?.trim());
+  const recoveryValidation = useRecoveryValidation({
+    search: data.search.search,
+  });
 
   return (
     <FieldGroup
@@ -43,10 +47,10 @@ export const AlertConditionsFieldGroup: React.FC = () => {
       {recoveryType === 'query' && (
         <>
           <EuiSpacer size="m" />
-          {hasEvaluationCondition ? (
-            <RecoveryBaseAndConditionField />
+          {recoveryValidation.hasEvaluationCondition ? (
+            <RecoveryBaseAndConditionField validation={recoveryValidation} />
           ) : (
-            <RecoveryBaseQueryOnlyField />
+            <RecoveryBaseQueryOnlyField validation={recoveryValidation} />
           )}
         </>
       )}

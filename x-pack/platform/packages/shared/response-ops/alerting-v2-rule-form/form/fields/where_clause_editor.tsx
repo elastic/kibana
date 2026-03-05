@@ -34,6 +34,8 @@ export interface WhereClauseEditorProps {
   disabled?: boolean;
   /** Base query for autocomplete and validation context */
   baseQuery: string;
+  /** Whether to show the "Optional" label append. Defaults to true. */
+  isOptional?: boolean;
   rules?: {
     required?: string;
     validate?: (value: string | undefined) => string | boolean | Promise<string | boolean>;
@@ -51,6 +53,7 @@ interface EditorFieldProps {
   error?: { message?: string };
   fullWidth?: boolean;
   disabled?: boolean;
+  isOptional?: boolean;
   dataTestSubj?: string;
   suggestionProvider?: monaco.languages.CompletionItemProvider;
   baseQuery: string;
@@ -65,6 +68,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
   error,
   fullWidth,
   disabled,
+  isOptional = true,
   dataTestSubj,
   suggestionProvider,
   baseQuery,
@@ -273,11 +277,13 @@ const EditorField: React.FC<EditorFieldProps> = ({
     <EuiFormRow
       label={label}
       labelAppend={
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.alertingV2.ruleForm.conditionOptional', {
-            defaultMessage: 'Optional',
-          })}
-        </EuiText>
+        isOptional ? (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertingV2.ruleForm.conditionOptional', {
+              defaultMessage: 'Optional',
+            })}
+          </EuiText>
+        ) : undefined
       }
       helpText={helpText}
       isInvalid={!!error}
@@ -342,6 +348,7 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
   fullWidth = true,
   dataTestSubj = 'whereClauseEditor',
   disabled = false,
+  isOptional = true,
   services: { search },
   baseQuery = '',
   rules,
@@ -518,6 +525,7 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
             error={error}
             fullWidth={fullWidth}
             disabled={disabled}
+            isOptional={isOptional}
             dataTestSubj={dataTestSubj}
             suggestionProvider={suggestionProvider}
             baseQuery={baseQuery}

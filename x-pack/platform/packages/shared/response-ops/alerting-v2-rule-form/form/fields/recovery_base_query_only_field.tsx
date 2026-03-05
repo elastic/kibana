@@ -5,50 +5,52 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useFormContext, useWatch } from 'react-hook-form';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
+import type { useRecoveryValidation } from '../hooks/use_recovery_validation';
 import { RecoveryBaseQueryField } from './recovery_base_query_field';
+
+interface RecoveryBaseQueryOnlyFieldProps {
+  /** Validation state and rules from the consolidated useRecoveryValidation hook. */
+  validation: ReturnType<typeof useRecoveryValidation>;
+}
 
 /**
  * Recovery base query field for non-split mode (full ES|QL editor).
  *
- * Wraps `RecoveryBaseQueryField` and adds validation that the recovery query
- * must differ from the full evaluation query (base + condition combined).
- * Used when no evaluation condition (WHERE clause) exists, so the user
- * provides a complete ES|QL recovery query.
+ * Displayed when the recovery type is `query` and no evaluation condition (WHERE clause) exists.
+ * Seeds the recovery query from the evaluation query on mount, and validates
+ * ES|QL syntax, grouping fields, and that the recovery query differs from evaluation.
+ *
+ * Validation logic is provided by the `useRecoveryValidation` hook via the
+ * `validation` prop. Seeding is handled locally on mount.
  */
-export const RecoveryBaseQueryOnlyField: React.FC = () => {
-  const { control } = useFormContext<FormValues>();
-  const evaluationBase = useWatch({ control, name: 'evaluation.query.base' });
-  const evaluationCondition = useWatch({ control, name: 'evaluation.query.condition' });
+export const RecoveryBaseQueryOnlyField: React.FC<RecoveryBaseQueryOnlyFieldProps> = ({
+  validation,
+}) => {
+  const { fullBaseQueryRules, groupingValidationError } = validation;
+  const { getValues, setValue } = useFormContext<FormValues>();
 
-  // Assemble the full evaluation query for comparison with the recovery query.
-  const fullEvaluationQuery = useMemo(() => {
-    const base = evaluationBase?.trim() ?? '';
-    const condition = evaluationCondition?.trim() ?? '';
-    if (!base) return '';
-    if (condition) return `${base} | ${condition}`;
-    return base;
-  }, [evaluationBase, evaluationCondition]);
-
-  // Validate that the recovery query differs from the full evaluation query.
-  const validateNotSameAsEvaluation = useCallback(
-    (value: string | undefined) => {
-      if (!value || !fullEvaluationQuery) return true;
-      const normalizedRecovery = value.trim().toLowerCase();
-      const normalizedEvaluation = fullEvaluationQuery.trim().toLowerCase();
-      if (normalizedRecovery === normalizedEvaluation) {
-        return i18n.translate('xpack.alertingV2.ruleForm.recoveryQuerySameAsEvaluation', {
-          defaultMessage:
-            'Recovery query must differ from the evaluation query. The same query would never recover.',
-        });
-      }
-      return true;
-    },
-    [fullEvaluationQuery]
+  const groupingErrors = useMemo(
+    () => (groupingValidationError ? [new Error(groupingValidationError)] : undefined),
+    [groupingValidationError]
   );
 
-  return <RecoveryBaseQueryField additionalValidation={validateNotSameAsEvaluation} />;
+  const hasSeeded = useRef(false);
+
+  // Seed the recovery base query with the evaluation query on mount when empty
+  useEffect(() => {
+    if (hasSeeded.current) return;
+    hasSeeded.current = true;
+    const currentRecoveryQuery = getValues('recoveryPolicy.query.base');
+    if (!currentRecoveryQuery) {
+      const evaluationQuery = getValues('evaluation.query.base');
+      if (evaluationQuery) {
+        setValue('recoveryPolicy.query.base', evaluationQuery);
+      }
+    }
+  }, [getValues, setValue]);
+
+  return <RecoveryBaseQueryField rules={fullBaseQueryRules} errors={groupingErrors} />;
 };

@@ -11,7 +11,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { createQueryClientWrapper, defaultTestFormValues } from '../../test_utils';
-import { useRecoveryQueryValidation } from './use_recovery_query_validation';
+import { useRecoveryQueryGroupingValidation } from './use_recovery_query_grouping_validation';
 import type { FormValues } from '../types';
 
 jest.mock('@kbn/esql-utils');
@@ -36,7 +36,7 @@ const createFormAndQueryWrapper = (defaultValues: Partial<FormValues> = {}) => {
   };
 };
 
-describe('useRecoveryQueryValidation', () => {
+describe('useRecoveryQueryGroupingValidation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -46,7 +46,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: 'FROM logs-* | STATS count = COUNT(*)',
@@ -67,7 +67,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: '',
@@ -92,7 +92,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
@@ -119,7 +119,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: 'FROM logs-* | STATS count = COUNT(*)',
@@ -152,7 +152,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: 'FROM logs-* | STATS count = COUNT(*)',
@@ -182,7 +182,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
@@ -212,7 +212,7 @@ describe('useRecoveryQueryValidation', () => {
 
     const { result } = renderHook(
       () =>
-        useRecoveryQueryValidation({
+        useRecoveryQueryGroupingValidation({
           control: undefined as any,
           search,
           query: 'INVALID QUERY',

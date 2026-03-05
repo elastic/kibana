@@ -30,7 +30,7 @@ interface UseRecoveryQueryValidationProps {
  * instances. This hook wraps `useQueryGroupingValidation` with
  * recovery-specific error messages.
  */
-export const useRecoveryQueryValidation = ({
+export const useRecoveryQueryGroupingValidation = ({
   control,
   search,
   query,
