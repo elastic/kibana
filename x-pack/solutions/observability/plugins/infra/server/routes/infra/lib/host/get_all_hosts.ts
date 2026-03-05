@@ -60,47 +60,47 @@ export const getAllHosts = async ({
           },
         },
         aggs: {
-        // find hosts with metrics that are monitored by the system integration.
-        monitoredHosts: {
-          filter: getFilterByIntegration('system'),
-          aggs: {
-            names: {
-              terms: {
-                field: HOST_NAME_FIELD,
-                size: limit,
-                order: {
-                  _key: 'asc',
+          monitoredHosts: {
+            filter: getFilterByIntegration('system'),
+            aggs: {
+              names: {
+                terms: {
+                  field: HOST_NAME_FIELD,
+                  size: limit,
+                  order: {
+                    _key: 'asc',
+                  },
                 },
               },
             },
           },
-        },
-        allHostMetrics: {
-          terms: {
-            field: HOST_NAME_FIELD,
-            size: limit,
-            order: {
-              _key: 'asc',
+          allHostMetrics: {
+            terms: {
+              field: HOST_NAME_FIELD,
+              size: limit,
+              order: {
+                _key: 'asc',
+              },
             },
-          },
-          aggs: {
-            ...metricAggregations,
-            [METADATA_AGGREGATION_NAME]: {
-              top_metrics: {
-                metrics: [
-                  {
-                    field: 'host.os.name',
+            aggs: {
+              ...metricAggregations,
+              [METADATA_AGGREGATION_NAME]: {
+                top_metrics: {
+                  metrics: [
+                    {
+                      field: 'host.os.name',
+                    },
+                    {
+                      field: 'cloud.provider',
+                    },
+                    {
+                      field: 'host.ip',
+                    },
+                  ],
+                  size: 1,
+                  sort: {
+                    '@timestamp': 'desc',
                   },
-                  {
-                    field: 'cloud.provider',
-                  },
-                  {
-                    field: 'host.ip',
-                  },
-                ],
-                size: 1,
-                sort: {
-                  '@timestamp': 'desc',
                 },
               },
             },
