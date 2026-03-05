@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiText,
+  EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -131,6 +132,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
       <EuiFlexItem
         css={css`
           min-width: 0;
+          overflow: hidden;
         `}
       >
         {isClickable ? (
@@ -138,16 +140,11 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
             onClick={handlePreviewClick}
             color="primary"
             css={css`
-              display: block;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
               font-weight: ${euiTheme.font.weight.semiBold};
-              width: 100%;
             `}
             data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_LINK}
           >
-            {title}
+            <EuiTextTruncate text={title} truncation="middle" />
           </EuiLink>
         ) : (
           <EuiToolTip
@@ -164,7 +161,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
                 font-weight: ${euiTheme.font.weight.medium};
               `}
             >
-              {title}
+              <EuiTextTruncate text={title} truncation="middle" />
             </EuiText>
           </EuiToolTip>
         )}
