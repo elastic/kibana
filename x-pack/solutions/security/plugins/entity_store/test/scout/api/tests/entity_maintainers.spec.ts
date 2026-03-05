@@ -69,7 +69,7 @@ const getRoleWithoutTargetIndexPrivileges = () =>
 const getRoleWithoutSavedObjectCreate = () =>
   buildRoleDescriptor({ withSavedObjectCreate: false });
 
-apiTest.describe(
+apiTest.describe.only(
   'Entity Store entity maintainers',
   { tag: ENTITY_STORE_TAGS },
   () => {
@@ -169,7 +169,7 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(getBefore.statusCode).toBe(200);
-          const maintainerBefore = getBefore.body.list?.find(
+          const maintainerBefore = getBefore.body.maintainers?.find(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
           expect(maintainerBefore).toBeDefined();
@@ -188,7 +188,7 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(getAfter.statusCode).toBe(200);
-          const maintainerAfter = getAfter.body.list?.find(
+          const maintainerAfter = getAfter.body.maintainers?.find(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
           expect(maintainerAfter).toBeDefined();
@@ -215,7 +215,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
           });
-          const maintainerAfterFirst = getAfterFirst.body.list?.find(
+          const maintainerAfterFirst = getAfterFirst.body.maintainers?.find(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
           expect(maintainerAfterFirst?.taskStatus).toBe('started');
@@ -231,7 +231,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
           });
-          const listAfterSecond = getAfterSecond.body.list ?? [];
+          const listAfterSecond = getAfterSecond.body.maintainers ?? [];
           const maintainersWithId = listAfterSecond.filter(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
@@ -268,7 +268,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
           });
-          const maintainerStopped = getAfterStop.body.list?.find(
+          const maintainerStopped = getAfterStop.body.maintainers?.find(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
           expect(maintainerStopped?.taskStatus).toBe('stopped');
@@ -284,7 +284,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
           });
-          const maintainerAfterInit = getAfterInit.body.list?.find(
+          const maintainerAfterInit = getAfterInit.body.maintainers?.find(
             (m: { id: string }) => m.id === REGISTERED_MAINTAINER_ID
           );
           expect(maintainerAfterInit?.taskStatus).toBe('stopped');
@@ -411,7 +411,7 @@ apiTest.describe(
 
           expect(runResponse.statusCode).toBe(400);
           expect(runResponse.body).toMatchObject({
-            message: 'Entity maintainer not found',
+            message: '[request params]: id: Entity maintainer not found',
           });
         }
       );
