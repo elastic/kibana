@@ -296,3 +296,10 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
+
+# Debug-level logging
+logging:
+  loggers:
+    - name: plugins.actions
+      level: debug
+      appenders: [default]
