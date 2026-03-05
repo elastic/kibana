@@ -22,7 +22,7 @@ import { dialogTexts } from './translations';
  * Opens when the control enters editing mode.
  */
 export function DateRangePickerDialog({ children }: PropsWithChildren) {
-  const { isEditing, setIsEditing, panelRef, panelId } = useDateRangePickerContext();
+  const { isEditing, setIsEditing, panelRef, panelId, width } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const maxWidth = euiTheme.components.forms.maxWidth;
 
@@ -70,15 +70,20 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
     [panelRef, setIsEditing]
   );
 
+  const popoverWrapperFullWidthStyles = css`
+    inline-size: 100%;
+  `;
+
   return (
     <EuiPopover
+      css={width === 'full' && popoverWrapperFullWidthStyles}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
       closePopover={closePopover}
       anchorPosition="downLeft"
       attachToAnchor={true}
       repositionToCrossAxis={false}
-      display="block"
+      display={width === 'auto' ? 'inline' : 'block'}
       ownFocus={false}
       panelPaddingSize="none"
       panelRef={(node) => {
