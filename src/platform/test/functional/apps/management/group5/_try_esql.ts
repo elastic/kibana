@@ -10,33 +10,46 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
+  const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover']);
+  const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover']);
 
   describe('No Data Views: Try ES|QL', () => {
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      const response = await supertest.get('/api/data_views').set('kbn-xsrf', 'true').expect(200);
-      for (const dv of response.body.data_view || []) {
-        await supertest
-          .delete(`/api/data_views/data_view/${dv.id}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
-      }
-    });
-
     it('navigates to Discover and presents an ES|QL query', async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+
+      await retry.try(async () => {
+        const response = await supertest
+          .get('/api/data_views')
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        for (const dv of response.body.data_view || []) {
+          await supertest
+            .delete(`/api/data_views/data_view/${dv.id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        }
+        const verifyResponse = await supertest
+          .get('/api/data_views')
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        if ((verifyResponse.body.data_view || []).length > 0) {
+          throw new Error('Data views still exist after deletion');
+        }
+      });
+
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.existOrFail('noDataViewsPrompt');
       await testSubjects.click('tryESQLLink');
 
       await PageObjects.discover.expectOnDiscover();
-      await esql.expectEsqlStatement('FROM logs*');
+      await esql.expectEsqlStatement('FROM logs*');
     });
   });
 }
