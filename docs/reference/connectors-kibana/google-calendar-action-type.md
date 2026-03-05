@@ -1,7 +1,5 @@
 ---
 navigation_title: "Google Calendar"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/google-calendar-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview
