@@ -8,60 +8,21 @@
  */
 
 import semverGte from 'semver/functions/gte';
-import { getLegacyVisualizeEmbeddableMigrations } from './legacy_visualizations_embeddable_migrations';
-import { getLegacyVisualizationSavedObjectMigrations } from './legacy_visualizations_saved_object_migrations';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { legacyVisualizeEmbeddableMigrations } from './legacy_visualizations_embeddable_migrations';
+import { legacyVisualizationSavedObjectMigrations } from './legacy_visualizations_saved_object_migrations';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {
     const savedObjectMigrationVersions = Object.keys(
-      getLegacyVisualizationSavedObjectMigrations({})
+      legacyVisualizationSavedObjectMigrations
     ).filter((version) => {
       return semverGte(version, '7.13.1');
     });
-    const embeddableMigrationVersions = getLegacyVisualizeEmbeddableMigrations(() => ({}));
+    const embeddableMigrationVersions = legacyVisualizeEmbeddableMigrations;
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
         Object.keys(embeddableMigrationVersions).sort()
       );
     }
-  });
-
-  test('should properly apply a filter migration within a legacy visualization', () => {
-    const migrationVersion = 'some-version';
-
-    const embeddedVisualizationDoc = {
-      savedVis: {
-        data: {
-          searchSource: {
-            type: 'some-type',
-            migrated: false,
-          },
-        },
-      },
-    };
-
-    const embeddableMigrationVersions = getLegacyVisualizeEmbeddableMigrations(() => ({
-      [migrationVersion]: (searchSource: SerializedSearchSourceFields) => {
-        return {
-          ...searchSource,
-          migrated: true,
-        };
-      },
-    }));
-
-    const migratedVisualizationDoc =
-      embeddableMigrationVersions?.[migrationVersion](embeddedVisualizationDoc);
-
-    expect(migratedVisualizationDoc).toEqual({
-      savedVis: {
-        data: {
-          searchSource: {
-            type: 'some-type',
-            migrated: true,
-          },
-        },
-      },
-    });
   });
 });

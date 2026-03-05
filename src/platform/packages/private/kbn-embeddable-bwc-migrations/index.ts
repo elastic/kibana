@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getLegacyVisualizationSavedObjectMigrations } from './legacy_visualizations/legacy_visualizations_saved_object_migrations';
+export { getAllEmbeddableMigrations } from './get_all_embeddable_migrations';
+export { getAllEmbeddableReferenceManagers } from './get_all_embeddable_reference_managers';
+export { legacyVisualizationSavedObjectMigrations } from './legacy_visualizations/legacy_visualizations_saved_object_migrations';
 export { getDashboardSavedObjectMigrations } from './dashboards/dashboard_saved_object_migrations';

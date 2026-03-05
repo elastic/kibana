@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getLegacyVisualizationSavedObjectMigrations } from './legacy_visualizations_saved_object_migrations';
-import type {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
-  SavedObjectUnsanitizedDoc,
-} from '@kbn/core/server';
+import { legacyVisualizationSavedObjectMigrations } from './legacy_visualizations_saved_object_migrations';
+import type { SavedObjectMigrationContext, SavedObjectMigrationFn } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
@@ -62,11 +58,9 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
 };
 
 describe('migration visualization', () => {
-  const visualizationSavedObjectTypeMigrations = getLegacyVisualizationSavedObjectMigrations({});
-
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['6.7.2'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['6.7.2'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -200,7 +194,7 @@ describe('migration visualization', () => {
 
   describe('7.0.0', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.0.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.0.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -785,7 +779,7 @@ describe('migration visualization', () => {
   describe('7.2.0', () => {
     describe('date histogram custom interval removal', () => {
       const migrate = (doc: any) =>
-        SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.2.0'])(
+        SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.2.0'])(
           doc as Parameters<SavedObjectMigrationFn>[0],
           savedObjectMigrationContext
         );
@@ -937,7 +931,7 @@ describe('migration visualization', () => {
     } as unknown as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.3.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.3.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         logger
       );
@@ -1128,7 +1122,7 @@ describe('migration visualization', () => {
 
   describe('7.3.0 tsvb', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.3.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.3.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1224,7 +1218,7 @@ describe('migration visualization', () => {
 
   describe('7.3.1', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.3.1'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.3.1'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1268,7 +1262,7 @@ describe('migration visualization', () => {
 
   describe('7.4.2 tsvb split_filters migration', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.4.2'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.4.2'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1401,7 +1395,7 @@ describe('migration visualization', () => {
 
   describe('7.7.0 tsvb opperator typo migration', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.7.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.7.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1508,7 +1502,7 @@ describe('migration visualization', () => {
 
   describe('7.9.3', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.9.3'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.9.3'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1520,7 +1514,7 @@ describe('migration visualization', () => {
 
   describe('7.8.0 tsvb split_color_mode', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.8.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.8.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1578,7 +1572,7 @@ describe('migration visualization', () => {
 
   describe('7.10.0 tsvb filter_ratio migration', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.10.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.10.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1612,7 +1606,7 @@ describe('migration visualization', () => {
 
   describe('7.10.0 remove tsvb search source', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.10.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.10.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1652,7 +1646,7 @@ describe('migration visualization', () => {
 
   describe('7.11.0 Data table vis - enable toolbar', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.11.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.11.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1674,7 +1668,7 @@ describe('migration visualization', () => {
 
   describe('7.12.0 update vislib visualization defaults', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.12.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.12.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1819,7 +1813,7 @@ describe('migration visualization', () => {
 
   describe('7.12.0 update "schema" in aggregations', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.12.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.12.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1960,7 +1954,7 @@ describe('migration visualization', () => {
 
   describe('7.13.0 tsvb hide Last value indicator by default', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.13.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.13.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1992,7 +1986,7 @@ describe('migration visualization', () => {
 
   describe('7.13.0 tsvb - remove default_index_pattern and default_timefield from Model', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.13.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.13.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2016,13 +2010,13 @@ describe('migration visualization', () => {
 
   describe('7.13.0 and 7.13.1 tsvb migrations can run twice', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.13.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.13.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
 
     const migrateAgain = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.13.1'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.13.1'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2056,7 +2050,7 @@ describe('migration visualization', () => {
 
   describe('7.14.0 tsvb - add empty value rule to savedObjects with less and greater then zero rules', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.14.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.14.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2153,7 +2147,7 @@ describe('migration visualization', () => {
 
   describe('7.14.0 tsvb - add drop last bucket into TSVB model', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.14.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.14.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2234,7 +2228,7 @@ describe('migration visualization', () => {
 
   describe('7.14.0 update pie visualization defaults', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.14.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.14.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2282,7 +2276,7 @@ describe('migration visualization', () => {
 
   describe('7.14.0 replaceIndexPatternReference', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.14.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.14.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2312,7 +2306,7 @@ describe('migration visualization', () => {
 
   describe('7.14.0 update tagcloud defaults', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.14.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.14.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2353,7 +2347,7 @@ describe('migration visualization', () => {
 
   describe('8.0.0 removeMarkdownLessFromTSVB', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['8.0.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['8.0.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2385,13 +2379,13 @@ describe('migration visualization', () => {
 
   describe('7.17.0 tsvb - add drop last bucket into TSVB model', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.14.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.14.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
 
     const migrateAgain = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['7.17.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['7.17.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2438,68 +2432,6 @@ describe('migration visualization', () => {
           "drop_last_bucket": 0,
         }
       `);
-    });
-  });
-
-  it('should apply search source migrations within visualization', () => {
-    const visualizationDoc = {
-      attributes: {
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: JSON.stringify({
-            some: 'prop',
-            migrated: false,
-          }),
-        },
-      },
-    } as SavedObjectUnsanitizedDoc;
-
-    const versionToTest = '1.2.3';
-    const visMigrations = getLegacyVisualizationSavedObjectMigrations({
-      [versionToTest]: (state) => ({ ...state, migrated: true }),
-    });
-
-    expect(
-      SavedObjectsUtils.getMigrationFunction(visMigrations[versionToTest])(
-        visualizationDoc,
-        {} as SavedObjectMigrationContext
-      )
-    ).toEqual({
-      attributes: {
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: JSON.stringify({
-            some: 'prop',
-            migrated: true,
-          }),
-        },
-      },
-    });
-  });
-
-  it('should not apply search source migrations within visualization when searchSourceJSON is not an object', () => {
-    const visualizationDoc = {
-      attributes: {
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '5',
-        },
-      },
-    } as SavedObjectUnsanitizedDoc;
-
-    const versionToTest = '1.2.4';
-    const visMigrations = getLegacyVisualizationSavedObjectMigrations({
-      [versionToTest]: (state) => ({ ...state, migrated: true }),
-    });
-
-    expect(
-      SavedObjectsUtils.getMigrationFunction(visMigrations[versionToTest])(
-        visualizationDoc,
-        {} as SavedObjectMigrationContext
-      )
-    ).toEqual({
-      attributes: {
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '5',
-        },
-      },
     });
   });
 
@@ -2551,7 +2483,7 @@ describe('migration visualization', () => {
       },
     });
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['8.1.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['8.1.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2588,7 +2520,7 @@ describe('migration visualization', () => {
       },
     });
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['8.3.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['8.3.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -2634,7 +2566,7 @@ describe('migration visualization', () => {
 
   describe('8.5.0 tsvb - remove exclamation circle icon', () => {
     const migrate = (doc: any) =>
-      SavedObjectsUtils.getMigrationFunction(visualizationSavedObjectTypeMigrations['8.5.0'])(
+      SavedObjectsUtils.getMigrationFunction(legacyVisualizationSavedObjectMigrations['8.5.0'])(
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );

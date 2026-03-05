@@ -1201,7 +1201,7 @@ const removeExclamationCircleIcon: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
-const visualizationSavedObjectTypeMigrations = {
+export const legacyVisualizationSavedObjectMigrations: SavedObjectMigrationMap = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
    * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
@@ -1260,6 +1260,3 @@ const visualizationSavedObjectTypeMigrations = {
   '8.3.0': preserveOldLegendSizeDefault,
   '8.5.0': removeExclamationCircleIcon,
 };
-
-export const getLegacyVisualizationSavedObjectMigrations = (): SavedObjectMigrationMap =>
-  visualizationSavedObjectTypeMigrations;

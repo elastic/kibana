@@ -24,6 +24,11 @@ export interface GridData {
 }
 
 export interface RawDashboardSavedObjectAttributes {
+  description?: string;
+  optionsJSON?: string;
+  title?: string;
+  version?: number;
+  timeRestore?: boolean;
   panelsJSON?: string;
   kibanaSavedObjectMeta: {
     searchSourceJSON?: string;

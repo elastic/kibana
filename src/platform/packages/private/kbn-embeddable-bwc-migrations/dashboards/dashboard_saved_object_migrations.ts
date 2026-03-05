@@ -23,25 +23,13 @@ import { getAllEmbeddableReferenceManagers } from '../get_all_embeddable_referen
 export const getDashboardSavedObjectMigrations = (
   embeddableSetup: EmbeddableSetup
 ): SavedObjectMigrationMap => {
-  // gathers all of the hardcoded BWC embeddable migrations
-  const bwcEmbeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
-    getAllEmbeddableMigrations(),
-    migrateByValueDashboardPanels
-  ) as MigrateFunctionsObject;
-
   // gathers all of the hardcoded BWC reference managers
   const bwcEmbeddableReferenceManagers = getAllEmbeddableReferenceManagers();
 
-  // gathers all of the deprecated serverside embeddable factory migrations TODO, remove this when all serverside embeddable factories have been removed.
-  const legacyEmbeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
-    embeddableSetup.getAllMigrations(),
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+    getAllEmbeddableMigrations(embeddableSetup),
     migrateByValueDashboardPanels
   ) as MigrateFunctionsObject;
-
-  const embeddableMigrations = mergeMigrationFunctionMaps(
-    bwcEmbeddableMigrations,
-    legacyEmbeddableMigrations
-  );
 
   const dashboardMigrations = {
     '6.7.2': flow(migrateMatchAllQuery),
@@ -55,6 +43,5 @@ export const getDashboardSavedObjectMigrations = (
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
 
-  const test = mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
-  return test;
+  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
 };
