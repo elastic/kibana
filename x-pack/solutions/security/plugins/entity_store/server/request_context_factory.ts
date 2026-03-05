@@ -12,7 +12,7 @@ import type {
   EntityStoreCoreSetup,
   EntityStoreRequestHandlerContext,
 } from './types';
-import { AssetManager } from './domain/asset_manager';
+import { AssetManagerClient } from './domain/asset_manager/asset_manager_client';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
 import {
@@ -91,7 +91,7 @@ export async function createRequestHandlerContext({
   return {
     core,
     logger,
-    assetManager: new AssetManager({
+    assetManagerClient: new AssetManagerClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       taskManager: taskManagerStart,

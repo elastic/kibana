@@ -96,7 +96,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, assetManager } = entityStoreCtx;
+          const { logger, assetManagerClient: assetManager } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
           const { status, engines, ...rest } = await assetManager.getStatus(withComponents);

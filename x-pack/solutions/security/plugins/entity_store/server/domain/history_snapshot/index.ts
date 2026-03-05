@@ -10,9 +10,9 @@ import moment from 'moment';
 import type { EntityStoreGlobalState } from '../definitions/saved_objects';
 import type { EntityStoreGlobalStateClient } from '../definitions/saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
-import { getLatestEntitiesIndexName } from '../assets/latest_index';
+import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
 import { getErrorMessage } from '../../../common';
-import { getHistorySnapshotIndexName } from '../assets/history_snapshot_index';
+import { getHistorySnapshotIndexName } from '../asset_manager/history_snapshot_index';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 export type RunHistorySnapshotResult =

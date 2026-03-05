@@ -23,14 +23,14 @@ import {
   extractPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
-import { getLatestEntitiesIndexName } from '../assets/latest_index';
-import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
+import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
+import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
-} from '../assets/external_indices_contants';
+} from '../asset_manager/external_indices_contants';
 import type { LogExtractionConfig } from '../definitions/saved_objects';
 import {
   type EngineDescriptorClient,
