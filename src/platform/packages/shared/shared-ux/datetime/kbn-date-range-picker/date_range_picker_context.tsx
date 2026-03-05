@@ -100,6 +100,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   width: NonNullable<DateRangePickerProps['width']>;
   /** Whether the picker is disabled. */
   disabled: boolean;
+  /** Whether a loading spinner is shown inside the form control. */
+  isLoading: boolean;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -127,6 +129,7 @@ export function DateRangePickerProvider({
   dateFormat,
   isInvalid = false,
   disabled = false,
+  isLoading = false,
   compressed = true,
   collapsed = false,
   showTimeWindowButtons = false,
@@ -250,6 +253,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      isLoading,
     }),
     [
       text,
@@ -272,6 +276,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      isLoading,
     ]
   );
 

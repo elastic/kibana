@@ -8,7 +8,7 @@
  */
 
 import React, { type PropsWithChildren } from 'react';
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 
 import { useEuiTheme } from '@elastic/eui';
 
@@ -18,13 +18,22 @@ import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 interface DateRangePickerLayoutProps extends PropsWithChildren {
   /** CSS class name added to the outermost container element. */
   className?: string;
+  /** Test subject selector added to the outermost container element. */
+  'data-test-subj'?: string;
+  /** Additional Emotion CSS styles for the outermost container element. */
+  css?: SerializedStyles | SerializedStyles[];
 }
 
 /**
  * Outer layout wrapper for the DateRangePicker.
  * Arranges the dialog and optional time-window buttons in a horizontal row.
  */
-export function DateRangePickerLayout({ children, className }: DateRangePickerLayoutProps) {
+export function DateRangePickerLayout({
+  children,
+  className,
+  'data-test-subj': dataTestSubj,
+  css: cssOverrides,
+}: DateRangePickerLayoutProps) {
   const { timeWindowButtonsConfig, width } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
 
@@ -42,7 +51,8 @@ export function DateRangePickerLayout({ children, className }: DateRangePickerLa
   return (
     <div
       className={className}
-      css={[containerStyles, width === 'full' && containerFullWidthStyles]}
+      data-test-subj={dataTestSubj}
+      css={[containerStyles, width === 'full' && containerFullWidthStyles, cssOverrides]}
     >
       {children}
       {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
