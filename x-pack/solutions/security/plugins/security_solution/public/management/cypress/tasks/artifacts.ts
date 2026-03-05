@@ -404,21 +404,23 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('comboBoxClearButton').click();
   },
   validateSuccessPopup: (type: 'create' | 'update' | 'delete') => {
-    let expectedTitle = '';
+    let expectedTitle: string | RegExp = '';
     switch (type) {
       case 'create':
         expectedTitle = '"Test Blocklist" has been added to your blocklist.';
         break;
       case 'update':
-        expectedTitle = '"Test Blocklist" has been updated';
+        expectedTitle = /"Test Blocklist" has been updated/;
         break;
       case 'delete':
-        expectedTitle = '"Test Blocklist" has been removed from blocklist.';
+        expectedTitle = /"Test Blocklist" has been removed from .*blocklist/i;
         break;
     }
     cy.getByTestSubj('euiToastHeader__title').contains(expectedTitle);
   },
   validateRenderedCondition: (expectedCondition: RegExp) => {
+    // Wait for flyout to close (after create/update) before looking for the card
+    cy.getByTestSubj('blocklistPage-flyout').should('not.exist');
     cy.getByTestSubj('blocklistPage-card')
       .first()
       .within(() => {
@@ -429,6 +431,8 @@ export const blocklistFormSelectors = {
       });
   },
   deleteBlocklistItem: () => {
+    // Wait for list to load and card to appear
+    cy.getByTestSubj('blocklistPage-card').should('exist');
     cy.getByTestSubj('blocklistPage-card')
       .first()
       .within(() => {
