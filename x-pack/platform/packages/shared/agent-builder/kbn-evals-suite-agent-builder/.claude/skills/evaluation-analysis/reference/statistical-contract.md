@@ -10,7 +10,7 @@ This contract is scoped to common paired-comparison cases.
 
 2. **Binary** (genuine 0/1 paired outcomes: ToolUsageOnly, DocVersionReleaseDate, ES|QL Functional Equivalence)
    - Primary test: exact McNemar via binomial test on discordant pairs
-   - Primary effect size: odds ratio with Haldane-Anscombe correction
+   - Primary effect size: odds ratio with Haldane-Anscombe correction — `OR = (c + 0.5) / (b + 0.5)` (`b` = variant-only successes, `c` = baseline-only successes; concordant cells cancel in McNemar's OR and are omitted)
    - CI: not reported in V1 for binary rows (summary CI column is `n/a`)
 
 Display labels (RAG, LLM Quality, Latency, Efficiency) are presentation-only and do not affect test selection. All numeric metrics use the same Wilcoxon + r_rb pipeline.
@@ -20,7 +20,7 @@ Override channels are intentionally separate:
 - `EVAL_METRIC_DISPLAY_LABEL_MAP_JSON` changes display labels only.
 - `EVAL_METRIC_TEST_CATEGORY_MAP_JSON` changes test selection only (`Numeric`, `Binary`, `Excluded`).
 
-## Out of scope in V1
+## Out of scope:
 
 - Multi-class categorical inferential testing
 - Unpaired comparisons

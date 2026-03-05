@@ -1,6 +1,6 @@
 ---
 name: evaluation-analysis
-description: Compare agent-builder evaluation runs with paired statistical tests — fetch scores from ES with PIT pagination, run Wilcoxon for numeric families and exact McNemar for binary metrics, compute family-appropriate effect sizes and bootstrap CIs, apply Holm correction, and produce summary outputs.
+description: Compare agent-builder evaluation runs with statistical tests — fetch scores from ES with PIT pagination, run Wilcoxon for numeric families and exact McNemar for binary metrics, compute family-appropriate effect sizes and bootstrap CIs, and produce summary outputs.
 allowed-tools: Bash, Read
 argument-hint: <baseline-run-id> [variant-run-id-1 ...] [--label <run-id>=<name> ...]
 ---
