@@ -40,7 +40,7 @@ import { apm, log, timerange } from '@kbn/synthtrace-client';
 import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from '../constants';
 
 const FRONTEND_SERVICE = RICH_TRACE.SERVICE_NAME;
-const BACKEND_SERVICE = 'synth-traces-backend';
+const BACKEND_SERVICE = PRODUCER_TRACE.SERVICE_NAME;
 const ENVIRONMENT = 'production';
 
 interface TraceCorrelationIds {
@@ -78,7 +78,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
           .children(
             backend
               .span({
-                spanName: 'Publish to kafka/orders',
+                spanName: PRODUCER_TRACE.KAFKA_SPAN_NAME,
                 spanType: 'messaging',
                 spanSubtype: 'kafka',
               })
@@ -176,19 +176,14 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
     return error.timestamp(timestamp).serialize()[0];
   };
 
-  // 2 errors on "Process order item" span (which also has span links), 1 error on DB span
+  // 2 errors on transaction, 1 error on DB span
   const errorEvents: ApmFields[] = [
-    createError(
-      RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR,
-      'DatabaseError',
-      correlationIds.processOrderSpanId,
-      from + 320
-    ),
+    createError(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR, 'DatabaseError', transactionId, from + 100),
     createError(
       RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR,
       'ValidationError',
-      correlationIds.processOrderSpanId,
-      from + 330
+      transactionId,
+      from + 200
     ),
     createError(
       RICH_TRACE.ERRORS.DB_SPAN_TIMEOUT,

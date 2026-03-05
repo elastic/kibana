@@ -42,5 +42,7 @@ export const MINIMAL_TRACE = {
 };
 
 export const PRODUCER_TRACE = {
+  SERVICE_NAME: 'synth-traces-backend',
   TRANSACTION_NAME: 'Background job',
+  KAFKA_SPAN_NAME: 'Publish to kafka/orders',
 };
