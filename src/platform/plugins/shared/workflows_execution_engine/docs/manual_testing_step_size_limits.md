@@ -12,7 +12,7 @@ Each section describes the workflow to create, what to expect, and how to verify
    ```
 3. Seed the test Elasticsearch index (for ES step tests):
    ```bash
-   bash workflows/examples/seed-large-index.sh
+   bash workflows/examples/seed_large_index.sh
    ```
 4. Workflows UI enabled (`uiSettings.overrides: workflows:ui:enabled: true`)
 

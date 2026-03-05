@@ -8,6 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 
@@ -46,7 +47,7 @@ describe('ElasticsearchActionStepImpl', () => {
         workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
       }),
       getDependencies: jest.fn().mockReturnValue({
-        config: { maxResponseSize: { getValueInBytes: () => 10 * 1024 * 1024 } },
+        config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
       renderValueAccordingToContext: jest.fn((value) => value),
       getEsClientAsUser: jest.fn().mockReturnValue(mockEsClient),

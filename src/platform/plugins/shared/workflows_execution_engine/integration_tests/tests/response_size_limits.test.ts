@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
@@ -19,9 +20,9 @@ describe('response size limits', () => {
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Disable size limit to simulate the "before" state
-        const noLimit = { getValueInBytes: () => 0 };
+        const noLimit = new ByteSizeValue(0);
         (workflowRunFixture.configMock as any).maxResponseSize = noLimit;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = noLimit;
+        workflowRunFixture.dependencies.config.maxResponseSize = noLimit;
 
         const workflowYaml = `
 steps:
@@ -50,9 +51,9 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Set a 1KB limit -- the connector returns 5KB, so it should fail
-        const limit1kb = { getValueInBytes: () => 1024 };
+        const limit1kb = new ByteSizeValue(1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit1kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
 
         const workflowYaml = `
 steps:
@@ -66,10 +67,6 @@ steps:
       });
 
       it('connector step with large output fails with ResponseSizeLimitExceeded', () => {
-        const workflowExecutionDoc =
-          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-            'fake_workflow_execution_id'
-          );
         // Workflow should be COMPLETED (engine continues after step failure)
         // but the step itself should have failed
         const stepExecutions = Array.from(
@@ -87,9 +84,9 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Set a 10KB limit -- the connector returns 5KB, so it should pass
-        const limit10kb = { getValueInBytes: () => 10 * 1024 };
+        const limit10kb = new ByteSizeValue(10 * 1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit10kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit10kb;
 
         const workflowYaml = `
 steps:
@@ -118,9 +115,9 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Plugin config: 1KB (would reject 5KB output)
-        const limit1kb = { getValueInBytes: () => 1024 };
+        const limit1kb = new ByteSizeValue(1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit1kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
 
         // But step-level override allows 10KB
         const workflowYaml = `
@@ -151,9 +148,9 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Plugin config: 1KB (would reject 5KB output)
-        const limit1kb = { getValueInBytes: () => 1024 };
+        const limit1kb = new ByteSizeValue(1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit1kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
 
         // But workflow-level settings allow 10KB
         const workflowYaml = `
@@ -185,9 +182,9 @@ steps:
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
         // Set a 1KB limit
-        const limit1kb = { getValueInBytes: () => 1024 };
+        const limit1kb = new ByteSizeValue(1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit1kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
 
         const workflowYaml = `
 steps:
@@ -228,9 +225,9 @@ steps:
 
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
-        const limit10kb = { getValueInBytes: () => 10 * 1024 };
+        const limit10kb = new ByteSizeValue(10 * 1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit10kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit10kb;
 
         const workflowYaml = `
 steps:
@@ -258,9 +255,9 @@ steps:
 
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
-        const limit1kb = { getValueInBytes: () => 1024 };
+        const limit1kb = new ByteSizeValue(1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit1kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit1kb;
 
         // large_response connector returns 5KB -- exceeds 1KB limit
         const workflowYaml = `
@@ -289,9 +286,9 @@ steps:
 
       beforeAll(async () => {
         workflowRunFixture = new WorkflowRunFixture();
-        const limit10kb = { getValueInBytes: () => 10 * 1024 };
+        const limit10kb = new ByteSizeValue(10 * 1024);
         (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
-        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit10kb;
+        workflowRunFixture.dependencies.config.maxResponseSize = limit10kb;
 
         // Step 1: generate large output (under 10kb limit)
         // Step 2: pass it as input to a step with 100b limit -- input check should fail

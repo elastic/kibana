@@ -315,7 +315,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         if (done) break;
         totalBytes += value.byteLength;
         if (maxSize > 0 && totalBytes > maxSize) {
-          reader.cancel();
+          void reader.cancel();
           const stepName =
             this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
           throw new ResponseSizeLimitError(totalBytes, maxSize, stepName);
@@ -345,7 +345,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         if (done) break;
         totalBytes += value.byteLength;
         if (totalBytes > maxBytes) {
-          reader.cancel();
+          void reader.cancel();
           return `${Buffer.concat(chunks).toString('utf-8')}... [truncated]`;
         }
         chunks.push(value);

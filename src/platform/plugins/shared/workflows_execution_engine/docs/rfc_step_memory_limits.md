@@ -253,15 +253,15 @@ if (result.output !== undefined && result.output !== null) {
 
 | Step Type | OOM Prevention (Layer 1) | Context Protection (Layer 2) | Demo Workflow | Notes |
 |---|---|---|---|---|
-| `HttpStepImpl` | Yes -- axios `maxContentLength` aborts mid-stream | Yes -- base class output check | `test-response-size-limit.yaml` | Full coverage |
-| `KibanaActionStepImpl` | Yes -- streaming reader aborts mid-stream | Yes -- base class output check | `test-kibana-action-size-limit.yaml` | Full coverage |
-| `ElasticsearchActionStepImpl` | Yes -- `transport.request({ maxResponseSize })` aborts mid-stream | Yes -- base class output check | `test-es-size-limit.yaml` | Full coverage |
+| `HttpStepImpl` | Yes -- axios `maxContentLength` aborts mid-stream | Yes -- base class output check | `test_response_size_limit.yaml` | Full coverage |
+| `KibanaActionStepImpl` | Yes -- streaming reader aborts mid-stream | Yes -- base class output check | `test_kibana_action_size_limit.yaml` | Full coverage |
+| `ElasticsearchActionStepImpl` | Yes -- `transport.request({ maxResponseSize })` aborts mid-stream | Yes -- base class output check | `test_es_size_limit.yaml` | Full coverage |
 | `ConnectorStepImpl` | No -- `actionsClient.execute()` is opaque | Yes -- base class output check | `test-connector-size-limit.yaml` | Layer 2 only |
 | `CustomStepImpl` | No -- handler code is opaque | Yes -- base class output check | -- | Layer 2 only |
 | `DataSetStepImpl` | N/A -- no external I/O | Yes -- base class output check | -- | Very low risk |
 | Control flow nodes | N/A | N/A | -- | No data processing |
 
-All demo workflows are in `workflows/examples/`. The ES workflow requires seeding test data first via `bash workflows/examples/seed-large-index.sh`.
+All demo workflows are in `workflows/examples/`. The ES workflow requires seeding test data first via `bash workflows/examples/seed_large_index.sh`.
 
 ---
 
@@ -535,7 +535,7 @@ The PoC directly addresses the **critical path** items from the epic:
 
 ## Enforcement, connector coverage, and observability
 
-See [step-size-limits-enforcement-and-observability.md](./step-size-limits-enforcement-and-observability.md) for:
+See [step_size_limits_enforcement_and_observability.md](./step_size_limits_enforcement_and_observability.md) for:
 
 - How Layer 2 is enforced on new steps (single execution path via `BaseAtomicNodeImplementation.run()`).
 - How to track connector coverage (which connector types have Layer 1 vs Layer 2 only) and the `CONNECTOR_TYPES_WITH_LAYER_1` allowlist.

@@ -4,7 +4,7 @@ description: |
   Queries 10K docs (~10MB) from large-test-data index.
   ES transport aborts mid-stream with StepSizeLimitExceeded.
 
-  Prerequisites: bash workflows/examples/seed-large-index.sh
+  Prerequisites: bash workflows/examples/seed_large_index.sh
 
 triggers:
   - type: manual
