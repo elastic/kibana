@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // API design document (internal): https://docs.google.com/document/d/1AYlt8wJMoLD-V_owAd4qL-h76IOVnfDCZ77VNmmf-Ks
 export type PrebuiltRuleAssetsFilter = z.infer<typeof PrebuiltRuleAssetsFilter>;
