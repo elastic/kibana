@@ -59,18 +59,9 @@ export const createTimedCallbacks = (
       const result = (value as Function)(...args);
 
       // If the result is a promise, wrap it in the onStart and onEnd logic
-      if (result != null && typeof (result as { then?: unknown }).then === 'function') {
+      if (result instanceof Promise) {
         onStart();
-        return (result as Promise<unknown>).then(
-          (res) => {
-            onEnd();
-            return res;
-          },
-          (err) => {
-            onEnd();
-            throw err;
-          }
-        );
+        result.finally(onEnd);
       }
 
       return result;
