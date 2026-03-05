@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ClassicHeader } from './header';
+import type { FC } from 'react';
+import React from 'react';
+import { useChromeComponentsDeps } from '../context';
+import { LoadingIndicator } from './loading_indicator';
+
+export const ChromelessHeader: FC = () => {
+  const { loadingCount$ } = useChromeComponentsDeps();
+  return (
+    <div data-test-subj="kibanaHeaderChromeless">
+      <LoadingIndicator loadingCount$={loadingCount$} showAsBar />
+    </div>
+  );
+};
