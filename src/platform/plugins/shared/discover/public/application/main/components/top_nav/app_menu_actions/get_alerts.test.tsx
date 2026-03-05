@@ -38,6 +38,8 @@ const getAlertsMenuItem = async ({
     tabId: toolkit.getCurrentTab().id,
   });
 
+  const currentTab = toolkit.getCurrentTab();
+
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
     adHocDataViews: [],
@@ -51,6 +53,8 @@ const getAlertsMenuItem = async ({
   return getAlertsAppMenuItem({
     discoverParams: discoverParamsMock,
     services,
+    tabId: currentTab.id,
+    getState: toolkit.internalState.getState,
   });
 };
 

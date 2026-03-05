@@ -121,6 +121,8 @@ export const useTopNavLinks = ({
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
+        tabId: currentTab.id,
+        getState,
       });
       items.push(alertsAppMenuItem);
     }
@@ -197,6 +199,7 @@ export const useTopNavLinks = ({
     appId,
     onOpenInspector,
     dispatch,
+    getState,
     isEsqlMode,
     currentDataView,
     currentTab,

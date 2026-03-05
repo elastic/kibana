@@ -20,7 +20,8 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/d
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
-import { useCurrentTabSelector } from '../../../state_management/redux';
+import type { DiscoverInternalState } from '../../../state_management/redux';
+import { selectTab } from '../../../state_management/redux/selectors';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -39,8 +40,10 @@ const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
+  tabId: string;
+  getState: () => DiscoverInternalState;
   onFinishAction: () => void;
-}> = ({ discoverParams, services, onFinishAction = () => {} }) => {
+}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -50,7 +53,9 @@ const CreateAlertFlyout: React.FC<{
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
-  const currentTab = useCurrentTabSelector((state) => state);
+
+  // Get fresh tab state when the component renders
+  const currentTab = selectTab(getState(), tabId);
   const timeField = getTimeField(dataView);
   const { query, savedQuery: savedQueryId } = currentTab.appState;
 
@@ -119,9 +124,13 @@ const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
+  tabId,
+  getState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
+  tabId: string;
+  getState: () => DiscoverInternalState;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -166,6 +175,8 @@ export const getAlertsAppMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
+              tabId={tabId}
+              getState={getState}
             />
           );
         },
