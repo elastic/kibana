@@ -92,7 +92,9 @@ export const UpdateWorkflowInsightRequestSchema = {
     metadata: schema.maybe(
       schema.object({
         notes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-        message_variables: schema.maybe(arrayWithNonEmptyString('message_variable', { maxSize: 50 })),
+        message_variables: schema.maybe(
+          arrayWithNonEmptyString('message_variable', { maxSize: 50 })
+        ),
       })
     ),
   }),
