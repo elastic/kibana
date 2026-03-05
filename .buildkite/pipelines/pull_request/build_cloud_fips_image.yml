@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/fips/build_cloud_fips_image.sh
-    cancel_on_build_failing: true
     label: 'Build Cloud FIPS Image'
     agents:
       machineType: n2-standard-2

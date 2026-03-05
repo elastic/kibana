@@ -81,7 +81,7 @@
         "tags": [],
         "label": "AiButtonDefault",
         "description": [
-          "\nRenders the default text AI button variants (`base` and `accent`)."
+          "\nRenders the default text AI button variants (`base` and `accent`).\nDefault variant is `'base'` when omitted."
         ],
         "signature": [
           "(props: ",
@@ -95,7 +95,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -119,7 +119,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,

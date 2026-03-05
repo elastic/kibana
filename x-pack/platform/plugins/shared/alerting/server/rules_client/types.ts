@@ -13,6 +13,7 @@ import type {
   ISavedObjectsRepository,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -88,6 +89,8 @@ export interface RulesClientContext {
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly shouldGrantUiam?: boolean;
+  readonly isServerless: boolean;
+  readonly featureFlags: FeatureFlagsStart;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

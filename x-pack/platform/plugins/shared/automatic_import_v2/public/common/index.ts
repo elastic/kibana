@@ -16,6 +16,7 @@ export { useUploadSamples } from './hooks/use_upload_samples';
 export { useDeleteDataStream } from './hooks/use_delete_data_stream';
 export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
 export { useReanalyzeDataStream } from './hooks/use_reanalyze_data_stream';
+export { useUpdateDataStreamPipeline } from './hooks/use_update_data_stream_pipeline';
 
 export {
   INDEX_VALIDATION_FAILED,
@@ -35,6 +36,7 @@ export {
   createIntegration,
   getAllIntegrations,
   getIntegrationById,
+  updateDataStreamPipeline,
 } from './lib/api';
 export { getIntegrationNameFromResponse } from './lib/api_parsers';
 
@@ -43,6 +45,7 @@ export type {
   CreateUpdateIntegrationRequest,
   UploadSamplesRequest,
   GetDataStreamResultsResponse,
+  UpdateDataStreamPipelineRequest,
 } from './lib/api';
 
 export { getLangSmithOptions } from './lib/lang_smith';
