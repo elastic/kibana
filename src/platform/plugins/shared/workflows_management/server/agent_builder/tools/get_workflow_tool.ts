@@ -13,23 +13,23 @@ import { z } from '@kbn/zod';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
-export const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
+export const GET_WORKFLOW_TOOL_ID = 'platform.workflows.get_workflow';
 
-export function registerValidateWorkflowTool(
+export function registerGetWorkflowTool(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: VALIDATE_WORKFLOW_TOOL_ID,
+    id: GET_WORKFLOW_TOOL_ID,
     type: ToolType.builtin,
-    description: `Validate a workflow YAML string against all validation rules.
-Use this tool AFTER generating or modifying workflow YAML and BEFORE proposing changes to the user.
-It checks YAML syntax, schema conformance, step name uniqueness, and Liquid template syntax.
-If validation fails, fix the issues and re-validate until the YAML is valid.`,
+    description: `Get full details of a workflow by its ID, including the complete YAML definition.
+
+**When to use:** After listing workflows with list_workflows, to inspect a specific workflow's YAML for reference or reuse.
+**When NOT to use:** To discover workflows (use list_workflows first).`,
     schema: z.object({
-      yaml: z.string().describe('The complete workflow YAML string to validate'),
+      workflowId: z.string().describe('The workflow ID to retrieve'),
     }),
-    tags: ['workflows', 'yaml', 'validation'],
+    tags: ['workflows', 'yaml'],
     availability: {
       handler: async ({ uiSettings }) => {
         const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
@@ -39,13 +39,31 @@ If validation fails, fix the issues and re-validate until the YAML is valid.`,
       },
       cacheMode: 'space',
     },
-    handler: async ({ yaml }, { spaceId, request }) => {
-      const result = await api.validateWorkflow(yaml, spaceId, request);
+    handler: async ({ workflowId }, { spaceId }) => {
+      const workflow = await api.getWorkflow(workflowId, spaceId);
+
+      if (!workflow) {
+        return {
+          results: [
+            {
+              type: 'other' as const,
+              data: { error: `Workflow "${workflowId}" not found` },
+            },
+          ],
+        };
+      }
+
       return {
         results: [
           {
             type: 'other' as const,
-            data: { result },
+            data: {
+              id: workflow.id,
+              name: workflow.name,
+              description: workflow.description,
+              enabled: workflow.enabled,
+              yaml: workflow.yaml,
+            },
           },
         ],
       };

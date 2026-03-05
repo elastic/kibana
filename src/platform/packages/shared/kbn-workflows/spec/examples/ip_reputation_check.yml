@@ -1,0 +1,73 @@
+name: IP Reputation Check
+description: Check IP address reputation using AbuseIPDB and enrich with geolocation data.
+
+consts:
+  api_key: API-KEY
+  abuseipdb_base_url: https://api.abuseipdb.com/api/v2
+  ipapi_base_url: http://ip-api.com/json
+
+inputs:
+  - name: ip_address
+    type: string
+    description: The IP address to check for malicious activity (e.g., 8.8.8.8)
+    required: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: check_abuseipdb
+    type: http
+    with:
+      url: '{{ consts.abuseipdb_base_url }}/check?ipAddress={{ inputs.ip_address }}&maxAgeInDays=90&verbose=true'
+      method: GET
+      headers:
+        Key: '{{ consts.api_key }}'
+        Accept: application/json
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: 3s
+      continue: true
+
+  - name: get_geolocation
+    type: http
+    with:
+      url: '{{ consts.ipapi_base_url }}/{{ inputs.ip_address }}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting'
+      method: GET
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: 2s
+      continue: true
+
+  - name: format_results
+    type: console
+    with:
+      message: |
+        === IP Threat Intelligence Report ===
+        IP Address: {{ inputs.ip_address }}
+
+        AbuseIPDB Results:
+        - Abuse Confidence Score: {{ steps.check_abuseipdb.output.data.data.abuseConfidenceScore }}%
+        - Total Reports: {{ steps.check_abuseipdb.output.data.data.totalReports }}
+        - Is Whitelisted: {{ steps.check_abuseipdb.output.data.data.isWhitelisted }}
+        - Country: {{ steps.check_abuseipdb.output.data.data.countryCode }}
+        - ISP: {{ steps.check_abuseipdb.output.data.data.isp }}
+
+        Geolocation Results:
+        - Country: {{ steps.get_geolocation.output.data.country }} ({{ steps.get_geolocation.output.data.countryCode }})
+        - Region: {{ steps.get_geolocation.output.data.regionName }}
+        - City: {{ steps.get_geolocation.output.data.city }}
+        - ISP: {{ steps.get_geolocation.output.data.isp }}
+        - Is Proxy: {{ steps.get_geolocation.output.data.proxy }}
+        - Is Hosting: {{ steps.get_geolocation.output.data.hosting }}
+
+        Threat Assessment:
+        {% if steps.check_abuseipdb.output.data.abuseConfidenceScore > 75 %}
+        HIGH RISK - This IP has a high abuse confidence score
+        {% elsif steps.check_abuseipdb.output.data.abuseConfidenceScore > 25 %}
+        MEDIUM RISK - This IP has been reported for abuse
+        {% else %}
+        LOW RISK - No significant abuse reports
+        {% endif %}

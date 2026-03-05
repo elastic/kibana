@@ -1,0 +1,21 @@
+version: '1'
+name: Invoke an Agent
+description: Triggers an AI agent to triage a security alert using the Kibana Agent Builder API.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: alert
+
+steps:
+  - name: log_for_debug
+    type: console
+    with:
+      message: '{{ event | json }}'
+
+  - name: kibana_post_agent_builder_converse_step
+    type: kibana.post_agent_builder_converse
+    with:
+      agent_id: alert.triage
+      input: 'Triage the following alert based on your system instructions: {{event | json}}'
+    timeout: 600s
