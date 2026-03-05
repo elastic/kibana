@@ -71,6 +71,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                auth_mode: 'shared',
               });
               break;
             default:

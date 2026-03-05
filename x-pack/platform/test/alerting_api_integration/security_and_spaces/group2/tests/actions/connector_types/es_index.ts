@@ -72,6 +72,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
+        auth_mode: 'shared',
       });
 
       // create action with all config props

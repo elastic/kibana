@@ -67,7 +67,6 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             apiUrl: simulatorUrl,
           },
           is_connector_type_deprecated: false,
-          auth_mode: 'shared',
         });
       });
 

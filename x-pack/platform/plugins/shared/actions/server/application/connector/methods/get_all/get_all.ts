@@ -20,7 +20,6 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 
@@ -122,7 +121,6 @@ async function getAllHelper({
   const mergedResult = [
     ...savedObjectsActions,
     ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
-      const authMode = getAuthMode(connector.authMode);
       return {
         id: connector.id,
         actionTypeId: connector.actionTypeId,
@@ -132,7 +130,7 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
-        authMode,
+        authMode: connector.authMode ? connector.authMode : 'shared',
       };
     }),
   ].sort((a, b) => a.name.localeCompare(b.name));
@@ -183,7 +181,6 @@ export async function getAllSystemConnectors({
 
   const transformedSystemConnectors = systemConnectors
     .map((systemConnector) => {
-      const authMode = getAuthMode(systemConnector.authMode);
       return {
         id: systemConnector.id,
         actionTypeId: systemConnector.actionTypeId,
@@ -194,7 +191,7 @@ export async function getAllSystemConnectors({
         isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
           systemConnector.actionTypeId
         ),
-        authMode,
+        authMode: systemConnector.authMode ? systemConnector.authMode : 'shared',
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));

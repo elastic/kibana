@@ -48,6 +48,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
             unencrypted: `This value shouldn't get encrypted`,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
     });
 
@@ -88,6 +89,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           connector_type_id: '.slack',
           name: 'Slack#xyz',
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
     });
 

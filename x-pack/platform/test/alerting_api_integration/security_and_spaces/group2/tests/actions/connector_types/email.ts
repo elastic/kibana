@@ -93,6 +93,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -480,6 +481,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -550,6 +552,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -629,6 +632,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           clientId: '12345',
           tenantId: '1234567',
         },
+        auth_mode: 'shared',
       });
     });
 
