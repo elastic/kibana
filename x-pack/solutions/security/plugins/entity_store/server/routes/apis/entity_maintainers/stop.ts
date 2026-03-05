@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { entityMaintainersRegistry } from '../../../tasks/entity_maintainers/entity_maintainers_registry';
-
-const StopMaintainerParamsSchema = z
-  .object({
-    id: z.string().min(1, 'id is required'),
-  })
-  .superRefine(validateMaintainerIdExists);
+import { maintainerIdParamsSchema } from './utils/validator';
 
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
   router.versioned
@@ -35,7 +28,7 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(StopMaintainerParamsSchema),
+            params: buildRouteValidationWithZod(maintainerIdParamsSchema),
           },
         },
       },
@@ -51,14 +44,4 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
         return res.ok({ body: { ok: true } });
       })
     );
-}
-
-function validateMaintainerIdExists(data: { id: string }, ctx: z.RefinementCtx): void {
-  if (!entityMaintainersRegistry.hasId(data.id)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['id'],
-      message: 'Entity maintainer not found',
-    });
-  }
 }
