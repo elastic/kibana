@@ -119,9 +119,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const connectorIdInput = await testSubjects.find('connectorIdInput');
       const autoPopulatedId = await connectorIdInput.getAttribute('value');
       expect(autoPopulatedId).to.eql('my-test-connector');
-
-      // Close without saving
-      await testSubjects.click('create-connector-flyout-close-btn');
     });
 
     it('should show connector ID as disabled when editing an existing connector', async () => {
