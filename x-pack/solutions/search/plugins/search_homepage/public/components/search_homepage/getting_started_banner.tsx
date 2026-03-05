@@ -58,7 +58,7 @@ export const GettingStartedBanner = () => {
                 <EuiButton
                   data-test-subj="searchHomepageGettingStartedBannerGetStartedWithElasticsearchButton"
                   iconSide="left"
-                  iconType="launch"
+                  iconType="rocket"
                   color="primary"
                   size="s"
                   onClick={() => application.navigateToApp('searchGettingStarted')}

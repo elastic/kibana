@@ -142,7 +142,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                 <EuiButtonEmpty
                   data-telemetry-id={`${dataTelemetryIdPrefix}-documents-docsPerPage`}
                   size="s"
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   iconSide="right"
                   onClick={() => {
                     setIsPopoverOpen(true);
@@ -237,7 +237,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               }}
             />
           }
-          iconType="search"
+          iconType="magnify"
         >
           <p>
             <FormattedMessage

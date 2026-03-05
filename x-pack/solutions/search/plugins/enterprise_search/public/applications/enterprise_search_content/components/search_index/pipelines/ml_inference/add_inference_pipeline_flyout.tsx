@@ -285,7 +285,7 @@ export const AddInferencePipelineFooter: React.FC<
         {previousStep !== undefined ? (
           <EuiButtonEmpty
             flush="both"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={() =>
               onAddInferencePipelineStepChange(previousStep as AddInferencePipelineSteps)
             }
@@ -298,7 +298,7 @@ export const AddInferencePipelineFooter: React.FC<
         {nextStep !== undefined ? (
           <EuiButton
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             iconSide="right"
             onClick={() => onAddInferencePipelineStepChange(nextStep as AddInferencePipelineSteps)}
             disabled={!isContinueButtonEnabled}

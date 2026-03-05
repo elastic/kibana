@@ -37,7 +37,7 @@ export const CreateIndexButton: React.FC = () => {
   return createIndexUrl ? (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiButton
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="createIndexButton"
       href={createIndexUrl}
       onClick={handleCreateIndexClick}

@@ -154,7 +154,7 @@ const apiKeyStep = (
           <EuiButton
             data-test-subj="enterpriseSearchApiKeyStepCreateApiKeyButton"
             iconSide="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={openApiKeyModal}
             data-telemetry-id="entSearchContent-analytics-apiKey-createApiKeyButton"
           >
@@ -170,7 +170,7 @@ const apiKeyStep = (
           <EuiButton
             data-test-subj="enterpriseSearchApiKeyStepViewKeysButton"
             iconSide="left"
-            iconType="popout"
+            iconType="external"
             data-telemetry-id="entSearchContent-analytics-apiKey-viewKeysButton"
             onClick={() =>
               navigateToUrl('/app/management/security/api_keys', {

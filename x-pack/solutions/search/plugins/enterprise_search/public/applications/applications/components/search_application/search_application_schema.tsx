@@ -311,7 +311,7 @@ export const SearchApplicationSchema: React.FC = () => {
       render: (schemaField: SchemaField) => {
         const { name, type, indices } = schemaField;
         if (type === 'conflict' || indices.some((i) => i.type === 'unmapped')) {
-          const icon = itemIdToExpandedRowMap[name] ? 'arrowUp' : 'arrowDown';
+          const icon = itemIdToExpandedRowMap[name] ? 'chevronSingleUp' : 'chevronSingleDown';
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
               <EuiButtonEmpty
@@ -338,7 +338,7 @@ export const SearchApplicationSchema: React.FC = () => {
   ];
   const filterButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setIsFilterByPopoverOpen(!isFilterByPopoverOpen)}
       numFilters={selectedEsFieldTypes.length}

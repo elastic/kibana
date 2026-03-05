@@ -74,7 +74,7 @@ const SharedPipelineBadge: React.FC = () => (
       { defaultMessage: 'This pipeline is shared across all Search ingestion methods' }
     )}
   >
-    <EuiBadge iconType="logstashIf" color="hollow" tabIndex={0}>
+    <EuiBadge iconType="if" color="hollow" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.shared',
         { defaultMessage: 'Shared' }
@@ -111,7 +111,7 @@ const MlInferenceBadge: React.FC = () => (
       }
     )}
   >
-    <EuiBadge iconType="compute" color="hollow" tabIndex={0}>
+    <EuiBadge iconType="processor" color="hollow" tabIndex={0}>
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.mlInference',
         { defaultMessage: 'ML Inference' }

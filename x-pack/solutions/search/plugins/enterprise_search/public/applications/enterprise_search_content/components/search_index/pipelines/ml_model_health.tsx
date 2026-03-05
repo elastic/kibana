@@ -214,7 +214,7 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
           data-test-subj="enterpriseSearchTrainedModelHealthPopoverButton"
           iconSide="right"
           flush="both"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => onClickAction()}
         >
           <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>

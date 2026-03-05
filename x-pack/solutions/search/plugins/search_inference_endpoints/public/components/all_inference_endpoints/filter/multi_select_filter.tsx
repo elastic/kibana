@@ -62,7 +62,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
         ownFocus
         button={
           <EuiFilterButton
-            iconType={'arrowDown'}
+            iconType={'chevronSingleDown'}
             onClick={toggleIsPopoverOpen}
             isSelected={isPopoverOpen}
             numFilters={options.length}

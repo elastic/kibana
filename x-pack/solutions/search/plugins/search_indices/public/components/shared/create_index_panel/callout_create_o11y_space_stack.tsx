@@ -19,7 +19,7 @@ export const CreateIndexPanelCreateO11ySpaceBtn = () => {
     <EuiButtonEmpty
       color="text"
       iconSide="right"
-      iconType="popout"
+      iconType="external"
       data-test-subj="createO11ySpaceBtn"
       href={o11yCreateSpaceLink}
       target="_blank"

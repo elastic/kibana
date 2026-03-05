@@ -37,7 +37,7 @@ export const DocCallouts: React.FC<DocCalloutsProps> = ({
         <EuiButtonEmpty
           href={buttonHref}
           target="_blank"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           flush="left"
           data-test-subj={dataTestSubj}

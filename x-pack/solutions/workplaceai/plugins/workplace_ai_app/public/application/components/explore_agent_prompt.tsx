@@ -174,7 +174,7 @@ export const ExploreAgentPrompt: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      iconType="arrowUp"
+                      iconType="chevronSingleUp"
                       aria-label={i18n.translate(
                         'xpack.workplaceai.exploreAgentPrompt.submitAriaLabel',
                         {

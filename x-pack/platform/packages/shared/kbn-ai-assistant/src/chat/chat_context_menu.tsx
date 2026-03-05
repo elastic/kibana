@@ -71,7 +71,7 @@ export function ChatContextMenu({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="copyConversationToClipboard"
-      icon="copyClipboard"
+      icon="copy"
       onClick={() => {
         onCopyToClipboardClick();
         setIsPopoverOpen(false);

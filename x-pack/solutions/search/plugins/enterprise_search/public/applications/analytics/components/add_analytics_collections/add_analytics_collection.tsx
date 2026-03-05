@@ -32,7 +32,7 @@ export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({
       ) : (
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={showModal}
           disabled={disabled}
           data-test-subj="create-analytics-collection-btn"

@@ -367,7 +367,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiButton
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                     onClick={handleAddCriteria}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     iconSide="left"
                     size="s"
                     color={criteriaCount === 0 ? 'primary' : 'text'}

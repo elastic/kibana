@@ -261,7 +261,7 @@ export const SnapshotsSection: React.FC = () => {
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       {status === 'Sync error' && (
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="alert" color="danger" />
+                          <EuiIcon type="warning" color="danger" />
                         </EuiFlexItem>
                       )}
                       <EuiFlexItem>

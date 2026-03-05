@@ -131,7 +131,7 @@ export const SearchApplicationAPI = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconSide="left"
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 onClick={openGenerateModal}
                 data-telemetry-id="entSearchApplications-searchApi-step2-createApiKeyButton"
               >
@@ -146,7 +146,7 @@ export const SearchApplicationAPI = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconSide="left"
-                iconType="popout"
+                iconType="external"
                 data-telemetry-id="entSearchApplications-searchApi-step2-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {

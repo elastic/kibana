@@ -58,7 +58,7 @@ export const IndexloadingError = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             color="danger"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={() => navigateToIndexListPage()}
             data-test-subj="loadingErrorBackToIndicesButton"
           >

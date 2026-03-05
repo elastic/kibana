@@ -152,7 +152,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
         actions={[
           <EuiButton
             size="s"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             disabled={isEditing}
             onClick={handleEditNewItem}
             color="primary"

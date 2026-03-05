@@ -127,7 +127,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={
-              <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
+              <EuiButton iconType="chevronSingleDown" iconSide="right" onClick={togglePopover}>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.manageButton"
                   defaultMessage="Manage"
@@ -172,7 +172,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               {discoverLink && (
                 <EuiContextMenuItem
-                  icon="visArea"
+                  icon="chartArea"
                   href={discoverLink}
                   size="s"
                   data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}

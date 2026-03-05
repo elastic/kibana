@@ -39,7 +39,7 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
                 defaultMessage: 'Remove index from sources',
               }),
               color: 'text',
-              iconType: 'minusInCircle',
+              iconType: 'minusCircle',
               onClick: () => onRemoveClick(index),
               disabled: indices.length === 1,
               'data-test-subj': `removeIndexButton`,

@@ -19,12 +19,5 @@ export const CopyActionButton: React.FC<CopyActionButtonProps> = ({ copyText, ar
     navigator.clipboard.writeText(copyText);
   };
 
-  return (
-    <EuiButtonIcon
-      aria-label={ariaLabel}
-      color="text"
-      iconType="copyClipboard"
-      onClick={handleCopy}
-    />
-  );
+  return <EuiButtonIcon aria-label={ariaLabel} color="text" iconType="copy" onClick={handleCopy} />;
 };
