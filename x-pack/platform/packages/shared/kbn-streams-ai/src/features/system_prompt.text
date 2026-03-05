@@ -1,23 +1,5 @@
 You are extracting **features** from log data. Features are stable facts about real system components that are **explicitly supported by log evidence**. Prioritize **correctness, deduplication, and actionable details**.
 
-## Deleted Features
-
-If `deleted_features` are provided in the input, the user has explicitly removed those features. Do **not** regenerate any feature that represents the **exact same real-world component** as a deleted feature.
-
-**Exclusion rules:**
-- Only exclude a feature when you are **100 % certain** it refers to the same real-world component as a deleted feature. When in doubt, **generate the feature**.
-- Features that are similar but represent genuinely different components **must** still be generated. For example, if `service-1` is deleted, `service-2` is a different component and must be emitted.
-- Do not rely on superficial signals such as shared naming patterns, shared type/subtype, or overlapping tags. Base your decision solely on whether the two features describe the identical real-world entity or fact.
-
-**Reporting ignored features:**
-For every feature you decide **not** to generate because it matches a deleted feature, include an entry in the `ignored_features` array of `finalize_features` with:
-- `feature_id`: the id you would have assigned to the feature.
-- `feature_title`: the title you would have assigned.
-- `deleted_feature_id`: the id of the deleted feature it matched.
-- `reason`: one sentence explaining why you consider them the same component.
-
-## Goal
-
 The primary goal is to identify **entities** (what distinct components exist in the system) and **dependencies** (how they are connected). Additionally, extract relevant **infrastructure** and **technology** details as standalone features when they provide independent value.
 
 Every feature you output MUST include ALL required fields:
@@ -160,6 +142,22 @@ Version formatting rules (important for vulnerability analysis):
 - Strip leading `v` and surrounding text; keep only the numeric portion when possible
 - If the original version contains labels (LTS/Enterprise/codename/build metadata), store the normalized numeric part in `properties.version` and store the original in `meta.raw_version`
 - Remove codenames/release names/edition labels from `properties.version`
+
+## Deleted Features
+
+If `deleted_features` are provided in the input, the user has explicitly removed those features. Do **not** regenerate any feature that represents the **exact same real-world component** as a deleted feature.
+
+**Exclusion rules:**
+- Only exclude a feature when you are **100 % certain** it refers to the same real-world component as a deleted feature. When in doubt, **generate the feature**.
+- Features that are similar but represent genuinely different components **must** still be generated. For example, if `service-1` is deleted, `service-2` is a different component and must be emitted.
+- Do not rely on superficial signals such as shared naming patterns, shared type/subtype, or overlapping tags. Base your decision solely on whether the two features describe the identical real-world entity or fact.
+
+**Reporting ignored features:**
+For every feature you decide **not** to generate because it matches a deleted feature, include an entry in the `ignored_features` array of `finalize_features` with:
+- `feature_id`: the id you would have assigned to the feature.
+- `feature_title`: the title you would have assigned.
+- `deleted_feature_id`: the id of the deleted feature it matched.
+- `reason`: one sentence explaining why you consider them the same component.
 
 ## Examples
 

@@ -71,6 +71,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 total_tokens_used: 0,
                 inferred_total_count: 0,
                 inferred_dedup_count: 0,
+                deleted_features_count: 0,
+                llm_ignored_count: 0,
+                code_ignored_count: 0,
                 state: 'success',
               };
 
@@ -231,10 +234,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { features }
                 );
 
+                const codeIgnoredCount =
+                  inferredBaseFeatures.length - nonDeletedInferredFeatures.length;
+
                 taskContext.telemetry.trackFeaturesIdentified({
                   ...telemetryProps,
                   inferred_total_count: inferredBaseFeatures.length,
                   inferred_dedup_count: newFeaturesCount,
+                  deleted_features_count: deletedFeatures.length,
+                  llm_ignored_count: ignoredFeatures.length,
+                  code_ignored_count: codeIgnoredCount,
                   total_duration_ms: Date.now() - taskStart,
                   state: 'success',
                 });
