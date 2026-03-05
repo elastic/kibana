@@ -163,11 +163,7 @@ export function ClassicHeader() {
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                {hasAppMenuConfig ? (
-                  <HeaderAppMenu />
-                ) : (
-                  <HeaderActionMenu />
-                )}
+                {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
