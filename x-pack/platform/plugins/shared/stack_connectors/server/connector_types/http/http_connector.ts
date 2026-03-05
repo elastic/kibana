@@ -168,6 +168,7 @@ export async function executor(
     logger,
     connectorUsageCollector,
     services,
+    signal,
   } = execOptions;
 
   const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
@@ -240,6 +241,7 @@ export async function executor(
       connectorUsageCollector,
       keepAlive,
       maxRedirects,
+      signal,
     })
   );
 

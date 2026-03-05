@@ -53,11 +53,22 @@ export interface TextAttachmentData {
   content: string;
 }
 
+export const screenContextTimeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
+
+export interface ScreenContextTimeRange {
+  from: string;
+  to: string;
+}
+
 export const screenContextAttachmentDataSchema = z
   .object({
     url: z.string().optional(),
     app: z.string().optional(),
     description: z.string().optional(),
+    time_range: screenContextTimeRangeSchema.optional(),
     additional_data: z.record(z.string(), z.string()).optional(),
   })
   .check((ctx) => {
@@ -82,15 +93,23 @@ export interface ScreenContextAttachmentData {
   app?: string;
   /** app description */
   description?: string;
+  /** the currently active time range */
+  time_range?: ScreenContextTimeRange;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
 }
+
+export const visualizationTimeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
 
 export const visualizationAttachmentDataSchema = z.object({
   query: z.string(),
   visualization: z.record(z.string(), z.unknown()),
   chart_type: z.string(),
   esql: z.string(),
+  time_range: visualizationTimeRangeSchema.optional(),
 });
 
 /**
@@ -106,6 +125,8 @@ export interface VisualizationAttachmentData {
   chart_type: string;
   /** The ES|QL query */
   esql: string;
+  /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
+  time_range?: { from: string; to: string };
 }
 
 export const visualizationOriginDataSchema = z.object({
