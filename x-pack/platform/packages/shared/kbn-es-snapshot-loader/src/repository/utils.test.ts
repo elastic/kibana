@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { getSnapshotMetadata } from './repository';
+import { getSnapshotMetadata } from './utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
 const log = new ToolingLog({
