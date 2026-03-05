@@ -115,7 +115,7 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
 
   return rightPanelParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj ?? FLYOUT_LINK_TEST_ID}>
-      {children ?? field}
+      {children ?? value}
     </EuiLink>
   ) : (
     <>{children ?? value}</>

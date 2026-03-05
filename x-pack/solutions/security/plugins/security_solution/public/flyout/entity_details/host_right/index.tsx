@@ -11,6 +11,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { euid } from '@kbn/entity-store/public';
+import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
@@ -103,7 +104,7 @@ export const HostPanel = ({
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.host,
-    filterQuery: hostFilterQuery,
+    filterQuery: hostFilterQuery as ESQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled,

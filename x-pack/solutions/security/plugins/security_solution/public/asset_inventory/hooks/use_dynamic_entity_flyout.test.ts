@@ -99,7 +99,6 @@ describe('useDynamicEntityFlyout', () => {
           entityIdentifiers: { 'user.name': 'testUser' },
           scopeId: 'scope1',
           contextID: 'context1',
-          isPreviewMode: false,
         },
       },
     });
