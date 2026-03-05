@@ -7,7 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { ExperimentalFeatures } from '../../../common';
 import { coreMock } from '@kbn/core/server/mocks';
 import {

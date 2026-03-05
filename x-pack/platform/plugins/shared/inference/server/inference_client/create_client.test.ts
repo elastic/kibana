@@ -47,25 +47,29 @@ describe('createClient', () => {
     it('calls createInferenceClient and return the client', () => {
       const expectedResult = Symbol('expected') as any;
       createInferenceClientMock.mockReturnValue(expectedResult);
+      const anonymizationRulesPromise = Promise.resolve([]);
 
       const result = createClient({
         request,
         actions,
         logger,
         esClient: mockEsClient,
-        anonymizationRulesPromise: Promise.resolve([]),
+        anonymizationRulesPromise,
         regexWorker,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
-      expect(createInferenceClientMock).toHaveBeenCalledWith({
-        request,
-        actions,
-        logger: logger.get('client'),
-        esClient: mockEsClient,
-        anonymizationRulesPromise: Promise.resolve([]),
-        regexWorker,
-      });
+      expect(createInferenceClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request,
+          actions,
+          namespace: 'default',
+          logger: logger.get('client'),
+          esClient: mockEsClient,
+          anonymizationRulesPromise,
+          regexWorker,
+        })
+      );
 
       expect(bindClientMock).not.toHaveBeenCalled();
 
@@ -98,6 +102,7 @@ describe('createClient', () => {
     it('calls createInferenceClient and bindClient and forward the expected value', () => {
       const createInferenceResult = Symbol('createInferenceResult') as any;
       createInferenceClientMock.mockReturnValue(createInferenceResult);
+      const anonymizationRulesPromise = Promise.resolve([]);
 
       const bindClientResult = Symbol('bindClientResult') as any;
       bindClientMock.mockReturnValue(bindClientResult);
@@ -110,19 +115,22 @@ describe('createClient', () => {
           connectorId: '.my-connector',
         },
         esClient: mockEsClient,
-        anonymizationRulesPromise: Promise.resolve([]),
+        anonymizationRulesPromise,
         regexWorker,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
-      expect(createInferenceClientMock).toHaveBeenCalledWith({
-        request,
-        actions,
-        logger: logger.get('client'),
-        esClient: mockEsClient,
-        anonymizationRulesPromise: Promise.resolve([]),
-        regexWorker,
-      });
+      expect(createInferenceClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request,
+          actions,
+          namespace: 'default',
+          logger: logger.get('client'),
+          esClient: mockEsClient,
+          anonymizationRulesPromise,
+          regexWorker,
+        })
+      );
 
       expect(bindClientMock).toHaveBeenCalledTimes(1);
       expect(bindClientMock).toHaveBeenCalledWith(createInferenceResult, {
