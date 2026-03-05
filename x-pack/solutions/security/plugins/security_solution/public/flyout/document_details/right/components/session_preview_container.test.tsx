@@ -16,7 +16,7 @@ import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('../../shared/hooks/use_session_view_config');
