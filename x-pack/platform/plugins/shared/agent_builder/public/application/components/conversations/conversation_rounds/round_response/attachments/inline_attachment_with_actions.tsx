@@ -6,9 +6,13 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  UnknownAttachment,
+  ScreenContextAttachmentData,
+} from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
@@ -17,6 +21,7 @@ interface InlineAttachmentWithActionsProps {
   attachmentsService: AttachmentsService;
   isSidebar: boolean;
   conversationId: string;
+  screenContext?: ScreenContextAttachmentData;
 }
 
 /**
@@ -27,8 +32,10 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   attachmentsService,
   isSidebar,
   conversationId,
+  screenContext,
 }) => {
   const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
+  const { conversationActions } = useConversationContext();
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
@@ -36,9 +43,11 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
-      return attachmentsService.updateOrigin(conversationId, attachment.id, origin);
+      const result = await attachmentsService.updateOrigin(conversationId, attachment.id, origin);
+      conversationActions.invalidateConversation();
+      return result;
     },
-    [attachmentsService, conversationId, attachment.id]
+    [attachmentsService, conversationId, attachment.id, conversationActions]
   );
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
@@ -63,7 +72,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     return null;
   }
 
-  const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   return (
     <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
@@ -73,7 +82,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar, screenContext })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

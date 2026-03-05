@@ -18,17 +18,18 @@ describe('processMatches', () => {
     pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
   };
 
-  const phoneRule: RegexAnonymizationRule = {
+  // PHONE is intentionally represented as MISC until a canonical PHONE class is introduced.
+  const phoneLikeRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
-    entityClass: 'PHONE',
+    entityClass: 'MISC',
     pattern: '\\d{3}-\\d{3}-\\d{4}',
   };
 
   const domainRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
-    entityClass: 'DOMAIN',
+    entityClass: 'HOST_NAME',
     pattern: '[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
   };
 
@@ -65,7 +66,7 @@ describe('processMatches', () => {
     start,
     end: start + value.length,
     matchValue: value,
-    class_name: 'PHONE',
+    class_name: 'MISC',
     ruleIndex,
   });
 
@@ -81,7 +82,7 @@ describe('processMatches', () => {
     start,
     end: start + value.length,
     matchValue: value,
-    class_name: 'DOMAIN',
+    class_name: 'HOST_NAME',
     ruleIndex,
   });
 
@@ -91,7 +92,11 @@ describe('processMatches', () => {
 
     const result = resolveOverlapsAndMask({ detectedMatches, state, rules: [emailRule] });
 
-    const expectedMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
+    const expectedMask = getEntityMask({
+      value: 'carlos@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Email ${expectedMask} for help`);
     expect(result.anonymizations).toHaveLength(1);
     expect(result.anonymizations[0]).toEqual({
@@ -110,11 +115,19 @@ describe('processMatches', () => {
     const result = resolveOverlapsAndMask({
       detectedMatches,
       state,
-      rules: [emailRule, phoneRule],
+      rules: [emailRule, phoneLikeRule],
     });
 
-    const emailMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
-    const phoneMask = getEntityMask({ value: '555-123-4567', class_name: 'PHONE' });
+    const emailMask = getEntityMask({
+      value: 'carlos@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
+    const phoneMask = getEntityMask({
+      value: '555-123-4567',
+      class_name: 'MISC',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Email ${emailMask} or call ${phoneMask}`);
     expect(result.anonymizations).toHaveLength(2);
     expect(result.anonymizations[0]).toEqual({
@@ -123,7 +136,7 @@ describe('processMatches', () => {
     });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },
-      entity: { value: '555-123-4567', class_name: 'PHONE', mask: phoneMask },
+      entity: { value: '555-123-4567', class_name: 'MISC', mask: phoneMask },
     });
   });
 
@@ -141,12 +154,20 @@ describe('processMatches', () => {
     const result = resolveOverlapsAndMask({
       detectedMatches,
       state,
-      rules: [emailRule, phoneRule],
+      rules: [emailRule, phoneLikeRule],
     });
 
-    const emailMask = getEntityMask({ value: 'maria@test.com', class_name: 'EMAIL' });
-    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'PHONE' });
-    const emailMask2 = getEntityMask({ value: 'diego@example.org', class_name: 'EMAIL' });
+    const emailMask = getEntityMask({
+      value: 'maria@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
+    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'MISC', field: 'data' });
+    const emailMask2 = getEntityMask({
+      value: 'diego@example.org',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Email: ${emailMask}`);
     expect(result.records[0].data).toBe(`Phone: ${phoneMask}`);
     expect(result.records[1].content).toBe(`Contact ${emailMask2}`);
@@ -157,7 +178,7 @@ describe('processMatches', () => {
     });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },
-      entity: { value: '555-1234', class_name: 'PHONE', mask: phoneMask },
+      entity: { value: '555-1234', class_name: 'MISC', mask: phoneMask },
     });
     expect(result.anonymizations[2]).toEqual({
       rule: { type: 'RegExp' },
@@ -178,13 +199,48 @@ describe('processMatches', () => {
       rules: [emailRule, domainRule],
     });
 
-    const emailMask = getEntityMask({ value: 'sofia@example.com', class_name: 'EMAIL' });
+    const emailMask = getEntityMask({
+      value: 'sofia@example.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Contact ${emailMask} today`);
     expect(result.anonymizations).toHaveLength(1);
     expect(result.anonymizations[0]).toEqual({
       rule: { type: 'RegExp' },
       entity: { value: 'sofia@example.com', class_name: 'EMAIL', mask: emailMask },
     });
+  });
+
+  it('handles unsorted matches where a later rule matches at an earlier position', () => {
+    const content = 'Visit example.com or email admin@example.com today';
+    const state = createInitialState([{ content }]);
+    // Matches arrive in rule order (not position order): email rule first at pos 30,
+    // domain rule second at pos 6. Without sorting, the domain match at pos 6 would be
+    // incorrectly skipped because it appears after the email match in the array.
+    const detectedMatches = [
+      createEmailMatch(0, 'content', content.indexOf('admin@example.com'), 'admin@example.com', 0),
+      createDomainMatch(0, 'content', content.indexOf('example.com'), 'example.com', 1),
+    ];
+
+    const result = resolveOverlapsAndMask({
+      detectedMatches,
+      state,
+      rules: [emailRule, domainRule],
+    });
+
+    const domainMask = getEntityMask({
+      value: 'example.com',
+      class_name: 'HOST_NAME',
+      field: 'content',
+    });
+    const emailMask = getEntityMask({
+      value: 'admin@example.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
+    expect(result.records[0].content).toBe(`Visit ${domainMask} or email ${emailMask} today`);
+    expect(result.anonymizations).toHaveLength(2);
   });
 
   it('preserves existing anonymizations in state', () => {
@@ -214,7 +270,11 @@ describe('processMatches', () => {
         mask: getEntityMask({ value: 'existing', class_name: 'EXISTING' }),
       },
     });
-    const emailMask = getEntityMask({ value: 'luis@test.com', class_name: 'EMAIL' });
+    const emailMask = getEntityMask({
+      value: 'luis@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },
       entity: { value: 'luis@test.com', class_name: 'EMAIL', mask: emailMask },
