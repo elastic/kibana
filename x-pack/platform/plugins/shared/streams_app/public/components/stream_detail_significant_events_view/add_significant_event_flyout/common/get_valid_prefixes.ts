@@ -14,7 +14,7 @@ import {
 } from '@kbn/streams-schema';
 import type { ValidPrefixes } from '../../../esql_query_editor';
 
-export const getDefaultQueryFrom = (definition: Streams.all.Definition) =>
+const getDefaultQueryFrom = (definition: Streams.all.Definition) =>
   BasicPrettyPrinter.print(
     Builder.expression.query([
       Builder.command({

@@ -22,10 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
-import { StreamsESQLEditor, validatePrefix, type ValidPrefixes } from '../../../esql_query_editor';
+import { StreamsESQLEditor, validatePrefix } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { getDefaultQueryFrom } from '../common/get_valid_prefixes';
+import { getValidPrefixes } from '../common/get_valid_prefixes';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
@@ -48,10 +48,7 @@ export function GeneratedEventPreview({
 
   const [touched, setTouched] = useState({ title: false, esql: false });
   const validation = validateQuery(query);
-  const prefix = useMemo((): ValidPrefixes => {
-    const primary = getDefaultQueryFrom(definition);
-    return { primary };
-  }, [definition]);
+  const prefix = useMemo(() => getValidPrefixes(definition), [definition]);
   const prefixValidation = validatePrefix(query.esql.query, prefix);
 
   return (

@@ -6,7 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { getDefaultQueryFrom, getValidPrefixes } from './get_valid_prefixes';
+import { getValidPrefixes } from './get_valid_prefixes';
 
 const makeClassicDefinition = (name: string): Streams.ClassicStream.Definition => ({
   name,
@@ -32,18 +32,6 @@ const makeWiredDefinition = (name: string): Streams.WiredStream.Definition => ({
     wired: { fields: {}, routing: [] },
     failure_store: { inherit: {} },
   },
-});
-
-describe('getDefaultQueryFrom', () => {
-  it('returns FROM <name> for classic streams', () => {
-    const result = getDefaultQueryFrom(makeClassicDefinition('logs'));
-    expect(result).toBe('FROM logs METADATA _id, _source');
-  });
-
-  it('returns FROM <name>,<name>.* for wired streams', () => {
-    const result = getDefaultQueryFrom(makeWiredDefinition('logs'));
-    expect(result).toBe('FROM logs,logs.* METADATA _id, _source');
-  });
 });
 
 describe('getValidPrefixes', () => {

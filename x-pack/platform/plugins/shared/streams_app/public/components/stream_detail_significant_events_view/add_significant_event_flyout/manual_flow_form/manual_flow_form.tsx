@@ -41,6 +41,7 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
 }: ManualFlowFormProps) {
+  // Captured once at mount so that re-renders with new query props don't shift the allowed prefixes.
   const initialEsqlRef = useRef(query.esql.query);
   const validPrefixes = useMemo(
     () => getValidPrefixes(definition, initialEsqlRef.current),
