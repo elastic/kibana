@@ -10,7 +10,11 @@
 import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
+import {
+  ChartSectionTemplate,
+  UnifiedHistogramChart,
+  useUnifiedHistogram,
+} from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
@@ -226,6 +230,9 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
+      chartSectionTitle={i18n.translate('discover.chart.chartSectionTitle', {
+        defaultMessage: 'Chart',
+      })}
     />
   );
 };
@@ -298,6 +305,24 @@ const CustomChartSectionWrapper = ({
   }
 
   const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
+
+  if (!isComponentVisible && renderCustomChartToggleActions) {
+    if (!layoutProps.chart) {
+      return null;
+    }
+
+    const collapsedTitle = chartSectionConfig.renderCollapsedTitle?.(fetchParams);
+    return (
+      <ChartSectionTemplate
+        id="unifiedHistogramCollapsablePanel"
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          toggleActions: renderCustomChartToggleActions(),
+          leftSide: collapsedTitle ? [collapsedTitle] : undefined,
+        }}
+      />
+    );
+  }
 
   return (
     <KibanaSectionErrorBoundary

@@ -14,6 +14,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
+import { VIEW_MODE } from '../../../common/constants';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -42,20 +43,52 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
+  const isTableHidden = useAppStateSelector((state) => Boolean(state.hideDataTable));
+  const viewMode = useAppStateSelector((state) => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL);
+
+  // Mutual exclusion: you can't collapse both chart and table at the same time.
+  // If one is collapsed and the user collapses the other, it acts as a swap/toggle
+  const isInDocumentView = viewMode === VIEW_MODE.DOCUMENT_LEVEL;
 
   const onToggleChart = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
-  }, [dispatch, isChartHidden, updateAppState]);
+    const willHideChart = !isChartHidden;
+    if (willHideChart && isTableHidden && isInDocumentView) {
+      // Swap: hide chart, show table
+      dispatch(updateAppState({ appState: { hideChart: true, hideDataTable: false } }));
+    } else {
+      dispatch(updateAppState({ appState: { hideChart: willHideChart } }));
+    }
+  }, [dispatch, isChartHidden, isTableHidden, isInDocumentView, updateAppState]);
+
+  const onToggleTable = useCallback(() => {
+    const willHideTable = !isTableHidden;
+    if (willHideTable && isChartHidden && isChartAvailable) {
+      // Swap: hide table, show chart
+      dispatch(updateAppState({ appState: { hideDataTable: true, hideChart: false } }));
+    } else {
+      dispatch(updateAppState({ appState: { hideDataTable: willHideTable } }));
+    }
+  }, [dispatch, isTableHidden, isChartHidden, isChartAvailable, updateAppState]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
   const isInsideHistogram = renderedFor === 'histogram';
   const isInsideDiscoverContent = !isInsideHistogram;
+  const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
+
+  // Chart toggle: only in histogram toolbar (chart section).
+  // When chart is collapsed, the toggle stays in the collapsed chart bar
+  const showChartToggle = isInsideHistogram;
+
+  // Table toggle: only in tabs context when in document view and chart is available,
+  // since collapsing the table requires a chart to expand into
+  const showTableToggle =
+    isInTabsContext && viewMode === VIEW_MODE.DOCUMENT_LEVEL && isChartAvailable;
 
   const buttons = [
     ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
+    (isInsideDiscoverContent && isSidebarCollapsed && !isChartAvailable)
       ? [
           {
             label: i18n.translate('discover.panelsToggle.showSidebarButton', {
@@ -69,7 +102,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
           },
         ]
       : []),
-    ...(isInsideHistogram || (isInsideDiscoverContent && isChartAvailable && isChartHidden)
+    ...(showChartToggle
       ? [
           {
             label: isChartHidden
@@ -84,6 +117,24 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
             'aria-expanded': !isChartHidden,
             'aria-controls': 'unifiedHistogramCollapsablePanel',
             onClick: onToggleChart,
+          },
+        ]
+      : []),
+    ...(showTableToggle
+      ? [
+          {
+            label: isTableHidden
+              ? i18n.translate('discover.panelsToggle.showTableButton', {
+                  defaultMessage: 'Show table',
+                })
+              : i18n.translate('discover.panelsToggle.hideTableButton', {
+                  defaultMessage: 'Hide table',
+                }),
+            iconType: isTableHidden ? 'transitionTopOut' : 'transitionTopIn',
+            'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
+            'aria-expanded': !isTableHidden,
+            'aria-controls': 'discoverDocTable',
+            onClick: onToggleTable,
           },
         ]
       : []),

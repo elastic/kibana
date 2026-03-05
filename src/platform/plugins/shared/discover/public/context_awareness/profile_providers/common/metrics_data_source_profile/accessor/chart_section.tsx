@@ -9,7 +9,11 @@
 
 import React, { useCallback } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
+import {
+  UnifiedMetricsExperienceGrid,
+  categorizeFields,
+  MetricsCountLabel,
+} from '@kbn/unified-chart-section-viewer';
 import {
   internalStateActions,
   useAppStateSelector,
@@ -60,5 +64,17 @@ export const createChartSection =
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
       defaultTopPanelHeight: 'max-content',
+      renderCollapsedTitle: (fetchParams) => {
+        const { dataView, table } = fetchParams;
+        const { metricFields } = categorizeFields({
+          index: dataView.getIndexPattern(),
+          dataViewFieldMap: dataView.fields.toSpec(),
+          columns: table?.columns,
+        });
+        if (metricFields.length === 0) {
+          return null;
+        }
+        return <MetricsCountLabel count={metricFields.length} />;
+      },
     };
   };

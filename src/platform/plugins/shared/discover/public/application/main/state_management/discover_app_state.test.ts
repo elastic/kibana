@@ -113,6 +113,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
+        hideDataTable: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -120,6 +121,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
+        hideDataTable: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -133,6 +135,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
+        hideDataTable: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -140,6 +143,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: true,
+        hideDataTable: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -153,6 +157,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
+        hideDataTable: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -160,6 +165,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
+        hideDataTable: true,
         rowHeight: false,
         breakdownField: true,
       });
@@ -173,6 +179,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
+        hideDataTable: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -180,6 +187,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: false,
+        hideDataTable: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -196,6 +204,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
+        hideDataTable: false,
         rowHeight: false,
         breakdownField: false,
       });
@@ -203,6 +212,7 @@ describe('Test discover app state', () => {
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
+        hideDataTable: false,
         rowHeight: false,
         breakdownField: false,
       });

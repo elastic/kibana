@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiDelayRender, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -59,6 +59,7 @@ export interface UnifiedHistogramChartProps {
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
+  chartSectionTitle?: string;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   fetch$: UnifiedHistogramFetch$;
@@ -87,6 +88,7 @@ export function UnifiedHistogramChart({
   lensVisService,
   lensVisServiceState,
   renderCustomChartToggleActions,
+  chartSectionTitle,
   fetch$,
   fetchParams,
   lensAdapters,
@@ -249,7 +251,6 @@ export function UnifiedHistogramChart({
 
   const toolbarSelectors = useMemo(
     () => [
-      ,
       chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
@@ -281,7 +282,24 @@ export function UnifiedHistogramChart({
   };
 
   if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
-    return <div {...a11yCommonProps} data-test-subj="unifiedHistogramChartPanelHidden" />;
+    if (!isChartAvailable) {
+      return null;
+    }
+
+    return (
+      <ChartSectionTemplate
+        {...a11yCommonProps}
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          toggleActions: toolbarToggleActions,
+          leftSide: chartSectionTitle ? (
+            <EuiText size="s">
+              <strong>{chartSectionTitle}</strong>
+            </EuiText>
+          ) : undefined,
+        }}
+      />
+    );
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;

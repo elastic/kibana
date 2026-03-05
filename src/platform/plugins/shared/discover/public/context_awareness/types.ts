@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
 import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
@@ -162,6 +163,11 @@ export type ChartSectionConfiguration<T extends object = object> =
        * The default chart section height
        */
       defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+      /**
+       * Renders the title displayed in the collapsed chart bar when the chart is hidden.
+       * If not provided, no title is shown.
+       */
+      renderCollapsedTitle?: (fetchParams: ChartSectionProps['fetchParams']) => React.ReactNode;
     }
   | {
       replaceDefaultChart: false;
@@ -280,6 +286,10 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * The state for data table visibility toggle
+   */
+  hideDataTable?: boolean;
 }
 
 /**

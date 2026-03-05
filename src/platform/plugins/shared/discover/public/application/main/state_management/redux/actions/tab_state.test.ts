@@ -68,6 +68,7 @@ describe('tab_state actions', () => {
         rowHeight: false,
         breakdownField: false,
         hideChart: false,
+        hideDataTable: false,
       });
 
       // Transition to data view mode
@@ -99,6 +100,7 @@ describe('tab_state actions', () => {
         rowHeight: true,
         breakdownField: true,
         hideChart: true,
+        hideDataTable: true,
       });
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId
@@ -159,6 +161,7 @@ describe('tab_state actions', () => {
         rowHeight: false,
         breakdownField: false,
         hideChart: false,
+        hideDataTable: false,
       });
 
       // Transition to ES|QL mode
@@ -190,6 +193,7 @@ describe('tab_state actions', () => {
         rowHeight: true,
         breakdownField: true,
         hideChart: true,
+        hideDataTable: true,
       });
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId

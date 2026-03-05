@@ -483,6 +483,7 @@ export function getDataStateContainer({
                     rowHeight: false,
                     breakdownField: false,
                     hideChart: false,
+                    hideDataTable: false,
                   },
                 })
               );

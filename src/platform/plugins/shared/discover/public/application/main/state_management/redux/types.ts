@@ -66,6 +66,10 @@ export interface DiscoverAppState {
    */
   hideChart?: boolean;
   /**
+   * Hide data table
+   */
+  hideDataTable?: boolean;
+  /**
    * The current data source
    */
   dataSource?: DiscoverDataSource;
@@ -167,6 +171,7 @@ export interface TabState extends TabItem {
     rowHeight: boolean;
     breakdownField: boolean;
     hideChart: boolean;
+    hideDataTable: boolean;
   };
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;

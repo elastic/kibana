@@ -26,6 +26,7 @@ import { FieldStatisticsTab } from '../field_stats_table';
 import { PatternAnalysisTab } from '../pattern_analysis';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { TableHiddenBar } from '../../../../components/table_hidden_bar';
 import { createDataSource } from '../../../../../common/data_sources';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -37,11 +38,13 @@ const dataView = dataViewWithTimefieldMock;
 
 const mountComponent = async ({
   hideChart = false,
+  hideDataTable = false,
   isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
 }: {
   hideChart?: boolean;
+  hideDataTable?: boolean;
   isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
@@ -62,6 +65,10 @@ const mountComponent = async ({
     ? { esql: 'from *' }
     : { query: '', language: 'kuery' };
 
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+
   toolkit.internalState.dispatch(
     internalStateActions.updateAppState({
       tabId: toolkit.getCurrentTab().id,
@@ -69,15 +76,12 @@ const mountComponent = async ({
         dataSource: createDataSource({ dataView, query }),
         interval: 'auto',
         hideChart,
+        hideDataTable,
         columns: [],
         query,
       },
     })
   );
-
-  const { stateContainer } = await toolkit.initializeSingleTab({
-    tabId: toolkit.getCurrentTab().id,
-  });
 
   stateContainer.dataState.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,
@@ -155,7 +159,7 @@ describe('Discover main content component', () => {
       const component = await mountComponent({ isChartAvailable: true, hideChart: true });
       expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
       expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
-      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
+      expect(component.find(EuiHorizontalRule).exists()).toBe(true);
     });
 
     it('should include PanelsToggle when chart is not available', async () => {
@@ -172,6 +176,12 @@ describe('Discover main content component', () => {
       expect(component.find(DiscoverDocuments).exists()).toBe(true);
       expect(component.find(PatternAnalysisTab).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+    });
+
+    it('should not show DiscoverDocuments when hideDataTable is true', async () => {
+      const component = await mountComponent({ hideDataTable: true });
+      expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(TableHiddenBar).exists()).toBe(true);
     });
 
     it('should show FieldStatisticsTab when VIEW_MODE is AGGREGATED_LEVEL', async () => {

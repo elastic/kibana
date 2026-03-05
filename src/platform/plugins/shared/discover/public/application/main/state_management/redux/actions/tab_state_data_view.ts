@@ -108,6 +108,7 @@ export const changeDataView: InternalStateThunkActionCreator<
             rowHeight: true,
             breakdownField: true,
             hideChart: true,
+            hideDataTable: true,
           },
         })
       );
