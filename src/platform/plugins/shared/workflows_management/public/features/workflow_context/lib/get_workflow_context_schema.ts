@@ -63,52 +63,6 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   return eventSchema.optional();
 }
 
-function outputToSchema(field: WorkflowOutput): z.ZodType {
-  let valueSchema: z.ZodType;
-  switch (field.type) {
-    case 'string':
-      valueSchema = z.string();
-      break;
-    case 'number':
-      valueSchema = z.number();
-      break;
-    case 'boolean':
-      valueSchema = z.boolean();
-      break;
-    case 'choice': {
-      const opts = field.options ?? [];
-      valueSchema = z.any();
-      if (opts.length > 0) {
-        const literals = opts.map((o) => z.literal(o));
-        valueSchema = z.union(literals);
-      }
-      break;
-    }
-    case 'array': {
-      const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-      const { minItems, maxItems } = field;
-      const applyConstraints = (schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>) => {
-        let s = schema;
-        if (minItems != null) s = s.min(minItems);
-        if (maxItems != null) s = s.max(maxItems);
-        return s;
-      };
-      valueSchema = z.union(
-        arraySchemas.map(applyConstraints) as [
-          z.ZodArray<z.ZodString>,
-          z.ZodArray<z.ZodNumber>,
-          z.ZodArray<z.ZodBoolean>
-        ]
-      );
-      break;
-    }
-    default:
-      valueSchema = z.any();
-      break;
-  }
-  return valueSchema;
-}
-
 function buildOutputsSchema(
   outputs: WorkflowOutput[] | undefined
 ): z.ZodObject<Record<string, z.ZodType>> {
