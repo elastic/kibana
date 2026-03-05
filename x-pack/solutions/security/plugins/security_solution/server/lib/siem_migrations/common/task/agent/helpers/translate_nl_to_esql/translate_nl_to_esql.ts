@@ -33,16 +33,21 @@ export const getNLToESQLQuery: NodeHelperCreator<
   NLToESQLQueryOutput
 > = ({ esqlKnowledgeBase, logger }) => {
   return async (input) => {
+    const { query, indexPattern, fieldsMetadata = {} } = input;
+
     const mainPrompt = await NL_TO_ESQL_TRANSLATION_PROMPT.format({
-      nl_query: input.query,
+      nl_query: query,
     });
+
     const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
-      index_pattern: input.indexPattern,
-      fields_metadata: JSON.stringify(input.fieldsMetadata ?? {}),
+      index_pattern: indexPattern,
+      fields_metadata: JSON.stringify(fieldsMetadata ?? {}),
     });
     const response = await esqlKnowledgeBase.translate(
-      input.indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
+      indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
     );
+
+    logger.warn(`NLTOESQL translation response: \n ${response}`);
 
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
 

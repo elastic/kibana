@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type { MigrationComments } from '../../../../../../../../../../common/siem_migrations/model/common.gen';
 import { getNLToESQLQuery } from '../../../../../../../common/task/agent/helpers/translate_nl_to_esql/translate_nl_to_esql';
 import {
@@ -24,9 +25,9 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
   return async (state) => {
     const vendor = state.original_rule.vendor;
 
-    const indexPatterns = state.integration?.data_streams
-      ?.map((dataStream) => dataStream.index_pattern)
-      .join(',');
+    const indexPatterns = !isEmpty(state.integration)
+      ? state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',')
+      : 'logs-*';
 
     const fieldsMetadata = state.integration?.fields_metadata;
 
