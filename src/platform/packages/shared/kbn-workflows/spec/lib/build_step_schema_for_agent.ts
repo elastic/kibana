@@ -178,7 +178,7 @@ export function buildStepParamsSummary(schema: z.ZodType): StepParamSummary[] {
     const { optional } = unwrapSchema(fieldSchema);
     let description = fieldSchema.description ?? undefined;
     if (description && description.length > MAX_PARAM_DESCRIPTION_LENGTH) {
-      description = description.slice(0, MAX_PARAM_DESCRIPTION_LENGTH) + '...';
+      description = `${description.slice(0, MAX_PARAM_DESCRIPTION_LENGTH)}...`;
     }
     return {
       name,

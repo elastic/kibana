@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
@@ -15,7 +16,6 @@ import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitio
 import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
-import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
 import type { AgentBuilderPluginSetupContract } from '../types';
 import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
