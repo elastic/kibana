@@ -23,10 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
 
       await retry.try(async () => {
-        const response = await supertest
-          .get('/api/data_views')
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const response = await supertest.get('/api/data_views').set('kbn-xsrf', 'true').expect(200);
         for (const dv of response.body.data_view || []) {
           await supertest
             .delete(`/api/data_views/data_view/${dv.id}`)
