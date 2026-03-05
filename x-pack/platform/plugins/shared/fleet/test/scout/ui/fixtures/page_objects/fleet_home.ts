@@ -18,11 +18,10 @@ export class FleetHomePage {
   }
 
   async waitForPageToLoad() {
-    await this.page.testSubj.waitForSelector(FLEET_AGENTS_TAB_SELECTOR, {
-      state: 'visible',
-      timeout: 20_000,
-    });
-    await this.page.testSubj.waitForSelector(FLEET_SETUP_LOADING_SELECTOR, { state: 'hidden' });
+    await this.page.testSubj
+      .locator(FLEET_AGENTS_TAB_SELECTOR)
+      .waitFor({ state: 'visible', timeout: 20_000 });
+    await this.page.testSubj.locator(FLEET_SETUP_LOADING_SELECTOR).waitFor({ state: 'hidden' });
   }
 
   getMissingPrivilegesPromptTitle() {
@@ -70,7 +69,7 @@ export class FleetHomePage {
   }
 
   getPackagePolicyLink(name: string) {
-    return this.page.locator(`a[title="${name}"]`);
+    return this.page.getByRole('link', { name });
   }
 
   getCreateAgentPolicyButton() {

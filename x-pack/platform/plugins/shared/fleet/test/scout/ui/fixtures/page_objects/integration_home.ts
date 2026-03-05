@@ -16,10 +16,9 @@ export class IntegrationHomePage {
   }
 
   async waitForPageToLoad() {
-    await this.page.testSubj.waitForSelector('epmList.integrationCards', {
-      state: 'visible',
-      timeout: 20_000,
-    });
+    await this.page.testSubj
+      .locator('epmList.integrationCards')
+      .waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   getIntegrationCard(integration: string) {
