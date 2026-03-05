@@ -72,7 +72,11 @@ describe('useAssetCriticality', () => {
       mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
       mockDeleteAssetCriticality.mockResolvedValue({});
       mockCreateAssetCriticality.mockResolvedValue({});
-      const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
+      const entity: Entity = {
+        name: 'test_entity_name',
+        type: EntityType.host,
+        identifiers: { 'host.name': 'test_entity_name' },
+      };
 
       const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
@@ -91,7 +95,11 @@ describe('useAssetCriticality', () => {
       mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
       mockDeleteAssetCriticality.mockResolvedValue({});
       mockCreateAssetCriticality.mockResolvedValue({});
-      const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
+      const entity: Entity = {
+        name: 'test_entity_name',
+        type: EntityType.host,
+        identifiers: { 'host.name': 'test_entity_name' },
+      };
 
       const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 

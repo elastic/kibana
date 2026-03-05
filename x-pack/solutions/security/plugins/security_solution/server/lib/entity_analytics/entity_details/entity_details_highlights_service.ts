@@ -20,7 +20,7 @@ import {
   buildEntityFlyoutPreviewQueryWithStatus,
   VULNERABILITY_QUERY_FIELD,
 } from '@kbn/cloud-security-posture-common';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, getRawDataOrDefault } from '@kbn/elastic-assistant-common';
 import { omit } from 'lodash';
@@ -220,10 +220,10 @@ export const entityDetailsHighlightsServiceFactory = ({
     async getVulnerabilityData(entityField: EntityIdentifierFields, entityIdentifier: string) {
       const vulnerabilitiesQuery = getVulnerabilitiesQuery({
         query: buildEntityFlyoutPreviewQueryWithStatus(
-        buildEntityFiltersFromEntityIdentifiers({ [entityField]: entityIdentifier }),
-        undefined,
-        VULNERABILITY_QUERY_FIELD
-      ),
+          buildEntityFiltersFromEntityIdentifiers({ [entityField]: entityIdentifier }),
+          undefined,
+          VULNERABILITY_QUERY_FIELD
+        ),
         enabled: true,
         pageSize: 1,
         sort: [{ 'vulnerability.score.base': 'desc' }],

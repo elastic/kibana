@@ -81,7 +81,6 @@ const ServiceNameComponent: React.FC<Props> = ({
         onClick={isInTimelineContext || !isInSecurityApp ? openServiceDetailsSidePanel : undefined}
         title={title}
         entityType={EntityType.service}
-        entityIdentifiers={entityIdentifiers ?? undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">
           {serviceName}
@@ -96,7 +95,6 @@ const ServiceNameComponent: React.FC<Props> = ({
       Component,
       title,
       isInSecurityApp,
-      entityIdentifiers,
     ]
   );
 

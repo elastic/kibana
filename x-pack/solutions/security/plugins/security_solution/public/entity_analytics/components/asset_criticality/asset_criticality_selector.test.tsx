@@ -28,7 +28,11 @@ describe('AssetCriticalitySelector', () => {
     const { getByTestId } = render(
       <AssetCriticalitySelector
         criticality={criticality}
-        entity={{ type: EntityType.host, name: 'My test Host' }}
+        entity={{
+          type: EntityType.host,
+          name: 'My test Host',
+          identifiers: { 'host.name': 'My test Host' },
+        }}
       />,
       {
         wrapper: TestProviders,
@@ -42,7 +46,11 @@ describe('AssetCriticalitySelector', () => {
     const { getByTestId } = render(
       <AssetCriticalitySelector
         criticality={criticality}
-        entity={{ type: EntityType.host, name: 'My test Host' }}
+        entity={{
+          type: EntityType.host,
+          name: 'My test Host',
+          identifiers: { 'host.name': 'My test Host' },
+        }}
         compressed
       />,
       {

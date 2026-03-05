@@ -152,7 +152,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
   const hostRiskFromSearch = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
-    entityIdentifiers,
+    hostName,
     indexNames: selectedPatterns,
     startDate: from,
     endDate: to,

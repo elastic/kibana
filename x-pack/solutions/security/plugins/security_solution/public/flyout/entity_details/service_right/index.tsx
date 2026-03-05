@@ -128,6 +128,7 @@ export const ServicePanel = ({ contextID, scopeId, entityIdentifiers }: ServiceP
       />
       <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
       <ServicePanelContent
+        entityIdentifiers={entityIdentifiers}
         serviceName={serviceName}
         observedService={observedService}
         riskScoreState={riskScoreState}

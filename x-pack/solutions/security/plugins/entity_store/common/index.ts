@@ -62,3 +62,13 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_DELETE: '/internal/security/entity-store/entities',
   FORCE_LOG_EXTRACTION: '/internal/security/entity-store/{entityType}/force-log-extraction',
 } as const satisfies Record<string, string>;
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+};

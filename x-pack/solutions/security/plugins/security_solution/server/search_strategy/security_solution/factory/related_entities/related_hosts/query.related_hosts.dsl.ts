@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { euid } from '@kbn/entity-store/public';
+import { euid } from '@kbn/entity-store/common';
 import type { RelatedHostsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 export const buildRelatedHostsQuery = ({

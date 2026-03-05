@@ -913,7 +913,7 @@ describe('EntityStoreCrudClient', () => {
         index: '.entities.v2.updates.security_default',
         operations: expect.any(Array),
       });
-      const ops = esClientMock.bulk.mock.calls[0][0].operations;
+      const ops = esClientMock.bulk.mock.calls[0][0].operations ?? [];
       expect(ops.length).toBe(4); // create + doc for user, create + doc for host
     });
 

@@ -22,7 +22,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const defaultParams: HostDetailsPanelProps = {
   isRiskScoreExist: true,
-  name: 'testHost',
+  entityIdentifiers: { 'host.name': 'testHost' },
   scopeId: 'test',
 };
 
@@ -133,7 +133,7 @@ describe('hooks', () => {
         () =>
           useTabs({
             isRiskScoreExist: false,
-            name: '',
+            entityIdentifiers: { 'host.name': '' },
             scopeId: 'scope1',
             hasMisconfigurationFindings: false,
             hasVulnerabilitiesFindings: false,

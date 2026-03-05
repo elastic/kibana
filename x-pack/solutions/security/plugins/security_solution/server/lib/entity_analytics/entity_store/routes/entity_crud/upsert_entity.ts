@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { UpsertEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import {

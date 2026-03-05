@@ -25,7 +25,8 @@ describe('buildRelatedUsersQuery', () => {
         { term: { 'event.outcome': 'success' } },
       ])
     );
-    expect(Array.isArray(result.query?.bool?.filter)).toBe(true);
-    expect((result.query?.bool?.filter ?? []).length).toBeGreaterThanOrEqual(3);
+    const filter = result.query?.bool?.filter;
+    expect(Array.isArray(filter)).toBe(true);
+    expect(Array.isArray(filter) ? filter.length : 0).toBeGreaterThanOrEqual(3);
   });
 });

@@ -54,7 +54,6 @@ describe('User Summary Component', () => {
     loading: false,
     narrowDateRange: jest.fn(),
     startDate: '2019-06-15T06:00:00.000Z',
-    userName: 'testUserName',
     indexPatterns: [],
     jobNameById: {},
     scopeId: 'testScopeId',
