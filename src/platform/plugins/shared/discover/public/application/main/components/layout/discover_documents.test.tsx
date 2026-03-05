@@ -24,7 +24,7 @@ import type { DiscoverAppState } from '../../state_management/redux';
 import type { DiscoverCustomization } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import { type ProfilesManager } from '../../../../context_awareness';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
@@ -34,7 +34,8 @@ const customisationService = createCustomizationService();
 async function mountComponent(
   fetchStatus: FetchStatus,
   hits: EsHitRecord[],
-  profilesManager?: ProfilesManager
+  profilesManager?: ProfilesManager,
+  isEsqlMode?: boolean
 ) {
   const services = discoverServiceMock;
 
@@ -49,9 +50,14 @@ async function mountComponent(
   const stateContainer = getDiscoverStateMock({});
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
-      appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
-      },
+      appState: isEsqlMode
+        ? {
+            dataSource: createEsqlDataSource(),
+            query: { esql: 'from *' },
+          }
+        : {
+            dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+          },
     })
   );
   stateContainer.internalState.dispatch(
@@ -125,6 +131,18 @@ describe('Discover documents layout', () => {
     expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
     expect(findTestSubject(component, 'unifiedDataTableToolbarBottom').exists()).toBe(true);
     expect(findTestSubject(component, 'viewModeToggle').exists()).toBe(true);
+  });
+
+  test('ES|QL: should not pass onUpdateSampleSize to DiscoverGrid', async () => {
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock, undefined, true);
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.prop('onUpdateSampleSize')).toBeUndefined();
+  });
+
+  test('should pass onUpdateSampleSize to DiscoverGrid when not in ES|QL mode', async () => {
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock, undefined, false);
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.prop('onUpdateSampleSize')).toBeDefined();
   });
 
   test('should set rounded width to state on resize column', () => {

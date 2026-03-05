@@ -286,9 +286,9 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
   schema.nullable(
     schema.oneOf([
-      schema.boolean(),
       schema.string(),
       schema.number(),
+      schema.boolean(),
       schema.arrayOf(schema.string(), { maxSize: 100 }),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets
