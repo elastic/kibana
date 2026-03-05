@@ -221,6 +221,7 @@ export function fromStaticColorAPIToLensState(
 function fromColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode
 ): ColorMappingColorDefType {
+  console.log('fromColorLensStateToAPI', { color });
   if (color.type === 'colorCode') {
     return {
       type: 'colorCode',
@@ -253,9 +254,7 @@ function fromUnassignedColorLensStateToAPI(
     return {};
   }
   const unassignedColor = fromColorLensStateToAPI(color);
-  if (unassignedColor.type === 'from_palette') {
-    return {};
-  }
+  console.log({ unassignedColor });
   return { unassignedColor };
 }
 
@@ -290,14 +289,25 @@ export function fromColorMappingLensStateToAPI(
       ...unassignedColor,
     };
   }
-  const colorAssignments = colorMapping.assignments.filter(
-    (
-      assignment
-    ): assignment is ColorMapping.AssignmentBase<
-      ColorMapping.ColorRule,
-      ColorMapping.CategoricalColor | ColorMapping.ColorCode
-    > => assignment.color.type !== 'gradient'
-  );
+
+  // because of early return above, we know it is a gradient at this point so casting is safe
+  const colorMode = colorMapping.colorMode as ColorMapping.GradientColorMode;
+  const colorAssignments = colorMapping.assignments;
+
+  // .filter(
+  //   (
+  //     assignment
+  //   ): assignment is ColorMapping.AssignmentBase<
+  //     ColorMapping.ColorRule,
+  //     ColorMapping.CategoricalColor | ColorMapping.ColorCode
+  //   > => assignment.color.type !== 'gradient'
+  // );
+  console.log({
+    colorMapping,
+    colorMode,
+    colorMappingStringified: JSON.stringify(colorMapping, null, 2),
+    colorAssignments,
+  });
   return {
     mode: 'gradient',
     palette: colorMapping.paletteId,
@@ -306,7 +316,7 @@ export function fromColorMappingLensStateToAPI(
         values: fromRulesLensStateToAPI(rules),
       };
     }),
-    gradient: colorAssignments.map(({ color }) => fromColorLensStateToAPI(color)),
+    gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
     ...unassignedColor,
   };
 }
@@ -314,6 +324,7 @@ export function fromColorMappingLensStateToAPI(
 function fromColorDefAPIToLensState(
   color: ColorMappingColorDefType
 ): ColorMapping.CategoricalColor | ColorMapping.ColorCode {
+  console.log('fromColorDefAPIToLensState', { color });
   if (color.type === 'colorCode') {
     return {
       type: 'colorCode',

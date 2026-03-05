@@ -98,6 +98,7 @@ export const TagCloudChart = ({
   overrides,
   isDarkMode,
 }: TagCloudChartProps) => {
+  console.log({ visData });
   const [warning, setWarning] = useState(false);
   const palettes = useKbnPalettes();
   const chartBaseTheme = useElasticChartsTheme();
@@ -134,15 +135,18 @@ export const TagCloudChart = ({
           ? { value: undefined, tag: 'all' }
           : { value: row[tagColumn], tag: row[tagColumn] };
 
+      const color = colorFromMappingFn
+        ? colorFromMappingFn(tagValue)
+        : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)';
+      console.log({ tagValue, row, color });
+
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color: colorFromMappingFn
-          ? colorFromMappingFn(tagValue)
-          : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
+        color,
       };
     });
   }, [

@@ -39,6 +39,7 @@ export function getAssignmentColor(
     case 'loop':
       return getColor(color, palettes);
     case 'gradient': {
+      // debugger;
       if (colorMode.type === 'categorical') {
         return FALLBACK_ASSIGNMENT_COLOR;
       }
@@ -77,6 +78,7 @@ export function getColorFactory(
   isDarkMode: boolean,
   data: ColorMappingInputData
 ): ColorHandlingFn {
+  // debugger;
   const lastCategorical = assignments.findLast(({ color }) => color.type === 'categorical');
   const nextCategoricalIndex =
     lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;

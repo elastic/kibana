@@ -202,6 +202,14 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
 
   const attributes = builder.fromAPIFormat(state.attributes);
 
+  // console.log('transformFromApiConfig', {
+  //   before: state,
+  //   after: {
+  //     ...state,
+  //     attributes,
+  //   },
+  // });
+
   return {
     ...state,
     attributes,
@@ -243,7 +251,13 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
     ...attributes,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
-
+  // console.log('transformToApiConfig', {
+  //   before: state,
+  //   after: {
+  //     ...state,
+  //     attributes: apiConfigAttributes,
+  //   },
+  // });
   return {
     ...state,
     attributes: apiConfigAttributes,
