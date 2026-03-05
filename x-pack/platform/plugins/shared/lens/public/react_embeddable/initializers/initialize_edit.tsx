@@ -243,8 +243,8 @@ export function initializeEditApi(
         updateState({ ...firstState });
       },
       onApply: !canEdit()
-        ? noop
-        : async (attributes: LensRuntimeState['attributes']) => {
+        ? undefined
+        : async (attributes) => {
             let appliedAttributes = attributes;
             if (attributes.visualizationType === 'lnsXY') {
               const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(

@@ -82,7 +82,7 @@ export interface EditConfigPanelProps {
   /** Apply button handler — may return updated attributes (e.g. with synced __lastSaved) */
   onApply?: (
     attrs: TypedLensSerializedState['attributes']
-  ) => Promise<TypedLensSerializedState['attributes'] | void>;
+  ) => Promise<TypedLensSerializedState['attributes'] | void> | void;
   /** Cancel button handler */
   onCancel?: () => void;
   // Lens panels allow read-only "edit" where the user can look and tweak the existing chart, without
