@@ -35,7 +35,7 @@ describe('SlackActionFields renders', () => {
     const actionConnector = {
       secrets: {},
       config: {},
-      id: 'test',
+      id: 'slack',
       actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,
@@ -186,7 +186,7 @@ describe('SlackActionFields renders', () => {
         token: 'some token',
       },
       config: { allowedChannels: [{ id: 'channel-id', name: '#test' }] },
-      id: 'test',
+      id: 'slack',
       actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,

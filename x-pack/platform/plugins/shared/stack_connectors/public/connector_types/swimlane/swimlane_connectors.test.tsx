@@ -304,6 +304,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
       secrets: {
         apiToken: 'test',
       },
+      id: 'swimlane',
       isDeprecated: false,
     });
 

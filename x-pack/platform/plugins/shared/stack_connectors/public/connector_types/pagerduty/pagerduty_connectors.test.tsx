@@ -64,7 +64,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         secrets: {
           routingKey: 'test',
         },
-        id: 'test',
+        id: 'pagerduty',
         actionTypeId: '.pagerduty',
         name: 'pagerduty',
         config: {
@@ -92,7 +92,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
           secrets: {
             routingKey: 'test',
           },
-          id: 'test',
+          id: 'pagerduty',
           actionTypeId: '.pagerduty',
           name: 'pagerduty',
           config: {
@@ -109,7 +109,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         secrets: {
           routingKey: 'test',
         },
-        id: 'test',
+        id: 'pagerduty',
         actionTypeId: '.pagerduty',
         name: 'pagerduty',
         config: {
@@ -137,7 +137,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
           secrets: {
             routingKey: 'test',
           },
-          id: 'test',
+          id: 'pagerduty',
           actionTypeId: '.pagerduty',
           name: 'pagerduty',
           isDeprecated: false,

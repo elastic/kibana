@@ -56,7 +56,7 @@ describe('SlackActionFields renders', () => {
         secrets: {
           webhookUrl: 'http://test.com',
         },
-        id: 'test',
+        id: 'slack',
         actionTypeId: '.slack',
         name: 'slack',
         config: {},
@@ -82,7 +82,7 @@ describe('SlackActionFields renders', () => {
           secrets: {
             webhookUrl: 'http://test.com',
           },
-          id: 'test',
+          id: 'slack',
           actionTypeId: '.slack',
           name: 'slack',
           isDeprecated: false,
