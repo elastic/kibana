@@ -21,12 +21,10 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
 import {
-  __clearEmittedFilterEvents,
-  __getEmittedFilterEvents,
+  emitFilterToggle,
   isFilterActiveForScope,
   isEntityRelationshipExpandedForScope,
-  __clearEmittedEntityRelationshipEvents,
-  __getEmittedEntityRelationshipEvents,
+  emitEntityRelationshipToggle,
 } from '../../filters/filter_store';
 
 // Mock filter_store module to control isFilterActiveForScope and isEntityRelationshipExpandedForScope
@@ -36,6 +34,8 @@ jest.mock('../../filters/filter_store', () => {
     ...actual,
     isFilterActiveForScope: jest.fn(() => false),
     isEntityRelationshipExpandedForScope: jest.fn(() => false),
+    emitFilterToggle: jest.fn(),
+    emitEntityRelationshipToggle: jest.fn(),
   };
 });
 
@@ -46,6 +46,10 @@ const mockIsEntityRelationshipExpandedForScope =
   isEntityRelationshipExpandedForScope as jest.MockedFunction<
     typeof isEntityRelationshipExpandedForScope
   >;
+const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
+const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
+  typeof emitEntityRelationshipToggle
+>;
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -158,8 +162,8 @@ describe('useEntityNodeExpandPopover', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedItemsFn = null;
-    __clearEmittedFilterEvents();
-    __clearEmittedEntityRelationshipEvents();
+    mockEmitFilterToggle.mockClear();
+    mockEmitEntityRelationshipToggle.mockClear();
     mockIsFilterActiveForScope.mockReturnValue(false);
     mockIsEntityRelationshipExpandedForScope.mockReturnValue(false);
   });
@@ -421,12 +425,12 @@ describe('useEntityNodeExpandPopover', () => {
       }
 
       // Verify event was emitted
-      const events = __getEmittedFilterEvents();
-      expect(events.length).toBeGreaterThan(0);
-      expect(events[events.length - 1]).toMatchObject({
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
-        action: 'show',
-      });
+        expect.any(String),
+        expect.any(String),
+        'show'
+      );
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {
@@ -581,13 +585,7 @@ describe('useEntityNodeExpandPopover', () => {
       expect(relationshipsItem).toBeDefined();
       if (relationshipsItem?.type === 'item' && relationshipsItem.onClick) {
         relationshipsItem.onClick();
-        const events = __getEmittedEntityRelationshipEvents();
-        expect(events.length).toBeGreaterThan(0);
-        expect(events[events.length - 1]).toMatchObject({
-          scopeId,
-          entityId: node.id,
-          action: 'show',
-        });
+        expect(mockEmitEntityRelationshipToggle).toHaveBeenCalledWith(scopeId, node.id, 'show');
       }
     });
 
@@ -609,13 +607,7 @@ describe('useEntityNodeExpandPopover', () => {
       expect(relationshipsItem).toBeDefined();
       if (relationshipsItem?.type === 'item' && relationshipsItem.onClick) {
         relationshipsItem.onClick();
-        const events = __getEmittedEntityRelationshipEvents();
-        expect(events.length).toBeGreaterThan(0);
-        expect(events[events.length - 1]).toMatchObject({
-          scopeId,
-          entityId: node.id,
-          action: 'hide',
-        });
+        expect(mockEmitEntityRelationshipToggle).toHaveBeenCalledWith(scopeId, node.id, 'hide');
       }
     });
   });

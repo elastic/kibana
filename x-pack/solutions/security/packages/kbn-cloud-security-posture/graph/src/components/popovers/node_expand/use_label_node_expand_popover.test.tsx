@@ -16,11 +16,7 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import {
-  __clearEmittedFilterEvents,
-  __getEmittedFilterEvents,
-  isFilterActiveForScope,
-} from '../../filters/filter_store';
+import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_store';
 
 // Mock filter_store module to control isFilterActiveForScope
 jest.mock('../../filters/filter_store', () => {
@@ -28,12 +24,14 @@ jest.mock('../../filters/filter_store', () => {
   return {
     ...actual,
     isFilterActiveForScope: jest.fn(() => false),
+    emitFilterToggle: jest.fn(),
   };
 });
 
 const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
   typeof isFilterActiveForScope
 >;
+const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
 
 // Mock useLabelExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -85,7 +83,7 @@ describe('useLabelNodeExpandPopover', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedItemsFn = null;
-    __clearEmittedFilterEvents();
+    mockEmitFilterToggle.mockClear();
     mockIsFilterActiveForScope.mockReturnValue(false);
   });
 
@@ -185,14 +183,12 @@ describe('useLabelNodeExpandPopover', () => {
       }
 
       // Verify event was emitted
-      const events = __getEmittedFilterEvents();
-      expect(events.length).toBeGreaterThan(0);
-      expect(events[events.length - 1]).toMatchObject({
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
-        field: 'event.action',
-        value: 'Test Label',
-        action: 'show',
-      });
+        'event.action',
+        'Test Label',
+        'show'
+      );
     });
   });
 });

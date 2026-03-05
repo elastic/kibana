@@ -42,16 +42,12 @@ const filterToggleEvents$ = new Subject<FilterToggleEvent>();
 // Global event bus for entity relationship toggle actions
 const entityRelationshipEvents$ = new Subject<EntityRelationshipEvent>();
 
-// Store emitted events for testing purposes
-const emittedFilterEvents: FilterToggleEvent[] = [];
-const emittedEntityRelationshipEvents: EntityRelationshipEvent[] = [];
-
 /**
  * Emit a filter toggle event. Any FilterStore listening for this scopeId
  * will receive the event and update its filter state.
  *
  * This function can be called without having a FilterStore instance.
- * If no store exists for the scopeId, the event is still emitted (and recorded for testing)
+ * If no store exists for the scopeId, the event is still emitted
  * but no filter state will be updated.
  *
  * @param scopeId - Unique identifier for the graph instance
@@ -72,7 +68,6 @@ export const emitFilterToggle = (
   action: 'show' | 'hide'
 ): void => {
   const event: FilterToggleEvent = { scopeId, field, value, action };
-  emittedFilterEvents.push(event);
   filterToggleEvents$.next(event);
 };
 
@@ -90,7 +85,6 @@ export const emitEntityRelationshipToggle = (
   action: 'show' | 'hide'
 ): void => {
   const event: EntityRelationshipEvent = { scopeId, entityId, action };
-  emittedEntityRelationshipEvents.push(event);
   entityRelationshipEvents$.next(event);
 };
 
@@ -128,34 +122,6 @@ export const isEntityRelationshipExpandedForScope = (
 export const isFilterActiveForScope = (scopeId: string, field: string, value: string): boolean => {
   const store = stores.get(scopeId);
   return store?.isFilterActive(field, value) ?? false;
-};
-
-/**
- * Get all emitted filter events. Primarily for testing.
- */
-export const __getEmittedFilterEvents = (): FilterToggleEvent[] => {
-  return [...emittedFilterEvents];
-};
-
-/**
- * Clear all emitted filter events. Primarily for testing.
- */
-export const __clearEmittedFilterEvents = (): void => {
-  emittedFilterEvents.length = 0;
-};
-
-/**
- * Get all emitted entity relationship events. Primarily for testing.
- */
-export const __getEmittedEntityRelationshipEvents = (): EntityRelationshipEvent[] => {
-  return [...emittedEntityRelationshipEvents];
-};
-
-/**
- * Clear all emitted entity relationship events. Primarily for testing.
- */
-export const __clearEmittedEntityRelationshipEvents = (): void => {
-  emittedEntityRelationshipEvents.length = 0;
 };
 
 // =============================================================================
@@ -385,12 +351,4 @@ export const destroyFilterStore = (scopeId: string): void => {
     store.destroy();
     stores.delete(scopeId);
   }
-};
-
-/**
- * Reset all stores. Primarily for testing.
- */
-export const __resetAllStores = (): void => {
-  stores.forEach((store) => store.destroy());
-  stores.clear();
 };
