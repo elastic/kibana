@@ -85,7 +85,7 @@ function skipNonEsqlReferences(
   return {
     ...evaluator,
     evaluate: async (args) => {
-      if (args.expected?.language !== 'esql') {
+      if (args.expected?.language !== 'esql' && !args.expected?.esqlQuery) {
         return NON_ESQL_REFERENCE_NA;
       }
       return evaluator.evaluate(args);
@@ -401,7 +401,10 @@ export function createEvaluateDataset({
     log,
     predictionExtractor: (output: unknown) =>
       (output as RuleGenerationTaskOutput)?.generatedRule?.query ?? '',
-    groundTruthExtractor: (expected: unknown) => (expected as Partial<ReferenceRule>)?.query ?? '',
+    groundTruthExtractor: (expected: unknown) => {
+      const rule = expected as Partial<ReferenceRule>;
+      return rule?.esqlQuery ?? rule?.query ?? '';
+    },
   });
 
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
