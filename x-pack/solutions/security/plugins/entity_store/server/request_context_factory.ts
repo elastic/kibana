@@ -12,7 +12,7 @@ import type {
   EntityStoreCoreSetup,
   EntityStoreRequestHandlerContext,
 } from './types';
-import { AssetManagerClient } from './domain/asset_manager/asset_manager_client';
+import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
 import {
@@ -21,7 +21,7 @@ import {
 } from './domain/definitions/saved_objects';
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
-import { CRUDClient } from './domain/crud';
+import { CRUDClient } from './domain/crud/crud_client';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {

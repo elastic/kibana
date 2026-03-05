@@ -19,7 +19,7 @@ import {
   extractPaginationParams,
 } from './logs_extraction_query_builder';
 import { executeEsqlQuery, esqlResponseToBulkObjects } from '../../infra/elasticsearch/esql';
-import type { CRUDClient } from '../crud';
+import type { CRUDClient } from '../crud/crud_client';
 
 export interface CcsExtractToUpdatesParams {
   type: EntityType;
