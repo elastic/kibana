@@ -11,13 +11,12 @@ import type { TsProject } from '@kbn/ts-projects';
 import { createTypeCheckConfigs } from './create_type_check_configs';
 
 jest.mock('@kbn/std', () => ({
-  asyncMapWithLimit: jest.fn().mockImplementation(
-    async <T, R>(
-      items: T[],
-      _limit: number,
-      mapper: (item: T) => Promise<R>
-    ): Promise<R[]> => Promise.all(items.map(mapper))
-  ),
+  asyncMapWithLimit: jest
+    .fn()
+    .mockImplementation(
+      async <T, R>(items: T[], _limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> =>
+        Promise.all(items.map(mapper))
+    ),
 }));
 
 const makeProject = (dir: string): TsProject =>
