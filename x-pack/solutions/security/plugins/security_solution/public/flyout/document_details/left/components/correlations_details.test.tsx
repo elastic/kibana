@@ -27,7 +27,7 @@ import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_re
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
