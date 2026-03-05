@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EdgeContents } from './edge_contents';
 import type { ServiceMapEdge } from '../../../../../common/service_map';
 import {
@@ -74,7 +75,11 @@ describe('EdgeContents', () => {
   it('shows stats for a producer edge (service to messaging queue)', () => {
     const edge = createMsgQueueProducerEdge();
 
-    render(<EdgeContents selection={edge} {...defaultProps} />);
+    render(
+      <IntlProvider locale="en">
+        <EdgeContents selection={edge} {...defaultProps} />
+      </IntlProvider>
+    );
 
     expect(screen.queryByTestId(TEST_SUBJ)).not.toBeInTheDocument();
   });
@@ -82,7 +87,11 @@ describe('EdgeContents', () => {
   it('shows no-metrics message for a consumer edge (messaging queue to service)', () => {
     const edge = createMsgQueueConsumerEdge();
 
-    render(<EdgeContents selection={edge} {...defaultProps} />);
+    render(
+      <IntlProvider locale="en">
+        <EdgeContents selection={edge} {...defaultProps} />
+      </IntlProvider>
+    );
 
     expect(screen.getByTestId(TEST_SUBJ)).toBeInTheDocument();
   });
@@ -90,7 +99,11 @@ describe('EdgeContents', () => {
   it('shows no-metrics message for an outgoing edge from a grouped messaging node', () => {
     const edge = createGroupedMessagingOutgoingEdge();
 
-    render(<EdgeContents selection={edge} {...defaultProps} />);
+    render(
+      <IntlProvider locale="en">
+        <EdgeContents selection={edge} {...defaultProps} />
+      </IntlProvider>
+    );
 
     expect(screen.getByTestId(TEST_SUBJ)).toBeInTheDocument();
   });

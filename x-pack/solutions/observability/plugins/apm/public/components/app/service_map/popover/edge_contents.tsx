@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isEdge } from './utils';
@@ -25,13 +26,34 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
+const DOCUMENTATION_LINK = 'https://ela.st/docs-service-map-no-metrics-available';
+
 function MessagingEdgeNoMetricsMessage() {
   return (
-    <EuiText color="subdued" size="s" data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage">
-      {i18n.translate('xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsMessage', {
-        defaultMessage:
-          'No metrics available. Grouped dependencies and inferred messaging consumer connections do not have associated span metrics.',
-      })}
+    <EuiText
+      color="subdued"
+      size="s"
+      style={{ maxWidth: 360 }}
+      data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage"
+    >
+      <FormattedMessage
+        id="xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsMessage"
+        defaultMessage="No metrics available. Grouped dependencies and inferred messaging consumer connections do not have associated span metrics. See {documentation} for more information."
+        values={{
+          documentation: (
+            <EuiLink
+              data-test-subj="apmServiceMapMessagingEdgeDocumentationLink"
+              href={DOCUMENTATION_LINK}
+              target="_blank"
+            >
+              {i18n.translate(
+                'xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsDocumentation',
+                { defaultMessage: 'documentation' }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
     </EuiText>
   );
 }
