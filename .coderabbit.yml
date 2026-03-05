@@ -7,3 +7,4 @@ reviews:
       - Team:Operations
       - Team:QA
       - Team:SigEvents
+      - Team:Kibana Management
