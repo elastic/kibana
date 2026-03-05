@@ -347,6 +347,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const resp = await alertingApi.waitForAlertInIndex({
           indexName: RULE_ALERT_INDEX,
           ruleId,
+          filters: [{ term: { 'kibana.alert.action_group': 'slo.burnRate.alert' } }],
         });
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.category', 'SLO burn rate');
         expect(resp.hits.hits[0]._source).property(
