@@ -7,7 +7,7 @@
 
 import type { CreateConfig, CreateResult } from '../types';
 import { getErrorMessage } from '../utils';
-import { deleteRepository, generateRepoName } from '../restore/repository';
+import { deleteRepository, generateRepoName } from '../repository';
 
 export async function createSnapshot(config: CreateConfig): Promise<CreateResult> {
   const { esClient, log, repository, snapshotName, indices, ignoreUnavailable } = config;
@@ -37,7 +37,11 @@ export async function createSnapshot(config: CreateConfig): Promise<CreateResult
       ...(indices && indices.length > 0 ? { indices: indices.join(',') } : {}),
     });
 
-    result.indices = response.snapshot?.indices ?? indices ?? [];
+    const capturedIndices = response.snapshot?.indices;
+    if (!capturedIndices || capturedIndices.length === 0) {
+      throw new Error('Snapshot was created but no indices were captured');
+    }
+    result.indices = capturedIndices;
     result.success = true;
     log.info(`Snapshot creation completed: ${result.indices.length} indices captured`);
   } catch (error) {

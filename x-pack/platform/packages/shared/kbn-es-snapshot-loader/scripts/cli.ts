@@ -99,14 +99,11 @@ function resolveRepositoryFromFlags(flags: CommonFlags): RepositoryStrategy {
 
   const hasGcsFlag = Boolean(gcsBucket || gcsBasePath || gcsClient);
   const hasFsFlag = Boolean(fsLocation || fsCompress);
-  if (hasGcsFlag && snapshotUrl) {
-    throw new Error('Cannot use both --snapshot-url and --gcs-* flags');
+  if (hasFsFlag && repoType !== 'fs') {
+    throw new Error('--fs-* flags require --repo-type fs');
   }
-  if (hasFsFlag && snapshotUrl) {
-    throw new Error('Cannot use both --snapshot-url and --fs-* flags');
-  }
-  if (hasFsFlag && hasGcsFlag) {
-    throw new Error('Cannot use both --fs-* and --gcs-* flags');
+  if (hasGcsFlag && repoType !== 'gcs') {
+    throw new Error('--gcs-* flags require --repo-type gcs');
   }
 
   if (repoType === 'gcs' && !gcsBucket) {
@@ -116,14 +113,14 @@ function resolveRepositoryFromFlags(flags: CommonFlags): RepositoryStrategy {
     throw new Error('--fs-location is required when using --repo-type fs');
   }
 
-  if (gcsBucket || repoType === 'gcs') {
+  if (repoType === 'gcs') {
     return createGcsRepository({
       bucket: gcsBucket!,
       basePath: gcsBasePath,
       client: gcsClient,
     });
   }
-  if (fsLocation || repoType === 'fs') {
+  if (repoType === 'fs') {
     return createFsRepository({
       location: fsLocation!,
       compress: fsCompress,

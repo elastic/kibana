@@ -104,6 +104,27 @@ describe('createSnapshot', () => {
     });
   });
 
+  it('fails when snapshot response contains no indices', async () => {
+    const create = jest.fn().mockResolvedValue({ snapshot: { indices: [] } });
+    const deleteRepository = jest.fn().mockResolvedValue(undefined);
+    const esClient = {
+      snapshot: { create, deleteRepository },
+    } as unknown as Client;
+    const { repository } = createRepositoryStrategy();
+
+    const result = await createSnapshot({
+      esClient,
+      log,
+      repository,
+      snapshotName: 'empty-snap',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.indices).toEqual([]);
+    expect(result.errors).toEqual(['Snapshot was created but no indices were captured']);
+    expect(deleteRepository).toHaveBeenCalled();
+  });
+
   it('forwards index filters to Elasticsearch snapshot.create', async () => {
     const create = jest.fn().mockResolvedValue({
       snapshot: {
