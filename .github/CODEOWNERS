@@ -1816,8 +1816,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
-/src/cli/keystore/ @elastic/kibana-operations
-/src/cli/serve/ @elastic/kibana-operations
+/src/cli/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /.github/copilot-instructions.md @elastic/kibana-operations
