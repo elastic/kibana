@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './internal/schema';
+const API_BASE_PATH = '/api';
+const LENS_INTERNAL_API_BASE_PATH = '/internal/lens';
+
+export const LENS_VIS_API_PATH = `${API_BASE_PATH}/visualizations`;
+
+export const LENS_INTERNAL_VIS_API_PATH = `${LENS_INTERNAL_API_BASE_PATH}/visualizations`;

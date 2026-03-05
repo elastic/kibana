@@ -7,25 +7,32 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import type { TypeOf } from '@kbn/config-schema';
-
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
-import type { LensSavedObject } from '../../../content_management';
-import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
-import { getLensResponseItem } from './utils';
-import type { RegisterAPIRouteFn } from '../../types';
+import {
+  LENS_INTERNAL_VIS_API_PATH,
+  LENS_INTERNAL_API_VERSION,
+} from '../../../../../common/constants';
+import type { LensUpdateIn, LensSavedObject } from '../../../../content_management';
+import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
+import {
+  lensUpdateRequestBodySchema,
+  lensUpdateRequestParamsSchema,
+  lensUpdateRequestQuerySchema,
+  lensUpdateResponseBodySchema,
+} from './schema';
+import { getLensInternalRequestConfig, getLensInternalResponseItem } from './utils';
 
-export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
+export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement, builder }
 ) => {
-  const getRoute = router.get({
-    path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
+  const updateRoute = router.put({
+    path: `${LENS_INTERNAL_VIS_API_PATH}/{id}`,
+    access: 'internal',
     enableQueryVersion: true,
-    summary: 'Get Lens visualization',
-    description: 'Get a Lens visualization from id.',
+    summary: 'Update Lens visualization',
+    description: 'Update an existing Lens visualization.',
     options: {
       tags: ['oas-tag:Lens'],
       availability: {
@@ -40,16 +47,18 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
     },
   });
 
-  getRoute.addVersion(
+  updateRoute.addVersion(
     {
-      version: LENS_API_VERSION,
+      version: LENS_INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: lensGetRequestParamsSchema,
+          params: lensUpdateRequestParamsSchema,
+          body: lensUpdateRequestBodySchema,
+          query: lensUpdateRequestQuerySchema,
         },
         response: {
           200: {
-            body: () => lensGetResponseBodySchema,
+            body: () => lensUpdateResponseBodySchema,
             description: 'Ok',
           },
           400: {
@@ -71,20 +80,29 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestBodyData = req.body;
+      if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
+        throw new Error('visualizationType is required');
+      }
+
+      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
+      // Note: these types are to enforce loose param typings of client methods
+      const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
+      const options: LensUpdateIn['options'] = { ...req.query, references };
+
       try {
-        const { result } = await client.get(req.params.id);
+        const { result } = await client.update(req.params.id, data, options);
 
         if (result.item.error) {
           throw result.item.error;
         }
 
-        const responseItem = getLensResponseItem(builder, result.item);
-
-        return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+        const responseItem = getLensInternalResponseItem(builder, result.item);
+        return res.ok<LensUpdateResponseBody>({
           body: responseItem,
         });
       } catch (error) {
@@ -92,7 +110,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
+                message: `A Lens visualization with id [${req.params.id}] was not found.`,
               },
             });
           }

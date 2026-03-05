@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './internal/schema';
+export type * from './visualizations/types';
