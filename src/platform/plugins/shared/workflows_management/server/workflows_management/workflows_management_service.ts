@@ -81,10 +81,8 @@ import type { WorkflowsServerPluginStartDeps } from '../types';
 function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
   const triggers = definition?.triggers ?? [];
   return triggers
-    .map((t) =>
-      t && typeof (t as { type?: string }).type === 'string' ? (t as { type: string }).type : null
-    )
-    .filter((t): t is string => t != null);
+    .map((t) => (t && typeof t.type === 'string' ? t.type : null))
+    .filter(<T>(v: T): v is NonNullable<T> => v != null);
 }
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -746,6 +744,18 @@ export class WorkflowsService {
     const searchResponse = await this.workflowStorage.getClient().search({
       size: 1000,
       track_total_hits: true,
+      _source: [
+        'name',
+        'description',
+        'enabled',
+        'yaml',
+        'definition',
+        'createdBy',
+        'lastUpdatedBy',
+        'valid',
+        'created_at',
+        'updated_at',
+      ],
       query: {
         bool: {
           must: [
