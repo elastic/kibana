@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsTagging: 0,
         graph: 0,
         rulesSettings: 0,
+        running_queries: 0,
         maintenanceWindow: 0,
         stackAlerts: 0,
         streams: 0,
