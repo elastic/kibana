@@ -9,7 +9,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { basename, join } from 'path';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
