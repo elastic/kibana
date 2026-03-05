@@ -205,7 +205,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
 
   const entity = useMemo(
-    () => ({ type: EntityType.host as const, name: detailName, identifiers: { 'host.name': detailName } }),
+    () => ({
+      type: EntityType.host as const,
+      name: detailName,
+      identifiers: { 'host.name': detailName },
+    }),
     [detailName]
   );
   const privileges = useAssetCriticalityPrivileges(entity.name);
