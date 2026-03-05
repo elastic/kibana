@@ -25,6 +25,7 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
+  isThreatParams,
   getDisabledActionsWarningText,
   checkForFrozenIndices,
 } from './utils/utils';
@@ -298,8 +299,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let skipExecution: boolean = false;
 
           if (!isMachineLearningParams(params)) {
+            const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
+
             try {
-              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
               const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
                 inputIndex
               );
@@ -311,6 +313,23 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
             } catch (exc) {
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
+            }
+
+            if (isThreatParams(params)) {
+              try {
+                const threatIndexPatternsWithMatches =
+                  await indexPatterns.getIndexPatternsWithMatches(params.threatIndex);
+
+                if (threatIndexPatternsWithMatches.length === 0) {
+                  const warningMessage = `Unable to find matching threat indicator indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching threat index is created or the rule is disabled.`;
+                  wrapperWarnings.push(warningMessage);
+                  skipExecution = true;
+                }
+              } catch (exc) {
+                wrapperWarnings.push(
+                  `Encountered an error validating threat index patterns: ${exc}`
+                );
+              }
             }
 
             if (!skipExecution) {
