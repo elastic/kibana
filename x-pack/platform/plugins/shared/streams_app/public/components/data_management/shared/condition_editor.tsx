@@ -193,7 +193,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
       return;
     }
     try {
-      const parsed = yaml.parse(currentValue) as Condition;
+      const parsed = yaml.parse(currentValue);
+      if (!isCondition(parsed)) {
+        return;
+      }
       debouncedEmitConditionChange.cancel();
       handleConditionChange(parsed);
     } catch (error: unknown) {
@@ -276,7 +279,12 @@ export function ConditionEditor(props: ConditionEditorProps) {
             syntaxEditorValueRef.current = value;
             setSyntaxEditorValue(value);
             try {
-              const parsed = yaml.parse(value) as Condition;
+              const parsed = yaml.parse(value);
+              if (!isCondition(parsed)) {
+                reportValidityChange(false);
+                debouncedEmitConditionChange.cancel();
+                return;
+              }
               reportValidityChange(true);
               debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {

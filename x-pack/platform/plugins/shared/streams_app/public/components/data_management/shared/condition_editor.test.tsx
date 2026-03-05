@@ -378,6 +378,62 @@ describe('ConditionEditor', () => {
         screen.getByText(/The condition is invalid or in unrecognized format/i)
       ).toBeInTheDocument();
     });
+
+    it('should NOT call onConditionChange and should report invalid when syntax editor is cleared (empty string)', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      mockOnConditionChange.mockClear();
+      mockOnValidityChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      fireEvent.change(codeEditor, { target: { value: '' } });
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+      expect(mockOnValidityChange).toHaveBeenCalledWith(false);
+
+      jest.useRealTimers();
+    });
+
+    it('should NOT call onConditionChange on blur when syntax editor is empty', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      fireEvent.change(codeEditor, { target: { value: '' } });
+      fireEvent.blur(codeEditor);
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('help text for date math', () => {
