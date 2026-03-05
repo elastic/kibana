@@ -920,7 +920,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         kbnExpect(_log.errors).to.be.empty();
         kbnExpect(_log.warnings).to.contain(
-          'The following indices are missing the timestamp field "@timestamp": ["auditbeat-no_at_timestamp_field"]'
+          'The following indices are missing the timestamp field "@timestamp": ["auditbeat-no_at_timestamp_field"].'
         );
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });

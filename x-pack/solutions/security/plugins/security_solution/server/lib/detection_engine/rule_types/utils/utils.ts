@@ -97,7 +97,7 @@ export const hasReadIndexPrivileges = async (args: {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
   docLinks: DocLinksServiceSetup;
-}): Promise<string | undefined> => {
+}): Promise<{ warningMessage: string | undefined; inaccessibleIndices: string[] }> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
   const apiKeyDocs = docLinks.links.alerting.authorization;
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -107,22 +107,21 @@ export const hasReadIndexPrivileges = async (args: {
     : indexNames.filter((indexName) => {
         return !isCCSRemoteIndexName(indexName);
       });
-  const [, indexesWithNoReadPrivileges] = partition(
+  const [accessibleIndices, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
   let warningStatusMessage;
 
-  // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
+    warningStatusMessage = `This rule's API key is unable to access the following indices: ${indexesString} (${accessibleIndices.length} of ${filteredIndexNames.length} indices are accessible). The rule runs with the credentials of the user who last updated it. Ensure that user (or the rule's API key) has read access to all indices used by this rule. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
   }
-  return warningStatusMessage;
+  return { warningMessage: warningStatusMessage, inaccessibleIndices: indexesWithNoReadPrivileges };
 };
 
 export const hasTimestampFields = async (args: {
@@ -136,6 +135,7 @@ export const hasTimestampFields = async (args: {
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
+  indicesMissingTimestampField: string[];
 }> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
@@ -161,34 +161,44 @@ export const hasTimestampFields = async (args: {
     return {
       foundNoIndices: true,
       warningMessage: errorString.trimEnd(),
+      indicesMissingTimestampField: [],
     };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
   ) {
-    // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
-    // warning
-    const errorString = `The following indices are missing the ${
-      timestampField === '@timestamp'
-        ? 'timestamp field "@timestamp"'
-        : `timestamp override field "${timestampField}"`
-    }: ${JSON.stringify(
+    const missingIndices: string[] =
       isEmpty(timestampFieldCapsResponse.body.fields) ||
-        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
+      isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
         ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
-    )}`;
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices;
+
+    const isOverride = timestampField !== '@timestamp';
+    const fieldDescription = isOverride
+      ? `timestamp override field "${timestampField}"`
+      : 'timestamp field "@timestamp"';
+    const mappingNote = isOverride
+      ? ' Note: this check is mapping-based — even empty indices need the field defined in their index or component template. Ensure the field is added to the template used by these indices.'
+      : '';
+
+    const errorString = `The following indices are missing the ${fieldDescription}: ${JSON.stringify(
+      missingIndices
+    )}.${mappingNote}`;
 
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString,
     });
 
-    return { foundNoIndices: false, warningMessage: errorString };
+    return {
+      foundNoIndices: false,
+      warningMessage: errorString,
+      indicesMissingTimestampField: missingIndices ?? [],
+    };
   }
 
-  return { foundNoIndices: false, warningMessage: undefined };
+  return { foundNoIndices: false, warningMessage: undefined, indicesMissingTimestampField: [] };
 };
 
 /**

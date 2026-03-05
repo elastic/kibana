@@ -33,6 +33,9 @@ export const createPreviewRuleExecutionLogger = (
           loggedStatusChanges.push({ ...context, ...args });
           return Promise.resolve();
         },
+
+        stats: () => {},
+        flush: () => {},
       };
 
       return Promise.resolve(spyLogger);

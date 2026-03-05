@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, partition } from 'lodash';
+import { isEmpty, partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -205,6 +205,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             },
           });
 
+          const executionStartTime = Date.now();
+
           const completeRule = {
             ruleConfig: rule,
             ruleParams: params,
@@ -218,6 +220,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const refresh = isPreview ? false : true;
 
           ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
+
+          ruleExecutionLogger.stats({
+            started_at: startedAt.toISOString(),
+            input_index_patterns: [],
+            timestamp_field_used: '@timestamp',
+          });
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatusEnum.running,
@@ -297,6 +305,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // as `index`
           agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
+          ruleExecutionLogger.stats({
+            input_index_patterns: [...inputIndex],
+            timestamp_field_used: primaryTimestamp,
+            timestamp_override: timestampOverride ?? undefined,
+          });
+
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
@@ -307,17 +321,31 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
 
+              ruleExecutionLogger.stats({
+                indices_accessed_count: existingIndices.length,
+              });
+
               if (existingIndices.length > 0) {
                 const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
-                const readIndexWarningMessage = await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                  docLinks,
-                });
+                const { warningMessage: readIndexWarningMessage, inaccessibleIndices } =
+                  await hasReadIndexPrivileges({
+                    privileges,
+                    ruleExecutionLogger,
+                    uiSettingsClient,
+                    docLinks,
+                  });
 
                 if (readIndexWarningMessage != null) {
                   wrapperWarnings.push(readIndexWarningMessage);
+                }
+
+                if (inaccessibleIndices.length > 0) {
+                  const details = `API key cannot read indices: ${inaccessibleIndices.join(', ')}`;
+                  ruleExecutionLogger.stats({
+                    indices_inaccessible: inaccessibleIndices,
+                    has_permission_errors: true,
+                    permission_error_details: details,
+                  });
                 }
               }
             } catch (exc) {
@@ -340,17 +368,28 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 )
               );
 
-              const { foundNoIndices, warningMessage: warningMissingTimestampFieldsMessage } =
-                await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices: inputIndex,
-                  ruleExecutionLogger,
-                });
+              const {
+                foundNoIndices,
+                warningMessage: warningMissingTimestampFieldsMessage,
+                indicesMissingTimestampField,
+              } = await hasTimestampFields({
+                timestampField: primaryTimestamp,
+                timestampFieldCapsResponse: timestampFieldCaps,
+                inputIndices: inputIndex,
+                ruleExecutionLogger,
+              });
               if (warningMissingTimestampFieldsMessage != null) {
                 wrapperWarnings.push(warningMissingTimestampFieldsMessage);
               }
               skipExecution = foundNoIndices;
+
+              ruleExecutionLogger.stats({
+                found_no_indices: foundNoIndices,
+                indices_missing_timestamp_field:
+                  indicesMissingTimestampField.length > 0
+                    ? indicesMissingTimestampField
+                    : undefined,
+              });
             } catch (exc) {
               wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }
@@ -369,6 +408,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
                 if (frozenIndices.length > 0) {
                   frozenIndicesQueriedCount = frozenIndices.length;
+                  ruleExecutionLogger.stats({
+                    frozen_indices_queried_count: frozenIndicesQueriedCount,
+                  });
+                  ruleExecutionLogger.warn(
+                    `This run queried ${frozenIndicesQueriedCount} frozen indices. Consider excluding cold/frozen data tiers from rule execution to improve performance.`
+                  );
                 }
               } catch (exc) {
                 wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
@@ -465,6 +510,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               chunkSize: 10,
               lists: exceptionItems,
               listClient,
+            });
+
+            const unprocessedReasons =
+              unprocessedExceptions.length > 0
+                ? unprocessedExceptions.map(
+                    (e) => `Exception "${e.name ?? e.id}" could not be applied`
+                  )
+                : undefined;
+
+            ruleExecutionLogger.stats({
+              exception_lists_count: params.exceptionsList?.length ?? 0,
+              exception_items_count: exceptionItems.length,
+              unprocessed_exceptions_count: unprocessedExceptions.length,
+              unprocessed_exception_reasons: unprocessedReasons,
             });
 
             if (!skipExecution) {
@@ -570,6 +629,26 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
+            const executionEndTime = Date.now();
+            const totalSearchDurationMs = sum(result.searchAfterTimes.map(Number)) || 0;
+            const totalIndexingDurationMs = sum(result.bulkCreateTimes.map(Number)) || 0;
+            const totalEnrichmentDurationMs = sum(result.enrichmentTimes.map(Number)) || 0;
+            const eventsExcludedCount =
+              (result.totalEventsFound ?? 0) - createdSignalsCount - suppressedAlertsCount;
+
+            ruleExecutionLogger.stats({
+              execution_duration_ms: executionEndTime - executionStartTime,
+              completed_at: new Date(executionEndTime).toISOString(),
+              total_search_duration_ms: Math.round(totalSearchDurationMs),
+              total_indexing_duration_ms: Math.round(totalIndexingDurationMs),
+              total_enrichment_duration_ms: Math.round(totalEnrichmentDurationMs),
+              alerts_created_count: createdSignalsCount,
+              alerts_suppressed_count: suppressedAlertsCount,
+              events_found_count: result.totalEventsFound ?? 0,
+              events_excluded_count: eventsExcludedCount > 0 ? eventsExcludedCount : 0,
+              last_alert_created_at: createdSignalsCount > 0 ? new Date().toISOString() : undefined,
+            });
+
             if (disabledActions.length > 0) {
               const disabledActionsWarning = getDisabledActionsWarningText({
                 alertsCreated: createdSignalsCount > 0,
@@ -579,12 +658,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
 
             if (result.warningMessages.length > 0 || wrapperWarnings.length > 0) {
-              // write warning messages first because if we have still have an error to write
-              // we want to write the error messages last, so that the errors are set
-              // as the current status of the rule.
+              const allWarnings = result.warningMessages.concat(wrapperWarnings);
+              ruleExecutionLogger.stats({
+                status: RuleExecutionStatusEnum['partial failure'],
+                status_message: truncateList(allWarnings).join('\n\n'),
+              });
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join('\n\n'),
+                message: truncateList(allWarnings).join('\n\n'),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -594,9 +675,28 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
             if (wrapperErrors.length > 0 || result.errors.length > 0) {
+              const allErrors = result.errors.concat(wrapperErrors);
+              const isUserError =
+                result.userError ||
+                result.errors.every((err) => checkErrorDetails(err).isUserError);
+
+              const securityErrors = allErrors.filter(
+                (err) => err.includes('security_exception') || err.includes('unauthorized')
+              );
+              if (securityErrors.length > 0) {
+                ruleExecutionLogger.stats({
+                  has_permission_errors: true,
+                  permission_error_details: securityErrors.join('; '),
+                });
+              }
+
+              ruleExecutionLogger.stats({
+                status: RuleExecutionStatusEnum.failed,
+                status_message: truncateList(allErrors).join(', '),
+              });
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
-                message: truncateList(result.errors.concat(wrapperErrors)).join(', '),
+                message: truncateList(allErrors).join(', '),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -605,9 +705,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                   frozenIndicesQueriedCount,
                 },
-                userError:
-                  result.userError ||
-                  result.errors.every((err) => checkErrorDetails(err).isUserError),
+                userError: isUserError,
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
@@ -620,6 +718,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     : ''
                 }`
               );
+              ruleExecutionLogger.stats({
+                status: RuleExecutionStatusEnum.succeeded,
+                status_message: 'Rule execution completed successfully',
+              });
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.succeeded,
                 message: 'Rule execution completed successfully',
@@ -631,8 +733,42 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 },
               });
             }
+
+            ruleExecutionLogger.flush();
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
+            const isTimedOut =
+              errorMessage.includes('timed out') || errorMessage.includes('expired after running');
+            const isCancelled =
+              errorMessage.includes('cancel') || errorMessage.includes('Task Manager');
+
+            ruleExecutionLogger.stats({
+              status: RuleExecutionStatusEnum.failed,
+              status_message: `An error occurred during rule execution. ${errorMessage}`,
+              execution_duration_ms: Date.now() - executionStartTime,
+              completed_at: new Date().toISOString(),
+              timed_out: isTimedOut,
+              execution_cancelled: isCancelled,
+            });
+
+            if (
+              errorMessage.includes('security_exception') ||
+              errorMessage.includes('unauthorized')
+            ) {
+              ruleExecutionLogger.stats({
+                has_permission_errors: true,
+                permission_error_details: errorMessage,
+              });
+            }
+
+            if (
+              errorMessage.includes('Unknown column') ||
+              errorMessage.includes('verification_exception')
+            ) {
+              ruleExecutionLogger.warn(
+                `Rule failed with a field/column error. This often occurs when the rule references fields that no longer exist in any queried index (e.g. after ILM removed indices). Consider updating the rule query or creating an alias with placeholder documents. Error: ${errorMessage}`
+              );
+            }
 
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
@@ -645,6 +781,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 frozenIndicesQueriedCount,
               },
             });
+
+            ruleExecutionLogger.flush();
           }
 
           if (!isPreview && analytics) {

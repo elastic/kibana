@@ -98,6 +98,14 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
+    ruleExecutionLogger.stats({
+      esql: {
+        is_aggregating: isRuleAggregating,
+        iterations: 0,
+        excluded_documents_count: 0,
+      },
+    });
+
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
       isRuleAggregating,
@@ -320,16 +328,43 @@ export const esqlExecutor = async ({
       }
       result.errors.push(error.message);
       result.success = false;
+
+      const isCancelled = error.message?.includes('cancel') || error.message?.includes('timeout');
+      if (isCancelled) {
+        ruleExecutionLogger.stats({
+          esql: {
+            is_aggregating: isRuleAggregating,
+            iterations: iteration,
+            async_search_cancelled: true,
+          },
+        });
+        ruleExecutionLogger.warn(
+          `ES|QL search was cancelled (likely due to rule timeout). Async cancellation is best-effort; long-running ES|QL tasks in Elasticsearch may outlive the rule run.`
+        );
+      }
     }
 
     result.totalEventsFound = totalEventsFound;
+
+    const totalExcludedDocumentsCount = Object.values(excludedDocuments).reduce(
+      (acc, docs) => acc + docs.length,
+      0
+    );
+    ruleExecutionLogger.stats({
+      esql: {
+        is_aggregating: isRuleAggregating,
+        iterations: iteration,
+        excluded_documents_count: totalExcludedDocumentsCount,
+        async_search_cancelled: false,
+      },
+    });
 
     return {
       ...result,
       state: {
         ...state,
         excludedDocuments,
-        lastQuery: hasMvExpand ? ruleParams.query : undefined, // lastQuery is only relevant for mv_expand queries
+        lastQuery: hasMvExpand ? ruleParams.query : undefined,
       },
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };

@@ -539,7 +539,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(rule?.execution_summary?.last_execution.status).toEqual('partial failure');
         expect(rule?.execution_summary?.last_execution.message).toEqual(
-          `The following indices are missing the timestamp override field "event.ingested": ["${EVENTS_INDEX_NAME}"]`
+          `The following indices are missing the timestamp override field "event.ingested": ["${EVENTS_INDEX_NAME}"]. Note: this check is mapping-based — even empty indices need the field defined in their index or component template. Ensure the field is added to the template used by these indices.`
         );
       });
 

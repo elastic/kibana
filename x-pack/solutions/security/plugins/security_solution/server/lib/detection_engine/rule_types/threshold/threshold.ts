@@ -110,6 +110,20 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
+    ruleExecutionLogger.stats({
+      threshold: {
+        threshold_value: ruleParams.threshold.value,
+        threshold_group_by_fields:
+          ruleParams.threshold.field.length > 0 ? ruleParams.threshold.field : undefined,
+      },
+    });
+
+    if (ruleParams.threshold.field.length === 0) {
+      ruleExecutionLogger.warn(
+        'Threshold rule has no group-by fields. In recent versions, at least one group-by field is required for threshold rules to generate alerts.'
+      );
+    }
+
     const { buckets, searchErrors, searchDurations, warnings, loggedRequests } =
       await findThresholdSignals({
         inputIndexPattern: inputIndex,
@@ -126,6 +140,34 @@ export const thresholdExecutor = async ({
         aggregatableTimestampField,
         isLoggedRequestsEnabled,
       });
+
+    const thresholdMetCount = buckets.length;
+
+    if (thresholdMetCount === 0) {
+      let zeroReason: 'no_group_by' | 'count_below_threshold' | 'no_events' =
+        'count_below_threshold';
+      if (ruleParams.threshold.field.length === 0) {
+        zeroReason = 'no_group_by';
+      }
+      ruleExecutionLogger.stats({
+        threshold: {
+          threshold_value: ruleParams.threshold.value,
+          threshold_group_by_fields:
+            ruleParams.threshold.field.length > 0 ? ruleParams.threshold.field : undefined,
+          threshold_met_count: 0,
+          threshold_zero_reason: zeroReason,
+        },
+      });
+    } else {
+      ruleExecutionLogger.stats({
+        threshold: {
+          threshold_value: ruleParams.threshold.value,
+          threshold_group_by_fields:
+            ruleParams.threshold.field.length > 0 ? ruleParams.threshold.field : undefined,
+          threshold_met_count: thresholdMetCount,
+        },
+      });
+    }
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
 

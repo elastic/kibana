@@ -28,9 +28,13 @@ jest.mock('../utils/utils', () => ({
     return {
       foundNoIndices: false,
       warningMessage: undefined,
+      indicesMissingTimestampField: [],
     };
   }),
-  hasReadIndexPrivileges: jest.fn(async () => undefined),
+  hasReadIndexPrivileges: jest.fn(async () => ({
+    warningMessage: undefined,
+    inaccessibleIndices: [],
+  })),
   checkForFrozenIndices: jest.fn(async () => []),
 }));
 

@@ -517,7 +517,7 @@ describe('utils', () => {
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
+          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]. Note: this check is mapping-based — even empty indices need the field defined in their index or component template. Ensure the field is added to the template used by these indices.',
       });
     });
 
@@ -559,7 +559,7 @@ describe('utils', () => {
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
+          'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"].',
       });
     });
 

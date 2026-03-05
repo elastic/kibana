@@ -42,6 +42,10 @@ import type {
 import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
+import type {
+  ExecutionOutcomeDocument,
+  ExecutionOutcomeStats,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring/model/execution_outcome';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -56,6 +60,16 @@ export const createRuleExecutionLogClientForExecutors = (
   const baseLogMeta = baseCorrelationIds.getLogMeta();
 
   const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
+
+  const outcomeBuffer: {
+    stats: ExecutionOutcomeStats;
+    errors: Array<{ message: string; timestamp: string }>;
+    warnings: Array<{ message: string; timestamp: string }>;
+  } = {
+    stats: {},
+    errors: [],
+    warnings: [],
+  };
 
   const client: IRuleExecutionLogForExecutors = {
     get context() {
@@ -117,6 +131,101 @@ export const createRuleExecutionLogClientForExecutors = (
           writeExceptionToConsole(e, logMessage, logMeta);
         }
       });
+    },
+
+    stats(data: ExecutionOutcomeStats): void {
+      Object.assign(outcomeBuffer.stats, data);
+
+      if (data.errors) {
+        outcomeBuffer.errors.push(...data.errors);
+      }
+      if (data.warnings) {
+        outcomeBuffer.warnings.push(...data.warnings);
+      }
+    },
+
+    flush(): void {
+      const now = new Date().toISOString();
+      const s = outcomeBuffer.stats;
+
+      const outcomeDocument: ExecutionOutcomeDocument = {
+        '@timestamp': now,
+        execution_id: executionId,
+        rule_id: ruleId,
+        rule_uuid: ruleUuid,
+        rule_name: ruleName,
+        rule_revision: ruleRevision,
+        rule_type: ruleType,
+        space_id: spaceId,
+
+        status: s.status ?? 'unknown',
+        status_message: s.status_message,
+
+        execution_duration_ms: s.execution_duration_ms ?? 0,
+        started_at: s.started_at ?? now,
+        completed_at: s.completed_at ?? now,
+        schedule_delay_ms: s.schedule_delay_ms,
+
+        total_search_duration_ms: s.total_search_duration_ms,
+        total_indexing_duration_ms: s.total_indexing_duration_ms,
+        total_enrichment_duration_ms: s.total_enrichment_duration_ms,
+
+        alerts_created_count: s.alerts_created_count ?? 0,
+        alerts_suppressed_count: s.alerts_suppressed_count ?? 0,
+        events_found_count: s.events_found_count ?? 0,
+        events_excluded_count: s.events_excluded_count ?? 0,
+
+        execution_gap_duration_s: s.execution_gap_duration_s,
+        gap_range: s.gap_range,
+
+        input_index_patterns: s.input_index_patterns ?? [],
+        indices_accessed_count: s.indices_accessed_count,
+        indices_inaccessible: s.indices_inaccessible,
+        indices_missing_timestamp_field: s.indices_missing_timestamp_field,
+        timestamp_field_used: s.timestamp_field_used ?? '@timestamp',
+        timestamp_override: s.timestamp_override,
+        frozen_indices_queried_count: s.frozen_indices_queried_count ?? 0,
+        found_no_indices: s.found_no_indices ?? false,
+
+        exception_lists_count: s.exception_lists_count ?? 0,
+        exception_items_count: s.exception_items_count ?? 0,
+        unprocessed_exceptions_count: s.unprocessed_exceptions_count ?? 0,
+        unprocessed_exception_reasons: s.unprocessed_exception_reasons,
+
+        timed_out: s.timed_out ?? false,
+        execution_cancelled: s.execution_cancelled ?? false,
+
+        has_permission_errors: s.has_permission_errors ?? false,
+        permission_error_details: s.permission_error_details,
+
+        errors: outcomeBuffer.errors,
+        warnings: outcomeBuffer.warnings,
+
+        indicator_match: s.indicator_match,
+        threshold: s.threshold,
+        esql: s.esql,
+        eql: s.eql,
+        ml: s.ml,
+        new_terms: s.new_terms,
+
+        last_alert_created_at: s.last_alert_created_at,
+        consecutive_no_alert_runs: s.consecutive_no_alert_runs,
+      };
+
+      try {
+        eventLog.logExecutionOutcome({
+          ruleId,
+          ruleUuid,
+          ruleName,
+          ruleRevision,
+          ruleType,
+          spaceId,
+          executionId,
+          outcome: outcomeDocument,
+        });
+      } catch (e) {
+        writeExceptionToConsole(e, 'Error flushing execution outcome', baseLogMeta);
+      }
     },
   };
 
