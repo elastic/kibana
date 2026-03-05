@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
@@ -27,7 +28,9 @@ import { dump, load } from 'js-yaml';
 import { useHistory, useParams } from 'react-router-dom';
 import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
-import { RulesApi } from '../services/rules_api';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useCreateRule } from '../../hooks/use_create_rule';
+import { useUpdateRule } from '../../hooks/use_update_rule';
 
 const DEFAULT_RULE_YAML = `kind: alert
 
@@ -81,21 +84,99 @@ const parseYaml = (value: string): Record<string, unknown> | null => {
   }
 };
 
-export const CreateRulePage = () => {
+export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
   const isEditing = Boolean(ruleId);
+
+  if (isEditing && ruleId) {
+    return <EditRuleFormPageContent ruleId={ruleId} />;
+  }
+
+  return <RuleFormPageContent />;
+};
+
+const EditRuleFormPageContent: React.FC<{ ruleId: string }> = ({ ruleId }) => {
+  const { data: rule, isLoading, isError, error } = useFetchRule(ruleId);
+
+  if (isLoading) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+
+  if (isError) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.alertingV2.ruleFormPage.loadErrorTitle"
+            defaultMessage="Failed to load rule"
+          />
+        }
+        color="danger"
+        iconType="error"
+        announceOnMount
+      >
+        {error instanceof Error ? error.message : String(error)}
+      </EuiCallOut>
+    );
+  }
+
+  if (!rule) {
+    return null;
+  }
+
+  const rulePayload: CreateRuleData = {
+    kind: rule.kind ?? DEFAULT_RULE_VALUES.kind,
+    metadata: {
+      name: rule.metadata?.name ?? DEFAULT_RULE_VALUES.metadata.name,
+      owner: rule.metadata?.owner,
+      labels: rule.metadata?.labels,
+    },
+    time_field: rule.time_field ?? DEFAULT_RULE_VALUES.time_field,
+    schedule: {
+      every: rule.schedule?.every ?? DEFAULT_RULE_VALUES.schedule.every,
+      lookback: rule.schedule?.lookback ?? DEFAULT_RULE_VALUES.schedule.lookback,
+    },
+    evaluation: {
+      query: {
+        base: rule.evaluation?.query?.base ?? DEFAULT_RULE_VALUES.evaluation.query.base,
+        ...(rule.evaluation?.query?.condition != null
+          ? { condition: rule.evaluation.query.condition }
+          : {}),
+      },
+    },
+    recovery_policy: rule.recovery_policy,
+    state_transition: rule.state_transition,
+    grouping: rule.grouping,
+    no_data: rule.no_data,
+    notification_policies: rule.notification_policies,
+  };
+
+  const initialYaml = dump(rulePayload, { lineWidth: 120, noRefs: true });
+
+  return <RuleFormPageContent ruleId={ruleId} initialYaml={initialYaml} />;
+};
+
+interface RuleFormPageContentProps {
+  ruleId?: string;
+  initialYaml?: string;
+}
+
+const RuleFormPageContent: React.FC<RuleFormPageContentProps> = ({ ruleId, initialYaml }) => {
+  const isEditing = Boolean(ruleId);
   const history = useHistory();
-  const rulesApi = useService(RulesApi);
   const http = useService(CoreStart('http'));
   const application = useService(CoreStart('application'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
-  const [yaml, setYaml] = useState(DEFAULT_RULE_YAML);
-  const [error, setError] = useState<React.ReactNode | null>(null);
-  const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingRule, setIsLoadingRule] = useState(false);
+
+  const createRuleMutation = useCreateRule();
+  const updateRuleMutation = useUpdateRule();
+
+  const [yaml, setYaml] = useState(initialYaml ?? DEFAULT_RULE_YAML);
+  const [validationError, setValidationError] = useState<React.ReactNode | null>(null);
+  const [validationErrorTitle, setValidationErrorTitle] = useState<React.ReactNode | null>(null);
 
   const parsedDoc = useMemo(() => parseYaml(yaml), [yaml]);
+  const isSubmitting = createRuleMutation.isLoading || updateRuleMutation.isLoading;
 
   const esqlCallbacks = useMemo<ESQLCallbacks>(
     () => ({
@@ -106,131 +187,58 @@ export const CreateRulePage = () => {
     [application, http, data.search.search]
   );
 
-  useEffect(() => {
-    if (!ruleId) {
+  const onSave = async () => {
+    setValidationError(null);
+    setValidationErrorTitle(null);
+
+    if (!parsedDoc) {
+      setValidationErrorTitle(
+        <FormattedMessage
+          id="xpack.alertingV2.createRule.invalidYamlTitle"
+          defaultMessage="Invalid YAML"
+        />
+      );
+      setValidationError(
+        <FormattedMessage
+          id="xpack.alertingV2.createRule.invalidYaml"
+          defaultMessage="YAML must define an object with rule fields."
+        />
+      );
       return;
     }
 
-    let cancelled = false;
-    const loadRule = async () => {
-      setIsLoadingRule(true);
-      setError(null);
-      setErrorTitle(null);
-
-      try {
-        const rule = await rulesApi.getRule(ruleId);
-        if (cancelled) {
-          return;
-        }
-
-        // Map the API response back to the create schema shape for editing.
-        const nextPayload: CreateRuleData = {
-          kind: rule.kind ?? DEFAULT_RULE_VALUES.kind,
-          metadata: {
-            name: rule.metadata?.name ?? DEFAULT_RULE_VALUES.metadata.name,
-            owner: rule.metadata?.owner,
-            labels: rule.metadata?.labels,
-          },
-          time_field: rule.time_field ?? DEFAULT_RULE_VALUES.time_field,
-          schedule: {
-            every: rule.schedule?.every ?? DEFAULT_RULE_VALUES.schedule.every,
-            lookback: rule.schedule?.lookback ?? DEFAULT_RULE_VALUES.schedule.lookback,
-          },
-          evaluation: {
-            query: {
-              base: rule.evaluation?.query?.base ?? DEFAULT_RULE_VALUES.evaluation.query.base,
-              ...(rule.evaluation?.query?.condition != null
-                ? { condition: rule.evaluation.query.condition }
-                : {}),
-            },
-          },
-          recovery_policy: rule.recovery_policy,
-          state_transition: rule.state_transition,
-          grouping: rule.grouping,
-          no_data: rule.no_data,
-          notification_policies: rule.notification_policies,
-        };
-
-        setYaml(dump(nextPayload, { lineWidth: 120, noRefs: true }));
-      } catch (err) {
-        if (!cancelled) {
-          setErrorTitle(
-            <FormattedMessage
-              id="xpack.alertingV2.createRule.loadErrorTitle"
-              defaultMessage="Failed to load rule"
-            />
-          );
-          setError(getErrorMessage(err));
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingRule(false);
-        }
-      }
-    };
-
-    loadRule();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [ruleId, rulesApi]);
-
-  const onSave = async () => {
-    setIsSubmitting(true);
-    setError(null);
-    setErrorTitle(null);
-
-    try {
-      if (!parsedDoc) {
-        setErrorTitle(
-          <FormattedMessage
-            id="xpack.alertingV2.createRule.invalidYamlTitle"
-            defaultMessage="Invalid YAML"
-          />
-        );
-        setError(
-          <FormattedMessage
-            id="xpack.alertingV2.createRule.invalidYaml"
-            defaultMessage="YAML must define an object with rule fields."
-          />
-        );
-        setIsSubmitting(false);
-        return;
-      }
-
-      const validated = createRuleDataSchema.safeParse(parsedDoc);
-      if (!validated.success) {
-        setErrorTitle(
-          <FormattedMessage
-            id="xpack.alertingV2.createRule.validationTitle"
-            defaultMessage="Rule validation failed"
-          />
-        );
-        setError(validated.error.message);
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (isEditing && ruleId) {
-        await rulesApi.updateRule(ruleId, validated.data);
-      } else {
-        await rulesApi.createRule(validated.data);
-      }
-
-      history.push('/');
-    } catch (err) {
-      setErrorTitle(
+    const validated = createRuleDataSchema.safeParse(parsedDoc);
+    if (!validated.success) {
+      setValidationErrorTitle(
         <FormattedMessage
-          id="xpack.alertingV2.createRule.saveErrorTitle"
-          defaultMessage="Failed to save rule"
+          id="xpack.alertingV2.createRule.validationTitle"
+          defaultMessage="Rule validation failed"
         />
       );
-      setError(getErrorMessage(err));
-    } finally {
-      setIsSubmitting(false);
+      setValidationError(validated.error.message);
+      return;
+    }
+
+    if (isEditing && ruleId) {
+      updateRuleMutation.mutate(
+        { id: ruleId, payload: validated.data },
+        { onSuccess: () => history.push('/') }
+      );
+    } else {
+      createRuleMutation.mutate(validated.data, {
+        onSuccess: () => history.push('/'),
+      });
     }
   };
+
+  const mutationError = createRuleMutation.error ?? updateRuleMutation.error;
+  const displayError = validationError ?? (mutationError ? getErrorMessage(mutationError) : null);
+  const displayErrorTitle = validationErrorTitle ?? (
+    <FormattedMessage
+      id="xpack.alertingV2.createRule.saveErrorTitle"
+      defaultMessage="Failed to save rule"
+    />
+  );
 
   return (
     <>
@@ -251,22 +259,10 @@ export const CreateRulePage = () => {
       />
       <EuiSpacer size="m" />
       <EuiForm component="form" fullWidth>
-        {error ? (
+        {displayError ? (
           <>
-            <EuiCallOut
-              title={
-                errorTitle ?? (
-                  <FormattedMessage
-                    id="xpack.alertingV2.createRule.errorTitle"
-                    defaultMessage="Failed to create rule"
-                  />
-                )
-              }
-              color="danger"
-              iconType="error"
-              announceOnMount
-            >
-              {error}
+            <EuiCallOut title={displayErrorTitle} color="danger" iconType="error" announceOnMount>
+              {displayError}
             </EuiCallOut>
             <EuiSpacer />
           </>
@@ -290,7 +286,7 @@ export const CreateRulePage = () => {
             value={yaml}
             onChange={setYaml}
             esqlCallbacks={esqlCallbacks}
-            isReadOnly={isLoadingRule || isSubmitting}
+            isReadOnly={isSubmitting}
             dataTestSubj="alertingV2CreateRuleYaml"
           />
         </EuiFormRow>

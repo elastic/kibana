@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { CreateRulePage } from './create_rule_page';
-import { RulesListPage } from './rules_list_page';
+import { RuleFormPage } from '../pages/rule_form_page/rule_form_page';
+import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 
 export const App = () => {
   return (
     <Routes>
       <Route path="/edit/:id">
-        <CreateRulePage />
+        <RuleFormPage />
       </Route>
       <Route path="/create">
-        <CreateRulePage />
+        <RuleFormPage />
       </Route>
       <Route path="/">
         <RulesListPage />

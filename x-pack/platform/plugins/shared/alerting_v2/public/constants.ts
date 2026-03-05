@@ -7,4 +7,11 @@
 
 export const ALERTING_V2_APP_ID = 'alerting_v2';
 export const ALERTING_V2_APP_ROUTE = '/alerting_v2';
+export const ALERTING_V2_BASE_PATH = '/app/management/insightsAndAlerting/alerting_v2';
 export const INTERNAL_ALERTING_V2_RULE_API_PATH = '/internal/alerting/v2/rule' as const;
+
+export const paths = {
+  ruleCreate: `${ALERTING_V2_BASE_PATH}/create`,
+  ruleEdit: (id: string) => `${ALERTING_V2_BASE_PATH}/edit/${encodeURIComponent(id)}`,
+  ruleList: ALERTING_V2_BASE_PATH,
+};
