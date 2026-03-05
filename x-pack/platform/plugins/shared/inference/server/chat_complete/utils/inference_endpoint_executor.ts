@@ -36,7 +36,7 @@ export const createInferenceEndpointExecutor = ({
         {
           asStream: true,
           ...(signal ? { signal } : {}),
-          ...(typeof timeout === 'number' && isFinite(timeout) ? { requestTimeout: timeout } : {}),
+          ...(typeof timeout === 'number' && Number.isFinite(timeout) ? { requestTimeout: timeout } : {}),
         }
       );
       return response as unknown as Readable;
