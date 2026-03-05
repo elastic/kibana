@@ -11,10 +11,12 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../types';
-import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { OBSERVABILITY_AGENT_ID } from '../../common/constants';
+import { OBSERVABILITY_TOOL_IDS, PLATFORM_TOOL_IDS } from '../tools/register_tools';
+
+const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
 
 export async function registerObservabilityAgent({
   core,

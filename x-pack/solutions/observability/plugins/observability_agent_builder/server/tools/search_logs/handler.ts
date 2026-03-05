@@ -6,10 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { groupBy, mapValues, orderBy, sortBy, sumBy } from 'lodash';
 import { parseDatemath } from '../../utils/time';
 import { MAX_CELL_VALUE_LENGTH } from './constants';
 
-export interface SearchLogsParams {
+interface SearchLogsParams {
   start: string;
   end: string;
   index: string;
@@ -20,19 +23,19 @@ export interface SearchLogsParams {
   fields: string[];
 }
 
-export interface HistogramBucket {
+interface HistogramBucket {
   bucket: string;
   count: number;
   breakdown?: string;
 }
 
-export interface LogSample {
+interface LogSample {
   _id?: string;
   _index?: string;
   [key: string]: unknown;
 }
 
-export interface SearchLogsResult {
+interface SearchLogsResult {
   histogram: HistogramBucket[];
   totalCount: number;
   samples: LogSample[];
@@ -53,190 +56,213 @@ export async function searchLogsHandler({
     throw new Error(`Invalid date range: start="${start}", end="${end}"`);
   }
 
-  const startIso = new Date(startMs).toISOString();
-  const endIso = new Date(endMs).toISOString();
+  const query = buildEsqlQuery({
+    startIso: new Date(startMs).toISOString(),
+    endIso: new Date(endMs).toISOString(),
+    index,
+    kqlFilter,
+    limit,
+    bucketSize,
+    breakdownField,
+  });
 
-  const histogramGroupBy = breakdownField
-    ? `bucket = BUCKET(@timestamp, ${bucketSize}), ${breakdownField}`
+  const result = (await esClient.esql.query({
+    query,
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+
+  return parseForkedResult(result, breakdownField, fields);
+}
+
+function buildEsqlQuery({
+  startIso,
+  endIso,
+  index,
+  kqlFilter,
+  limit,
+  bucketSize,
+  breakdownField,
+}: {
+  startIso: string;
+  endIso: string;
+  index: string;
+  kqlFilter?: string;
+  limit: number;
+  bucketSize: string;
+  breakdownField?: string;
+}): string {
+  const SAFE_INDEX_PATTERN = /^[a-zA-Z0-9_.*,:\-]+$/;
+  if (!SAFE_INDEX_PATTERN.test(index)) {
+    throw new Error(`Invalid index pattern: "${index}"`);
+  }
+
+  const SAFE_BUCKET_SIZE =
+    /^\d+(milliseconds?|ms|seconds?|s|minutes?|m|hours?|h|days?|d|weeks?|w|months?|mo|quarters?|q|years?|y)$/i;
+  if (!SAFE_BUCKET_SIZE.test(bucketSize)) {
+    throw new Error(`Invalid bucket size: "${bucketSize}"`);
+  }
+
+  const histogramByClause = breakdownField
+    ? `bucket = BUCKET(@timestamp, ${bucketSize}), ${sanitazeESQLInput(breakdownField)}`
     : `bucket = BUCKET(@timestamp, ${bucketSize})`;
 
-  const filterClause = kqlFilter ? `| WHERE KQL("${escapeKql(kqlFilter)}")` : '';
+  const filterClause = kqlFilter ? `| WHERE KQL("""${kqlFilter}""")` : '';
 
-  const query = [
+  return [
     `FROM ${index} METADATA _id, _index`,
     `| WHERE @timestamp >= TO_DATETIME("${startIso}") AND @timestamp <= TO_DATETIME("${endIso}")`,
     filterClause,
     `| FORK`,
-    `  (STATS count = COUNT(*) BY ${histogramGroupBy} | SORT bucket)`,
+    `  (STATS count = COUNT(*) BY ${histogramByClause} | SORT bucket)`,
     `  (STATS total = COUNT(*))`,
     `  (SORT @timestamp DESC | LIMIT ${limit})`,
   ]
     .filter(Boolean)
     .join('\n');
-
-  const result = await runEsqlQuery(esClient, query);
-  return parseForkedResult(result, breakdownField, fields);
 }
 
-interface EsqlResult {
-  columns: Array<{ name: string; type: string }>;
-  values: unknown[][];
-}
+// ES|QL FORK produces three result sets identified by a `_fork` column.
+// These constants map those IDs to their semantic meaning.
+const FORK_ID_HISTOGRAM = 'fork1';
+const FORK_ID_TOTAL_COUNT = 'fork2';
+const FORK_ID_SAMPLES = 'fork3';
 
-async function runEsqlQuery(esClient: ElasticsearchClient, query: string): Promise<EsqlResult> {
-  const response = await esClient.transport.request<EsqlResult>({
-    method: 'POST',
-    path: '/_query?format=json&drop_null_columns=true',
-    body: { query },
-  });
-
-  return {
-    columns: response.columns ?? [],
-    values: response.values ?? [],
-  };
-}
+const EMPTY_RESULT: SearchLogsResult = { histogram: [], totalCount: 0, samples: [] };
 
 function parseForkedResult(
-  result: EsqlResult,
+  result: ESQLSearchResponse,
   breakdownField: string | undefined,
   fields: string[]
 ): SearchLogsResult {
   if (!result.columns?.length || !result.values?.length) {
-    return { histogram: [], totalCount: 0, samples: [] };
+    return EMPTY_RESULT;
   }
 
-  const forkColIdx = result.columns.findIndex((c) => c.name === '_fork');
-  if (forkColIdx < 0) {
-    return { histogram: [], totalCount: 0, samples: [] };
+  const forkColumnIndex = result.columns.findIndex((column) => column.name === '_fork');
+  if (forkColumnIndex < 0) {
+    return EMPTY_RESULT;
   }
 
-  const grouped = groupByFork(result, forkColIdx);
+  const resultsByForkId = splitResultByForkId(result, forkColumnIndex);
 
-  const histogram = parseHistogram(grouped.fork1, breakdownField);
-  const totalCount = parseTotalCount(grouped.fork2);
-  const samples = parseSamples(grouped.fork3, fields);
+  const histogram = parseHistogram(resultsByForkId[FORK_ID_HISTOGRAM], breakdownField);
+  const totalCount = parseTotalCount(resultsByForkId[FORK_ID_TOTAL_COUNT]);
+  const samples = parseSamples(resultsByForkId[FORK_ID_SAMPLES], fields);
 
   return { histogram, totalCount, samples };
 }
 
 const MAX_BREAKDOWN_VALUES = 10;
 
-function parseHistogram(fork: EsqlResult | undefined, breakdownField?: string): HistogramBucket[] {
+function parseHistogram(
+  fork: ESQLSearchResponse | undefined,
+  breakdownField?: string
+): HistogramBucket[] {
   if (!fork?.values.length) {
     return [];
   }
 
-  const countIdx = fork.columns.findIndex((c) => c.name === 'count');
-  const bucketIdx = fork.columns.findIndex((c) => c.name === 'bucket');
-  const breakdownIdx = breakdownField
-    ? fork.columns.findIndex((c) => c.name === breakdownField)
+  const countColumnIndex = fork.columns.findIndex((column) => column.name === 'count');
+  const bucketColumnIndex = fork.columns.findIndex((column) => column.name === 'bucket');
+  const breakdownColumnIndex = breakdownField
+    ? fork.columns.findIndex((column) => column.name === breakdownField)
     : -1;
 
-  if (countIdx < 0 || bucketIdx < 0) {
+  if (countColumnIndex < 0 || bucketColumnIndex < 0) {
     return [];
   }
 
-  if (breakdownIdx < 0) {
+  if (breakdownColumnIndex < 0) {
     return fork.values.map((row) => ({
-      bucket: String(row[bucketIdx] ?? ''),
-      count: Number(row[countIdx]) || 0,
+      bucket: String(row[bucketColumnIndex] ?? ''),
+      count: Number(row[countColumnIndex]) || 0,
     }));
   }
 
-  const topBreakdownValues = getTopBreakdownValues(fork.values, countIdx, breakdownIdx);
+  const topBreakdownValues = getTopBreakdownValues(
+    fork.values,
+    countColumnIndex,
+    breakdownColumnIndex
+  );
 
-  const otherBuckets = new Map<string, number>();
-  const entries: HistogramBucket[] = [];
+  const topEntries = fork.values
+    .filter((row) => topBreakdownValues.has(String(row[breakdownColumnIndex] ?? 'unknown')))
+    .map((row) => ({
+      bucket: String(row[bucketColumnIndex] ?? ''),
+      count: Number(row[countColumnIndex]) || 0,
+      breakdown: String(row[breakdownColumnIndex] ?? 'unknown'),
+    }));
 
-  for (const row of fork.values) {
-    const breakdownValue = String(row[breakdownIdx] ?? 'unknown');
-    const bucket = String(row[bucketIdx] ?? '');
-    const count = Number(row[countIdx]) || 0;
+  const otherRows = fork.values.filter(
+    (row) => !topBreakdownValues.has(String(row[breakdownColumnIndex] ?? 'unknown'))
+  );
+  const otherByBucket = groupBy(otherRows, (row) => String(row[bucketColumnIndex] ?? ''));
+  const otherEntries = Object.entries(otherByBucket).map(([bucket, rows]) => ({
+    bucket,
+    count: sumBy(rows, (row) => Number(row[countColumnIndex]) || 0),
+    breakdown: '_other' as const,
+  }));
 
-    if (topBreakdownValues.has(breakdownValue)) {
-      entries.push({ bucket, count, breakdown: breakdownValue });
-    } else {
-      otherBuckets.set(bucket, (otherBuckets.get(bucket) ?? 0) + count);
-    }
-  }
-
-  for (const [bucket, count] of otherBuckets) {
-    entries.push({ bucket, count, breakdown: '_other' });
-  }
-
-  return entries.sort((a, b) => a.bucket.localeCompare(b.bucket));
+  return sortBy([...topEntries, ...otherEntries], 'bucket');
 }
 
 function getTopBreakdownValues(
   rows: unknown[][],
-  countIdx: number,
-  breakdownIdx: number
+  countColumnIndex: number,
+  breakdownColumnIndex: number
 ): Set<string> {
-  const totals = new Map<string, number>();
-  for (const row of rows) {
-    const key = String(row[breakdownIdx] ?? 'unknown');
-    totals.set(key, (totals.get(key) ?? 0) + (Number(row[countIdx]) || 0));
-  }
+  const grouped = groupBy(rows, (row) => String(row[breakdownColumnIndex] ?? 'unknown'));
+  const totalsByValue = mapValues(grouped, (groupRows) =>
+    sumBy(groupRows, (row) => Number(row[countColumnIndex]) || 0)
+  );
 
   return new Set(
-    [...totals.entries()]
-      .sort((a, b) => b[1] - a[1])
+    orderBy(Object.entries(totalsByValue), ([, total]) => total, 'desc')
       .slice(0, MAX_BREAKDOWN_VALUES)
       .map(([key]) => key)
   );
 }
 
-function parseTotalCount(fork: EsqlResult | undefined): number {
+function parseTotalCount(fork: ESQLSearchResponse | undefined): number {
   if (!fork?.values.length) {
     return 0;
   }
-  const totalIdx = fork.columns.findIndex((c) => c.name === 'total');
-  if (totalIdx < 0) {
+  const totalColumnIndex = fork.columns.findIndex((column) => column.name === 'total');
+  if (totalColumnIndex < 0) {
     return 0;
   }
-  return Number(fork.values[0][totalIdx]) || 0;
+  return Number(fork.values[0][totalColumnIndex]) || 0;
 }
 
 const ALWAYS_INCLUDED_FIELDS = ['_id', '_index', '@timestamp'];
 
-function parseSamples(fork: EsqlResult | undefined, fields: string[]): LogSample[] {
+function parseSamples(fork: ESQLSearchResponse | undefined, fields: string[]): LogSample[] {
   if (!fork?.values.length) {
     return [];
   }
 
-  const allowedFields = new Set([...ALWAYS_INCLUDED_FIELDS, ...fields]);
+  const fieldsToInclude = new Set([...ALWAYS_INCLUDED_FIELDS, ...fields]);
 
-  return fork.values.map((row) => {
-    const sample: LogSample = {};
-    for (let i = 0; i < fork.columns.length; i++) {
-      const col = fork.columns[i].name;
-      const value = row[i];
-      if (value != null && allowedFields.has(col)) {
-        sample[col] = truncateCellValue(value);
-      }
-    }
-    return sample;
-  });
+  return fork.values.map((row) =>
+    Object.fromEntries(
+      fork.columns
+        .map((col, i) => [col.name, row[i]] as const)
+        .filter(([name, value]) => value != null && fieldsToInclude.has(name))
+        .map(([name, value]) => [name, truncateCellValue(value)])
+    )
+  );
 }
 
-interface GroupedForkResult {
-  [forkId: string]: EsqlResult;
-}
-
-function groupByFork(result: EsqlResult, forkColIdx: number): GroupedForkResult {
-  const grouped: GroupedForkResult = {};
-
-  const columnsWithoutFork = result.columns.filter((_, i) => i !== forkColIdx);
-
-  for (const row of result.values) {
-    const forkId = String(row[forkColIdx] ?? 'unknown');
-    if (!grouped[forkId]) {
-      grouped[forkId] = { columns: columnsWithoutFork, values: [] };
-    }
-    grouped[forkId].values.push(row.filter((_, i) => i !== forkColIdx));
-  }
-
-  return grouped;
+function splitResultByForkId(
+  result: ESQLSearchResponse,
+  forkColumnIndex: number
+): Record<string, ESQLSearchResponse> {
+  const columnsWithoutFork = result.columns.filter((_, i) => i !== forkColumnIndex);
+  const grouped = groupBy(result.values, (row) => String(row[forkColumnIndex] ?? 'unknown'));
+  return mapValues(grouped, (rows) => ({
+    columns: columnsWithoutFork,
+    values: rows.map((row) => row.filter((_, i) => i !== forkColumnIndex)),
+  }));
 }
 
 function truncateCellValue(value: unknown): unknown {
@@ -244,8 +270,4 @@ function truncateCellValue(value: unknown): unknown {
     return value.slice(0, MAX_CELL_VALUE_LENGTH) + '...';
   }
   return value;
-}
-
-function escapeKql(kql: string): string {
-  return kql.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }

@@ -101,10 +101,10 @@
 
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { generateShortId, log } from '@kbn/synthtrace-client';
-import type { Scenario } from '../../cli/scenario';
-import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
-import { withClient } from '../../lib/utils/with_client';
-import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
+import type { Scenario } from '../../../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../../../lib/utils/with_client';
+import { parseLogsScenarioOpts } from '../../../helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
