@@ -13,13 +13,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { RuleFormPage } from './rule_form_page';
 
-const mockHistoryPush = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockHistoryPush }),
-}));
-
 const mockUseFetchRule = jest.fn();
 jest.mock('../../hooks/use_fetch_rule', () => ({
   useFetchRule: (id: string | undefined) => mockUseFetchRule(id),
@@ -41,13 +34,15 @@ const mockDataPlugin = {
   search: { search: jest.fn() },
 };
 
+const mockNavigateToUrl = jest.fn();
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
     if (token === 'application') {
-      return { navigateToUrl: jest.fn() };
+      return { navigateToUrl: mockNavigateToUrl };
     }
     if (token === 'data') {
       return mockDataPlugin;
@@ -150,7 +145,9 @@ describe('RuleFormPage', () => {
 
       fireEvent.click(screen.getByTestId('cancelCreateRule'));
 
-      expect(mockHistoryPush).toHaveBeenCalledWith('/');
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(
+        '/app/management/insightsAndAlerting/alerting_v2'
+      );
     });
   });
 

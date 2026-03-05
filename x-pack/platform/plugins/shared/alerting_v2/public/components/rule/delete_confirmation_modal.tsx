@@ -17,12 +17,12 @@ interface DeleteConfirmationModalProps {
   isLoading: boolean;
 }
 
-export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
+export const DeleteConfirmationModal = ({
   ruleName,
   onCancel,
   onConfirm,
   isLoading,
-}) => {
+}: DeleteConfirmationModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
   return (

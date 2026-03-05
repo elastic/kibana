@@ -25,12 +25,13 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dump, load } from 'js-yaml';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useCreateRule } from '../../hooks/use_create_rule';
 import { useUpdateRule } from '../../hooks/use_update_rule';
+import { paths } from '../../constants';
 
 const DEFAULT_RULE_YAML = `kind: alert
 
@@ -95,7 +96,7 @@ export const RuleFormPage = () => {
   return <RuleFormPageContent />;
 };
 
-const EditRuleFormPageContent: React.FC<{ ruleId: string }> = ({ ruleId }) => {
+const EditRuleFormPageContent = ({ ruleId }: { ruleId: string }) => {
   const { data: rule, isLoading, isError, error } = useFetchRule(ruleId);
 
   if (isLoading) {
@@ -161,11 +162,12 @@ interface RuleFormPageContentProps {
   initialYaml?: string;
 }
 
-const RuleFormPageContent: React.FC<RuleFormPageContentProps> = ({ ruleId, initialYaml }) => {
+const RuleFormPageContent = ({ ruleId, initialYaml }: RuleFormPageContentProps) => {
   const isEditing = Boolean(ruleId);
-  const history = useHistory();
   const http = useService(CoreStart('http'));
   const application = useService(CoreStart('application'));
+  const { navigateToUrl } = application;
+  const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
 
   const createRuleMutation = useCreateRule();
@@ -222,11 +224,11 @@ const RuleFormPageContent: React.FC<RuleFormPageContentProps> = ({ ruleId, initi
     if (isEditing && ruleId) {
       updateRuleMutation.mutate(
         { id: ruleId, payload: validated.data },
-        { onSuccess: () => history.push('/') }
+        { onSuccess: () => navigateToUrl(basePath.prepend(paths.ruleList)) }
       );
     } else {
       createRuleMutation.mutate(validated.data, {
-        onSuccess: () => history.push('/'),
+        onSuccess: () => navigateToUrl(basePath.prepend(paths.ruleList)),
       });
     }
   };
@@ -313,7 +315,10 @@ const RuleFormPageContent: React.FC<RuleFormPageContentProps> = ({ ruleId, initi
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => history.push('/')} data-test-subj="cancelCreateRule">
+            <EuiButtonEmpty
+              onClick={() => navigateToUrl(basePath.prepend(paths.ruleList))}
+              data-test-subj="cancelCreateRule"
+            >
               <FormattedMessage
                 id="xpack.alertingV2.createRule.cancelLabel"
                 defaultMessage="Cancel"

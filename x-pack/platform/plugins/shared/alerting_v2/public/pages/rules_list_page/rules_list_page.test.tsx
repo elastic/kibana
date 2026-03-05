@@ -12,11 +12,19 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage } from './rules_list_page';
 
-const mockHistoryPush = jest.fn();
+const mockNavigateToUrl = jest.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockHistoryPush }),
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'application') {
+      return { navigateToUrl: mockNavigateToUrl };
+    }
+    if (token === 'http') {
+      return { basePath: { prepend: (p: string) => p } };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -142,7 +150,9 @@ describe('RulesListPage', () => {
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
 
-    expect(mockHistoryPush).toHaveBeenCalledWith('/create');
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/insightsAndAlerting/alerting_v2/create'
+    );
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

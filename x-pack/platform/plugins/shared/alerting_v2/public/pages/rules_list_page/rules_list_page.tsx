@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -25,53 +25,53 @@ import {
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
-import { getDataSourceFromQuery } from './utils/get_data_source_from_query';
+import { paths } from '../../constants';
 
 const DEFAULT_PER_PAGE = 20;
 
-const RuleActionsMenu: React.FC<{
+interface RuleActionsMenuProps {
   rule: RuleApiResponse;
   onEdit: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
-}> = ({ rule, onEdit, onDelete }) => {
+}
+
+const RuleActionsMenu = ({ rule, onEdit, onDelete }: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const menuItems = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="edit"
-        icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
-        onClick={() => {
-          setIsOpen(false);
-          onEdit(rule);
-        }}
-        data-test-subj={`editRule-${rule.id}`}
-      >
-        {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="delete"
-        icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-        onClick={() => {
-          setIsOpen(false);
-          onDelete(rule);
-        }}
-        data-test-subj={`deleteRule-${rule.id}`}
-      >
-        {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-          defaultMessage: 'Delete',
-        })}
-      </EuiContextMenuItem>,
-    ],
-    [rule, onEdit, onDelete]
-  );
+  const menuItems = [
+    <EuiContextMenuItem
+      key="edit"
+      icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onEdit(rule);
+      }}
+      data-test-subj={`editRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="delete"
+      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onDelete(rule);
+      }}
+      data-test-subj={`deleteRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
+        defaultMessage: 'Delete',
+      })}
+    </EuiContextMenuItem>,
+  ];
 
   return (
     <EuiPopover
@@ -97,7 +97,8 @@ const RuleActionsMenu: React.FC<{
 };
 
 export const RulesListPage = () => {
-  const history = useHistory();
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const { basePath } = useService(CoreStart('http'));
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -106,132 +107,114 @@ export const RulesListPage = () => {
   const { data, isLoading, isError, error } = useFetchRules({ page, perPage });
   const deleteRuleMutation = useDeleteRule();
 
-  const onTableChange = useCallback(
-    ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
-      setPage(tablePage.index + 1);
-      setPerPage(tablePage.size);
-    },
-    []
-  );
+  const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
+    setPage(tablePage.index + 1);
+    setPerPage(tablePage.size);
+  };
 
-  const onDeleteConfirm = useCallback(() => {
+  const onDeleteConfirm = () => {
     if (!ruleToDelete) {
       return;
     }
     deleteRuleMutation.mutate(ruleToDelete.id, {
       onSettled: () => setRuleToDelete(null),
     });
-  }, [ruleToDelete, deleteRuleMutation]);
+  };
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex: page - 1,
-      pageSize: perPage,
-      totalItemCount: data?.total ?? 0,
-      pageSizeOptions: [10, 20, 50],
-    }),
-    [page, perPage, data?.total]
-  );
+  const pagination = {
+    pageIndex: page - 1,
+    pageSize: perPage,
+    totalItemCount: data?.total ?? 0,
+    pageSizeOptions: [10, 20, 50],
+  };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => [
-      {
-        field: 'metadata',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
-        ),
-        width: '20%',
-        truncateText: true,
-        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) =>
-          metadata?.name ?? rule.id,
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = [
+    {
+      field: 'metadata',
+      name: <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />,
+      width: '20%',
+      truncateText: true,
+      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) =>
+        metadata?.name ?? rule.id,
+    },
+    {
+      field: 'evaluation',
+      name: (
+        <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
+      ),
+      width: '18%',
+      truncateText: true,
+      render: (evaluation: RuleApiResponse['evaluation']) => {
+        const source = getIndexPatternFromESQLQuery(evaluation?.query?.base) || undefined;
+        return source ? (
+          <EuiBadge color="hollow">{source}</EuiBadge>
+        ) : (
+          <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
+        );
       },
-      {
-        field: 'evaluation',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
-        ),
-        width: '18%',
-        truncateText: true,
-        render: (evaluation: RuleApiResponse['evaluation']) => {
-          const source = getDataSourceFromQuery(evaluation?.query?.base);
-          return source ? (
-            <EuiBadge color="hollow">{source}</EuiBadge>
-          ) : (
-            <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-          );
-        },
-      },
-      {
-        field: 'metadata',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
-        ),
-        width: '12%',
-        render: (_metadata: RuleApiResponse['metadata']) => {
-          const labels = _metadata?.labels;
-          if (!labels || labels.length === 0) {
-            return (
-              <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-            );
-          }
-          return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {labels.map((label) => (
-                <EuiFlexItem key={label} grow={false}>
-                  <EuiBadge color="hollow">{label}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        field: 'kind',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
-        ),
-        width: '12%',
-        render: (kind: string) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={kind === 'alert' ? 'bell' : 'securitySignalResolved'}
-                size="m"
-                aria-hidden={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {kind === 'alert'
-                ? i18n.translate('xpack.alertingV2.rulesList.modeAlerting', {
-                    defaultMessage: 'Alerting',
-                  })
-                : i18n.translate('xpack.alertingV2.rulesList.modeDetectOnly', {
-                    defaultMessage: 'Detect only',
-                  })}
-            </EuiFlexItem>
+    },
+    {
+      field: 'metadata',
+      name: (
+        <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
+      ),
+      width: '12%',
+      render: (_metadata: RuleApiResponse['metadata']) => {
+        const labels = _metadata?.labels;
+        if (!labels || labels.length === 0) {
+          return <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />;
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {labels.map((label) => (
+              <EuiFlexItem key={label} grow={false}>
+                <EuiBadge color="hollow">{label}</EuiBadge>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
-        ),
+        );
       },
-      {
-        name: (
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.column.actions"
-            defaultMessage="Actions"
-          />
-        ),
-        width: '6%',
-        align: 'right',
-        render: (rule: RuleApiResponse) => (
-          <RuleActionsMenu
-            rule={rule}
-            onEdit={(r) => history.push(`/edit/${r.id}`)}
-            onDelete={(r) => setRuleToDelete(r)}
-          />
-        ),
-      },
-    ],
-    [history]
-  );
+    },
+    {
+      field: 'kind',
+      name: <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />,
+      width: '12%',
+      render: (kind: string) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={kind === 'alert' ? 'bell' : 'securitySignalResolved'}
+              size="m"
+              aria-hidden={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {kind === 'alert'
+              ? i18n.translate('xpack.alertingV2.rulesList.modeAlerting', {
+                  defaultMessage: 'Alerting',
+                })
+              : i18n.translate('xpack.alertingV2.rulesList.modeDetectOnly', {
+                  defaultMessage: 'Detect only',
+                })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      name: (
+        <FormattedMessage id="xpack.alertingV2.rulesList.column.actions" defaultMessage="Actions" />
+      ),
+      width: '6%',
+      align: 'right',
+      render: (rule: RuleApiResponse) => (
+        <RuleActionsMenu
+          rule={rule}
+          onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
+          onDelete={(r) => setRuleToDelete(r)}
+        />
+      ),
+    },
+  ];
 
   return (
     <>
@@ -245,7 +228,7 @@ export const RulesListPage = () => {
         rightSideItems={[
           <EuiButton
             key="create-rule"
-            onClick={() => history.push('/create')}
+            onClick={() => navigateToUrl(basePath.prepend(paths.ruleCreate))}
             data-test-subj="createRuleButton"
           >
             <FormattedMessage
