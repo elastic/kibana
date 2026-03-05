@@ -15,3 +15,6 @@ export { registerCRUDUpsert } from './crud/upsert';
 export { registerCRUDUpsertBulk } from './crud/upsert_bulk';
 export { registerCRUDDelete } from './crud/delete';
 export { registerStart } from './start';
+export { registerStartMaintainer } from './entity_maintainers/start';
+export { registerStopMaintainer } from './entity_maintainers/stop';
+export { registerGetMaintainers } from './entity_maintainers/get_maintainers';

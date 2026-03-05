@@ -8,13 +8,23 @@
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-export interface EntityMaintainerConfig {
+export const EntityMaintainerTaskStatus = {
+  NEVER_STARTED: 'never_started',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+} as const;
+
+export type EntityMaintainerTaskStatus =
+  (typeof EntityMaintainerTaskStatus)[keyof typeof EntityMaintainerTaskStatus];
+
+export interface EntityMaintainerRegistryData {
   interval: string;
+  taskStatus: EntityMaintainerTaskStatus;
+  description?: string;
 }
 
-export interface EntityMaintainerTaskEntry {
+export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData {
   id: string;
-  interval: string;
 }
 
 export interface EntityMaintainerStatusMetadata {
