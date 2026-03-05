@@ -61,6 +61,14 @@ export interface DateRangePickerProps {
    */
   onInputChange?: (value: string) => void;
   /**
+   * Horizontal sizing behavior.
+   * - `'auto'` — shrinks to fit content (inline-flex).
+   * - `'restricted'` — sets the width of the control to a fixed value.
+   * - `'full'` — stretches to 100% of the parent (flex).
+   * @default 'auto'
+   */
+  width?: 'restricted' | 'auto' | 'full';
+  /**
    * Reduce input height and padding
    * @default true
    */

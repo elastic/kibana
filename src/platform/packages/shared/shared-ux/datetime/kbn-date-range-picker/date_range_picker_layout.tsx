@@ -20,18 +20,22 @@ import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
  * Arranges the dialog and optional time-window buttons in a horizontal row.
  */
 export function DateRangePickerLayout({ children }: PropsWithChildren) {
-  const { timeWindowButtonsConfig } = useDateRangePickerContext();
+  const { timeWindowButtonsConfig, width } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
 
-  // TODO set max-inline-size based on `width` prop?
   const containerStyles = css`
-    display: flex;
+    display: inline-flex;
+    inline-size: auto;
     align-items: center;
     gap: ${euiTheme.size.s};
   `;
+  const containerFullWidthStyles = css`
+    display: flex;
+    inline-size: 100%;
+  `;
 
   return (
-    <div css={containerStyles}>
+    <div css={[containerStyles, width === 'full' && containerFullWidthStyles]}>
       {children}
       {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>

@@ -48,6 +48,7 @@ export function DateRangePickerControl() {
     panelId,
     initialFocus,
     onInputChange,
+    width,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -138,15 +139,25 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
+  // This magic number is fine for now
+  // and the --kbnDateRangePickerWidth is undefined on purpose
+  const wrapperRestrictedStyles = css`
+    inline-size: var(--kbnDateRangePickerWidth, 21.25rem);
+  `;
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
 
   return (
-    <div ref={controlRef} onKeyDown={onControlKeyDown}>
+    <div
+      ref={controlRef}
+      onKeyDown={onControlKeyDown}
+      css={width === 'restricted' && wrapperRestrictedStyles}
+    >
       <EuiFormControlLayout
         compressed={compressed}
         isInvalid={isInvalid}
+        fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
       >
         {isEditing ? (
@@ -161,6 +172,7 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
+            fullWidth={width !== 'auto'}
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
             compressed={compressed}

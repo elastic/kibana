@@ -93,6 +93,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
    * @beta
    */
   onInputChange?: (value: string) => void;
+  /** Horizontal sizing behavior of the picker. */
+  width: NonNullable<DateRangePickerProps['width']>;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -125,6 +127,7 @@ export function DateRangePickerProvider({
   onPresetSave,
   onPresetDelete,
   onInputChange,
+  width = 'auto',
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -224,6 +227,7 @@ export function DateRangePickerProvider({
       onPresetSave,
       onPresetDelete,
       onInputChange,
+      width,
     }),
     [
       text,
@@ -243,6 +247,7 @@ export function DateRangePickerProvider({
       onPresetSave,
       onPresetDelete,
       onInputChange,
+      width,
     ]
   );
 
