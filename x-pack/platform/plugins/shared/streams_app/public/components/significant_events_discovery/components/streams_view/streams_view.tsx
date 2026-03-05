@@ -290,14 +290,14 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
           <EuiButtonEmpty
             onClick={onBulkOnboardStreamsClick}
-            iconType="securitySignal"
+            iconType="radar"
             disabled={selectedStreams.length === 0}
           >
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
 
           <EuiButtonEmpty
-            iconType="crosshairs"
+            iconType="crosshair"
             onClick={() => scheduleInsightsTask()}
             disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
             isLoading={isSchedulingInsights || isWaitingForInsightsTask}

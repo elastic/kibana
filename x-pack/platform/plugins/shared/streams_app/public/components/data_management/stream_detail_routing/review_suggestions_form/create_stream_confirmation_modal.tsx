@@ -113,7 +113,7 @@ export function CreateStreamConfirmationModal({
                 <EuiButtonEmpty
                   data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
                   size="s"
-                  iconType="editorCodeBlock"
+                  iconType="code"
                   onClick={copy}
                 >
                   {copyCodeButtonText}

@@ -239,7 +239,7 @@ export function StreamNameFormRow({
           prefix ? (
             <EuiFormPrepend
               id={descriptionId}
-              iconLeft="streamsWired"
+              iconLeft="productStreamsWired"
               label={
                 <>
                   <EuiScreenReaderOnly>

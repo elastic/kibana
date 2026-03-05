@@ -82,7 +82,7 @@ export function ConnectorListButtonBase({
                 onClick={togglePopover}
                 display="base"
                 size={buttonSize}
-                iconType="controlsHorizontal"
+                iconType="controls"
                 aria-label={SHOW_MORE_ARIA_LABEL}
               />
             }

@@ -179,7 +179,7 @@ const DraggablePatternInput = ({
                   { defaultMessage: 'Drag Handle' }
                 )}
               >
-                <EuiIcon type="grab" />
+                <EuiIcon type="dragVertical" />
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem style={{ minWidth: 0 }}>
@@ -193,7 +193,7 @@ const DraggablePatternInput = ({
             {onRemove && (
               <EuiButtonIcon
                 data-test-subj="streamsAppDraggablePatternInputButton"
-                iconType="minusInCircle"
+                iconType="minusCircle"
                 color="danger"
                 onClick={onRemove}
                 aria-label={i18n.translate(

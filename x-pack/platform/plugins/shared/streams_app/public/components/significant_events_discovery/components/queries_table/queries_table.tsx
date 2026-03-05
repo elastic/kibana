@@ -219,7 +219,7 @@ export function QueriesTable() {
         render: (_: unknown, item: SignificantEventQueryRow) => (
           <EuiButtonIcon
             data-test-subj="queriesDiscoveryDetailsButton"
-            iconType="expand"
+            iconType="maximize"
             aria-label={DETAILS_BUTTON_ARIA_LABEL}
             onClick={() => setSelectedQuery(item)}
           />

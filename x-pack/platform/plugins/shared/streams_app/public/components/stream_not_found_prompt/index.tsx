@@ -22,7 +22,7 @@ export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) 
   return (
     <StreamsAppPageTemplate.EmptyPrompt
       data-test-subj="streamNotFoundPrompt"
-      iconType="search"
+      iconType="magnify"
       title={
         <h2>
           <FormattedMessage

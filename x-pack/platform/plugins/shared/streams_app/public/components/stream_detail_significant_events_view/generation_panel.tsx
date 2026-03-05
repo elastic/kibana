@@ -133,7 +133,7 @@ export function SignificantEventsGenerationPanel({
               data-test-subj="significant_events_manual_entry_button"
               onClick={onManualEntryClick}
               isDisabled={isGeneratingQueries || selectedFlow === 'manual'}
-              iconType="plusInCircle"
+              iconType="plusCircle"
             >
               {i18n.translate(
                 'xpack.streams.significantEvents.significantEventsGenerationPanel.manualEntryButtonLabel',

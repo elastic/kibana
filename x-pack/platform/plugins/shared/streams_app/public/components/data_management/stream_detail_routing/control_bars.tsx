@@ -88,7 +88,7 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
           <EuiButtonEmpty
             data-test-subj="streamsAppRoutingAddRoutingRuleViewCodeButton"
             size="s"
-            iconType="editorCodeBlock"
+            iconType="code"
             onClick={onViewCodeClick}
           >
             {viewCodeButtonLabel}
@@ -187,7 +187,7 @@ export const EditRoutingRuleControls = ({
                 data-test-subj="streamsAppRoutingEditRoutingRuleViewCodeButton"
                 aria-label={viewCodeButtonLabel}
                 size="s"
-                iconType="editorCodeBlock"
+                iconType="code"
                 display="base"
                 onClick={onViewCodeClick}
               />

@@ -290,7 +290,7 @@ export function EditLifecycleModal({
                 <EuiButtonEmpty
                   data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
                   size="s"
-                  iconType="editorCodeBlock"
+                  iconType="code"
                   onClick={copy}
                   disabled={isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)}
                 >

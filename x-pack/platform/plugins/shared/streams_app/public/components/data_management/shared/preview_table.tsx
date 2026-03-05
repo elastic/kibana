@@ -468,7 +468,7 @@ export function PreviewTable({
                         viewModeToggle.setViewMode('summary');
                       }
                     }}
-                    iconType={viewModeToggle.currentMode === 'summary' ? 'eye' : 'eyeClosed'}
+                    iconType={viewModeToggle.currentMode === 'summary' ? 'eye' : 'eyeSlash'}
                     color="text"
                   >
                     {i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
