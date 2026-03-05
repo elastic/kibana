@@ -18,7 +18,6 @@ describe('OnePasswordConnector', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
-    patch: jest.fn(),
   } as unknown as jest.Mocked<AxiosInstance>;
 
   const mockContext = {
@@ -81,45 +80,50 @@ describe('OnePasswordConnector', () => {
   });
 
   describe('listUsers action', () => {
-    const usersList = [
-      {
-        uuid: 'USER1234567890ABCDEF12',
-        email: 'alice@example.com',
-        name: 'Alice',
-        status: 'ACTIVE',
-        createdAt: '2024-01-15T10:30:00Z',
-      },
-      {
-        uuid: 'USER9876543210FEDCBA98',
-        email: 'bob@example.com',
-        name: 'Bob',
-        status: 'SUSPENDED',
-        createdAt: '2024-03-20T09:15:00Z',
-      },
-    ];
+    const usersList = {
+      results: [
+        {
+          id: 'USER1234567890ABCDEF12',
+          email: 'alice@example.com',
+          display_name: 'Alice',
+          state: 'ACTIVE',
+          create_time: '2024-01-15T10:30:00Z',
+          path: `accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12`,
+        },
+        {
+          id: 'USER9876543210FEDCBA98',
+          email: 'bob@example.com',
+          display_name: 'Bob',
+          state: 'SUSPENDED',
+          create_time: '2024-03-20T09:15:00Z',
+          path: `accounts/${ACCOUNT_UUID}/users/USER9876543210FEDCBA98`,
+        },
+      ],
+    };
 
     it('should list users without filters', async () => {
       (mockClient.get as jest.Mock).mockResolvedValue({ data: usersList });
 
       const result = await OnePasswordConnector.actions.listUsers.handler(mockContext, {});
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/users`, {
-        params: { accountUuid: ACCOUNT_UUID },
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
+        params: {},
       });
       expect(result).toEqual(usersList);
     });
 
-    it('should list users filtered by status', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ data: [usersList[0]] });
+    it('should list users filtered by state', async () => {
+      const activeOnly = { results: [usersList.results[0]] };
+      (mockClient.get as jest.Mock).mockResolvedValue({ data: activeOnly });
 
       const result = await OnePasswordConnector.actions.listUsers.handler(mockContext, {
-        status: 'ACTIVE',
+        filter: 'user.isActive()',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/users`, {
-        params: { accountUuid: ACCOUNT_UUID, status: 'ACTIVE' },
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
+        params: { filter: 'user.isActive()' },
       });
-      expect(result).toEqual([usersList[0]]);
+      expect(result).toEqual(activeOnly);
     });
 
     it('should support pagination parameters', async () => {
@@ -130,11 +134,10 @@ describe('OnePasswordConnector', () => {
         pageToken: 'CAIQAg',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/users`, {
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
         params: {
-          accountUuid: ACCOUNT_UUID,
-          max_page_size: 10,
-          page_token: 'CAIQAg',
+          maxPageSize: 10,
+          pageToken: 'CAIQAg',
         },
       });
     });
@@ -151,11 +154,12 @@ describe('OnePasswordConnector', () => {
 
   describe('getUser action', () => {
     const userDetail = {
-      uuid: 'USER1234567890ABCDEF12',
+      id: 'USER1234567890ABCDEF12',
       email: 'alice@example.com',
-      name: 'Alice',
-      status: 'ACTIVE',
-      createdAt: '2024-01-15T10:30:00Z',
+      display_name: 'Alice',
+      state: 'ACTIVE',
+      create_time: '2024-01-15T10:30:00Z',
+      path: `accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12`,
     };
 
     it('should get a single user by UUID', async () => {
@@ -165,9 +169,9 @@ describe('OnePasswordConnector', () => {
         uuid: 'USER1234567890ABCDEF12',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/users/USER1234567890ABCDEF12`, {
-        params: { accountUuid: ACCOUNT_UUID },
-      });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${BASE_URL}/accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12`
+      );
       expect(result).toEqual(userDetail);
     });
 
@@ -183,32 +187,31 @@ describe('OnePasswordConnector', () => {
 
   describe('suspendUser action', () => {
     const suspendedUser = {
-      uuid: 'USER1234567890ABCDEF12',
+      id: 'USER1234567890ABCDEF12',
       email: 'alice@example.com',
-      name: 'Alice',
-      status: 'SUSPENDED',
-      createdAt: '2024-01-15T10:30:00Z',
+      display_name: 'Alice',
+      state: 'SUSPENDED',
+      create_time: '2024-01-15T10:30:00Z',
+      path: `accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12`,
     };
 
     it('should suspend an active user', async () => {
-      (mockClient.patch as jest.Mock).mockResolvedValue({ data: suspendedUser });
+      (mockClient.post as jest.Mock).mockResolvedValue({ data: suspendedUser });
 
       const result = await OnePasswordConnector.actions.suspendUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
       });
 
-      expect(mockClient.patch).toHaveBeenCalledWith(
-        `${BASE_URL}/users/USER1234567890ABCDEF12/suspend`,
-        undefined,
-        { params: { accountUuid: ACCOUNT_UUID }, headers: { 'Content-Type': 'application/json' } }
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${BASE_URL}/accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12:suspend`
       );
       expect(result).toEqual(suspendedUser);
-      expect(result.status).toBe('SUSPENDED');
+      expect(result.state).toBe('SUSPENDED');
     });
 
     it('should propagate errors when suspending fails', async () => {
       const error = new Error('Cannot suspend account owner');
-      (mockClient.patch as jest.Mock).mockRejectedValue(error);
+      (mockClient.post as jest.Mock).mockRejectedValue(error);
 
       await expect(
         OnePasswordConnector.actions.suspendUser.handler(mockContext, { uuid: 'OWNER-UUID' })
@@ -218,32 +221,31 @@ describe('OnePasswordConnector', () => {
 
   describe('reactivateUser action', () => {
     const reactivatedUser = {
-      uuid: 'USER1234567890ABCDEF12',
+      id: 'USER1234567890ABCDEF12',
       email: 'alice@example.com',
-      name: 'Alice',
-      status: 'ACTIVE',
-      createdAt: '2024-01-15T10:30:00Z',
+      display_name: 'Alice',
+      state: 'ACTIVE',
+      create_time: '2024-01-15T10:30:00Z',
+      path: `accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12`,
     };
 
     it('should reactivate a suspended user', async () => {
-      (mockClient.patch as jest.Mock).mockResolvedValue({ data: reactivatedUser });
+      (mockClient.post as jest.Mock).mockResolvedValue({ data: reactivatedUser });
 
       const result = await OnePasswordConnector.actions.reactivateUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
       });
 
-      expect(mockClient.patch).toHaveBeenCalledWith(
-        `${BASE_URL}/users/USER1234567890ABCDEF12/reactivate`,
-        undefined,
-        { params: { accountUuid: ACCOUNT_UUID }, headers: { 'Content-Type': 'application/json' } }
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${BASE_URL}/accounts/${ACCOUNT_UUID}/users/USER1234567890ABCDEF12:reactivate`
       );
       expect(result).toEqual(reactivatedUser);
-      expect(result.status).toBe('ACTIVE');
+      expect(result.state).toBe('ACTIVE');
     });
 
     it('should propagate errors when reactivation fails', async () => {
       const error = new Error('User is not suspended');
-      (mockClient.patch as jest.Mock).mockRejectedValue(error);
+      (mockClient.post as jest.Mock).mockRejectedValue(error);
 
       await expect(
         OnePasswordConnector.actions.reactivateUser.handler(mockContext, {
@@ -255,15 +257,15 @@ describe('OnePasswordConnector', () => {
 
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: [] });
+      (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: { results: [] } });
 
       if (!OnePasswordConnector.test) {
         throw new Error('Test handler not defined');
       }
       const result = await OnePasswordConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/users`, {
-        params: { accountUuid: ACCOUNT_UUID, max_page_size: 1 },
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
+        params: { maxPageSize: 1 },
       });
       expect(mockContext.log.debug).toHaveBeenCalledWith('1Password test handler');
       expect(result).toEqual({

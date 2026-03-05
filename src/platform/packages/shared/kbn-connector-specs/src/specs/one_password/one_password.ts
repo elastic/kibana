@@ -81,28 +81,27 @@ export const OnePasswordConnector: ConnectorSpec = {
       isTool: true,
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
-        { defaultMessage: 'List users in the 1Password account, optionally filtered by status' }
+        { defaultMessage: 'List users in the 1Password account, optionally filtered by state' }
       ),
       input: z.object({
-        status: z.enum(['ACTIVE', 'SUSPENDED', 'STATUS_UNSPECIFIED']).optional(),
+        filter: z.enum(['user.isActive()', 'user.isSuspended()']).optional(),
         maxPageSize: z.number().optional(),
         pageToken: z.string().optional(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
-          status?: 'ACTIVE' | 'SUSPENDED' | 'STATUS_UNSPECIFIED';
+          filter?: 'user.isActive()' | 'user.isSuspended()';
           maxPageSize?: number;
           pageToken?: string;
         };
         const { accountUuid } = ctx.config as { accountUuid: string };
 
         try {
-          const response = await ctx.client.get(`${BASE_URL}/users`, {
+          const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
             params: {
-              accountUuid,
-              ...(typedInput.status && { status: typedInput.status }),
-              ...(typedInput.maxPageSize && { max_page_size: typedInput.maxPageSize }),
-              ...(typedInput.pageToken && { page_token: typedInput.pageToken }),
+              ...(typedInput.filter && { filter: typedInput.filter }),
+              ...(typedInput.maxPageSize && { maxPageSize: typedInput.maxPageSize }),
+              ...(typedInput.pageToken && { pageToken: typedInput.pageToken }),
             },
           });
           return response.data;
@@ -126,9 +125,9 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { accountUuid } = ctx.config as { accountUuid: string };
 
         try {
-          const response = await ctx.client.get(`${BASE_URL}/users/${uuid}`, {
-            params: { accountUuid },
-          });
+          const response = await ctx.client.get(
+            `${BASE_URL}/accounts/${accountUuid}/users/${uuid}`
+          );
           return response.data;
         } catch (error) {
           throwWithApiError(error);
@@ -153,10 +152,9 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { accountUuid } = ctx.config as { accountUuid: string };
 
         try {
-          const response = await ctx.client.patch(`${BASE_URL}/users/${uuid}/suspend`, undefined, {
-            params: { accountUuid },
-            headers: { 'Content-Type': 'application/json' },
-          });
+          const response = await ctx.client.post(
+            `${BASE_URL}/accounts/${accountUuid}/users/${uuid}:suspend`
+          );
           return response.data;
         } catch (error) {
           throwWithApiError(error);
@@ -178,13 +176,8 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { accountUuid } = ctx.config as { accountUuid: string };
 
         try {
-          const response = await ctx.client.patch(
-            `${BASE_URL}/users/${uuid}/reactivate`,
-            undefined,
-            {
-              params: { accountUuid },
-              headers: { 'Content-Type': 'application/json' },
-            }
+          const response = await ctx.client.post(
+            `${BASE_URL}/accounts/${accountUuid}/users/${uuid}:reactivate`
           );
           return response.data;
         } catch (error) {
@@ -203,8 +196,8 @@ export const OnePasswordConnector: ConnectorSpec = {
       const { accountUuid } = ctx.config as { accountUuid: string };
 
       try {
-        const response = await ctx.client.get(`${BASE_URL}/users`, {
-          params: { accountUuid, max_page_size: 1 },
+        const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
+          params: { maxPageSize: 1 },
         });
 
         if (response.status === 200) {
