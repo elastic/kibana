@@ -42,7 +42,7 @@ export function HeaderNavControls({ navControls$, append = null }: Props) {
             }
           `}
         >
-          <HeaderExtension extension={navControl.mount} />
+          <HeaderExtension extension={navControl.content ?? navControl.mount} />
         </EuiHeaderSectionItem>
       ))}
       {append}
