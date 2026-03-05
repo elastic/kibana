@@ -6,21 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
 
-import { lensResponseItemSchema } from './common';
-
-export const lensUpdateRequestParamsSchema = schema.object(
+export const lensDeleteRequestParamsSchema = schema.object(
   {
     id: schema.string({
       meta: {
-        description: 'The saved object id of a visualization.',
+        description: 'The saved object id of a Lens visualization.',
       },
     }),
   },
   { unknowns: 'forbid' }
 );
-
-export const lensUpdateRequestBodySchema = lensApiStateSchema;
-
-export const lensUpdateResponseBodySchema = lensResponseItemSchema;

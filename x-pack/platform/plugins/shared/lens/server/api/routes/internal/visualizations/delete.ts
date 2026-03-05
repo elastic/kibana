@@ -7,18 +7,21 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
-import type { LensSavedObject } from '../../../content_management';
+import {
+  LENS_INTERNAL_VIS_API_PATH,
+  LENS_INTERNAL_API_VERSION,
+} from '../../../../../common/constants';
+import type { LensSavedObject } from '../../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
 
-export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
+export const registerLensInternalVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement }
 ) => {
   const deleteRoute = router.delete({
-    path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
+    path: `${LENS_INTERNAL_VIS_API_PATH}/{id}`,
+    access: 'internal',
     enableQueryVersion: true,
     summary: 'Delete Lens visualization',
     description: 'Delete a Lens visualization by id.',
@@ -38,7 +41,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
 
   deleteRoute.addVersion(
     {
-      version: LENS_API_VERSION,
+      version: LENS_INTERNAL_API_VERSION,
       validate: {
         request: {
           params: lensDeleteRequestParamsSchema,
@@ -66,6 +69,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
@@ -83,7 +87,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
+                message: `A Lens visualization with id [${req.params.id}] was not found.`,
               },
             });
           }

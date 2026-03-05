@@ -7,23 +7,27 @@
 
 import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
-
-import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management';
-
-const savedObjectProps = lensCommonSavedObjectSchemaV2.getPropSchemas();
+import {
+  lensCommonSavedObjectSchemaV2,
+  lensItemDataSchemaV2,
+  lensSavedObjectSchemaV2,
+} from '../../../../../content_management';
+import { pickFromObjectSchema } from '../../../../../utils';
 
 /**
  * The Lens item meta returned from the server
  */
 export const lensItemMetaSchema = schema.object(
   {
-    type: savedObjectProps.type,
-    created_at: savedObjectProps.createdAt,
-    updated_at: savedObjectProps.updatedAt,
-    created_by: savedObjectProps.createdBy,
-    updated_by: savedObjectProps.updatedBy,
-    origin_id: savedObjectProps.originId,
-    managed: savedObjectProps.managed,
+    ...pickFromObjectSchema(lensCommonSavedObjectSchemaV2.getPropSchemas(), [
+      'type',
+      'createdAt',
+      'updatedAt',
+      'createdBy',
+      'updatedBy',
+      'originId',
+      'managed',
+    ]),
   },
   { unknowns: 'forbid' }
 );
@@ -33,8 +37,8 @@ export const lensItemMetaSchema = schema.object(
  */
 export const lensResponseItemSchema = schema.object(
   {
-    id: savedObjectProps.id,
-    data: lensApiStateSchema,
+    id: lensSavedObjectSchemaV2.getPropSchemas().id,
+    data: schema.oneOf([lensApiStateSchema, lensItemDataSchemaV2]),
     meta: lensItemMetaSchema,
   },
   { unknowns: 'forbid' }

@@ -9,19 +9,22 @@ import { isBoom, boomify } from '@hapi/boom';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
-import type { LensSearchIn, LensSavedObject } from '../../../content_management';
+import {
+  LENS_INTERNAL_VIS_API_PATH,
+  LENS_INTERNAL_API_VERSION,
+} from '../../../../../common/constants';
+import type { LensSearchIn, LensSavedObject } from '../../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
-import { getLensResponseItem } from './utils';
+import { getLensInternalResponseItem } from './utils';
 
-export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
+export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement, builder }
 ) => {
   const searchRoute = router.get({
-    path: LENS_VIS_API_PATH,
-    access: 'internal', // to go public in 9.4
+    path: LENS_INTERNAL_VIS_API_PATH,
+    access: 'internal',
     enableQueryVersion: true,
     summary: 'Search Lens visualizations',
     description: 'Get list of Lens visualizations.',
@@ -41,7 +44,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
 
   searchRoute.addVersion(
     {
-      version: LENS_API_VERSION,
+      version: LENS_INTERNAL_API_VERSION,
       validate: {
         request: {
           query: lensSearchRequestQuerySchema,
@@ -72,7 +75,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
+      const { query: q, page, perPage, ...reqOptions } = req.query;
 
       try {
         // Note: these types are to enforce loose param typings of client methods
@@ -96,7 +99,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
         return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
           body: {
             data: hits.map((item) => {
-              return getLensResponseItem(builder, item);
+              return getLensInternalResponseItem(builder, item);
             }),
             meta: {
               page,
