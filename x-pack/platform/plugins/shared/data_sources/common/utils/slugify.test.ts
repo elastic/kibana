@@ -34,8 +34,9 @@ describe('slugify', () => {
     expect(slugify('-_-test_-_')).toBe('test');
   });
 
-  it('returns empty string when input contains only special characters', () => {
-    expect(slugify('---')).toBe('');
-    expect(slugify('!!!')).toBe('');
+  it('throws when input contains only special characters or empty string', () => {
+    expect(() => slugify('---')).toThrow('must contain at least one alphanumeric');
+    expect(() => slugify('!!!')).toThrow('must contain at least one alphanumeric');
+    expect(() => slugify('')).toThrow('must contain at least one alphanumeric');
   });
 });

@@ -33,7 +33,7 @@ import type {
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 import type { DeleteDataSourceAndRelatedResourcesResult } from '../../common';
-import { slugify } from '../../common/utils/slugify';
+import { slugify } from '../../common';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;

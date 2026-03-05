@@ -8,16 +8,20 @@
 /**
  * Converts a user-provided name into a safe, lowercase identifier suitable for
  * workflow name prefixes, tool ID segments, and MCP namespaces.
- *
- * Only applies the minimum transformation required by the strictest downstream
- * constraint (tool IDs: lowercase `[a-z0-9_-]`, segments start/end with `[a-z0-9]`).
- * Underscores are intentionally preserved to stay faithful to user input.
  */
 export const slugify = (input: string): string => {
-  return input
+  const result = input
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9_]+/g, '-')
     .replace(/^[-_]+|[-_]+$/g, '');
+
+  if (!result) {
+    throw new Error(
+      `Unable to generate a valid identifier from "${input}": name must contain at least one alphanumeric character`
+    );
+  }
+
+  return result;
 };

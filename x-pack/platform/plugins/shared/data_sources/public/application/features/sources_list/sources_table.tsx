@@ -30,9 +30,14 @@ import {
   PAGINATION_ITEMS_PER_PAGE_OPTIONS,
 } from '../../../../common/constants';
 import { getConnectorIcon } from '../../../utils';
-import { slugify } from '../../../../common/utils/slugify';
+import { slugify } from '../../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { SourcesUtilityBar } from './sources_utility_bar';
+
+const getWorkflowPrefix = (source: ActiveSource): string =>
+  `${slugify(source.name)}.source.${source.type}`;
+
+const getToolPrefix = (source: ActiveSource): string => `${source.type}.${slugify(source.name)}`;
 
 interface SourcesTableProps {
   sources: ActiveSource[];
@@ -247,8 +252,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         }),
         align: 'center',
         render: (workflows: string[], source: ActiveSource) => {
-          const workflowPrefix = `${slugify(source.name)}.source.${source.type}`;
-          const path = `?query=${encodeURIComponent(workflowPrefix)}`;
+          const path = `?query=${encodeURIComponent(getWorkflowPrefix(source))}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return workflows.length > 0 ? (
             <EuiLink href={workflowsUrl} data-test-subj={`workflowsLink-${source.id}`}>
@@ -266,8 +270,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         }),
         align: 'center',
         render: (agentTools: string[], source: ActiveSource) => {
-          const toolPrefix = `${source.type}.${slugify(source.name)}`;
-          const path = `/tools?search=${encodeURIComponent(toolPrefix)}`;
+          const path = `/tools?search=${encodeURIComponent(getToolPrefix(source))}`;
           const toolsUrl = application.getUrlForApp(AGENT_BUILDER_APP_ID, { path });
           return agentTools.length > 0 ? (
             <EuiLink href={toolsUrl} data-test-subj={`toolsLink-${source.id}`}>
@@ -285,8 +288,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         width: '120px',
         align: 'right',
         render: (source: ActiveSource) => {
-          const workflowPrefix = `${slugify(source.name)}.source.${source.type}`;
-          const path = `?query=${encodeURIComponent(workflowPrefix)}`;
+          const path = `?query=${encodeURIComponent(getWorkflowPrefix(source))}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return (
             <ActionsCell
