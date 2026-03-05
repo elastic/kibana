@@ -29,7 +29,7 @@ import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import { ContentListFooter } from '@kbn/content-list-footer';
 
-import { createStoryFindItems, toJsx } from '../stories_helpers';
+import { createStoryFindItems, mockTagsService, toJsx } from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
 import type { PlaygroundState } from './playground_state';
 import { INITIAL_STATE, playgroundReducer } from './playground_state';
@@ -120,6 +120,8 @@ const usePreview = (state: PlaygroundState) => {
 
   const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
 
+  const hasTagsFilter = toolbar.filters.some((f) => f.type === 'tags');
+
   const providerFeatures = useMemo(
     () => ({
       sorting: features.sorting
@@ -129,8 +131,16 @@ const usePreview = (state: PlaygroundState) => {
         ? { initialPageSize: features.initialPageSize }
         : (false as const),
       search: features.search ? {} : (false as const),
+      tags: hasTagsFilter ? true : (false as const),
     }),
-    [features.sorting, features.pagination, features.initialPageSize, features.search, sortFields]
+    [
+      features.sorting,
+      features.pagination,
+      features.initialPageSize,
+      features.search,
+      sortFields,
+      hasTagsFilter,
+    ]
   );
 
   const providerItemConfig = useMemo(() => {
@@ -219,7 +229,18 @@ const usePreview = (state: PlaygroundState) => {
         <Filters>
           {toolbar.filters.map((f) => {
             if (f.type === 'sort') {
-              return <Filters.Sort key={f.instanceId} />;
+              return (
+                <React.Fragment key={f.instanceId}>
+                  <Filters.Sort />
+                </React.Fragment>
+              );
+            }
+            if (f.type === 'tags') {
+              return (
+                <React.Fragment key={f.instanceId}>
+                  <Filters.Tags />
+                </React.Fragment>
+              );
             }
             return null;
           })}
@@ -237,8 +258,9 @@ const usePreview = (state: PlaygroundState) => {
       features: providerFeatures,
       isReadOnly: provider.isReadOnly,
       item: providerItemConfig,
+      ...(hasTagsFilter && { services: { tags: mockTagsService } }),
     }),
-    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig]
+    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, hasTagsFilter]
   );
 
   const consumerJsx = useMemo(
@@ -305,6 +327,16 @@ export const PlaygroundBuilder = () => {
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
+        id: 'about',
+        name: 'About',
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <EuiMarkdownFormat textSize="s">{INSTRUCTIONS_MD}</EuiMarkdownFormat>
+          </>
+        ),
+      },
+      {
         id: 'preview',
         name: 'Preview',
         content: (
@@ -325,16 +357,6 @@ export const PlaygroundBuilder = () => {
             <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" overflowHeight={300}>
               {jsx}
             </EuiCodeBlock>
-          </>
-        ),
-      },
-      {
-        id: 'about',
-        name: 'About',
-        content: (
-          <>
-            <EuiSpacer size="m" />
-            <EuiMarkdownFormat textSize="s">{INSTRUCTIONS_MD}</EuiMarkdownFormat>
           </>
         ),
       },
