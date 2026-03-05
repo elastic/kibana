@@ -6,11 +6,7 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
-import {
-  parseEsqlQuery,
-  computeIsESQLQueryAggregating,
-  injectMetadataId,
-} from '@kbn/securitysolution-utils';
+import { parseEsqlQuery, injectMetadataId } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
@@ -33,10 +29,14 @@ export function esqlQueryValidatorFactory({
     }
 
     try {
-      const { errors } = parseEsqlQuery(esqlQuery);
+      const { errors, isEsqlQueryAggregating } = parseEsqlQuery(esqlQuery);
 
       if (errors.length) {
         return constructSyntaxError(new Error(errors[0].message));
+      }
+
+      if (isEsqlQueryAggregating) {
+        return;
       }
 
       let queryToValidate = esqlQuery;
@@ -48,12 +48,9 @@ export function esqlQueryValidatorFactory({
 
       const columns = await fetchEsqlQueryColumns({ esqlQuery: queryToValidate, queryClient });
 
-      const isAggregating = computeIsESQLQueryAggregating(esqlQuery);
-      if (!isAggregating) {
-        const hasIdColumn = columns.some((col) => col.id === '_id');
-        if (!hasIdColumn) {
-          return constructMissingIdFieldWarning();
-        }
+      const hasIdColumn = columns.some((col) => col.id === '_id');
+      if (!hasIdColumn) {
+        return constructMissingIdFieldWarning();
       }
     } catch (error) {
       return constructValidationError(error);
