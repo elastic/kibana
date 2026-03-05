@@ -58,7 +58,7 @@ test.describe(
       );
     });
 
-    test('should disable update when syntax editor JSON is invalid', async ({
+    test('should disable update when syntax editor YAML is invalid', async ({
       page,
       pageObjects,
     }) => {
@@ -68,15 +68,15 @@ test.describe(
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
 
       await pageObjects.streams.fillConditionEditorWithSyntax(
-        '{"field":"service.name","eq":"updated-service"}'
+        'field: service.name\neq: updated-service'
       );
       await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeEnabled();
 
-      await pageObjects.streams.fillConditionEditorWithSyntax('{');
+      await pageObjects.streams.fillConditionEditorWithSyntax('field: :\ninvalid');
       await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeDisabled();
 
       await pageObjects.streams.fillConditionEditorWithSyntax(
-        '{"field":"service.name","eq":"updated-service"}'
+        'field: service.name\neq: updated-service'
       );
       await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeEnabled();
     });
@@ -138,19 +138,19 @@ test.describe(
       // Switch to syntax editor
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
 
-      // Clear the condition (empty JSON)
+      // Clear the condition (empty YAML)
       await pageObjects.streams.fillConditionEditorWithSyntax('');
 
       // Verify Update button is disabled (condition stays at last valid value, no changes made)
       const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
       await expect(updateButton).toBeDisabled();
 
-      // Note: Error message is NOT shown because invalid JSON is silently ignored
+      // Note: Error message is NOT shown because invalid YAML is silently ignored
       // and the condition remains at its last valid value. This allows users to type
-      // partial JSON without the state being overridden.
+      // partial YAML without the state being overridden.
     });
 
-    test('should disable Update button when syntax editor has invalid JSON', async ({
+    test('should disable Update button when syntax editor has invalid YAML', async ({
       page,
       pageObjects,
     }) => {
@@ -160,16 +160,16 @@ test.describe(
       // Switch to syntax editor
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
 
-      // Enter invalid JSON
-      await pageObjects.streams.fillConditionEditorWithSyntax('{ invalid json }');
+      // Enter invalid YAML
+      await pageObjects.streams.fillConditionEditorWithSyntax('field: :\ninvalid yaml');
 
       // Verify Update button is disabled (condition stays at last valid value, no changes made)
       const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
       await expect(updateButton).toBeDisabled();
 
-      // Note: Error message is NOT shown because invalid JSON is silently ignored
+      // Note: Error message is NOT shown because invalid YAML is silently ignored
       // and the condition remains at its last valid value. This allows users to type
-      // partial JSON without the state being overridden.
+      // partial YAML without the state being overridden.
     });
 
     test('should disable Update button when no changes have been made', async ({

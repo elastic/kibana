@@ -8,7 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
