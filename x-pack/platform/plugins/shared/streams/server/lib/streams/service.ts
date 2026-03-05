@@ -12,7 +12,6 @@ import { createStreamsStorageClient } from './storage/streams_storage_client';
 import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
-import type { SystemClient } from './system/system_client';
 import type { FeatureClient } from './feature';
 
 export class StreamsService {
@@ -25,14 +24,12 @@ export class StreamsService {
   async getClient({
     attachmentClient,
     queryClient,
-    systemClient,
     featureClient,
     esClient,
     esClientAsInternalUser,
   }: {
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
-    systemClient: SystemClient;
     featureClient: FeatureClient;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
@@ -47,7 +44,6 @@ export class StreamsService {
       attachmentClient,
       queryClient,
       logger,
-      systemClient,
       featureClient,
       esClient,
       esClientAsInternalUser,

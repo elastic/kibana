@@ -6,7 +6,7 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
 import {

@@ -49,7 +49,6 @@ import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
-import { SystemService } from './lib/streams/system/system_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
@@ -115,7 +114,6 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
-    const systemService = new SystemService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
@@ -143,35 +141,27 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [
-        attachmentClient,
-        featureClient,
-        systemClient,
-        insightClient,
-        contentClient,
-        queryClient,
-      ] = await Promise.all([
-        attachmentService.getClient({
-          soClient,
-          rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
-        }),
-        featureService.getClient(),
-        systemService.getClient(),
-        insightService.getInternalClient(),
-        contentService.getClient(),
-        queryService.getClient({
-          soClient,
-          rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-            request,
-            DEFAULT_SPACE_ID
-          ),
-        }),
-      ]);
+      const [attachmentClient, featureClient, insightClient, contentClient, queryClient] =
+        await Promise.all([
+          attachmentService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+          }),
+          featureService.getClient(),
+          insightService.getInternalClient(),
+          contentService.getClient(),
+          queryService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+              request,
+              DEFAULT_SPACE_ID
+            ),
+          }),
+        ]);
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
         queryClient,
-        systemClient,
         featureClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
@@ -183,7 +173,6 @@ export class StreamsPlugin
         attachmentClient,
         streamsClient,
         featureClient,
-        systemClient,
         insightClient,
         inferenceClient,
         contentClient,
@@ -295,17 +284,15 @@ export class StreamsPlugin
             },
           } as unknown as RulesClient;
 
-          const [attachmentClient, featureClient, systemClient, queryClient] = await Promise.all([
+          const [attachmentClient, featureClient, queryClient] = await Promise.all([
             attachmentService.getClient({ soClient, rulesClient }),
             featureService.getClient(),
-            systemService.getClient(),
             queryService.getClient({ soClient, rulesClient }),
           ]);
 
           const streamsClient = await streamsService.getClient({
             attachmentClient,
             queryClient,
-            systemClient,
             featureClient,
             esClient,
             esClientAsInternalUser: esClient,

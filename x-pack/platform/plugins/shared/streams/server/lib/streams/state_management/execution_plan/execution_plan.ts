@@ -29,6 +29,7 @@ import {
 } from '../../ingest_pipelines/manage_ingest_pipelines';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
+import { retryTransientEsErrors } from '../../helpers/retry';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
 import { InsufficientPermissionsError } from '../../errors/insufficient_permissions_error';
@@ -274,15 +275,8 @@ export class ExecutionPlan {
   }
 
   private async unlinkSystems(actions: UnlinkSystemsAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.systemClient.syncSystemList(action.request.name, [])
-      )
-    );
+    // Systems have been removed; this is a no-op kept for backward compatibility
+    // with existing execution plans that may contain unlink_systems actions.
   }
 
   private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
@@ -472,11 +466,15 @@ export class ExecutionPlan {
   private async upsertAndDeleteDotStreamsDocuments(
     actions: Array<UpsertDotStreamsDocumentAction | DeleteDotStreamsDocumentAction>
   ) {
-    return this.dependencies.storageClient.bulk({
-      operations: actions.map(dotDocumentActionToBulkOperation),
-      refresh: true,
-      throwOnFail: true,
-    });
+    return retryTransientEsErrors(
+      () =>
+        this.dependencies.storageClient.bulk({
+          operations: actions.map(dotDocumentActionToBulkOperation),
+          refresh: true,
+          throwOnFail: true,
+        }),
+      { logger: this.dependencies.logger }
+    );
   }
 
   private async updateIngestSettings(actions: UpdateIngestSettingsAction[]) {

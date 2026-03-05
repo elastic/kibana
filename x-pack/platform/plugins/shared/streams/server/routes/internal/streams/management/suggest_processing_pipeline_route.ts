@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
