@@ -13,34 +13,34 @@ import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type {
   EntityType,
   ManagedEntityDefinition,
-} from '../../common/domain/definitions/entity_schema';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import type { PaginationParams } from './logs_extraction/logs_extraction_query_builder';
+} from '../../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import type { PaginationParams } from './logs_extraction_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   extractPaginationParams,
   HASHED_ID_FIELD,
-} from './logs_extraction/logs_extraction_query_builder';
-import { getLatestEntitiesIndexName } from './assets/latest_index';
-import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import { executeEsqlQuery } from '../infra/elasticsearch/esql';
-import { ingestEntities } from '../infra/elasticsearch/ingest';
+} from './logs_extraction_query_builder';
+import { getLatestEntitiesIndexName } from '../assets/latest_index';
+import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
+import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
+import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
-} from './assets/external_indices_contants';
-import type { LogExtractionConfig } from './definitions/saved_objects';
+} from '../assets/external_indices_contants';
+import type { LogExtractionConfig } from '../definitions/saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
-} from './definitions/saved_objects';
-import { ENGINE_STATUS } from './constants';
-import { parseDurationToMs } from '../infra/time';
+} from '../definitions/saved_objects';
+import { ENGINE_STATUS } from '../constants';
+import { parseDurationToMs } from '../../infra/time';
 import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
-import { EntityStoreNotRunningError } from './errors';
+import { EntityStoreNotRunningError } from '../errors';
 
 interface LogsExtractionOptions {
   specificWindow?: {

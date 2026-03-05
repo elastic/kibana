@@ -7,6 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
+import type { EuiPanelProps, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiSplitPanel,
@@ -23,7 +24,6 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EuiPanelProps, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface ExpandablePanelPanelProps {
