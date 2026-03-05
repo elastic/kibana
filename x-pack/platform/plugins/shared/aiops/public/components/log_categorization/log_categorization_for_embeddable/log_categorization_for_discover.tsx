@@ -152,6 +152,10 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
   // Find important patterns (LLM refine): track excluded patterns and update single "Noisy" filter
   const [excludedPatternKeys, setExcludedPatternKeys] = useState<Set<string>>(() => new Set());
   const [excludedCategories, setExcludedCategories] = useState<Category[]>([]);
+  // Patterns we already sent to the LLM and were classified as important; skip them in the next batch
+  const [alreadyClassifiedAsImportantKeys, setAlreadyClassifiedAsImportantKeys] = useState<
+    Set<string>
+  >(() => new Set());
   const [refiningLoading, setRefiningLoading] = useState<boolean>(false);
   const [connectors, setConnectors] = useState<Array<{ connectorId: string; name: string }>>([]);
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
@@ -237,6 +241,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
         setCurrentDocumentStatsHash(hash);
         setData(null);
         setFieldValidationResult(null);
+        setAlreadyClassifiedAsImportantKeys(new Set());
       }
     },
     [documentStats, previousDocumentStatsHash]
@@ -253,6 +258,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
         setCurrentAdditionalConfigsHash(hash);
         setData(null);
         setFieldValidationResult(null);
+        setAlreadyClassifiedAsImportantKeys(new Set());
       }
     },
     [minimumTimeRangeOption, previousAdditionalConfigsHash, selectedField]
@@ -279,6 +285,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     setLoading(true);
     setData(null);
     setFieldValidationResult(null);
+    setAlreadyClassifiedAsImportantKeys(new Set());
 
     const additionalFilter: CategorizationAdditionalFilter = {
       from: earliest,
@@ -465,9 +472,16 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     async (connectorId: string) => {
       const categories = categoriesRef.current;
       if (!categories.length || selectedField === null) return;
+      // Skip patterns we already sent and were classified as important so we make progress through the list
+      const notYetClassified = categories.filter(
+        (c) => !alreadyClassifiedAsImportantKeys.has(c.key)
+      );
+      const categoriesToSend = notYetClassified.slice(0, 100);
+      if (categoriesToSend.length === 0) {
+        return;
+      }
       setRefiningLoading(true);
       try {
-        const categoriesToSend = categories.slice(0, 100);
         const response = await http.post<{
           classifications: Array<{ pattern_key: string; label: 'important' | 'noise' }>;
         }>(AIOPS_API_ENDPOINT.LOG_CATEGORIZATION_REFINE_PATTERNS, {
@@ -482,6 +496,12 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
           }),
         });
         const labelsMap = new Map(response.classifications.map((c) => [c.pattern_key, c.label]));
+        const importantKeysFromBatch = categoriesToSend
+          .filter((c) => labelsMap.get(c.key) === 'important')
+          .map((c) => c.key);
+        setAlreadyClassifiedAsImportantKeys(
+          (prev) => new Set([...prev, ...importantKeysFromBatch])
+        );
         const noiseCategories = categoriesToSend.filter((c) => labelsMap.get(c.key) === 'noise');
         const newNoiseCategories = noiseCategories.filter((c) => !excludedPatternKeys.has(c.key));
         if (newNoiseCategories.length > 0) {
@@ -511,7 +531,9 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
             const withoutNoisy = current.filter((f) => !isNoisyFilter(f));
             filterManager.setFilters([...withoutNoisy, filter]);
             setExcludedCategories(mergedExcluded);
-            setExcludedPatternKeys((prev) => new Set([...prev, ...newNoiseCategories.map((c) => c.key)]));
+            setExcludedPatternKeys(
+              (prev) => new Set([...prev, ...newNoiseCategories.map((c) => c.key)])
+            );
           });
         }
       } catch (err) {
@@ -529,6 +551,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     [
       dataView.id,
       selectedField,
+      alreadyClassifiedAsImportantKeys,
       excludedPatternKeys,
       excludedCategories,
       http,
