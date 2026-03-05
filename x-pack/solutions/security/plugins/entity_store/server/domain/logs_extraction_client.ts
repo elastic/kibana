@@ -31,14 +31,16 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from './assets/external_indices_contants';
-import type {
-  EngineDescriptor,
-  EngineDescriptorClient,
-  LogExtractionState,
+import type { LogExtractionConfig } from './definitions/saved_objects';
+import {
+  type EngineDescriptorClient,
+  type EngineLogExtractionState,
+  type EntityStoreGlobalStateClient,
 } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import { parseDurationToMs } from '../infra/time';
 import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+import { EntityStoreNotRunningError } from './errors';
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -68,6 +70,7 @@ export interface LogsExtractionClientDependencies {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
+  globalStateClient: EntityStoreGlobalStateClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
 }
 
@@ -77,6 +80,7 @@ export class LogsExtractionClient {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
+  globalStateClient: EntityStoreGlobalStateClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
 
   constructor({
@@ -85,6 +89,7 @@ export class LogsExtractionClient {
     esClient,
     dataViewsService,
     engineDescriptorClient,
+    globalStateClient,
     ccsLogsExtractionClient,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
@@ -92,7 +97,19 @@ export class LogsExtractionClient {
     this.esClient = esClient;
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
+    this.globalStateClient = globalStateClient;
     this.ccsLogsExtractionClient = ccsLogsExtractionClient;
+  }
+
+  private async getLogExtractionConfigAndState(
+    type: EntityType
+  ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
+    const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
+    if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
+      throw new EntityStoreNotRunningError();
+    }
+    const globalState = await this.globalStateClient.findOrThrow();
+    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
   }
 
   public async extractLogs(
@@ -102,22 +119,14 @@ export class LogsExtractionClient {
     this.logger.debug('starting entity extraction');
 
     try {
-      const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
-
-      if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
-        return {
-          success: false,
-          error: new Error(
-            `Entity store is not started for type ${type}, status: ${engineDescriptor.status}`
-          ),
-        };
-      }
-
-      const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
+      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const delayMs = parseDurationToMs(config.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
       const { count, pages, indexPatterns, lastSearchTimestamp, ccsError } =
         await this.runQueryAndIngestDocs({
-          engineDescriptor,
+          type,
+          config,
+          engineState,
           opts,
           delayMs,
           entityDefinition,
@@ -134,29 +143,18 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      await this.engineDescriptorClient.update(
-        type,
-        {
-          ...engineDescriptor,
-          logExtractionState: {
-            ...engineDescriptor.logExtractionState,
-
-            // we went through all the pages,
-            // therefore we can leave the lastExecutionTimestamp as the beginning of the next
-            // window
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-
-            // Store last searched timestamp to start window from here
-            lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
-          },
-          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : undefined,
-
-          // we need to do a full write to overwrite pagination
-          // id and timestamp cursors with undefined
+      await this.engineDescriptorClient.update(type, {
+        logExtractionState: {
+          // we went through all the pages,
+          // therefore we can leave the lastExecutionTimestamp as the beginning of the next
+          // window
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          // Store last searched timestamp to start window from here
+          lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
         },
-        { mergeAttributes: false }
-      );
+        error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : undefined,
+      });
 
       return operationResult;
     } catch (error) {
@@ -166,17 +164,12 @@ export class LogsExtractionClient {
 
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
     try {
-      const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
-      const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
-      const indexPatterns = await this.getLocalIndexPatterns(
-        engineDescriptor.logExtractionState.additionalIndexPatterns
-      );
-      const { fromDateISO } = this.getExtractionWindow(
-        engineDescriptor.logExtractionState,
-        delayMs
-      );
+      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const delayMs = parseDurationToMs(config.delay);
+      const indexPatterns = await this.getLocalIndexPatterns(config.additionalIndexPatterns);
+      const { fromDateISO } = this.getExtractionWindow(config, engineState, delayMs);
       const toDateISO = moment().utc().toISOString();
-      const recoveryId = engineDescriptor.logExtractionState.paginationId;
+      const recoveryId = engineState.paginationId;
       const query = buildRemainingLogsCountQuery({
         indexPatterns,
         type,
@@ -203,12 +196,16 @@ export class LogsExtractionClient {
   }
 
   private async runQueryAndIngestDocs({
-    engineDescriptor,
+    type,
+    config,
+    engineState,
     opts,
     delayMs,
     entityDefinition,
   }: {
-    engineDescriptor: EngineDescriptor;
+    type: EntityType;
+    config: LogExtractionConfig;
+    engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     delayMs: number;
     entityDefinition: ManagedEntityDefinition;
@@ -219,20 +216,20 @@ export class LogsExtractionClient {
     lastSearchTimestamp: string;
     ccsError?: Error;
   }> {
-    const { docsLimit } = engineDescriptor.logExtractionState;
+    const { docsLimit } = config;
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
-      engineDescriptor.logExtractionState.additionalIndexPatterns
+      config.additionalIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
     const { fromDateISO, toDateISO } =
-      opts?.specificWindow ||
-      this.getExtractionWindow(engineDescriptor.logExtractionState, delayMs);
+      opts?.specificWindow || this.getExtractionWindow(config, engineState, delayMs);
 
     this.validateExtractionWindow(fromDateISO, toDateISO);
 
     const mainPromise = this.runMainExtractionLoop({
-      engineDescriptor,
+      type,
+      engineState,
       opts,
       indexPatterns: localIndexPatterns,
       latestIndex,
@@ -244,7 +241,7 @@ export class LogsExtractionClient {
 
     if (remoteIndexPatterns.length > 0) {
       const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
-        type: engineDescriptor.type,
+        type,
         remoteIndexPatterns,
         fromDateISO,
         toDateISO,
@@ -266,7 +263,8 @@ export class LogsExtractionClient {
   }
 
   private async runMainExtractionLoop({
-    engineDescriptor,
+    type,
+    engineState,
     opts,
     indexPatterns,
     latestIndex,
@@ -275,7 +273,8 @@ export class LogsExtractionClient {
     docsLimit,
     entityDefinition,
   }: {
-    engineDescriptor: EngineDescriptor;
+    type: EntityType;
+    engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     indexPatterns: string[];
     latestIndex: string;
@@ -291,7 +290,7 @@ export class LogsExtractionClient {
     const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
-    let recoveryId: string | undefined = engineDescriptor.logExtractionState.paginationId;
+    let recoveryId: string | undefined = engineState.paginationId;
     if (recoveryId) {
       this.logger.warn(
         `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beginning of the window.`
@@ -343,9 +342,8 @@ export class LogsExtractionClient {
       });
 
       if (pagination) {
-        await this.engineDescriptorClient.update(engineDescriptor.type, {
+        await this.engineDescriptorClient.update(type, {
           logExtractionState: {
-            ...engineDescriptor.logExtractionState,
             paginationTimestamp: pagination?.timestampCursor,
             paginationId: pagination?.idCursor,
           },
@@ -377,15 +375,16 @@ export class LogsExtractionClient {
   // 3. LastExecutionTimestamp is present:
   //    fromDate = lastExecutionTimestamp | toDate = now - delay
   private getExtractionWindow(
-    logsExtractionState: LogExtractionState,
+    config: LogExtractionConfig,
+    engineState: EngineLogExtractionState,
     delayMs: number
   ): { fromDateISO: string; toDateISO: string } {
-    const { paginationTimestamp } = logsExtractionState;
+    const { paginationTimestamp } = engineState;
 
     const fromDateISO =
       paginationTimestamp ||
-      this.getDelayedLastExecutionTimestamp(logsExtractionState, delayMs) ||
-      this.getFromDateBasedOnLookback(logsExtractionState);
+      this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
+      this.getFromDateBasedOnLookback(config);
 
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
@@ -393,17 +392,19 @@ export class LogsExtractionClient {
   }
 
   private getDelayedLastExecutionTimestamp(
-    { lastExecutionTimestamp }: LogExtractionState,
+    engineState: EngineLogExtractionState,
     durationMs: number
   ): string | undefined {
-    if (!lastExecutionTimestamp) {
+    if (!engineState.lastExecutionTimestamp) {
       return undefined;
     }
 
-    return moment(lastExecutionTimestamp).subtract(durationMs, 'millisecond').toISOString();
+    return moment(engineState.lastExecutionTimestamp)
+      .subtract(durationMs, 'millisecond')
+      .toISOString();
   }
 
-  private getFromDateBasedOnLookback({ lookbackPeriod }: LogExtractionState): string {
+  private getFromDateBasedOnLookback({ lookbackPeriod }: LogExtractionConfig): string {
     const lookbackPeriodMs = parseDurationToMs(lookbackPeriod);
     return moment().utc().subtract(lookbackPeriodMs, 'millisecond').toISOString();
   }
@@ -411,7 +412,10 @@ export class LogsExtractionClient {
   private async handleError(error: any, type: EntityType): Promise<ExtractedLogsSummary> {
     this.logger.error(error);
 
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+    if (
+      SavedObjectsErrorHelpers.isNotFoundError(error) ||
+      error instanceof EntityStoreNotRunningError
+    ) {
       return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
     }
 
