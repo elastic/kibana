@@ -16,7 +16,16 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
-import type { ProcessedConversation } from '../utils/prepare_conversation';
+import type { ChatMessage, SerializedAttachment } from '@kbn/agent-builder-server';
+import {
+  MAX_ATTACHMENT_DATA_CHARS,
+  MAX_CONVERSATION_HISTORY_CHARS,
+  MAX_CONVERSATION_HISTORY_MESSAGES,
+} from '@kbn/workflows-extensions/common';
+import type {
+  ProcessedConversation,
+  ProcessedConversationRound,
+} from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
@@ -38,6 +47,48 @@ import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
+
+function buildConversationHistory(rounds: ProcessedConversationRound[]): ChatMessage[] {
+  const messages: ChatMessage[] = [];
+  for (const round of rounds) {
+    messages.push({ role: 'user', content: round.input.message ?? '' });
+    if (round.response?.message) {
+      messages.push({ role: 'assistant', content: round.response.message });
+    }
+  }
+  const windowed = messages.slice(-MAX_CONVERSATION_HISTORY_MESSAGES * 2);
+  let total = 0;
+  const result: ChatMessage[] = [];
+  for (let i = windowed.length - 1; i >= 0; i--) {
+    const msg = windowed[i];
+    const len = (msg.content?.length ?? 0) + 50;
+    if (total + len > MAX_CONVERSATION_HISTORY_CHARS && result.length > 0) break;
+    result.unshift(msg);
+    total += len;
+  }
+  return result;
+}
+
+function serializeAttachmentData(data: Record<string, unknown>): Record<string, unknown> {
+  const str = JSON.stringify(data);
+  if (str.length <= MAX_ATTACHMENT_DATA_CHARS) return data;
+  return { _truncated: true, _summary: `${str.slice(0, 200)}... [${str.length} chars total]` };
+}
+
+function buildSerializedAttachments(
+  processed: Array<{ attachment: { id?: string; type: string; data?: unknown; hidden?: boolean } }>
+): SerializedAttachment[] {
+  return processed.map((p) => ({
+    id: p.attachment.id,
+    type: p.attachment.type,
+    data: serializeAttachmentData(
+      (typeof p.attachment.data === 'object' && p.attachment.data !== null
+        ? p.attachment.data
+        : {}) as Record<string, unknown>
+    ),
+    ...(p.attachment.hidden !== undefined && { hidden: p.attachment.hidden }),
+  }));
+}
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
   browserApiTools?: BrowserApiToolMetadata[];
@@ -115,11 +166,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     action,
   });
 
+  const conversationHistory = buildConversationHistory(processedConversation.previousRounds);
+  const serializedAttachments = buildSerializedAttachments(
+    processedConversation.nextInput.attachments ?? []
+  );
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
+    conversationHistory,
+    attachments: serializedAttachments,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 

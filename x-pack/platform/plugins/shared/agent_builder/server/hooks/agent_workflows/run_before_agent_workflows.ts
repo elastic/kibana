@@ -34,6 +34,17 @@ import {
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
+function buildWorkflowParams(
+  context: BeforeAgentHookContext,
+  currentNextInput: BeforeAgentHookContext['nextInput']
+): Record<string, unknown> {
+  return {
+    prompt: currentNextInput.message ?? '',
+    conversation_history: context.conversationHistory ?? [],
+    attachments: context.attachments ?? [],
+  };
+}
+
 export interface RunBeforeAgentWorkflowsParams {
   context: BeforeAgentHookContext;
   workflowApi: WorkflowApi;
@@ -92,9 +103,10 @@ export async function runBeforeAgentWorkflows({
   let currentNextInput = context.nextInput;
 
   for (const workflowId of workflowIds) {
+    const workflowParams = buildWorkflowParams(context, currentNextInput);
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: { prompt: currentNextInput.message ?? '' },
+      workflowParams,
       request: context.request,
       spaceId,
       workflowApi,

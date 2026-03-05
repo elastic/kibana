@@ -8,7 +8,12 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { AiGuardrailsStepCommonDefinition } from '../../../../common/steps/ai';
+import {
+  AiGuardrailsStepCommonDefinition,
+  MAX_ATTACHMENT_DATA_CHARS,
+  MAX_ATTACHMENTS,
+  MAX_CONVERSATION_HISTORY_MESSAGES,
+} from '../../../../common/steps/ai';
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
@@ -20,15 +25,6 @@ Respond with JSON only. Use this exact shape:
 - If not acceptable: {"pass": false, "reason": "brief explanation"}
 
 Do not include any other text or markdown.`;
-
-/** Max conversation turns included in context (most recent only). */
-const MAX_CONVERSATION_HISTORY_MESSAGES = 20;
-
-/** Max characters per attachment's stringified data; beyond this we truncate. */
-const MAX_ATTACHMENT_DATA_CHARS = 5000;
-
-/** Max number of attachments included in context. */
-const MAX_ATTACHMENTS = 10;
 
 function truncate(str: string, maxChars: number): string {
   if (str.length <= maxChars) return str;

@@ -222,6 +222,56 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
+  it('passes prompt, conversation_history, and attachments in workflowParams', async () => {
+    const conversationHistory = [
+      { role: 'user' as const, content: 'First user' },
+      { role: 'assistant' as const, content: 'First assistant' },
+      { role: 'user' as const, content: 'Second user' },
+      { role: 'assistant' as const, content: 'Second assistant' },
+      { role: 'user' as const, content: 'Third user' },
+      { role: 'assistant' as const, content: 'Third assistant' },
+    ];
+    const attachments = [
+      { id: 'a1', type: 'text', data: { content: 'attachment data' }, hidden: false },
+    ];
+    const context = {
+      request,
+      nextInput: { message: 'current message', attachments: [] },
+      agentId: 'agent-1',
+      conversationHistory,
+      attachments,
+    };
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-1',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    });
+
+    await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-1',
+        workflowParams: {
+          prompt: 'current message',
+          conversation_history: conversationHistory,
+          attachments,
+        },
+      })
+    );
+  });
+
   it('executes each workflow once when global and agent workflows overlap', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices, uiSettingsClient, registry } = createDeps();
