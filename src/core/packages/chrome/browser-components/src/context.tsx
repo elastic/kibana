@@ -115,7 +115,6 @@ const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null)
  * @temporary This provider is a stepping stone toward a proper `ChromeStateProvider` that will
  * expose React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) and allow components to
  * self-hydrate without Observable props. Once that package exists this provider can be replaced.
- * The factory `createChromeComponents` has already been removed as part of this migration.
  * @see kibana-team#2651 (Chrome & Grid Evolution epic — private repo)
  */
 export const ChromeComponentsProvider: FC<PropsWithChildren<{ value: ChromeComponentsDeps }>> = ({

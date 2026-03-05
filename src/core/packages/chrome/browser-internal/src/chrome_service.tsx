@@ -184,7 +184,7 @@ export class ChromeService {
     const homeHref = http.basePath.prepend('/app/home');
     const kibanaVersion = this.params.kibanaVersion;
 
-    // 7. Build component deps bag (consumed by createChromeComponents in the layout service)
+    // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
     const componentDeps: ChromeComponentsDeps = {
       config: {
         isServerless: this.isServerless,

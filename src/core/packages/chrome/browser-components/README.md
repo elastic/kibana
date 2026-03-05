@@ -17,7 +17,7 @@ src/
 
 | Export | Description |
 |---|---|
-| `ChromeComponentsDeps` | Deps bag passed to `ChromeComponentsProvider` — single contract between `ChromeService` and the layout |
+| `ChromeComponentsDeps` | Deps passed to `ChromeComponentsProvider` — single contract between `ChromeService` and the layout |
 | `ChromeApplicationContext` | Minimal application contract used inside `ChromeComponentsDeps`; replaces `InternalApplicationStart` to break the private-package dependency |
 | `ChromeComponentsProvider` | Context provider; wrap the layout tree once with `chrome.componentDeps` |
 | `useChromeComponentsDeps` | Hook to read `ChromeComponentsDeps` from context (use inside provider) |
@@ -33,6 +33,6 @@ src/
 
 ## Note: `ChromeComponentsProvider` is a stepping stone
 
-`ChromeComponentsProvider` / `useChromeComponentsDeps` are **temporary**. They exist as an intermediate step toward a proper `ChromeStateProvider` in a dedicated package that exposes React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) so components are fully decoupled from Observable props. The factory `createChromeComponents` has already been removed as part of this migration. Once `ChromeStateProvider` exists this provider can be replaced.
+`ChromeComponentsProvider` / `useChromeComponentsDeps` are **temporary**. They exist as an intermediate step toward a proper `ChromeStateProvider` in a dedicated package that exposes React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) so components are fully decoupled from Observable props. Once `ChromeStateProvider` exists this provider can be replaced.
 
 Progress is tracked in the Chrome & Grid Evolution epic: kibana-team#2651 (private repo).

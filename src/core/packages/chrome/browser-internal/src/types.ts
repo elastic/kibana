@@ -29,7 +29,7 @@ export type InternalChromeSetup = ChromeSetup;
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
-   * Deps bag passed to `createChromeComponents` by the layout service.
+   * Deps passed to `ChromeComponentsProvider` by the layout service.
    * @internal
    */
   componentDeps: ChromeComponentsDeps;
