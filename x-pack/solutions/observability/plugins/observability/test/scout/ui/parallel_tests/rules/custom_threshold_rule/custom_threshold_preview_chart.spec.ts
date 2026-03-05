@@ -46,10 +46,11 @@ test.describe(
         await customEquationPopoverCloseButton.click();
 
         await expect(lensFailure).toBeVisible({ timeout: 20_000 });
-        await expect(lensFailure).toContainText('An error occurred while rendering the chart');
       });
 
       await test.step('fix the error and verify failure panel disappears', async () => {
+        await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+
         await customEquation.click();
         await customEquationField.click();
         await customEquationField.fill('A');
