@@ -243,7 +243,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private registerAgentBuilderAttachmentsAndTools(
     agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    setupPlugins: Pick<SecuritySolutionPluginSetupDependencies, 'lists'>
   ): void {
     if (!agentBuilder) {
       return;
@@ -252,7 +253,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerTools(agentBuilder, core, logger, experimentalFeatures, setupPlugins).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -687,7 +688,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger, {
+      lists: plugins.lists,
+    });
 
     return {
       setProductFeaturesConfigurator:

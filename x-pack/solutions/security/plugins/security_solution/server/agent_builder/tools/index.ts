@@ -16,3 +16,7 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export {
+  manageRuleExceptionsTool,
+  SECURITY_MANAGE_RULE_EXCEPTIONS_TOOL_ID,
+} from './manage_rule_exceptions_tool';
