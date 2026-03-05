@@ -35,7 +35,6 @@ import type {
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { css } from '@emotion/react';
-import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
 const buildDefaultContentLinks = ({
@@ -124,15 +123,6 @@ export const HeaderHelpMenu = ({
 
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
-
-  const helpExtensionContent = helpExtension?.content;
-  const helpExtensionMount = useCallback(
-    (domNode: HTMLDivElement) => {
-      const unmount = helpExtensionContent?.(domNode, { hideHelpMenu: closeMenu });
-      return unmount ?? (() => {});
-    },
-    [helpExtensionContent, closeMenu]
-  );
 
   const createOnClickHandler = useCallback(
     (href: string) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -234,16 +224,18 @@ export const HeaderHelpMenu = ({
         }
       });
 
+    const extensionContent = content?.({ hideHelpMenu: closeMenu }) ?? null;
+
     customContent = (
       <>
         <EuiPopoverTitle>
           <h3>{appName}</h3>
         </EuiPopoverTitle>
         {customLinks}
-        {content && (
+        {extensionContent && (
           <>
             {customLinks && <EuiSpacer size="xs" />}
-            <HeaderExtension extension={helpExtensionMount} />
+            {extensionContent}
           </>
         )}
       </>
