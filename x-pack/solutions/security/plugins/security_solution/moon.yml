@@ -277,6 +277,11 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/esql-language'
+  - '@kbn/workflows-ui'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/core-rendering-browser'
 tags:
   - plugin
   - prod
