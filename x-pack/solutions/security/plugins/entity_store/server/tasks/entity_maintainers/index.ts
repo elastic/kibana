@@ -23,40 +23,36 @@ function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
 }
 
-function getTaskId(id: string, namespace: string): string {
+export function getTaskId(id: string, namespace: string): string {
   return `${id}:${namespace}`;
 }
 
-export async function scheduleEntityMaintainerTasks({
+export async function scheduleEntityMaintainerTask({
   logger,
   taskManager,
+  id,
+  interval,
   namespace,
   request,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
+  id: string;
+  interval: string;
   namespace: string;
   request: KibanaRequest;
 }): Promise<void> {
-  try {
-    logger.debug(`Scheduling entity maintainer tasks`);
-    const tasks = entityMaintainersRegistry.getAll();
-    for (const { id, interval } of tasks) {
-      await taskManager.ensureScheduled(
-        {
-          id: getTaskId(id, namespace),
-          taskType: getTaskType(id),
-          schedule: { interval },
-          state: { namespace },
-          params: {},
-        },
-        { request }
-      );
-    }
-  } catch (err) {
-    logger.error(`Failed to schedule entity maintainer tasks: ${err?.message}`);
-    throw err;
-  }
+  logger.debug(`Scheduling entity maintainer task: ${id}`);
+  await taskManager.ensureScheduled(
+    {
+      id: getTaskId(id, namespace),
+      taskType: getTaskType(id),
+      schedule: { interval },
+      state: { namespace },
+      params: {},
+    },
+    { request }
+  );
 }
 
 export function registerEntityMaintainerTask({
@@ -75,11 +71,15 @@ export function registerEntityMaintainerTask({
   const { run, interval, initialState, description, id, setup } = config;
   const type = getTaskType(id);
 
-  entityMaintainersRegistry.update({ id, interval });
-
   void core
     .getStartServices()
     .then(([start]) => {
+      entityMaintainersRegistry.register({
+        id,
+        interval,
+        description,
+      });
+
       taskManager.registerTaskDefinitions({
         [type]: {
           title,
@@ -173,4 +173,20 @@ async function runEntityMaintainerTask({
   return {
     state: currentStatus,
   };
+}
+
+export async function stopEntityMaintainer({
+  taskManager,
+  id,
+  namespace,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  id: string;
+  namespace: string;
+  logger: Logger;
+}): Promise<void> {
+  const taskId = getTaskId(id, namespace);
+  await taskManager.removeIfExists(taskId);
+  logger.debug(`removed entity maintainer task: ${taskId}`);
 }

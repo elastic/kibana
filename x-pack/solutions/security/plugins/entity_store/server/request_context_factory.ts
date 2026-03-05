@@ -13,13 +13,13 @@ import type {
   EntityStoreRequestHandlerContext,
 } from './types';
 import { AssetManager } from './domain/asset_manager';
+import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
 import {
   EngineDescriptorClient,
   EntityStoreGlobalStateClient,
 } from './domain/definitions/saved_objects';
-import { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
-import { LogsExtractionClient } from './domain/logs_extraction_client';
+import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { CRUDClient } from './domain/crud_client';
 import type { TelemetryReporter } from './telemetry/events';
 
@@ -94,6 +94,11 @@ export async function createRequestHandlerContext({
       logsExtractionClient,
       security: startPlugins.security,
       analytics,
+    }),
+    entityMaintainersClient: new EntityMaintainersClient({
+      logger,
+      taskManager: taskManagerStart,
+      namespace,
     }),
     crudClient,
     ccsLogsExtractionClient,
