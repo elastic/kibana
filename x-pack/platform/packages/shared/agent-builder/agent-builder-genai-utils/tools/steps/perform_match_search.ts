@@ -8,24 +8,36 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { MappingField } from '../utils/mappings';
+import { executeEsql, interpolateEsqlQuery } from '../utils/esql';
 import { isCcsTarget } from '../utils/ccs';
 
 export interface MatchResult {
   id: string;
   index: string;
-  highlights: string[];
+  contentFragments: string[];
 }
 
 export interface PerformMatchSearchResponse {
   results: MatchResult[];
 }
 
-/**
- * Builds the search request body. For local indices, uses the RRF retriever
- * for best relevance ranking. For CCS targets, falls back to a query-based
- * approach because the simplified RRF retriever syntax does not support
- * cross-cluster index patterns.
- */
+// --- Search & extraction configuration ---
+
+const useSnippets = true;
+const numSnippets = 2;
+const numWords = 750;
+
+const rerankInferenceID = '.jina-reranker-v3';
+const rerankCandidateDocs = true;
+const rerankSnippets = true;
+
+// Number of candidate documents to retrieve for doc reranking
+const rankWindowSize = 20;
+// Number of candidate snippets to extract per doc for snippet reranking
+const snippetRankWindowSize = 10;
+
+// --- End configuration ---
+
 const buildSearchRequest = ({
   index,
   term,
@@ -37,54 +49,44 @@ const buildSearchRequest = ({
   fields: MappingField[];
   size: number;
 }): Record<string, any> => {
-  const highlightConfig = {
-    number_of_fragments: 5,
-    fragment_size: 500,
-    pre_tags: [''],
-    post_tags: [''],
-    order: 'score' as const,
-    fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
-  };
+  const requestSize = rerankCandidateDocs ? rankWindowSize : size;
 
-  // CCS fallback: the simplified RRF retriever syntax does not support
-  // cross-cluster index patterns, so we use a query-based approach instead.
+  const highlightConfig = !useSnippets
+    ? {
+        highlight: {
+          number_of_fragments: 5,
+          fragment_size: 500,
+          pre_tags: [''],
+          post_tags: [''],
+          order: 'score' as const,
+          fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
+        },
+      }
+    : {};
+
   if (isCcsTarget(index)) {
     return {
       index,
-      size,
+      size: requestSize,
       query: buildCcsQuery({ term, fields }),
-      highlight: highlightConfig,
+      ...highlightConfig,
     };
   }
 
-  // Local indices: use the RRF retriever for optimal relevance ranking
-  // TODO: once multi_match supports semantic_text (elastic/search-team#11226),
-  // consider unifying local and CCS paths.
-  // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch
   return {
     index,
-    size,
+    size: requestSize,
     retriever: {
       rrf: {
-        rank_window_size: size * 2,
+        rank_window_size: requestSize * 2,
         query: term,
         fields: fields.map((field) => field.path),
       },
     },
-    highlight: highlightConfig,
+    ...highlightConfig,
   };
 };
 
-/**
- * Builds the query for a CCS target using a bool/should with one match clause
- * per searchable field.
- *
- * We cannot use multi_match here because it does not support semantic_text
- * fields (elastic/search-team#11226), and _field_caps (our mapping source for
- * CCS) reports semantic_text fields as "text", making them indistinguishable.
- * Individual match queries work correctly with both regular text and
- * semantic_text fields.
- */
 const buildCcsQuery = ({
   term,
   fields,
@@ -98,6 +100,129 @@ const buildCcsQuery = ({
       minimum_should_match: 1,
     },
   };
+};
+
+const escapeEsqlString = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+const buildMvAppendExpr = (fieldPaths: string[]): string => {
+  if (fieldPaths.length === 1) {
+    return fieldPaths[0];
+  }
+  return fieldPaths.reduce((acc, path) => `MV_APPEND(${acc}, ${path})`);
+};
+
+const extractSnippets = async ({
+  docId,
+  index,
+  term,
+  fields,
+  esClient,
+  logger,
+}: {
+  docId: string;
+  index: string;
+  term: string;
+  fields: MappingField[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<string[]> => {
+  const fieldPaths = fields.map((field) => field.path);
+  const mvAppendExpr = buildMvAppendExpr(fieldPaths);
+
+  const snippetCount = rerankSnippets ? snippetRankWindowSize : numSnippets;
+
+  const esqlQuery = interpolateEsqlQuery(
+    `FROM ${index} METADATA _id | WHERE _id == ?docId | EVAL doc = MV_DEDUPE(${mvAppendExpr}) | EVAL snippets = TOP_SNIPPETS(doc, ?term, {"num_snippets": ${snippetCount}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP snippets`,
+    { docId, term }
+  );
+
+  logger.info(`TOP_SNIPPETS query for doc="${docId}": ${esqlQuery}`);
+
+  const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
+
+  const snippets: string[] = [];
+  for (const row of esqlResponse.values) {
+    const value = row[0];
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item === 'string') snippets.push(item);
+      }
+    } else if (typeof value === 'string') {
+      snippets.push(value);
+    }
+  }
+  return snippets;
+};
+
+const rerankDocuments = async ({
+  docIds,
+  index,
+  term,
+  fields,
+  resultSize,
+  esClient,
+  logger,
+}: {
+  docIds: string[];
+  index: string;
+  term: string;
+  fields: MappingField[];
+  resultSize: number;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<string[]> => {
+  logger.info(`rerankDocuments called with ${docIds.length} docs, resultSize=${resultSize}`);
+  if (docIds.length === 0) return [];
+
+  const fieldPaths = fields.map((f) => f.path);
+  const mvAppendExpr = buildMvAppendExpr(fieldPaths);
+
+  const idList = docIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
+  const escapedTerm = escapeEsqlString(term);
+
+  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | EVAL rerank_input = MV_CONCAT(MV_DEDUPE(${mvAppendExpr}), " ") | RERANK "${escapedTerm}" ON rerank_input WITH {"inference_id": "${rerankInferenceID}"} | KEEP _id | LIMIT ${resultSize}`;
+
+  logger.info(`RERANK candidate docs query: ${esqlQuery}`);
+
+  const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
+  logger.info(`RERANK candidate docs response: ${JSON.stringify(esqlResponse)}`);
+
+  return esqlResponse.values.map((row) => row[0]).filter((v): v is string => typeof v === 'string');
+};
+
+interface SnippetEntry {
+  docId: string;
+  snippet: string;
+}
+
+const rerankSnippetEntries = async ({
+  entries,
+  term,
+  esClient,
+  logger,
+}: {
+  entries: SnippetEntry[];
+  term: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<SnippetEntry[]> => {
+  if (entries.length === 0) return [];
+
+  logger.info(`RERANK snippets: sending ${entries.length} snippets to inference API`);
+
+  const response = await esClient.inference.inference({
+    inference_id: rerankInferenceID,
+    task_type: 'rerank',
+    query: term,
+    input: entries.map((e) => e.snippet),
+  });
+
+  const reranked = (response as { rerank?: Array<{ index: number; relevance_score: number }> })
+    .rerank;
+  if (!reranked) return entries.slice(0, numSnippets);
+
+  return reranked.slice(0, numSnippets).map((r) => entries[r.index]);
 };
 
 export const performMatchSearch = async ({
@@ -121,9 +246,9 @@ export const performMatchSearch = async ({
 
   let response;
   try {
-    response = await esClient.search<any>(searchRequest);
+    response = await esClient.search<Record<string, unknown>>(searchRequest);
   } catch (error) {
-    logger.debug(
+    logger.info(
       `Elasticsearch search failed for index="${index}", term="${term}": ${
         error instanceof Error ? error.message : String(error)
       }`
@@ -131,14 +256,109 @@ export const performMatchSearch = async ({
     throw error;
   }
 
-  const results = response.hits.hits.map<MatchResult>((hit) => {
+  let hitOrder = response.hits.hits.map((hit) => hit._id!);
+  logger.info(
+    `Search returned ${hitOrder.length} hits: [${hitOrder.join(
+      ', '
+    )}], rerankCandidateDocs=${rerankCandidateDocs}, useSnippets=${useSnippets}`
+  );
+
+  if (rerankCandidateDocs) {
+    const originalOrder = hitOrder;
+    logger.info(`Entering RERANK candidate docs block with ${hitOrder.length} docs`);
+    try {
+      hitOrder = await rerankDocuments({
+        docIds: hitOrder,
+        index,
+        term,
+        fields,
+        resultSize: size,
+        esClient,
+        logger,
+      });
+      logger.info(
+        `RERANK candidate docs: before=[${originalOrder.join(', ')}] after=[${hitOrder.join(', ')}]`
+      );
+    } catch (error) {
+      logger.info(
+        `RERANK candidate docs failed, keeping original order: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      hitOrder = hitOrder.slice(0, size);
+    }
+  }
+
+  const hitsByDocId = new Map(response.hits.hits.map((hit) => [hit._id!, hit]));
+
+  if (useSnippets) {
+    const snippetsByDocId = new Map<string, string[]>();
+
+    for (const docId of hitOrder) {
+      try {
+        const rawSnippets = await extractSnippets({
+          docId,
+          index,
+          term,
+          fields,
+          esClient,
+          logger,
+        });
+
+        const seen = new Set<string>();
+        const uniqueSnippets = rawSnippets.filter((s) => {
+          if (seen.has(s)) return false;
+          seen.add(s);
+          return true;
+        });
+
+        let finalSnippets = uniqueSnippets;
+        if (rerankSnippets && uniqueSnippets.length > 0) {
+          try {
+            const entries: SnippetEntry[] = uniqueSnippets.map((s) => ({ docId, snippet: s }));
+            const reranked = await rerankSnippetEntries({ entries, term, esClient, logger });
+            logger.info(
+              `RERANK snippets for doc="${docId}": ${uniqueSnippets.length} candidates -> ${reranked.length} returned`
+            );
+            finalSnippets = reranked.map((e) => e.snippet);
+          } catch (error) {
+            logger.info(
+              `RERANK snippets failed for doc="${docId}", keeping original order: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            finalSnippets = uniqueSnippets.slice(0, numSnippets);
+          }
+        }
+
+        snippetsByDocId.set(docId, finalSnippets);
+      } catch (error) {
+        logger.info(
+          `TOP_SNIPPETS failed for doc="${docId}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
+    const results: MatchResult[] = hitOrder.map((docId) => ({
+      id: docId,
+      index: hitsByDocId.get(docId)?._index ?? index,
+      contentFragments: snippetsByDocId.get(docId) ?? [],
+    }));
+
+    return { results };
+  }
+
+  const results: MatchResult[] = hitOrder.map((docId) => {
+    const hit = hitsByDocId.get(docId);
     return {
-      id: hit._id!,
-      index: hit._index!,
-      highlights: Object.entries(hit.highlight ?? {}).reduce((acc, [field, highlights]) => {
-        acc.push(...highlights);
+      id: docId,
+      index: hit?._index ?? index,
+      contentFragments: Object.values(hit?.highlight ?? {}).reduce<string[]>((acc, fragments) => {
+        acc.push(...fragments);
         return acc;
-      }, [] as string[]),
+      }, []),
     };
   });
 
