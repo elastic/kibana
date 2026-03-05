@@ -616,11 +616,11 @@ describe('filtersAndQueryToLensState', () => {
 
     expect(result.filters).toHaveLength(1);
     expect(result.references).toHaveLength(1);
-    expect(result.filters[0].meta.index).toEqual('filter-ref-dv-2');
+    expect(result.filters[0].meta.index).toEqual('filter-ref-dv-1');
     expect(result.references[0]).toMatchObject({
       type: 'index-pattern',
-      id: 'dv-2',
-      name: 'filter-ref-dv-2',
+      id: 'dv-1',
+      name: 'filter-ref-dv-1',
     });
   });
 });
