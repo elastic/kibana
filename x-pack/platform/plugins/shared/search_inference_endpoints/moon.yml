@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/search-kibana'
   metadata:
-    sourceRoot: x-pack/solutions/search/plugins/search_inference_endpoints
+    sourceRoot: x-pack/platform/plugins/shared/search_inference_endpoints
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
@@ -51,8 +51,8 @@ dependsOn:
 tags:
   - plugin
   - prod
-  - group-search
-  - private
+  - group-platform
+  - shared
   - jest-unit-tests
 fileGroups:
   src:
