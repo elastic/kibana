@@ -71,6 +71,28 @@ export class DiscoverPageObject extends FtrService {
     return await getHistogramChartDataTimeRange();
   }
 
+  public async saveAsSearch(searchName: string) {
+    await this.clickSaveAsSearchButton();
+    // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+    await this.retry.waitFor(
+      `saved search title is set to ${searchName} and save button is clickable`,
+      async () => {
+        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
+        await this.testSubjects.setValue('savedObjectTitle', searchName);
+        return (await saveButton.getAttribute('disabled')) !== 'true';
+      }
+    );
+
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
+
+    await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+      const last = await this.getCurrentQueryName();
+
+      return last === searchName;
+    });
+  }
+
   public async saveSearch(
     searchName: string,
     saveAsNew?: boolean,
@@ -218,6 +240,16 @@ export class DiscoverPageObject extends FtrService {
   public async clickSaveSearchButton() {
     await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
+  }
+
+  public async clickSaveAsSearchButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
+    });
+    await this.testSubjects.moveMouseTo('interactiveSaveMenuItem');
+    await this.testSubjects.click('interactiveSaveMenuItem');
   }
 
   public async clickCancelButton() {

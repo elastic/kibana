@@ -42,7 +42,6 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
@@ -80,10 +79,9 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId =
         runtimeState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
         (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
-      const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
+      await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
-      const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
       const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
         scopedEbtManager,
@@ -408,48 +406,46 @@ export const getSearchEmbeddableFactory = ({
                   scopedProfilesManager={scopedProfilesManager}
                   scopedEBTManager={scopedEbtManager}
                 >
-                  <AppWrapper>
-                    {renderAsFieldStatsTable ? (
-                      <SearchEmbeddablFieldStatsTableComponent
-                        api={{
-                          ...api,
-                          fetchContext$,
-                        }}
-                        dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                        stateManager={searchEmbeddable.stateManager}
-                      />
-                    ) : (
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={
-                          discoverServices.uiActions.getTriggerCompatibleActions
-                        }
-                      >
-                        <SearchEmbeddableGridComponent
-                          api={{ ...api, fetchWarnings$, fetchContext$ }}
-                          dataView={dataView!}
-                          onAddFilter={
-                            runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                              ? undefined
-                              : onAddFilter
-                          }
-                          enableDocumentViewer={
-                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                            undefined
-                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                              : true
-                          }
-                          inlineEditing={{
-                            isActive: isInlineEditing,
-                            hasPendingChanges: hasPendingInlineTabChanges,
-                            onApply: inlineEditingApi.applyInlineTabSelection,
-                            onCancel: inlineEditingApi.cancelInlineTabSelection,
-                          }}
-                          stateManager={searchEmbeddable.stateManager}
-                        />
-                      </CellActionsProvider>
-                    )}
-                  </AppWrapper>
+                  {renderAsFieldStatsTable ? (
+                    <SearchEmbeddablFieldStatsTableComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
+                      dataView={dataView!}
+                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                      stateManager={searchEmbeddable.stateManager}
+                    />
+                  ) : (
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={
+                        discoverServices.uiActions.getTriggerCompatibleActions
+                       }
+                     >
+                       <SearchEmbeddableGridComponent
+                         api={{ ...api, fetchWarnings$, fetchContext$ }}
+                         dataView={dataView!}
+                         onAddFilter={
+                           runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                             ? undefined
+                             : onAddFilter
+                         }
+                         enableDocumentViewer={
+                           runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                           undefined
+                             ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                             : true
+                         }
+                         inlineEditing={{
+                           isActive: isInlineEditing,
+                           hasPendingChanges: hasPendingInlineTabChanges,
+                           onApply: inlineEditingApi.applyInlineTabSelection,
+                           onCancel: inlineEditingApi.cancelInlineTabSelection,
+                         }}
+                         stateManager={searchEmbeddable.stateManager}
+                       />
+                     </CellActionsProvider>
+                  )}
                 </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>

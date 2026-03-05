@@ -49,7 +49,7 @@ describe('saved search embeddable', () => {
       .mockResolvedValueOnce(searchSource);
 
     return {
-      timeRange: { from: 'now-15m', to: 'now' },
+      time_range: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
       headerRowHeight: 5,
