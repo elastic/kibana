@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
