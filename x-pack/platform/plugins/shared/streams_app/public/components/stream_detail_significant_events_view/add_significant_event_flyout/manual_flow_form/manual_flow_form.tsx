@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { StreamsESQLEditor, validatePrefix } from '../../../esql_query_editor';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
@@ -41,10 +41,12 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
 }: ManualFlowFormProps) {
+  const initialEsqlRef = useRef(query.esql.query);
   const validPrefixes = useMemo(
-    () => getValidPrefixes(definition, query.esql.query),
-    [definition, query.esql.query]
+    () => getValidPrefixes(definition, initialEsqlRef.current),
+    [definition]
   );
+
   const queryFrom = validPrefixes[0];
   const defaultEsql = query.esql.query || queryFrom;
 
