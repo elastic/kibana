@@ -203,6 +203,8 @@ When a field is required with a default, instead of failing the request for not 
 
 ```
 //
+// Use this pattern
+//
 // When route validation recieves "{}", validation passes "{ foo: '' }" to handler
 //
 const myEmbeddlabeStateSchema = schema: schema.object({
@@ -215,6 +217,8 @@ const myEmbeddlabeStateSchema = schema: schema.object({
 When a field is optional with a default, route validation does not supply the default value to the handler.
 
 ```
+//
+// Avoid this pattern
 //
 // When route validation recieves "{}", validation passes "{}" to route handler
 //
