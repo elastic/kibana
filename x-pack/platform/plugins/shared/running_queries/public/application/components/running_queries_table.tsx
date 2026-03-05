@@ -34,6 +34,8 @@ import {
 interface RunningQueriesTableProps {
   queries: RunningQuery[];
   onCancelQuery: (taskId: string) => Promise<boolean>;
+  isLoading?: boolean;
+  error?: string;
 }
 
 type TableRunningQuery = RunningQuery & { sourceDisplay: string; sourceAvailable: boolean };
@@ -45,6 +47,8 @@ export const notAvailableLabel = i18n.translate('xpack.runningQueries.table.notA
 export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   queries,
   onCancelQuery,
+  isLoading = false,
+  error,
 }) => {
   const { capabilities } = useRunningQueriesAppContext();
   const canCancelTasks = capabilities.canCancelTasks;
@@ -304,6 +308,8 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         tableCaption={tableCaption}
         items={filteredQueries}
         columns={columns}
+        loading={isLoading}
+        error={error}
         search={{
           box: {
             incremental: true,

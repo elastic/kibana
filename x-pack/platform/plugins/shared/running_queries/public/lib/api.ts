@@ -49,4 +49,11 @@ export class RunningQueriesApiService {
       body: { taskId },
     });
   }
+
+  public fetchRunningQueries() {
+    return this.sendRequest<{ queries: RunningQuery[] }>({
+      path: `${API_BASE_PATH}/search`,
+      method: 'get',
+    });
+  }
 }

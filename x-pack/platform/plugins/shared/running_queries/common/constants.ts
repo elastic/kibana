@@ -14,3 +14,5 @@ export const PLUGIN_NAME = i18n.translate('xpack.runningQueries.pluginName', {
 
 export const RUNNING_QUERIES_READ_PRIVILEGE = 'running_queries-read';
 export const RUNNING_QUERIES_WRITE_PRIVILEGE = 'running_queries-write';
+
+export const CANCELLATION_POLL_INTERVAL_MS = 5_000;
