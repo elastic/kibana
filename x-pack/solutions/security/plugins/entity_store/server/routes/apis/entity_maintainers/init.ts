@@ -48,7 +48,6 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
     );
 }
 
-
 /**
  * Validates that the request can proceed with entity maintainers init:
  * 1. User has required privileges (cluster, index, saved object).

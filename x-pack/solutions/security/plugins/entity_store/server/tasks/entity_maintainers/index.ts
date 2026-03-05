@@ -113,8 +113,7 @@ export function registerEntityMaintainerTask({
                   namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace,
                 },
                 state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
-                taskStatus:
-                  currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
+                taskStatus: currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
               };
 
               const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
@@ -132,7 +131,7 @@ export function registerEntityMaintainerTask({
                 run,
                 abortController,
                 esClient,
-                crudClient
+                crudClient,
               });
             },
           }),
@@ -173,7 +172,7 @@ async function runEntityMaintainerTask({
         logger,
         fakeRequest,
         esClient,
-        crudClient
+        crudClient,
       });
     }
     logger.debug(`Executing run`);
@@ -183,7 +182,7 @@ async function runEntityMaintainerTask({
       logger,
       fakeRequest,
       esClient,
-      crudClient
+      crudClient,
     });
     currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {
@@ -209,11 +208,7 @@ async function updateTaskStatus({
   taskStatus: EntityMaintainerTaskStatus;
   request: KibanaRequest;
 }): Promise<void> {
-  await taskManager.bulkUpdateState(
-    [taskId],
-    (state) => ({ ...state, taskStatus }),
-    { request }
-  );
+  await taskManager.bulkUpdateState([taskId], (state) => ({ ...state, taskStatus }), { request });
 }
 
 export async function stopEntityMaintainer({

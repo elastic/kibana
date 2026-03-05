@@ -8,7 +8,9 @@
 import { getMissingPrivileges } from './get_missing_privileges';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
-function createMockPrivilegesResponse(overrides?: Partial<CheckPrivilegesResponse>): CheckPrivilegesResponse {
+function createMockPrivilegesResponse(
+  overrides?: Partial<CheckPrivilegesResponse>
+): CheckPrivilegesResponse {
   return {
     hasAllRequested: true,
     privileges: {
