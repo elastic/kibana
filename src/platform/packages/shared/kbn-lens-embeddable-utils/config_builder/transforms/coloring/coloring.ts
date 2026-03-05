@@ -222,7 +222,6 @@ export function fromStaticColorAPIToLensState(
 function fromColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode
 ): ColorMappingColorDefType {
-  console.log('fromColorLensStateToAPI', { color });
   if (color.type === 'colorCode') {
     return {
       type: 'colorCode',
@@ -251,12 +250,10 @@ function isLensStateCategoricalConfigColorMapping(
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
 ): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'colorCode' }> } | {} {
-  console.log('fromUnassignedColorLensStateToAPI', color);
   if (!color || color.type === 'loop') {
     return {};
   }
   const unassignedColor = fromColorLensStateToAPI(color);
-  console.log({ unassignedColor });
   return { unassignedColor };
 }
 
@@ -278,7 +275,6 @@ export function fromColorMappingLensStateToAPI(
   const unassignedColor = fromUnassignedColorLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
-  console.log({ unassignedColor });
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -297,20 +293,6 @@ export function fromColorMappingLensStateToAPI(
   const colorMode = colorMapping.colorMode as ColorMapping.GradientColorMode;
   const colorAssignments = colorMapping.assignments;
 
-  // .filter(
-  //   (
-  //     assignment
-  //   ): assignment is ColorMapping.AssignmentBase<
-  //     ColorMapping.ColorRule,
-  //     ColorMapping.CategoricalColor | ColorMapping.ColorCode
-  //   > => assignment.color.type !== 'gradient'
-  // );
-  console.log({
-    colorMapping,
-    colorMode,
-    colorMappingStringified: JSON.stringify(colorMapping, null, 2),
-    colorAssignments,
-  });
   return {
     mode: 'gradient',
     palette: colorMapping.paletteId,
@@ -328,7 +310,6 @@ export function fromColorMappingLensStateToAPI(
 function fromColorDefAPIToLensState(
   color: ColorMappingColorDefType
 ): ColorMapping.CategoricalColor | ColorMapping.ColorCode {
-  console.log('fromColorDefAPIToLensState', { color });
   if (color.type === 'colorCode') {
     return {
       type: 'colorCode',
@@ -365,7 +346,6 @@ function fromAPIMappingToAssignments(
     ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.GradientColor
   >
 > {
-  console.log('fromAPIMappingToAssignments', { colorMapping });
   if (!colorMapping || !colorMapping.mapping) {
     return [];
   }
@@ -399,7 +379,7 @@ export function fromColorMappingAPIToLensState(
       palette: { type: 'palette', name: colorMapping.palette.replace(LEGACY_PALETTE_PREFIX, '') }, // remove the prefix
     };
   }
-  console.log('fromColorMappingAPIToLensState', { before: colorMapping });
+
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [

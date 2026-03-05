@@ -120,7 +120,6 @@ function getTagcloudTagBy(
   }
 
   const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
-  console.log('getTagcloudTagBy', { color });
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
@@ -210,7 +209,7 @@ export function fromAPItoLensState(
     ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
-  const after = {
+  return {
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
     references,
@@ -221,8 +220,6 @@ export function fromAPItoLensState(
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
-  console.log('fromAPItoLensState', { before: config, after });
-  return after;
 }
 
 export function fromLensStateToAPI(
@@ -244,12 +241,6 @@ export function fromLensStateToAPI(
       config.state.internalReferences
     ),
   };
-  console.log('fromLensStateToAPI', {
-    before: config,
-    beforeStringified: JSON.stringify(config, null, 2),
-    after: visualizationState,
-    afterStringified: JSON.stringify(visualizationState, null, 2),
-  });
 
   return visualizationState;
 }
