@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -74,6 +75,12 @@ export function ObservabilityAlertSearchBar({
     http,
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   });
+  const { dataView } = useAlertsDataView({
+    http,
+    dataViewsService: dataViews,
+    toasts: notifications.toasts,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  });
 
   const clearSavedQuery = useCallback(
     () => (setSavedQuery ? setSavedQuery(undefined) : null),
@@ -111,6 +118,7 @@ export function ObservabilityAlertSearchBar({
           kuery,
           filters: [...filters, ...(filterControls ?? []), ...defaultFilters],
           config: getEsQueryConfig(uiSettings),
+          indexPattern: dataView,
         })
       );
       setTimeFilter(
@@ -136,6 +144,7 @@ export function ObservabilityAlertSearchBar({
     uiSettings,
     toasts,
     onKueryChange,
+    dataView,
   ]);
 
   useEffect(() => {
