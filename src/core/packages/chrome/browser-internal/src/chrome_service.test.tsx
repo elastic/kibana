@@ -30,6 +30,11 @@ import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
+import {
+  ChromeComponentsProvider,
+  ChromelessHeader,
+  ClassicHeader,
+} from '@kbn/core-chrome-browser-components';
 import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
@@ -233,22 +238,33 @@ describe('start', () => {
     });
   });
 
-  describe('getHeaderComponent', () => {
-    it('returns a renderable React component', async () => {
+  describe('componentDeps', () => {
+    it('exposes componentDeps for use by the layout service', async () => {
       const { chrome } = await start();
-
-      // Have to do some fanagling to get the type system and enzyme to accept this.
-      // Don't capture the snapshot because it's 600+ lines long.
-      // Render and assert that no error is thrown
-      render(React.createElement(() => chrome.getClassicHeaderComponent()));
+      expect(chrome.componentDeps).toBeDefined();
+      expect(chrome.componentDeps.config).toBeDefined();
     });
 
-    it('renders chromeless header', async () => {
+    it('ClassicHeader renders within ChromeComponentsProvider', async () => {
       const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getChromelessHeader()}
+          <ChromeComponentsProvider value={chrome.componentDeps}>
+            <ClassicHeader />
+          </ChromeComponentsProvider>
+        </KibanaRenderContextProvider>
+      );
+    });
+
+    it('ChromelessHeader renders within ChromeComponentsProvider', async () => {
+      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+
+      render(
+        <KibanaRenderContextProvider {...startDeps}>
+          <ChromeComponentsProvider value={chrome.componentDeps}>
+            <ChromelessHeader />
+          </ChromeComponentsProvider>
         </KibanaRenderContextProvider>
       );
 
@@ -577,7 +593,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.hasHeaderBanner$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHeaderBanner({ mount: () => () => undefined });
+      chrome.setHeaderBanner({ content: <></> });
       chrome.setHeaderBanner(undefined);
       service.stop();
 
