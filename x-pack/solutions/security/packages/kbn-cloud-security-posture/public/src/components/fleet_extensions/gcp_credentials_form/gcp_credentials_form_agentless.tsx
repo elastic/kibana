@@ -223,7 +223,6 @@ export const GcpCredentialsFormAgentless = ({
       isGcpCloudConnectorEnabled ? (
         <Suspense fallback={<EuiLoadingSpinner />}>
           <LazyCloudConnectorSetup
-            input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
