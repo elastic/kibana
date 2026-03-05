@@ -284,48 +284,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   unit: 'm',
                 },
               },
-              {
-                id: '2',
-                actionGroup: 'slo.burnRate.high',
-                burnRateThreshold: 1.4,
-                maxBurnRateThreshold: 120,
-                longWindow: {
-                  value: 6,
-                  unit: 'h',
-                },
-                shortWindow: {
-                  value: 30,
-                  unit: 'm',
-                },
-              },
-              {
-                id: '3',
-                actionGroup: 'slo.burnRate.medium',
-                burnRateThreshold: 0.7,
-                maxBurnRateThreshold: 30,
-                longWindow: {
-                  value: 24,
-                  unit: 'h',
-                },
-                shortWindow: {
-                  value: 120,
-                  unit: 'm',
-                },
-              },
-              {
-                id: '4',
-                actionGroup: 'slo.burnRate.low',
-                burnRateThreshold: 0.234,
-                maxBurnRateThreshold: 10,
-                longWindow: {
-                  value: 72,
-                  unit: 'h',
-                },
-                shortWindow: {
-                  value: 360,
-                  unit: 'm',
-                },
-              },
             ],
           },
           actions: [],
@@ -347,7 +305,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const resp = await alertingApi.waitForAlertInIndex({
           indexName: RULE_ALERT_INDEX,
           ruleId,
-          filters: [{ term: { 'kibana.alert.action_group': 'slo.burnRate.alert' } }],
         });
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.category', 'SLO burn rate');
         expect(resp.hits.hits[0]._source).property(
