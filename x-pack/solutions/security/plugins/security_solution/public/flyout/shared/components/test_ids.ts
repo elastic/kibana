@@ -12,20 +12,6 @@ export const FLYOUT_LINK_TEST_ID = `${PREFIX}Link` as const;
 
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
-export const EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID = (dataTestSubj: string) =>
-  `${dataTestSubj}ToggleIcon`;
-export const EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID = (dataTestSubj: string) =>
-  `${dataTestSubj}LeftSection`;
-export const EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID = (dataTestSubj: string) =>
-  `${dataTestSubj}TitleIcon`;
-export const EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID = (dataTestSubj: string) =>
-  `${dataTestSubj}TitleLink`;
-export const EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID = (dataTestSubj: string) =>
-  `${dataTestSubj}TitleText`;
-export const EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID = (dataTestSubj: string) =>
-  `${dataTestSubj}RightSection`;
-export const EXPANDABLE_PANEL_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
-export const EXPANDABLE_PANEL_CONTENT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Content`;
 
 /* Header Navigation */
 
@@ -49,6 +35,8 @@ export const FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID =
 
 export const DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID =
   `${FLYOUT_HISTORY_TEST_ID}DocumentDetailsRow` as const;
+export const ATTACK_DETAILS_HISTORY_ROW_TEST_ID =
+  `${FLYOUT_HISTORY_TEST_ID}AttackDetailsRow` as const;
 export const RULE_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}RuleRow` as const;
 export const HOST_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}HostRow` as const;
 export const USER_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}UserRow` as const;

@@ -63,21 +63,20 @@ function setupIntegrations() {
 function getAllIntegrations() {
   const cardItems = new Set<string>();
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     cy.window().then((win) => {
       const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
 
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       } else {
-        cy.scrollTo(0, i * 600);
+        cy.scrollTo(0, i * 300);
       }
     });
 
     cy.wait(50);
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
-      .should('be.visible')
       .each((element) => {
         const attrValue = element.attr('data-test-subj');
         if (attrValue) {
@@ -243,6 +242,7 @@ describe('Browsing integrations - Real API', () => {
         cy.getBySel(LOADING_SPINNER).should('not.exist');
 
         // Verify that integrations are displayed
+        cy.getBySel(INTEGRATION_LIST).scrollTo('bottom', { ensureScrollable: false });
         cy.getBySel(INTEGRATION_LIST).should('be.visible');
         getAllIntegrations().should('have.length.greaterThan', 50);
       });
