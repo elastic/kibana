@@ -36,7 +36,9 @@ describe('HeaderTopBanner', () => {
   });
 
   it('renders a ReactNode-based banner content', () => {
-    renderBanner({ content: <span data-test-subj="banner-content">Maintenance window active</span> });
+    renderBanner({
+      content: <span data-test-subj="banner-content">Maintenance window active</span>,
+    });
     expect(screen.getByTestId('banner-content')).toHaveTextContent('Maintenance window active');
   });
 
