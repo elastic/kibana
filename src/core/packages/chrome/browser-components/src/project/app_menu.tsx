@@ -11,7 +11,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import React, { useMemo } from 'react';
 import { HeaderAppMenu } from '../shared/header_app_menu';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from '../shared/header_action_menu';
+import { HeaderActionMenu, useHasActionMenu } from '../shared/header_action_menu';
 import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
 const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   useMemo(() => {
@@ -31,14 +31,14 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   }, [euiTheme]);
 
 export const AppMenuBar = () => {
-  const headerActionMenuMounter = useHeaderActionMenuMounter();
+  const hasActionMenu = useHasActionMenu();
   const { euiTheme } = useEuiTheme();
 
   const styles = useAppMenuBarStyles(euiTheme);
 
-  const hasBetaConfig = useHasAppMenuConfig();
+  const hasAppMenuConfig = useHasAppMenuConfig();
 
-  if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
+  if (!hasActionMenu && !hasAppMenuConfig) return null;
 
   return (
     <div
@@ -46,7 +46,7 @@ export const AppMenuBar = () => {
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={styles.root}
     >
-      {hasBetaConfig ? <HeaderAppMenu /> : <HeaderActionMenu mounter={headerActionMenuMounter} />}
+      {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
     </div>
   );
 };

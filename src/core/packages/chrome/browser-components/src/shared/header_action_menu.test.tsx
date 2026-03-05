@@ -15,7 +15,7 @@ import { act } from 'react-dom/test-utils';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 import { ChromeComponentsProvider } from '../context';
 import { createMockChromeComponentsDeps } from '../test_helpers';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
+import { HeaderActionMenu } from './header_action_menu';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 
@@ -63,13 +63,8 @@ describe('HeaderActionMenu', () => {
     return mount(<ChromeComponentsProvider value={deps}>{ui}</ChromeComponentsProvider>);
   };
 
-  const TestComponent = () => {
-    const mounter = useHeaderActionMenuMounter();
-    return <HeaderActionMenu mounter={mounter} />;
-  };
-
   it('mounts the current value of the provided observable', () => {
-    component = renderWithProvider(<TestComponent />);
+    component = renderWithProvider(<HeaderActionMenu />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
@@ -82,7 +77,7 @@ describe('HeaderActionMenu', () => {
   });
 
   it('clears the content of the component when emitting undefined', () => {
-    component = renderWithProvider(<TestComponent />);
+    component = renderWithProvider(<HeaderActionMenu />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
@@ -104,7 +99,7 @@ describe('HeaderActionMenu', () => {
   });
 
   it('updates the dom when a new mount point is emitted', () => {
-    component = renderWithProvider(<TestComponent />);
+    component = renderWithProvider(<HeaderActionMenu />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
@@ -126,7 +121,7 @@ describe('HeaderActionMenu', () => {
   });
 
   it('calls the previous mount point `unmount` when mounting a new mount point', () => {
-    component = renderWithProvider(<TestComponent />);
+    component = renderWithProvider(<HeaderActionMenu />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));
@@ -147,7 +142,7 @@ describe('HeaderActionMenu', () => {
   });
 
   it('calls mount point `unmount` when unmounts', () => {
-    component = renderWithProvider(<TestComponent />);
+    component = renderWithProvider(<HeaderActionMenu />);
 
     act(() => {
       menuMount$.next(createMountPoint('FOO'));

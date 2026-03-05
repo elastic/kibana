@@ -27,7 +27,7 @@ import { HeaderMenuButton } from './header_menu_button';
 import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from '../shared/header_action_menu';
+import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
 import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
@@ -49,9 +49,7 @@ export function ClassicHeader() {
 
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
-  const headerActionMenuMounter = useHeaderActionMenuMounter();
-
-  const hasBetaConfig = useHasAppMenuConfig();
+  const hasAppMenuConfig = useHasAppMenuConfig();
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
@@ -164,10 +162,10 @@ export function ClassicHeader() {
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                {hasBetaConfig ? (
+                {hasAppMenuConfig ? (
                   <HeaderAppMenu />
                 ) : (
-                  <HeaderActionMenu mounter={headerActionMenuMounter} />
+                  <HeaderActionMenu />
                 )}
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
