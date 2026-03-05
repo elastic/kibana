@@ -6,26 +6,26 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+import type { CcsLogsExtractionClient } from '.';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
-import { executeEsqlQuery } from '../infra/elasticsearch/esql';
-import { ingestEntities } from '../infra/elasticsearch/ingest';
+import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
+import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   HASHED_ID_FIELD,
-} from './logs_extraction/logs_extraction_query_builder';
+} from './logs_extraction_query_builder';
 import {
   LogExtractionConfig,
   type EngineDescriptorClient,
   type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
-} from './definitions/saved_objects';
-import { ENGINE_STATUS } from './constants';
-import type { EntityType } from '../../common/domain/definitions/entity_schema';
+} from '../definitions/saved_objects';
+import { ENGINE_STATUS } from '../constants';
+import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
 function createMockCcsLogsExtractionClient(): jest.Mocked<
   Pick<CcsLogsExtractionClient, 'extractToUpdates'>
@@ -35,8 +35,8 @@ function createMockCcsLogsExtractionClient(): jest.Mocked<
   };
 }
 
-jest.mock('../infra/elasticsearch/esql');
-jest.mock('../infra/elasticsearch/ingest');
+jest.mock('../../infra/elasticsearch/esql');
+jest.mock('../../infra/elasticsearch/ingest');
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
