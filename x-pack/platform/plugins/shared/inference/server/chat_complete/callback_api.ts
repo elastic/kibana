@@ -44,7 +44,6 @@ import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
-import { prepareAnonymization } from './prepare_anonymization';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 interface CreateChatCompleteApiOptions {
