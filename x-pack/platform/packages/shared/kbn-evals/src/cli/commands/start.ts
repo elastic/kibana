@@ -17,7 +17,6 @@ import {
   promptForConnector,
   promptForProject,
   isTTY,
-  parseConnectorsFromEnv,
   getAllAvailableConnectors,
   readLocalEsUrl,
   SCOUT_EVALS_ARGS,
@@ -122,10 +121,19 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
   throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
 };
 
-const hasEisConnectors = (): boolean => {
-  const connectors = parseConnectorsFromEnv();
-  return connectors.some((c) => c.id.startsWith('eis-'));
+const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
+
+const shellQuote = (value: string): string => {
+  // Prefer single quotes for bash/zsh. If the string contains single quotes, fall back to double quotes.
+  if (!value.includes("'")) {
+    return `'${value}'`;
+  }
+  const escaped = value.replace(/(["\\$`])/g, '\\$1');
+  return `"${escaped}"`;
 };
+
+const formatRerunCommand = (args: string[]): string =>
+  ['node', 'scripts/evals', ...args.map((a) => (a.includes(' ') ? shellQuote(a) : a))].join(' ');
 
 const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
   const suites = resolveEvalSuites(repoRoot, log);
@@ -228,6 +236,11 @@ export const startCmd: Command<void> = {
     }
 
     const skipServer = flagsReader.boolean('skip-server');
+    const requiresEisCcm =
+      isEisConnectorId(evaluationConnectorId) ||
+      (projects.length > 0
+        ? projects.some(isEisConnectorId)
+        : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
@@ -238,6 +251,36 @@ export const startCmd: Command<void> = {
       log.info(`Models:    all (from KIBANA_TESTING_AI_CONNECTORS)`);
     }
     log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
+    log.info('');
+
+    const rerunArgs: string[] = [];
+    if (suiteId) {
+      rerunArgs.push('--suite', suiteId);
+    } else if (configPath) {
+      rerunArgs.push('--config', configPath);
+    }
+
+    rerunArgs.push('--judge', evaluationConnectorId);
+
+    if (projects.length > 0) {
+      rerunArgs.push('--model', projects.join(','));
+    }
+
+    const grep = flagsReader.string('grep');
+    if (grep) {
+      rerunArgs.push('--grep', grep);
+    }
+
+    const repetitions = flagsReader.string('repetitions');
+    if (repetitions) {
+      rerunArgs.push('--repetitions', repetitions);
+    }
+
+    if (skipServer) {
+      rerunArgs.push('--skip-server');
+    }
+
+    log.info(`Re-run command: ${formatRerunCommand(['start', ...rerunArgs])}`);
     log.info('');
 
     if (flagsReader.boolean('dry-run')) {
@@ -299,7 +342,7 @@ export const startCmd: Command<void> = {
       }
 
       // --- Step 3: EIS CCM ---
-      if (hasEisConnectors()) {
+      if (requiresEisCcm) {
         log.info('[3/4] Enabling EIS (Cloud Connected Mode)...');
         const ccmApiKey = fetchCcmApiKey(log);
 
@@ -326,7 +369,7 @@ export const startCmd: Command<void> = {
 
         log.info('[3/4] EIS CCM enabled');
       } else {
-        log.info('[3/4] Skipping EIS CCM (no eis- connectors detected)');
+        log.info('[3/4] Skipping EIS CCM (no eis- judge/models selected)');
       }
     }
 
@@ -354,7 +397,6 @@ export const startCmd: Command<void> = {
       log.info(`Evaluation results will export to: ${localEsUrl}`);
     }
 
-    const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
       envOverrides.EVALUATION_REPETITIONS = repetitions;
     }
@@ -374,7 +416,6 @@ export const startCmd: Command<void> = {
       args.push('--project', p);
     }
 
-    const grep = flagsReader.string('grep');
     if (grep) {
       args.push('--grep', grep);
     }

@@ -85,6 +85,67 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and Alerting tab visibility', () => {
+    it('should show Alerting tab when package has alerting type assets', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const itemWithAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            ...baseResponse.item.assets?.kibana,
+            alerting_rule_template: [
+              {
+                pkgkey: 'nginx-0.3.7',
+                service: 'kibana',
+                type: 'alerting_rule_template',
+                file: 'nginx-inactivity.json',
+              },
+            ],
+          },
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: { ...itemWithAlertingAssets, type: 'input' as const } as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+    });
+
+    it('should not show Alerting tab when package has no alerting type assets', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithoutAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithoutAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(renderResult.queryByTestId('tab-alerting')).toBeNull();
+    });
+  });
+
   function mockGAAndPrereleaseVersions(pkgVersion: string) {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
