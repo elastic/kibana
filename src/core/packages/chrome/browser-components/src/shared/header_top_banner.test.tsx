@@ -9,24 +9,34 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { act, screen } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
-import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import { act, render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
+import { ChromeComponentsProvider } from '../context';
+import { createMockChromeComponentsDeps } from '../test_helpers';
 import { HeaderTopBanner } from './header_top_banner';
+
+const renderBanner = (banner?: ChromeUserBanner) => {
+  const deps = createMockChromeComponentsDeps();
+  if (banner) deps.headerBanner$.next(banner);
+  const result = render(
+    <EuiProvider>
+      <ChromeComponentsProvider value={deps}>
+        <HeaderTopBanner />
+      </ChromeComponentsProvider>
+    </EuiProvider>
+  );
+  return { ...result, deps };
+};
 
 describe('HeaderTopBanner', () => {
   it('renders nothing when no banner is set', () => {
-    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const { container } = renderWithEuiTheme(<HeaderTopBanner headerBanner$={headerBanner$} />);
+    const { container } = renderBanner();
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders a ReactNode-based banner content', () => {
-    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>({
-      content: <span data-test-subj="banner-content">Maintenance window active</span>,
-    });
-    renderWithEuiTheme(<HeaderTopBanner headerBanner$={headerBanner$} />);
+    renderBanner({ content: <span data-test-subj="banner-content">Maintenance window active</span> });
     expect(screen.getByTestId('banner-content')).toHaveTextContent('Maintenance window active');
   });
 
@@ -35,20 +45,18 @@ describe('HeaderTopBanner', () => {
       el.setAttribute('data-test-subj', 'mount-banner');
       return () => {};
     };
-    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>({ mount });
-    renderWithEuiTheme(<HeaderTopBanner headerBanner$={headerBanner$} />);
+    renderBanner({ mount });
     expect(screen.getByTestId('mount-banner')).toBeInTheDocument();
   });
 
   it('hides the banner when the observable emits undefined', () => {
-    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>({
+    const { deps } = renderBanner({
       content: <span data-test-subj="banner-content">Active</span>,
     });
-    renderWithEuiTheme(<HeaderTopBanner headerBanner$={headerBanner$} />);
     expect(screen.getByTestId('banner-content')).toBeInTheDocument();
 
     act(() => {
-      headerBanner$.next(undefined);
+      deps.headerBanner$.next(undefined);
     });
 
     expect(screen.queryByTestId('banner-content')).not.toBeInTheDocument();
