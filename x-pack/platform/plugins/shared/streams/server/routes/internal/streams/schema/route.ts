@@ -13,7 +13,6 @@ import type {
 import {
   FIELD_DEFINITION_TYPES,
   namedFieldDefinitionConfigSchema,
-  fieldDefinitionConfigSchema,
   isDescendantOf,
   Streams,
   LOGS_ROOT_STREAM_NAME,
@@ -346,9 +345,7 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
