@@ -35,7 +35,6 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { css } from '@emotion/react';
 import type { ChromeApplicationContext } from '../context';
-import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
 const buildDefaultContentLinks = ({
@@ -125,15 +124,6 @@ export const HeaderHelpMenu = ({
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  const helpExtensionLegacyContent = helpExtension?.content;
-  const helpExtensionMount = useCallback(
-    (domNode: HTMLDivElement) => {
-      const unmount = helpExtensionLegacyContent?.(domNode, { hideHelpMenu: closeMenu });
-      return unmount ?? (() => {});
-    },
-    [helpExtensionLegacyContent, closeMenu]
-  );
-
   const createOnClickHandler = useCallback(
     (href: string) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       if (!isModifiedOrPrevented(event) && event.button === 0) {
@@ -198,7 +188,7 @@ export const HeaderHelpMenu = ({
 
   let customContent: React.ReactNode = null;
   if (helpExtension) {
-    const { appName, links, content, reactContent } = helpExtension;
+    const { appName, links, content } = helpExtension;
 
     const customLinks =
       links &&
@@ -234,12 +224,7 @@ export const HeaderHelpMenu = ({
         }
       });
 
-    let extensionContent: React.ReactNode = null;
-    if (reactContent) {
-      extensionContent = reactContent({ hideHelpMenu: closeMenu });
-    } else if (content) {
-      extensionContent = <HeaderExtension extension={helpExtensionMount} />;
-    }
+    const extensionContent = content?.({ hideHelpMenu: closeMenu }) ?? null;
 
     customContent = (
       <>
