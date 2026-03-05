@@ -8,6 +8,7 @@
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
+import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
 
 const INDEX_THRESHOLD_PARAMS = {
   aggType: 'count',
@@ -79,38 +80,12 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
 
   apiTest('The rule runs and event log shows success', async ({ apiClient, samlAuth }) => {
     // rule is created with enabled: true, so it should run automatically
-
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-
-    const dateStart = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const pollIntervalMs = 2000;
-    const timeoutMs = 30000;
-    const maxAttempts = Math.ceil(timeoutMs / pollIntervalMs);
-
-    interface ExecutionLogEntry {
-      status: string;
-    }
-    interface ExecutionLogResponse {
-      total: number;
-      data: ExecutionLogEntry[];
-    }
-
-    let lastResponse: ExecutionLogResponse | undefined;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const logUrl =
-        `internal/alerting/rule/${createdRuleId}/_execution_log?date_start=` +
-        `${encodeURIComponent(dateStart)}&per_page=10`;
-      const logResponse = await apiClient.get(logUrl, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      expect(logResponse).toHaveStatusCode(200);
-      lastResponse = logResponse.body as ExecutionLogResponse;
-      await new Promise((r) => setTimeout(r, pollIntervalMs));
-    }
-
-    expect(lastResponse).toBeDefined();
-    expect(lastResponse!.data.some((entry) => entry.status === 'success')).toBe(true);
+    const result = await waitForSuccessfulEventLogEntry(apiClient, createdRuleId, {
+      ...COMMON_HEADERS,
+      ...cookieHeader,
+    });
+    expect(result.data.some((entry) => entry.status === 'success')).toBe(true);
   });
 
   apiTest(
