@@ -131,24 +131,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         createdAgentIds.push(agentId);
       });
-
-      it('should allow creating an agent with explicit private visibility', async () => {
-        const agentId = `visibility-private-agent-${Date.now()}`;
-        const response = await supertest
-          .post('/api/agent_builder/agents')
-          .set('kbn-xsrf', 'kibana')
-          .send({
-            ...mockAgent,
-            id: agentId,
-            visibility: AgentVisibility.Private,
-          })
-          .expect(200);
-
-        expect(response.body).to.have.property('id', agentId);
-        expect(response.body).to.have.property('visibility', AgentVisibility.Private);
-
-        createdAgentIds.push(agentId);
-      });
     });
 
     describe('GET /api/agent_builder/agents/get-test-agent', () => {
@@ -289,15 +271,50 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ name: 'Updated name' })
           .expect(404);
       });
+    });
+
+    describe('Visibility API (experimental features enabled)', function () {
+      this.tags(['skipServerless']);
+
+      it('should allow creating an agent with explicit private visibility', async () => {
+        const agentId = `visibility-private-agent-${Date.now()}`;
+        const response = await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+            visibility: AgentVisibility.Private,
+          })
+          .expect(200);
+
+        expect(response.body).to.have.property('id', agentId);
+        expect(response.body).to.have.property('visibility', AgentVisibility.Private);
+
+        createdAgentIds.push(agentId);
+      });
 
       it('should update visibility explicitly', async () => {
+        const agentId = `visibility-update-agent-${Date.now()}`;
+
+        await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+          })
+          .expect(200);
+
+        createdAgentIds.push(agentId);
+
         const response = await supertest
-          .put(`/api/agent_builder/agents/update-test-agent`)
+          .put(`/api/agent_builder/agents/${agentId}`)
           .set('kbn-xsrf', 'kibana')
           .send({ visibility: AgentVisibility.Shared })
           .expect(200);
 
-        expect(response.body).to.have.property('id', 'update-test-agent');
+        expect(response.body).to.have.property('id', agentId);
         expect(response.body).to.have.property('visibility', AgentVisibility.Shared);
       });
     });

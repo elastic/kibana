@@ -40,6 +40,17 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
+const VISIBILITY_DISABLED_MESSAGE =
+  'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
+
+const isVisibilityBlockedByExperimentalGate = ({
+  experimentalFeaturesEnabled,
+  visibility,
+}: {
+  experimentalFeaturesEnabled: boolean;
+  visibility: AgentVisibility | undefined;
+}): boolean => !experimentalFeaturesEnabled && visibility !== undefined;
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -222,13 +233,15 @@ export function registerAgentRoutes({
           AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
 
-        // Temporary route-level gate: keep API defaults unchanged while hiding visibility controls
-        // until the experimental features setting is enabled.
-        if (!experimentalFeaturesEnabled && request.body.visibility !== undefined) {
+        if (
+          isVisibilityBlockedByExperimentalGate({
+            experimentalFeaturesEnabled,
+            visibility: request.body.visibility,
+          })
+        ) {
           return response.badRequest({
             body: {
-              message:
-                'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.',
+              message: VISIBILITY_DISABLED_MESSAGE,
             },
           });
         }
@@ -363,13 +376,15 @@ export function registerAgentRoutes({
           AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
 
-        // Temporary route-level gate: keep API defaults unchanged while hiding visibility controls
-        // until the experimental features setting is enabled.
-        if (!experimentalFeaturesEnabled && request.body.visibility !== undefined) {
+        if (
+          isVisibilityBlockedByExperimentalGate({
+            experimentalFeaturesEnabled,
+            visibility: request.body.visibility,
+          })
+        ) {
           return response.badRequest({
             body: {
-              message:
-                'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.',
+              message: VISIBILITY_DISABLED_MESSAGE,
             },
           });
         }
