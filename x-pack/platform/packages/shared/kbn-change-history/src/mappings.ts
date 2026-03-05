@@ -21,8 +21,6 @@ export const changeHistoryMappings = {
       properties: {
         id: mappings.keyword(),
         name: mappings.keyword(),
-        email: mappings.keyword(),
-        ip: mappings.keyword(),
       },
     }),
 
@@ -35,10 +33,7 @@ export const changeHistoryMappings = {
         type: mappings.keyword(),
         outcome: mappings.keyword(),
         reason: mappings.text(),
-        start: mappings.date(),
         created: mappings.date(),
-        ingested: mappings.date(),
-        duration: mappings.long(),
         group: mappings.object({
           properties: {
             id: mappings.keyword(),
@@ -51,32 +46,28 @@ export const changeHistoryMappings = {
       properties: {
         id: mappings.keyword(),
         type: mappings.keyword(),
+        index: mappings.keyword(),
         hash: mappings.keyword(),
         sequence: mappings.keyword(),
         fields: mappings.object({
           properties: {
             changed: mappings.keyword(),
             masked: mappings.keyword(),
-            ignored: mappings.keyword(),
           },
         }),
-        oldvalues: mappings.object({ properties: {} }), // mappings.flattened(),
-        snapshot: mappings.object({ properties: {} }), // mappings.flattened(),
+        oldvalues: mappings.flattened(),
+        snapshot: mappings.flattened(),
       },
     }),
 
     tags: mappings.keyword(),
 
-    // mappings.flattened(),
-    metadata: mappings.object({
-      properties: {},
-    }),
+    metadata: mappings.flattened(),
 
     kibana: mappings.object({
       properties: {
         space_id: mappings.keyword(),
         version: mappings.keyword(),
-        session_id: mappings.keyword(),
       },
     }),
   },

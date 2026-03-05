@@ -6,7 +6,6 @@
  */
 
 import { monotonicFactory } from 'ulid';
-import crypto from 'node:crypto';
 import type {
   QueryDslQueryContainer,
   SearchTotalHits,
@@ -30,7 +29,7 @@ export * from './src/types';
 
 const ulid = monotonicFactory();
 
-const MAX_RESULT_SIZE = 100;
+const DEFAULT_RESULT_SIZE = 100;
 
 type ChangeHistoryDataStreamClient = DataStreamClient<
   typeof changeHistoryMappings,
@@ -41,8 +40,8 @@ export interface IChangeHistoryClient {
   dataStreamName: string;
   isInitialized(): boolean;
   initialize(elasticsearchClient: ElasticsearchClient): void;
-  log(change: ObjectChange, opts: LogChangeHistoryOptions): void;
-  logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): void;
+  log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
+  logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
     objectType: string,
     objectId: string,
@@ -154,7 +153,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param changes - The changes to objects that were affected.
    * @param opts - The options for the bulk change.
    * @param opts.action - The action performed (`rule-create`, `rule-update`, `rule-delete`, etc.)
-   * @param opts.userId - The ID of the user who performed the change.
+   * @param opts.username - Current login name for the user who performed the change.
+   * @param opts.userProfileId - Optional user profile ID (auth realm). See Elastic User Profiles.
    * @param opts.spaceId - The ID of the space that the change belongs to.
    * @param opts.timestamp - Optional timestamp of the change.
    * @param opts.correlationId - Optional correlation ID for the bulk change.
@@ -162,51 +162,48 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.ignoreFields - Optional fields to ignore in the diff calculation.
    * @param opts.maskFields - Optional "sensitive data" fields to mask instead of store in plain form.
    * @param opts.diffDocCalculation - Optional function to calculate the diff between the current and next state of the object.
+   * @param opts.refresh - Optional indicator to force an ES refresh after changes (affects perfomance)
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
    */
   async logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions) {
-    this.logger.debug(
-      `ChangeHistoryClient.logBulk(action: ${opts.action}, userId: ${opts.userId}, chages: ${changes.length})`
-    );
-
-    const correlationId =
-      opts.correlationId ?? changes.length > 1 ? crypto.randomBytes(16).toString('hex') : undefined;
     const { module, dataset, client, kibanaVersion } = this;
     if (!client) {
       const err = new Error(`Data stream not initialized: [${this.dataStreamName}]`);
       this.logger.error(err);
       throw err;
     }
-    const { timestamp, userId, spaceId: space } = opts;
-    const request: ClientCreateRequest<ChangeHistoryDocument> = { documents: [], space };
+    const { username, userProfileId, spaceId: space, correlationId, refresh } = opts;
+    const request: ClientCreateRequest<ChangeHistoryDocument> = { documents: [], space, refresh };
+
     for (const change of changes) {
       // Create document and populate
-      const { id, objectType, objectId, sequence } = change;
+      const { id, objectType, objectId, index, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.after));
       const document = this.createDocument(id, timestamp, opts.data);
-      document.user = { id: userId };
+      document.user = { name: username, id: userProfileId };
       document.event = { ...document.event, module, dataset, action: opts.action };
       if (correlationId && !document.event.group) document.event.group = { id: correlationId };
-      const fields = {} as { changed?: string[]; ignored?: string[]; masked?: string[] };
+
+      const fields = {} as { changed?: string[]; masked?: string[] };
       const { masked, snapshot } = maskSensitiveFields(change.after, opts.maskFields);
       fields.masked = masked;
-      document.object = { id: objectId, type: objectType, hash, sequence, fields, snapshot };
+      document.object = { id: objectId, type: objectType, index, hash, sequence, fields, snapshot };
       document.kibana = { space_id: space, version: kibanaVersion };
+
       // Do we have "before" state?
       // Perform diff using diffDocCalculation(), defaulted to standard if not passed in.
       if (change.before) {
         const diffCalc = opts.diffDocCalculation ?? standardDiffDocCalculation;
         try {
           const a = maskSensitiveFields(change.before, opts.maskFields);
-          const { fieldChanges, ignored, oldvalues } = diffCalc({
+          const { fieldChanges, oldvalues } = diffCalc({
             a: a.snapshot,
             b: snapshot,
             ignoreFields: opts.ignoreFields,
           });
           fields.masked = Array.from(new Set([...a.masked, ...fields.masked]));
           fields.changed = fieldChanges;
-          fields.ignored = ignored;
           document.object = { ...document.object, oldvalues };
         } catch (err) {
           // Uncalculated diff should not be fatal, just log and continue
@@ -218,7 +215,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     }
 
     try {
-      await client.create({ refresh: true, ...request });
+      await client.create({ ...request });
     } catch (err) {
       const error = new Error(`Error saving change history: ${err}`, { cause: err });
       this.logger.error(error);
@@ -263,7 +260,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     const history = await client.search<Record<string, ChangeHistoryDocument>>({
       query: { bool: { filter } },
       sort: opts?.sort ?? defaultSort,
-      size: opts?.size ?? MAX_RESULT_SIZE,
+      size: opts?.size ?? DEFAULT_RESULT_SIZE,
       from: opts?.from,
     });
     return {
