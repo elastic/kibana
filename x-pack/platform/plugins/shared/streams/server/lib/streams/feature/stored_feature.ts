@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { featureStatusSchema } from '@kbn/streams-schema/src/feature';
 import { conditionSchema } from '@kbn/streamlang/types/conditions';
 import {

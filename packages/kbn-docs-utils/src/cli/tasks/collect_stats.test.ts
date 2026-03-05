@@ -55,6 +55,7 @@ describe('collectStats', () => {
       plugins: [mockPlugin],
       pathsByPlugin: new Map([[mockPlugin, ['src/plugins/test/public/index.ts']]]),
       project: {} as any,
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {

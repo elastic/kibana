@@ -154,11 +154,11 @@ export default ({ getService }: FtrProviderContext) => {
           investigation_fields: ['foo'],
         };
 
-        // @ts-expect-error we are testing the invalid payload
+        // we are testing the invalid payload
         const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(400);
 
         expect(body.message).to.eql(
-          '[request body]: investigation_fields: Expected object, received array'
+          '[request body]: investigation_fields: Invalid input: expected object, received array'
         );
       });
 
