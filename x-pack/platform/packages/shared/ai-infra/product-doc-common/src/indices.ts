@@ -36,3 +36,23 @@ export const getSecurityLabsIndexName = (inferenceId?: string): string => {
     !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
   }`;
 };
+
+/**
+ * Index name prefix for OpenAPI Spec content.
+ */
+export const openApiSpecIndexPrefix = '.kibana_ai_openapi_spec';
+
+/**
+ * Index pattern for OpenAPI Spec content.
+ */
+export const openApiSpecIndexPattern = `${openApiSpecIndexPrefix}*`;
+
+/**
+ * Returns the index name for OpenAPI Spec content.
+ * Format: .kibana_ai_openapi_spec[-{inferenceId}]
+ */
+export const getOpenApiSpecIndexName = (inferenceId?: string): string => {
+  return `${openApiSpecIndexPrefix}${
+    !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
+  }`;
+};

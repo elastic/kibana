@@ -42,7 +42,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-        "lineNumber": 75,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +58,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 91,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +75,7 @@
                   "<object>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 91,
+                "lineNumber": 93,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -116,7 +116,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 109,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -143,7 +143,7 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 110,
+                "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 111,
+                "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -191,7 +191,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 273,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -207,7 +207,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 273,
+                "lineNumber": 276,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +224,7 @@
                   "StartPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 273,
+                "lineNumber": 276,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +244,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 287,
+            "lineNumber": 296,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -259,12 +259,24 @@
             "label": "registerDiscoverSharedFeatures",
             "description": [],
             "signature": [
-              "(plugins: ",
+              "(core: ",
+              "CoreSetup",
+              "<",
+              "StartPluginsDependencies",
+              ", ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
+              ">, plugins: ",
               "SetupPlugins",
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 291,
+            "lineNumber": 314,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -274,14 +286,42 @@
                 "id": "def-public.Plugin.registerDiscoverSharedFeatures.$1",
                 "type": "Object",
                 "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<",
+                  "StartPluginsDependencies",
+                  ", ",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
+                    "text": "PluginStart"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 315,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "plugins",
                 "description": [],
                 "signature": [
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 291,
-                "columnNumber": 47,
+                "lineNumber": 316,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -302,7 +342,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 320,
+            "lineNumber": 350,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -880,7 +920,7 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | \"deHealthUIEnabled\" | \"ruleHealthUIEnabled\" | \"automaticTroubleshootingSkill\" | \"newFlyoutSystemEnabled\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | \"deHealthUIEnabled\" | \"ruleHealthUIEnabled\" | \"automaticTroubleshootingSkill\" | \"newFlyoutSystemEnabled\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "lineNumber": 42,
@@ -970,7 +1010,7 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | \"deHealthUIEnabled\" | \"ruleHealthUIEnabled\" | \"automaticTroubleshootingSkill\" | \"newFlyoutSystemEnabled\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | \"deHealthUIEnabled\" | \"ruleHealthUIEnabled\" | \"automaticTroubleshootingSkill\" | \"newFlyoutSystemEnabled\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "lineNumber": 64,
@@ -2358,7 +2398,7 @@
       "label": "PluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-      "lineNumber": 228,
+      "lineNumber": 230,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2376,7 +2416,7 @@
             ">"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 229,
+          "lineNumber": 231,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2391,10 +2431,10 @@
           "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 230,
+          "lineNumber": 232,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2418,7 +2458,7 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 231,
+          "lineNumber": 233,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2440,7 +2480,7 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-              "lineNumber": 231,
+              "lineNumber": 233,
               "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
@@ -2461,7 +2501,7 @@
       "label": "PluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-      "lineNumber": 234,
+      "lineNumber": 236,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2477,7 +2517,7 @@
             "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType; AdditionalChargesMessage: React.ComponentType; }>) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 235,
+          "lineNumber": 237,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2516,7 +2556,7 @@
             ">"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 236,
+          "lineNumber": 238,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2535,7 +2575,7 @@
             "UpsellingService"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 237,
+          "lineNumber": 239,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2553,7 +2593,7 @@
             "({ userUrl, isAgentlessAvailable, projectUrl, deploymentUrl, }: { userUrl: UserUrl; isAgentlessAvailable: boolean; projectUrl?: string | undefined; deploymentUrl?: string | undefined; }) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 238,
+          "lineNumber": 240,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2592,7 +2632,7 @@
             ", string, string> | null) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "lineNumber": 239,
+          "lineNumber": 241,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2611,7 +2651,7 @@
                 ", string, string> | null"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-              "lineNumber": 239,
+              "lineNumber": 241,
               "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
@@ -3979,7 +4019,7 @@
             "\nThe security solution generic experimental features"
           ],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
           "lineNumber": 104,
@@ -4124,7 +4164,7 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 301,
+        "lineNumber": 308,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4179,7 +4219,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 575,
+        "lineNumber": 582,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4193,7 +4233,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
+          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "lineNumber": 8,
@@ -4301,7 +4341,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: true; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: true; readonly entityStoreDisabled: false; readonly aiRuleCreationEnabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly enableAlertsAndAttacksAlignment: false; readonly qradarRulesMigration: true; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly trialCompanionEnabled: false; readonly linuxDnsEvents: true; readonly splunkV2DashboardsEnabled: true; readonly deHealthUIEnabled: false; readonly ruleHealthUIEnabled: false; readonly automaticTroubleshootingSkill: false; readonly newFlyoutSystemEnabled: false; }"
+          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: true; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly storeGapsInEventLogEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: true; readonly entityStoreDisabled: false; readonly aiRuleCreationEnabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly enableAlertsAndAttacksAlignment: false; readonly qradarRulesMigration: true; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly trialCompanionEnabled: false; readonly linuxDnsEvents: true; readonly splunkV2DashboardsEnabled: true; readonly deHealthUIEnabled: false; readonly ruleHealthUIEnabled: false; readonly automaticTroubleshootingSkill: false; readonly newFlyoutSystemEnabled: false; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "lineNumber": 14,

@@ -96,6 +96,7 @@
     "ruleTypeId",
     "tags"
   ],
+  "anonymization-salt": [],
   "api_key_pending_invalidation": [
     "apiKeyId",
     "createdAt",
@@ -922,6 +923,11 @@
     "title",
     "uiStateJSON",
     "version"
+  ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],

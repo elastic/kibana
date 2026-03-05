@@ -18,9 +18,11 @@ import {
   esqlGauge,
 } from './lens_api_config.mock';
 import {
+  defaultColorByValueAttributes,
   gaugeAttributes,
   gaugeAttributesWithPercentageColorMode,
   gaugeESQLAttributes,
+  selectorColorByValueAttributes,
 } from './lens_state_config.mock';
 
 describe('Gauge', () => {
@@ -28,12 +30,21 @@ describe('Gauge', () => {
     it('should convert a gauge chart with full config and absolute color mode', () => {
       validateConverter(gaugeAttributes, gaugeStateSchema);
     });
-    //  rangeMax: null for percentage color mode -> throws validation error in the color schema
-    it.skip('should convert a gauge chart with full config and percentage color mode', () => {
+
+    it('should convert a gauge chart with full config and percentage color mode', () => {
       validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
     });
+
     it('should convert a gauge chart with ESQL dataset', () => {
       validateConverter(gaugeESQLAttributes, gaugeStateSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, gaugeStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, gaugeStateSchema);
     });
   });
   describe('validateAPIConverter', () => {

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { errors, getFunctionDefinition } from '..';
-import { FunctionDefinitionTypes } from '../../../../..';
 import {
   isColumn,
   isFunctionExpression,
@@ -16,18 +14,21 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../../ast/is';
-import { getLocationInfo } from '../../../registry/location';
-import { isTimeseriesSourceCommand } from '../timeseries_check';
-import { Location } from '../../../registry/types';
-import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
+} from '@elastic/esql';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
   ESQLAstItem,
   ESQLFunction,
   ESQLMessage,
-} from '../../../../types';
+} from '@elastic/esql/types';
+import type { PromQLFunction } from '@elastic/esql';
+import { errors, getFunctionDefinition } from '..';
+import { FunctionDefinitionTypes } from '../../../../..';
+import { getLocationInfo } from '../../../registry/location';
+import { isTimeseriesSourceCommand } from '../timeseries_check';
+import { Location } from '../../../registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
   FunctionDefinition,
   PromQLFunctionDefinition,
@@ -37,7 +38,6 @@ import type {
 } from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
-import type { PromQLFunction } from '../../../../embedded_languages/promql/types';
 
 export function validateFunction({
   fn,

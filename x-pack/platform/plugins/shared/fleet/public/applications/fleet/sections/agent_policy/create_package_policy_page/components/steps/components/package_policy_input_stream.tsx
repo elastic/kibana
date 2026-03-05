@@ -82,6 +82,7 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   totalStreams?: number;
+  showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
 }
 
@@ -95,6 +96,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     totalStreams,
+    showDescriptionColumn = true,
     varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
@@ -264,7 +266,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     return (
       <>
         <EuiFlexGrid
-          columns={2}
+          columns={showDescriptionColumn ? 2 : 1}
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
