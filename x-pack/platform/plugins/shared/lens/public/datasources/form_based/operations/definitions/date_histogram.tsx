@@ -31,16 +31,16 @@ import {
   extendedBoundsToAst,
   intervalOptions,
   getCalculateAutoTimeExpression,
+  splitStringInterval,
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type {
   DateHistogramIndexPatternColumn,
-  DateRange,
   IndexPattern,
   FormBasedLayer,
 } from '@kbn/lens-common';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
@@ -104,16 +104,6 @@ function getTimeZoneAndInterval(
   };
 }
 
-function splitIntervalToValueAndUnit(interval: string) {
-  if (!interval || interval === 'auto') return null;
-  const trimmed = interval.trim();
-  const numMatch = trimmed.match(/^[\d.]+/);
-  const value = numMatch ? parseFloat(numMatch[0]) : 1;
-  const unit = trimmed.replace(/^[\d.\s]+/, '').trim() || 'h';
-  if (!Number.isFinite(value) || value <= 0) return null;
-  return { value, unit };
-}
-
 const ESQL_UNIT_MAP: Record<string, [string, string]> = {
   ms: ['millisecond', 'milliseconds'],
   s: ['second', 'seconds'],
@@ -125,8 +115,8 @@ const ESQL_UNIT_MAP: Record<string, [string, string]> = {
   y: ['year', 'years'],
 };
 
-function mapToEsqlInterval(_dateRange: DateRange, interval: string) {
-  const parsed = splitIntervalToValueAndUnit(interval);
+function mapToEsqlInterval(interval: string) {
+  const parsed = splitStringInterval(interval);
   if (!parsed) return '1 hour';
   const { value, unit } = parsed;
   const n = value;
@@ -248,10 +238,9 @@ export const dateHistogramOperation: OperationDefinition<
     const resolvedInterval =
       interval === 'auto'
         ? mapToEsqlInterval(
-            dateRange,
             calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
           )
-        : mapToEsqlInterval(dateRange, interval);
+        : mapToEsqlInterval(interval);
 
     return {
       template: `BUCKET(${esql.col(column.sourceField)}, ${resolvedInterval})`,
@@ -261,7 +250,7 @@ export const dateHistogramOperation: OperationDefinition<
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
     const dropPartials = Boolean(
       column.params?.dropPartials &&
-        // set to false when detached from time picker
+        // Set to false when detached from time picker
         (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
     );
 

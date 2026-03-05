@@ -99,7 +99,7 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   m: '1m',
   s: '1s',
   ms: '1ms',
-};
+} as const;
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -188,9 +188,10 @@ export function generateEsqlQuery(
   });
 
   // Process metrics (excluding static_value which is handled above)
-  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col], _index) => {
+  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     const def = operationDefinitionMap[col.operationType];
 
+    // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
       return getEsqlQueryFailedResult('formula_not_supported');
     }
@@ -211,7 +212,9 @@ export function generateEsqlQuery(
     }
 
     const format =
+      // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
+      // 2. Operation-specific format
       operationDefinitionMap[col.operationType].getSerializedFormat?.(
         col,
         col,
@@ -219,6 +222,7 @@ export function generateEsqlQuery(
         uiSettings,
         dateRange
       ) ??
+      // 3. Field's default format from data view
       ('sourceField' in col
         ? col.sourceField === '___records___'
           ? { id: 'number' }
@@ -259,9 +263,9 @@ export function generateEsqlQuery(
       filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
-    const esAggsId = (metricESQL += filterClause);
+    metricESQL += filterClause;
 
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+    esAggsIdMap[metricESQL] = createEsAggsIdMapEntry({
       col,
       colId,
       format,
@@ -291,6 +295,7 @@ export function generateEsqlQuery(
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
+    // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'terms') {
       return getEsqlQueryFailedResult('terms_not_supported');
     }
@@ -324,6 +329,7 @@ export function generateEsqlQuery(
       const column = col;
       if (
         column.params?.dropPartials &&
+        // set to false when detached from time picker
         (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
           !column.params?.ignoreTimeRange)
       ) {
@@ -360,7 +366,9 @@ export function generateEsqlQuery(
     resolvedBucketExprs.set(index, esAggsId);
 
     const format =
+      // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
+      // 2. Operation-specific format
       operationDefinitionMap[col.operationType].getSerializedFormat?.(
         col,
         col,
@@ -368,6 +376,7 @@ export function generateEsqlQuery(
         uiSettings,
         dateRange
       ) ??
+      // 3. Field's default format from data view (buckets don't need fallback)
       undefined;
 
     esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
@@ -407,10 +416,12 @@ export function generateEsqlQuery(
       queryParts.push(`STATS ${statsBody}`);
     }
 
+    // Build sort fields, excluding date fields (date_histogram columns)
+    // The first .map() attaches the original index so we can reference
+    // the correct esAggsId in the final string.
     const sortFields = bucketEsAggsEntries
       .map(([, col], index) => ({ col, index }))
-      .filter(({ col }) => col.dataType !== 'date')
-      .filter(({ index }) => resolvedBucketExprs.has(index))
+      .filter(({ col, index }) => col.dataType !== 'date' && resolvedBucketExprs.has(index))
       .map(({ index }) => `\`${resolvedBucketExprs.get(index)}\` ASC`);
 
     // Only add SORT clause if there are non-date fields to sort by
