@@ -145,10 +145,6 @@ export function EnvironmentSelect({
 
   return (
     <EuiFormRow
-      aria-label={i18n.translate(
-        'xpack.apm.environmentSelect.selectenvironmentComboBox.ariaLabel',
-        { defaultMessage: 'Select environment' }
-      )}
       error={i18n.translate('xpack.apm.filter.environment.error', {
         defaultMessage: '{value} is not a valid environment',
         values: { value: searchValue },
@@ -158,6 +154,10 @@ export function EnvironmentSelect({
       isInvalid={isInvalid}
     >
       <EuiComboBox
+        aria-label={i18n.translate(
+          'xpack.apm.environmentSelect.selectenvironmentComboBox.ariaLabel',
+          { defaultMessage: 'Select environment' }
+        )}
         compressed={compressed}
         data-test-subj="environmentFilter"
         fullWidth={fullWidth}
