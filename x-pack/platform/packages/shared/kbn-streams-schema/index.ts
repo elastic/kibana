@@ -29,7 +29,7 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
@@ -53,6 +53,7 @@ export {
   extractWhereExpression,
   getFromSources,
   normalizeEsqlQuery,
+  replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
 
@@ -189,8 +190,6 @@ export {
   baseFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
-
-export { type System, systemSchema, isSystem } from './src/system';
 
 export {
   type BaseSimulationError,
