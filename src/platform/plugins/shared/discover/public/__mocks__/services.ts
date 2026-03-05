@@ -266,9 +266,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
-    notifications: {
-      toasts: notificationServiceMock.createStartContract().toasts,
-    },
+    notifications: notificationServiceMock.createStartContract(),
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
@@ -310,6 +308,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       isEmbeddedEditor: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
+      clearEditorState: jest.fn(),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;

@@ -31,6 +31,7 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { type Index } from '../../../../../../../common';
 import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
@@ -53,9 +54,17 @@ import { IndexDocuments } from '../index_documents/index_documents';
 
 interface Props {
   indexDetails: Index;
+  sampleDocuments: SearchHit[];
+  isDocumentsLoading: boolean;
+  documentsError: unknown;
 }
 
-export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({ indexDetails }) => {
+export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
+  indexDetails,
+  sampleDocuments,
+  isDocumentsLoading,
+  documentsError,
+}) => {
   const {
     name,
     status,
@@ -225,7 +234,12 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({ indexDet
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
             />
           </EuiFlexItem>
-          <IndexDocuments indexName={name} mappings={mappingsData ?? undefined} />
+          <IndexDocuments
+            documents={sampleDocuments}
+            isLoading={isDocumentsLoading}
+            error={documentsError}
+            mappings={mappingsData ?? undefined}
+          />
         </EuiFlexGroup>
       )}
     </>
