@@ -138,7 +138,6 @@ dependsOn:
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/inspector-plugin'
-  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
