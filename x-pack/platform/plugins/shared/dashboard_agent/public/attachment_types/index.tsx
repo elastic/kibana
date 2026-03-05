@@ -31,10 +31,11 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    renderCanvasContent: (props, registerActionButtons) => (
+    renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
-        registerActionButtons={registerActionButtons}
+        registerActionButtons={callbacks.registerActionButtons}
+        updateOrigin={callbacks.updateOrigin}
         dashboardLocator={dashboardLocator}
       />
     ),

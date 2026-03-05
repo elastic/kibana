@@ -6,11 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardAttachmentData, AttachmentPanel } from '@kbn/dashboard-agent-common';
+import type {
+  DashboardAttachmentData,
+  DashboardAttachmentOrigin,
+  AttachmentPanel,
+} from '@kbn/dashboard-agent-common';
 import { isGenericAttachmentPanel, isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
@@ -31,6 +35,7 @@ import {
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { unifiedSearch } from '../kibana_services';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
@@ -295,15 +300,6 @@ export const getDashboardRendererCreationOptions = async ({
   };
 };
 
-export const saveDashboardFromApi = async (dashboardApi: DashboardApi): Promise<void> => {
-  if (dashboardApi.savedObjectId$.value) {
-    await dashboardApi.runQuickSave();
-    return;
-  }
-
-  await dashboardApi.runInteractiveSave();
-};
-
 const getDashboardCanvasContentStyles = ({
   euiTheme,
 }: {
@@ -329,20 +325,27 @@ const getDashboardCanvasContentStyles = ({
   searchBar: css({
     flexShrink: 0,
   }),
+  callout: css({
+    marginTop: euiTheme.size.s,
+    marginBottom: euiTheme.size.s,
+  }),
 });
 
 export const DashboardCanvasContent = ({
   attachment,
   registerActionButtons,
+  updateOrigin,
   dashboardLocator,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
+  updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
   dashboardLocator?: DashboardRendererProps['locator'];
 }) => {
   const { euiTheme } = useEuiTheme();
   const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemo(() => getDashboardCanvasContentStyles({ euiTheme }), [euiTheme]);
+  const linkedSavedObjectId = attachment.origin?.savedObjectId;
 
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
 
@@ -387,18 +390,27 @@ export const DashboardCanvasContent = ({
       }),
       icon: 'save',
       type: ActionButtonType.SECONDARY,
-      handler: () => saveDashboardFromApi(dashboardApi),
+      handler: async () => {
+        const result = await dashboardApi.runInteractiveSave();
+        const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
+
+        if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectId) {
+          await updateOrigin({ savedObjectId: nextSavedObjectId });
+        }
+      },
     });
 
     registerActionButtons(buttons);
   }, [
     dashboardApi,
-    data.savedObjectId,
     initialDashboardInput.description,
     initialDashboardInput.panels,
     initialDashboardInput.time_range,
     initialDashboardInput.title,
     registerActionButtons,
+    data.savedObjectId,
+    linkedSavedObjectId,
+    updateOrigin,
   ]);
 
   const { SearchBar } = unifiedSearch.ui;
@@ -422,12 +434,42 @@ export const DashboardCanvasContent = ({
           data-test-subj="dashboardCanvasSearchBar"
         />
       </div>
+      {linkedSavedObjectId && (
+        <EuiCallOut
+          css={styles.callout}
+          size="s"
+          iconType="info"
+          announceOnMount={false}
+          title={
+            <FormattedMessage
+              id="xpack.dashboardAgent.attachments.dashboard.savedVersionCalloutDescription"
+              defaultMessage="There's a {savedVersion} of this dashboard that may have more up to date content."
+              values={{
+                savedVersion: (
+                  <EuiLink
+                    href={dashboardLocator?.getRedirectUrl({ dashboardId: linkedSavedObjectId })}
+                    css={{
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.dashboardAgent.attachments.dashboard.savedVersionLinkText',
+                      {
+                        defaultMessage: 'saved version',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
+      )}
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
           showPlainSpinner
           locator={dashboardLocator}
-          savedObjectId={data.savedObjectId}
           onApiAvailable={(api) => {
             api.setViewMode('view');
             const initialTimeRange = api.timeRange$.value;
