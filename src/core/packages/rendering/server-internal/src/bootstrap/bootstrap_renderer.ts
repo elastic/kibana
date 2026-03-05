@@ -104,7 +104,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       publicPathMap,
     });
 
-    const hash = createHash('sha1');
+    const hash = createHash('sha256');
     hash.update(body);
     const etag = hash.digest('hex');
 

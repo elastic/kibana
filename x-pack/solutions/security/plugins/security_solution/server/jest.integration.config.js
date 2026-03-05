@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('default index pattern', () => {
-    loadTestFile(require.resolve('./default_index_pattern'));
-  });
-}
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/server'],
+  haste: {
+    throwOnCollision: false,
+  },
+  forceExit: true,
+};
