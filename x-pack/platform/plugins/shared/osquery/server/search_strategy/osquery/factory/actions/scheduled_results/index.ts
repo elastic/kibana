@@ -37,7 +37,7 @@ export const scheduledActionResults: OsqueryFactory<OsqueryQueries.scheduledActi
     };
 
     return {
-      ...response,
+      ...(response as ScheduledActionResultsStrategyResponse),
       inspect,
       edges: response.rawResponse.hits.hits,
     };

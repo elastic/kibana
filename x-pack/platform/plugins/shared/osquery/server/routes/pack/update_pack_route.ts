@@ -260,7 +260,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                         {
                           shard: policyShards[agentPolicyId] ?? 100,
-                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId),
+                          queries: convertSOQueriesToPackConfig(
+                            updatedPackSO.attributes.queries,
+                            spaceId
+                          ),
                         }
                       );
 
@@ -351,7 +354,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
-                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId),
+                        queries: convertSOQueriesToPackConfig(
+                          updatedPackSO.attributes.queries,
+                          spaceId
+                        ),
                       }
                     );
 
@@ -384,7 +390,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
-                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId),
+                        queries: convertSOQueriesToPackConfig(
+                          updatedPackSO.attributes.queries,
+                          spaceId
+                        ),
                       }
                     );
 

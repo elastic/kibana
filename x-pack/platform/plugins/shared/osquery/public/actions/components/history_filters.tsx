@@ -82,7 +82,15 @@ const HistoryFiltersComponent: React.FC<HistoryFiltersProps> = ({
   );
 
   const emitChange = useCallback(
-    (overrides: Partial<{ search: string; users: string[]; sources: Set<SourceFilter>; start: string; end: string }>) => {
+    (
+      overrides: Partial<{
+        search: string;
+        users: string[];
+        sources: Set<SourceFilter>;
+        start: string;
+        end: string;
+      }>
+    ) => {
       const search = overrides.search ?? activeSearchTerm;
       const users = overrides.users ?? selectedUserIds;
       const sources = overrides.sources ?? sourceFilters;

@@ -50,7 +50,10 @@ export const useAllResults = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
-    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort, scheduleId, executionCount }],
+    [
+      'allActionResults',
+      { actionId, liveQueryActionId, activePage, limit, sort, scheduleId, executionCount },
+    ],
     () => {
       if (scheduleId && executionCount != null) {
         return http.get<{ data: ResultsStrategyResponse }>(

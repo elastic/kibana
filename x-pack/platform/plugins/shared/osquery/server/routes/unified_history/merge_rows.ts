@@ -54,9 +54,11 @@ export const mergeRows = <T extends MergeableRow>(
     if (!nextActionsCursor && merged[i].rowType === 'live') {
       nextActionsCursor = merged[i].timestamp;
     }
+
     if (!nextScheduledCursor && merged[i].rowType === 'scheduled') {
       nextScheduledCursor = merged[i].timestamp;
     }
+
     if (nextActionsCursor && nextScheduledCursor) break;
   }
 

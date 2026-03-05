@@ -177,15 +177,9 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const deleteDataStreamAndTemplates = async () => {
-    await es.indices
-      .deleteDataStream({ name: responsesIndex })
-      .catch(() => {});
-    await es.indices
-      .deleteIndexTemplate({ name: indexTemplateName })
-      .catch(() => {});
-    await es.cluster
-      .deleteComponentTemplate({ name: componentTemplateName })
-      .catch(() => {});
+    await es.indices.deleteDataStream({ name: responsesIndex }).catch(() => {});
+    await es.indices.deleteIndexTemplate({ name: indexTemplateName }).catch(() => {});
+    await es.cluster.deleteComponentTemplate({ name: componentTemplateName }).catch(() => {});
   };
 
   describe('Unified history', () => {

@@ -117,7 +117,16 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, startDate, locator, logsDataView, isScheduled, scheduleId, executionCount]);
+  }, [
+    actionId,
+    endDate,
+    startDate,
+    locator,
+    logsDataView,
+    isScheduled,
+    scheduleId,
+    executionCount,
+  ]);
 
   if (!discoverPermissions.show) {
     return null;

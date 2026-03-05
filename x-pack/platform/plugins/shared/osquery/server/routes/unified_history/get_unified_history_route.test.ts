@@ -52,12 +52,7 @@ describe('unified history merge logic', () => {
 
       const result = mergeRows(live, scheduled, 10);
 
-      expect(result.rows.map((r) => r.id)).toEqual([
-        'sched-1',
-        'live-1',
-        'sched-2',
-        'live-2',
-      ]);
+      expect(result.rows.map((r) => r.id)).toEqual(['sched-1', 'live-1', 'sched-2', 'live-2']);
     });
 
     test('rows with the same timestamp preserve the relative order of the two input arrays', () => {
@@ -80,10 +75,7 @@ describe('unified history merge logic', () => {
         makeLiveRow(`live-${i}`, `2024-01-${String(15 - i).padStart(2, '0')}T00:00:00.000Z`)
       );
       const scheduled = Array.from({ length: 15 }, (_, i) =>
-        makeScheduledRow(
-          `sched-${i}`,
-          `2024-01-${String(15 - i).padStart(2, '0')}T12:00:00.000Z`
-        )
+        makeScheduledRow(`sched-${i}`, `2024-01-${String(15 - i).padStart(2, '0')}T12:00:00.000Z`)
       );
 
       const result = mergeRows(live, scheduled, 20);
@@ -115,10 +107,7 @@ describe('unified history merge logic', () => {
         makeLiveRow(`live-${i}`, `2024-01-${String(10 - i).padStart(2, '0')}T00:00:00.000Z`)
       );
       const scheduled = Array.from({ length: 5 }, (_, i) =>
-        makeScheduledRow(
-          `sched-${i}`,
-          `2024-01-${String(5 - i).padStart(2, '0')}T00:00:00.000Z`
-        )
+        makeScheduledRow(`sched-${i}`, `2024-01-${String(5 - i).padStart(2, '0')}T00:00:00.000Z`)
       );
 
       const result = mergeRows(live, scheduled, 10);
@@ -145,12 +134,7 @@ describe('unified history merge logic', () => {
       const result = mergeRows(live, scheduled, 4);
 
       // Merged (desc): live-0 (Jan 4), sched-0 (Jan 3), live-1 (Jan 2), sched-1 (Jan 1 noon)
-      expect(result.rows.map((r) => r.id)).toEqual([
-        'live-0',
-        'sched-0',
-        'live-1',
-        'sched-1',
-      ]);
+      expect(result.rows.map((r) => r.id)).toEqual(['live-0', 'sched-0', 'live-1', 'sched-1']);
       // Cursors point to the timestamp of the last item of each type within the slice
       expect(result.nextActionsCursor).toBe('2024-01-02T00:00:00.000Z');
       expect(result.nextScheduledCursor).toBe('2024-01-01T12:00:00.000Z');
@@ -182,10 +166,7 @@ describe('unified history merge logic', () => {
 
     test('nextActionsCursor is undefined when no live rows appear in the page', () => {
       const scheduled = Array.from({ length: 11 }, (_, i) =>
-        makeScheduledRow(
-          `sched-${i}`,
-          `2024-01-${String(20 - i).padStart(2, '0')}T00:00:00.000Z`
-        )
+        makeScheduledRow(`sched-${i}`, `2024-01-${String(20 - i).padStart(2, '0')}T00:00:00.000Z`)
       );
 
       const result = mergeRows([], scheduled, 10);

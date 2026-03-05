@@ -18,6 +18,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
+  total: number;
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -82,7 +83,10 @@ export const useActionResults = ({
   }, [agentIds, activePage, limit]);
 
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField, scheduleId, executionCount }],
+    [
+      'actionResults',
+      { actionId, activePage, limit, direction, sortField, scheduleId, executionCount },
+    ],
     () => {
       if (scheduleId && executionCount != null) {
         return http.get<ActionResultsResponse>(
@@ -138,6 +142,7 @@ export const useActionResults = ({
 
         return {
           edges: mergedEdges,
+          total: response.total,
           aggregations: response.aggregations,
           inspect: response.inspect || { dsl: [], response: [] },
         };

@@ -17,62 +17,60 @@ export const buildScheduledActionResultsQuery = ({
   executionCount,
   sort,
   pagination,
-}: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
-  return {
-    allow_no_indices: true,
-    index: `${ACTION_RESPONSES_INDEX}-*,${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
-    ignore_unavailable: true,
+}: ScheduledActionResultsRequestOptions): ISearchRequestParams => ({
+  allow_no_indices: true,
+  index: `${ACTION_RESPONSES_INDEX}-*,${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+  ignore_unavailable: true,
+  aggs: {
     aggs: {
+      global: {},
       aggs: {
-        global: {},
-        aggs: {
-          responses_by_action_id: {
-            filter: {
-              bool: {
-                must: [
-                  { term: { schedule_id: scheduleId } },
-                  { term: { schedule_execution_count: executionCount } },
-                ],
+        responses_by_action_id: {
+          filter: {
+            bool: {
+              must: [
+                { term: { schedule_id: scheduleId } },
+                { term: { schedule_execution_count: executionCount } },
+              ],
+            },
+          },
+          aggs: {
+            rows_count: {
+              sum: {
+                field: 'action_response.osquery.count',
               },
             },
-            aggs: {
-              rows_count: {
-                sum: {
-                  field: 'action_response.osquery.count',
-                },
-              },
-              responses: {
-                terms: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                  } as const,
-                },
+            responses: {
+              terms: {
+                script: {
+                  lang: 'painless',
+                  source:
+                    "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                } as const,
               },
             },
           },
         },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          { term: { schedule_id: scheduleId } },
-          { term: { schedule_execution_count: executionCount } },
-        ],
+  },
+  query: {
+    bool: {
+      filter: [
+        { term: { schedule_id: scheduleId } },
+        { term: { schedule_execution_count: executionCount } },
+      ],
+    },
+  },
+  from: pagination ? pagination.activePage * pagination.querySize : 0,
+  size: pagination?.querySize ?? 100,
+  track_total_hits: true,
+  fields: ['*'],
+  sort: [
+    {
+      [sort.field]: {
+        order: sort.direction,
       },
     },
-    from: pagination ? pagination.activePage * pagination.querySize : 0,
-    size: pagination?.querySize ?? 100,
-    track_total_hits: true,
-    fields: ['*'],
-    sort: [
-      {
-        [sort.field]: {
-          order: sort.direction,
-        },
-      },
-    ],
-  };
-};
+  ],
+});

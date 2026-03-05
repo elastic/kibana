@@ -61,6 +61,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
     ];
   }, [data, scheduleId]);
 
+  const executionCountValues = useMemo(() => ({ count: executionCount }), [executionCount]);
+
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
@@ -119,7 +121,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
                 <FormattedMessage
                   id="xpack.osquery.scheduledExecutionDetails.executionCountLabel"
                   defaultMessage="Execution #{count}"
-                  values={{ count: executionCount }}
+                  values={executionCountValues}
                 />
               </EuiText>
             </EuiFlexItem>

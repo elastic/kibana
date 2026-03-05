@@ -13,6 +13,7 @@ import { PackQueriesAttachmentWrapper } from './pack_queries_attachment_wrapper'
 
 const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
   const { externalReferenceMetadata } = props;
+
   return (
     <EuiFlexGroup data-test-subj="osquery-attachment-content">
       <EuiFlexItem>

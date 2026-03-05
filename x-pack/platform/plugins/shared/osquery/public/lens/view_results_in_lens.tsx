@@ -61,7 +61,13 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId, undefined, scheduleId, executionCount),
+            attributes: getLensAttributes(
+              logsDataView,
+              actionId,
+              undefined,
+              scheduleId,
+              executionCount
+            ),
           },
           {
             openInNewTab: true,

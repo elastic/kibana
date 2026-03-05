@@ -16,10 +16,7 @@ import type {
   ScheduledActionResultsStrategyResponse,
   ScheduledActionResultsRequestOptions,
 } from './actions';
-import type {
-  ResultsStrategyResponse,
-  ResultsRequestOptions,
-} from './results';
+import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
 import type { SortField, PaginationInputPaginated } from '../common';
 

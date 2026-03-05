@@ -26,9 +26,7 @@ const makePackSO = (
 describe('buildPackLookup', () => {
   test('maps by UUID schedule_id when present', () => {
     const packSOs = [
-      makePackSO('pack-1', 'my_pack', [
-        { id: 'q1', query: 'SELECT 1', schedule_id: 'uuid-abc' },
-      ]),
+      makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1', schedule_id: 'uuid-abc' }]),
     ];
 
     const lookup = buildPackLookup(packSOs);
@@ -42,9 +40,7 @@ describe('buildPackLookup', () => {
   });
 
   test('maps by osquery-format schedule name: pack_<packName>_<queryId>', () => {
-    const packSOs = [
-      makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1' }]),
-    ];
+    const packSOs = [makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1' }])];
 
     const lookup = buildPackLookup(packSOs);
 
@@ -58,9 +54,7 @@ describe('buildPackLookup', () => {
 
   test('maps by both UUID and osquery-format when schedule_id is present', () => {
     const packSOs = [
-      makePackSO('pack-1', 'my_pack', [
-        { id: 'q1', query: 'SELECT 1', schedule_id: 'uuid-123' },
-      ]),
+      makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1', schedule_id: 'uuid-123' }]),
     ];
 
     const lookup = buildPackLookup(packSOs);
@@ -91,9 +85,7 @@ describe('buildPackLookup', () => {
         { id: 'q1', query: 'SELECT 1', schedule_id: 'uuid-a' },
         { id: 'q2', query: 'SELECT 2', schedule_id: 'uuid-b' },
       ]),
-      makePackSO('pack-2', 'beta', [
-        { id: 'q3', query: 'SELECT 3', schedule_id: 'uuid-c' },
-      ]),
+      makePackSO('pack-2', 'beta', [{ id: 'q3', query: 'SELECT 3', schedule_id: 'uuid-c' }]),
     ];
 
     const lookup = buildPackLookup(packSOs);

@@ -29,50 +29,9 @@ import type { ConfigType } from '../../common/config';
 import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
-import type { PackSavedObject } from '../common/types';
-
-export interface CachedPackSO {
-  id: string;
-  attributes: PackSavedObject;
-}
-
-interface PackCacheEntry {
-  packSOs: CachedPackSO[];
-  createdAt: number;
-}
-
-const PACK_CACHE_TTL_MS = 60_000; // 1 minute
-
-/**
- * Per-space cache of pack saved objects.
- * Entries expire after 1 minute (TTL) and are also
- * invalidated on pack create/update/delete/copy operations.
- */
-export class PackLookupCache {
-  private cache = new Map<string, PackCacheEntry>();
-
-  public get(spaceId: string): CachedPackSO[] | undefined {
-    const entry = this.cache.get(spaceId);
-    if (!entry) return undefined;
-    if (Date.now() - entry.createdAt > PACK_CACHE_TTL_MS) {
-      this.cache.delete(spaceId);
-      return undefined;
-    }
-    return entry.packSOs;
-  }
-
-  public set(spaceId: string, packSOs: CachedPackSO[]): void {
-    this.cache.set(spaceId, { packSOs, createdAt: Date.now() });
-  }
-
-  public invalidate(spaceId: string): void {
-    this.cache.delete(spaceId);
-  }
-
-  public invalidateAll(): void {
-    this.cache.clear();
-  }
-}
+import { PackLookupCache } from './pack_lookup_cache';
+export type { CachedPackSO } from './pack_lookup_cache';
+export { PackLookupCache };
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<

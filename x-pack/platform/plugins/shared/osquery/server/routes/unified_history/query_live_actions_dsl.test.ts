@@ -32,9 +32,7 @@ describe('buildLiveActionsQuery', () => {
     });
 
     test('_source is always true', () => {
-      expect(
-        buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' }).body._source
-      ).toBe(true);
+      expect(buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' }).body._source).toBe(true);
     });
   });
 
@@ -96,9 +94,9 @@ describe('buildLiveActionsQuery', () => {
 
       const shouldFilter = filters.find((f) => {
         const filter = f as Record<string, unknown>;
+
         return (
-          filter.bool !== undefined &&
-          (filter.bool as Record<string, unknown>).should !== undefined
+          filter.bool !== undefined && (filter.bool as Record<string, unknown>).should !== undefined
         );
       });
       expect(shouldFilter).toBeUndefined();
@@ -111,6 +109,7 @@ describe('buildLiveActionsQuery', () => {
 
       const plainTermFilter = filters.find((f) => {
         const filter = f as Record<string, unknown>;
+
         return (
           filter.term !== undefined &&
           (filter.term as Record<string, unknown>).space_id !== undefined
@@ -137,9 +136,7 @@ describe('buildLiveActionsQuery', () => {
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      const rangeFilter = filters.find(
-        (f) => (f as Record<string, unknown>).range !== undefined
-      );
+      const rangeFilter = filters.find((f) => (f as Record<string, unknown>).range !== undefined);
       expect(rangeFilter).toBeUndefined();
     });
   });

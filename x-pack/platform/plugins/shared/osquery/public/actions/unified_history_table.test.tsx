@@ -55,7 +55,13 @@ jest.mock('../common/use_persisted_page_size', () => ({
 }));
 
 jest.mock('./components/history_filters', () => ({
-  HistoryFilters: ({ onFiltersChange, onRefresh }: { onFiltersChange: jest.Mock; onRefresh: jest.Mock }) => (
+  HistoryFilters: ({
+    onFiltersChange,
+    onRefresh,
+  }: {
+    onFiltersChange: jest.Mock;
+    onRefresh: jest.Mock;
+  }) => (
     <div data-test-subj="historyFilters">
       <input
         data-test-subj="unifiedHistorySearch"
@@ -83,9 +89,8 @@ jest.mock('./use_history_users', () => ({
 }));
 
 const useUnifiedHistoryMock = useUnifiedHistory as jest.MockedFunction<typeof useUnifiedHistory>;
-const useBulkGetUnifiedHistoryProfilesMock = useBulkGetUnifiedHistoryProfiles as jest.MockedFunction<
-  typeof useBulkGetUnifiedHistoryProfiles
->;
+const useBulkGetUnifiedHistoryProfilesMock =
+  useBulkGetUnifiedHistoryProfiles as jest.MockedFunction<typeof useBulkGetUnifiedHistoryProfiles>;
 const usePacksMock = usePacks as jest.MockedFunction<typeof usePacks>;
 
 const mockKibana = (permissions = defaultPermissions) => {
