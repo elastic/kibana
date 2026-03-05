@@ -204,3 +204,10 @@ node scripts/capture_sigevents_my_app_snapshots.js --connector-id <id> --run-id 
 ```bash
 SIGEVENTS_DATASET=my-app node scripts/evals run --suite streams/significant-events --judge <gemini-3-pro-connector-id>
 ```
+
+## Adding a new eval spec
+
+1. Create a spec file under `evals/significant_events/` (e.g. `my_eval/my_eval.spec.ts`)
+2. Add evaluators in `src/evaluators/` (e.g. `my_eval_evaluators.ts`) — code evaluators for deterministic checks and LLM-as-a-judge evaluators for qualitative criteria. See the existing files for reference (e.g. [`feature_extraction_evaluators.ts`](../../src/evaluators/feature_extraction_evaluators.ts))
+3. If the dataset defines evaluation criteria per scenario, you can reuse the [`scenario_criteria_llm_evaluator`](../../src/evaluators/scenario_criteria_llm_evaluator.ts) - it automatically scores LLM output against the dataset's criteria using an LLM judge, so you don't need to write custom LLM evaluators for each spec
+4. Wire up the spec with the dataset scenarios and evaluators
