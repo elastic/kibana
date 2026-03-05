@@ -61,9 +61,6 @@ export function searchProvider(
       {
         ...searchParams,
         index: ML_RESULTS_INDEX_PATTERN,
-        ...(serverless.isServerless && serverless.cpsEnabled
-          ? { project_routing: '_alias:_origin' }
-          : {}),
       },
       options
     );
