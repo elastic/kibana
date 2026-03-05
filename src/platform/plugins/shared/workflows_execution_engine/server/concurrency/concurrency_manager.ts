@@ -61,7 +61,7 @@ export class ConcurrencyManager {
     }
 
     try {
-      const evaluated = this.templatingEngine.evaluateExpression(
+      const evaluated = this.templatingEngine.render(
         keyExpression,
         context as Record<string, unknown>
       );
