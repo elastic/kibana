@@ -22,16 +22,10 @@ import {
 import type { SearchBarCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { DiscoverTopNavMenuProvider, discoverTopNavMenuContext } from './discover_topnav_menu';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn(),
-}));
 
 let mockDiscoverService = createDiscoverServicesMock();
 
@@ -109,7 +103,6 @@ const TopNavMenuCapture = () => {
   return null;
 };
 
-const mockUseKibana = useKibana as jest.Mock;
 const getTestComponent = ({
   toolkit,
   props,
@@ -144,15 +137,10 @@ describe('Discover topnav component', () => {
           throw new Error(`Unknown customization id: ${id}`);
       }
     });
-
-    mockUseKibana.mockReturnValue({
-      services: mockDiscoverService,
-    });
   });
 
   test('generated config of AppMenuConfig is correct when discover save permissions are assigned', async () => {
     const { toolkit, props } = await setup({ capabilities: { discover_v2: { save: true } } });
-    mockUseKibana.mockReturnValue({ services: toolkit.services });
     await act(async () => {
       getTestComponent({ toolkit, props });
     });
@@ -164,7 +152,6 @@ describe('Discover topnav component', () => {
 
   test('generated config of AppMenuConfig is correct when no discover save permissions are assigned', async () => {
     const { toolkit, props } = await setup({ capabilities: { discover_v2: { save: false } } });
-    mockUseKibana.mockReturnValue({ services: toolkit.services });
     await act(async () => {
       getTestComponent({ toolkit, props });
     });
@@ -183,7 +170,6 @@ describe('Discover topnav component', () => {
       });
 
       const { toolkit, props } = await setup();
-      mockUseKibana.mockReturnValue({ services: toolkit.services });
       let component: ReturnType<typeof mountWithIntl>;
       await act(async () => {
         component = getTestComponent({ toolkit, props });
@@ -195,7 +181,6 @@ describe('Discover topnav component', () => {
     it('should render CustomDataViewPicker', async () => {
       mockUseCustomizations = true;
       const { toolkit, props } = await setup();
-      mockUseKibana.mockReturnValue({ services: toolkit.services });
       let component: ReturnType<typeof mountWithIntl>;
       await act(async () => {
         component = getTestComponent({ toolkit, props });
@@ -217,7 +202,6 @@ describe('Discover topnav component', () => {
       });
 
       const { toolkit, props } = await setup();
-      mockUseKibana.mockReturnValue({ services: toolkit.services });
       let component: ReturnType<typeof mountWithIntl>;
       await act(async () => {
         component = getTestComponent({ toolkit, props });

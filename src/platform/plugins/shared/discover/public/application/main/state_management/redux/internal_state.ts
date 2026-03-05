@@ -495,7 +495,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, listenerApi.getState, tabId, services);
+          selectTabRuntimeInternalState({
+            runtimeStateManager,
+            tabState: selectTab(listenerApi.getState(), tabId),
+            services,
+          });
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -514,12 +518,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(
+            internalState: selectTabRuntimeInternalState({
               runtimeStateManager,
-              listenerApi.getState,
-              tab.id,
-              services
-            ),
+              tabState: tab,
+              services,
+            }),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,

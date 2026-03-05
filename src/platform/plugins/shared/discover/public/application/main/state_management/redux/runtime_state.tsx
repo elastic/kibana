@@ -16,9 +16,8 @@ import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ScopedProfilesManager } from '../../../../context_awareness';
-import type { DiscoverInternalState, TabState } from './types';
+import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
-import { selectTab } from './selectors';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
 import { CascadedDocumentsFetcher } from '../../data_fetching/cascaded_documents_fetcher';
 import type { DiscoverServices } from '../../../../build_services';
@@ -129,20 +128,22 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
     (tab) => tab.currentDataView$.getValue()?.id === dataViewId
   ).length > 1;
 
-export const selectTabRuntimeInternalState = (
-  runtimeStateManager: RuntimeStateManager,
-  getState: () => DiscoverInternalState,
-  tabId: string,
-  services: DiscoverServices
-): TabState['initialInternalState'] | undefined => {
-  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+export const selectTabRuntimeInternalState = ({
+  runtimeStateManager,
+  tabState,
+  services,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabState: TabState;
+  services: DiscoverServices;
+}): TabState['initialInternalState'] | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
   const dataView = tabRuntimeState?.currentDataView$.getValue();
 
   if (!dataView) {
     return undefined;
   }
 
-  const tabState = selectTab(getState(), tabId);
   const { dataRequestParams, appState, globalState } = tabState;
   const searchSource = createSearchSource({
     dataView,
