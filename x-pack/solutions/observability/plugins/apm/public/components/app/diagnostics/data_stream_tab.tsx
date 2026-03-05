@@ -69,5 +69,5 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
 }
 
 export function getIndexTemplateState(diagnosticsBundle: DiagnosticsBundle, templateName: string) {
-  return diagnosticsBundle.apmIndexTemplates.find(({ name }) => templateName === name);
+  return diagnosticsBundle.apmIndexTemplates?.find(({ name }) => templateName === name);
 }
