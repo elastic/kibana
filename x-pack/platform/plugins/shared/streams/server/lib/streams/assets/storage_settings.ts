@@ -16,6 +16,7 @@ import {
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
   RULE_BACKED,
+  RULE_ID,
   STREAM_NAME,
 } from './fields';
 
@@ -37,6 +38,7 @@ export const queryStorageSettings = {
       [QUERY_TITLE]: types.keyword(),
       [QUERY_SEVERITY_SCORE]: types.long(),
       [RULE_BACKED]: types.boolean(),
+      [RULE_ID]: types.keyword(),
       experimental: types.object({ enabled: false }),
     },
   },

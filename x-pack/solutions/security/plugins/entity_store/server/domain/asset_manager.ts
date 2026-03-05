@@ -11,11 +11,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import type {
-  EntityType,
-  ManagedEntityDefinition,
-} from '../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
@@ -49,7 +45,16 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
+import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
+import {
+  type TelemetryReporter,
+  ENTITY_STORE_DELETION_EVENT,
+  ENTITY_STORE_INITIALIZATION_EVENT,
+  ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
+} from '../telemetry/events';
+import { getErrorMessage } from '../../common';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -60,6 +65,7 @@ interface AssetManagerDependencies {
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
+  analytics: TelemetryReporter;
 }
 
 export class AssetManager {
@@ -71,6 +77,7 @@ export class AssetManager {
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
   private readonly security: SecurityPluginStart;
+  private readonly analytics: TelemetryReporter;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -81,6 +88,7 @@ export class AssetManager {
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
     this.security = deps.security;
+    this.analytics = deps.analytics;
   }
 
   public async init(
@@ -105,6 +113,10 @@ export class AssetManager {
         }),
       ]);
     } catch (error) {
+      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_FAILURE_EVENT, {
+        namespace: this.namespace,
+        error: getErrorMessage(error),
+      });
       this.logger.error('Error during entity store init:', error);
       throw error;
     }
@@ -173,7 +185,10 @@ export class AssetManager {
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
-
+      this.analytics.reportEvent(ENTITY_STORE_DELETION_EVENT, {
+        entityType: type,
+        namespace: this.namespace,
+      });
       return true;
     } catch (error) {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });
@@ -209,7 +224,10 @@ export class AssetManager {
     if (installed) {
       await this.start(request, type);
     }
-
+    this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
+      entityType: type,
+      namespace: this.namespace,
+    });
     return installed;
   }
 
@@ -219,7 +237,7 @@ export class AssetManager {
   ): Promise<CheckPrivilegesResponse> {
     const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
-    const sourceIndexPatterns = await this.logsExtractionClient.getIndexPatterns(
+    const sourceIndexPatterns = await this.logsExtractionClient.getLocalIndexPatterns(
       additionalIndexPatterns
     );
 

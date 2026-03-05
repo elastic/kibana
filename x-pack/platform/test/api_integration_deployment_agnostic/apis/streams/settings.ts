@@ -83,19 +83,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Wired streams update', () => {
       it('updates settings', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
         const response = await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
           'index.refresh_interval': { value: '10s' },
         });
         expect(response).to.have.property('acknowledged', true);
 
-        await expectSettings(['logs'], {
-          'index.refresh_interval': { value: '10s', from: 'logs' },
+        await expectSettings(['logs.otel'], {
+          'index.refresh_interval': { value: '10s', from: 'logs.otel' },
         });
       });
 
       it('inherits settings', async () => {
-        await putStream(apiClient, 'logs.foo.bar', {
+        await putStream(apiClient, 'logs.otel.foo.bar', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -109,22 +109,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectSettings(['logs', 'logs.foo', 'logs.foo.bar'], {
-          'index.refresh_interval': { value: '10s', from: 'logs' },
+        await expectSettings(['logs.otel', 'logs.otel.foo', 'logs.otel.foo.bar'], {
+          'index.refresh_interval': { value: '10s', from: 'logs.otel' },
         });
 
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
         await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
           'index.refresh_interval': { value: '20s' },
         });
 
-        await expectSettings(['logs', 'logs.foo', 'logs.foo.bar'], {
-          'index.refresh_interval': { value: '20s', from: 'logs' },
+        await expectSettings(['logs.otel', 'logs.otel.foo', 'logs.otel.foo.bar'], {
+          'index.refresh_interval': { value: '20s', from: 'logs.otel' },
         });
       });
 
       it('allows local overrides', async () => {
-        await putStream(apiClient, 'logs.override', {
+        await putStream(apiClient, 'logs.otel.override', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -140,24 +140,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectSettings(['logs.override'], {
-          'index.refresh_interval': { value: '30s', from: 'logs.override' },
+        await expectSettings(['logs.otel.override'], {
+          'index.refresh_interval': { value: '30s', from: 'logs.otel.override' },
         });
 
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
         await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
           'index.refresh_interval': { value: '40s' },
         });
 
         // override is preserved
-        await expectSettings(['logs.override'], {
-          'index.refresh_interval': { value: '30s', from: 'logs.override' },
+        await expectSettings(['logs.otel.override'], {
+          'index.refresh_interval': { value: '30s', from: 'logs.otel.override' },
         });
       });
 
       if (!isServerless) {
         it('allows all settings', async () => {
-          await putStream(apiClient, 'logs.allsettings', {
+          await putStream(apiClient, 'logs.otel.allsettings', {
             ...emptyAssets,
             stream: {
               description: '',
@@ -175,27 +175,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          await expectSettings(['logs.allsettings'], {
-            'index.refresh_interval': { value: '30s', from: 'logs.allsettings' },
-            'index.number_of_shards': { value: 3, from: 'logs.allsettings' },
-            'index.number_of_replicas': { value: 2, from: 'logs.allsettings' },
+          await expectSettings(['logs.otel.allsettings'], {
+            'index.refresh_interval': { value: '30s', from: 'logs.otel.allsettings' },
+            'index.number_of_shards': { value: 3, from: 'logs.otel.allsettings' },
+            'index.number_of_replicas': { value: 2, from: 'logs.otel.allsettings' },
           });
         });
 
         it('registers a rollover when updating number_of_shards', async () => {
-          const rootDefinition = await getStream(apiClient, 'logs');
+          const rootDefinition = await getStream(apiClient, 'logs.otel');
           await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
             'index.refresh_interval': { value: '7s' },
           });
           await esClient.index({
-            index: 'logs',
+            index: 'logs.otel',
             document: { '@timestamp': new Date().toISOString(), message: 'test' },
           });
 
           // no rollover when updating refresh_interval
           const {
             data_streams: [{ indices }],
-          } = await esClient.indices.getDataStream({ name: 'logs' });
+          } = await esClient.indices.getDataStream({ name: 'logs.otel' });
           expect(indices).to.have.length(1);
 
           await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
@@ -203,13 +203,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'index.refresh_interval': { value: '40s' },
           });
           await esClient.index({
-            index: 'logs',
+            index: 'logs.otel',
             document: { '@timestamp': new Date().toISOString(), message: 'test' },
           });
 
           const {
             data_streams: [{ indices: indicesAfterUpdate }],
-          } = await esClient.indices.getDataStream({ name: 'logs' });
+          } = await esClient.indices.getDataStream({ name: 'logs.otel' });
           expect(indicesAfterUpdate).to.have.length(2);
         });
       }
@@ -335,11 +335,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Settings validation with dry_run', () => {
       describe('Wired streams', () => {
         it('rejects invalid settings with 400 error', async () => {
-          const rootDefinition = await getStream(apiClient, 'logs');
+          const rootDefinition = await getStream(apiClient, 'logs.otel');
           const response = await apiClient
             .fetch('PUT /api/streams/{name} 2023-10-31', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   ...emptyAssets,
                   stream: {
@@ -367,7 +367,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('rejects invalid settings on child stream update', async () => {
-          await putStream(apiClient, 'logs.validation_test', {
+          await putStream(apiClient, 'logs.otel.validation_test', {
             ...emptyAssets,
             stream: {
               description: '',
@@ -384,7 +384,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('PUT /api/streams/{name} 2023-10-31', {
               params: {
-                path: { name: 'logs.validation_test' },
+                path: { name: 'logs.otel.validation_test' },
                 body: {
                   ...emptyAssets,
                   stream: {
@@ -408,7 +408,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const body = response.body as unknown as { message?: string };
           expect(body.message ?? '').to.contain('Invalid stream settings');
 
-          await deleteStream(apiClient, 'logs.validation_test');
+          await deleteStream(apiClient, 'logs.otel.validation_test');
         });
 
         describe('Serverless-only settings validation', function () {
@@ -418,7 +418,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             const response = await apiClient
               .fetch('PUT /api/streams/{name} 2023-10-31', {
                 params: {
-                  path: { name: 'logs.creation_validation_test' },
+                  path: { name: 'logs.otel.creation_validation_test' },
                   body: {
                     ...emptyAssets,
                     stream: {
@@ -444,7 +444,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         });
         it('accepts valid settings on new stream creation via API', async () => {
-          const response = await putStream(apiClient, 'logs.creation_valid_test', {
+          const response = await putStream(apiClient, 'logs.otel.creation_valid_test', {
             ...emptyAssets,
             stream: {
               description: '',
@@ -462,7 +462,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response).to.have.property('acknowledged', true);
 
-          await deleteStream(apiClient, 'logs.creation_valid_test');
+          await deleteStream(apiClient, 'logs.otel.creation_valid_test');
         });
       });
 

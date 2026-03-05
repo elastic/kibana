@@ -108,7 +108,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
     isReadonly: false,
 
     getAgentDescription: () => {
-      return 'A visualization attachment contains a Lens visualization configuration. It can be rendered inline using <render_attachment id="..." />.';
+      return 'A visualization attachment contains a Lens visualization configuration. It can be rendered inline using <render_attachment id="..." /> and can also be added to dashboard compositions through dashboard panel-ingestion operations.';
     },
 
     getTools: () => [],

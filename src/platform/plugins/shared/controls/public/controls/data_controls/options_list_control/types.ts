@@ -49,7 +49,13 @@ export type OptionsListComponentState = Pick<DataControlState, 'field_name'> &
     sort: OptionsListSortingType | undefined;
   };
 
-type PublishesOptionsListComponentState = SubjectsOf<OptionsListComponentState>;
+type PublishesOptionsListComponentState = SubjectsOf<
+  /**
+   * For API consistency, we continue to refer to the control's label as `title`; however, to avoid
+   * being impacted by default embeddable title handling, we switch to `label` for the implementation
+   */
+  Omit<OptionsListComponentState, 'title'> & { label: string }
+>;
 type OptionsListComponentStateSetters = Partial<SettersOf<OptionsListComponentState>> &
   SettersOf<Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
@@ -63,9 +69,7 @@ export type OptionsListComponentApi = PublishesField &
     loadMoreSubject: Subject<void>;
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
-    defaultTitle$?: PublishingSubject<string | undefined>;
     uuid: string;
-    allowExpensiveQueries$: PublishingSubject<boolean>;
   };
 
 export interface OptionsListCustomStrings {

@@ -52,6 +52,15 @@ describe('PublicTriggerRegistry', () => {
         registry.register(definition2);
       }).toThrow('Trigger definition for "example.test_trigger" is already registered');
     });
+
+    it('should register trigger definition with snippets.condition', () => {
+      const definition: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        snippets: { condition: 'event.message: *test*' },
+      };
+      registry.register(definition);
+      expect(registry.get(triggerId)?.snippets?.condition).toBe('event.message: *test*');
+    });
   });
 
   describe('get', () => {

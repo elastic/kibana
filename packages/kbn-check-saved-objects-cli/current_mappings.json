@@ -324,6 +324,10 @@
       }
     }
   },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
@@ -3039,6 +3043,21 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "type": "text",
+        "index": false
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
