@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger, ElasticsearchClient } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AttackDiscoveryMissingPrivileges } from '@kbn/elastic-assistant-common';
 import {

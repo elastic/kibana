@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
@@ -43,6 +43,7 @@ import { GenerateSuggestionButton } from './review_suggestions_form/generate_sug
 import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
+import { BulkCreateStreamsConfirmationModal } from './review_suggestions_form/bulk_create_streams_confirmation_modal';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
@@ -174,7 +175,26 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     acceptSuggestion,
     rejectSuggestion,
     updateSuggestion,
+    selectedSuggestionNames,
+    toggleSuggestionSelection,
+    isSuggestionSelected,
+    bulkAcceptSuggestions,
+    selectAllSuggestions,
+    clearSuggestionSelection,
   } = useReviewSuggestionsForm();
+
+  const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
+  const { acknowledgeBulkFork } = useStreamRoutingEvents();
+  const isBulkForkComplete = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: { bulkForking: 'complete' } } })
+  );
+  const bulkForkResults = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.bulkFork?.results
+  );
+
+  const handleBulkAccept = () => {
+    setShowBulkAcceptModal(true);
+  };
 
   const currentRuleId = useStreamsRoutingSelector((snapshot) => snapshot.context.currentRuleId);
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
@@ -274,6 +294,28 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     );
   };
 
+  const handleBulkAcceptSuccess = useCallback(
+    (successfulNames: string[]) => {
+      bulkAcceptSuggestions(successfulNames);
+      setShowBulkAcceptModal(false);
+    },
+    [bulkAcceptSuggestions]
+  );
+
+  useEffect(() => {
+    if (isBulkForkComplete && !showBulkAcceptModal && bulkForkResults) {
+      const successfulNames = bulkForkResults.filter((r) => r.success).map((r) => r.name);
+      bulkAcceptSuggestions(successfulNames);
+      acknowledgeBulkFork();
+    }
+  }, [
+    isBulkForkComplete,
+    showBulkAcceptModal,
+    bulkForkResults,
+    bulkAcceptSuggestions,
+    acknowledgeBulkFork,
+  ]);
+
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
     <NoDataEmptyPrompt
       createNewRule={createNewRule}
@@ -302,6 +344,14 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     </NoDataEmptyPrompt>
   ) : (
     <>
+      {showBulkAcceptModal && suggestions && (
+        <BulkCreateStreamsConfirmationModal
+          suggestions={suggestions}
+          selectedNames={selectedSuggestionNames}
+          onClose={() => setShowBulkAcceptModal(false)}
+          onSuccess={handleBulkAcceptSuccess}
+        />
+      )}
       {/* Scrollable routing rules container */}
       <EuiFlexItem
         grow={false}
@@ -391,6 +441,12 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   resetForm={resetForm}
                   suggestions={suggestions}
                   updateSuggestion={updateSuggestion}
+                  selectedSuggestionNames={selectedSuggestionNames}
+                  toggleSuggestionSelection={toggleSuggestionSelection}
+                  isSuggestionSelected={isSuggestionSelected}
+                  onBulkAccept={handleBulkAccept}
+                  selectAllSuggestions={selectAllSuggestions}
+                  clearSuggestionSelection={clearSuggestionSelection}
                 />
               )
             ) : null}

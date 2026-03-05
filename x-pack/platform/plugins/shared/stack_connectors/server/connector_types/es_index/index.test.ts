@@ -77,9 +77,10 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(connectorType, { index: 666 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"index\\": Expected string, received number"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received number
+        → at index"
+    `);
     delete config.executionTimeField;
 
     expect(() => {
@@ -88,9 +89,10 @@ describe('config validation', () => {
         { index: 'testing-123', executionTimeField: true },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"executionTimeField\\": Expected string, received boolean"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received boolean
+        → at executionTimeField"
+    `);
 
     delete config.refresh;
     expect(() => {
@@ -99,9 +101,10 @@ describe('config validation', () => {
         { index: 'testing-123', refresh: 'foo' },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"refresh\\": Expected boolean, received string"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected boolean, received string
+        → at refresh"
+    `);
   });
 
   test('config validation fails when config is not valid', () => {
@@ -112,9 +115,9 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: 2 errors:
-       [1]: Unrecognized key(s) in object: 'indeX';
-       [2]: Field \\"index\\": Required"
+      "error validating connector type config: ✖ Unrecognized key: \\"indeX\\"
+      ✖ Invalid input: expected string, received undefined
+        → at index"
     `);
   });
 
@@ -122,14 +125,15 @@ describe('config validation', () => {
     expect(() => {
       validateParams(connectorType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Unrecognized key(s) in object: 'jim'"`
+      `"error validating action params: ✖ Unrecognized key: \\"jim\\""`
     );
 
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"documents\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected array, received undefined
+        → at documents"
+    `);
 
     expect(() => {
       validateParams(
@@ -137,9 +141,10 @@ describe('config validation', () => {
         { documents: ['should be an object'] },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"documents.0\\": Expected object, received string"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected record, received string
+        → at documents[0]"
+    `);
   });
 });
 
