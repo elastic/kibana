@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import type { UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme, EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFormContext } from 'react-hook-form';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
@@ -16,6 +17,8 @@ import {
   TEMPLATE_SCHEMA_URI,
 } from '../utils/template_json_schema';
 import { TemplateYamlEditorBase } from './template_yaml_editor';
+import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
+import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
 import * as i18n from '../translations';
 
 export interface YamlEditorFormValues {
@@ -31,7 +34,6 @@ export interface TemplateYamlEditorProps {
 const styles = {
   editorContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       height: '100%',
       width: '100%',
       padding: euiTheme.size.xs,
@@ -44,6 +46,16 @@ const styles = {
       right: euiTheme.size.s,
       zIndex: 1,
     }),
+  validationContainer: css({
+    position: 'fixed',
+    bottom: '60px',
+    pointerEvents: 'none',
+    display: 'flex',
+    flexDirection: 'column-reverse',
+    '& > *': {
+      pointerEvents: 'auto',
+    },
+  }),
 };
 
 export const TemplateYamlEditor = ({
@@ -54,12 +66,23 @@ export const TemplateYamlEditor = ({
   const euiTheme = useEuiTheme();
   const { setValue } = useFormContext<YamlEditorFormValues>();
 
+  const {
+    containerRef,
+    accordionRef,
+    containerBounds,
+    accordionHeight,
+    portalNode,
+    validationErrors,
+    isEditorMounted,
+    handleValidationChange,
+    handleEditorMount,
+    handleErrorClick,
+  } = useValidationAccordionPositioning();
+
   const { value, onChange, isSaving, isSaved } = useDebouncedYamlEdit(
     storageKey,
     initialValue,
-    (newValue) => {
-      setValue('definition', newValue);
-    },
+    (newValue) => setValue('definition', newValue),
     templateId
   );
 
@@ -77,20 +100,52 @@ export const TemplateYamlEditor = ({
     ];
   }, []);
 
+  const editorPaddingBottom = `${accordionHeight + 8}px`;
+
   return (
-    <div css={styles.editorContainer(euiTheme)}>
-      {isSaving && (
-        <div css={styles.statusIndicator(euiTheme)}>
-          <EuiLoadingSpinner size="m" />
-        </div>
-      )}
-      {isSaved && (
-        <div css={styles.statusIndicator(euiTheme)}>
-          <EuiBadge color="success">{i18n.TEMPLATE_SAVED}</EuiBadge>
-        </div>
-      )}
-      <TemplateYamlEditorBase value={value} onChange={onChange} schemas={schemas} />
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        css={styles.editorContainer(euiTheme)}
+        style={{ paddingBottom: editorPaddingBottom }}
+      >
+        {isSaving && (
+          <div css={styles.statusIndicator(euiTheme)}>
+            <EuiLoadingSpinner size="m" />
+          </div>
+        )}
+        {isSaved && (
+          <div css={styles.statusIndicator(euiTheme)}>
+            <EuiBadge color="success">{i18n.TEMPLATE_SAVED}</EuiBadge>
+          </div>
+        )}
+        <TemplateYamlEditorBase
+          value={value}
+          onChange={onChange}
+          schemas={schemas}
+          onValidationChange={handleValidationChange}
+          onEditorMount={handleEditorMount}
+        />
+      </div>
+      {portalNode &&
+        createPortal(
+          <div
+            ref={accordionRef}
+            css={styles.validationContainer}
+            style={{
+              left: `${containerBounds.left}px`,
+              width: `${containerBounds.width}px`,
+            }}
+          >
+            <TemplateYamlValidationAccordion
+              isMounted={isEditorMounted}
+              validationErrors={validationErrors}
+              onErrorClick={handleErrorClick}
+            />
+          </div>,
+          portalNode
+        )}
+    </>
   );
 };
 

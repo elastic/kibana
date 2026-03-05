@@ -13,6 +13,8 @@ export const componentStyles = {
     css({
       marginTop: `-${euiTheme.size.l}`,
       marginBottom: `-${euiTheme.size.l}`,
+      height: '100%',
+      overflow: 'hidden',
     }),
   pageTemplate: css({
     flexGrow: 0,

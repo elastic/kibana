@@ -48,3 +48,14 @@ export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templ
 export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
   defaultMessage: 'Saved',
 });
+
+export const VALIDATION_LOADING_EDITOR = i18n.translate(
+  'xpack.cases.templates.validation.loadingEditor',
+  {
+    defaultMessage: 'Loading editor...',
+  }
+);
+
+export const VALIDATION_NO_ERRORS = i18n.translate('xpack.cases.templates.validation.noErrors', {
+  defaultMessage: 'No validation errors',
+});

@@ -46,10 +46,18 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
       return response.ok({
         body: {
           ...pagination,
-          templates: templates.map((template) => ({
-            ...parseTemplate(template),
-            fieldSearchMatches: template.fieldSearchMatches,
-          })),
+          templates: templates.map((template) => {
+            try {
+              return {
+                ...parseTemplate(template),
+                fieldSearchMatches: template.fieldSearchMatches,
+              };
+            } catch (parseError) {
+              throw new Error(
+                `Failed to parse template "${template.name}" (ID: ${template.templateId}): ${parseError}`
+              );
+            }
+          }),
         },
       });
     } catch (error) {
