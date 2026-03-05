@@ -52,7 +52,7 @@ describe('getValidPrefixes', () => {
       const definition = makeWiredDefinition('logs');
       const result = getValidPrefixes(definition);
       expect(result.primary).toBe('FROM logs,logs.* METADATA _id, _source');
-      expect(result.all).toEqual(['FROM logs,logs.* METADATA _id, _source']);
+      expect(result.alsoAllowed).toBeUndefined();
     });
 
     it('returns only the primary prefix even when initialEsql uses wired-style pattern', () => {
@@ -62,7 +62,7 @@ describe('getValidPrefixes', () => {
         'FROM logs,logs.* METADATA _id, _source | WHERE severity = "critical"'
       );
       expect(result.primary).toBe('FROM logs,logs.* METADATA _id, _source');
-      expect(result.all).toEqual(['FROM logs,logs.* METADATA _id, _source']);
+      expect(result.alsoAllowed).toBeUndefined();
     });
   });
 
@@ -71,7 +71,7 @@ describe('getValidPrefixes', () => {
       const definition = makeClassicDefinition('logs');
       const result = getValidPrefixes(definition);
       expect(result.primary).toBe('FROM logs METADATA _id, _source');
-      expect(result.all).toEqual(['FROM logs METADATA _id, _source']);
+      expect(result.alsoAllowed).toBeUndefined();
     });
 
     it('returns only the primary prefix when initialEsql uses the primary pattern', () => {
@@ -81,20 +81,17 @@ describe('getValidPrefixes', () => {
         'FROM logs METADATA _id, _source | WHERE severity = "critical"'
       );
       expect(result.primary).toBe('FROM logs METADATA _id, _source');
-      expect(result.all).toEqual(['FROM logs METADATA _id, _source']);
+      expect(result.alsoAllowed).toBeUndefined();
     });
 
-    it('returns both primary and wired-style prefixes when initialEsql uses the wired-style pattern', () => {
+    it('includes wired-style as alternative when initialEsql uses the wired-style pattern', () => {
       const definition = makeClassicDefinition('logs');
       const result = getValidPrefixes(
         definition,
         'FROM logs,logs.* METADATA _id, _source | WHERE severity = "critical"'
       );
       expect(result.primary).toBe('FROM logs METADATA _id, _source');
-      expect(result.all).toEqual([
-        'FROM logs METADATA _id, _source',
-        'FROM logs,logs.* METADATA _id, _source',
-      ]);
+      expect(result.alsoAllowed).toEqual(['FROM logs,logs.* METADATA _id, _source']);
     });
   });
 });

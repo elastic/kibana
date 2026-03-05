@@ -50,7 +50,7 @@ export function GeneratedEventPreview({
   const validation = validateQuery(query);
   const prefix = useMemo((): ValidPrefixes => {
     const primary = getDefaultQueryFrom(definition);
-    return { primary, all: [primary] };
+    return { primary };
   }, [definition]);
   const prefixValidation = validatePrefix(query.esql.query, prefix);
 

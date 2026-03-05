@@ -15,7 +15,7 @@ import { normalizeEsqlQuery } from '@kbn/streams-schema';
 
 export interface ValidPrefixes {
   primary: string;
-  all: string[];
+  alsoAllowed?: string[];
 }
 
 export const StreamsESQLEditor = ({
@@ -54,12 +54,13 @@ export const StreamsESQLEditor = ({
 const memoizedNormalizeEsqlQuery = memoize(normalizeEsqlQuery);
 
 export function validatePrefix(value: string, prefix?: ValidPrefixes) {
-  if (!prefix || prefix.all.length === 0) {
+  if (!prefix) {
     return { isValid: true, error: undefined } as const;
   }
 
   const normalizedValue = memoizedNormalizeEsqlQuery(value);
-  const normalizedPrefixes = prefix.all.map(memoizedNormalizeEsqlQuery);
+  const allPrefixes = [prefix.primary, ...(prefix.alsoAllowed ?? [])];
+  const normalizedPrefixes = allPrefixes.map(memoizedNormalizeEsqlQuery);
 
   if (normalizedPrefixes.some((p) => normalizedValue.startsWith(p))) {
     return { isValid: true, error: undefined } as const;

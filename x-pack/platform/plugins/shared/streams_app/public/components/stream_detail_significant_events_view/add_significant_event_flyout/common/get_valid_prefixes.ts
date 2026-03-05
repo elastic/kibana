@@ -52,9 +52,9 @@ export const getValidPrefixes = (
     const normalizedInitial = normalizeEsqlQuery(initialEsql);
     const normalizedWired = normalizeEsqlQuery(wiredStylePrefix);
     if (normalizedInitial.startsWith(normalizedWired)) {
-      return { primary, all: [primary, wiredStylePrefix] };
+      return { primary, alsoAllowed: [wiredStylePrefix] };
     }
   }
 
-  return { primary, all: [primary] };
+  return { primary };
 };
