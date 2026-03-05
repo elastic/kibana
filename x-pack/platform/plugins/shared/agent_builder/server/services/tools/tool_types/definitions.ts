@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/agent-builder-common';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/agent-builder-server';
 import type { ObjectType } from '@kbn/config-schema';
