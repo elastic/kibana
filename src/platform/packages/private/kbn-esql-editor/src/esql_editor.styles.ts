@@ -33,7 +33,7 @@ export const esqlEditorStyles = (
       zIndex: 4,
       height: `${editorHeight}px`,
       border: hasOutline ? euiTheme.border.thin : 'none',
-      filter: isVisorOpen ? 'blur(0.8px)' : 'none',
+      filter: isVisorOpen ? 'blur(0.5px)' : 'none',
       transition: 'filter 0.3s ease',
     },
     resizableContainer: {

@@ -25,10 +25,13 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import {
   ESQLLangEditor,
   ESQLMenu,
   EsqlEditorActionsProvider,
+  DesignPanel,
+  useDesignPanel,
   type ESQLEditorProps,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
@@ -1050,6 +1053,46 @@ export const QueryBarTopRow = React.memo(
       `,
     };
 
+    const fakeControls = useMemo(
+      () => [
+        { title: 'Source Country', variable_name: 'source_country', available_options: ['US', 'CN', 'DE', 'GB', 'JP', 'BR'] },
+        { title: 'Status Code', variable_name: 'status_code', available_options: ['200', '301', '404', '500', '503'] },
+        { title: 'Agent Name', variable_name: 'agent_name', available_options: ['Mozilla', 'Chrome', 'Safari', 'Edge'] },
+        { title: 'Destination City', variable_name: 'dest_city', available_options: ['New York', 'London', 'Tokyo', 'Berlin', 'Sydney'] },
+        { title: 'Response Time', variable_name: 'response_time', available_options: ['Fast', 'Medium', 'Slow'] },
+        { title: 'OS Platform', variable_name: 'os_platform', available_options: ['Windows', 'macOS', 'Linux', 'iOS', 'Android'] },
+        { title: 'Log Level', variable_name: 'log_level', available_options: ['INFO', 'WARN', 'ERROR', 'DEBUG'] },
+        { title: 'Cloud Provider', variable_name: 'cloud_provider', available_options: ['AWS', 'GCP', 'Azure'] },
+        { title: 'HTTP Method', variable_name: 'http_method', available_options: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] },
+        { title: 'Region', variable_name: 'region', available_options: ['us-east-1', 'eu-west-1', 'ap-southeast-1', 'us-west-2'] },
+      ],
+      []
+    );
+
+    const generateFakeControls = useCallback(async (count: number) => {
+      const { onSaveControl } = props.esqlVariablesConfig ?? {};
+      if (!onSaveControl) return;
+
+      const currentQuery =
+        props.query && isOfAggregateQueryType(props.query)
+          ? (props.query as { esql: string }).esql
+          : '';
+
+      for (const ctrl of fakeControls.slice(0, count)) {
+        await onSaveControl(
+          {
+            ...ctrl,
+            selected_options: [ctrl.available_options[0]],
+            single_select: true,
+            variable_type: ESQLVariableType.VALUES,
+            esql_query: currentQuery,
+            control_type: EsqlControlType.STATIC_VALUES,
+          },
+          currentQuery
+        );
+      }
+    }, [props.esqlVariablesConfig, props.query, fakeControls]);
+
     return (
       <>
         <SharingMetaFields
@@ -1059,28 +1102,25 @@ export const QueryBarTopRow = React.memo(
         />
         {!isScreenshotMode &&
           (isQueryLangSelected ? (
-            <EsqlEditorActionsProvider>
-              <EuiFlexGroup {...queryBarFlexGroupProps}>
-                {props.dataViewPickerOverride || renderDataViewsPicker()}
-                {renderDatePickerWithUpdateBtn()}
-                {/* Optional wrapper for the ES|QL controls elements */}
+            <DesignPanel
+              onGenerateControls={props.esqlVariablesConfig ? generateFakeControls : undefined}
+            >
+              <EsqlEditorActionsProvider>
+                <EuiFlexGroup {...queryBarFlexGroupProps}>
+                  {props.dataViewPickerOverride || renderDataViewsPicker()}
+                  {renderDatePickerWithUpdateBtn()}
+                  {renderEsqlMenuPopover()}
+                </EuiFlexGroup>
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      @media (max-width: ${euiTheme.breakpoint.xl}px) {
-                        order: 1;
-                      }
-                    `}
-                  >
-                    {props.esqlVariablesConfig?.controlsWrapper}
-                  </EuiFlexItem>
+                  <EsqlControlsWrapper
+                    controlsWrapper={props.esqlVariablesConfig?.controlsWrapper}
+                    disableExternalPadding={props.disableExternalPadding}
+                  />
                 )}
-                {renderEsqlMenuPopover()}
-              </EuiFlexGroup>
-              {!shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderTextLangEditor()}
-            </EsqlEditorActionsProvider>
+                {!shouldShowDatePickerAsBadge() && props.filterBar}
+                {renderTextLangEditor()}
+              </EsqlEditorActionsProvider>
+            </DesignPanel>
           ) : (
             <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
@@ -1108,6 +1148,30 @@ export const QueryBarTopRow = React.memo(
     return isQueryEqual && shallowEqual(prevProps, nextProps);
   }
 ) as GenericQueryBarTopRow;
+
+function EsqlControlsWrapper({
+  controlsWrapper,
+  disableExternalPadding,
+}: {
+  controlsWrapper: React.ReactNode;
+  disableExternalPadding?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const { showControls, visibleControlCount } = useDesignPanel();
+  return (
+    <div
+      css={css`
+        padding: ${!disableExternalPadding ? `0 ${euiTheme.size.s} ${euiTheme.size.s}` : 0};
+        ${!showControls && 'visibility: hidden; height: 0; overflow: hidden;'}
+        .controlGroup > li:nth-child(n + ${visibleControlCount + 1}) {
+          display: none;
+        }
+      `}
+    >
+      {controlsWrapper}
+    </div>
+  );
+}
 
 const inputStringStyles = {
   datePickerWrapper: ({ euiTheme }: UseEuiTheme) =>

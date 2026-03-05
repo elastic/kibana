@@ -13,7 +13,6 @@ import { isMac } from '@kbn/shared-ux-utility';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
-import { MagnifyGradientIcon } from './magnify_gradient_icon';
 import {
   addStarredQueryLabel,
   helpLabel,
@@ -74,7 +73,7 @@ export function ESQLMenu({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType={MagnifyGradientIcon}
+            iconType="search"
             size="xs"
             aria-label={searchPlaceholder}
             onClick={onToggleVisor}
