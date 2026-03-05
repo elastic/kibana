@@ -17,7 +17,7 @@ export const useGetLinkTo = (
   policyName: string,
   getPolicyArtifactsPath: (policyId: string) => string,
   getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string,
-  location?: Partial<{ show: 'create' }>
+  location?: Partial<{ show: Extract<ArtifactListPageUrlParams['show'], 'create' | 'import'> }>
 ) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
