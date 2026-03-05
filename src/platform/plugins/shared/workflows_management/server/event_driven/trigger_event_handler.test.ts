@@ -39,6 +39,10 @@ describe('createTriggerEventHandler', () => {
 
   const mockRequest = {} as any;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should pass event with timestamp, spaceId, and payload to runWorkflow', async () => {
     const timestamp = '2025-01-01T12:00:00.000Z';
     const triggerId = 'cases.updated';
@@ -180,5 +184,147 @@ describe('createTriggerEventHandler', () => {
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Execution failed for wf-2')
     );
+  });
+
+  it('should run only workflows returned by resolver (KQL-matched and enabled)', async () => {
+    const wf1 = createMockWorkflow({ id: 'wf-1' });
+    const wf2 = createMockWorkflow({ id: 'wf-2' });
+    const runWorkflow = jest.fn().mockResolvedValue(undefined);
+    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2]);
+
+    const handler = createTriggerEventHandler({
+      api: { runWorkflow } as any,
+      logger: mockLogger,
+      getTriggerEventsClient: () => null,
+      resolveMatchingWorkflowSubscriptions,
+    });
+
+    await handler({
+      timestamp: '2025-01-01T12:00:00.000Z',
+      triggerId: 'cases.updated',
+      spaceId: 'default',
+      payload: { severity: 'high' },
+      request: mockRequest,
+    });
+
+    expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledTimes(1);
+    expect(runWorkflow).toHaveBeenCalledTimes(2);
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-1' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-2' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+  });
+
+  it('should run all resolved workflows when none have conditions', async () => {
+    const wf1 = createMockWorkflow({ id: 'wf-no-condition-1' });
+    const wf2 = createMockWorkflow({ id: 'wf-no-condition-2' });
+    const runWorkflow = jest.fn().mockResolvedValue(undefined);
+    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2]);
+
+    const handler = createTriggerEventHandler({
+      api: { runWorkflow } as any,
+      logger: mockLogger,
+      getTriggerEventsClient: () => null,
+      resolveMatchingWorkflowSubscriptions,
+    });
+
+    await handler({
+      timestamp: '2025-01-01T12:00:00.000Z',
+      triggerId: 'cases.updated',
+      spaceId: 'default',
+      payload: {},
+      request: mockRequest,
+    });
+
+    expect(runWorkflow).toHaveBeenCalledTimes(2);
+    expect(runWorkflow).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ id: 'wf-no-condition-1' }),
+      'default',
+      expect.objectContaining({
+        event: expect.objectContaining({
+          timestamp: expect.any(String),
+          spaceId: 'default',
+        }),
+      }),
+      mockRequest,
+      'cases.updated'
+    );
+    expect(runWorkflow).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ id: 'wf-no-condition-2' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+  });
+
+  it('should run valid workflows and log warning when one fails validation', async () => {
+    const validWf1 = createMockWorkflow({ id: 'wf-valid-1' });
+    const invalidWf = createMockWorkflow({
+      id: 'wf-invalid',
+      definition: null,
+      valid: false,
+    } as Partial<WorkflowDetailDto>);
+    const validWf2 = createMockWorkflow({ id: 'wf-valid-2' });
+
+    const runWorkflow = jest.fn().mockResolvedValue(undefined);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue([validWf1, invalidWf, validWf2]);
+
+    const handler = createTriggerEventHandler({
+      api: { runWorkflow } as any,
+      logger: mockLogger,
+      getTriggerEventsClient: () => null,
+      resolveMatchingWorkflowSubscriptions,
+    });
+
+    await handler({
+      timestamp: '2025-01-01T12:00:00.000Z',
+      triggerId: 'cases.updated',
+      spaceId: 'default',
+      payload: {},
+      request: mockRequest,
+    });
+
+    expect(runWorkflow).toHaveBeenCalledTimes(2);
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-valid-1' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+    expect(runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-valid-2' }),
+      'default',
+      expect.any(Object),
+      mockRequest,
+      'cases.updated'
+    );
+    expect(runWorkflow).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'wf-invalid' }),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Event-driven workflow execution failed')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('wf-invalid'));
   });
 });
