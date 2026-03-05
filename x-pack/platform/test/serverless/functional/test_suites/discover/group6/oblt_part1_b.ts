@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group6 (oblt part 1)', function () {
+  describe('discover/group6 (oblt part 1b)', function () {
     this.tags(['esGate']);
 
     before(async function () {
@@ -24,6 +24,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_sidebar_part1'));
+    loadTestFile(require.resolve('./_sidebar_part2'));
   });
 }

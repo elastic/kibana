@@ -60,12 +60,15 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group27.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group28.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group29.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.group30.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.group31.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.logs_essentials.group1.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.2.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.3.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_assistant.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.2.ts
