@@ -20,54 +20,56 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Firecrawl connectors have the following configuration properties:
 
 API Key (Bearer token)
-:   Your Firecrawl API key for authentication. Provide it as the Bearer token when creating or editing the connector. The connector sends it in the `Authorization: Bearer <key>` header to `https://api.firecrawl.dev`.
-
+:   Your Firecrawl API key for authentication. The connector sends it in the `Authorization: Bearer <key>` header to `https://api.firecrawl.dev`.
 
 ## Test connectors [firecrawl-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}.
+You can test connectors when you create or edit the connector in {{kib}}.
 
 The Firecrawl connector has the following actions:
 
-scrape
-:   Scrape a single URL and extract content (for example, markdown or HTML).
-    - **url** (required): The URL to scrape.
-    - **formats** (optional): Output formats: `markdown`, `html`, `links`, `screenshot`, `extract`. Defaults to markdown.
-    - **onlyMainContent** (optional): Return only main content, excluding nav/footer. Defaults to true.
-    - **waitFor** (optional): Delay in milliseconds before fetching (useful for JS-rendered pages).
+`scrape`
+:   Scrape a single URL and extract content (for example, Markdown or HTML).
+    - `url` (required): The URL to scrape.
+    - `formats` (optional): Output formats: `markdown`, `html`, `links`, `screenshot`, `extract`. Defaults to Markdown.
+    - `onlyMainContent` (optional): Return only main content, excluding navigation and footer elements. Defaults to true.
+    - `waitFor` (optional): Delay in milliseconds before fetching (useful for JavaScript-rendered pages).
 
-search
+`search`
 :   Search the web and optionally get full content from results.
-    - **query** (required): Search query string.
-    - **limit** (optional): Maximum number of results (1–100). Defaults to 5.
+    - `query` (required): Search query string.
+    - `limit` (optional): Maximum number of results (1 to 100). Defaults to 5.
 
-map
+`map`
 :   Map a website to discover indexed URLs.
-    - **url** (required): Base URL to map.
-    - **search** (optional): Search term to filter/order URLs by relevance.
-    - **limit** (optional): Maximum URLs to return. Defaults to 5000.
-    - **includeSubdomains** (optional): Include subdomains. Defaults to true.
-    - **ignoreQueryParameters** (optional): Dedupe by path only. Defaults to true.
+    - `url` (required): Base URL to map.
+    - `search` (optional): Search term to filter or order URLs by relevance.
+    - `limit` (optional): Maximum URLs to return. Defaults to 5000.
+    - `includeSubdomains` (optional): Include subdomains. Defaults to true.
+    - `ignoreQueryParameters` (optional): Deduplicate by path only. Defaults to true.
 
-crawl
-:   Start an asynchronous crawl of a website. Returns a job ID; use **getCrawlStatus** to poll for results.
-    - **url** (required): Base URL to start crawling from.
-    - **limit** (optional): Maximum pages to crawl. Defaults to 100.
-    - **maxDiscoveryDepth** (optional): Maximum discovery depth.
-    - **allowExternalLinks** (optional): Follow external links. Defaults to false.
+`crawl`
+:   Start an asynchronous crawl of a website. Returns a job ID. Use `getCrawlStatus` to poll for results.
+    - `url` (required): Base URL to start crawling from.
+    - `limit` (optional): Maximum pages to crawl. Defaults to 100.
+    - `maxDiscoveryDepth` (optional): Maximum discovery depth.
+    - `allowExternalLinks` (optional): Follow external links. Defaults to false.
 
-getCrawlStatus
+`getCrawlStatus`
 :   Get the status and results of a crawl job.
-    - **id** (required): The crawl job ID (UUID) returned from the **crawl** action.
+    - `id` (required): The crawl job ID (UUID) returned from the `crawl` action.
 
+## Connector networking configuration [firecrawl-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [firecrawl-api-credentials]
 
-To use the Firecrawl connector, you need to:
+To use the Firecrawl connector:
 
 1. Sign up at [Firecrawl](https://www.firecrawl.dev) or log in to your account.
-2. Open [API keys](https://www.firecrawl.dev/app/api-keys) in the Firecrawl dashboard.
+2. Go to [API keys](https://www.firecrawl.dev/app/api-keys) in the Firecrawl dashboard.
 3. Create an API key or copy an existing one (for example, `fc-...`).
-4. In Kibana, when creating or editing the Firecrawl connector, provide this key as the Bearer token (API key / secret).
+4. Enter the API key in the **API Key** field when configuring the Firecrawl connector in {{kib}}.
 
-Rate limits and billing depend on your Firecrawl plan. Check [Firecrawl billing](https://docs.firecrawl.dev/billing) for details.
+Rate limits and billing depend on your Firecrawl plan. Refer to [Firecrawl billing](https://docs.firecrawl.dev/billing) for details.
