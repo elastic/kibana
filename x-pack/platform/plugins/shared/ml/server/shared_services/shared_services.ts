@@ -187,9 +187,9 @@ export function createSharedServices(
      * Exposed providers for shared services used by other plugins
      */
     sharedServicesProviders: {
-      ...getJobServiceProvider(getGuards, serverless),
+      ...getJobServiceProvider(getGuards),
       ...getAnomalyDetectorsProvider(getGuards),
-      ...getModulesProvider(getGuards, getDataViews, compatibleModuleType, serverless),
+      ...getModulesProvider(getGuards, getDataViews, compatibleModuleType),
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
@@ -199,7 +199,7 @@ export function createSharedServices(
      * Services providers for ML internal usage
      */
     internalServicesProviders: {
-      ...getJobsHealthServiceProvider(getGuards, serverless),
+      ...getJobsHealthServiceProvider(getGuards),
     },
   };
 }
