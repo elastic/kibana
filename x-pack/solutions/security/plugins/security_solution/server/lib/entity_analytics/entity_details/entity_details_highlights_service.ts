@@ -220,10 +220,10 @@ export const entityDetailsHighlightsServiceFactory = ({
     async getVulnerabilityData(entityField: EntityIdentifierFields, entityIdentifier: string) {
       const vulnerabilitiesQuery = getVulnerabilitiesQuery({
         query: buildEntityFlyoutPreviewQueryWithStatus(
-        buildEntityFiltersFromEntityIdentifiers({ [entityField]: entityIdentifier }),
-        undefined,
-        VULNERABILITY_QUERY_FIELD
-      ),
+          buildEntityFiltersFromEntityIdentifiers({ [entityField]: entityIdentifier }),
+          undefined,
+          VULNERABILITY_QUERY_FIELD
+        ),
         enabled: true,
         pageSize: 1,
         sort: [{ 'vulnerability.score.base': 'desc' }],
