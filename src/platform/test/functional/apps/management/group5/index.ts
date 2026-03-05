@@ -9,8 +9,21 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+
   describe('management - group 5', function () {
+    before(async () => {
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
+    });
+
+    after(async () => {
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/makelogs');
+    });
+
     loadTestFile(require.resolve('./_try_esql'));
     loadTestFile(require.resolve('./_runtime_fields_composite'));
     loadTestFile(require.resolve('./_field_formatter'));
