@@ -109,7 +109,7 @@ describe('github workflows', () => {
   describe('search workflow', () => {
     it('calls MCP callTool with the selected search tool and query', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('sources.github.search'),
+        workflowYaml: getWorkflowYaml('source.github.search'),
         inputs: { tool_name: 'search_code', query: 'handleError language:typescript', per_page: 5 },
       });
 
@@ -120,13 +120,16 @@ describe('github workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'callTool',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               name: 'search_code',
-              arguments: expect.objectContaining({
+              arguments: {
                 query: 'handleError language:typescript',
+                order: 'desc',
+                page: 1,
                 perPage: 5,
-              }),
-            }),
+                sort: 'created',
+              },
+            },
           }),
         })
       );

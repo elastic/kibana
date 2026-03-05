@@ -111,7 +111,7 @@ describe('notion workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('sources.notion.search'),
+        workflowYaml: getWorkflowYaml('source.notion.search'),
         inputs: { query_string: 'meeting notes', query_object: 'page' },
       });
 
@@ -167,7 +167,12 @@ describe('notion workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'queryDataSource',
-            subActionParams: expect.objectContaining({ dataSourceId: 'db-456', pageSize: 5 }),
+            subActionParams: {
+              dataSourceId: 'db-456',
+              pageSize: 5,
+              startCursor: undefined,
+              filter: undefined,
+            },
           }),
         })
       );

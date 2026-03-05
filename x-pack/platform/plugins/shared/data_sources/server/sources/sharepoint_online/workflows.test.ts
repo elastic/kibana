@@ -253,11 +253,13 @@ describe('sharepoint online workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'search',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               query: 'quarterly report',
               entityTypes: ['driveItem'],
               region: 'EUR',
-            }),
+              from: undefined,
+              size: 3,
+            },
           }),
         })
       );

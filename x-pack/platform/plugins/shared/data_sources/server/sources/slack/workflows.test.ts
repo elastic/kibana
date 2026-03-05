@@ -103,11 +103,13 @@ describe('slack workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'sendMessage',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               channel: 'C123ABC',
               text: 'Hello from test',
               threadTs: '1234.5678',
-            }),
+              unfurlLinks: undefined,
+              unfurlMedia: undefined,
+            },
           }),
         })
       );
@@ -128,11 +130,18 @@ describe('slack workflows', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             subAction: 'searchMessages',
-            subActionParams: expect.objectContaining({
+            subActionParams: {
               query: 'deployment update',
               inChannel: 'engineering',
               count: 5,
-            }),
+              fromUser: undefined,
+              after: undefined,
+              before: undefined,
+              sort: 'score',
+              sortDir: 'desc',
+              cursor: undefined,
+              raw: false,
+            },
           }),
         })
       );

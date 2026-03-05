@@ -57,7 +57,29 @@ Remember:
 - Use `<%= your-source-stack-connector-id %>` for connector-id, where your-source is the id of the newly created data source type
 - Use `${{ inputs.param_name }}` for input references
 
-## Step 4: Write Documentation
+## Step 4: Create Tests
+
+Two types of tests are required:
+
+### Connector spec tests
+If you created a custom connector spec (non-MCP path), add unit tests for each action in `src/platform/packages/shared/kbn-connector-specs/src/specs/{connector_name}/{connector_name}.test.ts`. See existing specs like `google_drive/google_drive.test.ts` for the pattern: mock the HTTP client, call each action, and assert on the request parameters and response shape.
+
+### Workflow behavioral tests
+Add a `workflows.test.ts` next to your `data_type.ts` in `x-pack/platform/plugins/shared/data_sources/server/sources/{source_name}/workflows.test.ts`. These tests run your workflow YAMLs through the real workflow execution engine with mocked connector boundaries.
+
+Follow the existing pattern (e.g., `google_drive/workflows.test.ts`, `slack/workflows.test.ts`):
+1. Import `loadWorkflowsThroughProductionPath` and `ProcessedWorkflow` from `../workflow_test_helpers`
+2. Import `WorkflowRunFixture` from `@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture`
+3. Import your data source object from `./data_type`
+4. In `beforeAll`, call `loadWorkflowsThroughProductionPath(yourDataSource, { stackConnectorId: CONNECTOR_NAME })` to load workflows through the real production code path
+5. Add a test that asserts all workflows pass validation without liquid template errors
+6. For each workflow, add a test that runs it via `fixture.runWorkflow()` with representative inputs and asserts:
+   - The workflow completes successfully
+   - The expected connector actions are called with the correct parameters (assert the full `subActionParams` object, including optional params with their default values)
+
+You do not need to execute the tests — just create the files.
+
+## Step 5: Write Documentation
 
 Create a connector doc page in `docs/reference/connectors-kibana/{name}-action-type.md`.
 
@@ -88,10 +110,7 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 1. Add an entry in `docs/reference/toc.yml` under the data and context sources connectors section.
 2. Add a row in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`.
 
-## Step 5: Tell the user you're done
-
-You do not need to execute tests, linting, type-checking, etc.
-Once you are done developing the connector, data source, and documentation, let the user review your work before next steps.
+Once you are done developing the connector, data source, tests, and documentation, let the user review your work before next steps.
 
 ## Important Notes
 

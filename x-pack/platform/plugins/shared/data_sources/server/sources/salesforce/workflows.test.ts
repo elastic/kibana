@@ -12,12 +12,12 @@ import {
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow_test_helpers';
-import { jiraDataSource } from './data_type';
+import { salesforceDataSource } from './data_type';
 
-const CONNECTOR_NAME = 'fake-jira-connector';
-const CONNECTOR_ID = 'fake-jira-connector-uuid';
+const CONNECTOR_NAME = 'fake-salesforce-connector';
+const CONNECTOR_ID = 'fake-salesforce-connector-uuid';
 
-describe('jira cloud workflows', () => {
+describe('salesforce workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
@@ -34,7 +34,7 @@ describe('jira cloud workflows', () => {
   };
 
   beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(jiraDataSource, {
+    workflows = await loadWorkflowsThroughProductionPath(salesforceDataSource, {
       stackConnectorId: CONNECTOR_NAME,
     });
   });
@@ -43,7 +43,7 @@ describe('jira cloud workflows', () => {
     fixture = new WorkflowRunFixture();
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.jira-cloud' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.salesforce' },
     ]);
 
     fixture.scopedActionsClientMock.returnMockedConnectorResult = async ({
@@ -54,58 +54,49 @@ describe('jira cloud workflows', () => {
       params: Record<string, unknown>;
     }): Promise<ActionTypeExecutorResult<unknown>> => {
       const subAction = params.subAction as string;
-      const subActionParams = params.subActionParams as Record<string, unknown>;
 
       switch (subAction) {
-        case 'searchIssuesWithJql':
+        case 'search':
           return {
             status: 'ok',
             actionId,
-            data: {
-              issues: [{ id: '10001', key: 'PROJ-1', fields: { summary: 'Fix bug' } }],
-              total: 1,
-            },
+            data: { searchRecords: [{ Id: '001', Name: 'Acme' }] },
           };
-        case 'getIssue':
+        case 'query':
           return {
             status: 'ok',
             actionId,
-            data: {
-              id: '10001',
-              key: `PROJ-${subActionParams.issueId}`,
-              fields: { summary: 'Test Issue' },
-            },
+            data: { records: [{ Id: '001', Name: 'Acme' }], totalSize: 1, done: true },
           };
-        case 'getProject':
+        case 'list_records':
           return {
             status: 'ok',
             actionId,
-            data: { id: subActionParams.projectId, key: 'PROJ', name: 'Test Project' },
+            data: { records: [{ Id: '001' }], totalSize: 1, done: true },
           };
-        case 'getProjects':
+        case 'get_record':
           return {
             status: 'ok',
             actionId,
-            data: { values: [{ id: '1', key: 'PROJ', name: 'Test Project' }], total: 1 },
+            data: { Id: '001', Name: 'Acme Corp', Type: 'Customer' },
           };
-        case 'searchUsers':
+        case 'download_file':
           return {
             status: 'ok',
             actionId,
-            data: [
-              { accountId: 'abc-123', displayName: 'Jane Doe', emailAddress: 'jane@example.com' },
-            ],
+            data: { base64: 'dGVzdA==', contentType: 'application/pdf' },
+          };
+        case 'describe':
+          return {
+            status: 'ok',
+            actionId,
+            data: { name: 'Account', fields: [{ name: 'Id', type: 'id' }] },
           };
         default:
-          throw new Error(`Unexpected Jira subAction: ${subAction}`);
+          throw new Error(`Unexpected Salesforce subAction: ${subAction}`);
       }
     };
   });
-
-  const getStepExecutions = (stepId: string) =>
-    Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).filter(
-      (se) => se.stepId === stepId
-    );
 
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
@@ -119,24 +110,23 @@ describe('jira cloud workflows', () => {
     }
   });
 
-  describe('search_issues_with_jql workflow', () => {
-    it('forwards JQL query to the connector', async () => {
+  describe('search workflow', () => {
+    it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_issues_with_jql'),
-        inputs: { jql: 'project = PROJ AND status = Open', maxResults: 50 },
+        workflowYaml: getWorkflowYaml('search'),
+        inputs: { search_term: 'Acme Corp', returning: 'Account,Contact' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-issues-with-jql')).toHaveLength(1);
 
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'searchIssuesWithJql',
+            subAction: 'search',
             subActionParams: {
-              jql: 'project = PROJ AND status = Open',
-              maxResults: 50,
-              nextPageToken: undefined,
+              searchTerm: 'Acme Corp',
+              returning: 'Account,Contact',
+              nextRecordsUrl: undefined,
             },
           }),
         })
@@ -144,100 +134,34 @@ describe('jira cloud workflows', () => {
     });
   });
 
-  describe('get_resource workflow', () => {
-    it('resourceType=issue routes to getIssue connector action', async () => {
+  describe('query workflow', () => {
+    it('forwards SOQL query to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_resource'),
-        inputs: { resourceType: 'issue', id: 'PROJ-123' },
+        workflowYaml: getWorkflowYaml('query'),
+        inputs: { soql: 'SELECT Id, Name FROM Account LIMIT 10' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-issue')).toHaveLength(1);
-      expect(getStepExecutions('get-project')).toHaveLength(0);
 
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'getIssue',
-            subActionParams: expect.objectContaining({ issueId: 'PROJ-123' }),
-          }),
-        })
-      );
-    });
-
-    it('resourceType=project routes to getProject connector action', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_resource'),
-        inputs: { resourceType: 'project', id: '10001' },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-project')).toHaveLength(1);
-      expect(getStepExecutions('get-issue')).toHaveLength(0);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'getProject',
-            subActionParams: expect.objectContaining({ projectId: '10001' }),
-          }),
-        })
-      );
-    });
-  });
-
-  describe('get_projects workflow', () => {
-    it('forwards query parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_projects'),
-        inputs: { query: 'backend', maxResults: 10 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-projects')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'getProjects',
-            subActionParams: { query: 'backend', maxResults: 10, startAt: undefined },
-          }),
-        })
-      );
-    });
-  });
-
-  describe('search_users workflow', () => {
-    it('forwards user search parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_users'),
-        inputs: { query: 'jane', maxResults: 25 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-users')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'searchUsers',
+            subAction: 'query',
             subActionParams: {
-              query: 'jane',
-              maxResults: 25,
-              username: undefined,
-              accountId: undefined,
-              startAt: undefined,
-              property: undefined,
+              soql: 'SELECT Id, Name FROM Account LIMIT 10',
+              nextRecordsUrl: undefined,
             },
           }),
         })
       );
     });
+  });
 
-    it('forwards accountId when searching by specific user', async () => {
+  describe('list_records workflow', () => {
+    it('forwards list parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_users'),
-        inputs: { accountId: 'abc-123-def' },
+        workflowYaml: getWorkflowYaml('list_records'),
+        inputs: { sobject_name: 'Account', limit: 5 },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -245,14 +169,78 @@ describe('jira cloud workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'searchUsers',
+            subAction: 'list_records',
             subActionParams: {
-              accountId: 'abc-123-def',
-              query: undefined,
-              username: undefined,
-              startAt: undefined,
-              maxResults: undefined,
-              property: undefined,
+              sobjectName: 'Account',
+              limit: 5,
+              nextRecordsUrl: undefined,
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('get_record workflow', () => {
+    it('forwards record lookup to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml('get_record'),
+        inputs: { sobject_name: 'Account', record_id: '001ABC123' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'get_record',
+            subActionParams: {
+              sobjectName: 'Account',
+              recordId: '001ABC123',
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('download_file workflow', () => {
+    it('forwards content version ID to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml('download_file'),
+        inputs: { content_version_id: '068ABC123' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'download_file',
+            subActionParams: {
+              contentVersionId: '068ABC123',
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('describe workflow', () => {
+    it('forwards sobject name to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml('describe'),
+        inputs: { sobject_name: 'Account' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'describe',
+            subActionParams: {
+              sobjectName: 'Account',
             },
           }),
         })

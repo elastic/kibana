@@ -12,12 +12,12 @@ import {
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow_test_helpers';
-import { jiraDataSource } from './data_type';
+import { firecrawlDataSource } from './data_type';
 
-const CONNECTOR_NAME = 'fake-jira-connector';
-const CONNECTOR_ID = 'fake-jira-connector-uuid';
+const CONNECTOR_NAME = 'fake-firecrawl-connector';
+const CONNECTOR_ID = 'fake-firecrawl-connector-uuid';
 
-describe('jira cloud workflows', () => {
+describe('firecrawl workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
@@ -34,7 +34,7 @@ describe('jira cloud workflows', () => {
   };
 
   beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(jiraDataSource, {
+    workflows = await loadWorkflowsThroughProductionPath(firecrawlDataSource, {
       stackConnectorId: CONNECTOR_NAME,
     });
   });
@@ -43,7 +43,7 @@ describe('jira cloud workflows', () => {
     fixture = new WorkflowRunFixture();
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.jira-cloud' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.firecrawl' },
     ]);
 
     fixture.scopedActionsClientMock.returnMockedConnectorResult = async ({
@@ -54,58 +54,45 @@ describe('jira cloud workflows', () => {
       params: Record<string, unknown>;
     }): Promise<ActionTypeExecutorResult<unknown>> => {
       const subAction = params.subAction as string;
-      const subActionParams = params.subActionParams as Record<string, unknown>;
 
       switch (subAction) {
-        case 'searchIssuesWithJql':
+        case 'scrape':
           return {
             status: 'ok',
             actionId,
-            data: {
-              issues: [{ id: '10001', key: 'PROJ-1', fields: { summary: 'Fix bug' } }],
-              total: 1,
-            },
+            data: { markdown: '# Example\nContent here', metadata: { title: 'Example' } },
           };
-        case 'getIssue':
+        case 'search':
           return {
             status: 'ok',
             actionId,
-            data: {
-              id: '10001',
-              key: `PROJ-${subActionParams.issueId}`,
-              fields: { summary: 'Test Issue' },
-            },
+            data: [{ url: 'https://example.com', markdown: '# Result', metadata: {} }],
           };
-        case 'getProject':
+        case 'map':
           return {
             status: 'ok',
             actionId,
-            data: { id: subActionParams.projectId, key: 'PROJ', name: 'Test Project' },
+            data: { links: ['https://example.com/p1', 'https://example.com/p2'] },
           };
-        case 'getProjects':
+        case 'crawl':
+          return { status: 'ok', actionId, data: { id: 'crawl-job-123', status: 'scraping' } };
+        case 'getCrawlStatus':
           return {
             status: 'ok',
             actionId,
-            data: { values: [{ id: '1', key: 'PROJ', name: 'Test Project' }], total: 1 },
+            data: { status: 'completed', total: 5, completed: 5, data: [] },
           };
-        case 'searchUsers':
+        case 'crawlAndWait':
           return {
             status: 'ok',
             actionId,
-            data: [
-              { accountId: 'abc-123', displayName: 'Jane Doe', emailAddress: 'jane@example.com' },
-            ],
+            data: { status: 'completed', total: 3, completed: 3, data: [] },
           };
         default:
-          throw new Error(`Unexpected Jira subAction: ${subAction}`);
+          throw new Error(`Unexpected Firecrawl subAction: ${subAction}`);
       }
     };
   });
-
-  const getStepExecutions = (stepId: string) =>
-    Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).filter(
-      (se) => se.stepId === stepId
-    );
 
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
@@ -119,24 +106,24 @@ describe('jira cloud workflows', () => {
     }
   });
 
-  describe('search_issues_with_jql workflow', () => {
-    it('forwards JQL query to the connector', async () => {
+  describe('scrape workflow', () => {
+    it('forwards scrape parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_issues_with_jql'),
-        inputs: { jql: 'project = PROJ AND status = Open', maxResults: 50 },
+        workflowYaml: getWorkflowYaml('scrape'),
+        inputs: { url: 'https://example.com' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-issues-with-jql')).toHaveLength(1);
 
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'searchIssuesWithJql',
+            subAction: 'scrape',
             subActionParams: {
-              jql: 'project = PROJ AND status = Open',
-              maxResults: 50,
-              nextPageToken: undefined,
+              url: 'https://example.com',
+              onlyMainContent: true,
+              waitFor: 0,
+              maxMarkdownLength: 100000,
             },
           }),
         })
@@ -144,100 +131,82 @@ describe('jira cloud workflows', () => {
     });
   });
 
-  describe('get_resource workflow', () => {
-    it('resourceType=issue routes to getIssue connector action', async () => {
+  describe('search workflow', () => {
+    it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_resource'),
-        inputs: { resourceType: 'issue', id: 'PROJ-123' },
+        workflowYaml: getWorkflowYaml('search'),
+        inputs: { query: 'kibana plugins', limit: 3 },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-issue')).toHaveLength(1);
-      expect(getStepExecutions('get-project')).toHaveLength(0);
 
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'getIssue',
-            subActionParams: expect.objectContaining({ issueId: 'PROJ-123' }),
-          }),
-        })
-      );
-    });
-
-    it('resourceType=project routes to getProject connector action', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_resource'),
-        inputs: { resourceType: 'project', id: '10001' },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-project')).toHaveLength(1);
-      expect(getStepExecutions('get-issue')).toHaveLength(0);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'getProject',
-            subActionParams: expect.objectContaining({ projectId: '10001' }),
-          }),
-        })
-      );
-    });
-  });
-
-  describe('get_projects workflow', () => {
-    it('forwards query parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_projects'),
-        inputs: { query: 'backend', maxResults: 10 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-projects')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'getProjects',
-            subActionParams: { query: 'backend', maxResults: 10, startAt: undefined },
-          }),
-        })
-      );
-    });
-  });
-
-  describe('search_users workflow', () => {
-    it('forwards user search parameters to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_users'),
-        inputs: { query: 'jane', maxResults: 25 },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-users')).toHaveLength(1);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'searchUsers',
+            subAction: 'search',
             subActionParams: {
-              query: 'jane',
-              maxResults: 25,
-              username: undefined,
-              accountId: undefined,
-              startAt: undefined,
-              property: undefined,
+              query: 'kibana plugins',
+              limit: 3,
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('map workflow', () => {
+    it('forwards map parameters to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml('map'),
+        inputs: { url: 'https://example.com', search: 'docs' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'map',
+            subActionParams: {
+              url: 'https://example.com',
+              search: 'docs',
+              limit: 5000,
+              includeSubdomains: true,
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('crawl workflow', () => {
+    it('crawl action starts an async crawl job', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml('crawl'),
+        inputs: { crawl_action: 'crawl', url: 'https://example.com', limit: 10 },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'crawl',
+            subActionParams: {
+              url: 'https://example.com',
+              limit: 10,
+              maxDiscoveryDepth: undefined,
+              allowExternalLinks: false,
             },
           }),
         })
       );
     });
 
-    it('forwards accountId when searching by specific user', async () => {
+    it('getCrawlStatus checks an existing crawl job', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_users'),
-        inputs: { accountId: 'abc-123-def' },
+        workflowYaml: getWorkflowYaml('crawl'),
+        inputs: { crawl_action: 'getCrawlStatus', id: 'crawl-job-123' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -245,14 +214,32 @@ describe('jira cloud workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'searchUsers',
+            subAction: 'getCrawlStatus',
             subActionParams: {
-              accountId: 'abc-123-def',
-              query: undefined,
-              username: undefined,
-              startAt: undefined,
-              maxResults: undefined,
-              property: undefined,
+              id: 'crawl-job-123',
+            },
+          }),
+        })
+      );
+    });
+
+    it('crawlAndWait runs a synchronous crawl', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml('crawl'),
+        inputs: { crawl_action: 'crawlAndWait', url: 'https://example.com' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'crawlAndWait',
+            subActionParams: {
+              url: 'https://example.com',
+              limit: 20,
+              maxDiscoveryDepth: undefined,
+              allowExternalLinks: false,
             },
           }),
         })
