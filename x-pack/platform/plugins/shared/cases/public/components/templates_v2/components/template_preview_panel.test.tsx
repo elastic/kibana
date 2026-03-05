@@ -33,7 +33,7 @@ describe('TemplatePreviewPanel', () => {
     definition: {
       fields: [
         { name: 'field1', control: 'INPUT_TEXT', type: 'keyword' },
-        { name: 'field2', control: 'INPUT_TEXT', type: 'text' },
+        { name: 'field2', control: 'INPUT_TEXT', type: 'keyword' },
       ],
     },
   };

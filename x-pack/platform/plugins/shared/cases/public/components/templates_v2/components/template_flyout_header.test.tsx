@@ -12,8 +12,8 @@ import { TemplateFlyoutHeader } from './template_flyout_header';
 
 describe('TemplateFlyoutHeader', () => {
   const mockSteps: EuiStepsHorizontalProps['steps'] = [
-    { title: 'Upload', status: 'complete' },
-    { title: 'Select', status: 'current' },
+    { title: 'Upload', status: 'complete', onClick: () => {} },
+    { title: 'Select', status: 'current', onClick: () => {} },
   ];
 
   it('renders the header with title', () => {
@@ -44,9 +44,9 @@ describe('TemplateFlyoutHeader', () => {
 
   it('renders with multiple steps', () => {
     const multipleSteps: EuiStepsHorizontalProps['steps'] = [
-      { title: 'Step 1', status: 'complete' },
-      { title: 'Step 2', status: 'current' },
-      { title: 'Step 3', status: 'incomplete' },
+      { title: 'Step 1', status: 'complete', onClick: () => {} },
+      { title: 'Step 2', status: 'current', onClick: () => {} },
+      { title: 'Step 3', status: 'incomplete', onClick: () => {} },
     ];
 
     render(<TemplateFlyoutHeader steps={multipleSteps} />);
