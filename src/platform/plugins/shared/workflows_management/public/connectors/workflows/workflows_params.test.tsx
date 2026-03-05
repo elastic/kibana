@@ -123,7 +123,11 @@ describe('WorkflowsParamsFields', () => {
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
     expect(mockEditAction).toHaveBeenCalledWith(
       'subActionParams',
-      { workflowId: '', summaryMode: true },
+      {
+        workflowId: '',
+        summaryMode: true,
+        alertStates: { new: true, ongoing: false, recovered: false },
+      },
       0
     );
   });
@@ -919,7 +923,11 @@ describe('WorkflowsParamsFields', () => {
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: '', summaryMode: true },
+          {
+            workflowId: '',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
           0
         );
       });
@@ -1092,6 +1100,137 @@ describe('WorkflowsParamsFields', () => {
         expect.objectContaining({ summaryMode: true }),
         0
       );
+    });
+  });
+
+  describe('Alert states (alertStates parameter)', () => {
+    test('should render "Run workflow for" section with checkboxes', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Run workflow for')).toBeInTheDocument();
+        expect(screen.getByText('Firing alerts')).toBeInTheDocument();
+        expect(screen.getByText('Ongoing alerts')).toBeInTheDocument();
+        expect(screen.getByText('Recovered alerts')).toBeInTheDocument();
+      });
+    });
+
+    test('should render checkboxes with correct defaults (only firing checked)', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        const checkboxes = screen.getByTestId('workflow-alert-states-checkboxes');
+        expect(checkboxes).toBeInTheDocument();
+
+        const firingCheckbox = screen.getByLabelText('Firing alerts');
+        const ongoingCheckbox = screen.getByLabelText('Ongoing alerts');
+        const recoveredCheckbox = screen.getByLabelText('Recovered alerts');
+
+        expect(firingCheckbox).toBeChecked();
+        expect(ongoingCheckbox).not.toBeChecked();
+        expect(recoveredCheckbox).not.toBeChecked();
+      });
+    });
+
+    test('should toggle recovered checkbox and call editAction', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      const recoveredCheckbox = screen.getByLabelText('Recovered alerts');
+
+      await act(async () => {
+        fireEvent.click(recoveredCheckbox);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          expect.objectContaining({
+            alertStates: { new: true, ongoing: false, recovered: true },
+          }),
+          0
+        );
+      });
+    });
+
+    test('should initialize alertStates when missing from subActionParams', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          expect.objectContaining({
+            alertStates: { new: true, ongoing: false, recovered: false },
+          }),
+          0
+        );
+      });
+    });
+
+    test('should show all checkboxes as checked when all states are enabled', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: true, recovered: true },
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Firing alerts')).toBeChecked();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeChecked();
+        expect(screen.getByLabelText('Recovered alerts')).toBeChecked();
+      });
     });
   });
 });

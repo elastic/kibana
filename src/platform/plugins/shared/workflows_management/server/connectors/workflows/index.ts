@@ -25,6 +25,7 @@ import {
 } from './service';
 import * as i18n from './translations';
 import type {
+  AlertStates,
   ExecutorParams,
   ExecutorSubActionRunParams,
   WorkflowsActionParamsType,
@@ -41,6 +42,7 @@ export interface WorkflowsRuleActionParams {
   subActionParams: {
     workflowId: string;
     summaryMode?: boolean;
+    alertStates?: AlertStates;
   };
   [key: string]: unknown;
 }
@@ -170,16 +172,30 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
         }
 
-        const { workflowId, summaryMode = true } = subActionParams;
+        const {
+          workflowId,
+          summaryMode = true,
+          alertStates = { new: true, ongoing: false, recovered: false },
+        } = subActionParams;
         if (!workflowId) {
           throw new Error(
             `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
           );
         }
 
-        // Build alert event using shared utility function
+        const emptyAlertGroup = {
+          count: 0,
+          data: [],
+          alert_count: { active: 0, recovered: 0, ignored: 0 },
+        };
+        const filteredAlerts = {
+          new: alertStates.new !== false ? alerts.new : emptyAlertGroup,
+          ongoing: alertStates.ongoing === true ? alerts.ongoing : emptyAlertGroup,
+          recovered: alertStates.recovered === true ? alerts.recovered : emptyAlertGroup,
+        };
+
         const alertEvent = buildAlertEvent({
-          alerts,
+          alerts: filteredAlerts,
           rule,
           ruleUrl,
           spaceId,
@@ -192,6 +208,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             inputs: { event: alertEvent },
             spaceId,
             summaryMode,
+            alertStates,
           },
         };
       } catch (error) {
@@ -201,6 +218,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
             summaryMode: params?.subActionParams?.summaryMode ?? true,
+            alertStates: params?.subActionParams?.alertStates,
           },
         };
       }

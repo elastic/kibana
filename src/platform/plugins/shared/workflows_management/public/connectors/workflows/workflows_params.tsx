@@ -8,6 +8,8 @@
  */
 
 import {
+  EuiCheckboxGroup,
+  type EuiCheckboxGroupOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,7 +21,7 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
-import type { WorkflowsActionParams } from './types';
+import type { AlertStates, WorkflowsActionParams } from './types';
 
 const RUN_PER_ALERT_LABEL = i18n.translate(
   'xpack.stackConnectors.components.workflows.runPerAlert.label',
@@ -41,7 +43,11 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   index,
   errors,
 }) => {
-  const { workflowId, summaryMode = true } = actionParams.subActionParams ?? {};
+  const {
+    workflowId,
+    summaryMode = true,
+    alertStates = { new: true, ongoing: false, recovered: false },
+  } = actionParams.subActionParams ?? {};
 
   const handleWorkflowChange = useCallback(
     (newWorkflowId: string) => {
@@ -67,16 +73,54 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     [editAction, index, actionParams.subActionParams]
   );
 
+  const handleAlertStateChange = useCallback(
+    (optionId: string) => {
+      const newAlertStates: AlertStates = {
+        ...alertStates,
+        [optionId]: !alertStates[optionId as keyof AlertStates],
+      };
+      editAction(
+        'subActionParams',
+        { ...actionParams.subActionParams, alertStates: newAlertStates },
+        index
+      );
+    },
+    [editAction, index, actionParams.subActionParams, alertStates]
+  );
+
   // Ensure proper initialization of action parameters
   useEffect(() => {
     if (!actionParams?.subAction) {
       editAction('subAction', 'run', index);
     }
     if (!actionParams?.subActionParams) {
-      editAction('subActionParams', { workflowId: '', summaryMode: true }, index);
-    } else if (actionParams.subActionParams.summaryMode === undefined) {
-      // Ensure summaryMode defaults to true for backward compatibility
-      editAction('subActionParams', { ...actionParams.subActionParams, summaryMode: true }, index);
+      editAction(
+        'subActionParams',
+        {
+          workflowId: '',
+          summaryMode: true,
+          alertStates: { new: true, ongoing: false, recovered: false },
+        },
+        index
+      );
+    } else {
+      if (actionParams.subActionParams.summaryMode === undefined) {
+        editAction(
+          'subActionParams',
+          { ...actionParams.subActionParams, summaryMode: true },
+          index
+        );
+      }
+      if (!actionParams.subActionParams.alertStates) {
+        editAction(
+          'subActionParams',
+          {
+            ...actionParams.subActionParams,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
+          index
+        );
+      }
     }
   }, [actionParams, editAction, index]);
 
@@ -87,6 +131,27 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   // When summaryMode is false, runPerAlert is true (switch ON)
   // When summaryMode is true, runPerAlert is false (switch OFF)
   const runPerAlert = !summaryMode;
+
+  const alertStateOptions: EuiCheckboxGroupOption[] = [
+    {
+      id: 'new',
+      label: i18n.translate('xpack.stackConnectors.components.workflows.alertStates.new', {
+        defaultMessage: 'Firing alerts',
+      }),
+    },
+    {
+      id: 'ongoing',
+      label: i18n.translate('xpack.stackConnectors.components.workflows.alertStates.ongoing', {
+        defaultMessage: 'Ongoing alerts',
+      }),
+    },
+    {
+      id: 'recovered',
+      label: i18n.translate('xpack.stackConnectors.components.workflows.alertStates.recovered', {
+        defaultMessage: 'Recovered alerts',
+      }),
+    },
+  ];
 
   return (
     <>
@@ -108,6 +173,41 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         }}
         error={validationError}
       />
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.stackConnectors.components.workflows.alertStates.label', {
+                defaultMessage: 'Run workflow for',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.stackConnectors.components.workflows.alertStates.helpText',
+                  {
+                    defaultMessage: 'Select which alert states should trigger the workflow',
+                  }
+                )}
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <EuiCheckboxGroup
+          options={alertStateOptions}
+          idToSelectedMap={{
+            new: alertStates.new !== false,
+            ongoing: alertStates.ongoing === true,
+            recovered: alertStates.recovered === true,
+          }}
+          onChange={handleAlertStateChange}
+          data-test-subj="workflow-alert-states-checkboxes"
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth

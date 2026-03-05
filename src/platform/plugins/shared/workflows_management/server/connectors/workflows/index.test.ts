@@ -296,6 +296,153 @@ describe('Workflows Connector', () => {
       expect(result.subActionParams.inputs?.event?.alerts).toHaveLength(1);
     });
 
+    it('should default to only new alerts when alertStates is not provided', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [], count: 0 },
+        new: { data: [{ _id: 'alert-new-1', _index: 'idx' }], count: 1 },
+        ongoing: { data: [{ _id: 'alert-ongoing-1', _index: 'idx' }], count: 1 },
+        recovered: { data: [{ _id: 'alert-recovered-1', _index: 'idx' }], count: 1 },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: [],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params: { subAction: 'run' as const, subActionParams: { workflowId: 'wf-1' } },
+        ruleUrl: 'https://example.com/rule',
+        spaceId: 'default',
+      });
+
+      const alertIds = result.subActionParams.inputs?.event?.alerts?.map((a: any) => a._id);
+      expect(alertIds).toEqual(['alert-new-1']);
+      expect(result.subActionParams.alertStates).toEqual({
+        new: true,
+        ongoing: false,
+        recovered: false,
+      });
+    });
+
+    it('should include recovered alerts when alertStates.recovered is true', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [], count: 0 },
+        new: { data: [{ _id: 'alert-new-1', _index: 'idx' }], count: 1 },
+        ongoing: { data: [], count: 0 },
+        recovered: { data: [{ _id: 'alert-recovered-1', _index: 'idx' }], count: 1 },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: [],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params: {
+          subAction: 'run' as const,
+          subActionParams: {
+            workflowId: 'wf-1',
+            alertStates: { new: true, ongoing: false, recovered: true },
+          },
+        },
+        ruleUrl: 'https://example.com/rule',
+        spaceId: 'default',
+      });
+
+      const alertIds = result.subActionParams.inputs?.event?.alerts?.map((a: any) => a._id);
+      expect(alertIds).toEqual(['alert-new-1', 'alert-recovered-1']);
+    });
+
+    it('should include only recovered alerts when only recovered is selected', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [], count: 0 },
+        new: { data: [{ _id: 'alert-new-1', _index: 'idx' }], count: 1 },
+        ongoing: { data: [{ _id: 'alert-ongoing-1', _index: 'idx' }], count: 1 },
+        recovered: { data: [{ _id: 'alert-recovered-1', _index: 'idx' }], count: 1 },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: [],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params: {
+          subAction: 'run' as const,
+          subActionParams: {
+            workflowId: 'wf-1',
+            alertStates: { new: false, ongoing: false, recovered: true },
+          },
+        },
+        ruleUrl: 'https://example.com/rule',
+        spaceId: 'default',
+      });
+
+      const alertIds = result.subActionParams.inputs?.event?.alerts?.map((a: any) => a._id);
+      expect(alertIds).toEqual(['alert-recovered-1']);
+    });
+
+    it('should include all alert states when all are enabled', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [], count: 0 },
+        new: { data: [{ _id: 'new-1', _index: 'idx' }], count: 1 },
+        ongoing: { data: [{ _id: 'ongoing-1', _index: 'idx' }], count: 1 },
+        recovered: { data: [{ _id: 'recovered-1', _index: 'idx' }], count: 1 },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: [],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params: {
+          subAction: 'run' as const,
+          subActionParams: {
+            workflowId: 'wf-1',
+            alertStates: { new: true, ongoing: true, recovered: true },
+          },
+        },
+        ruleUrl: 'https://example.com/rule',
+        spaceId: 'default',
+      });
+
+      const alertIds = result.subActionParams.inputs?.event?.alerts?.map((a: any) => a._id);
+      expect(alertIds).toEqual(['new-1', 'ongoing-1', 'recovered-1']);
+    });
+
     it('should handle missing workflowId gracefully', () => {
       const adapter = getWorkflowsConnectorAdapter();
 
