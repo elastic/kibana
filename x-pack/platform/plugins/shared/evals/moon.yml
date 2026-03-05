@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/storage-adapter'
+  - '@kbn/es-errors'
   - '@kbn/evals-common'
   - '@kbn/i18n'
   - '@kbn/react-kibana-context-render'
