@@ -9,10 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import type {
   HealthHistory,
-  RuleInfo,
-  RuleInfoWithPercentiles,
   SpaceHealthOverviewStats,
   TopRulesByMetrics,
+  RuleInfo,
+  RuleInfoWithPercentiles,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 import type { RuleExecutionStatsAggregationLevel } from '../aggregations/rule_execution_stats';

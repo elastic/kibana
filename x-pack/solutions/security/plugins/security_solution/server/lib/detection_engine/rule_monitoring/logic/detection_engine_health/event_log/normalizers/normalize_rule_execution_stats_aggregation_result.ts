@@ -6,25 +6,21 @@
  */
 
 import type {
+  HealthOverviewStats,
   LogLevel,
+  NumberOfDetectedGaps,
+  NumberOfExecutions,
+  NumberOfLoggedMessages,
   RuleExecutionStatus,
+  TopMessages,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevelEnum,
   RuleExecutionStatusEnum,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
-
 import type { RawData } from '../../../utils/normalization';
 import type { RuleExecutionStatsAggregationLevel } from '../aggregations/rule_execution_stats';
 import { normalizeAggregatedMetric } from './normalize_aggregated_metric';
-
-import type {
-  HealthOverviewStats,
-  NumberOfDetectedGaps,
-  NumberOfExecutions,
-  NumberOfLoggedMessages,
-  TopMessages,
-} from '../aggregations/types';
 
 export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,

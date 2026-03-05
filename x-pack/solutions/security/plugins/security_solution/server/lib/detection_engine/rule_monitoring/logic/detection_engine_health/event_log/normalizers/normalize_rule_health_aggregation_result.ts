@@ -7,8 +7,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type {
+  HealthOverviewStats,
+  HealthHistory,
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { HealthOverInterval } from '../aggregations/types';
 import type { RawData } from '../../../utils/normalization';
-import type { HealthHistory, HealthOverInterval, HealthOverviewStats } from '../aggregations/types';
 import { normalizeRuleExecutionStatsAggregationResult } from './normalize_rule_execution_stats_aggregation_result';
 
 export const normalizeRuleHealthAggregationResult = (

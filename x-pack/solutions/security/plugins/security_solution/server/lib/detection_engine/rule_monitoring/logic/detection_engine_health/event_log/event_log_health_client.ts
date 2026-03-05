@@ -25,12 +25,12 @@ import {
 } from '../../event_log/event_log_constants';
 import { kqlOr } from '../../utils/kql';
 import type { IRuleSpacesClient } from '../rule_spaces/rule_spaces_client';
-import { getRuleHealthAggregation } from './aggregations/health_stats_for_rule';
-import { getSpacesHealthAggregation } from './aggregations/get_spaces_health_aggregation';
 import {
   normalizeRuleHealthAggregationResult,
   normalizeSpacesHealthAggregationResult,
 } from './normalizers';
+import { getRuleHealthAggregation } from './aggregations/health_stats_for_rule';
+import { getSpacesHealthAggregation } from './aggregations/get_spaces_health_aggregation';
 import type { HealthOverInterval, SpaceHealthOverInterval } from './aggregations/types';
 
 /**
