@@ -16,7 +16,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
-import { EntityStoreGlobalStateClient } from '../domain/definitions/saved_objects';
+import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];

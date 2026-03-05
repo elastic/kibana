@@ -13,7 +13,7 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
-import type { LogExtractionConfig } from '../../domain/definitions/saved_objects';
+import type { LogExtractionConfig } from '../../domain/saved_objects';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**

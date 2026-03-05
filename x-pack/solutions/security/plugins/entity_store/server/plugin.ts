@@ -19,10 +19,7 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import {
-  EngineDescriptorType,
-  EntityStoreGlobalStateType,
-} from './domain/definitions/saved_objects';
+import { EngineDescriptorType, EntityStoreGlobalStateType } from './domain/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud/crud_client';

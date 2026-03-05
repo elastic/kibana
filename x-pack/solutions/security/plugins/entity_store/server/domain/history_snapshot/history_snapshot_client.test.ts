@@ -53,7 +53,7 @@ describe('HistorySnapshotClient', () => {
       esClient: mockEsClient,
       namespace,
       globalStateClient:
-        mockGlobalStateClient as unknown as import('../definitions/saved_objects').EntityStoreGlobalStateClient,
+        mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
     });
   });
 
@@ -134,7 +134,7 @@ describe('HistorySnapshotClient', () => {
         esClient: mockEsClient,
         namespace,
         globalStateClient:
-          mockGlobalStateClient as unknown as import('../definitions/saved_objects').EntityStoreGlobalStateClient,
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
       });
 
       const result = await client.runHistorySnapshot();

@@ -31,12 +31,12 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import type { LogExtractionConfig } from '../definitions/saved_objects';
+import type { LogExtractionConfig } from '../saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
-} from '../definitions/saved_objects';
+} from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { parseDurationToMs } from '../../infra/time';
 import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';

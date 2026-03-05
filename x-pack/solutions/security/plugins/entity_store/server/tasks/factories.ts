@@ -11,10 +11,7 @@ import type { EntityStoreCoreSetup } from '../types';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { CcsLogsExtractionClient } from '../domain/logs_extraction';
 import { CRUDClient } from '../domain/crud/crud_client';
-import {
-  EngineDescriptorClient,
-  EntityStoreGlobalStateClient,
-} from '../domain/definitions/saved_objects';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;

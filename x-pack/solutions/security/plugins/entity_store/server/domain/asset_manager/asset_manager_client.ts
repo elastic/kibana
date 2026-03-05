@@ -22,7 +22,7 @@ import {
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
   LogExtractionConfig,
-} from '../definitions/saved_objects';
+} from '../saved_objects';
 import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,

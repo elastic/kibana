@@ -15,10 +15,7 @@ import type {
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
-import {
-  EngineDescriptorClient,
-  EntityStoreGlobalStateClient,
-} from './domain/definitions/saved_objects';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud/crud_client';
