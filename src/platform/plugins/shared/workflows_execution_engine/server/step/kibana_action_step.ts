@@ -289,9 +289,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
 
-if (response.status === 204 || response.status === 304) {
-  return { status: response.status };
-}
-return response.json();
+    if (response.status === 204 || response.status === 304) {
+      return { status: response.status };
+    }
+    return response.json();
   }
 }
