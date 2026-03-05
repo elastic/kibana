@@ -56,7 +56,7 @@ const mapHistoryItem = (item: RuleChangeHistoryDocument): RuleHistoryResult => {
     timestamp: item['@timestamp'],
     id: event.id,
     ruleId: rule.id,
-    userId: user?.id,
+    username: user?.name,
     revision: rule.revision as number | undefined,
     previousRevision: object.oldvalues?.['attributes.revision'] as number | undefined,
     version: rule.version as number | undefined,

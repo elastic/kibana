@@ -259,21 +259,23 @@ export async function createRule<Params extends RuleParams = never>(
   );
 
   // Success? Track changes
-  const change = {
-    objectId: id,
-    objectType: RULE_SAVED_OBJECT_TYPE,
-    module: ruleType.solution,
-    after: {
-      attributes: ruleAttributes,
-      references,
-    },
-  };
-  context.changeTrackingService?.log(change, {
-    action: options?.action ?? RuleChangeTrackingAction.ruleCreate,
-    userId: username ?? 'unknown',
-    spaceId: context.spaceId,
-    data: { metadata: { originalRuleId: options?.originalId } },
-  });
+  if (context.changeTrackingService && ruleType.trackChanges) {
+    const change = {
+      objectId: id,
+      objectType: RULE_SAVED_OBJECT_TYPE,
+      module: ruleType.solution,
+      after: {
+        attributes: ruleAttributes,
+        references,
+      },
+    };
+    context.changeTrackingService.log(change, {
+      action: options?.action ?? RuleChangeTrackingAction.ruleCreate,
+      username: username ?? 'unknown',
+      spaceId: context.spaceId,
+      data: { metadata: { originalRuleId: options?.originalId } },
+    });
+  }
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

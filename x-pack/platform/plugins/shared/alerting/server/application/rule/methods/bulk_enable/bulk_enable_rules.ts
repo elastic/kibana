@@ -365,9 +365,10 @@ const bulkEnableRulesWithOCC = async (
   });
   context.changeTrackingService?.logBulk(changes, {
     action: RuleChangeTrackingAction.ruleEnable,
-    userId: username ?? 'unknown',
+    username: username ?? 'unknown',
     spaceId: context.spaceId,
     data: { metadata: { bulkCount: rulesToEnable.length } },
+    refresh: 'wait_for',
   });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping

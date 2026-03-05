@@ -64,7 +64,11 @@ export async function getHistoryForRule(
   }
 
   if (context.changeTrackingService?.initialized(module)) {
-    const opts: GetChangeHistoryOptions = {};
+    const { page = 1, perPage = 10 } = params;
+    const opts: GetChangeHistoryOptions = {
+      size: perPage,
+      from: (page - 1) * perPage,
+    };
     if (changeId) {
       opts.additionalFilters = [{ term: { 'event.id': changeId } }];
     }

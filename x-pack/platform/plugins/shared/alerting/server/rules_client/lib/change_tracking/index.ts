@@ -27,7 +27,7 @@ export const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
     monitoring: true,
     lastRun: true,
     nextRun: true,
-    mapped_params: true,
+    scheduledTaskId: true,
   },
 };
 
@@ -118,7 +118,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   async logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions) {
     this.logger.warn(
-      `ChangeTrackingService.logBulkChange(action: ${opts.action}, userId: ${opts.userId}, changes: ${changes.length})`
+      `ChangeTrackingService.logBulkChange(action: ${opts.action}, userId: ${opts.username}, changes: ${changes.length})`
     );
 
     // Group rule changes per solution
@@ -148,6 +148,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
             maskFields: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
           });
         } catch (err) {
+          // Just catch the error.
           const error = new Error(`Error saving change history: ${err}`, { cause: err });
           this.logger.error(error);
         }

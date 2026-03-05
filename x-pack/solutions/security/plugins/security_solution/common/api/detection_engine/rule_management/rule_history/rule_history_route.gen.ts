@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { RuleObjectId } from '../../model/rule_schema/common_attributes.gen';
 
@@ -22,17 +22,16 @@ export type RuleHistoryResult = z.infer<typeof RuleHistoryResult>;
 export const RuleHistoryResult = z.object({
   timestamp: z.string(),
   id: z.string(),
-  ruleId: z.string(),
-  userId: z.string(),
+  username: z.string(),
   revision: z.number().int().optional(),
   previousRevision: z.number().int().optional(),
   version: z.number().int().optional(),
   action: z.string().optional(),
   changes: z.array(z.string()).optional(),
-  oldvalues: z.object({}).optional(),
-  snapshot: z.object({}).optional(),
-  metadata: z.object({}).optional(),
-  rule: z.object({}).optional(),
+  oldvalues: z.unknown(),
+  snapshot: z.unknown(),
+  metadata: z.unknown(),
+  rule: z.unknown(),
 });
 
 export type RestoreRuleRequestQuery = z.infer<typeof RestoreRuleRequestQuery>;

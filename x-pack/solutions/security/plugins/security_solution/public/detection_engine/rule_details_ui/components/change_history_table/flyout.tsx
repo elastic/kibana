@@ -178,7 +178,7 @@ export const ChangeHistoryFlyout = ({ isOpen, onClose, change }: ChangeHistoryFl
             </>
           ) : null}
           <strong style={{ marginLeft: '0.5em' }}>{i18n.UPDATED_BY_LABEL}</strong>
-          {change.userId}
+          {change.username}
           {i18n.ON_DATE_LABEL}
           {moment(change.timestamp).format(DATE_DISPLAY_FORMAT_WITH_SECONDS)}
         </EuiText>

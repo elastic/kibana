@@ -383,22 +383,24 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     });
 
     // Success? Track changes
-    const change = {
-      objectId: id,
-      objectType: RULE_SAVED_OBJECT_TYPE,
-      module: ruleType.solution,
-      before: pick(originalRuleSavedObject, ['attributes', 'references']),
-      after: {
-        attributes: updatedRuleAttributes,
-        references: extractedReferences,
-      },
-    };
-    context.changeTrackingService?.log(change, {
-      action: action ?? RuleChangeTrackingAction.ruleUpdate,
-      userId: username ?? 'unknown',
-      spaceId: context.spaceId,
-      data: { metadata },
-    });
+    if (context.changeTrackingService && ruleType.trackChanges) {
+      const change = {
+        objectId: id,
+        objectType: RULE_SAVED_OBJECT_TYPE,
+        module: ruleType.solution,
+        before: pick(originalRuleSavedObject, ['attributes', 'references']),
+        after: {
+          attributes: updatedRuleAttributes,
+          references: extractedReferences,
+        },
+      };
+      context.changeTrackingService.log(change, {
+        action: action ?? RuleChangeTrackingAction.ruleUpdate,
+        username: username ?? 'unknown',
+        spaceId: context.spaceId,
+        data: { metadata },
+      });
+    }
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
 

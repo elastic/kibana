@@ -8,10 +8,13 @@
 import {
   EuiAvatar,
   EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTablePagination,
   EuiText,
   EuiTimeline,
   EuiTimelineItem,
@@ -19,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -59,9 +62,9 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   const {
     [RuleDetailTabs.history]: {
       state: {
-        pagination: { pageIndex, pageSize },
+        pagination: { activePage, itemsPerPage },
       },
-      // actions: { setPageIndex, setPageSize },
+      actions: { setActivePage, setItemsPerPage },
     },
   } = useRuleDetailsContext();
 
@@ -72,8 +75,8 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   const { data, isFetching } = useChangeHistory({
     id: ruleId,
     rule,
-    page: pageIndex,
-    perPage: pageSize,
+    page: activePage + 1,
+    perPage: itemsPerPage,
   });
   // const items = data?.items || [];
   const maxItems = (data?.total ?? 1) + 1;
@@ -100,7 +103,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
         >
           <div>
             {`On ${moment(item.timestamp).format(DATE_DISPLAY_FORMAT)} `}
-            <EuiBadge color="hollow">{item.userId}</EuiBadge>
+            <EuiBadge color="hollow">{item.username}</EuiBadge>
             {template({ ...item, changes: visibleChanges }, euiTheme)}
           </div>
           <EuiLink
@@ -117,28 +120,6 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
     );
   });
 
-  // TODO: Only at the end (watch out for pagination)
-  items?.push(
-    <EuiTimelineItem
-      icon={<EuiAvatar name="Elastic" iconType="logoElastic" color={backgroundBasePrimary} />}
-    >
-      <EuiText
-        key={'end'}
-        css={css`
-          padding: ${euiTheme.size.s} ${euiTheme.size.s};
-          border-radius: 6px;
-          background-color: ${backgroundBasePrimary};
-        `}
-        size="s"
-      >
-        <p>
-          {`On ${moment(data?.startDate).format(DATE_DISPLAY_FORMAT)} `}
-          {`Rule history tracking started`}
-        </p>
-      </EuiText>
-    </EuiTimelineItem>
-  );
-
   //   // Callbacks
   // const onTableChangeCallback = useCallback(
   //   ({ page }: CriteriaWithPagination<ChangeHistoryResult>) => {
@@ -150,14 +131,41 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   // );
 
   // Memoized state
-  // const pagination = useMemo(() => {
-  //   return {
-  //     pageIndex: pageIndex - 1,
-  //     pageSize,
-  //     totalItemCount: maxItems > 50 ? 50 : maxItems,
-  //     pageSizeOptions: [10, 20, 50],
-  //   };
-  // }, [maxItems, pageIndex, pageSize]);
+  const pagination = useMemo(() => {
+    const pageCount = Math.ceil(maxItems / itemsPerPage);
+    return {
+      activePage,
+      itemsPerPage,
+      totalItemCount: maxItems > 50 ? 50 : maxItems,
+      itemsPerPageOptions: [10, 20, 50],
+      pageCount,
+      lastPage: activePage + 1 === pageCount,
+    };
+  }, [maxItems, activePage, itemsPerPage]);
+
+  // Last item on last page contains
+  // the date rule history tracking started
+  if (pagination.lastPage)
+    items?.push(
+      <EuiTimelineItem
+        icon={<EuiAvatar name="Elastic" iconType="logoElastic" color={backgroundBasePrimary} />}
+      >
+        <EuiText
+          key={'end'}
+          css={css`
+            padding: ${euiTheme.size.s} ${euiTheme.size.s};
+            border-radius: 6px;
+            background-color: ${backgroundBasePrimary};
+          `}
+          size="s"
+        >
+          <p>
+            {`On ${moment(data?.startDate).format(DATE_DISPLAY_FORMAT)} `}
+            {`Rule history tracking started`}
+          </p>
+        </EuiText>
+      </EuiTimelineItem>
+    );
 
   return (
     <EuiPanel data-test-subj="executionLogContainer" hasBorder>
@@ -197,6 +205,23 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
       </UtilityBar>
       <EuiSpacer size="s" />
       <EuiTimeline aria-label="Change History timeline">{items}</EuiTimeline>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiTablePagination
+            aria-label="Change History pagination"
+            pageCount={pagination.pageCount}
+            activePage={pagination.activePage}
+            onChangePage={(p) => setActivePage(p)}
+            onChangeItemsPerPage={(n) => {
+              setActivePage(0);
+              setItemsPerPage(n);
+            }}
+            itemsPerPage={pagination.itemsPerPage}
+            itemsPerPageOptions={pagination.itemsPerPageOptions}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <ChangeHistoryFlyout
         isOpen={isFlyoutOpen}
         onClose={() => setIsFlyoutOpen(false)}

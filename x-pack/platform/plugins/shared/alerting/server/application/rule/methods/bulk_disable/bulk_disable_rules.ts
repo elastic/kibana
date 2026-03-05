@@ -80,7 +80,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
+          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }), // here
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -261,9 +261,10 @@ const bulkDisableRulesWithOCC = async (
   });
   context.changeTrackingService?.logBulk(changes, {
     action: RuleChangeTrackingAction.ruleDisable,
-    userId: username ?? 'unknown',
+    username: username ?? 'unknown',
     spaceId: context.spaceId,
     data: { metadata: { bulkCount: rulesToDisable.length } },
+    refresh: 'wait_for',
   });
 
   const taskIdsToDisable: string[] = [];

@@ -202,6 +202,7 @@ async function saveBulkUpdatedRules({
     });
 
     // 1. Track changes
+    // TODO: Remove items that failed
     const changes = rules.map((rule) => {
       const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
       const original = originalRules.find((r) => rule.id === r.id);
@@ -214,7 +215,7 @@ async function saveBulkUpdatedRules({
       };
     }) as RuleChange[];
     context.changeTrackingService?.logBulk(changes, {
-      userId: (await context.getUserName()) ?? 'unknown',
+      username: (await context.getUserName()) ?? 'unknown',
       action: RuleChangeTrackingAction.ruleUpdate,
       spaceId: context.spaceId,
       data: { metadata: { bulkCount: rules.length } },

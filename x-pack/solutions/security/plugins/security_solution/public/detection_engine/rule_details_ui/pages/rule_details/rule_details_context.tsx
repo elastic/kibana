@@ -23,8 +23,8 @@ import { RuleDetailTabs } from './use_rule_details_tabs';
 
 export interface HistoryTableState {
   pagination: {
-    pageIndex: number;
-    pageSize: number;
+    activePage: number;
+    itemsPerPage: number;
   };
 }
 
@@ -110,8 +110,8 @@ const DEFAULT_STATE: ExecutionLogTableState = {
 };
 
 export interface HistoryTableActions {
-  setPageIndex: React.Dispatch<React.SetStateAction<number>>;
-  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  setActivePage: React.Dispatch<React.SetStateAction<number>>;
+  setItemsPerPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export interface ExecutionLogTableActions {
@@ -170,28 +170,24 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
   const [showSourceEventTimeRange, setShowSourceEventTimeRange] = useState<boolean>(
     storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY) ?? false
   );
-  // Pagination state
+  // Pagination state (execution results)
   const [pageIndex, setPageIndex] = useState(1);
-  const [pageIndexHistory, setPageIndexHistory] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const [pageSizeHistory, setPageSizeHistory] = useState(10);
   const [sortField, setSortField] = useState<keyof RuleExecutionResult>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
+  // Pagination state (history)
+  const [activePage, setActivePage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // // End Execution Log Table tab
 
   const providerValue = useMemo<RuleDetailsContextType>(
     () => ({
       [RuleDetailTabs.history]: {
         state: {
-          pagination: {
-            pageIndex: pageIndexHistory,
-            pageSize: pageSizeHistory,
-          },
+          pagination: { activePage, itemsPerPage },
         },
-        actions: {
-          setPageIndex: setPageIndexHistory,
-          setPageSize: setPageSizeHistory,
-        },
+        actions: { setActivePage, setItemsPerPage },
       },
       [RuleDetailTabs.executionResults]: {
         state: {
@@ -235,8 +231,8 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
       },
     }),
     [
-      pageIndexHistory,
-      pageSizeHistory,
+      activePage,
+      itemsPerPage,
       recentlyUsedRanges,
       refreshInterval,
       isPaused,

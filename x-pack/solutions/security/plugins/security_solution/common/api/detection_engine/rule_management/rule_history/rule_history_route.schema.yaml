@@ -72,7 +72,7 @@ paths:
                     total: 4
                     items:
                       - timestamp: '2025-07-02T10:05:19.613Z'
-                        userId: 'bobpurton'
+                        username: 'bobpurton'
                         message: 'Rule installed'
                         revision: 256
                         changedFields:
@@ -117,14 +117,14 @@ components:
         - timestamp
         - id
         - ruleId
-        - userId
+        - username
         - rule
       properties:
         timestamp:
           type: string
         id:
           type: string
-        userId:
+        username:
           type: string
         revision:
           type: integer
@@ -138,11 +138,7 @@ components:
           type: array
           items:
             type: string
-        oldvalues:
-          type: object
-        snapshot:
-          type: object
-        metadata:
-          type: object
-        rule:
-          type: object
+        oldvalues: {}
+        snapshot: {}
+        metadata: {}
+        rule: {}

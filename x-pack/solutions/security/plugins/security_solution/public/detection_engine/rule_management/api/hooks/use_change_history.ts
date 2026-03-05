@@ -22,7 +22,7 @@ export const ChangeHistoryResult = z.object({
   revision: z.number().int().optional(),
   previousRevision: z.number().int().optional(),
   version: z.number().int().optional(),
-  userId: z.string(),
+  username: z.string(),
   action: z.string(),
   changes: z.array(z.string()),
   oldvalues: z.object({}).passthrough().optional(),

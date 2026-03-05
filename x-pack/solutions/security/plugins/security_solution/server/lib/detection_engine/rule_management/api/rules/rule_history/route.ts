@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DETECTION_ENGINE_RULES_URL_HISTORY } from '../../../../../../../common/constants';
 import type { RuleHistoryResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
