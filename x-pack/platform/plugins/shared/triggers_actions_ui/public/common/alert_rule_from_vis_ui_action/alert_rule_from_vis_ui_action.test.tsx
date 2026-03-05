@@ -95,6 +95,7 @@ const startDependenciesMock = {
 const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
 // FLAKY: https://github.com/elastic/kibana/issues/255104
+// FLAKY: https://github.com/elastic/kibana/issues/255103
 describe.skip('AlertRuleFromVisAction', () => {
   const action = new AlertRuleFromVisAction(
     ruleTypeRegistry,
