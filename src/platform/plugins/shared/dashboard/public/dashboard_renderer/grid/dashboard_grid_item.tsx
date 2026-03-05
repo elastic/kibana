@@ -237,6 +237,10 @@ const dashboardGridItemStyles = {
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
         },
+        // Call out focused panels with a simple border moved here because are not a part of highlight styles
+        '&.dshDashboardGrid__item--focused .embPanel': {
+          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
+        },
       },
       printViewportVisStyles(context),
     ]),
@@ -257,6 +261,10 @@ const dashboardGridItemStylesWithHighlight = {
         },
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
+        },
+        // Call out focused panels with a simple border moved here because are not a part of highlight styles
+        '&.dshDashboardGrid__item--focused .embPanel': {
+          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
       },
       getHighlightStyles(context),
