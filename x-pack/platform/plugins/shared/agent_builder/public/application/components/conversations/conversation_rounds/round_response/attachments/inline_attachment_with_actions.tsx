@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
@@ -34,6 +35,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   screenContext,
 }) => {
   const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
+  const { conversationActions } = useConversationContext();
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
@@ -41,9 +43,11 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
-      return attachmentsService.updateOrigin(conversationId, attachment.id, origin);
+      const result = await attachmentsService.updateOrigin(conversationId, attachment.id, origin);
+      conversationActions.invalidateConversation();
+      return result;
     },
-    [attachmentsService, conversationId, attachment.id]
+    [attachmentsService, conversationId, attachment.id, conversationActions]
   );
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
@@ -68,7 +72,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     return null;
   }
 
-  const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   return (
     <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>

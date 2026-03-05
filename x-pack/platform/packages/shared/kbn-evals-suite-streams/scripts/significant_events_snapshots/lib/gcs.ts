@@ -60,6 +60,21 @@ export async function createSnapshot({
   const repoName = generateGcsRepoName({ runId });
   const featuresIndex = getSigeventsSnapshotFeaturesIndex(snapshotName);
   const indices = `logs*,${featuresIndex}`;
+
+  try {
+    await esClient.snapshot.get({ repository: repoName, snapshot: snapshotName });
+    throw new Error(
+      `Snapshot "${repoName}/${snapshotName}" already exists. ` +
+        `Use a different --run-id or delete it manually:\n` +
+        `  DELETE _snapshot/${repoName}/${snapshotName}`
+    );
+  } catch (err) {
+    const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (statusCode !== 404) {
+      throw err;
+    }
+  }
+
   log.info(`Creating snapshot "${repoName}/${snapshotName}" (indices: ${indices})`);
 
   const result = await esClient.snapshot.create({

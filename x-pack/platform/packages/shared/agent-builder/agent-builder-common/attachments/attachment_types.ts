@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * List of internal / built-in attachment types.
@@ -69,10 +69,18 @@ export const screenContextAttachmentDataSchema = z
     app: z.string().optional(),
     description: z.string().optional(),
     time_range: screenContextTimeRangeSchema.optional(),
-    additional_data: z.record(z.string()).optional(),
+    additional_data: z.record(z.string(), z.string()).optional(),
   })
-  .refine((data) => {
-    return data.url || data.app || data.description || data.time_range || data.additional_data;
+  .check((ctx) => {
+    // at least one of the fields must be present
+    const data = ctx.value;
+    if (!data.url && !data.app && !data.description && !data.additional_data) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'At least one of url, app, description, or additional_data must be present',
+        input: data,
+      });
+    }
   });
 
 /**
@@ -98,7 +106,7 @@ export const visualizationTimeRangeSchema = z.object({
 
 export const visualizationAttachmentDataSchema = z.object({
   query: z.string(),
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   chart_type: z.string(),
   esql: z.string(),
   time_range: visualizationTimeRangeSchema.optional(),

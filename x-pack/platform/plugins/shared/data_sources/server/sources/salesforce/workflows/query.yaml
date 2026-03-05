@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.salesforce.query'
+description: 'Run a SOQL query against Salesforce. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl for more.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: soql
+    type: string
+    required: true
+    description: "SOQL query string, e.g. SELECT Id, Name FROM Account LIMIT 10"
+  - name: next_records_url
+    type: string
+    required: false
+    description: "Pagination URL from previous response's nextRecordsUrl"
+steps:
+  - name: query
+    type: salesforce.query
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      soql: "${{inputs.soql}}"
+      nextRecordsUrl: "${{inputs.next_records_url}}"
