@@ -14,7 +14,8 @@ import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/grap
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 
-export function graphBasicTests({ getService }: FtrProviderContext) {
+// eslint-disable-next-line import/no-default-export
+export default function graphBasicTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const logger = getService('log');
 
