@@ -45,6 +45,9 @@ interface TemplateFormLayoutProps {
   isSaving?: boolean;
   onCreate: (data: YamlEditorFormValues) => Promise<void>;
   isEdit?: boolean;
+  storageKey: string;
+  initialValue: string;
+  templateId?: string;
 }
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
@@ -54,6 +57,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   isSaving,
   onCreate,
   isEdit = false,
+  storageKey,
+  initialValue,
+  templateId,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
@@ -157,7 +163,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
               className="eui-fullHeight"
               flexPanel={
                 <div css={styles.editorPanel}>
-                  <TemplateYamlEditor />
+                  <TemplateYamlEditor
+                    storageKey={storageKey}
+                    initialValue={initialValue}
+                    templateId={templateId}
+                  />
                 </div>
               }
               minFlexPanelSize={MIN_EDITOR_WIDTH}

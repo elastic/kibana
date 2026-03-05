@@ -10,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { TemplateYamlEditor } from './template_form';
 import { TestProviders } from '../../../common/mock';
+import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
@@ -35,7 +36,10 @@ describe('TemplateFormFields', () => {
       return (
         <TestProviders>
           <FormProvider {...form}>
-            <TemplateYamlEditor />
+            <TemplateYamlEditor
+              storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}
+              initialValue={definition}
+            />
           </FormProvider>
         </TestProviders>
       );

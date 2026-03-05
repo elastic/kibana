@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import type { CaseSeverity } from '../../../../common/types/domain';
 import { SeverityHealth } from '../../severity/config';

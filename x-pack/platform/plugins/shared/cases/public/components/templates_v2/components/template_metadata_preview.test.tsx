@@ -19,6 +19,7 @@ jest.mock('../../severity/config', () => ({
 const defaultProps: TemplateMetadataPreviewProps = {
   parsedTemplate: {
     name: 'Test Template',
+    fields: [],
   },
 };
 
@@ -35,7 +36,11 @@ describe('TemplateMetadataPreview', () => {
 
   it('renders description when provided', () => {
     renderComponent({
-      parsedTemplate: { name: 'Test', description: 'A test description' },
+      parsedTemplate: {
+        name: 'Test',
+        description: 'A test description',
+        fields: [],
+      },
     });
 
     expect(screen.getByText('Description')).toBeInTheDocument();
@@ -50,7 +55,11 @@ describe('TemplateMetadataPreview', () => {
 
   it('renders severity when provided', () => {
     renderComponent({
-      parsedTemplate: { name: 'Test', severity: 'high' },
+      parsedTemplate: {
+        name: 'Test',
+        severity: 'high',
+        fields: [],
+      },
     });
 
     expect(screen.getByText('Severity')).toBeInTheDocument();
@@ -65,7 +74,11 @@ describe('TemplateMetadataPreview', () => {
 
   it('renders category when provided', () => {
     renderComponent({
-      parsedTemplate: { name: 'Test', category: 'Security' },
+      parsedTemplate: {
+        name: 'Test',
+        category: 'Security',
+        fields: [],
+      },
     });
 
     expect(screen.getByText('Category')).toBeInTheDocument();
@@ -80,7 +93,11 @@ describe('TemplateMetadataPreview', () => {
 
   it('renders tags when provided', () => {
     renderComponent({
-      parsedTemplate: { name: 'Test', tags: ['tag-one', 'tag-two'] },
+      parsedTemplate: {
+        name: 'Test',
+        tags: ['tag-one', 'tag-two'],
+        fields: [],
+      },
     });
 
     expect(screen.getByText('Tags')).toBeInTheDocument();
@@ -90,7 +107,11 @@ describe('TemplateMetadataPreview', () => {
 
   it('does not render tags when the array is empty', () => {
     renderComponent({
-      parsedTemplate: { name: 'Test', tags: [] },
+      parsedTemplate: {
+        name: 'Test',
+        tags: [],
+        fields: [],
+      },
     });
 
     expect(screen.queryByText('Tags')).not.toBeInTheDocument();
@@ -110,6 +131,7 @@ describe('TemplateMetadataPreview', () => {
         severity: 'critical',
         category: 'Observability',
         tags: ['alpha', 'beta'],
+        fields: [],
       },
     });
 

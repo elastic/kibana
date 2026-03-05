@@ -16,6 +16,7 @@ import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesTemplatesNavigation } from '../../../../common/navigation';
+import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 
 import * as i18n from '../../translations';
 
@@ -57,6 +58,8 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
       title={i18n.ADD_TEMPLATE_TITLE}
       isSaving={isSaving}
       onCreate={handleCreate}
+      storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}
+      initialValue={exampleTemplateDefinition}
     />
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { dump as yamlDump } from 'js-yaml';
@@ -14,6 +14,7 @@ import type { YamlEditorFormValues } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
 import { useUpdateTemplate } from '../../hooks/use_update_template';
 import { TemplateFormLayout } from '../../components/template_form_layout';
+import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import * as i18n from '../../translations';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,9 +26,17 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
+  // Server version as initial value - useDebouncedYamlEdit will use WIP from storage if exists
+  const serverDefinition = useMemo(() => {
+    if (template) {
+      return yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
+    }
+    return '';
+  }, [template]);
+
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
-      definition: '',
+      definition: serverDefinition,
     },
   });
 
@@ -66,6 +75,9 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       isSaving={isSaving}
       onCreate={handleSave}
       isEdit
+      storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorEditState}
+      initialValue={serverDefinition}
+      templateId={templateId}
     />
   );
 };

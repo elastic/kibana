@@ -10,6 +10,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useDebouncedYamlEdit } from './use_debounced_yaml_edit';
 import { exampleTemplateDefinition } from '../field_types/constants';
+import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 
 describe('useDebouncedYamlEdit', () => {
   const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
@@ -17,6 +18,8 @@ describe('useDebouncedYamlEdit', () => {
   );
 
   const mockOnChange = jest.fn();
+  const testStorageKey = LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState;
+  const testInitialValue = exampleTemplateDefinition;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,25 +33,37 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('returns initial value from local storage or default', () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     expect(result.current.value).toBe(exampleTemplateDefinition);
   });
 
   it('returns isSaving as false initially', () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     expect(result.current.isSaving).toBe(false);
   });
 
   it('returns isSaved as false initially', () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     expect(result.current.isSaved).toBe(false);
   });
 
   it('sets isSaving to true immediately when onChange is called', () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('new value');
@@ -59,7 +74,10 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('saves to local storage after debounce delay', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('new yaml content');
@@ -81,13 +99,18 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('calls onChangeCallback after debounce delay', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
+
+    // onChangeCallback is called on mount with initial value
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledWith(testInitialValue);
 
     act(() => {
       result.current.onChange('new yaml content');
     });
-
-    expect(mockOnChange).not.toHaveBeenCalled();
 
     act(() => {
       jest.advanceTimersByTime(300);
@@ -97,11 +120,14 @@ describe('useDebouncedYamlEdit', () => {
       expect(mockOnChange).toHaveBeenCalledWith('new yaml content');
     });
 
-    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
   });
 
   it('resets isSaved to false after indicator duration', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('new value');
@@ -125,7 +151,14 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('debounces multiple rapid changes', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
+
+    // onChangeCallback is called on mount with initial value
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledWith(testInitialValue);
 
     act(() => {
       result.current.onChange('value 1');
@@ -147,21 +180,22 @@ describe('useDebouncedYamlEdit', () => {
       result.current.onChange('value 3');
     });
 
-    expect(mockOnChange).not.toHaveBeenCalled();
-
     act(() => {
       jest.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledTimes(1);
+      expect(mockOnChange).toHaveBeenCalledTimes(2);
     });
 
     expect(mockOnChange).toHaveBeenCalledWith('value 3');
   });
 
   it('clears previous saved indicator timeout when saving again', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('first change');
@@ -201,21 +235,33 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('flushes pending changes on unmount', () => {
-    const { result, unmount } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result, unmount } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
+
+    // onChangeCallback is called on mount with initial value
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledWith(testInitialValue);
 
     act(() => {
       result.current.onChange('pending value');
     });
 
-    expect(mockOnChange).not.toHaveBeenCalled();
-
     unmount();
 
     expect(mockOnChange).toHaveBeenCalledWith('pending value');
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
   });
 
   it('cancels pending debounce on unmount', () => {
-    const { result, unmount } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result, unmount } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
+
+    // onChangeCallback is called on mount with initial value
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
 
     act(() => {
       result.current.onChange('value');
@@ -223,13 +269,16 @@ describe('useDebouncedYamlEdit', () => {
 
     unmount();
 
-    // Flush is called on unmount, so callback should be invoked once
-    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    // Flush is called on unmount, so callback should be invoked twice (mount + flush)
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
     expect(mockOnChange).toHaveBeenCalledWith('value');
   });
 
   it('clears saved indicator timeout on unmount', () => {
-    const { result, unmount } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result, unmount } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('value');
@@ -252,7 +301,10 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('preserves value across re-renders', () => {
-    const { result, rerender } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result, rerender } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('persistent value');
@@ -268,7 +320,10 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('handles empty string values', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
 
     act(() => {
       result.current.onChange('');
@@ -284,7 +339,10 @@ describe('useDebouncedYamlEdit', () => {
   });
 
   it('handles very long YAML content', async () => {
-    const { result } = renderHook(() => useDebouncedYamlEdit(mockOnChange), { wrapper });
+    const { result } = renderHook(
+      () => useDebouncedYamlEdit(testStorageKey, testInitialValue, mockOnChange),
+      { wrapper }
+    );
     const longContent = 'field:\n'.repeat(1000);
 
     act(() => {

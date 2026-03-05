@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { useEuiTheme, EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CodeEditor } from '@kbn/code-editor';
 import { useFormContext } from 'react-hook-form';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
+import {
+  getTemplateDefinitionJsonSchema,
+  TEMPLATE_SCHEMA_URI,
+} from '../utils/template_json_schema';
+import { TemplateYamlEditorBase } from './template_yaml_editor';
 import * as i18n from '../translations';
 
 export interface YamlEditorFormValues {
   definition: string;
+}
+
+export interface TemplateYamlEditorProps {
+  storageKey: string;
+  initialValue: string;
+  templateId?: string;
 }
 
 const styles = {
@@ -36,13 +46,36 @@ const styles = {
     }),
 };
 
-export const TemplateYamlEditor = () => {
+export const TemplateYamlEditor = ({
+  storageKey,
+  initialValue,
+  templateId,
+}: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
   const { setValue } = useFormContext<YamlEditorFormValues>();
 
-  const { value, onChange, isSaving, isSaved } = useDebouncedYamlEdit((newValue) => {
-    setValue('definition', newValue);
-  });
+  const { value, onChange, isSaving, isSaved } = useDebouncedYamlEdit(
+    storageKey,
+    initialValue,
+    (newValue) => {
+      setValue('definition', newValue);
+    },
+    templateId
+  );
+
+  const schemas = useMemo(() => {
+    const jsonSchema = getTemplateDefinitionJsonSchema();
+    if (!jsonSchema) {
+      return [];
+    }
+    return [
+      {
+        uri: TEMPLATE_SCHEMA_URI,
+        fileMatch: ['*'],
+        schema: jsonSchema,
+      },
+    ];
+  }, []);
 
   return (
     <div css={styles.editorContainer(euiTheme)}>
@@ -56,14 +89,7 @@ export const TemplateYamlEditor = () => {
           <EuiBadge color="success">{i18n.TEMPLATE_SAVED}</EuiBadge>
         </div>
       )}
-      <CodeEditor
-        fullWidth
-        height={'100%'}
-        transparentBackground
-        languageId="yaml"
-        value={value}
-        onChange={onChange}
-      />
+      <TemplateYamlEditorBase value={value} onChange={onChange} schemas={schemas} />
     </div>
   );
 };
