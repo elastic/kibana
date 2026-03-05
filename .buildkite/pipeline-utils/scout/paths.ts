@@ -12,4 +12,5 @@ import { getKibanaDir } from '#pipeline-utils';
 
 export const SCOUT_OUTPUT_ROOT = path.resolve(getKibanaDir(), '.scout');
 
+export const SCOUT_TEST_TRACKS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'test_tracks');
 export const SCOUT_TEST_LANE_LOADS_PATH = path.resolve(SCOUT_OUTPUT_ROOT, 'test_lane_loads.json');

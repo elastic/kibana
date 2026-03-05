@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
-import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_LANE_LOADS_PATH } from './paths';
+import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths';
 import { scoutTestTrack, type ScoutTestTrack } from './test_tracks';
 import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
@@ -54,7 +54,7 @@ async function distributeScoutTestsOnLanes() {
   const testTracksDefinitionPaths = scoutTestTrack.definitions.all();
 
   if (testTracksDefinitionPaths.length === 0) {
-    throw new Error(`No Scout test tracks definition files found under ${SCOUT_OUTPUT_ROOT}`);
+    throw new Error(`No Scout test tracks definition files found under ${SCOUT_TEST_TRACKS_ROOT}`);
   }
 
   const steps: BuildkiteStep[] = [];

@@ -14,12 +14,13 @@ import { ScoutTestTarget, testTargets } from '@kbn/scout-info';
 import { SCOUT_CI_CONFIG_PATH } from '@kbn/scout-info';
 import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
 import yaml from 'js-yaml';
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { writeFileSync } from 'node:fs';
+import path from 'path';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
 
@@ -412,11 +413,11 @@ export const createTestTracks: Command<void> = {
     ],
     boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
-      outputPath: `${SCOUT_OUTPUT_ROOT}/test_tracks_${Date.now()}.json`,
+      outputPath: `${SCOUT_OUTPUT_ROOT}/test_tracks/${Date.now()}.json`,
     },
     help: `
     --testTarget                    (required)  One or more test target in the {location}-{arch}-{domain} format
-    --outputPath                    (optional)  Where to write the test track specification [default: ${SCOUT_OUTPUT_ROOT}/test_track_{timestamp}.json]
+    --outputPath                    (optional)  Where to write the test track specification [default: ${SCOUT_OUTPUT_ROOT}/test_tracks/{timestamp}.json]
     --targetRuntimeMinutes          (optional)  How long the test track should run [default: longest estimated load runtime]
     --minRuntimeMinutes             (optional)  Target runtime minutes shouldn't be lower than this
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
@@ -526,6 +527,7 @@ export const createTestTracks: Command<void> = {
     // Write track specifications
     const outputPath = flagsReader.requiredString('outputPath');
     log.info(`Writing test track specification to ${outputPath}`);
+    mkdirSync(path.dirname(outputPath), { recursive: true });
     writeFileSync(
       outputPath,
       JSON.stringify(

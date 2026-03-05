@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { SCOUT_OUTPUT_ROOT } from './paths';
+import { SCOUT_TEST_TRACKS_ROOT } from './paths';
 
 export interface ScoutTestLane {
   number: number;
@@ -58,11 +58,15 @@ export interface ScoutTestTrack {
 export const scoutTestTrack = {
   definitions: {
     all: () => {
+      if (!fs.existsSync(SCOUT_TEST_TRACKS_ROOT)) {
+        return [];
+      }
+
       return fs
-        .readdirSync(SCOUT_OUTPUT_ROOT)
-        .filter((filename) => filename.startsWith('test_tracks_') && filename.endsWith('.json'))
+        .readdirSync(SCOUT_TEST_TRACKS_ROOT)
+        .filter((filename) => filename.endsWith('.json'))
         .sort((a, b) => b.localeCompare(a))
-        .map((filename) => path.resolve(SCOUT_OUTPUT_ROOT, filename));
+        .map((filename) => path.resolve(SCOUT_TEST_TRACKS_ROOT, filename));
     },
 
     loadFromPath: (definitionPath: string): { tracks: ScoutTestTrack[] } => {

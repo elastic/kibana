@@ -13,17 +13,17 @@ import os from 'node:os';
 import { scoutTestTrack } from './test_tracks';
 
 jest.mock('./paths', () => ({
-  SCOUT_OUTPUT_ROOT: '',
+  SCOUT_TEST_TRACKS_ROOT: '',
 }));
 
 describe('scoutTestTrack.definitions', () => {
   let tmpDir: string;
-  let pathsMock: { SCOUT_OUTPUT_ROOT: string };
+  let pathsMock: { SCOUT_TEST_TRACKS_ROOT: string };
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-tracks-test-'));
     pathsMock = require('./paths');
-    pathsMock.SCOUT_OUTPUT_ROOT = tmpDir;
+    pathsMock.SCOUT_TEST_TRACKS_ROOT = tmpDir;
   });
 
   afterEach(() => {
@@ -31,39 +31,35 @@ describe('scoutTestTrack.definitions', () => {
   });
 
   describe('all', () => {
-    it('returns only files matching test_tracks_*.json pattern', () => {
-      fs.writeFileSync(path.join(tmpDir, 'test_tracks_123.json'), '{}');
-      fs.writeFileSync(path.join(tmpDir, 'test_tracks_456.json'), '{}');
-      fs.writeFileSync(path.join(tmpDir, 'other.json'), '{}');
-      fs.writeFileSync(path.join(tmpDir, 'test_track_789.json'), '{}');
+    it('returns only files matching *.json pattern', () => {
+      fs.writeFileSync(path.join(tmpDir, '123.json'), '{}');
+      fs.writeFileSync(path.join(tmpDir, '456.txt'), '{}');
+      fs.writeFileSync(path.join(tmpDir, 'not_a_number.json'), '{}');
+      fs.writeFileSync(path.join(tmpDir, '789.json'), '{}');
 
       const results = scoutTestTrack.definitions.all();
 
-      expect(results).toHaveLength(2);
-      expect(results.every((r) => path.basename(r).startsWith('test_tracks_'))).toBe(true);
+      expect(results).toHaveLength(3);
+      expect(results.every((r) => path.basename(r).endsWith('.json'))).toBe(true);
     });
 
     it('sorts files in descending order', () => {
-      fs.writeFileSync(path.join(tmpDir, 'test_tracks_100.json'), '{}');
-      fs.writeFileSync(path.join(tmpDir, 'test_tracks_300.json'), '{}');
-      fs.writeFileSync(path.join(tmpDir, 'test_tracks_200.json'), '{}');
+      fs.writeFileSync(path.join(tmpDir, '100.json'), '{}');
+      fs.writeFileSync(path.join(tmpDir, '300.json'), '{}');
+      fs.writeFileSync(path.join(tmpDir, '200.json'), '{}');
 
       const results = scoutTestTrack.definitions.all();
       const basenames = results.map((r) => path.basename(r));
 
-      expect(basenames).toEqual([
-        'test_tracks_300.json',
-        'test_tracks_200.json',
-        'test_tracks_100.json',
-      ]);
+      expect(basenames).toEqual(['300.json', '200.json', '100.json']);
     });
 
     it('returns full resolved paths', () => {
-      fs.writeFileSync(path.join(tmpDir, 'test_tracks_1.json'), '{}');
+      fs.writeFileSync(path.join(tmpDir, '142857.json'), '{}');
 
       const results = scoutTestTrack.definitions.all();
 
-      expect(results[0]).toBe(path.resolve(tmpDir, 'test_tracks_1.json'));
+      expect(results[0]).toBe(path.resolve(tmpDir, '142857.json'));
     });
 
     it('returns empty array when no matching files exist', () => {
