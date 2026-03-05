@@ -14,29 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
 
-export const renderApp = async (
-  core: CoreStart,
-  services: AppPluginStartDependencies,
-  element: HTMLElement
-) => {
-  const { InferenceEndpointsRouter } = await import('./inference_endpoints_router');
-
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider services={{ ...core, ...services }}>
-        <I18nProvider>
-          <Router history={services.history}>
-            <InferenceEndpointsRouter />
-          </Router>
-        </I18nProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
-};
-
 export const renderInferenceEndpointsMgmtApp = async (
   core: CoreStart,
   services: AppPluginStartDependencies,
