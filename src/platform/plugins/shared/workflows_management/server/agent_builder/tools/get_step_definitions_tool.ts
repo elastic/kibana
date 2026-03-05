@@ -153,12 +153,9 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
       },
       cacheMode: 'space',
     },
-    handler: async (
-      { stepType, search, category, includeFullSchema },
-      { spaceId, request }: { spaceId: string; request: unknown }
-    ) => {
+    handler: async ({ stepType, search, category, includeFullSchema }, { spaceId, request }) => {
       const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
-      const { connectorsByType } = await api.getAvailableConnectors(spaceId, request as never);
+      const { connectorsByType } = await api.getAvailableConnectors(spaceId, request);
       const enabledConnectorTypes = Object.fromEntries(
         Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
       );
