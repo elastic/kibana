@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, getIndexFromPromQLParams, isSubQuery } from '@kbn/esql-language';
-import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@kbn/esql-language';
+import { Parser, isSubQuery } from '@elastic/esql';
+import { getIndexFromPromQLParams } from '@kbn/esql-language';
+import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
 function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
   const promqlCommand = commands.find(({ name }) => name === 'promql');
