@@ -9,11 +9,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
+import { registerExecuteWorkflowTool } from './tools/execute_workflow_tool';
+import { registerExecuteWorkflowStepTool } from './tools/execute_workflow_step_tool';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
 import { registerGetWorkflowTool } from './tools/get_workflow_tool';
+import { registerGetWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status_tool';
 import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import type { AgentBuilderPluginSetupContract } from '../types';
@@ -39,6 +42,9 @@ export function registerWorkflowAgentBuilderIntegration({
   registerListWorkflowsTool(agentBuilder, api);
   registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
+  registerExecuteWorkflowTool(agentBuilder, api);
+  registerExecuteWorkflowStepTool(agentBuilder, api);
+  registerGetWorkflowExecutionStatusTool(agentBuilder, api);
 
   agentBuilder.skills.register(workflowAuthoringSkill);
 

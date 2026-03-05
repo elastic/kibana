@@ -8,11 +8,14 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { EXECUTE_WORKFLOW_TOOL_ID } from '../tools/execute_workflow_tool';
+import { EXECUTE_WORKFLOW_STEP_TOOL_ID } from '../tools/execute_workflow_step_tool';
 import { GET_CONNECTORS_TOOL_ID } from '../tools/get_connectors_tool';
 import { GET_EXAMPLES_TOOL_ID } from '../tools/get_examples_tool';
 import { GET_STEP_DEFINITIONS_TOOL_ID } from '../tools/get_step_definitions_tool';
 import { GET_TRIGGER_DEFINITIONS_TOOL_ID } from '../tools/get_trigger_definitions_tool';
 import { GET_WORKFLOW_TOOL_ID } from '../tools/get_workflow_tool';
+import { GET_WORKFLOW_EXECUTION_STATUS_TOOL_ID } from '../tools/get_workflow_execution_status_tool';
 import { LIST_WORKFLOWS_TOOL_ID } from '../tools/list_workflows_tool';
 import { VALIDATE_WORKFLOW_TOOL_ID } from '../tools/validate_workflow_tool';
 
@@ -40,6 +43,9 @@ Use this skill when the user wants to:
 - **validate_workflow**: Validate a complete workflow YAML string against all rules
 - **list_workflows**: List workflows in the user's environment
 - **get_workflow**: Retrieve a specific workflow by ID
+- **execute_workflow**: Execute a workflow (by ID or inline YAML) as a test run. Requires human confirmation.
+- **execute_workflow_step**: Execute a single step within a workflow for debugging. Requires human confirmation.
+- **get_workflow_execution_status**: Poll for the status and results of a workflow execution.
 
 ## Core Instructions
 
@@ -186,6 +192,30 @@ When the user asks you to fix a validation error:
 5. If the step type does NOT exist: tell the user and list similar alternatives
 6. NEVER guess or replace a step type with something unrelated
 
+### Executing and Testing Workflows
+
+You can execute workflows directly from the conversation to help users test and debug:
+
+1. **Execute a full workflow**: Use \`execute_workflow\` with either a workflow ID or inline YAML
+2. **Execute a single step**: Use \`execute_workflow_step\` to test individual steps with mock context
+3. **Check results**: Use \`get_workflow_execution_status\` to poll for execution status and results
+
+**Important**: Both execution tools require explicit human confirmation before running, because they
+perform real actions (API calls, sending notifications, writing data, etc.).
+
+**Typical testing flow:**
+1. Validate the workflow YAML with \`validate_workflow\`
+2. Execute with \`execute_workflow\` (user confirms)
+3. Poll status with \`get_workflow_execution_status\` until complete
+4. Review results and help debug any failures
+
+**Step-level debugging flow:**
+1. Identify the step to debug
+2. Prepare a context override with mock data for upstream step outputs
+3. Execute with \`execute_workflow_step\` (user confirms)
+4. Poll status with \`get_workflow_execution_status\`
+5. Inspect the step output and errors
+
 ### Best Practices
 
 1. Always search examples first before writing step YAML
@@ -201,5 +231,8 @@ When the user asks you to fix a validation error:
     VALIDATE_WORKFLOW_TOOL_ID,
     LIST_WORKFLOWS_TOOL_ID,
     GET_WORKFLOW_TOOL_ID,
+    EXECUTE_WORKFLOW_TOOL_ID,
+    EXECUTE_WORKFLOW_STEP_TOOL_ID,
+    GET_WORKFLOW_EXECUTION_STATUS_TOOL_ID,
   ],
 });
