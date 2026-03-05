@@ -73,9 +73,7 @@ describe('backfillScheduleIds', () => {
           attributes: {
             name: 'test-pack',
             enabled: true,
-            queries: [
-              { id: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'existing-uuid' },
-            ],
+            queries: [{ id: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'existing-uuid' }],
           },
         },
       ],
@@ -192,9 +190,7 @@ describe('backfillScheduleIds', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('version conflict for pack pack-1')
     );
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('backfilled pack pack-2')
-    );
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('backfilled pack pack-2'));
   });
 
   test('logs and skips on non-conflict errors', async () => {
