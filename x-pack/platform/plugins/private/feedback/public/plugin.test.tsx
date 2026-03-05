@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { FeedbackPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -29,10 +30,12 @@ describe('Feedback Plugin', () => {
       plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
       expect(coreStartMock.notifications.feedback.isEnabled).toHaveBeenCalled();
+      const [[{ content }]] = coreStartMock.chrome.navControls.registerRight.mock.calls;
       expect(coreStartMock.chrome.navControls.registerRight).toHaveBeenCalledWith({
         order: 1001,
-        mount: expect.any(Function),
+        content: expect.anything(),
       });
+      expect(React.isValidElement(content)).toBe(true);
     });
 
     it('should not register feedback button when feedback is disabled', () => {
