@@ -43,6 +43,7 @@ export async function registerObservabilityAgent({
         instructions:
           dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
+        ${getTimeRangeInstructions()}
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getTraceMetricFormatInstructions()}
@@ -56,6 +57,18 @@ export async function registerObservabilityAgent({
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
+}
+
+function getTimeRangeInstructions() {
+  return dedent(`
+    <time_range>
+    ### Time Range
+    The screen context attachment contains the user's currently selected time range (e.g. "Time range: now-15m to now").
+    Always pass this as the \`start\` and \`end\` parameters when calling tools, unless the user explicitly specifies a different time period.
+    Do not omit \`start\` and \`end\` — tools have inconsistent defaults, and omitting them leads to data from mismatched time windows being combined in a single answer.
+    If the user asks to compare with a previous period (e.g. "compared to yesterday"), you may query outside the selected range for that specific comparison.
+    </time_range>
+  `);
 }
 
 function getInvestigationInstructions() {
