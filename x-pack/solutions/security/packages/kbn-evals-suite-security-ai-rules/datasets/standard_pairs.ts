@@ -51,6 +51,11 @@ export const standardPairs: ReferenceRule[] = [
     category: 'privilege_escalation',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND process.parent.name == "mmc.exe"
+    AND process.parent.args == "WF.msc"
+    AND process.name != "WerFault.exe"`,
   },
 
   // Pair 2 — https://github.com/elastic/detection-rules/blob/main/rules/windows/defense_evasion_posh_obfuscation_high_number_proportion.toml
@@ -120,6 +125,17 @@ export const standardPairs: ReferenceRule[] = [
     category: 'credential_access',
     type: 'new_terms',
     language: 'kuery',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE event.category == "file"
+    AND host.os.type == "windows"
+    AND event.action == "open"
+    AND file.name == "web.config"
+    AND file.path like "*VirtualDirectories*"
+    AND NOT process.executable IN (
+      "C:\\\\Program Files\\\\Microsoft Security Client\\\\MsMpEng.exe",
+      "C:\\\\Program Files\\\\Windows Defender Advanced Threat Protection\\\\MsSense.exe",
+      "C:\\\\Windows\\\\System32\\\\MRT.exe"
+    )`,
   },
 
   // Pair 4 — https://github.com/elastic/detection-rules/blob/main/rules/linux/initial_access_telnet_auth_bypass_via_user_envar.toml
@@ -156,6 +172,11 @@ export const standardPairs: ReferenceRule[] = [
     category: 'initial_access',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "linux" AND event.type == "start"
+    AND event.action IN ("exec", "exec_event", "start", "ProcessRollup2", "executed")
+    AND process.name == "login" AND process.parent.name == "telnetd"
+    AND process.args like "-*f*"`,
   },
 
   // Pair 5 — https://github.com/elastic/detection-rules/blob/main/rules/linux/privilege_escalation_potential_bufferoverflow_attack.toml
@@ -187,6 +208,10 @@ export const standardPairs: ReferenceRule[] = [
     category: 'privilege_escalation',
     type: 'threshold',
     language: 'kuery',
+    esqlQuery: `FROM .alerts-security.* metadata _id, _version, _index
+| WHERE kibana.alert.rule.rule_id == "5c81fc9d-1eae-437f-ba07-268472967013"
+    AND host.os.type == "linux"
+    AND event.kind == "signal"`,
   },
 
   // Pair 6 — https://github.com/elastic/detection-rules/blob/main/rules/macos/persistence_loginwindow_plist_modification.toml
@@ -218,6 +243,12 @@ export const standardPairs: ReferenceRule[] = [
     category: 'persistence',
     type: 'query',
     language: 'kuery',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE event.category == "file"
+    AND host.os.type == "macos"
+    AND event.type != "deletion"
+    AND file.name == "com.apple.loginwindow.plist"
+    AND NOT process.name IN ("systemmigrationd", "DesktopServicesHelper", "diskmanagementd", "rsync", "launchd", "cfprefsd", "xpcproxy", "ManagedClient", "MCXCompositor", "backupd", "iMazing Profile Editor", "storagekitd", "CloneKitService")`,
   },
 
   // Pair 7 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/aws/ml_cloudtrail_rare_method_by_user.toml
@@ -280,6 +311,11 @@ export const standardPairs: ReferenceRule[] = [
     category: 'defense_evasion',
     type: 'query',
     language: 'kuery',
+    esqlQuery: `FROM logs-aws.cloudtrail* metadata _id, _version, _index
+| WHERE event.dataset == "aws.cloudtrail"
+    AND event.provider == "route53resolver.amazonaws.com"
+    AND event.action == "DeleteResolverQueryLogConfig"
+    AND event.outcome == "success"`,
   },
 
   // Pair 9 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/azure/persistence_entra_id_service_principal_created.toml
@@ -316,6 +352,17 @@ export const standardPairs: ReferenceRule[] = [
     category: 'persistence',
     type: 'query',
     language: 'kuery',
+    esqlQuery: `FROM logs-azure.auditlogs* metadata _id, _version, _index
+| WHERE event.dataset == "azure.auditlogs"
+    AND azure.auditlogs.operation_name == "Add service principal"
+    AND event.outcome IN ("success", "Success")
+    AND NOT azure.auditlogs.identity IN (
+      "Managed Service Identity",
+      "Windows Azure Service Management API",
+      "Microsoft Azure AD Internal - Jit Provisioning",
+      "AAD App Management",
+      "Power Virtual Agents Service"
+    )`,
   },
 
   // Pair 10 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/gcp/defense_evasion_gcp_logging_sink_deletion.toml
@@ -342,6 +389,10 @@ export const standardPairs: ReferenceRule[] = [
     category: 'defense_evasion',
     type: 'query',
     language: 'kuery',
+    esqlQuery: `FROM logs-gcp.audit* metadata _id, _version, _index
+| WHERE event.dataset == "gcp.audit"
+    AND event.action like "google.logging.v*.ConfigServiceV*.DeleteSink"
+    AND event.outcome == "success"`,
   },
 
   // Pair 11 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/o365/impact_security_compliance_potential_ransomware_activity.toml
@@ -373,6 +424,12 @@ export const standardPairs: ReferenceRule[] = [
     category: 'impact',
     type: 'query',
     language: 'kuery',
+    esqlQuery: `FROM logs-o365.audit* metadata _id, _version, _index
+| WHERE event.dataset == "o365.audit"
+    AND event.provider == "SecurityComplianceCenter"
+    AND event.category == "web"
+    AND rule.name IN ("Ransomware activity", "Potential ransomware activity")
+    AND event.outcome == "success"`,
   },
 
   // Pair 12 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/o365/credential_access_entra_id_device_reg_via_oauth_redirection.toml
@@ -411,6 +468,27 @@ export const standardPairs: ReferenceRule[] = [
     type: 'eql',
     language: 'eql',
     interval: '15m',
+    esqlQuery: `FROM logs-o365.audit* metadata _id, _version, _index
+| WHERE (
+    (event.action == "UserLoggedIn"
+      AND o365.audit.ExtendedProperties.RequestType == "OAuth2:Authorize"
+      AND o365.audit.ExtendedProperties.ResultStatusDetail == "Redirect"
+      AND o365.audit.UserType IN ("0", "2", "3", "10"))
+    OR
+    (event.action == "UserLoggedIn"
+      AND o365.audit.ExtendedProperties.RequestType == "OAuth2:Token"
+      AND o365.audit.ExtendedProperties.ResultStatusDetail == "Success")
+    OR
+    (event.dataset == "o365.audit" AND event.action == "Add registered users to device.")
+  )
+| EVAL Esql.step = CASE(
+    o365.audit.ExtendedProperties.RequestType == "OAuth2:Authorize", "oauth_authorize",
+    o365.audit.ExtendedProperties.RequestType == "OAuth2:Token", "oauth_token",
+    event.action == "Add registered users to device.", "device_registration",
+    "unknown"
+  )
+| STATS Esql.step_count = COUNT_DISTINCT(Esql.step) BY related.user
+| WHERE Esql.step_count >= 3`,
   },
 
   // Pair 13 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/google_workspace/collection_google_workspace_custom_gmail_route_created_or_modified.toml
@@ -437,6 +515,11 @@ export const standardPairs: ReferenceRule[] = [
     type: 'query',
     language: 'kuery',
     interval: '10m',
+    esqlQuery: `FROM logs-google_workspace.admin* metadata _id, _version, _index
+| WHERE event.dataset == "google_workspace.admin"
+    AND event.action IN ("CREATE_GMAIL_SETTING", "CHANGE_GMAIL_SETTING")
+    AND google_workspace.event.type == "EMAIL_SETTINGS"
+    AND google_workspace.admin.setting.name IN ("EMAIL_ROUTE", "MESSAGE_SECURITY_RULE")`,
   },
 
   // Pair 14 — https://github.com/elastic/detection-rules/blob/main/rules/linux/privilege_escalation_mount_launched_inside_container.toml
@@ -473,6 +556,22 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     category: 'privilege_escalation',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "linux" AND event.type == "start" AND event.action == "exec"
+    AND process.entry_leader.entry_meta.type == "container" AND process.name == "mount"
+    AND NOT (
+      process.parent.command_line like "*grep*" OR
+      process.parent.executable like (
+        "/usr/local/bin/dind",
+        "/run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io/*/longhorn-instance-manager",
+        "/run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io/*/longhorn-manager",
+        "/usr/sbin/update-binfmts",
+        "/usr/local/bin/engine-manager", "/usr/bin/timeout", "/opt/gitlab/embedded/bin/ruby",
+        "/usr/local/sbin/longhorn-manager", "/longhorn-share-manager",
+        "/usr/lib/systemd/systemd", "/lib/systemd/systemd"
+      ) OR
+      process.parent.args IN ("/usr/local/bin/instance-manager", "/usr/local/sbin/nsmounter")
+    )`,
   },
 
   // Pair 15 — https://github.com/elastic/detection-rules/blob/main/rules/network/command_and_control_vnc_virtual_network_computing_to_the_internet.toml
@@ -513,6 +612,12 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     category: 'command_and_control',
     type: 'query',
     language: 'kuery',
+    esqlQuery: `FROM logs-network_traffic.flow* metadata _id, _version, _index
+| WHERE (event.dataset == "network_traffic.flow" OR event.category IN ("network", "network_traffic"))
+    AND network.transport == "tcp"
+    AND destination.port >= 5800 AND destination.port <= 5810
+    AND CIDR_MATCH(source.ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+    AND NOT CIDR_MATCH(destination.ip, "10.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12", "192.168.0.0/16", "224.0.0.0/4", "240.0.0.0/4")`,
   },
 
   // Pair 16 — https://github.com/elastic/detection-rules/blob/main/rules/cross-platform/multiple_alerts_elastic_defend_netsecurity_by_host.toml
@@ -579,6 +684,8 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     type: 'threat_match',
     language: 'kuery',
     interval: '1h',
+    esqlQuery: `FROM logs-* metadata _id, _version, _index
+| WHERE source.ip IS NOT NULL OR destination.ip IS NOT NULL`,
   },
 
   // Pair 18 — https://github.com/elastic/detection-rules/blob/main/rules/integrations/okta/lateral_movement_multiple_sessions_for_single_user.toml
@@ -607,5 +714,10 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     type: 'threshold',
     language: 'kuery',
     interval: '30m',
+    esqlQuery: `FROM logs-okta.system* metadata _id, _version, _index
+| WHERE event.dataset == "okta.system"
+    AND okta.event_type == "user.session.start"
+    AND okta.authentication_context.external_session_id IS NOT NULL
+    AND NOT (okta.actor.id like "okta*" OR okta.actor.display_name like "okta*")`,
   },
 ];

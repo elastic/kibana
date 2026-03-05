@@ -52,6 +52,21 @@ export const complexPairs: ReferenceRule[] = [
     category: 'execution',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type IN ("linux", "macos") AND event.type == "start"
+    AND event.action IN ("exec", "ProcessRollup2", "start")
+    AND (
+      (process.name == "node" AND process.args == "install")
+      OR
+      process.parent.name == "node"
+    )
+| EVAL Esql.step = CASE(
+    process.name == "node" AND process.args == "install", "npm_install",
+    process.parent.name == "node", "node_child",
+    "unknown"
+  )
+| STATS Esql.step_count = COUNT_DISTINCT(Esql.step) BY host.id
+| WHERE Esql.step_count >= 2`,
   },
 
   // Complex 2 — https://github.com/elastic/detection-rules/blob/main/rules/cross-platform/execution_suspicious_genai_descendant_activity.toml
@@ -123,6 +138,11 @@ not process.env_vars like~ "RUNNER_TRACKING_ID=github_*"`,
     category: 'execution',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type IN ("linux", "macos") AND event.type == "start" AND event.action == "exec"
+    AND process.parent.name IN ("Runner.Worker", "Runner.Listener")
+    AND TO_LOWER(process.env_vars) like "runner_tracking_id*"
+    AND NOT TO_LOWER(process.env_vars) like "runner_tracking_id=github_*"`,
   },
 
   // Complex 4 — https://github.com/elastic/detection-rules/blob/main/rules/linux/execution_suspicious_pod_or_container_creation_command_execution.toml
@@ -170,6 +190,20 @@ process.command_line like~ (
     category: 'execution',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "linux" AND event.type == "start"
+    AND event.action IN ("exec", "exec_event", "start", "ProcessRollup2", "executed", "process_started")
+    AND (
+      (process.name == "kubectl" AND process.args == "run" AND process.args == "--restart=Never" AND process.args == "--")
+      OR
+      (process.name IN ("docker", "nerdctl", "ctl") AND process.args == "run")
+    )
+    AND process.args IN ("bash", "dash", "sh", "tcsh", "csh", "zsh", "ksh", "fish")
+    AND TO_LOWER(process.command_line) like (
+      "*atd*", "*cron*", "*/etc/rc.local*", "*/dev/tcp/*", "*/etc/init.d*", "*/etc/sudoers*", "*base64 *",
+      "*/etc/profile*", "*/etc/ssh*", "*/home/*/.ssh/*", "*/root/.ssh*", "*~/.ssh/*", "*autostart*",
+      "* ncat *", "* nc *", "* netcat *", "*socat*", "*/tmp/*", "*/dev/shm/*", "*/var/tmp/*"
+    )`,
   },
 
   // Complex 5 — https://github.com/elastic/detection-rules/blob/main/rules/linux/lateral_movement_kubeconfig_file_activity.toml
@@ -221,5 +255,25 @@ process.command_line like~ (
     category: 'lateral_movement',
     type: 'eql',
     language: 'eql',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "linux" AND event.type != "deletion"
+    AND file.path like (
+      "/root/.kube/config",
+      "/home/*/.kube/config",
+      "/etc/kubernetes/admin.conf",
+      "/etc/kubernetes/super-admin.conf",
+      "/etc/kubernetes/kubelet.conf",
+      "/etc/kubernetes/controller-manager.conf",
+      "/etc/kubernetes/scheduler.conf",
+      "/var/lib/*/kubeconfig"
+    )
+    AND NOT (
+      process.name IN ("kubeadm", "kubelet", "vcluster", "minikube", "kind") OR
+      (process.name == "sed" AND file.Ext.original.name like "sed*") OR
+      process.executable like (
+        "/usr/local/bin/k3d", "/usr/local/aws-cli/*/dist/aws", "/usr/local/bin/ks",
+        "/usr/local/bin/aws", "/usr/local/bin/kubectl"
+      )
+    )`,
   },
 ];

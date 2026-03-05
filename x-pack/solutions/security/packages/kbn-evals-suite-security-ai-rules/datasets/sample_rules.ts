@@ -29,6 +29,8 @@ export interface ReferenceRule {
   language?: string;
   /** Polling interval, e.g. '5m' */
   interval?: string;
+  /** Native ES|QL translation of the original query (for non-ES|QL rules) */
+  esqlQuery?: string;
 }
 
 /**
@@ -85,6 +87,20 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 47,
     from: 'now-9m',
     category: 'collection',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND (
+      (
+        (process.name IN ("rar.exe", "WinRAR.exe") OR process.code_signature.subject_name == "win.rar GmbH" OR
+         process.pe.original_file_name == "WinRAR.exe")
+        AND process.args == "a" AND process.args like ("-hp*", "-p*", "/hp*", "/p*")
+      ) OR
+      (
+        (process.name IN ("7z.exe", "7za.exe") OR process.pe.original_file_name IN ("7z.exe", "7za.exe"))
+        AND process.args == "a" AND process.args like "-p*"
+      )
+    )
+    AND NOT process.parent.executable like ("C:\\\\Program Files\\\\*.exe", "C:\\\\Program Files (x86)\\\\*.exe", "*:\\\\ManageEngine\\\\*\\\\jre\\\\bin\\\\java.exe", "*:\\\\Nox\\\\bin\\\\Nox.exe")`,
   },
   {
     id: 'lsass-malseclogon',
@@ -115,6 +131,11 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 73,
     from: 'now-9m',
     category: 'credential_access',
+    esqlQuery: `FROM logs-windows.sysmon_operational* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.code == "10"
+    AND winlog.event_data.TargetImage like "*:\\\\WINDOWS\\\\system32\\\\lsass.exe"
+    AND winlog.event_data.GrantedAccess == "0x1fffff"
+    AND winlog.event_data.CallTrace like "*seclogon.dll*"`,
   },
   {
     id: 'windows-defender-disabled-powershell',
@@ -144,6 +165,10 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 47,
     from: 'now-9m',
     category: 'defense_evasion',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND (process.name IN ("powershell.exe", "pwsh.exe", "powershell_ise.exe") OR process.pe.original_file_name IN ("powershell.exe", "pwsh.dll", "powershell_ise.exe"))
+    AND process.args == "Set-MpPreference" AND process.args like "-Disable*"`,
   },
   {
     id: 'remote-file-copy-powershell',
@@ -175,6 +200,11 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 47,
     from: 'now-9m',
     category: 'command_and_control',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND (process.name IN ("powershell.exe", "pwsh.exe", "powershell_ise.exe") OR process.pe.original_file_name IN ("powershell.exe", "pwsh.dll", "powershell_ise.exe"))
+    AND process.args like ("*Invoke-WebRequest*", "*iwr*", "*wget*", "*curl*", "*DownloadFile*", "*DownloadString*")
+    AND process.args like ("http*", "ftp*")`,
   },
   {
     id: 'mimikatz-powershell',
@@ -204,6 +234,10 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 99,
     from: 'now-9m',
     category: 'credential_access',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND (process.name IN ("powershell.exe", "pwsh.exe", "powershell_ise.exe") OR process.pe.original_file_name IN ("powershell.exe", "pwsh.dll", "powershell_ise.exe"))
+    AND process.args like ("*Invoke-Mimikatz*", "*DumpCreds*", "*sekurlsa*")`,
   },
   {
     id: 'clearing-windows-event-logs',
@@ -236,6 +270,13 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 47,
     from: 'now-9m',
     category: 'defense_evasion',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND (
+      (process.name == "wevtutil.exe" AND process.args == "cl") OR
+      (process.name IN ("powershell.exe", "pwsh.exe", "powershell_ise.exe") AND
+       process.args like ("*Clear-EventLog*", "*Remove-EventLog*", "*Limit-EventLog*"))
+    )`,
   },
   {
     id: 'suspicious-windows-utility-execution',
@@ -268,6 +309,13 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 73,
     from: 'now-9m',
     category: 'defense_evasion',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND (
+      (process.name == "mshta.exe" AND process.args like ("http*", "ftp*", "*.hta", "*.vbs", "javascript:*", "vbscript:*"))
+      OR
+      (process.name == "regsvr32.exe" AND process.args like ("http*", "ftp*", "/s", "-s", "/i", "-i", "scrobj.dll"))
+    )`,
   },
   {
     id: 'network-connection-windows-binary',
@@ -297,5 +345,10 @@ export const sampleRules: ReferenceRule[] = [
     riskScore: 47,
     from: 'now-9m',
     category: 'command_and_control',
+    esqlQuery: `FROM logs-endpoint.events.* metadata _id, _version, _index
+| WHERE host.os.type == "windows" AND event.type == "start"
+    AND process.name IN ("certutil.exe", "bitsadmin.exe", "mshta.exe", "regsvr32.exe", "rundll32.exe")
+    AND destination.port IN (80, 443, 8080, 8443)
+    AND NOT CIDR_MATCH(destination.ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8")`,
   },
 ];
