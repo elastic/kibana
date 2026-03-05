@@ -21,7 +21,6 @@ export const objectMappingWithFalseDynamic = mappings.object({
   properties: {},
 });
 
-// @ts-expect-error - object mappings must explicitly define dynamic
 export const objectMappingWithMissingDynamic = mappings.object({
   properties: {},
 });

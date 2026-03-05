@@ -70,6 +70,13 @@ describe('mappings', () => {
         "type": "object",
       }
     `);
+    expect(mappings.object({ properties: {} })).toMatchInlineSnapshot(`
+      Object {
+        "dynamic": false,
+        "properties": Object {},
+        "type": "object",
+      }
+    `);
   });
 
   it('Maps object properties to the correct mapping', () => {

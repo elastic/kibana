@@ -37,7 +37,7 @@ export type ObjectMapping<T = Record<string, AnyMapping>> = Omit<
   'dynamic' | 'properties'
 > & {
   type: 'object';
-  dynamic: StrictDynamic;
+  dynamic?: StrictDynamic;
   properties: T extends Record<string, AnyMapping> ? T : never;
 };
 

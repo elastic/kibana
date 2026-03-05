@@ -190,7 +190,7 @@ describe('Type checking with TypeScript compiler', () => {
     `);
   });
 
-  it('should require and restrict dynamic for object mappings', () => {
+  it('should default and restrict dynamic for object mappings', () => {
     const fixturePath = path.join(__dirname, '__fixture__', 'object_dynamic_example.ts');
 
     const program = createProgramForFixture(fixturePath);
@@ -199,33 +199,24 @@ describe('Type checking with TypeScript compiler', () => {
     const errorsByLine = groupDiagnosticsByLine(fixturePath, diagnostics);
 
     const errorLines = errorsByLine.map((error) => error.lineNumber);
-    expect(errorLines).toStrictEqual([25, 31, 37]);
+    expect(errorLines).toStrictEqual([30, 36]);
 
     expect(errorsByLine).toMatchInlineSnapshot(`
       Array [
         Object {
-          "errorMessage": "Argument of type '{ properties: {}; }' is not assignable to parameter of type 'WithoutTypeField<ObjectMapping<{}>>'.
-        Property 'dynamic' is missing in type '{ properties: {}; }' but required in type 'WithoutTypeField<ObjectMapping<{}>>'.",
-          "lineNumber": 25,
-          "tsErrorLine": Array [
-            "Type Error Explanation: object mappings must explicitly define dynamic",
-            "Error Line [25]: export const objectMappingWithMissingDynamic = mappings.object({",
-          ],
-        },
-        Object {
-          "errorMessage": "Type 'true' is not assignable to type 'StrictDynamic'.",
-          "lineNumber": 31,
+          "errorMessage": "Type 'true' is not assignable to type 'StrictDynamic | undefined'.",
+          "lineNumber": 30,
           "tsErrorLine": Array [
             "Type Error Explanation: true is not an allowed object dynamic value",
-            "Error Line [31]: dynamic: true,",
+            "Error Line [30]: dynamic: true,",
           ],
         },
         Object {
-          "errorMessage": "Type '\\"runtime\\"' is not assignable to type 'StrictDynamic'.",
-          "lineNumber": 37,
+          "errorMessage": "Type '\\"runtime\\"' is not assignable to type 'StrictDynamic | undefined'.",
+          "lineNumber": 36,
           "tsErrorLine": Array [
             "Type Error Explanation: runtime is not an allowed object dynamic value",
-            "Error Line [37]: dynamic: 'runtime',",
+            "Error Line [36]: dynamic: 'runtime',",
           ],
         },
       ]
