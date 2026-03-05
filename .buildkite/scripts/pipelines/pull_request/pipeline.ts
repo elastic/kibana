@@ -538,9 +538,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
 
-    // TODO: REMOVE ME!!
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/c4d_capacity_probe.yml'));
-
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     emitPipeline(pipeline);

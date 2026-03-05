@@ -36,8 +36,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4d-standard-16
-      diskType: hyperdisk-balanced
+      achineType: n2-standard-16
       zones: us-central1-c,us-central1-a
       diskSizeGb: 200
     key: build
