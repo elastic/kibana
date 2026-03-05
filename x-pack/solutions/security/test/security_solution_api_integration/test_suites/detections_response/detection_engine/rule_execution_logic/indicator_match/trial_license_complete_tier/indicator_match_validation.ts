@@ -8,18 +8,16 @@
 import expect from 'expect';
 
 import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-  waitForRulePartialFailure,
-} from '@kbn/detections-response-ftr-services';
-import { getThreatMatchRuleForAlertTesting, fetchRule } from '../../../../utils';
+import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { getThreatMatchRuleForAlertTesting, previewRule } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 const INPUT_INDEX_WARNING = 'Unable to find matching indices for rule';
 const THREAT_INDEX_WARNING = 'Unable to find matching threat indicator indices for rule';
+
+const warningsContain = (warnings: string[], substring: string): boolean =>
+  warnings.some((w) => w.includes(substring));
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -57,19 +55,11 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
         };
 
-        const { id } = await createRule(supertest, log, rule);
+        const { logs } = await previewRule({ supertest, rule });
 
-        await waitForRulePartialFailure({ supertest, log, id });
-
-        const fetchedRule = await fetchRule(supertest, { id });
-
-        expect(fetchedRule?.execution_summary?.last_execution?.status).toBe('partial failure');
-        expect(fetchedRule?.execution_summary?.last_execution?.message).toContain(
-          INPUT_INDEX_WARNING
-        );
-        expect(fetchedRule?.execution_summary?.last_execution?.message).not.toContain(
-          THREAT_INDEX_WARNING
-        );
+        expect(logs).toHaveLength(1);
+        expect(warningsContain(logs[0].warnings, INPUT_INDEX_WARNING)).toBe(true);
+        expect(warningsContain(logs[0].warnings, THREAT_INDEX_WARNING)).toBe(false);
       });
 
       it('results in partial failure when threat index pattern does not match any indices', async () => {
@@ -79,19 +69,11 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
         };
 
-        const { id } = await createRule(supertest, log, rule);
+        const { logs } = await previewRule({ supertest, rule });
 
-        await waitForRulePartialFailure({ supertest, log, id });
-
-        const fetchedRule = await fetchRule(supertest, { id });
-
-        expect(fetchedRule?.execution_summary?.last_execution?.status).toBe('partial failure');
-        expect(fetchedRule?.execution_summary?.last_execution?.message).toContain(
-          THREAT_INDEX_WARNING
-        );
-        expect(fetchedRule?.execution_summary?.last_execution?.message).not.toContain(
-          INPUT_INDEX_WARNING
-        );
+        expect(logs).toHaveLength(1);
+        expect(warningsContain(logs[0].warnings, THREAT_INDEX_WARNING)).toBe(true);
+        expect(warningsContain(logs[0].warnings, INPUT_INDEX_WARNING)).toBe(false);
       });
 
       it('results in partial failure when both index and threat index patterns do not match any indices', async () => {
@@ -106,16 +88,11 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
         };
 
-        const { id } = await createRule(supertest, log, rule);
+        const { logs } = await previewRule({ supertest, rule });
 
-        await waitForRulePartialFailure({ supertest, log, id });
-
-        const fetchedRule = await fetchRule(supertest, { id });
-
-        expect(fetchedRule?.execution_summary?.last_execution?.status).toBe('partial failure');
-        const message = fetchedRule?.execution_summary?.last_execution?.message ?? '';
-        expect(message).toContain(INPUT_INDEX_WARNING);
-        expect(message).toContain(THREAT_INDEX_WARNING);
+        expect(logs).toHaveLength(1);
+        expect(warningsContain(logs[0].warnings, INPUT_INDEX_WARNING)).toBe(true);
+        expect(warningsContain(logs[0].warnings, THREAT_INDEX_WARNING)).toBe(true);
       });
     });
   });
