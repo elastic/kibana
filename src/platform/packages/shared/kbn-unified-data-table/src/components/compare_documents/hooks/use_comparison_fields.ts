@@ -46,19 +46,46 @@ export const useComparisonFields = ({
     let comparisonFields = selectedFieldNames;
 
     if (showAllFields) {
-      const sortedFields = dataView.fields
-        .filter((field) => {
-          if (field.name === dataView.timeFieldName) {
-            return false;
-          }
+      let sortedFields: string[];
+      const dataViewFields = dataView.fields.getAll();
 
-          return (
-            baseDoc?.flattened[field.name] != null ||
-            comparisonDocs.some((doc) => doc.flattened[field.name] != null)
-          );
-        })
-        .sort((a, b) => a.displayName.localeCompare(b.displayName))
-        .map((field) => field.name);
+      if (dataViewFields.length > 0) {
+        // Use data view fields when available
+        sortedFields = dataViewFields
+          .filter((field) => {
+            if (field.name === dataView.timeFieldName) {
+              return false;
+            }
+
+            return (
+              baseDoc?.flattened[field.name] != null ||
+              comparisonDocs.some((doc) => doc.flattened[field.name] != null)
+            );
+          })
+          .sort((a, b) => a.displayName.localeCompare(b.displayName))
+          .map((field) => field.name);
+      } else {
+        // Fallback for ES|QL mode when data view fields are not populated:
+        // Extract field names directly from the documents
+        const allFieldNames = new Set<string>();
+        if (baseDoc) {
+          Object.keys(baseDoc.flattened).forEach((name) => allFieldNames.add(name));
+        }
+        comparisonDocs.forEach((doc) => {
+          Object.keys(doc.flattened).forEach((name) => allFieldNames.add(name));
+        });
+        sortedFields = Array.from(allFieldNames)
+          .filter((fieldName) => {
+            if (fieldName === dataView.timeFieldName) {
+              return false;
+            }
+            return (
+              baseDoc?.flattened[fieldName] != null ||
+              comparisonDocs.some((doc) => doc.flattened[fieldName] != null)
+            );
+          })
+          .sort((a, b) => a.localeCompare(b));
+      }
 
       comparisonFields = dataView.isTimeBased()
         ? [dataView.timeFieldName, ...sortedFields]

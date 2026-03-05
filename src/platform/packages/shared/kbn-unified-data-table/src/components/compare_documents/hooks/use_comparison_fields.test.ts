@@ -147,4 +147,57 @@ describe('useComparisonFields', () => {
     expect(comparisonFields).toHaveLength(fields.length - overflow);
     expect(totalFields).toBe(fields.length);
   });
+
+  it('should extract fields from documents when dataView.fields is empty (ES|QL mode)', () => {
+    const dataViewWithNoFields = buildDataViewMock({
+      name: 'esql-data-view',
+      fields: fieldList([]),
+      timeFieldName: '@timestamp',
+    });
+    const docs = [
+      buildDataTableRecord(
+        {
+          _index: 'test',
+          _id: '0',
+          fields: {
+            '@timestamp': ['2024-01-01T00:00:00Z'],
+            message: ['test message 0'],
+            'host.name': ['host-0'],
+          },
+        },
+        dataViewWithNoFields
+      ),
+      buildDataTableRecord(
+        {
+          _index: 'test',
+          _id: '1',
+          fields: {
+            '@timestamp': ['2024-01-01T00:00:01Z'],
+            message: ['test message 1'],
+            'host.name': ['host-1'],
+            status: ['ok'],
+          },
+        },
+        dataViewWithNoFields
+      ),
+    ];
+    const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+    const {
+      result: {
+        current: { comparisonFields, totalFields },
+      },
+    } = renderHook(() =>
+      useComparisonFields({
+        dataView: dataViewWithNoFields,
+        selectedFieldNames: ['message'],
+        selectedDocIds: ['0', '1'],
+        showAllFields: true,
+        showMatchingValues: true,
+        getDocById,
+      })
+    );
+    // Should include @timestamp first, then other fields alphabetically extracted from documents
+    expect(comparisonFields).toEqual(['@timestamp', '_index', 'host.name', 'message', 'status']);
+    expect(totalFields).toBe(5);
+  });
 });

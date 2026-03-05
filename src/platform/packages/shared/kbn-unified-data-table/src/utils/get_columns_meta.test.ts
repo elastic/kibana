@@ -39,17 +39,51 @@ describe('getColumnTypes', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "@timestamp": Object {
+            "esType": undefined,
+            "isComputedColumn": undefined,
             "type": "date",
           },
           "agent.keyword": Object {
             "esType": "keyword",
+            "isComputedColumn": undefined,
             "type": "string",
           },
           "bytes": Object {
+            "esType": undefined,
+            "isComputedColumn": undefined,
             "type": "number",
           },
         }
       `);
+    });
+
+    test('preserves isComputedColumn property', async () => {
+      const result = getTextBasedColumnsMeta([
+        {
+          id: 'category',
+          name: 'category',
+          meta: { type: 'string', esType: 'keyword' },
+          isComputedColumn: false, // Grouping field from BY clause
+        },
+        {
+          id: 'avg_price',
+          name: 'avg_price',
+          meta: { type: 'number' },
+          isComputedColumn: true, // Computed aggregation
+        },
+      ]);
+      expect(result).toEqual({
+        category: {
+          type: 'string',
+          esType: 'keyword',
+          isComputedColumn: false,
+        },
+        avg_price: {
+          type: 'number',
+          esType: undefined,
+          isComputedColumn: true,
+        },
+      });
     });
   });
 });
