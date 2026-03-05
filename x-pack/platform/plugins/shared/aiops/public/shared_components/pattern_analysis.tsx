@@ -81,8 +81,17 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+      cps,
+    } = pluginStart;
 
     return {
       data,
@@ -93,6 +102,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
       share,
       storage,
       unifiedSearch,
+      cps,
       ...coreStart,
     };
   }, [coreStart, pluginStart]);

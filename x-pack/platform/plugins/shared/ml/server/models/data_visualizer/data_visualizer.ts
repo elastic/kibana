@@ -215,7 +215,8 @@ export class DataVisualizer {
     query: any,
     fields: FieldsForHistograms,
     samplerShardSize: number,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ): Promise<any> {
     return await fetchHistogramsForFields({
       esClient: this._asCurrentUser,
@@ -225,6 +226,7 @@ export class DataVisualizer {
         fields,
         samplerShardSize,
         runtimeMappings,
+        projectRouting,
       },
     });
   }
@@ -242,7 +244,8 @@ export class DataVisualizer {
     latestMs: number | undefined,
     intervalMs: number | undefined,
     maxExamples: number,
-    runtimeMappings: RuntimeMappings
+    runtimeMappings: RuntimeMappings,
+    projectRouting?: string
   ): Promise<BatchStats[]> {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
@@ -289,7 +292,8 @@ export class DataVisualizer {
                 timeFieldName,
                 earliestMs,
                 latestMs,
-                runtimeMappings
+                runtimeMappings,
+                projectRouting
               );
             } else {
               // Will only ever be one document count card,
@@ -302,7 +306,8 @@ export class DataVisualizer {
                   earliestMs,
                   latestMs,
                   intervalMs,
-                  runtimeMappings
+                  runtimeMappings,
+                  projectRouting
                 );
                 batchStats.push(stats);
               }
@@ -318,7 +323,8 @@ export class DataVisualizer {
               timeFieldName,
               earliestMs,
               latestMs,
-              runtimeMappings
+              runtimeMappings,
+              projectRouting
             );
             break;
           case ML_JOB_FIELD_TYPES.DATE:
@@ -330,7 +336,8 @@ export class DataVisualizer {
               timeFieldName,
               earliestMs,
               latestMs,
-              runtimeMappings
+              runtimeMappings,
+              projectRouting
             );
             break;
           case ML_JOB_FIELD_TYPES.BOOLEAN:
@@ -342,7 +349,8 @@ export class DataVisualizer {
               timeFieldName,
               earliestMs,
               latestMs,
-              runtimeMappings
+              runtimeMappings,
+              projectRouting
             );
             break;
           case ML_JOB_FIELD_TYPES.TEXT:
@@ -359,7 +367,8 @@ export class DataVisualizer {
                   earliestMs,
                   latestMs,
                   maxExamples,
-                  runtimeMappings
+                  runtimeMappings,
+                  projectRouting
                 );
                 batchStats.push(stats);
               })
@@ -430,6 +439,10 @@ export class DataVisualizer {
       ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
       ...(isPopulatedObject(combinedRuntimeMappings)
         ? { runtime_mappings: combinedRuntimeMappings }
+        : {}),
+
+      ...(datafeedConfig?.project_routing
+        ? { project_routing: datafeedConfig.project_routing }
         : {}),
     };
 
@@ -546,7 +559,8 @@ export class DataVisualizer {
     earliestMs: number | undefined,
     latestMs: number | undefined,
     intervalMs: number,
-    runtimeMappings: RuntimeMappings
+    runtimeMappings: RuntimeMappings,
+    projectRouting?: string
   ): Promise<DocumentCountStats> {
     const index = indexPatternTitle;
     const size = 0;
@@ -573,6 +587,7 @@ export class DataVisualizer {
       },
       aggs,
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     };
 
     const body = await this._asCurrentUser.search(
@@ -611,7 +626,8 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -668,6 +684,7 @@ export class DataVisualizer {
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     };
 
     const body = await this._asCurrentUser.search(
@@ -751,7 +768,8 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -781,6 +799,7 @@ export class DataVisualizer {
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     };
 
     const body = await this._asCurrentUser.search(
@@ -833,7 +852,8 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -860,6 +880,7 @@ export class DataVisualizer {
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     };
 
     const body = await this._asCurrentUser.search(
@@ -904,7 +925,8 @@ export class DataVisualizer {
     timeFieldName: string | undefined,
     earliestMs: number | undefined,
     latestMs: number | undefined,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -932,6 +954,7 @@ export class DataVisualizer {
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     };
 
     const body = await this._asCurrentUser.search(
@@ -977,7 +1000,8 @@ export class DataVisualizer {
     earliestMs: number | undefined,
     latestMs: number | undefined,
     maxExamples: number,
-    runtimeMappings?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ): Promise<FieldExamples> {
     const index = indexPatternTitle;
 
@@ -1000,6 +1024,7 @@ export class DataVisualizer {
         },
       },
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     };
 
     const body = await this._asCurrentUser.search(

@@ -471,6 +471,15 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
 
+  // [LOCAL DEV PATCH] Skip pull if image exists locally (for locally-built images)
+  // try {
+  //   await execa('docker', ['inspect', '--type=image', image]);
+  //   log.info(`Image ${image} found locally, skipping pull.`);
+  //   return;
+  // } catch {
+  //   // Image not found locally, proceed with pull
+  // }
+
   await pRetry(
     async () => {
       await execa('docker', ['pull', image], {

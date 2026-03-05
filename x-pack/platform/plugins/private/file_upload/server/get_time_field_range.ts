@@ -14,7 +14,8 @@ export async function getTimeFieldRange(
   index: string[] | string,
   timeFieldName: string,
   query: QueryDslQueryContainer,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  projectRouting?: string
 ): Promise<{
   success: boolean;
   start: { epoch: number; string: string };
@@ -39,6 +40,7 @@ export async function getTimeFieldRange(
       },
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   });
 
   if (aggregations && aggregations.earliest && aggregations.latest) {

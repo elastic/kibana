@@ -413,20 +413,22 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
               /** Query to match documents in the index(es). */
               query: schema.maybe(schema.any()),
               runtimeMappings: schema.maybe(runtimeMappingsSchema),
+              projectRouting: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { index, timeFieldName, query, runtimeMappings } = request.body;
+          const { index, timeFieldName, query, runtimeMappings, projectRouting } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await getTimeFieldRange(
             esClient,
             index,
             timeFieldName,
             query,
-            runtimeMappings
+            runtimeMappings,
+            projectRouting
           );
 
           return response.ok({

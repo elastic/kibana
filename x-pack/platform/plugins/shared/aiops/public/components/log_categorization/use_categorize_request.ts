@@ -48,6 +48,7 @@ export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage)
       timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
       runtimeMappings: MappingRuntimeFields | undefined,
+      projectRouting: string | undefined,
       intervalMs?: number,
       additionalFilter?: CategorizationAdditionalFilter
     ): Promise<ReturnType<typeof processCategoryResults>> => {
@@ -63,6 +64,7 @@ export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage)
               timeRange,
               query,
               runtimeMappings,
+              projectRouting,
               wrap,
               intervalMs,
               additionalFilter,
