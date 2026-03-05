@@ -44,6 +44,7 @@ spaceTest.describe(
       const managementPage = pageObjects.entityAnalyticsManagementPage;
 
       await managementPage.navigate();
+      await managementPage.waitForStatusLoaded();
       await expect(managementPage.riskScoreTab).toHaveAttribute('aria-selected', 'true');
     });
 
@@ -59,6 +60,7 @@ spaceTest.describe(
       );
 
       await managementPage.navigate();
+      await managementPage.waitForStatusLoaded();
 
       await expect(managementPage.riskPreviewError).toContainText('Preview failed', {
         timeout: 30000,

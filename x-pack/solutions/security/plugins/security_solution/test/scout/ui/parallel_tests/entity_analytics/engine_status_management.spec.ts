@@ -29,6 +29,7 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await managementPage.navigate();
+        await managementPage.waitForStatusLoaded();
         await expect(managementPage.riskScoreTab).toBeVisible();
         await expect(managementPage.assetCriticalityTab).toBeVisible();
         await expect(managementPage.engineStatusTab).toBeHidden();

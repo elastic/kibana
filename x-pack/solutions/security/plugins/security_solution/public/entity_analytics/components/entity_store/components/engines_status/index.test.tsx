@@ -12,8 +12,13 @@ import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();
+const mockInstallMutate = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
+  useInstallEntityStoreMutation: () => ({
+    mutate: mockInstallMutate,
+    isLoading: false,
+  }),
 }));
 
 const mockDownloadBlob = jest.fn();
