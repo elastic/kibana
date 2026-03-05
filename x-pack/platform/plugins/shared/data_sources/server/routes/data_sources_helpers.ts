@@ -206,9 +206,9 @@ export async function createDataSourceAndRelatedResources(
             ? parsedWorkflow.description
             : `Workflow tool for ${type} data source`;
 
-        // Tool ID structure: type.data_source_name.workflow_base_name
+        // Tool ID structure: type.data_source_name.source.workflow_base_name
         const tool = await toolRegistry.create({
-          id: `${type}.${slugify(name)}.${workflowBaseName}`,
+          id: `${type}.${slugify(name)}.source.${workflowBaseName}`,
           type: ToolType.workflow,
           description: workflowDescription,
           tags: ['data-source', type],

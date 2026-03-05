@@ -223,7 +223,7 @@ tags:
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-data-source.search',
+        id: 'test_type.my-data-source.source.search',
         type: 'workflow',
         description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
@@ -296,7 +296,7 @@ tags:
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
     expect(createdYaml).toContain('name: notion_source.source.test_type.search');
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'test_type.notion_source.search' })
+      expect.objectContaining({ id: 'test_type.notion_source.source.search' })
     );
   });
 
