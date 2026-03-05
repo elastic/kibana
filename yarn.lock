@@ -2527,10 +2527,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.1.18":
-  version "3.1.18"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.18.tgz#e6931ca44fb5309275cc3db115d472fd88fa0dab"
-  integrity sha512-3yexduJ2l6RLw2E+uQmO1saO+iWc7zVFyyIcgsZa+Qz2mOCnfMBziUYRdEOuZ+cJdFe1G5HpHisAaYaBSSAIrQ==
+"@elastic/monaco-esql@3.1.19":
+  version "3.1.19"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.19.tgz#c48ce612664991423812cc84201af4988b0a7821"
+  integrity sha512-bMds++AYDqkTVARfbwyaOQlW6GdWyHlDyBs6z6MJsyxEbUInkBO5/3GBKPcbrghM/EmZDq92eWg8KV5aSPwtfA==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -4667,6 +4667,14 @@
   uid ""
 
 "@kbn/analytics@link:src/platform/packages/shared/kbn-analytics":
+  version "0.0.0"
+  uid ""
+
+"@kbn/anonymization-common@link:x-pack/platform/packages/shared/ai-infra/anonymization-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/anonymization-plugin@link:x-pack/platform/plugins/shared/anonymization":
   version "0.0.0"
   uid ""
 
@@ -8422,7 +8430,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-inference-endpoints@link:x-pack/solutions/search/plugins/search_inference_endpoints":
+"@kbn/search-inference-endpoints@link:x-pack/platform/plugins/shared/search_inference_endpoints":
   version "0.0.0"
   uid ""
 
@@ -10188,11 +10196,6 @@
     is-node-process "^1.2.0"
     outvariant "^1.4.3"
     strict-event-emitter "^0.5.1"
-
-"@n8n/json-schema-to-zod@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@n8n/json-schema-to-zod/-/json-schema-to-zod-1.1.0.tgz#d59ecf5f0c90c560b8b09374ea3efafc2dd5b84e"
-  integrity sha512-HfL3jq5NSb0Mng56QCfUnzD09F4wxWR543jYJZ+XBQpb0f9B102r6K3qEtdXVTs1mwHVnxz5KBaesqipFYPjww==
 
 "@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3":
   version "2.1.8-no-fsevents.3"
