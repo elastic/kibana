@@ -1,5 +1,7 @@
 ---
 navigation_title: "Salesforce"
+type: reference
+description: "Use the Salesforce connector to run SOQL and SOSL queries, fetch records, describe sobject metadata, and download files from your Salesforce org."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -75,11 +77,11 @@ To use the Salesforce connector, you need a Connected App with OAuth 2.0 Client 
 1. Log in to [Salesforce](https://www.salesforce.com/) and open **Setup**.
 2. In the Quick Find box, search for **App Manager** and open it.
 3. Click **New Connected App**.
-4. Enable **Enable OAuth Settings**.
+4. Turn on **Enable OAuth Settings**.
 5. Under **OAuth and OpenID Connect Settings**:
    - Add a **Callback URL** (required by Salesforce; the connector uses the client credentials flow).
    - Under **Selected OAuth Scopes**, add at least: **Access and manage your data (api)**, **Perform requests at any time (refresh_token, offline_access)**, and **Provide access to your data via the Web (web)** as needed for your use case.
-   - Enable **Enable Client Credentials Flow** if your org supports it (required for server-to-server integration).
+   - Turn on **Enable Client Credentials Flow** if your org supports it (required for server-to-server integration).
 6. Save the app. Wait a few minutes for the app to be activated, then click **Manage Consumer Details** and verify or set the **Consumer Key** (Client ID) and **Consumer Secret** (Client Secret).
 7. Use the **Consumer Key** as Client ID and **Consumer Secret** as Client Secret when creating the connector in Kibana.
 8. For Token URL, use the formula **domain name** + `/services/oauth2/token`:

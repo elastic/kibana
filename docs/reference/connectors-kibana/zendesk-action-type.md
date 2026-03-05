@@ -1,5 +1,7 @@
 ---
 navigation_title: "Zendesk"
+type: reference
+description: "Use the Zendesk connector to search and retrieve tickets, users, organizations, and Help Center articles via the Zendesk API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -22,10 +24,11 @@ data source.
 
 ### Connector configuration [zendesk-connector-configuration]
 
-- **Subdomain** (required): Your Zendesk subdomain (e.g. `your-company` for https://your-company.zendesk.com).
-- **Authentication**: Basic auth. Use your Zendesk account **email** and **API token** (from Admin Center > Apps 
-and integrations > APIs > Zendesk API). For API token auth, the username must be in the form 
-`your_email@example.com/token` and the password is your API token.
+Subdomain
+:   Your Zendesk subdomain (for example, `your-company` for `https://your-company.zendesk.com`).
+
+Authentication
+:   Basic authentication. Use your Zendesk account **email** and **API token** (from **Admin Center** → **Apps and integrations** → **APIs** → **Zendesk API**). For API token authentication, the username must be in the form `your_email@example.com/token` and the password is your API token.
 
 ## Available actions [zendesk-available-actions]
 
@@ -39,14 +42,13 @@ and integrations > APIs > Zendesk API). For API token auth, the username must be
 ## Get API credentials [zendesk-api-credentials]
 
 1. Log in to your [Zendesk](https://www.zendesk.com/) account.
-2. Go to **Admin Center** (gear icon) → **Apps and integrations** → **APIs** → **Zendesk API**.
-3. Enable **Token access** and create a new API token.
-4. Make sure that API access is enabled in the Admin UI under Apps and integrations > APIs > API Configuration
+2. Go to **Admin Center** → **Apps and integrations** → **APIs** → **Zendesk API**.
+3. Turn on **Token access** and create a new API token.
+4. Make sure that API access is turned on under **Apps and integrations** → **APIs** → **API Configuration**.
 5. Copy the token and store it securely.
-6. When configuring the connector: set the username to `your_email@example.com/token` and the password to the API token.
+6. When configuring the connector, in the **Username** field enter `your_email@example.com/token`. In the **Password** field, enter the API token.
 
 When creating or activating a Zendesk data source via script or API (including the "create new" flow with a single 
-credential string), use the format `your_email@example.com/token:your_api_token`. The system parses this as Basic 
-auth (username before the colon, password after) and creates the connector with the correct auth type. You must also 
-provide the **subdomain** in the connector config (e.g. when creating the connector in the UI, or via API 
+credential string), use the format `your_email@example.com/token:your_api_token`. Kibana parses this as Basic
+authentication credentials (username before the colon, password after) and creates the connector with the correct authentication type. Provide the **subdomain** in the connector configuration (for example, when creating the connector in the UI, or via API
 with `config: { subdomain: 'your-company' }`).

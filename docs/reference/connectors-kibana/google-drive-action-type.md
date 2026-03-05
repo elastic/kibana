@@ -1,5 +1,7 @@
 ---
 navigation_title: "Google Drive"
+type: reference
+description: "Use the Google Drive connector to search, list, and download files and folders from Google Drive."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/google-drive-action-type.html
 applies_to:
@@ -20,7 +22,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Google Drive connectors have the following configuration properties:
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Google Drive API scopes. Check the [Get API credentials](#google-drive-api-credentials) for instructions.
+:   A Google OAuth 2.0 access token with Google Drive API scopes. Refer to [Get API credentials](#google-drive-api-credentials) for instructions.
 
 ## Test connectors [google-drive-action-configuration]
 

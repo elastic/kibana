@@ -1,5 +1,7 @@
 ---
 navigation_title: "Firecrawl"
+type: reference
+description: "Use the Firecrawl connector to scrape web pages, search the web, map site URLs, and crawl websites using the Firecrawl REST API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -11,7 +13,7 @@ The Firecrawl connector uses the [Firecrawl REST API v2](https://docs.firecrawl.
 
 ## Create connectors in {{kib}} [define-firecrawl-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [firecrawl-connector-configuration]
 

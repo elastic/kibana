@@ -1,5 +1,7 @@
 ---
 navigation_title: "Notion"
+type: reference
+description: "Use the Notion connector to search pages and databases, retrieve content, and query databases in your Notion workspace."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/notion-action-type.html
 applies_to:
@@ -13,7 +15,7 @@ The Notion connector communicates with the Notion API to explore content and dat
 
 ## Create connectors in {{kib}} [define-notion-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [notion-connector-configuration]
 
@@ -40,7 +42,7 @@ Get Page
     - **Page ID** (required): The unique identifier of the page.
 
 Get Data Source
-:   Retrieve a database by its ID. Retrieve a database by its ID. This only returns information about the database properties and columns, _not_ about its rows.
+:   Retrieve a database by its ID. This only returns information about the database properties and columns, _not_ about its rows.
     - **Data Source ID** (required): The unique identifier of the database. Check [Notion's documentation](https://developers.notion.com/reference/retrieve-a-data-source#finding-a-data-source-id) for instructions on how to find this ID.
 
 Query Data Source
