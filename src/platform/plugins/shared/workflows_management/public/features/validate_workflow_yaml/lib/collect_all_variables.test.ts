@@ -84,7 +84,7 @@ steps:
     const yaml = `name: Test Workflow
 steps:
   - name: Foreach Step
-    foreach: {{items}}
+    foreach: "{{items}}"
     type: foreach
     steps:
       - name: Inner Step
