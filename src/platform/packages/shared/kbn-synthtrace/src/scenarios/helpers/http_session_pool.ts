@@ -18,6 +18,7 @@
 
 import { generateIPWithGeo, type GeoLocation } from './geo_ip_mappings';
 import { getRandomItem, USER_AGENTS, generateSessionId } from './http_field_generators';
+import { random } from './http_random';
 
 interface ActiveSession {
   sessionId: string;
@@ -39,7 +40,7 @@ function createSession(cloudRegion?: string): ActiveSession {
   const { ip, geo, isIPv6 } = generateIPWithGeo(cloudRegion);
   const requestCount =
     MIN_REQUESTS_PER_SESSION +
-    Math.floor(Math.random() * (MAX_REQUESTS_PER_SESSION - MIN_REQUESTS_PER_SESSION));
+    Math.floor(random() * (MAX_REQUESTS_PER_SESSION - MIN_REQUESTS_PER_SESSION));
 
   return {
     sessionId: generateSessionId(),
@@ -89,7 +90,7 @@ export function getActiveSession(cloudRegion?: string): ActiveSession {
     sessionPool.set(key, pool);
   }
 
-  const index = Math.floor(Math.random() * pool.length);
+  const index = Math.floor(random() * pool.length);
   const session = pool[index];
 
   session.remainingRequests--;
