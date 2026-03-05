@@ -16,6 +16,7 @@ import { createTestEsCluster } from '@kbn/test';
 import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 import { DataStreamClient } from '../client';
 import type { DataStreamDefinition } from '../types';
+import { setTimeout } from 'node:timers/promises';
 
 describe('DataStreamClient', () => {
   let esServer: EsTestCluster;
@@ -36,10 +37,49 @@ describe('DataStreamClient', () => {
     },
   };
 
+  const lifecycleTestDataStream: DataStreamDefinition<MappingsDefinition> = {
+    name: 'lifecycle-test-data-stream',
+    version: 1,
+    template: {
+      mappings: myTestDocMappings,
+      lifecycle: {
+        data_retention: '1s',
+      },
+    },
+  };
+
+  const lifecycleVersionedDataStreamV1: DataStreamDefinition<MappingsDefinition> = {
+    name: 'lifecycle-versioned-test-data-stream',
+    version: 1,
+    template: {
+      mappings: myTestDocMappings,
+      lifecycle: {
+        data_retention: '30d',
+      },
+    },
+  };
+
+  const lifecycleVersionedDataStreamV2: DataStreamDefinition<MappingsDefinition> = {
+    ...lifecycleVersionedDataStreamV1,
+    version: 2,
+    template: {
+      ...lifecycleVersionedDataStreamV1.template,
+      lifecycle: {
+        data_retention: '1s',
+      },
+    },
+  };
+
   const cleanup = async () => {
     const client = esServer.getClient();
-    await client.indices.deleteDataStream({ name: testDataStream.name }).catch(() => {});
-    await client.indices.deleteIndexTemplate({ name: testDataStream.name }).catch(() => {});
+    for (const name of [
+      testDataStream.name,
+      lifecycleTestDataStream.name,
+      lifecycleVersionedDataStreamV1.name,
+    ]) {
+      await client.indices.deleteDataStream({ name }).catch(() => {});
+      await client.indices.deleteIndexTemplate({ name }).catch(() => {});
+    }
   };
 
   beforeAll(async () => {
@@ -130,6 +170,78 @@ describe('DataStreamClient', () => {
     });
 
     // TODO: Add more thorough tests, for ex. for search runtime mappings
+  });
+
+  describe('lifecycle operations', () => {
+    let lifecycleClient: DataStreamClient<MappingsDefinition>;
+    let esClient: Client;
+
+    beforeEach(async () => {
+      esClient = esServer.getClient();
+      await esClient.cluster.putSettings({
+        persistent: {
+          'data_streams.lifecycle.poll_interval': '1s',
+        },
+      });
+
+      const initializedClient = await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: lifecycleTestDataStream,
+      });
+      if (!initializedClient) {
+        throw new Error('Failed to initialize lifecycle DataStreamClient');
+      }
+      lifecycleClient = initializedClient;
+    });
+
+    afterEach(async () => {
+      await esClient.cluster.putSettings({
+        persistent: {
+          'data_streams.lifecycle.poll_interval': null,
+        },
+      });
+    });
+
+    it('applies data retention and removes expired documents', async () => {
+      await lifecycleClient.create({
+        documents: [
+          {
+            '@timestamp': new Date().toISOString(),
+            mappedField: 'ephemeral-doc',
+          },
+        ],
+        refresh: true,
+      });
+
+      const initialSearch = await lifecycleClient.search({
+        query: { match_all: {} },
+      });
+      expect(initialSearch.hits.hits.length).toBe(1);
+
+      await esClient.indices.rollover({
+        alias: lifecycleTestDataStream.name,
+      });
+
+      const deadline = Date.now() + 30_000;
+      while (Date.now() < deadline) {
+        await setTimeout(1_000);
+        await esClient.indices.refresh({ index: lifecycleTestDataStream.name });
+
+        const searchAfterRetention = await lifecycleClient.search({
+          query: { match_all: {} },
+        });
+
+        if (searchAfterRetention.hits.hits.length === 0) {
+          return;
+        }
+      }
+
+      const finalSearch = await lifecycleClient.search({
+        query: { match_all: {} },
+      });
+      expect(finalSearch.hits.hits.length).toBe(0);
+    });
   });
 
   describe('space-aware operations', () => {
@@ -916,6 +1028,50 @@ describe('DataStreamClient', () => {
       expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1); // Index template not updated when version is same
       expect(createDataStreamSpy).toHaveBeenCalledTimes(1);
       expect(putMappingSpy).toHaveBeenCalledTimes(0); // Mappings are not applied to write index when version is not incremented
+    });
+
+    test('updates lifecycle policy when a new version is deployed', async () => {
+      const elasticsearchClient = esServer.getClient();
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleVersionedDataStreamV1,
+      });
+
+      const {
+        index_templates: [v1Template],
+      } = await elasticsearchClient.indices.getIndexTemplate({
+        name: lifecycleVersionedDataStreamV1.name,
+      });
+      expect(v1Template.index_template.template?.lifecycle).toEqual(
+        expect.objectContaining({
+          data_retention: '30d',
+        })
+      );
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleVersionedDataStreamV2,
+      });
+
+      const {
+        index_templates: [v2Template],
+      } = await elasticsearchClient.indices.getIndexTemplate({
+        name: lifecycleVersionedDataStreamV2.name,
+      });
+      expect(v2Template.index_template.template?.lifecycle).toEqual(
+        expect.objectContaining({
+          data_retention: '1s',
+        })
+      );
+      expect(v2Template.index_template._meta).toEqual(
+        expect.objectContaining({
+          version: 2,
+          previousVersions: [1],
+        })
+      );
     });
   });
 });
