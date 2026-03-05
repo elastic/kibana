@@ -324,6 +324,7 @@ export class TaskStore {
     if (idsOfMissingKeys.length === 0) return result;
 
     // do a refresh, and get the remaining keys
+    this.logger.warn('Refreshing index to get recently created API keys for tasks');
     await this.esClient.indices.refresh({ index: this.index });
 
     const missingResult = await this.getApiKeys(idsOfMissingKeys);
@@ -331,7 +332,7 @@ export class TaskStore {
     for (const id of idsOfMissingKeys) {
       const foundKey = missingResult.get(id);
       if (foundKey === undefined) {
-        this.logger.error(`unable to obtain API key for task ${id}`);
+        this.logger.error(`Unable to obtain API key for task ${id} after retry`);
       } else {
         result.set(id, foundKey);
       }

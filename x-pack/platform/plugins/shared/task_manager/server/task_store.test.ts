@@ -825,6 +825,7 @@ describe('TaskStore', () => {
     });
 
     test('when first getApiKeys search misses a key, refresh and second search returns the api key id', async () => {
+      const logger = mockLogger();
       const mockSerializer = savedObjectsServiceMock.createSerializer();
       mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
       mockSerializer.rawToSavedObject = jest
@@ -843,7 +844,7 @@ describe('TaskStore', () => {
         .mockResolvedValue({} as never);
 
       const refreshStore = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer: mockSerializer,
@@ -858,6 +859,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       let getApiKeysCallCount = 0;
@@ -923,6 +925,10 @@ describe('TaskStore', () => {
       expect(result.docs[1].apiKey).toBe('decryptedKey2');
       expect(indicesRefreshSpy).toHaveBeenCalledWith({ index: 'tasky' });
       expect(esoClient.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refreshing index to get recently created API keys for tasks'
+      );
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     test('when first getApiKeys search misses a key, refresh and second search still does not return the api key id', async () => {
@@ -958,6 +964,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       let getApiKeysCallCount = 0;
@@ -1015,7 +1022,12 @@ describe('TaskStore', () => {
       expect(result.docs[0].apiKey).toBe('decryptedKey1');
       expect(result.docs[1].apiKey).toBe('encryptedKey2');
       expect(mockEsClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
-      expect(logger.error).toHaveBeenCalledWith('unable to obtain API key for task task2');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refreshing index to get recently created API keys for tasks'
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        'Unable to obtain API key for task task2 after retry'
+      );
     });
 
     test('pushes error from call cluster to errors$', async () => {
