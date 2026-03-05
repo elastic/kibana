@@ -422,19 +422,25 @@ export const getInsertText = (
 
   let insertText = '';
   if (typeof name === 'string') {
-    const bodyContentLines = bodyContent.split('\n');
-    const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
-    if (hasUnclosedQuote(currentContentLine)) {
-      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
-      insertText = '';
+    if (name === '{') {
+      insertText = '{$0}';
+    } else if (name === '[') {
+      insertText = '[$0]';
     } else {
-      // The cursor is at the beginning of a field so the insert text should start with a quote
-      insertText = '"';
-    }
-    if (insertValue && insertValue !== '{' && insertValue !== '[') {
-      insertText += `${insertValue}"`;
-    } else {
-      insertText += `${name}"`;
+      const bodyContentLines = bodyContent.split('\n');
+      const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+      if (hasUnclosedQuote(currentContentLine)) {
+        // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+        insertText = '';
+      } else {
+        // The cursor is at the beginning of a field so the insert text should start with a quote
+        insertText = '"';
+      }
+      if (insertValue && insertValue !== '{' && insertValue !== '[') {
+        insertText += `${insertValue}"`;
+      } else {
+        insertText += `${name}"`;
+      }
     }
   } else {
     insertText = name + '';

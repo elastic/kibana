@@ -410,14 +410,28 @@ describe('autocomplete_utils', () => {
       expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
     });
 
-    it('handles unclosed quotes correctly', () => {
+    it('does not add quotes around braces and brackets', () => {
       expect(
         getInsertText(
-          { name: 'match_all' } as ResultTerm,
+          { name: '{' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('{$0}');
+      expect(
+        getInsertText(
+          { name: '[' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('[$0]');
+      expect(
+        getInsertText(
+          { name: '{' } as ResultTerm,
           '{\n' + '    "query": {\n' + '      "match_a',
           mockContext
         )
-      ).toBe('match_all"');
+      ).toBe('{$0}');
     });
 
     it('wraps insertValue with quotes when appropriate', () => {
