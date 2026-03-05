@@ -371,12 +371,39 @@ export const ConfigSchema = schema.object({
       ),
     }),
   }),
+  mcp: offeringBasedSchema({
+    serverless: schema.maybe(
+      schema.object({
+        oauth2: schema.object({
+          metadata: schema.object({
+            authorization_servers: schema.arrayOf(schema.uri({ scheme: ['https', 'http'] }), {
+              minSize: 1,
+            }),
+            resource: schema.maybe(schema.uri({ scheme: ['https', 'http'] })),
+            bearer_methods_supported: schema.maybe(
+              schema.arrayOf(
+                schema.oneOf([
+                  schema.literal('header'),
+                  schema.literal('body'),
+                  schema.literal('query'),
+                ]),
+                { minSize: 1 }
+              )
+            ),
+            scopes_supported: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            resource_documentation: schema.maybe(schema.uri({ scheme: ['https', 'http'] })),
+          }),
+        }),
+      })
+    ),
+  }),
   fipsMode: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 
 export type UiamConfigType = TypeOf<typeof ConfigSchema>['uiam'];
+export type McpConfigType = TypeOf<typeof ConfigSchema>['mcp'];
 
 export function createConfig(
   config: RawConfigType,
