@@ -521,9 +521,12 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
-        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-          body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
-        });
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/my-test',
+          {
+            body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
+          }
+        );
       });
 
       expect(onClose).toHaveBeenCalled();
@@ -667,9 +670,12 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-test-btn'));
 
       await waitFor(() => {
-        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-          body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
-        });
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/my-test',
+          {
+            body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
+          }
+        );
       });
 
       expect(onClose).toHaveBeenCalled();
@@ -810,14 +816,17 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
-        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-          body: JSON.stringify({
-            name: 'Initial connector',
-            config: { testTextField: 'Updated value' },
-            secrets: {},
-            connector_type_id: 'initial-connector',
-          }),
-        });
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/initial-connector',
+          {
+            body: JSON.stringify({
+              name: 'Initial connector',
+              config: { testTextField: 'Updated value' },
+              secrets: {},
+              connector_type_id: 'initial-connector',
+            }),
+          }
+        );
       });
 
       expect(onConnectorCreated).toHaveBeenCalled();

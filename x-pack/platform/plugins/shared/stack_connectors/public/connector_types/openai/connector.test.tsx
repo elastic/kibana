@@ -29,7 +29,7 @@ const mockDashboard = useGetDashboard as jest.Mock;
 const openAiConnector = {
   actionTypeId: '.gen-ai',
   name: 'OpenAI',
-  id: '123',
+  id: 'openai',
   config: {
     apiUrl: 'https://openaiurl.com',
     apiProvider: OpenAiProviderType.OpenAi,
@@ -272,7 +272,7 @@ describe('ConnectorFields renders', () => {
       const testFormData = {
         actionTypeId: '.gen-ai',
         name: 'OpenAI',
-        id: '123',
+        id: 'openai',
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
@@ -299,7 +299,7 @@ describe('ConnectorFields renders', () => {
           data: {
             actionTypeId: '.gen-ai',
             name: 'OpenAI',
-            id: '123',
+            id: 'openai',
             isDeprecated: false,
             config: {
               apiUrl: 'https://openaiurl.com',
@@ -321,7 +321,7 @@ describe('ConnectorFields renders', () => {
       const testFormData = {
         actionTypeId: '.gen-ai',
         name: 'OpenAI',
-        id: '123',
+        id: 'openai',
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
@@ -353,7 +353,7 @@ describe('ConnectorFields renders', () => {
           data: {
             actionTypeId: '.gen-ai',
             name: 'OpenAI',
-            id: '123',
+            id: 'openai',
             isDeprecated: false,
             config: {
               apiUrl: 'https://openaiurl.com',
@@ -409,7 +409,7 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
       fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/openai`);
     });
   });
   describe('Validation', () => {

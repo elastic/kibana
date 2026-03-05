@@ -39,7 +39,7 @@ describe('ConnectorFormFieldsGlobal', () => {
       expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.test',
-          id: 'test-id',
+          id: 'my-test-connector',
           isDeprecated: 'false',
           name: 'My test connector',
         },
