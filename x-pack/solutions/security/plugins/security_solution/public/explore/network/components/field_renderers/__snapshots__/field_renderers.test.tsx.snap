@@ -107,13 +107,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                       id="generated-id-wrapper"
                     >
-                      <button
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="securitySolutionFlyoutLink"
-                        type="button"
-                      >
-                        b19a781f683541a7a25ee345133aa399
-                      </button>
+                      b19a781f683541a7a25ee345133aa399
                     </span>
                   </span>
                 </div>
@@ -156,13 +150,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 id="generated-id-wrapper"
               >
-                <button
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="securitySolutionFlyoutLink"
-                  type="button"
-                >
-                  raspberrypi
-                </button>
+                raspberrypi
               </span>
             </span>
           </div>

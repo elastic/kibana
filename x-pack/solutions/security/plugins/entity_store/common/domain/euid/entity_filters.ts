@@ -19,6 +19,10 @@ import { getEuidDslFilterBasedOnDocument } from './dsl';
 export const buildEntityFiltersFromEntityIdentifiers = (
   entityIdentifiers: Record<string, string>
 ): QueryDslQueryContainer[] => {
+  if (!entityIdentifiers || typeof entityIdentifiers !== 'object') {
+    return [];
+  }
+
   const hostFilters = getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
   if (hostFilters) {
     return [hostFilters];

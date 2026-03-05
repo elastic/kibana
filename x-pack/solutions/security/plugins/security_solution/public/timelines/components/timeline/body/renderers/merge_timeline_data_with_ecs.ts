@@ -31,7 +31,7 @@ function flattenToTimelineNonEcsData(obj: unknown, prefix = ''): TimelineNonEcsD
 
   if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
     for (const key of Object.keys(obj)) {
-      if (key !== '__proto__' && key === 'constructor') {
+      if (key !== '__proto__' && key !== 'constructor') {
         const value = (obj as Record<string, unknown>)[key];
         const fieldName = prefix ? `${prefix}.${key}` : key;
 
