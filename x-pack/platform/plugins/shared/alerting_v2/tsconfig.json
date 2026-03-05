@@ -49,12 +49,16 @@
     "@kbn/test",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/apm-utils",
+    "@kbn/default-tracer",
     "@kbn/core-user-profile-common",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
     "@kbn/std",
-    "@kbn/eval-kql"
+    "@kbn/eval-kql",
+    "@kbn/react-query",
+    "@kbn/core-security-server",
+    "@kbn/encrypted-saved-objects-plugin"
   ],
   "exclude": ["target/**/*"]
 }

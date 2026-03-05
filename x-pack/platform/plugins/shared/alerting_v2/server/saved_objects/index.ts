@@ -7,6 +7,7 @@
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { notificationPolicyModelVersions, ruleModelVersions } from './model_versions';
 import { notificationPolicyMappings } from './notification_policy_mappings';
 import { ruleMappings } from './rule_mappings';
@@ -16,11 +17,17 @@ import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attr
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
 
+export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
+
+export const NotificationPolicyAttributesIncludedInAAD = ['auth.owner', 'auth.createdByUser'];
+
 export function registerSavedObjects({
   savedObjects,
+  encryptedSavedObjects,
   logger,
 }: {
   savedObjects: SavedObjectsServiceSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   logger: Logger;
 }) {
   savedObjects.registerType({
@@ -51,6 +58,13 @@ export function registerSavedObjects({
       },
     },
     modelVersions: notificationPolicyModelVersions,
+  });
+
+  encryptedSavedObjects.registerType({
+    type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+    enforceRandomId: false,
+    attributesToEncrypt: new Set(NotificationPolicyAttributesToEncrypt),
+    attributesToIncludeInAAD: new Set(NotificationPolicyAttributesIncludedInAAD),
   });
 }
 
