@@ -8,6 +8,7 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
+import { test as fcTest, fc } from '@fast-check/jest';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
@@ -559,41 +560,47 @@ test('format() correctly serializes meta.error after calling meta.toJSON() if me
   });
 });
 
-test.each([
-  ['Request timed out', 'Request timed out'],
-  [0, '0'],
-  [false, 'false'],
-  [['a', 'b'], 'a,b'],
-])('format() serializes non-object meta (%p) as error string', (meta, expectedError) => {
-  const layout = new JsonLayout();
+const nonObjectMetaArb = fc.oneof(
+  fc.string(),
+  fc.boolean(),
+  fc.integer(),
+  fc.float({ noNaN: false, noDefaultInfinity: true }),
+  fc.array(fc.string(), { maxLength: 20 })
+);
 
-  expect(
-    JSON.parse(
-      layout.format({
-        message: 'foo',
-        timestamp,
-        level: LogLevel.Debug,
-        context: 'bar',
+fcTest.prop([nonObjectMetaArb])(
+  'format() serializes non-object meta as plain string in error',
+  (meta) => {
+    const layout = new JsonLayout();
+
+    expect(
+      JSON.parse(
+        layout.format({
+          message: 'foo',
+          timestamp,
+          level: LogLevel.Debug,
+          context: 'bar',
+          pid: 3,
+          // @ts-expect-error validating defensive runtime behavior
+          meta,
+        })
+      )
+    ).toStrictEqual({
+      ecs: { version: expect.any(String) },
+      '@timestamp': '2012-02-01T09:30:22.011-05:00',
+      message: 'foo',
+      log: {
+        level: 'DEBUG',
+        logger: 'bar',
+      },
+      error: String(meta),
+      process: {
         pid: 3,
-        // @ts-expect-error validating defensive runtime behavior
-        meta,
-      })
-    )
-  ).toStrictEqual({
-    ecs: { version: expect.any(String) },
-    '@timestamp': '2012-02-01T09:30:22.011-05:00',
-    message: 'foo',
-    log: {
-      level: 'DEBUG',
-      logger: 'bar',
-    },
-    error: expectedError,
-    process: {
-      pid: 3,
-      uptime: 10,
-    },
-  });
-});
+        uptime: 10,
+      },
+    });
+  }
+);
 
 test('format() does not add error when meta is null', () => {
   const layout = new JsonLayout();
@@ -625,13 +632,18 @@ test('format() does not add error when meta is null', () => {
   });
 });
 
-test.each([
-  ['Request timed out', 'Request timed out'],
-  [null, 'null'],
-  [['x'], 'x'],
-])(
-  'format() serializes non-object meta.toJSON() output (%p) as error string',
-  (toJsonValue, expectedError) => {
+const nonObjectToJsonReturnArb = fc.oneof(
+  fc.string(),
+  fc.boolean(),
+  fc.integer(),
+  fc.constant(null),
+  fc.constant(undefined),
+  fc.array(fc.string(), { maxLength: 20 })
+);
+
+fcTest.prop([nonObjectToJsonReturnArb])(
+  'format() serializes non-object meta.toJSON() output as string in error',
+  (toJsonValue) => {
     const layout = new JsonLayout();
 
     expect(
@@ -658,7 +670,7 @@ test.each([
         level: 'DEBUG',
         logger: 'bar',
       },
-      error: expectedError,
+      error: String(toJsonValue),
       process: {
         pid: 3,
         uptime: 10,
