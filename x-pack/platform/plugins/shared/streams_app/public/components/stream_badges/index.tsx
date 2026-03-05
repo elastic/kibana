@@ -227,6 +227,7 @@ export function DiscoverBadgeButton({
   indexMode?: IndicesIndexMode;
 }) {
   const {
+    isServerless,
     dependencies: {
       start: { share },
     },
@@ -235,6 +236,7 @@ export function DiscoverBadgeButton({
     definition: stream,
     indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
     includeMetadata: Streams.WiredStream.Definition.is(stream),
+    useViews: !isServerless,
   });
   const useUrl = share.url.locators.useUrl;
 

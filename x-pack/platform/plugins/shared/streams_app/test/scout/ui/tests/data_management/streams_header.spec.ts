@@ -61,11 +61,6 @@ test.describe(
       await pageObjects.streams.verifyWiredBadge();
     });
 
-    test('Discover link for wired stream uses ES|QL view reference', async ({ pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs.otel');
-      await pageObjects.streams.verifyWiredStreamDiscoverLinkUsesView('logs.otel');
-    });
-
     test('transitions data quality from Good -> Degraded -> Poor for stream', async ({
       logsSynthtraceEsClient,
       page,

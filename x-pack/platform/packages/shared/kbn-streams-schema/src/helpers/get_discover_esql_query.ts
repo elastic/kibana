@@ -23,6 +23,11 @@ export interface GetDiscoverEsqlQueryOptions {
    * Whether to include METADATA _source (typically for wired streams)
    */
   includeMetadata?: boolean;
+  /**
+   * Whether to use ES|QL view names for wired streams. Set to false on
+   * serverless where the _query/view API is not available. Defaults to true.
+   */
+  useViews?: boolean;
 }
 
 /**
@@ -52,16 +57,16 @@ export interface GetDiscoverEsqlQueryOptions {
  * // Returns: "FROM logs,logs.* METADATA _source | SORT @timestamp DESC"
  */
 export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): string | undefined {
-  const { definition, indexMode, includeMetadata = false } = options;
+  const { definition, indexMode, includeMetadata = false, useViews = true } = options;
 
   if (Streams.QueryStream.Definition.is(definition)) {
     // Use the ES|QL view name as the query source
     return `FROM ${definition.query.view} | SORT @timestamp DESC`;
   }
 
-  if (Streams.WiredStream.Definition.is(definition)) {
+  if (useViews && Streams.WiredStream.Definition.is(definition)) {
     const metadataSuffix = includeMetadata ? ' METADATA _source' : '';
-    return `FROM ${getEsqlViewName(definition.name)}${metadataSuffix}`;
+    return `FROM ${getEsqlViewName(definition.name)}${metadataSuffix} | SORT @timestamp DESC`;
   }
 
   const indexPatterns = getIndexPatternsForStream(definition);

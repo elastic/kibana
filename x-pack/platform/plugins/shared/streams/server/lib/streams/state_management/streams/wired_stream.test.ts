@@ -451,6 +451,32 @@ describe('WiredStream', () => {
       expect(viewAction?.request.name).toBe('$.logs.otel.nginx');
       expect(viewAction?.request.query).toBe('FROM logs.otel.nginx');
     });
+
+    it('does not emit upsert_esql_view when isServerless is true', async () => {
+      const definition = createBaseWiredStreamDefinition({
+        name: 'logs.otel',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: { fields: {}, routing: [] },
+          failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
+        },
+      });
+      const serverlessDeps = {
+        ...createMockDependenciesWithEs(),
+        isServerless: true,
+      } as unknown as StateDependencies;
+      const stream = new WiredStream(definition, serverlessDeps);
+      const desiredState = createMockState(new Map([['logs.otel', { definition }]]));
+
+      const actions = await (stream as unknown as WiredStreamTestable).doDetermineCreateActions(
+        desiredState
+      );
+      const viewAction = actions.find((a) => a.type === 'upsert_esql_view');
+
+      expect(viewAction).toBeUndefined();
+    });
   });
 
   describe('doDetermineDeleteActions - ES|QL view', () => {
@@ -477,6 +503,20 @@ describe('WiredStream', () => {
       ) as Extract<ElasticsearchAction, { type: 'delete_esql_view' }> | undefined;
 
       expect(viewAction?.request.name).toBe('$.logs.otel.nginx');
+    });
+
+    it('does not emit delete_esql_view when isServerless is true', async () => {
+      const definition = createBaseWiredStreamDefinition({ name: 'logs.otel' });
+      const serverlessDeps = {
+        ...createMockDependencies(),
+        isServerless: true,
+      } as unknown as StateDependencies;
+      const stream = new WiredStream(definition, serverlessDeps);
+
+      const actions = await (stream as unknown as WiredStreamTestable).doDetermineDeleteActions();
+      const viewAction = actions.find((a) => a.type === 'delete_esql_view');
+
+      expect(viewAction).toBeUndefined();
     });
   });
 

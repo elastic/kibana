@@ -730,7 +730,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const settings = getInheritedSettings(ancestors);
     const failureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
 
-    return [
+    const actions: ElasticsearchAction[] = [
       {
         type: 'upsert_component_template',
         request: generateLayer(
@@ -757,13 +757,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       existsAsManagedDataStream
         ? {
-            type: 'rollover',
+            type: 'rollover' as const,
             request: {
               name: this._definition.name,
             },
           }
         : {
-            type: 'upsert_datastream',
+            type: 'upsert_datastream' as const,
             request: {
               name: this._definition.name,
             },
@@ -794,7 +794,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
-      {
+    ];
+
+    if (!this.dependencies.isServerless) {
+      actions.push({
         type: 'upsert_esql_view',
         request: {
           name: getEsqlViewName(this._definition.name),
@@ -803,8 +806,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             this._definition.ingest.wired.routing.map((r) => r.destination)
           ),
         },
-      },
-    ];
+      });
+    }
+
+    return actions;
   }
 
   public hasChangedFields(): boolean {
@@ -888,16 +893,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           definition: this._definition,
         }),
       });
-      actions.push({
-        type: 'upsert_esql_view',
-        request: {
-          name: getEsqlViewName(this._definition.name),
-          query: getWiredStreamViewQuery(
-            this._definition.name,
-            this._definition.ingest.wired.routing.map((r) => r.destination)
-          ),
-        },
-      });
+      if (!this.dependencies.isServerless) {
+        actions.push({
+          type: 'upsert_esql_view',
+          request: {
+            name: getEsqlViewName(this._definition.name),
+            query: getWiredStreamViewQuery(
+              this._definition.name,
+              this._definition.ingest.wired.routing.map((r) => r.destination)
+            ),
+          },
+        });
+      }
     }
     if (this._changes.processing) {
       actions.push({
@@ -1008,7 +1015,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-    return [
+    const actions: ElasticsearchAction[] = [
       {
         type: 'delete_index_template',
         request: {
@@ -1069,12 +1076,17 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           name: this._definition.name,
         },
       },
-      {
+    ];
+
+    if (!this.dependencies.isServerless) {
+      actions.push({
         type: 'delete_esql_view',
         request: {
           name: getEsqlViewName(this._definition.name),
         },
-      },
-    ];
+      });
+    }
+
+    return actions;
   }
 }

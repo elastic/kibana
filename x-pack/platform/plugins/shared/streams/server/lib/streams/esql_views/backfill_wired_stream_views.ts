@@ -50,10 +50,17 @@ async function sentinelViewsExist({
 export async function backfillWiredStreamViews({
   esClient,
   logger,
+  isServerless,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  isServerless: boolean;
 }): Promise<void> {
+  if (isServerless) {
+    logger.debug('ES|QL views are not supported in serverless mode, skipping view backfill.');
+    return;
+  }
+
   const viewsAlreadyExist = await sentinelViewsExist({ esClient, logger });
   if (viewsAlreadyExist) {
     logger.debug('Wired stream ES|QL views already exist, skipping startup backfill.');

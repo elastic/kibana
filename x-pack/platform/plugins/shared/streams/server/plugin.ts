@@ -272,6 +272,7 @@ export class StreamsPlugin
     backfillWiredStreamViews({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
+      isServerless: core.elasticsearch.getCapabilities().serverless,
     }).catch((err: Error) => {
       this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
         error: err,

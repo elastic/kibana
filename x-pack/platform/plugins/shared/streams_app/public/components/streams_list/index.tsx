@@ -179,6 +179,7 @@ function StreamNode({
 }) {
   const router = useStreamsAppRouter();
   const {
+    isServerless,
     dependencies: {
       start: { share },
     },
@@ -197,6 +198,7 @@ function StreamNode({
     const esqlQuery = getDiscoverEsqlQuery({
       definition: node.stream,
       indexMode: node.data_stream?.index_mode,
+      useViews: !isServerless,
     });
 
     if (!esqlQuery) {
@@ -208,7 +210,7 @@ function StreamNode({
         esql: esqlQuery,
       },
     });
-  }, [discoverLocator, node]);
+  }, [discoverLocator, node, isServerless]);
 
   return (
     <EuiFlexGroup
