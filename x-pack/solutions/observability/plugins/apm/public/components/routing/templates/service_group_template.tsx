@@ -22,7 +22,6 @@ export function ServiceGroupTemplate({
   pageHeader,
   pagePath,
   children,
-  environmentFilter = true,
   serviceGroupContextTab,
   ...pageTemplateProps
 }: {
@@ -30,7 +29,6 @@ export function ServiceGroupTemplate({
   pageHeader?: EuiPageHeaderProps;
   pagePath: string;
   children: React.ReactNode;
-  environmentFilter?: boolean;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
 } & KibanaPageTemplateProps) {
   const router = useApmRouter();
@@ -155,7 +153,6 @@ export function ServiceGroupTemplate({
             : undefined,
           ...pageHeader,
         }}
-        environmentFilter={environmentFilter}
         showServiceGroupSaveButton={!isAllServices}
         showServiceGroupsNav={isAllServices}
         selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}

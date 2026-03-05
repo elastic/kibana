@@ -8,6 +8,7 @@
 import type { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { CSSObject } from '@emotion/react';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { EnvironmentSelect } from '../environment_select';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
@@ -27,7 +28,17 @@ function updateEnvironmentUrl(
   });
 }
 
-export function ApmEnvironmentFilter() {
+export function ApmEnvironmentFilter({
+  compressed,
+  hideLabel,
+  fullWidth,
+  cssOverride,
+}: {
+  compressed?: boolean;
+  hideLabel?: boolean;
+  fullWidth?: boolean;
+  cssOverride?: CSSObject;
+}) {
   const { environment, environments, status, rangeFrom, rangeTo, serviceName } =
     useEnvironmentsContext();
   const history = useHistory();
@@ -39,6 +50,8 @@ export function ApmEnvironmentFilter() {
 
   return (
     <EnvironmentSelect
+      compressed={compressed}
+      hideLabel={hideLabel}
       status={status}
       environment={environment}
       availableEnvironments={environments}
@@ -46,6 +59,8 @@ export function ApmEnvironmentFilter() {
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       onChange={(changeValue: string) => updateEnvironmentUrl(history, location, changeValue)}
+      fullWidth={fullWidth}
+      cssOverride={cssOverride}
     />
   );
 }

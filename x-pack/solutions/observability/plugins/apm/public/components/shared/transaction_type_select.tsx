@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from '@emotion/styled';
+import type { CSSObject } from '@emotion/react';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
 import * as urlHelpers from './links/url_helpers';
@@ -22,7 +23,22 @@ const EuiSelectWithWidth = styled(EuiSelect)`
   min-width: 200px;
 `;
 
-export function TransactionTypeSelect() {
+const NO_SELECTION_OPTION = i18n.translate(
+  'xpack.apm.transactionTypeSelect.noTransactionTypeAvailable',
+  {
+    defaultMessage: 'No transaction type available',
+  }
+);
+
+export function TransactionTypeSelect({
+  compressed,
+  fullWidth,
+  cssOverride,
+}: {
+  compressed?: boolean;
+  fullWidth?: boolean;
+  cssOverride?: CSSObject;
+}) {
   const { isSmall } = useBreakpoints();
   const { transactionTypes, transactionType } = useApmServiceContext();
   const history = useHistory();
@@ -38,21 +54,22 @@ export function TransactionTypeSelect() {
   );
 
   const options = transactionTypes.map((t) => ({ text: t, value: t }));
+  const isDisabled = options.length === 0;
 
   return (
-    <>
-      <EuiSelectWithWidth
-        fullWidth={isSmall}
-        aria-label={i18n.translate(
-          'xpack.apm.serviceOverview.filterByTransactionTypeSelect.ariaLabel',
-          { defaultMessage: 'Filter by transaction type select' }
-        )}
-        data-test-subj="headerFilterTransactionType"
-        onChange={handleChange}
-        options={options}
-        compressed
-        value={transactionType}
-      />
-    </>
+    <EuiSelectWithWidth
+      css={cssOverride}
+      compressed={compressed !== false}
+      fullWidth={fullWidth ?? isSmall}
+      aria-label={i18n.translate(
+        'xpack.apm.serviceOverview.filterByTransactionTypeSelect.ariaLabel',
+        { defaultMessage: 'Filter by transaction type select' }
+      )}
+      data-test-subj={`headerFilterTransactionType${isDisabled ? 'Disabled' : ''}`}
+      disabled={isDisabled}
+      onChange={handleChange}
+      options={isDisabled ? [{ text: NO_SELECTION_OPTION, value: '' }] : options}
+      value={isDisabled ? '' : transactionType ?? options[0]?.value ?? ''}
+    />
   );
 }

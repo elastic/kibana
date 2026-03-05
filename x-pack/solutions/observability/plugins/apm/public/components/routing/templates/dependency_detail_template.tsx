@@ -104,7 +104,11 @@ export function DependencyDetailTemplate({ children }: Props) {
           ),
         }}
       >
-        <SearchBar showTimeComparison searchBarPlaceholder={unifiedSearchBarPlaceholder} />
+        <SearchBar
+          showTimeComparison
+          showEnvironmentFilter
+          searchBarPlaceholder={unifiedSearchBarPlaceholder}
+        />
         {children}
       </ApmMainTemplate>
     </ApmIndexSettingsContextProvider>

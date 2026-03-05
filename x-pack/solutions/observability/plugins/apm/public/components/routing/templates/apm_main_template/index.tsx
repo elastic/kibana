@@ -20,7 +20,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
-import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { ActionsMenu } from './actions_menu';
 import { getNoDataConfig } from '../no_data_config';
 
@@ -34,14 +33,12 @@ const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
  *  - Page title
  *
  *  Optionally:
- *   - EnvironmentFilter
  *   - ServiceGroupSaveButton
  */
 export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
-  environmentFilter = true,
   showActionsMenu = false,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
@@ -51,7 +48,6 @@ export function ApmMainTemplate({
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-  environmentFilter?: boolean;
   showActionsMenu?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
@@ -120,7 +116,6 @@ export function ApmMainTemplate({
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
     ...(showActionsMenu ? [<ActionsMenu />] : []),
-    ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
 
   return (

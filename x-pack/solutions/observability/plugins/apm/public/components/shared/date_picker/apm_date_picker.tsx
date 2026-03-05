@@ -13,7 +13,7 @@ import { toBoolean, toNumber } from '../../../context/url_params_context/helpers
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 
-export function ApmDatePicker() {
+export function ApmDatePicker({ compressed }: { compressed?: boolean }) {
   const { query } = useApmParams('/*');
 
   if (!('rangeFrom' in query)) {
@@ -34,6 +34,7 @@ export function ApmDatePicker() {
 
   return (
     <DatePicker
+      compressed={compressed}
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       refreshPaused={refreshPaused}

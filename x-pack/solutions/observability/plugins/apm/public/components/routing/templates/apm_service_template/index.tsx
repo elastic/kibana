@@ -191,7 +191,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
           </EuiFlexGroup>
         ) : (
           <>
-            <SearchBar {...searchBarOptions} />
+            <SearchBar {...searchBarOptions} showEnvironmentFilter />
             <ServiceAnomalyTimeseriesContextProvider>
               {children}
             </ServiceAnomalyTimeseriesContextProvider>

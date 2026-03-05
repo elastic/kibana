@@ -46,7 +46,7 @@ export function TopTracesOverview() {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <SearchBar />
+        <SearchBar showEnvironmentFilter />
       </EuiFlexItem>
 
       {fallbackToTransactions && (

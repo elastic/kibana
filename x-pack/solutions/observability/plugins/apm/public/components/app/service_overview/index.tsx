@@ -47,7 +47,7 @@ export function ServiceOverview() {
 
   return (
     <>
-      <SearchBar showTimeComparison showTransactionTypeSelector />
+      <SearchBar showTimeComparison showTransactionTypeSelector showEnvironmentFilter />
       <AnnotationsContextProvider
         serviceName={serviceName}
         environment={environment}

@@ -303,7 +303,7 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar showTimeComparison />
+      <SearchBar showTimeComparison showEnvironmentFilter />
       <EuiFlexGroup direction="column" gutterSize="m">
         <TracesInDiscoverCallout />
         {displayMlCallout && mlCallout}

@@ -37,7 +37,7 @@ import { ServiceMapGraph } from './graph';
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <SearchBar showTimeComparison />
+      <SearchBar showTimeComparison showEnvironmentFilter />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"
@@ -214,7 +214,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showTimeComparison />
+      <SearchBar showTimeComparison showEnvironmentFilter />
       <div
         className={cx({
           [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,

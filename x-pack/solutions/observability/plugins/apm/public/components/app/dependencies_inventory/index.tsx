@@ -25,6 +25,7 @@ export function DependenciesInventory() {
     <>
       <SearchBar
         showTimeComparison
+        showEnvironmentFilter
         searchBarPlaceholder={unifiedSearchBarPlaceholder}
         searchBarBoolFilter={searchBarBoolFilter}
       />
