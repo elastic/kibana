@@ -151,7 +151,7 @@ describe('NotesDetails', () => {
       </TestProviders>
     );
 
-    expect(getByText(NO_NOTES(true))).toBeInTheDocument();
+    expect(getByText(NO_NOTES('alert'))).toBeInTheDocument();
   });
 
   it('should render no data message for events if no notes are present', () => {
@@ -175,7 +175,7 @@ describe('NotesDetails', () => {
       </TestProviders>
     );
 
-    expect(getByText(NO_NOTES(false))).toBeInTheDocument();
+    expect(getByText(NO_NOTES('event'))).toBeInTheDocument();
   });
 
   it('should render error toast if fetching notes fails', () => {
