@@ -284,29 +284,24 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const getDatasetByName = evaluationsPluginEnabled
         ? async (datasetName: string): Promise<EvaluationDatasetWithId | null> => {
             const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
-            try {
-              const datasetResponse = GetEvaluationDatasetResponse.parse(
-                await evaluationsKbnClient.request({
-                  path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
-                  method: 'GET',
-                  retries: 0,
-                })
-              );
+            const response = await evaluationsKbnClient.request({
+              path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
+              method: 'GET',
+              retries: 0,
+            });
+            const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
 
-              return {
-                id: datasetResponse.id,
-                name: datasetResponse.name,
-                description: datasetResponse.description,
-                examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-                  id,
-                  input,
-                  output,
-                  metadata,
-                })),
-              };
-            } catch {
-              return null;
-            }
+            return {
+              id: datasetResponse.id,
+              name: datasetResponse.name,
+              description: datasetResponse.description,
+              examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
+                id,
+                input,
+                output,
+                metadata,
+              })),
+            };
           }
         : undefined;
 
