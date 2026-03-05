@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TemplateDeserialized } from '../../../../common';
+import type { TemplateDeserialized } from '../../../../../common';
 import { buildTemplateFromWizardData } from './build_template_from_wizard_data';
 
 describe('buildTemplateFromWizardData', () => {

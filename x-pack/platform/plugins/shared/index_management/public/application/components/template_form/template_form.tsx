@@ -25,7 +25,7 @@ import {
   LegacyIndexTemplatesDeprecation,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
-import { buildTemplateFromWizardData } from './build_template_from_wizard_data';
+import { buildTemplateFromWizardData } from './utils/build_template_from_wizard_data';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TemplateDeserialized } from '../../../../common';
-import type { DataStreamOptions } from '../../../../common/types/data_streams';
-import { serializeAsESLifecycle } from '../../../../common/lib';
+import type { TemplateDeserialized } from '../../../../../common';
+import type { DataStreamOptions } from '../../../../../common/types/data_streams';
+import { serializeAsESLifecycle } from '../../../../../common/lib';
 
 export interface TemplateFormWizardData {
   logistics: Omit<TemplateDeserialized, '_kbnMeta' | 'template'>;

@@ -21,6 +21,7 @@ import { getTemplateDetailsLink } from '../../services/routing';
 import { sendRequest, useRequest } from '../../services/use_request';
 import { TemplateEdit } from './template_edit';
 import type { UiMetricService } from '../../services/ui_metric';
+import type { UseRequestResponse } from '../../../shared_imports';
 
 jest.mock('../../services/use_request', () => ({
   __esModule: true,
@@ -110,15 +111,37 @@ const makeTemplate = (overrides: Partial<TemplateDeserialized> = {}): TemplateDe
   ...overrides,
 });
 
+const getUseRequestMock = <T,>({
+  isInitialRequest = false,
+  isLoading,
+  error,
+  data,
+}: {
+  isInitialRequest?: boolean;
+  isLoading: boolean;
+  error: Error | null;
+  data: T | null;
+}): UseRequestResponse<T, Error> => ({
+  isInitialRequest,
+  isLoading,
+  error,
+  data,
+  resendRequest: jest.fn(),
+});
+
 describe('TemplateEdit', () => {
   beforeEach(() => {
     breadcrumbService.setup(jest.fn());
     setUiMetricService({ trackMetric: jest.fn() } as unknown as UiMetricService);
-    (sendRequest as jest.Mock).mockResolvedValue({ error: null });
+    jest.mocked(sendRequest).mockResolvedValue({ data: null, error: null });
   });
 
   test('renders loading state', () => {
-    (useRequest as jest.Mock).mockReturnValue({ isLoading: true, error: null, data: null });
+    jest
+      .mocked(useRequest)
+      .mockReturnValue(
+        getUseRequestMock({ isInitialRequest: true, isLoading: true, error: null, data: null })
+      );
     const { history, location, match } = createRouterProps({ name: 'my_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -127,11 +150,11 @@ describe('TemplateEdit', () => {
   });
 
   test('renders error state when load fails', () => {
-    (useRequest as jest.Mock).mockReturnValue({
-      isLoading: false,
-      error: new Error('boom'),
-      data: null,
-    });
+    jest
+      .mocked(useRequest)
+      .mockReturnValue(
+        getUseRequestMock({ isLoading: false, error: new Error('boom'), data: null })
+      );
     const { history, location, match } = createRouterProps({ name: 'my_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -140,13 +163,15 @@ describe('TemplateEdit', () => {
   });
 
   test('blocks editing cloud managed templates', () => {
-    (useRequest as jest.Mock).mockReturnValue({
-      isLoading: false,
-      error: null,
-      data: makeTemplate({
-        _kbnMeta: { type: 'cloudManaged', hasDatastream: true, isLegacy: false },
-      }),
-    });
+    jest.mocked(useRequest).mockReturnValue(
+      getUseRequestMock({
+        isLoading: false,
+        error: null,
+        data: makeTemplate({
+          _kbnMeta: { type: 'cloudManaged', hasDatastream: true, isLegacy: false },
+        }),
+      })
+    );
     const { history, location, match } = createRouterProps({ name: 'my_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -155,11 +180,13 @@ describe('TemplateEdit', () => {
   });
 
   test('shows system template warning callout', () => {
-    (useRequest as jest.Mock).mockReturnValue({
-      isLoading: false,
-      error: null,
-      data: makeTemplate({ name: '.system_template' }),
-    });
+    jest.mocked(useRequest).mockReturnValue(
+      getUseRequestMock({
+        isLoading: false,
+        error: null,
+        data: makeTemplate({ name: '.system_template' }),
+      })
+    );
     const { history, location, match } = createRouterProps({ name: '.system_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -168,11 +195,13 @@ describe('TemplateEdit', () => {
   });
 
   test('shows deprecated template warning callout', () => {
-    (useRequest as jest.Mock).mockReturnValue({
-      isLoading: false,
-      error: null,
-      data: makeTemplate({ deprecated: true }),
-    });
+    jest.mocked(useRequest).mockReturnValue(
+      getUseRequestMock({
+        isLoading: false,
+        error: null,
+        data: makeTemplate({ deprecated: true }),
+      })
+    );
     const { history, location, match } = createRouterProps({ name: 'my_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -182,7 +211,9 @@ describe('TemplateEdit', () => {
 
   test('wires save to PUT /index_templates/{name} and navigates', async () => {
     const template = makeTemplate();
-    (useRequest as jest.Mock).mockReturnValue({ isLoading: false, error: null, data: template });
+    jest
+      .mocked(useRequest)
+      .mockReturnValue(getUseRequestMock({ isLoading: false, error: null, data: template }));
     const { history, location, match } = createRouterProps({ name: template.name });
     const pushSpy = jest.spyOn(history, 'push');
 
