@@ -42,6 +42,9 @@ jest.mock('@kbn/saved-objects-plugin/public', () => ({
   showSaveModal: jest.fn(),
 }));
 
+const STABLE_TEST_TAB_ID = 'stable-test-tab-id';
+jest.mock('uuid', () => ({ v4: jest.fn(() => STABLE_TEST_TAB_ID) }));
+
 type OnSaveProps = Parameters<DiscoverSessionSaveModalOnSaveCallback>[0];
 
 const getOnSaveProps = (props?: Partial<OnSaveProps>): OnSaveProps => ({
@@ -402,7 +405,7 @@ describe('onSaveDiscoverSession', () => {
       const { saveModal } = await setup({ services });
       await saveModal?.props.onSave(getOnSaveProps());
       expect(navigateSpy).not.toHaveBeenCalled();
-      const { toolkit, saveModal: newSaveModal } = await setup({
+      const { saveModal: newSaveModal } = await setup({
         savedSearch: false,
         services,
       });
@@ -410,7 +413,7 @@ describe('onSaveDiscoverSession', () => {
       expect(navigateSpy).toHaveBeenCalledWith({
         savedSearchId: 'new-session',
         tab: {
-          id: toolkit.getCurrentTab().id,
+          id: STABLE_TEST_TAB_ID,
         },
       });
     });
