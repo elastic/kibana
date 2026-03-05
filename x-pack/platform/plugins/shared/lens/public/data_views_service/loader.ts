@@ -13,12 +13,11 @@ import type {
   DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import {
-  LENS_DEFAULT_TIME_FIELD,
-  type IndexPattern,
-  type IndexPatternField,
-  type IndexPatternMap,
-  type IndexPatternRef,
+import type {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternMap,
+  IndexPatternRef,
 } from '@kbn/lens-common';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
@@ -46,12 +45,7 @@ export function convertDataViewIntoLensIndexPattern(
     .map((field) => buildIndexPatternField(field, metaKeys))
     .concat(documentField);
 
-  const { typeMeta, title, name, fieldFormatMap } = dataView;
-  const timeFieldName =
-    dataView.timeFieldName ??
-    (dataView.getFieldByName(LENS_DEFAULT_TIME_FIELD)?.type === 'date'
-      ? LENS_DEFAULT_TIME_FIELD
-      : undefined);
+  const { typeMeta, title, name, timeFieldName, fieldFormatMap } = dataView;
   if (typeMeta?.aggs) {
     const aggs = Object.keys(typeMeta.aggs);
     newFields.forEach((field, index) => {
@@ -207,7 +201,16 @@ export async function loadIndexPatterns({
   }
   indexPatterns.push(
     ...(await Promise.all(
-      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+      Object.values(adHocDataViews || {}).map(async (spec) => {
+        const dv = await dataViews.create(spec);
+        if (!dv.timeFieldName) {
+          const tsField = dv.getFieldByName('@timestamp');
+          if (tsField?.type === 'date') {
+            dv.timeFieldName = '@timestamp';
+          }
+        }
+        return dv;
+      })
     ))
   );
 
