@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
@@ -18,6 +18,7 @@ import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
 } from '@kbn/timelines-plugin/common/api/search_strategy';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
@@ -28,8 +29,8 @@ import { timelineActions } from '../store';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
-  TimelineEventsAllStrategyResponse,
   TimelineEdges,
+  TimelineEventsAllStrategyResponse,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';
@@ -49,6 +50,7 @@ import { DETECTIONS_TABLE_IDS } from '../../detections/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
+  rawEvents: EsHitRecord[];
   id: string;
   inspect: InspectResponse;
 
@@ -235,6 +237,7 @@ export const useTimelineEventsHandler = ({
         querySize: 0,
       },
       events: [],
+      rawEvents: [],
       loadNextBatch,
       refreshedAt: 0,
     }),
@@ -279,8 +282,9 @@ export const useTimelineEventsHandler = ({
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
                     ...prevResponse,
-                    /**/
                     events: getTimelineEvents(response.edges),
+                    // @ts-ignore
+                    rawEvents: (response.rawResponse?.hits?.hits ?? []) as EsHitRecord[],
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
