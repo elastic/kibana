@@ -43,7 +43,7 @@ import {
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
-  useInternalStateStore,
+  useInternalStateGetState,
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -74,7 +74,7 @@ export const useTopNavLinks = ({
 }): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
-  const internalStateStore = useInternalStateStore();
+  const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -248,7 +248,8 @@ export const useTopNavLinks = ({
           await onSaveDiscoverSession({
             initialCopyOnSave: true,
             services,
-            internalStateStore,
+            dispatch,
+            getState,
             runtimeStateManager,
           });
         },
@@ -275,7 +276,8 @@ export const useTopNavLinks = ({
         run: async () => {
           await onSaveDiscoverSession({
             services,
-            internalStateStore,
+            dispatch,
+            getState,
             runtimeStateManager,
             onSaveCb: isEmbeddedEditor ? services.embeddableEditor.transferBackToEditor : undefined,
           });
@@ -320,12 +322,10 @@ export const useTopNavLinks = ({
                     run: async () => {
                       dismissFlyouts([DiscoverFlyouts.lensEdit]);
 
-                      const internalState = internalStateStore.getState();
+                      const internalState = getState();
 
                       if (internalState.persistedDiscoverSession) {
-                        await internalStateStore
-                          .dispatch(internalStateActions.resetDiscoverSession())
-                          .unwrap();
+                        await dispatch(internalStateActions.resetDiscoverSession()).unwrap();
                       }
                     },
                     id: 'resetChanges',
@@ -357,7 +357,7 @@ export const useTopNavLinks = ({
     isEsqlMode,
     dataView,
     dispatch,
-    internalStateStore,
+    getState,
     runtimeStateManager,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,

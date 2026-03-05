@@ -154,7 +154,8 @@ const setup = async ({
 
   await onSaveDiscoverSession({
     services,
-    internalStateStore: toolkit.internalState,
+    dispatch: toolkit.internalState.dispatch,
+    getState: toolkit.internalState.getState,
     runtimeStateManager: toolkit.runtimeStateManager,
     onSaveCb,
     onClose,

@@ -23,7 +23,11 @@ export {
 
 export { DEFAULT_TAB_STATE } from './constants';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
@@ -33,8 +37,8 @@ export const internalStateActions = {
 
 export {
   InternalStateProvider,
-  useInternalStateStore,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabContext,

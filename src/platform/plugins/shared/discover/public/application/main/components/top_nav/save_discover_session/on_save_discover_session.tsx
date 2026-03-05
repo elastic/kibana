@@ -22,7 +22,8 @@ import {
   selectAllTabs,
   selectTabRuntimeState,
   selectTabSavedSearch,
-  type InternalStateStore,
+  type DiscoverInternalState,
+  type InternalStateDispatch,
   type RuntimeStateManager,
 } from '../../../state_management/redux';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
@@ -30,7 +31,8 @@ import { DiscoverSessionSaveModal } from './save_modal';
 
 export interface OnSaveDiscoverSessionParams {
   services: DiscoverServices;
-  internalStateStore: InternalStateStore;
+  dispatch: InternalStateDispatch;
+  getState: () => DiscoverInternalState;
   runtimeStateManager: RuntimeStateManager;
   initialCopyOnSave?: boolean;
   onClose?: () => void;
@@ -39,18 +41,19 @@ export interface OnSaveDiscoverSessionParams {
 
 export const onSaveDiscoverSession = async ({
   services,
-  internalStateStore,
+  dispatch,
+  getState,
   runtimeStateManager,
   initialCopyOnSave,
   onClose,
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
-  const internalState = internalStateStore.getState();
+  const internalState = getState();
   const tabId = internalState.tabs.unsafeCurrentId;
   if (services.embeddableEditor.isByValueEditor() && onSaveCb) {
     const savedSearch = await selectTabSavedSearch({
       tabId,
-      getState: internalStateStore.getState,
+      getState,
       runtimeStateManager,
       services,
     });
@@ -94,19 +97,17 @@ export const onSaveDiscoverSession = async ({
       };
 
       try {
-        response = await internalStateStore
-          .dispatch(
-            internalStateActions.saveDiscoverSession({
-              newTitle,
-              newTimeRestore,
-              newCopyOnSave,
-              newDescription,
-              newTags,
-              isTitleDuplicateConfirmed,
-              onTitleDuplicate,
-            })
-          )
-          .unwrap();
+        response = await dispatch(
+          internalStateActions.saveDiscoverSession({
+            newTitle,
+            newTimeRestore,
+            newCopyOnSave,
+            newDescription,
+            newTags,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          })
+        ).unwrap();
       } catch (error) {
         services.toastNotifications.addDanger({
           title: i18n.translate('discover.notifications.notSavedSearchTitle', {

@@ -31,7 +31,7 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
-  useInternalStateStore,
+  useInternalStateGetState,
   selectTab,
 } from '../../state_management/redux';
 
@@ -74,7 +74,7 @@ export const DiscoverMainContent = ({
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const internalStateStore = useInternalStateStore();
+  const getState = useInternalStateGetState();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const updateAppStateAndReplaceUrl = useCurrentTabAction(
@@ -101,7 +101,7 @@ export const DiscoverMainContent = ({
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
         dispatch(updateAppStateAndReplaceUrl({ appState: { viewMode: mode } })).then(() => {
-          const appState = selectTab(internalStateStore.getState(), currentTabId).appState;
+          const appState = selectTab(getState(), currentTabId).appState;
 
           if (appState.viewMode === mode) {
             resolve(mode);
@@ -111,14 +111,7 @@ export const DiscoverMainContent = ({
         });
       });
     },
-    [
-      dispatch,
-      updateAppStateAndReplaceUrl,
-      internalStateStore,
-      currentTabId,
-      trackUiMetric,
-      updateAppState,
-    ]
+    [dispatch, updateAppStateAndReplaceUrl, getState, currentTabId, trackUiMetric, updateAppState]
   );
 
   const isEsqlMode = useIsEsqlMode();

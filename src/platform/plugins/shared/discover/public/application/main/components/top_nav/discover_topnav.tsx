@@ -37,8 +37,8 @@ import {
   useCurrentTabDataStateContainer,
   useDataViewsForPicker,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useInternalStateSelector,
-  useInternalStateStore,
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
@@ -69,7 +69,7 @@ export const DiscoverTopNav = ({
   onCancelClick,
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
-  const internalStateStore = useInternalStateStore();
+  const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const services = useDiscoverServices();
@@ -189,13 +189,13 @@ export const DiscoverTopNav = ({
         dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
       } else {
         // remove savedQueryId from state
-        const { appState } = selectTab(internalStateStore.getState(), currentTabId);
+        const { appState } = selectTab(getState(), currentTabId);
         const newState = { ...appState };
         delete newState.savedQuery;
         dispatch(setAppState({ appState: newState }));
       }
     },
-    [dispatch, setAppState, internalStateStore, currentTabId, updateAppState]
+    [dispatch, setAppState, getState, currentTabId, updateAppState]
   );
 
   const dataStateContainer = useCurrentTabDataStateContainer();
@@ -220,7 +220,8 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         onSaveDiscoverSession({
           services,
-          internalStateStore,
+          dispatch,
+          getState,
           runtimeStateManager,
           onClose: () =>
             dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
@@ -232,14 +233,7 @@ export const DiscoverTopNav = ({
         dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
       }
     },
-    [
-      dataView.id,
-      dispatch,
-      services,
-      internalStateStore,
-      runtimeStateManager,
-      transitionFromESQLToDataView,
-    ]
+    [dataView.id, dispatch, services, getState, runtimeStateManager, transitionFromESQLToDataView]
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({
