@@ -8,6 +8,7 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
 
