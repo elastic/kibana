@@ -8,6 +8,14 @@
 /**
  * Converts a user-provided name into a safe, lowercase identifier suitable for
  * workflow name prefixes, tool ID segments, and MCP namespaces.
+ *
+ * Applies the minimum transformation required by the strictest downstream
+ * constraint (tool IDs: lowercase `[a-z0-9_-]`, segments start/end with `[a-z0-9]`).
+ *
+ * @throws {Error} When the input contains no alphanumeric characters, resulting in
+ *   an empty identifier that would produce malformed IDs downstream. Names with
+ *   only underscores or special characters are also rejected because boundary
+ *   trimming leaves nothing behind.
  */
 export const slugify = (input: string): string => {
   const result = input
