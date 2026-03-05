@@ -10,11 +10,17 @@
 import type { ParsedPart } from '@kbn/content-list-assembly';
 import { filter, type FilterContext } from './part';
 import { SortRenderer } from './sort';
+import { TagFilterRenderer } from './tags';
 
-// Ensure the sort preset's resolve callback is registered.
+// Ensure preset resolve callbacks are registered.
 import './sort/sort';
+import './tags/tag_filter';
 
-const createContext = (hasSorting: boolean): FilterContext => ({ hasSorting });
+const createContext = (overrides: Partial<FilterContext> = {}): FilterContext => ({
+  hasSorting: false,
+  hasTags: false,
+  ...overrides,
+});
 
 const createSortPart = (): ParsedPart => ({
   type: 'part',
@@ -24,21 +30,45 @@ const createSortPart = (): ParsedPart => ({
   attributes: {},
 });
 
-describe('filter.resolve', () => {
-  it('returns a `SearchFilterConfig` for the sort preset when sorting is available.', () => {
-    const result = filter.resolve(createSortPart(), createContext(true));
+const createTagsPart = (): ParsedPart => ({
+  type: 'part',
+  part: 'filter',
+  preset: 'tags',
+  instanceId: 'tags',
+  attributes: {},
+});
 
-    expect(result).toBeDefined();
-    expect(result).toMatchObject({
-      type: 'custom_component',
+describe('filter.resolve', () => {
+  describe('sort preset', () => {
+    it('returns a `SearchFilterConfig` for the sort preset when sorting is available.', () => {
+      const result = filter.resolve(createSortPart(), createContext({ hasSorting: true }));
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      expect((result as { component: unknown }).component).toBe(SortRenderer);
     });
-    expect((result as { component: unknown }).component).toBe(SortRenderer);
+
+    it('returns `undefined` for the sort preset when sorting is unavailable.', () => {
+      const result = filter.resolve(createSortPart(), createContext({ hasSorting: false }));
+
+      expect(result).toBeUndefined();
+    });
   });
 
-  it('returns `undefined` for the sort preset when sorting is unavailable.', () => {
-    const result = filter.resolve(createSortPart(), createContext(false));
+  describe('tags preset', () => {
+    it('returns a `SearchFilterConfig` for the tags preset when tags are available.', () => {
+      const result = filter.resolve(createTagsPart(), createContext({ hasTags: true }));
 
-    expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      expect((result as { component: unknown }).component).toBe(TagFilterRenderer);
+    });
+
+    it('returns `undefined` for the tags preset when tags are unavailable.', () => {
+      const result = filter.resolve(createTagsPart(), createContext({ hasTags: false }));
+
+      expect(result).toBeUndefined();
+    });
   });
 
   it('returns `undefined` for an unknown preset.', () => {
@@ -49,7 +79,7 @@ describe('filter.resolve', () => {
       instanceId: 'unknown-filter',
       attributes: {},
     };
-    const result = filter.resolve(unknownPart, createContext(true));
+    const result = filter.resolve(unknownPart, createContext({ hasSorting: true }));
 
     expect(result).toBeUndefined();
   });
@@ -62,7 +92,7 @@ describe('filter.resolve', () => {
       instanceId: 'custom',
       attributes: {},
     };
-    const result = filter.resolve(noPresetPart, createContext(true));
+    const result = filter.resolve(noPresetPart, createContext({ hasSorting: true }));
 
     expect(result).toBeUndefined();
   });
