@@ -35,11 +35,14 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, entityMaintainersClient } = entityStoreCtx;
-        const { entityTypes, logExtraction: params } = req.body;
+        const { logger, assetManager } = entityStoreCtx;
+        const { entityTypes, logExtraction, historySnapshot } = req.body;
         logger.debug('Install api called');
 
-        const privileges = await assetManager.getPrivileges(req, params?.additionalIndexPatterns);
+        const privileges = await assetManager.getPrivileges(
+          req,
+          logExtraction?.additionalIndexPatterns
+        );
         if (!privileges.hasAllRequested) {
           return res.forbidden({
             body: {
@@ -56,8 +59,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await assetManager.init(req, toInstall, params);
-        await entityMaintainersClient.startAll(req);
+        await assetManager.init(req, toInstall, logExtraction, historySnapshot);
 
         return res.created({ body: { ok: true } });
       })

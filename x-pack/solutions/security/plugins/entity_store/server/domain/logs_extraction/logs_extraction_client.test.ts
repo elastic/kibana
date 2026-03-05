@@ -18,7 +18,12 @@ import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
-import { LogExtractionState, type EngineDescriptorClient } from '../definitions/saved_objects';
+import {
+  LogExtractionConfig,
+  type EngineDescriptorClient,
+  type EntityStoreGlobalState,
+  type EntityStoreGlobalStateClient,
+} from '../definitions/saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
@@ -40,18 +45,32 @@ function createMockEngineDescriptor(
   type: EntityType = 'user',
   overrides?: Partial<{ lookbackPeriod: string; delay: string; paginationTimestamp: string }>
 ) {
-  const logExtractionState = LogExtractionState.parse({
-    docsLimit: 10000,
-    additionalIndexPatterns: [],
-    lookbackPeriod: overrides?.lookbackPeriod ?? '3h',
-    delay: overrides?.delay ?? '1m',
+  const logExtractionState = {
     paginationTimestamp: overrides?.paginationTimestamp,
-  });
+    paginationId: undefined,
+    lastExecutionTimestamp: undefined,
+  };
   return {
     type,
     status: ENGINE_STATUS.STARTED,
     logExtractionState,
     versionState: { version: 2, state: 'running' as const, isMigratedFromV1: false },
+  };
+}
+
+function createMockGlobalStateClient(
+  logExtractionOverrides?: Partial<{ lookbackPeriod: string; delay: string }>
+): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow'>> {
+  const logsExtraction = LogExtractionConfig.parse({
+    docsLimit: 10000,
+    additionalIndexPatterns: [],
+    lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
+    delay: logExtractionOverrides?.delay ?? '1m',
+  });
+  const state = { logsExtraction } as EntityStoreGlobalState;
+  return {
+    find: jest.fn().mockResolvedValue(state),
+    findOrThrow: jest.fn().mockResolvedValue(state),
   };
 }
 
@@ -63,6 +82,7 @@ describe('LogsExtractionClient', () => {
   let mockEngineDescriptorClient: jest.Mocked<
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
+  let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let mockCcsLogsExtractionClient: ReturnType<typeof createMockCcsLogsExtractionClient>;
 
   beforeEach(() => {
@@ -77,6 +97,7 @@ describe('LogsExtractionClient', () => {
       findOrThrow: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
     };
+    mockGlobalStateClient = createMockGlobalStateClient();
     mockCcsLogsExtractionClient = createMockCcsLogsExtractionClient();
 
     client = new LogsExtractionClient({
@@ -85,6 +106,7 @@ describe('LogsExtractionClient', () => {
       esClient: mockEsClient,
       dataViewsService: mockDataViewsService,
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+      globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
       ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
     });
   });
@@ -159,8 +181,7 @@ describe('LogsExtractionClient', () => {
             paginationId: undefined,
             lastExecutionTimestamp: expect.any(String),
           }),
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -202,8 +223,7 @@ describe('LogsExtractionClient', () => {
             paginationId: undefined,
             lastExecutionTimestamp: expect.any(String),
           }),
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -223,8 +243,13 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
+      const globalStateWithDelay5s = {
+        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+      } as EntityStoreGlobalState;
+      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', { lookbackPeriod: '3h', delay: '5s' }) as Awaited<
+        createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
         >
       );
@@ -586,8 +611,7 @@ describe('LogsExtractionClient', () => {
             lastExecutionTimestamp: expect.any(String),
           }),
           error: { message: ccsError.message, action: 'extractLogs' },
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -657,8 +681,7 @@ describe('LogsExtractionClient', () => {
             paginationId: undefined,
             lastExecutionTimestamp: expect.any(String),
           }),
-        }),
-        { mergeAttributes: false }
+        })
       );
     });
 
@@ -872,7 +895,7 @@ describe('LogsExtractionClient', () => {
       descriptor.logExtractionState = {
         ...descriptor.logExtractionState,
         paginationId: 'recovery-cursor-id',
-      };
+      } as typeof descriptor.logExtractionState;
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(descriptor);
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
