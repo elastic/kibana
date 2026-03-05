@@ -13,7 +13,6 @@ import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server'
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
-import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import {
   EngineDescriptorTypeName,
@@ -46,7 +45,7 @@ import {
   getUpdatesComponentTemplateName,
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import type { LogsExtractionClient } from './logs_extraction_client';
+import type { LogsExtractionClient } from './logs_extraction';
 import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
@@ -110,13 +109,6 @@ export class AssetManager {
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
-
-        scheduleEntityMaintainerTasks({
-          logger: this.logger,
-          taskManager: this.taskManager,
-          namespace: this.namespace,
-          request,
-        }),
 
         installEuidStoredScripts({
           esClient: this.esClient,

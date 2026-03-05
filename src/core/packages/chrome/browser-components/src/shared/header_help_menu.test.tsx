@@ -54,47 +54,19 @@ describe('HeaderHelpMenu', () => {
     expect(component.find('[data-test-subj="kbnVersionString"]').exists()).toBeFalsy();
   });
 
-  test('it renders reactContent and passes hideHelpMenu action', () => {
-    const reactContent = jest.fn(() => (
-      <span data-test-subj="react-content-node">React Content</span>
-    ));
+  test('it renders content and passes hideHelpMenu action', () => {
+    const content = jest.fn(() => <span data-test-subj="react-content-node">React Content</span>);
     const component = renderAndOpenMenu({
-      helpExtension$: new BehaviorSubject<ChromeHelpExtension | undefined>({
-        appName: 'Test App',
-        reactContent,
-      }),
-    });
-
-    expect(component.find('[data-test-subj="react-content-node"]').exists()).toBeTruthy();
-    expect(reactContent).toHaveBeenCalledWith(
-      expect.objectContaining({ hideHelpMenu: expect.any(Function) })
-    );
-  });
-
-  test('it renders legacy content when only content is provided', () => {
-    const content = jest.fn(() => () => {});
-    renderAndOpenMenu({
       helpExtension$: new BehaviorSubject<ChromeHelpExtension | undefined>({
         appName: 'Test App',
         content,
       }),
     });
 
-    expect(content).toHaveBeenCalled();
-  });
-
-  test('it prefers reactContent over legacy content when both are provided', () => {
-    const legacyContent = jest.fn(() => () => {});
-    const component = renderAndOpenMenu({
-      helpExtension$: new BehaviorSubject<ChromeHelpExtension | undefined>({
-        appName: 'Test App',
-        reactContent: () => <span data-test-subj="react-content-node">React Content</span>,
-        content: legacyContent,
-      }),
-    });
-
     expect(component.find('[data-test-subj="react-content-node"]').exists()).toBeTruthy();
-    expect(legacyContent).not.toHaveBeenCalled();
+    expect(content).toHaveBeenCalledWith(
+      expect.objectContaining({ hideHelpMenu: expect.any(Function) })
+    );
   });
 
   test('it renders the global custom content + the default content', () => {
