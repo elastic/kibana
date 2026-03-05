@@ -224,12 +224,18 @@ describe('Cloud Connector Schemas', () => {
     });
 
     describe('GCP provider', () => {
-      it('should return projectId for primary key project_id', () => {
-        expect(getCredentialKeyFromVarName('gcp', 'project_id')).toBe('projectId');
+      it('should return serviceAccount for primary key service_account', () => {
+        expect(getCredentialKeyFromVarName('gcp', 'service_account')).toBe('serviceAccount');
       });
 
-      it('should return serviceAccountKey for primary key service_account_key', () => {
-        expect(getCredentialKeyFromVarName('gcp', 'service_account_key')).toBe('serviceAccountKey');
+      it('should return audience for primary key audience', () => {
+        expect(getCredentialKeyFromVarName('gcp', 'audience')).toBe('audience');
+      });
+
+      it('should return gcp_credentials_cloud_connector_id for its primary key', () => {
+        expect(
+          getCredentialKeyFromVarName('gcp', 'gcp_credentials_cloud_connector_id')
+        ).toBe('gcp_credentials_cloud_connector_id');
       });
     });
 

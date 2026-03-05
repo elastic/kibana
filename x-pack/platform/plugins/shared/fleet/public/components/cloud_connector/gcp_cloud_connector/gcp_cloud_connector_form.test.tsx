@@ -157,7 +157,6 @@ describe('GCPCloudConnectorForm', () => {
   };
 
   const defaultProps: CloudConnectorFormProps = {
-    input: createMockInput(),
     newPolicy: createMockPolicy(),
     packageInfo: createMockPackageInfo(),
     updatePolicy: mockUpdatePolicy,
@@ -218,8 +217,8 @@ describe('GCPCloudConnectorForm', () => {
       expect(button.getAttribute('href')).toBeNull();
     });
 
-    it('should render Launch Cloud Shell button without href when templateName is undefined', () => {
-      renderComponent({ templateName: undefined });
+    it('should render Launch Cloud Shell button without href when iacTemplateUrl is undefined', () => {
+      renderComponent({ iacTemplateUrl: undefined });
 
       const button = screen.getByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ);
       expect(button).toBeInTheDocument();
