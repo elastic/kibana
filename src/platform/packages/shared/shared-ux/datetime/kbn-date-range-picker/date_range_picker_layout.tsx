@@ -15,11 +15,16 @@ import { useEuiTheme } from '@elastic/eui';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 
+interface DateRangePickerLayoutProps extends PropsWithChildren {
+  /** CSS class name added to the outermost container element. */
+  className?: string;
+}
+
 /**
  * Outer layout wrapper for the DateRangePicker.
  * Arranges the dialog and optional time-window buttons in a horizontal row.
  */
-export function DateRangePickerLayout({ children }: PropsWithChildren) {
+export function DateRangePickerLayout({ children, className }: DateRangePickerLayoutProps) {
   const { timeWindowButtonsConfig, width } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
 
@@ -35,7 +40,10 @@ export function DateRangePickerLayout({ children }: PropsWithChildren) {
   `;
 
   return (
-    <div css={[containerStyles, width === 'full' && containerFullWidthStyles]}>
+    <div
+      className={className}
+      css={[containerStyles, width === 'full' && containerFullWidthStyles]}
+    >
       {children}
       {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>
