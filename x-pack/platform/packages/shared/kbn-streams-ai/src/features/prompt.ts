@@ -40,8 +40,6 @@ const featuresSchema = {
           },
           properties: {
             type: 'object',
-            description:
-              'Stable, low-cardinality identifying properties. Must contain at least one key/value.',
             properties: {},
             minProperties: 1,
             description:
