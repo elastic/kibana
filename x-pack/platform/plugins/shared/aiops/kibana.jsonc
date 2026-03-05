@@ -28,7 +28,8 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "inference"
     ],
     "requiredBundles": [
       "fieldFormats",

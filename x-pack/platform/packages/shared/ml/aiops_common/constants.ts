@@ -16,6 +16,7 @@ export const AIOPS_API_ENDPOINT = {
   LOG_RATE_ANALYSIS_FIELD_CANDIDATES: '/internal/aiops/log_rate_analysis/field_candidates',
   LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',
   CATEGORIZATION_FIELD_VALIDATION: '/internal/aiops/categorization_field_validation',
+  LOG_CATEGORIZATION_REFINE_PATTERNS: '/internal/aiops/log_categorization/refine_patterns',
 } as const;
 
 /**
