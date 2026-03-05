@@ -1,0 +1,26 @@
+version: '1'
+name: sources.context7.resolve_library
+description: 'Resolve a library or package name to a Context7-compatible library ID. Returns matching libraries ranked by relevance to your query. Call this before query_docs to obtain the correct library ID.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  properties:
+    libraryName:
+      type: string
+      description: 'Library or package name to search for (e.g. "react", "next.js", "@elastic/eui")'
+    query:
+      type: string
+      description: 'What you need help with — used to rank library results by relevance'
+  required:
+    - libraryName
+    - query
+  additionalProperties: false
+steps:
+  - name: resolve-library
+    type: context7.resolveLibrary
+    connector-id: <%= context7-stack-connector-id %>
+    with:
+      libraryName: "${{inputs.libraryName}}"
+      query: "${{inputs.query}}"

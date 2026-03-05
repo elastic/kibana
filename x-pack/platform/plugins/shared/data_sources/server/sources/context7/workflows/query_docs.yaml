@@ -1,0 +1,26 @@
+version: '1'
+name: sources.context7.query_docs
+description: 'Query up-to-date documentation and code examples for a library from Context7. Requires a Context7 library ID (e.g. "/vercel/next.js") — call resolve_library first to obtain one.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  properties:
+    libraryId:
+      type: string
+      description: 'Context7 library ID in /org/project format (e.g. "/vercel/next.js"). Obtain via resolve_library first.'
+    query:
+      type: string
+      description: 'Specific question about the library (e.g. "React useEffect cleanup function examples")'
+  required:
+    - libraryId
+    - query
+  additionalProperties: false
+steps:
+  - name: query-docs
+    type: context7.queryDocs
+    connector-id: <%= context7-stack-connector-id %>
+    with:
+      libraryId: "${{inputs.libraryId}}"
+      query: "${{inputs.query}}"

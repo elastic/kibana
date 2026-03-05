@@ -121,4 +121,8 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.context7',
+    lazy(() => import(/* webpackChunkName: "connectorIconContext7" */ './specs/context7/icon')),
+  ],
 ]);
