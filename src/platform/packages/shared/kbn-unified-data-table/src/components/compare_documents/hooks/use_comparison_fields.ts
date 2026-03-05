@@ -43,49 +43,27 @@ export const useComparisonFields = ({
   }, [getDocById, selectedDocIds]);
 
   return useMemo(() => {
+    const hasFieldValue = (fieldName: string) =>
+      baseDoc?.flattened[fieldName] != null ||
+      comparisonDocs.some((doc) => doc.flattened[fieldName] != null);
+
     let comparisonFields = selectedFieldNames;
 
     if (showAllFields) {
-      let sortedFields: string[];
       const dataViewFields = dataView.fields.getAll();
+      const useDataViewFields = dataViewFields.length > 0;
 
-      if (dataViewFields.length > 0) {
-        // Use data view fields when available
-        sortedFields = dataViewFields
-          .filter((field) => {
-            if (field.name === dataView.timeFieldName) {
-              return false;
-            }
+      // Get field names from data view fields or extract from documents (ES|QL fallback)
+      const fieldEntries: Array<{ name: string; displayName: string }> = useDataViewFields
+        ? dataViewFields.map((field) => ({ name: field.name, displayName: field.displayName }))
+        : [...new Set([baseDoc, ...comparisonDocs].flatMap((doc) => Object.keys(doc?.flattened ?? {})))].map(
+            (name) => ({ name, displayName: name })
+          );
 
-            return (
-              baseDoc?.flattened[field.name] != null ||
-              comparisonDocs.some((doc) => doc.flattened[field.name] != null)
-            );
-          })
-          .sort((a, b) => a.displayName.localeCompare(b.displayName))
-          .map((field) => field.name);
-      } else {
-        // Fallback for ES|QL mode when data view fields are not populated:
-        // Extract field names directly from the documents
-        const allFieldNames = new Set<string>();
-        if (baseDoc) {
-          Object.keys(baseDoc.flattened).forEach((name) => allFieldNames.add(name));
-        }
-        comparisonDocs.forEach((doc) => {
-          Object.keys(doc.flattened).forEach((name) => allFieldNames.add(name));
-        });
-        sortedFields = Array.from(allFieldNames)
-          .filter((fieldName) => {
-            if (fieldName === dataView.timeFieldName) {
-              return false;
-            }
-            return (
-              baseDoc?.flattened[fieldName] != null ||
-              comparisonDocs.some((doc) => doc.flattened[fieldName] != null)
-            );
-          })
-          .sort((a, b) => a.localeCompare(b));
-      }
+      const sortedFields = fieldEntries
+        .filter(({ name }) => name !== dataView.timeFieldName && hasFieldValue(name))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName))
+        .map(({ name }) => name);
 
       comparisonFields = dataView.isTimeBased()
         ? [dataView.timeFieldName, ...sortedFields]
