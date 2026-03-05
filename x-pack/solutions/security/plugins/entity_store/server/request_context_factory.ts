@@ -22,7 +22,7 @@ import {
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot_client';
 import { CRUDClient } from './domain/crud_client';
-import { ResolutionClient } from './domain/resolution_client';
+import { ResolutionClient } from './domain/resolution';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
