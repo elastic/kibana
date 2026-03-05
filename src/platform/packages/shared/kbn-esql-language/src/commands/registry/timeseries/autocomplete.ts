@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import {
@@ -19,6 +19,10 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
+import {
+  getIndicesBrowserSuggestion,
+  shouldSuggestIndicesBrowserAfterComma,
+} from '../../definitions/utils/autocomplete/resource_browser_suggestions';
 
 export async function autocomplete(
   query: string,
@@ -33,6 +37,7 @@ export async function autocomplete(
   }
 
   const suggestions: ISuggestionItem[] = [];
+  const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({ callbacks, context });
 
   const indexes = getSourcesFromCommands([command], 'index');
   // Function to add suggestions based on canRemoveQuote
@@ -50,10 +55,15 @@ export async function autocomplete(
   // TS /
   if (indexes.length === 0) {
     const timeseriesIndices = context?.timeSeriesSources;
-    if (!timeseriesIndices) {
-      return [];
+    const shouldSuggestIndicesBrowserInInitialSlot = Boolean(indicesBrowserSuggestion);
+
+    const sourceSuggestions = timeseriesIndices
+      ? specialIndicesToSuggestions(timeseriesIndices)
+      : [];
+    if (shouldSuggestIndicesBrowserInInitialSlot) {
+      sourceSuggestions.unshift(indicesBrowserSuggestion!);
     }
-    return specialIndicesToSuggestions(timeseriesIndices);
+    return sourceSuggestions;
   }
   // TS something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
@@ -86,6 +96,13 @@ export async function autocomplete(
       recommendedQuerySuggestions
     );
     addSuggestionsBasedOnQuote(additionalSuggestions);
+  }
+
+  const shouldSuggestIndicesBrowserInAdditionalSlot =
+    Boolean(indicesBrowserSuggestion) && shouldSuggestIndicesBrowserAfterComma(innerText);
+
+  if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
+    suggestions.unshift(indicesBrowserSuggestion);
   }
 
   return suggestions;

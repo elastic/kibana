@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RefObject } from 'react';
+
 import type { DATE_TYPE_ABSOLUTE, DATE_TYPE_RELATIVE, DATE_TYPE_NOW } from './constants';
 
 export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | typeof DATE_TYPE_NOW;
@@ -14,17 +16,25 @@ export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | t
 /** Elastic dataMath string or ISO 8601 yyyy-MM-ddTHH:mm:ss.SSSZ e.g. 2025-12-23T08:15:13Z */
 export type DateString = string;
 
+/**
+ * Determines which element receives focus when ArrowDown is pressed from the input.
+ * A string is treated as a CSS selector resolved against the panel; a ref points
+ * to the element directly. When unset, defaults to the panel div itself.
+ */
+export type InitialFocus = RefObject<HTMLElement | null> | string;
+
 export interface TimeRangeBounds {
   end: DateString;
   start: DateString;
 }
 
-export interface TimeRangeBoundsPreset extends TimeRangeBounds {
-  label: string;
+/** Used for presets and recent options */
+export interface TimeRangeBoundsOption extends TimeRangeBounds {
+  label?: string;
 }
 
 export interface TimeRangeTransformOptions {
-  presets?: TimeRangeBoundsPreset[];
+  presets?: TimeRangeBoundsOption[];
   delimiter?: string;
   dateFormat?: string;
 }

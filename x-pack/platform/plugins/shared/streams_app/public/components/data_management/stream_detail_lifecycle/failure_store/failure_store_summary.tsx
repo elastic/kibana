@@ -22,9 +22,14 @@ import {
 interface FailureStoreSummaryProps {
   stats?: EnhancedFailureStoreStats;
   failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
+  canManageLifecycle: boolean;
 }
 
-export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreSummaryProps) => {
+export const FailureStoreSummary = ({
+  stats,
+  failureStoreConfig,
+  canManageLifecycle,
+}: FailureStoreSummaryProps) => {
   const { isServerless } = useKibana();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
@@ -55,9 +60,9 @@ export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreS
 
   return (
     <DataLifecycleSummary
-      phases={phases}
-      testSubjPrefix="failureStore"
-      canManageLifecycle={false}
+      model={{ phases, testSubjPrefix: 'failureStore' }}
+      capabilities={{ canManageLifecycle }}
+      showDownsampling={false}
     />
   );
 };

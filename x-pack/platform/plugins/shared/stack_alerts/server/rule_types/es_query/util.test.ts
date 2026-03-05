@@ -1232,6 +1232,110 @@ describe('es_query utils', () => {
             "searchPath": "email.x_mailer",
           },
           Object {
+            "label": "entity.attributes",
+            "searchPath": "entity.attributes",
+          },
+          Object {
+            "label": "entity.behavior",
+            "searchPath": "entity.behavior",
+          },
+          Object {
+            "label": "entity.display_name",
+            "searchPath": "entity.display_name",
+          },
+          Object {
+            "label": "entity.id",
+            "searchPath": "entity.id",
+          },
+          Object {
+            "label": "entity.last_seen_timestamp",
+            "searchPath": "entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "entity.lifecycle",
+            "searchPath": "entity.lifecycle",
+          },
+          Object {
+            "label": "entity.metrics",
+            "searchPath": "entity.metrics",
+          },
+          Object {
+            "label": "entity.name",
+            "searchPath": "entity.name",
+          },
+          Object {
+            "label": "entity.raw",
+            "searchPath": "entity.raw",
+          },
+          Object {
+            "label": "entity.reference",
+            "searchPath": "entity.reference",
+          },
+          Object {
+            "label": "entity.source",
+            "searchPath": "entity.source",
+          },
+          Object {
+            "label": "entity.sub_type",
+            "searchPath": "entity.sub_type",
+          },
+          Object {
+            "label": "entity.target.attributes",
+            "searchPath": "entity.target.attributes",
+          },
+          Object {
+            "label": "entity.target.behavior",
+            "searchPath": "entity.target.behavior",
+          },
+          Object {
+            "label": "entity.target.display_name",
+            "searchPath": "entity.target.display_name",
+          },
+          Object {
+            "label": "entity.target.id",
+            "searchPath": "entity.target.id",
+          },
+          Object {
+            "label": "entity.target.last_seen_timestamp",
+            "searchPath": "entity.target.last_seen_timestamp",
+          },
+          Object {
+            "label": "entity.target.lifecycle",
+            "searchPath": "entity.target.lifecycle",
+          },
+          Object {
+            "label": "entity.target.metrics",
+            "searchPath": "entity.target.metrics",
+          },
+          Object {
+            "label": "entity.target.name",
+            "searchPath": "entity.target.name",
+          },
+          Object {
+            "label": "entity.target.raw",
+            "searchPath": "entity.target.raw",
+          },
+          Object {
+            "label": "entity.target.reference",
+            "searchPath": "entity.target.reference",
+          },
+          Object {
+            "label": "entity.target.source",
+            "searchPath": "entity.target.source",
+          },
+          Object {
+            "label": "entity.target.sub_type",
+            "searchPath": "entity.target.sub_type",
+          },
+          Object {
+            "label": "entity.target.type",
+            "searchPath": "entity.target.type",
+          },
+          Object {
+            "label": "entity.type",
+            "searchPath": "entity.type",
+          },
+          Object {
             "label": "error.code",
             "searchPath": "error.code",
           },
@@ -2122,6 +2226,226 @@ describe('es_query utils', () => {
           Object {
             "label": "host.risk.static_score_norm",
             "searchPath": "host.risk.static_score_norm",
+          },
+          Object {
+            "label": "host.target.architecture",
+            "searchPath": "host.target.architecture",
+          },
+          Object {
+            "label": "host.target.boot.id",
+            "searchPath": "host.target.boot.id",
+          },
+          Object {
+            "label": "host.target.cpu.usage",
+            "searchPath": "host.target.cpu.usage",
+          },
+          Object {
+            "label": "host.target.disk.read.bytes",
+            "searchPath": "host.target.disk.read.bytes",
+          },
+          Object {
+            "label": "host.target.disk.write.bytes",
+            "searchPath": "host.target.disk.write.bytes",
+          },
+          Object {
+            "label": "host.target.domain",
+            "searchPath": "host.target.domain",
+          },
+          Object {
+            "label": "host.target.entity.attributes",
+            "searchPath": "host.target.entity.attributes",
+          },
+          Object {
+            "label": "host.target.entity.behavior",
+            "searchPath": "host.target.entity.behavior",
+          },
+          Object {
+            "label": "host.target.entity.display_name",
+            "searchPath": "host.target.entity.display_name",
+          },
+          Object {
+            "label": "host.target.entity.id",
+            "searchPath": "host.target.entity.id",
+          },
+          Object {
+            "label": "host.target.entity.last_seen_timestamp",
+            "searchPath": "host.target.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "host.target.entity.lifecycle",
+            "searchPath": "host.target.entity.lifecycle",
+          },
+          Object {
+            "label": "host.target.entity.metrics",
+            "searchPath": "host.target.entity.metrics",
+          },
+          Object {
+            "label": "host.target.entity.name",
+            "searchPath": "host.target.entity.name",
+          },
+          Object {
+            "label": "host.target.entity.raw",
+            "searchPath": "host.target.entity.raw",
+          },
+          Object {
+            "label": "host.target.entity.reference",
+            "searchPath": "host.target.entity.reference",
+          },
+          Object {
+            "label": "host.target.entity.source",
+            "searchPath": "host.target.entity.source",
+          },
+          Object {
+            "label": "host.target.entity.sub_type",
+            "searchPath": "host.target.entity.sub_type",
+          },
+          Object {
+            "label": "host.target.entity.type",
+            "searchPath": "host.target.entity.type",
+          },
+          Object {
+            "label": "host.target.geo.city_name",
+            "searchPath": "host.target.geo.city_name",
+          },
+          Object {
+            "label": "host.target.geo.continent_code",
+            "searchPath": "host.target.geo.continent_code",
+          },
+          Object {
+            "label": "host.target.geo.continent_name",
+            "searchPath": "host.target.geo.continent_name",
+          },
+          Object {
+            "label": "host.target.geo.country_iso_code",
+            "searchPath": "host.target.geo.country_iso_code",
+          },
+          Object {
+            "label": "host.target.geo.country_name",
+            "searchPath": "host.target.geo.country_name",
+          },
+          Object {
+            "label": "host.target.geo.location",
+            "searchPath": "host.target.geo.location",
+          },
+          Object {
+            "label": "host.target.geo.name",
+            "searchPath": "host.target.geo.name",
+          },
+          Object {
+            "label": "host.target.geo.postal_code",
+            "searchPath": "host.target.geo.postal_code",
+          },
+          Object {
+            "label": "host.target.geo.region_iso_code",
+            "searchPath": "host.target.geo.region_iso_code",
+          },
+          Object {
+            "label": "host.target.geo.region_name",
+            "searchPath": "host.target.geo.region_name",
+          },
+          Object {
+            "label": "host.target.geo.timezone",
+            "searchPath": "host.target.geo.timezone",
+          },
+          Object {
+            "label": "host.target.hostname",
+            "searchPath": "host.target.hostname",
+          },
+          Object {
+            "label": "host.target.id",
+            "searchPath": "host.target.id",
+          },
+          Object {
+            "label": "host.target.ip",
+            "searchPath": "host.target.ip",
+          },
+          Object {
+            "label": "host.target.mac",
+            "searchPath": "host.target.mac",
+          },
+          Object {
+            "label": "host.target.name",
+            "searchPath": "host.target.name",
+          },
+          Object {
+            "label": "host.target.network.egress.bytes",
+            "searchPath": "host.target.network.egress.bytes",
+          },
+          Object {
+            "label": "host.target.network.egress.packets",
+            "searchPath": "host.target.network.egress.packets",
+          },
+          Object {
+            "label": "host.target.network.ingress.bytes",
+            "searchPath": "host.target.network.ingress.bytes",
+          },
+          Object {
+            "label": "host.target.network.ingress.packets",
+            "searchPath": "host.target.network.ingress.packets",
+          },
+          Object {
+            "label": "host.target.os.family",
+            "searchPath": "host.target.os.family",
+          },
+          Object {
+            "label": "host.target.os.full",
+            "searchPath": "host.target.os.full",
+          },
+          Object {
+            "label": "host.target.os.kernel",
+            "searchPath": "host.target.os.kernel",
+          },
+          Object {
+            "label": "host.target.os.name",
+            "searchPath": "host.target.os.name",
+          },
+          Object {
+            "label": "host.target.os.platform",
+            "searchPath": "host.target.os.platform",
+          },
+          Object {
+            "label": "host.target.os.type",
+            "searchPath": "host.target.os.type",
+          },
+          Object {
+            "label": "host.target.os.version",
+            "searchPath": "host.target.os.version",
+          },
+          Object {
+            "label": "host.target.pid_ns_ino",
+            "searchPath": "host.target.pid_ns_ino",
+          },
+          Object {
+            "label": "host.target.risk.calculated_level",
+            "searchPath": "host.target.risk.calculated_level",
+          },
+          Object {
+            "label": "host.target.risk.calculated_score",
+            "searchPath": "host.target.risk.calculated_score",
+          },
+          Object {
+            "label": "host.target.risk.calculated_score_norm",
+            "searchPath": "host.target.risk.calculated_score_norm",
+          },
+          Object {
+            "label": "host.target.risk.static_level",
+            "searchPath": "host.target.risk.static_level",
+          },
+          Object {
+            "label": "host.target.risk.static_score",
+            "searchPath": "host.target.risk.static_score",
+          },
+          Object {
+            "label": "host.target.risk.static_score_norm",
+            "searchPath": "host.target.risk.static_score_norm",
+          },
+          Object {
+            "label": "host.target.type",
+            "searchPath": "host.target.type",
+          },
+          Object {
+            "label": "host.target.uptime",
+            "searchPath": "host.target.uptime",
           },
           Object {
             "label": "host.type",

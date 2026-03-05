@@ -25,10 +25,22 @@ import {
   ContentListProvider,
   useContentListItems,
   useContentListSort,
+  useContentListSearch,
+  useContentListPagination,
+  useContentListFilters,
   useContentListConfig,
 } from '@kbn/content-list-provider';
-import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
-import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
+import type {
+  FindItemsParams,
+  FindItemsResult,
+  ContentListServices,
+} from '@kbn/content-list-provider';
+import {
+  MOCK_DASHBOARDS,
+  createMockFindItems,
+  extractTagIds,
+  mockTagsService,
+} from '@kbn/content-list-mock-data/storybook';
 import { ContentListToolbar } from './content_list_toolbar';
 
 // =============================================================================
@@ -38,29 +50,24 @@ import { ContentListToolbar } from './content_list_toolbar';
 /**
  * Creates a mock `findItems` function with configurable behavior.
  *
- * Supports:
- * - Sorting (locale-aware for strings).
- * - Configurable delay for loading states.
+ * Supports sorting, search, tag filtering, and configurable delay.
  */
 const createStoryFindItems = (options?: { delay?: number }) => {
   const { delay = 0 } = options ?? {};
 
   return async (params: FindItemsParams): Promise<FindItemsResult> => {
-    // Simulate network delay.
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
-    // Use mock findItems for sorting logic.
     const mockFindItems = createMockFindItems({ items: MOCK_DASHBOARDS });
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
-      filters: {},
+      filters: params.filters,
       sort: params.sort ?? { field: 'title', direction: 'asc' },
       page: params.page,
     });
 
-    // Transform to ContentListItem format.
     return {
       items: result.items.map((item) => ({
         id: item.id,
@@ -68,8 +75,10 @@ const createStoryFindItems = (options?: { delay?: number }) => {
         description: item.attributes.description,
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        tags: extractTagIds(item.references),
       })),
       total: result.total,
+      counts: result.counts,
     };
   };
 };
@@ -93,15 +102,18 @@ const StateDiagnosticPanel = ({
   useDeclarativeConfig = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const { items, totalItems, isLoading } = useContentListItems();
+  const { items, totalItems, isLoading, isFetching } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
+  const { search } = useContentListSearch();
+  const { filters } = useContentListFilters();
+  const pagination = useContentListPagination();
   const config = useContentListConfig();
 
-  // Generate JSX code based on current configuration.
   const toolbarJsx = useMemo(() => {
     if (useDeclarativeConfig) {
       return `<ContentListToolbar>
   <ContentListToolbar.Filters>
+    <ContentListToolbar.Filters.Tags />
     <ContentListToolbar.Filters.Sort />
   </ContentListToolbar.Filters>
 </ContentListToolbar>`;
@@ -139,6 +151,11 @@ const StateDiagnosticPanel = ({
                   <EuiBadge color="primary">Loading...</EuiBadge>
                 </EuiFlexItem>
               )}
+              {isFetching && !isLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">Fetching...</EuiBadge>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -163,6 +180,40 @@ const StateDiagnosticPanel = ({
                   {JSON.stringify(config.features.sorting, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Search</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify({ search, isFetching }, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Filters</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify(filters, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              {pagination.isSupported && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>Pagination</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                    {JSON.stringify(
+                      {
+                        pageIndex: pagination.pageIndex,
+                        pageSize: pagination.pageSize,
+                        totalItems,
+                      },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                 <EuiTitle size="xxs">
                   <h3>Toolbar JSX</h3>
@@ -209,7 +260,7 @@ const ItemList = () => {
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content Management/Content List/Toolbar',
+  title: 'Content List/Components/Toolbar',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -230,6 +281,8 @@ interface PlaygroundArgs {
   entityNamePlural: string;
   searchPlaceholder: string;
   hasSorting: boolean;
+  hasPagination: boolean;
+  hasTags: boolean;
   useDeclarativeConfig: boolean;
   showDiagnostics: boolean;
 }
@@ -252,30 +305,34 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
   const dataSource = useMemo(() => ({ findItems: createStoryFindItems() }), []);
 
   const features = useMemo(
-    () =>
-      args.hasSorting
+    () => ({
+      sorting: args.hasSorting
         ? {
-            sorting: {
-              initialSort: { field: 'title', direction: 'asc' as const },
-              fields: [
-                { field: 'title', name: 'Name' },
-                {
-                  field: 'updatedAt',
-                  name: 'Last updated',
-                  ascLabel: 'Old-Recent',
-                  descLabel: 'Recent-Old',
-                },
-              ],
-            },
+            initialSort: { field: 'title', direction: 'asc' as const },
+            fields: [
+              { field: 'title', name: 'Name' },
+              {
+                field: 'updatedAt',
+                name: 'Last updated',
+                ascLabel: 'Old-Recent',
+                descLabel: 'Recent-Old',
+              },
+            ],
           }
-        : {},
-    [args.hasSorting]
+        : (false as const),
+      pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
+      tags: args.hasTags,
+    }),
+    [args.hasSorting, args.hasPagination, args.hasTags]
   );
 
-  // Key forces re-mount when configuration changes.
-  const key = `${args.hasSorting}-${args.useDeclarativeConfig}`;
+  const services: ContentListServices | undefined = useMemo(
+    () => (args.hasTags ? { tags: mockTagsService } : undefined),
+    [args.hasTags]
+  );
 
-  // Destructure Filters from ContentListToolbar for compound component usage.
+  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.useDeclarativeConfig}`;
+
   const { Filters } = ContentListToolbar;
 
   return (
@@ -285,6 +342,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
       labels={labels}
       dataSource={dataSource}
       features={features}
+      services={services}
     >
       <EuiTitle size="s">
         <h2>ContentListToolbar</h2>
@@ -308,6 +366,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           <EuiSpacer size="m" />
           <ContentListToolbar>
             <Filters>
+              <Filters.Tags />
               <Filters.Sort />
             </Filters>
           </ContentListToolbar>
@@ -349,6 +408,8 @@ export const Toolbar: PlaygroundStory = {
   args: {
     useDeclarativeConfig: false,
     hasSorting: true,
+    hasPagination: true,
+    hasTags: true,
     showDiagnostics: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
@@ -378,6 +439,16 @@ export const Toolbar: PlaygroundStory = {
     hasSorting: {
       control: 'boolean',
       description: 'Enable sorting in provider config.',
+      table: { category: 'Features' },
+    },
+    hasPagination: {
+      control: 'boolean',
+      description: 'Enable pagination in provider config.',
+      table: { category: 'Features' },
+    },
+    hasTags: {
+      control: 'boolean',
+      description: 'Enable tag filtering. Provides a mock tags service with 8 tags.',
       table: { category: 'Features' },
     },
     showDiagnostics: {

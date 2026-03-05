@@ -69,7 +69,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/logging'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-panel-plugin'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
@@ -110,12 +109,15 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
   - '@kbn/scout'
   - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

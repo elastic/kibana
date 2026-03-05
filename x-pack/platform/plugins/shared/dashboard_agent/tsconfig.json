@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/logging",
     "@kbn/i18n",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
@@ -15,15 +14,10 @@
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",
     "@kbn/zod",
-    "@kbn/management-settings-ids",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-common-2",
-    "@kbn/share-plugin",
-    "@kbn/agent-builder-platform-plugin",
-    "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render",
-    "@kbn/deeplinks-analytics",
-    "@kbn/dashboard-markdown"
+    "@kbn/dashboard-markdown",
+    "@kbn/lens-plugin"
   ],
   "exclude": ["target/**/*"]
 }

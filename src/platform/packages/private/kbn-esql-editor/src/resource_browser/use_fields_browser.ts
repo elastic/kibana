@@ -9,9 +9,12 @@
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
 import type { HttpStart } from '@kbn/core/public';
-import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type {
+  ESQLFieldWithMetadata,
+  RecommendedField,
+  ESQLRegistrySolutionId,
+} from '@kbn/esql-types';
 import type { TimeRange } from '@kbn/es-query';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
@@ -23,6 +26,11 @@ import {
 } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
 import type { BrowserPopoverPosition } from './types';
+import {
+  ResourceBrowserType,
+  ResourceBrowserOpenedFrom,
+  type ESQLEditorTelemetryService,
+} from '../telemetry/telemetry_service';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -31,7 +39,8 @@ interface UseFieldsBrowserParams {
   search: ISearchGeneric;
   getTimeRange: () => TimeRange;
   signal?: AbortSignal;
-  activeSolutionId?: SolutionId;
+  activeSolutionId?: ESQLRegistrySolutionId;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 export function useFieldsBrowser({
@@ -42,6 +51,7 @@ export function useFieldsBrowser({
   getTimeRange,
   signal,
   activeSolutionId,
+  telemetryService,
 }: UseFieldsBrowserParams) {
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
@@ -155,6 +165,11 @@ export function useFieldsBrowser({
       // an extra async fetch, improving responsiveness.
       const shouldUsePreloaded = Boolean(preloadedFields?.length);
 
+      telemetryService.trackResourceBrowserOpened({
+        browserType: ResourceBrowserType.FIELDS,
+        openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+      });
+
       if (shouldUsePreloaded && preloadedFields) {
         const fieldsFromNames: ESQLFieldWithMetadata[] = preloadedFields.map((f) => ({
           name: f.name,
@@ -202,7 +217,14 @@ export function useFieldsBrowser({
       updatePopoverPosition();
       setIsFieldsBrowserOpen(true);
     },
-    [editorModel, editorRef, fetchFields, fetchRecommendedFields, updatePopoverPosition]
+    [
+      editorModel,
+      editorRef,
+      fetchFields,
+      fetchRecommendedFields,
+      updatePopoverPosition,
+      telemetryService,
+    ]
   );
 
   const handleFieldsBrowserSelect = useCallback(
@@ -213,6 +235,12 @@ export function useFieldsBrowser({
       if (!editor || !model || insertAtOffset == null) {
         return;
       }
+
+      telemetryService.trackResourceBrowserItemToggled({
+        browserType: ResourceBrowserType.FIELDS,
+        openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+        action: change,
+      });
 
       const textToInsert = change === DataSourceSelectionChange.Add ? fieldName : '';
 
@@ -228,7 +256,7 @@ export function useFieldsBrowser({
 
       insertedTextLengthRef.current = textToInsert.length;
     },
-    [editorRef, editorModel]
+    [editorRef, editorModel, telemetryService]
   );
 
   return {

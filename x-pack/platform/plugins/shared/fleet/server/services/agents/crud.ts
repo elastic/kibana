@@ -81,7 +81,7 @@ export function _joinFilters(
 }
 
 export function removeSOAttributes(kuery: string) {
-  return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
+  return kuery.replace(/\.attributes\./g, '.').replace(/fleet-agents\./g, '');
 }
 
 export type GetAgentsOptions =

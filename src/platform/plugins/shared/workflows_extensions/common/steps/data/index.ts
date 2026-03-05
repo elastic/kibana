@@ -14,8 +14,23 @@ export {
   type DataDedupeStepOutputSchema,
 } from './data_dedupe_step';
 export {
+  DataFilterStepTypeId,
+  dataFilterStepCommonDefinition,
+  type DataFilterStepInputSchema,
+  type DataFilterStepOutputSchema,
+} from './data_filter_step';
+export {
+  DataFindStepTypeId,
+  dataFindStepCommonDefinition,
+  type DataFindStepInputSchema,
+  type DataFindStepOutputSchema,
+} from './data_find_step';
+export {
   DataMapStepTypeId,
   dataMapStepCommonDefinition,
+  MAP_DIRECTIVE,
+  type FieldsNode,
+  type MapDirectiveValue,
   type DataMapStepInputSchema,
   type DataMapStepOutputSchema,
 } from './data_map_step';
@@ -31,3 +46,21 @@ export {
   type DataRegexReplaceStepInputSchema,
   type DataRegexReplaceStepOutputSchema,
 } from './data_regex_replace_step';
+export {
+  DataAggregateStepTypeId,
+  dataAggregateStepCommonDefinition,
+  type DataAggregateStepInputSchema,
+  type DataAggregateStepOutputSchema,
+} from './data_aggregate_step';
+export {
+  DataParseJsonStepTypeId,
+  dataParseJsonStepCommonDefinition,
+  type DataParseJsonStepInputSchema,
+  type DataParseJsonStepOutputSchema,
+} from './data_parse_json_step';
+export {
+  DataStringifyJsonStepTypeId,
+  dataStringifyJsonStepCommonDefinition,
+  type DataStringifyJsonStepInputSchema,
+  type DataStringifyJsonStepOutputSchema,
+} from './data_stringify_json_step';

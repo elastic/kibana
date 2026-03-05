@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
+import { ENGINE_STATUS } from '../../domain/constants';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -20,7 +22,7 @@ const bodySchema = z.object({
 export function registerStart(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: '/internal/security/entity-store/start',
+      path: ENTITY_STORE_ROUTES.START,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -40,10 +42,15 @@ export function registerStart(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, assetManager } = entityStoreCtx;
         const { entityTypes } = req.body;
-
         logger.debug('Start API invoked');
 
-        await Promise.all(entityTypes.map((type) => assetManager.start(req, type)));
+        const { engines } = await assetManager.getStatus();
+        const stoppedTypes = new Set(
+          engines.filter((e) => e.status === ENGINE_STATUS.STOPPED).map((e) => e.type)
+        );
+        const toStart = entityTypes.filter((type) => stoppedTypes.has(type));
+
+        await Promise.all(toStart.map((type) => assetManager.start(req, type)));
 
         return res.ok({
           body: {
