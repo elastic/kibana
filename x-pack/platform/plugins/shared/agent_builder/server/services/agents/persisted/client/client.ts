@@ -29,7 +29,7 @@ import type {
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { AgentsUsingToolsResult, PersistedAgentDefinition } from '../types';
-import type { AgentProfileStorage, AgentProperties } from './storage';
+import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils/tools';
@@ -40,6 +40,7 @@ import {
   validateVisibilityUpdateAccess,
   hasWriteAccess,
 } from './utils/access_control';
+import { hasRequiredDocumentFields } from './utils/helper';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -51,8 +52,6 @@ export interface AgentClient {
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
 }
-
-type StoredDocument = Omit<Document, '_source'> & { _source: AgentProperties };
 
 export const createClient = async ({
   space,
@@ -279,9 +278,9 @@ class AgentClientImpl implements AgentClient {
   }: {
     agentId: string;
     access: 'read' | 'write';
-  }): Promise<StoredDocument> {
+  }): Promise<Required<Document>> {
     const document = await this._get(agentId);
-    if (!document || !document._source) {
+    if (!hasRequiredDocumentFields(document)) {
       throw createAgentNotFoundError({ agentId });
     }
 
@@ -302,7 +301,7 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
-    return document as StoredDocument;
+    return document;
   }
 
   /**

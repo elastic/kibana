@@ -10,7 +10,12 @@ import {
   securityServiceMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import { hasVisibilityAccessOverrideFromRequest, getUserFromRequest } from './utils';
+import {
+  hasVisibilityAccessOverrideFromRequest,
+  getAgentApiAccessFromRequest,
+  getUserFromRequest,
+} from './utils';
+import { apiPrivileges } from '../../common/features';
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -114,5 +119,47 @@ describe('hasVisibilityAccessOverrideFromRequest', () => {
 
     expect(result).toBe(false);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getAgentApiAccessFromRequest', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('resolves read and manage privileges for the current space', async () => {
+    esClient.security.hasPrivileges.mockResolvedValue({
+      application: {
+        'kibana-.kibana': {
+          'space:default': {
+            [apiPrivileges.readAgentBuilder]: true,
+            [apiPrivileges.manageAgents]: false,
+          },
+        },
+      },
+      cluster: {},
+      has_all_requested: false,
+      index: {},
+      username: 'testuser',
+    });
+
+    const result = await getAgentApiAccessFromRequest({ esClient, space: 'default' });
+
+    expect(result).toEqual({
+      canReadAgents: true,
+      canManageAgents: false,
+    });
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith({
+      application: [
+        {
+          application: 'kibana-.kibana',
+          resources: ['space:default'],
+          privileges: [apiPrivileges.readAgentBuilder, apiPrivileges.manageAgents],
+        },
+      ],
+    });
   });
 });

@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
+import { apiPrivileges } from '../../common/features';
 
 const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
 
@@ -72,4 +73,28 @@ export const hasVisibilityAccessOverrideFromRequest = async ({
   });
 
   return hasVisibilityAccessOverride;
+};
+
+export const getAgentApiAccessFromRequest = async ({
+  esClient,
+  space,
+}: {
+  esClient: ElasticsearchClient;
+  space: string;
+}): Promise<{ canReadAgents: boolean; canManageAgents: boolean }> => {
+  const resource = `space:${space}`;
+  const response = await esClient.security.hasPrivileges({
+    application: [
+      {
+        application: KIBANA_APPLICATION,
+        resources: [resource],
+        privileges: [apiPrivileges.readAgentBuilder, apiPrivileges.manageAgents],
+      },
+    ],
+  });
+  const applicationPrivileges = response.application?.[KIBANA_APPLICATION]?.[resource];
+  const canReadAgents = applicationPrivileges?.[apiPrivileges.readAgentBuilder] ?? false;
+  const canManageAgents = applicationPrivileges?.[apiPrivileges.manageAgents] ?? false;
+
+  return { canReadAgents, canManageAgents };
 };
