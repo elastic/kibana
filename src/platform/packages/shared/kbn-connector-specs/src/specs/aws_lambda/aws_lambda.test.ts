@@ -10,46 +10,22 @@
 import type { ActionContext } from '../../connector_spec';
 import { AwsLambdaConnector } from './aws_lambda';
 
-// Web Crypto API is not available in Jest's Node environment;
-// bridge to Node's crypto module for SigV4 signing in tests.
-beforeAll(() => {
-  if (!globalThis.crypto?.subtle) {
-    const nodeCrypto = jest.requireActual<typeof import('crypto')>('crypto');
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        ...globalThis.crypto,
-        subtle: {
-          digest: async (algorithm: string, data: BufferSource) => {
-            const name = algorithm.replace('-', '').toLowerCase();
-            const hash = nodeCrypto.createHash(name);
-            hash.update(Buffer.from(data as ArrayBuffer));
-            return hash.digest().buffer;
-          },
-          importKey: async (...args: unknown[]) => {
-            return { keyData: args[1] };
-          },
-          sign: async (_alg: string, key: { keyData: BufferSource }, data: BufferSource) => {
-            const hmac = nodeCrypto.createHmac('sha256', Buffer.from(key.keyData as ArrayBuffer));
-            hmac.update(Buffer.from(data as ArrayBuffer));
-            return hmac.digest().buffer;
-          },
-        },
-      },
-      writable: true,
-    });
-  }
-});
-
 describe('AwsLambdaConnector', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
   };
 
+  // Credentials are now stored as encrypted secrets (via aws_credentials auth type),
+  // not in config. The SigV4 interceptor is configured on the axios instance by the
+  // auth type, so action handlers receive a pre-configured client.
   const mockContext = {
     client: mockClient,
     config: {
       region: 'us-east-1',
+    },
+    secrets: {
+      authType: 'aws_credentials',
       accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
       secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
     },
@@ -61,10 +37,21 @@ describe('AwsLambdaConnector', () => {
   });
 
   describe('metadata', () => {
-    it('should have correct id and display name', () => {
+    it('should have correct id, display name, and auth type', () => {
       expect(AwsLambdaConnector.metadata.id).toBe('.aws_lambda');
       expect(AwsLambdaConnector.metadata.displayName).toBe('AWS Lambda');
       expect(AwsLambdaConnector.metadata.supportedFeatureIds).toContain('workflows');
+      expect(AwsLambdaConnector.auth?.types).toEqual(['aws_credentials']);
+    });
+  });
+
+  describe('schema', () => {
+    it('should only require region in config (credentials are in auth/secrets)', () => {
+      const schema = AwsLambdaConnector.schema;
+      expect(schema).toBeDefined();
+      if (schema) {
+        expect(Object.keys(schema.shape)).toEqual(['region']);
+      }
     });
   });
 
@@ -86,8 +73,6 @@ describe('AwsLambdaConnector', () => {
         expect.stringContaining('"key":"value"'),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-Amz-Date': expect.any(String),
-            Authorization: expect.stringContaining('AWS4-HMAC-SHA256'),
             'X-Amz-Invocation-Type': 'RequestResponse',
             'X-Amz-Log-Type': 'Tail',
           }),
@@ -245,11 +230,7 @@ describe('AwsLambdaConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('lambda.us-east-1.amazonaws.com/2015-03-31/functions/'),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: expect.stringContaining('AWS4-HMAC-SHA256'),
-          }),
-        })
+        expect.any(Object)
       );
 
       expect(result.functions).toHaveLength(2);
