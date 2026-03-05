@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import {
   TaskCost,
   type TaskManagerSetupContract,
@@ -82,7 +83,17 @@ export function registerHistorySnapshotTask({
     [taskType]: {
       title: config.title,
       timeout: config.timeout,
-      cost: TaskCost.ExtraLarge,
+      cost: TaskCost.Normal,
+      stateSchemaByVersion: {
+        1: {
+          up: (state: Record<string, unknown>) => ({
+            namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
+          }),
+          schema: schema.object({
+            namespace: schema.string(),
+          }),
+        },
+      },
       createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
         run: () =>
           runHistorySnapshotTask({

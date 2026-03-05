@@ -25,9 +25,9 @@ export const getHistorySnapshotIndexTemplateConfig = (
   name: getHistorySnapshotIndexTemplateId(namespace),
   _meta: {
     description: 'Index template for history snapshot indices managed by the Elastic Entity Store',
-    ecs_version: '8.0.0',
+    ecs_version: '9.3.0',
     managed: true,
-    managed_by: 'security_context_core_analysis',
+    managed_by: 'contextual_security_core_analysis',
   },
   composed_of: [
     ECS_MAPPINGS_COMPONENT_TEMPLATE,

@@ -25,8 +25,6 @@ if (ctx._source.entity != null) {
       def value = entry.getValue();
       if (value instanceof List || value instanceof String) {
         reset.put(key, new ArrayList());
-      } else if (value instanceof Boolean) {
-        reset.put(key, false);
       } else {
         // don't reset other types of values
         reset.put(key, value);
