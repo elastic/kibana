@@ -17,7 +17,7 @@ export class BrowseIntegrationPage {
   }
 
   async searchForIntegration(integrationName: string) {
-    const searchInput = this.page.getByTestId('browseIntegrations.searchBar.input');
+    const searchInput = this.page.getByTestId('epmList.searchBar');
     await searchInput.fill(integrationName);
   }
 
