@@ -7,7 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { HistorySnapshotClient, HISTORY_SNAPSHOT_RESET_SCRIPT } from '.';
+import { HistorySnapshotClient } from './history_snapshot_client';
+import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
 
 jest.mock('../../infra/elasticsearch');
