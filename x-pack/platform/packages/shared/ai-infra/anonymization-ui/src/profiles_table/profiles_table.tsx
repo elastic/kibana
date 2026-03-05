@@ -7,7 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { EuiBasicTable, type Criteria, type EuiBasicTableColumn } from '@elastic/eui';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
+import {
+  isGlobalAnonymizationProfileTarget,
+  type AnonymizationProfile,
+} from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { TARGET_TYPE_DATA_VIEW } from '../common/target_types';
 
@@ -70,15 +73,27 @@ export const ProfilesTable = ({
         name: i18n.translate('anonymizationUi.profiles.table.column.rules', {
           defaultMessage: 'Rules',
         }),
-        render: (profile: AnonymizationProfile) =>
-          i18n.translate('anonymizationUi.profiles.table.column.rulesValue', {
+        render: (profile: AnonymizationProfile) => {
+          const regexCount = profile.rules.regexRules?.length ?? 0;
+          const nerCount = profile.rules.nerRules?.length ?? 0;
+          if (isGlobalAnonymizationProfileTarget(profile.targetType, profile.targetId)) {
+            return i18n.translate('anonymizationUi.profiles.table.column.rulesValueGlobal', {
+              defaultMessage: '{regexCount} regex / {nerCount} ner',
+              values: {
+                regexCount,
+                nerCount,
+              },
+            });
+          }
+          return i18n.translate('anonymizationUi.profiles.table.column.rulesValue', {
             defaultMessage: '{fieldCount} field / {regexCount} regex / {nerCount} ner',
             values: {
               fieldCount: profile.rules.fieldRules.length,
-              regexCount: profile.rules.regexRules?.length ?? 0,
-              nerCount: profile.rules.nerRules?.length ?? 0,
+              regexCount,
+              nerCount,
             },
-          }),
+          });
+        },
       },
       {
         field: 'updatedAt',

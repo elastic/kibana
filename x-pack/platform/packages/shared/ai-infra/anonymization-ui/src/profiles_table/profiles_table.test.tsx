@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
+import {
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+  type AnonymizationProfile,
+} from '@kbn/anonymization-common';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../common/target_types';
 import { ProfilesTable } from './profiles_table';
 
@@ -69,5 +72,36 @@ describe('ProfilesTable', () => {
 
     expect(screen.getByText('logs-*')).toBeInTheDocument();
     expect(screen.queryByText('(dv-1)')).not.toBeInTheDocument();
+  });
+
+  it('omits field rule count for global profile rows', () => {
+    render(
+      React.createElement(ProfilesTable, {
+        profiles: [
+          {
+            ...createProfile('global', 'Global Anonymization Profile'),
+            targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+            rules: {
+              fieldRules: [],
+              regexRules: [{ id: 'regex-1', type: 'regex', pattern: 'foo', entityClass: 'OTHER' }],
+              nerRules: [
+                { id: 'ner-1', type: 'ner', modelId: 'model', allowedEntities: ['PERSON'] },
+              ],
+            },
+          },
+        ],
+        loading: false,
+        total: 1,
+        page: 1,
+        perPage: 20,
+        isManageMode: true,
+        onPageChange: jest.fn(),
+        onEditProfile: jest.fn(),
+        onDeleteProfile: jest.fn(),
+      })
+    );
+
+    expect(screen.getByText('1 regex / 1 ner')).toBeInTheDocument();
+    expect(screen.queryByText('0 field / 1 regex / 1 ner')).not.toBeInTheDocument();
   });
 });
