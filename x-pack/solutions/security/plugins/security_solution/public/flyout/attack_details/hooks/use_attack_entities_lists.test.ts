@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useAttackEntitiesCounts } from './use_attack_entities_counts';
+import { useAttackEntitiesLists } from './use_attack_entities_lists';
 import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 
@@ -18,7 +18,7 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_query', ()
   useQueryAlerts: jest.fn(),
 }));
 
-describe('useAttackEntitiesCounts', () => {
+describe('useAttackEntitiesLists', () => {
   const mockUseOriginalAlertIds = jest.mocked(useOriginalAlertIds);
   const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
 
@@ -35,25 +35,25 @@ describe('useAttackEntitiesCounts', () => {
     });
   });
 
-  it('returns zero counts and skips query when alertIds is empty', () => {
+  it('returns empty lists and skips query when alertIds is empty', () => {
     mockUseOriginalAlertIds.mockReturnValue([]);
 
-    const { result } = renderHook(() => useAttackEntitiesCounts());
+    const { result } = renderHook(() => useAttackEntitiesLists());
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: true,
       })
     );
-    expect(result.current.relatedUsers).toBe(0);
-    expect(result.current.relatedHosts).toBe(0);
+    expect(result.current.userNames).toEqual([]);
+    expect(result.current.hostNames).toEqual([]);
     expect(result.current.loading).toBe(false);
   });
 
-  it('passes query with ids filter and cardinality aggs when alertIds exist', () => {
+  it('passes query with ids filter and terms aggs when alertIds exist', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
 
-    renderHook(() => useAttackEntitiesCounts());
+    renderHook(() => useAttackEntitiesLists());
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -62,15 +62,19 @@ describe('useAttackEntitiesCounts', () => {
           query: { ids: { values: ['id1', 'id2'] } },
           size: 0,
           aggs: {
-            unique_users: { cardinality: { field: 'user.name' } },
-            unique_hosts: { cardinality: { field: 'host.name' } },
+            unique_user_names: {
+              terms: { field: 'user.name', size: 200 },
+            },
+            unique_host_names: {
+              terms: { field: 'host.name', size: 200 },
+            },
           },
         }),
       })
     );
   });
 
-  it('parses relatedUsers and relatedHosts from aggregations', () => {
+  it('parses userNames and hostNames from aggregation buckets', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
@@ -80,8 +84,18 @@ describe('useAttackEntitiesCounts', () => {
         took: 0,
         timeout: false,
         aggregations: {
-          unique_users: { value: 6 },
-          unique_hosts: { value: 10 },
+          unique_user_names: {
+            buckets: [
+              { key: 'user1', doc_count: 2 },
+              { key: 'user2', doc_count: 1 },
+            ],
+          },
+          unique_host_names: {
+            buckets: [
+              { key: 'host1', doc_count: 3 },
+              { key: 'host2', doc_count: 1 },
+            ],
+          },
         },
       },
       setQuery: jest.fn(),
@@ -90,15 +104,15 @@ describe('useAttackEntitiesCounts', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesCounts());
+    const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.relatedUsers).toBe(6);
-    expect(result.current.relatedHosts).toBe(10);
+    expect(result.current.userNames).toEqual(['user1', 'user2']);
+    expect(result.current.hostNames).toEqual(['host1', 'host2']);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(false);
   });
 
-  it('returns zero when aggregations are missing', () => {
+  it('returns empty arrays when aggregations are missing', () => {
     mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
@@ -115,9 +129,42 @@ describe('useAttackEntitiesCounts', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesCounts());
+    const { result } = renderHook(() => useAttackEntitiesLists());
 
-    expect(result.current.relatedUsers).toBe(0);
-    expect(result.current.relatedHosts).toBe(0);
+    expect(result.current.userNames).toEqual([]);
+    expect(result.current.hostNames).toEqual([]);
+  });
+
+  it('filters out empty string keys from buckets', () => {
+    mockUseOriginalAlertIds.mockReturnValue(['id1']);
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: {
+        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+        took: 0,
+        timeout: false,
+        aggregations: {
+          unique_user_names: {
+            buckets: [
+              { key: 'user1', doc_count: 1 },
+              { key: '', doc_count: 1 },
+            ],
+          },
+          unique_host_names: {
+            buckets: [{ key: 'host1', doc_count: 1 }],
+          },
+        },
+      },
+      setQuery: jest.fn(),
+      response: '',
+      request: '',
+      refetch: null,
+    });
+
+    const { result } = renderHook(() => useAttackEntitiesLists());
+
+    expect(result.current.userNames).toEqual(['user1']);
+    expect(result.current.hostNames).toEqual(['host1']);
   });
 });

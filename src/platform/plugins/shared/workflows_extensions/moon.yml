@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/eval-kql'
   - '@kbn/es-query'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
