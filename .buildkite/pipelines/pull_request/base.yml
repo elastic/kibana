@@ -74,7 +74,6 @@ steps:
     label: 'Linting (with oxlint)'
     agents:
       machineType: n2d-standard-16
-      diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-b,us-central1-c
       diskSizeGb: 105

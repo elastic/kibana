@@ -122,7 +122,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-16
-      diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-b,us-central1-c
       diskSizeGb: 105
@@ -174,7 +173,6 @@ steps:
 #      imageProject: elastic-images-prod
 #      provider: gcp
 #      machineType: n2d-standard-2
-#      diskType: hyperdisk-balanced
 #      preemptible: true
 #      spotZones: us-central1-c,us-central1-a
 #    depends_on: check_oas_snapshot
