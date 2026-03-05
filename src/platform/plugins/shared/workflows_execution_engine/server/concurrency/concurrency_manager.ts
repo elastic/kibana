@@ -53,30 +53,18 @@ export class ConcurrencyManager {
     }
 
     const keyExpression = concurrencySettings.key.trim();
-    if (keyExpression === '') {
-      return null;
-    }
-    if (!keyExpression.includes('{{') || !keyExpression.includes('}}')) {
-      return keyExpression;
-    }
 
     try {
-      const evaluated = this.templatingEngine.render(
+      const rendered = this.templatingEngine.render(
         keyExpression,
         context as Record<string, unknown>
       );
 
-      if (evaluated === null || evaluated === undefined) {
-        return keyExpression;
-      }
-
-      const result = String(evaluated).trim();
-
-      if (result === '') {
+      if (rendered === '') {
         return null;
       }
 
-      return result;
+      return rendered;
     } catch (error) {
       return keyExpression;
     }
