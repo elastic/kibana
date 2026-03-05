@@ -171,7 +171,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >();
           const stateStorage = stateContainer.stateStorage;
           const currentDataView$ = stateContainer.getCurrentTabDataView$();
-          const dataView = useObservable(currentDataView$);
+          const dataView = useObservable(currentDataView$, undefined);
 
           useEffect(() => {
             if (!controlGroupAPI) {

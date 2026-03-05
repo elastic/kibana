@@ -90,8 +90,10 @@ export const DiscoverToolkitTestProvider = ({
 
 /**
  * **Prefer {@link DiscoverToolkitTestProvider} when possible.**
- * Can be used to wrap Discover components in tests
- * to provide all necessary context providers and state.
+ * A lightweight test provider that wraps Discover components with
+ * basic services (Kibana context, query client, scoped services).
+ * Does not provide InternalStateProvider or RuntimeStateManagerProvider.
+ * For tests requiring full state management, use DiscoverToolkitTestProvider instead.
  */
 export const DiscoverTestProvider = ({
   services: originalServices,

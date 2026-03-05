@@ -45,7 +45,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue();
 
     if (!dataStateContainer) {
-      throw new Error('Data state container is not initialized');
+      throw new Error(`Data state container is not initialized for tab [${tabId}]`);
     }
 
     dispatch(stopSyncing({ tabId }));
