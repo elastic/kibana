@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "@kbn/eslint/scout_require_api_client_in_api_test": "off"
+  }
+}

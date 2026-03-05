@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';

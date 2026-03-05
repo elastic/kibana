@@ -6,14 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ExecutionStatus, WorkflowExecutionDto } from '@kbn/workflows/types/latest';
+import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
+import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import { apiTest } from '../../fixtures';
-import { WorkflowsApiService } from '../../fixtures/workflows_api_service';
+import type { WorkflowsApiService } from '../../fixtures/workflows_api_service';
 
 const getConcurrencyWorkflowYaml = (strategy: string) => `
 name: Scout API Test Workflow
@@ -84,7 +84,6 @@ apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymen
       });
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      
       scheduledExecutions.push({
         workflowExecutionId: response.workflowExecutionId,
         concurrencyKey: `${event.env}-${event.problem}`,
@@ -99,14 +98,17 @@ apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymen
       )
     );
 
-    const groupedByConcurrencyKey = terminalExecutions.reduce((acc, { execution, concurrencyKey }) => {
-      acc[concurrencyKey] = acc[concurrencyKey] || [];
+    const groupedByConcurrencyKey = terminalExecutions.reduce(
+      (acc, { execution, concurrencyKey }) => {
+        acc[concurrencyKey] = acc[concurrencyKey] || [];
 
-      if (execution) {
-        acc[concurrencyKey].push(execution);
-      }
-      return acc;
-    }, {} as Record<string, WorkflowExecutionDto[]>);
+        if (execution) {
+          acc[concurrencyKey].push(execution);
+        }
+        return acc;
+      },
+      {} as Record<string, WorkflowExecutionDto[]>
+    );
 
     return groupedByConcurrencyKey;
   }
@@ -119,18 +121,25 @@ apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymen
         getConcurrencyWorkflowYaml('cancel-in-progress')
       );
 
-      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(workflowsApi, createdWorkflow.id);
+      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
+        workflowsApi,
+        createdWorkflow.id
+      );
 
       Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
         expect(executions.length).toBeGreaterThan(0);
 
         // Check that all executions except the last one are cancelled
-        executions.filter((execution) => execution.status !== ExecutionStatus.COMPLETED).forEach((execution) => {
-          expect(execution?.status).toBe(ExecutionStatus.CANCELLED);
-        });
+        executions
+          .filter((execution) => execution.status !== ExecutionStatus.COMPLETED)
+          .forEach((execution) => {
+            expect(execution?.status).toBe(ExecutionStatus.CANCELLED);
+          });
 
         // Check that the last execution is completed
-        const completedExecution = executions.filter((execution) => execution.status === ExecutionStatus.COMPLETED);
+        const completedExecution = executions.filter(
+          (execution) => execution.status === ExecutionStatus.COMPLETED
+        );
         expect(completedExecution.at(0)?.status).toBe(ExecutionStatus.COMPLETED);
         expect(completedExecution.at(0)?.stepExecutions).toHaveLength(4);
       });
@@ -143,17 +152,24 @@ apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymen
       const workflowsApi = await getWorkflowsApi(adminApiCredentials);
       const createdWorkflow = await workflowsApi.create(getConcurrencyWorkflowYaml('drop'));
 
-      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(workflowsApi, createdWorkflow.id);
+      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
+        workflowsApi,
+        createdWorkflow.id
+      );
 
       Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
         expect(executions.length).toBeGreaterThan(0);
 
-        executions.filter((execution) => execution.status !== ExecutionStatus.COMPLETED).forEach((execution) => {
-          expect(execution?.status).toBe(ExecutionStatus.SKIPPED);
-          expect(execution?.stepExecutions).toHaveLength(0);
-        });
+        executions
+          .filter((execution) => execution.status !== ExecutionStatus.COMPLETED)
+          .forEach((execution) => {
+            expect(execution?.status).toBe(ExecutionStatus.SKIPPED);
+            expect(execution?.stepExecutions).toHaveLength(0);
+          });
 
-        const completedExecution = executions.filter((execution) => execution.status === ExecutionStatus.COMPLETED);
+        const completedExecution = executions.filter(
+          (execution) => execution.status === ExecutionStatus.COMPLETED
+        );
         expect(completedExecution).toHaveLength(1);
         expect(completedExecution.at(0)?.status).toBe(ExecutionStatus.COMPLETED);
         expect(completedExecution.at(0)?.stepExecutions).toHaveLength(4);
