@@ -33,6 +33,14 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
   percentage: 'percent',
 };
 
+export const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
+
+export function isLegacyColorPalette(
+  color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
+): color is { palette: PaletteOutput } {
+  return 'palette' in (color ?? {});
+}
+
 export function fromColorByValueAPIToLensState(
   config?: ColorByValueType
 ): PaletteOutput<CustomPaletteParams> | undefined {
@@ -252,11 +260,20 @@ function fromUnassignedColorLensStateToAPI(
 }
 
 export function fromColorMappingLensStateToAPI(
-  colorMapping: ColorMapping.Config | undefined
+  colorMapping: ColorMapping.Config | undefined,
+  legacyPalette?: PaletteOutput
 ): ColorMappingType | undefined {
+  if (legacyPalette && !colorMapping) {
+    return {
+      mode: 'categorical',
+      palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
+      mapping: [],
+    };
+  }
   if (!colorMapping) {
     return;
   }
+
   const unassignedColor = fromUnassignedColorLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
@@ -357,9 +374,14 @@ function fromAPIMappingToAssignments(
 
 export function fromColorMappingAPIToLensState(
   colorMapping: ColorMappingType | undefined
-): ColorMapping.Config | undefined {
+): { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined {
   if (!colorMapping) {
     return;
+  }
+  if (colorMapping.palette.includes(LEGACY_PALETTE_PREFIX)) {
+    return {
+      palette: { type: 'palette', name: colorMapping.palette.replace(LEGACY_PALETTE_PREFIX, '') }, // remove the prefix
+    };
   }
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
@@ -392,10 +414,12 @@ export function fromColorMappingAPIToLensState(
         };
 
   return {
-    colorMode,
-    paletteId: colorMapping.palette,
-    assignments,
-    specialAssignments,
+    colorMapping: {
+      colorMode,
+      paletteId: colorMapping.palette,
+      assignments,
+      specialAssignments,
+    },
   };
 }
 
