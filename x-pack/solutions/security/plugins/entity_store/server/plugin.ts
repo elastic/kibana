@@ -23,8 +23,8 @@ import {
   EngineDescriptorType,
   EntityStoreGlobalStateType,
 } from './domain/definitions/saved_objects';
-import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
-import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud_client';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 
