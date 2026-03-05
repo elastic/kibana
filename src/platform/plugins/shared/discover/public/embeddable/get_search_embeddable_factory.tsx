@@ -394,6 +394,7 @@ export const getSearchEmbeddableFactory = ({
                   onApply: inlineEditingApi.applyInlineTabSelection,
                   onCancel: inlineEditingApi.cancelInlineTabSelection,
                 }}
+                isByReference={Boolean(savedObjectId$.getValue())}
                 onEditInDiscover={editApi?.onEdit}
               />
             );

@@ -26,6 +26,7 @@ interface SearchEmbeddableMissingDataViewPromptProps {
   api: { parentApi?: unknown };
   canShowDashboardWriteControls: boolean;
   inlineEditing: InlineEditingProps;
+  isByReference: boolean;
   onEditInDiscover?: () => Promise<void>;
 }
 
@@ -39,6 +40,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
   api,
   canShowDashboardWriteControls,
   inlineEditing,
+  isByReference,
   onEditInDiscover,
 }: SearchEmbeddableMissingDataViewPromptProps) => {
   const { parentApi } = api;
@@ -61,73 +63,102 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
   const canEditPanelInViewMode =
     canShowDashboardWriteControls && canEditDashboardByAccessControl && canSwitchToEditMode;
 
-  const title = (
-    <h2>
-      <FormattedMessage
-        id="discover.embeddable.missingDataView.warningTitle"
-        defaultMessage="Couldn't find the data view associated with this Discover session tab"
-      />
-    </h2>
-  );
-
-  const getBody = () => {
-    if (!isEditMode) {
-      return canEditPanelInViewMode ? (
-        <p>
-          <FormattedMessage
-            id="discover.embeddable.missingDataView.viewModeWarningDescriptionEditable"
-            defaultMessage="<EditInDiscoverLink>Go to the Discover session</EditInDiscoverLink> and select a valid data view for the tab displayed in this panel"
-            values={{
-              EditInDiscoverLink: (chunks: React.ReactNode) => (
-                <EuiLink
-                  data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
-                  onClick={() => void onEditInDiscover?.()}
-                >
-                  {chunks}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      ) : (
-        <p>
-          <FormattedMessage
-            id="discover.embeddable.missingDataView.viewModeWarningDescriptionReadOnly"
-            defaultMessage="Contact one of the dashboard's authors or Discover session owners to fix it"
-          />
-        </p>
-      );
-    }
-
-    if (inlineEditing.isActive) {
+  const getTitle = () => {
+    if (isByReference) {
       return (
-        <p>
+        <h2>
           <FormattedMessage
-            id="discover.embeddable.missingDataView.editModeWarningDescription"
-            defaultMessage="Edit {editIcon} this panel to show a different tab or <EditInDiscoverLink>edit the Discover session</EditInDiscoverLink> to use a working data view."
-            values={{
-              editIcon: <EuiIcon aria-hidden={true} type="pencil" size="m" />,
-              EditInDiscoverLink: (chunks: React.ReactNode) => (
-                <EuiLink
-                  data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
-                  onClick={() => void onEditInDiscover?.()}
-                >
-                  {chunks}
-                </EuiLink>
-              ),
-            }}
+            id="discover.embeddable.missingDataView.warningTitleByReference"
+            defaultMessage="Couldn't find the data view associated with this Discover session tab."
           />
-        </p>
+        </h2>
       );
     }
 
     return (
+      <h2>
+        <FormattedMessage
+          id="discover.embeddable.missingDataView.warningTitleByValue"
+          defaultMessage="Couldn't find the data view associated with this Discover session."
+        />
+      </h2>
+    );
+  };
+
+  const getBody = () => {
+    if (!isEditMode) {
+      if (!canEditPanelInViewMode) {
+        return (
+          <p>
+            <FormattedMessage
+              id="discover.embeddable.missingDataView.viewModeWarningDescriptionReadOnly"
+              defaultMessage="Contact one of the dashboard's authors or Discover session owners to fix it."
+            />
+          </p>
+        );
+      } else {
+        return isByReference ? (
+          <p>
+            <FormattedMessage
+              id="discover.embeddable.missingDataView.viewModeWarningDescriptionEditableByReference"
+              defaultMessage="<EditInDiscoverLink>Go to the Discover session</EditInDiscoverLink> and select a valid data view for the tab displayed in this panel."
+              values={{
+                EditInDiscoverLink: (chunks: React.ReactNode) => (
+                  <EuiLink
+                    data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
+                    onClick={() => void onEditInDiscover?.()}
+                  >
+                    {chunks}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        ) : (
+          <p>
+            <FormattedMessage
+              id="discover.embeddable.missingDataView.viewModeWarningDescriptionEditableByValue"
+              defaultMessage="<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it."
+              values={{
+                EditInDiscoverLink: (chunks: React.ReactNode) => (
+                  <EuiLink
+                    data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
+                    onClick={() => void onEditInDiscover?.()}
+                  >
+                    {chunks}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        );
+      }
+    }
+
+    return isByReference ? (
       <p>
         <FormattedMessage
-          id="discover.embeddable.missingDataView.editModePreEditWarningDescription"
+          id="discover.embeddable.missingDataView.editModeWarningDescriptionByReference"
           defaultMessage="Edit {editIcon} this panel to show a different tab or <EditInDiscoverLink>edit the Discover session</EditInDiscoverLink> to use a working data view."
           values={{
             editIcon: <EuiIcon aria-hidden={true} type="pencil" size="m" />,
+            EditInDiscoverLink: (chunks: React.ReactNode) => (
+              <EuiLink
+                data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
+                onClick={() => void onEditInDiscover?.()}
+              >
+                {chunks}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ) : (
+      <p>
+        <FormattedMessage
+          id="discover.embeddable.missingDataView.editModeWarningDescriptionByValue"
+          defaultMessage="<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it."
+          values={{
             EditInDiscoverLink: (chunks: React.ReactNode) => (
               <EuiLink
                 data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
@@ -162,7 +193,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
             body={getBody()}
             data-test-subj="discoverEmbeddableMissingDataViewCallout"
             icon={<EuiIcon aria-hidden={true} color="warning" size="xxl" type="warning" />}
-            title={title}
+            title={getTitle()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
