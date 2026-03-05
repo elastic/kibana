@@ -28,7 +28,11 @@ export async function ensureMinikube(log: ToolingLog): Promise<void> {
       log.info('minikube is already running');
       return;
     }
-  } catch {
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code;
+    if (code === 'ENOENT') {
+      throw new Error('minikube is not installed. Please install minikube');
+    }
     // `minikube status` exits non-zero when the cluster is stopped or doesn't exist
   }
 
