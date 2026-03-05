@@ -52,7 +52,7 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
@@ -71,8 +71,8 @@ describe('useInstallEntityStoreV2', () => {
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get
-      .mockResolvedValueOnce({ status: EntityStoreStatus.Values.running })
-      .mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+      .mockResolvedValueOnce({ status: EntityStoreStatus.enum.running })
+      .mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
     mockServices.http.post.mockResolvedValueOnce({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -182,7 +182,7 @@ describe('isEntityStoreV1Installed', () => {
   it('returns true when status is not_installed is false', async () => {
     const mockServices = createMockServices();
     mockServices.http.get.mockResolvedValueOnce({
-      status: EntityStoreStatus.Values.running,
+      status: EntityStoreStatus.enum.running,
     });
 
     await expect(
@@ -196,7 +196,7 @@ describe('isEntityStoreV1Installed', () => {
   it('returns false when status is not_installed', async () => {
     const mockServices = createMockServices();
     mockServices.http.get.mockResolvedValueOnce({
-      status: EntityStoreStatus.Values.not_installed,
+      status: EntityStoreStatus.enum.not_installed,
     });
 
     await expect(
