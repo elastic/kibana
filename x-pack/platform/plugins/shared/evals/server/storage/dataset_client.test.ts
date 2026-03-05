@@ -326,7 +326,7 @@ describe('DatasetClient', () => {
       client.updateExample(exampleToUpdate.id, {
         input: baseExampleB.input,
         output: baseExampleB.output,
-        metadata: baseExampleB.metadata,
+        metadata: baseExampleB.metadata ?? undefined,
       })
     ).rejects.toThrow(ExampleAlreadyExistsError);
 
