@@ -323,6 +323,22 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
+          'click trace ID link and verify new tab returns trace documents',
+          async () => {
+            const traceIdLink = flyout.spanLinksSection.locator(
+              '[data-test-subj^="outgoing-traceIdLink-"]'
+            );
+            await traceIdLink.click();
+            const docTable = page.testSubj.locator('discoverDocTable');
+            await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
+          }
+        );
+
+        await spaceTest.step('switch back to original tab', async () => {
+          await pageObjects.discover.navigateToTabByName('Untitled');
+        });
+
+        await spaceTest.step(
           'click Open in Discover and verify new tab returns span link targets',
           async () => {
             await flyout.spanLinksOpenInDiscoverButton.click();
