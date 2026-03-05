@@ -16,8 +16,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
 
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/242089
-  describe.skip('getGlobalExecutionKpi', () => {
+  describe('getGlobalExecutionKpi', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -58,22 +57,30 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       const ruleId2 = response2.body.id;
       objectRemover.add(spaceId2, ruleId2, 'rule', 'alerting');
 
+      // Wait for successful executions before causing errors
       await retry.try(async () => {
-        // break AAD
+        const events = await getEventLog({
+          getService,
+          spaceId,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
+        });
+        const successfulEvents = events.filter((e) => e?.event?.outcome === 'success');
+        expect(successfulEvents.length).to.be.above(2);
+      });
+
+      await retry.try(async () => {
         await supertest
           .put(`${getUrlPrefix(spaceId2)}/api/alerts_fixture/saved_object/alert/${ruleId2}`)
           .set('kbn-xsrf', 'foo')
-          .send({
-            attributes: {
-              name: 'bar',
-            },
-          })
+          .send({ attributes: { name: 'bar' } })
           .expect(200);
       });
 
       await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const someEvents = await getEventLog({
+        const events = await getEventLog({
           getService,
           spaceId: spaceId2,
           type: 'alert',
@@ -81,14 +88,11 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const errorEvents = someEvents.filter(
-          (event) => event?.kibana?.alerting?.status === 'error'
-        );
+        const errorEvents = events.filter((e) => e?.kibana?.alerting?.status === 'error');
         expect(errorEvents.length).to.be.above(0);
       });
 
       await retry.try(async () => {
-        // there can be a successful execute before the error one
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -102,21 +106,15 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       await retry.try(async () => {
-        // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${ruleId}`)
           .set('kbn-xsrf', 'foo')
-          .send({
-            attributes: {
-              name: 'bar',
-            },
-          })
+          .send({ attributes: { name: 'bar' } })
           .expect(200);
       });
 
       await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const someEvents = await getEventLog({
+        const events = await getEventLog({
           getService,
           spaceId,
           type: 'alert',
@@ -124,14 +122,11 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const errorEvents = someEvents.filter(
-          (event) => event?.kibana?.alerting?.status === 'error'
-        );
+        const errorEvents = events.filter((e) => e?.kibana?.alerting?.status === 'error');
         expect(errorEvents.length).to.be.above(0);
       });
 
       const kpiLogs = await retry.try(async () => {
-        // there can be a successful execute before the error one
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -141,7 +136,6 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password);
         expect(logResponse.statusCode).to.be(200);
-
         return logResponse.body;
       });
 
@@ -196,22 +190,21 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       const ruleId2 = response2.body.id;
       objectRemover.add(spaceId2, ruleId2, 'rule', 'alerting');
 
+      // Wait for successful executions before causing errors
       await retry.try(async () => {
-        // break AAD
-        await supertest
-          .put(`${getUrlPrefix(spaceId2)}/api/alerts_fixture/saved_object/alert/${ruleId2}`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            attributes: {
-              name: 'bar',
-            },
-          })
-          .expect(200);
+        const events1 = await getEventLog({
+          getService,
+          spaceId,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
+        });
+        const success1 = events1.filter((e) => e?.event?.outcome === 'success');
+        expect(success1.length).to.be.above(0);
       });
-
       await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const someEvents = await getEventLog({
+        const events2 = await getEventLog({
           getService,
           spaceId: spaceId2,
           type: 'alert',
@@ -219,14 +212,32 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const errorEvents = someEvents.filter(
-          (event) => event?.kibana?.alerting?.status === 'error'
-        );
+        const success2 = events2.filter((e) => e?.event?.outcome === 'success');
+        expect(success2.length).to.be.above(0);
+      });
+
+      await retry.try(async () => {
+        await supertest
+          .put(`${getUrlPrefix(spaceId2)}/api/alerts_fixture/saved_object/alert/${ruleId2}`)
+          .set('kbn-xsrf', 'foo')
+          .send({ attributes: { name: 'bar' } })
+          .expect(200);
+      });
+
+      await retry.try(async () => {
+        const events = await getEventLog({
+          getService,
+          spaceId: spaceId2,
+          type: 'alert',
+          id: ruleId2,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
+        });
+        const errorEvents = events.filter((e) => e?.kibana?.alerting?.status === 'error');
         expect(errorEvents.length).to.be.above(0);
       });
 
       await retry.try(async () => {
-        // there can be a successful execute before the error one
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -240,21 +251,15 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       await retry.try(async () => {
-        // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${ruleId}`)
           .set('kbn-xsrf', 'foo')
-          .send({
-            attributes: {
-              name: 'bar',
-            },
-          })
+          .send({ attributes: { name: 'bar' } })
           .expect(200);
       });
 
       await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const someEvents = await getEventLog({
+        const events = await getEventLog({
           getService,
           spaceId,
           type: 'alert',
@@ -262,26 +267,21 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const errorEvents = someEvents.filter(
-          (event) => event?.kibana?.alerting?.status === 'error'
-        );
+        const errorEvents = events.filter((e) => e?.kibana?.alerting?.status === 'error');
         expect(errorEvents.length).to.be.above(0);
       });
 
       const kpiLogs = await retry.try(async () => {
-        // there can be a successful execute before the error one
+        const namespacesParam = [spaceId, spaceId2].map((ns) => `namespaces=${ns}`).join('&');
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
               spaceId
-            )}/internal/alerting/_global_execution_kpi?date_start=${startTime}&date_end=9999-12-31T23:59:59Z&namespaces=${JSON.stringify(
-              [spaceId, spaceId2]
-            )}`
+            )}/internal/alerting/_global_execution_kpi?date_start=${startTime}&date_end=9999-12-31T23:59:59Z&${namespacesParam}`
           )
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password);
         expect(logResponse.statusCode).to.be(200);
-
         return logResponse.body;
       });
 
