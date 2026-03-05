@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuiltInToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 import { stepSchemas } from '../../../common/step_schemas';
 
-const invokeHandler = async (tool: BuiltInToolDefinition, input: unknown, context: unknown) =>
+const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
 
 describe('get_step_definitions dynamic connector types', () => {
@@ -22,11 +22,11 @@ describe('get_step_definitions dynamic connector types', () => {
     stepSchemas.setDynamicConnectorTypesCache(null);
     stepSchemas.setLastProcessedConnectorTypesHash(null);
 
-    let registeredTool: BuiltInToolDefinition | undefined;
+    let registeredTool: BuiltinToolDefinition | undefined;
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltInToolDefinition) => {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },

@@ -198,7 +198,7 @@ export function buildOutputSummary(schema: z.ZodType): string {
   const kind = getZodSchemaType(inner);
 
   if (kind === 'object' && inner instanceof z.ZodObject) {
-    const keys = Object.entries(inner.shape as Record<string, z.ZodType>);
+    const keys = Object.entries(inner.shape);
     if (keys.length === 0) return 'object';
     const fields = keys
       .slice(0, 12)

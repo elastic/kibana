@@ -17,13 +17,14 @@ import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const GET_EXAMPLES_TOOL_ID = 'platform.workflows.get_examples';
 
-/**
- * Resolve the on-disk path to the examples directory inside the kbn-workflows package.
- * Uses require.resolve to find the package, then navigates to spec/examples/.
- */
+let cachedExamplesDir: string | undefined;
+
 function getExamplesDir(): string {
-  const pkgIndex = require.resolve('@kbn/workflows');
-  return resolve(dirname(pkgIndex), 'spec', 'examples');
+  if (!cachedExamplesDir) {
+    const pkgIndex = require.resolve('@kbn/workflows');
+    cachedExamplesDir = resolve(dirname(pkgIndex), 'spec', 'examples');
+  }
+  return cachedExamplesDir;
 }
 
 function loadExampleContent(filename: string): string | undefined {

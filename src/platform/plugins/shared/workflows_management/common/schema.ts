@@ -316,7 +316,10 @@ export function addDynamicConnectorsToCache(
     ...registeredStepDefinitions,
   ];
 
-  const dynamicConnectors = convertDynamicConnectorsToContractsInternal(dynamicConnectorTypes);
+  const enabledDynamicTypes = Object.fromEntries(
+    Object.entries(dynamicConnectorTypes).filter(([, value]) => value.enabled !== false)
+  );
+  const dynamicConnectors = convertDynamicConnectorsToContractsInternal(enabledDynamicTypes);
   const connectorByType = new Map<string, ConnectorContractUnion>(
     baseConnectors.map((c) => [c.type, c])
   );
