@@ -4670,6 +4670,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/anonymization-common@link:x-pack/platform/packages/shared/ai-infra/anonymization-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/anonymization-plugin@link:x-pack/platform/plugins/shared/anonymization":
+  version "0.0.0"
+  uid ""
+
 "@kbn/api-contracts@link:packages/kbn-api-contracts":
   version "0.0.0"
   uid ""
