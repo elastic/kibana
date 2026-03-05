@@ -13,20 +13,30 @@ import {
   byReferenceSavedSearchToDiscoverSessionEmbeddableState,
   byValueDiscoverSessionToSavedSearchEmbeddableState,
   byValueSavedSearchToDiscoverSessionEmbeddableState,
+  discoverSessionToSavedSearchEmbeddableState,
   fromStoredColumns,
   fromStoredDataset,
+  fromStoredHeight,
   fromStoredRuntimeFields,
   fromStoredSort,
+  fromStoredTab,
+  isByReferenceDiscoverSessionEmbeddableState,
+  isByReferenceSavedSearchEmbeddableState,
+  savedSearchToDiscoverSessionEmbeddableState,
   toStoredColumns,
   toStoredDataset,
+  toStoredFieldFormats,
   toStoredGrid,
+  toStoredHeight,
   toStoredRuntimeFields,
   toStoredSort,
+  toStoredTab,
 } from './transform_utils';
 import type {
   StoredSearchEmbeddableByReferenceState,
   StoredSearchEmbeddableByValueState,
 } from './types';
+import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
@@ -44,6 +54,189 @@ import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters
 describe('search embeddable transform utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('isByReferenceSavedSearchEmbeddableState', () => {
+    it('returns true when state has no attributes (by-reference)', () => {
+      const state: StoredSearchEmbeddableByReferenceState = {
+        title: 'My Search',
+        description: 'My description',
+        time_range: { from: 'now-15m', to: 'now' },
+      };
+      expect(isByReferenceSavedSearchEmbeddableState(state)).toBe(true);
+    });
+
+    it('returns false when state has attributes (by-value)', () => {
+      const state = {
+        title: 'My Search',
+        description: 'My description',
+        attributes: {
+          tabs: [],
+          title: '',
+          description: '',
+          sort: [],
+          columns: [],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: false,
+          kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+        },
+      } as unknown as StoredSearchEmbeddableByValueState;
+      expect(isByReferenceSavedSearchEmbeddableState(state)).toBe(false);
+    });
+  });
+
+  describe('isByReferenceDiscoverSessionEmbeddableState', () => {
+    it('returns true when state has discover_session_id', () => {
+      const state: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'My Search',
+        description: 'My description',
+        time_range: { from: 'now-15m', to: 'now' },
+        discover_session_id: 'session-123',
+        selected_tab_id: undefined,
+      };
+      expect(isByReferenceDiscoverSessionEmbeddableState(state)).toBe(true);
+    });
+
+    it('returns false when state has tabs (by-value)', () => {
+      const state: DiscoverSessionEmbeddableByValueState = {
+        title: 'My Search',
+        description: 'My description',
+        tabs: [
+          {
+            columns: [{ name: 'message' }],
+            sort: [],
+            view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            density: DataGridDensity.COMPACT,
+            header_row_height: 'auto',
+            row_height: 'auto',
+            query: { language: 'kuery', query: '' },
+            filters: [],
+            dataset: { type: 'dataView', id: 'dv-1' },
+          },
+        ],
+      };
+      expect(isByReferenceDiscoverSessionEmbeddableState(state)).toBe(false);
+    });
+  });
+
+  describe('savedSearchToDiscoverSessionEmbeddableState', () => {
+    it('dispatches to by-reference transform when state has no attributes', () => {
+      const storedState: StoredSearchEmbeddableByReferenceState = {
+        title: 'My Search',
+        description: 'My description',
+        time_range: { from: 'now-15m', to: 'now' },
+      };
+      const references: SavedObjectReference[] = [
+        { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-123' },
+      ];
+      const result = savedSearchToDiscoverSessionEmbeddableState(storedState, references);
+      expect(result).toMatchObject({
+        title: 'My Search',
+        description: 'My description',
+        time_range: { from: 'now-15m', to: 'now' },
+        discover_session_id: 'session-123',
+        selected_tab_id: undefined,
+      });
+    });
+
+    it('dispatches to by-value transform when state has attributes', () => {
+      const storedState = {
+        title: 'My Search',
+        description: 'My description',
+        attributes: {
+          title: '',
+          sort: [['@timestamp', 'desc']],
+          columns: ['message'],
+          grid: {},
+          hideChart: false,
+          viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+          isTextBasedQuery: false,
+          timeRestore: false,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON:
+              '{"query":{"language":"kuery","query":""},"index":"dv-1","filter":[]}',
+          },
+          tabs: [
+            {
+              id: 'tab-1',
+              label: 'Tab 1',
+              attributes: {
+                sort: [['@timestamp', 'desc']],
+                columns: ['message'],
+                grid: {},
+                hideChart: false,
+                viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+                isTextBasedQuery: false,
+                timeRestore: false,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"language":"kuery","query":""},"index":"dv-1","filter":[]}',
+                },
+              },
+            },
+          ],
+        },
+      } as StoredSearchEmbeddableByValueState;
+      const references: SavedObjectReference[] = [
+        { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
+      ];
+      const result = savedSearchToDiscoverSessionEmbeddableState(storedState, references);
+      expect('tabs' in result && result.tabs).toBeDefined();
+      expect('tabs' in result && Array.isArray(result.tabs)).toBe(true);
+      expect('tabs' in result && result.tabs.length).toBe(1);
+    });
+  });
+
+  describe('discoverSessionToSavedSearchEmbeddableState', () => {
+    it('dispatches to by-reference transform when state has discover_session_id', () => {
+      const apiState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'My Search',
+        description: 'My description',
+        time_range: { from: 'now-15m', to: 'now' },
+        discover_session_id: 'session-456',
+        selected_tab_id: undefined,
+      };
+      const { state, references } = discoverSessionToSavedSearchEmbeddableState(apiState);
+      expect(references).toContainEqual({
+        name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
+        type: SavedSearchType,
+        id: 'session-456',
+      });
+      expect(state).toMatchObject({
+        title: 'My Search',
+        description: 'My description',
+        time_range: { from: 'now-15m', to: 'now' },
+      });
+    });
+
+    it('dispatches to by-value transform when state has tabs', () => {
+      const apiState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Panel Title',
+        description: 'Panel description',
+        tabs: [
+          {
+            columns: [{ name: 'message' }],
+            sort: [],
+            view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            density: DataGridDensity.COMPACT,
+            header_row_height: 'auto',
+            row_height: 'auto',
+            query: { language: 'kuery', query: '' },
+            filters: [],
+            dataset: { type: 'dataView', id: 'data-view-1' },
+          },
+        ],
+      };
+      const { state, references } = discoverSessionToSavedSearchEmbeddableState(apiState);
+      expect(state).toHaveProperty('attributes');
+      expect((state as StoredSearchEmbeddableByValueState).attributes.tabs).toHaveLength(1);
+      expect(references).toContainEqual({
+        id: 'data-view-1',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      });
+    });
   });
 
   describe('byValueSavedSearchToDiscoverSessionEmbeddableState', () => {
@@ -91,7 +284,6 @@ describe('search embeddable transform utils', () => {
       const expected: DiscoverSessionEmbeddableByValueState = {
         title: '[filebeat-*] elasticsearch logs',
         description: 'my description',
-        // type: 'search',
         tabs: [
           {
             query: { language: 'kuery', query: 'service.type: "elasticsearch"' },
@@ -112,8 +304,7 @@ describe('search embeddable transform utils', () => {
             columns: [{ name: 'message' }],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
             density: DataGridDensity.COMPACT,
-            header_row_height: 'auto',
-            row_height: 'auto',
+            header_row_height: 3,
             dataset: {
               type: 'dataView',
               id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
@@ -164,7 +355,7 @@ describe('search embeddable transform utils', () => {
       const result = byReferenceDiscoverSessionToSavedSearchEmbeddableState(apiState);
       expect(result.references).toEqual([
         {
-          name: 'savedObjectRef',
+          name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
           type: SavedSearchType,
           id: 'session-456',
         },
@@ -173,6 +364,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
+        grid: { columns: {} },
       });
     });
   });
@@ -212,18 +404,15 @@ describe('search embeddable transform utils', () => {
       expect(result.state.attributes.tabs).toHaveLength(1);
       expect(result.state.attributes.tabs[0].attributes.columns).toEqual(['message', '@timestamp']);
       expect(result.state.attributes.tabs[0].attributes.sort).toEqual([['@timestamp', 'desc']]);
-      expect(result.state.attributes.tabs[0].attributes.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
       expect(result.state.attributes.tabs[0].attributes.rowHeight).toBe(-1);
       expect(result.state.attributes.tabs[0].attributes.headerRowHeight).toBe(-1);
-      expect(
-        JSON.parse(
-          result.state.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
-        )
-      ).toEqual({
-        index: 'data-view-1',
-        query: { language: 'kuery', query: '' },
-        filter: [],
-      });
+      const searchSource = JSON.parse(
+        result.state.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
+      expect(searchSource.index).toBeUndefined();
+      expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
+      expect(searchSource.filter).toEqual([]);
     });
 
     it('converts index-pattern tab with runtime fields to stored state', () => {
@@ -392,6 +581,32 @@ describe('search embeddable transform utils', () => {
 
     it('returns empty array when sort is empty', () => {
       expect(toStoredSort([])).toEqual([]);
+    });
+  });
+
+  describe('fromStoredHeight', () => {
+    it('returns numeric height as-is', () => {
+      expect(fromStoredHeight(3)).toBe(3);
+      expect(fromStoredHeight(5)).toBe(5);
+    });
+
+    it('returns "auto" when height is -1', () => {
+      expect(fromStoredHeight(-1)).toBe('auto');
+    });
+
+    it('defaults to 3 when height is undefined', () => {
+      expect(fromStoredHeight(undefined as unknown as number)).toBe(3);
+    });
+  });
+
+  describe('toStoredHeight', () => {
+    it('returns numeric height as-is', () => {
+      expect(toStoredHeight(3)).toBe(3);
+      expect(toStoredHeight(5)).toBe(5);
+    });
+
+    it('returns -1 when height is "auto"', () => {
+      expect(toStoredHeight('auto')).toBe(-1);
     });
   });
 
@@ -640,6 +855,162 @@ describe('search embeddable transform utils', () => {
 
     it('returns empty object when runtimeFields is empty array', () => {
       expect(toStoredRuntimeFields([])).toEqual({});
+    });
+  });
+
+  describe('toStoredFieldFormats', () => {
+    it('converts runtime fields with format to fieldFormats object', () => {
+      const runtimeFields: DiscoverSessionDataViewSpec['runtime_fields'] = [
+        {
+          name: 'rt',
+          type: 'keyword',
+          script: 'emit("x")',
+          format: { id: 'string' },
+        },
+      ];
+      const result = toStoredFieldFormats(runtimeFields);
+      expect(result).toEqual({
+        rt: { id: 'string' },
+      });
+    });
+
+    it('omits entries when format is missing', () => {
+      const runtimeFields: DiscoverSessionDataViewSpec['runtime_fields'] = [
+        { name: 'rt', type: 'keyword', script: 'emit("x")' },
+      ];
+      const result = toStoredFieldFormats(runtimeFields);
+      expect(result).toEqual({});
+    });
+
+    it('returns undefined when runtimeFields is undefined (default)', () => {
+      expect(toStoredFieldFormats()).toBeUndefined();
+    });
+
+    it('returns undefined when runtimeFields is empty array', () => {
+      expect(toStoredFieldFormats([])).toBeUndefined();
+    });
+
+    it('includes only runtime fields that have format', () => {
+      const runtimeFields: DiscoverSessionDataViewSpec['runtime_fields'] = [
+        { name: 'a', type: 'keyword', format: { id: 'url' } },
+        { name: 'b', type: 'long' },
+        { name: 'c', type: 'date', format: { id: 'date' } },
+      ];
+      const result = toStoredFieldFormats(runtimeFields);
+      expect(result).toEqual({
+        a: { id: 'url' },
+        c: { id: 'date' },
+      });
+    });
+  });
+
+  describe('fromStoredTab', () => {
+    it('converts stored tab with dataView id to API tab', () => {
+      const storedTab = {
+        sort: [['@timestamp', 'desc']],
+        columns: ['message', '@timestamp'],
+        grid: { columns: { '@timestamp': { width: 200 } } },
+        rowHeight: -1,
+        headerRowHeight: -1,
+        sampleSize: 500,
+        rowsPerPage: 100,
+        density: DataGridDensity.COMPACT,
+        viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+        hideChart: false,
+        isTextBasedQuery: false,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            query: { language: 'kuery', query: '' },
+            index: 'data-view-1',
+            filter: [],
+          }),
+        },
+      };
+      const references: SavedObjectReference[] = [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'data-view-1',
+        },
+      ];
+      const result = fromStoredTab(
+        storedTab as unknown as Parameters<typeof fromStoredTab>[0],
+        references
+      );
+      expect(result.sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+      expect(result.columns).toEqual([
+        { name: 'message' },
+        { name: '@timestamp', width: 200 },
+      ]);
+      expect(result.row_height).toBe('auto');
+      expect(result.header_row_height).toBe('auto');
+      expect(result.density).toBe(DataGridDensity.COMPACT);
+      expect('dataset' in result && result.dataset).toEqual({
+        type: 'dataView',
+        id: 'data-view-1',
+      });
+      expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    });
+  });
+
+  describe('toStoredTab', () => {
+    it('converts API classic tab to stored tab with references', () => {
+      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+        columns: [{ name: 'message' }, { name: '@timestamp', width: 200 }],
+        sort: [{ name: '@timestamp', direction: 'desc' }],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        density: DataGridDensity.COMPACT,
+        header_row_height: 'auto',
+        row_height: 'auto',
+        query: { language: 'kuery', query: '' },
+        filters: [],
+        rows_per_page: 100,
+        sample_size: 500,
+        dataset: { type: 'dataView', id: 'data-view-1' },
+      };
+      const { state, references } = toStoredTab(apiTab);
+      expect(references).toContainEqual({
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+        id: 'data-view-1',
+      });
+      expect(state.sort).toEqual([['@timestamp', 'desc']]);
+      expect(state.columns).toEqual(['message', '@timestamp']);
+      expect(state.rowHeight).toBe(-1);
+      expect(state.headerRowHeight).toBe(-1);
+      expect(state.density).toBe(DataGridDensity.COMPACT);
+      expect(state.hideChart).toBe(false);
+      expect(state.isTextBasedQuery).toBe(false);
+      const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
+      expect(searchSource.index).toBeUndefined();
+      expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
+      expect(searchSource.filter).toEqual([]);
+    });
+
+    it('converts API tab with index-pattern dataset (no refs) when inline', () => {
+      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+        columns: [{ name: 'foo' }],
+        sort: [],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        density: DataGridDensity.COMPACT,
+        header_row_height: 3,
+        row_height: 3,
+        query: { language: 'kuery', query: '' },
+        filters: [],
+        dataset: {
+          type: 'index',
+          index: 'my-*',
+          time_field: '@timestamp',
+        },
+      };
+      const { state, references } = toStoredTab(apiTab);
+      expect(references).toEqual([]);
+      const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource.index).toEqual({
+        title: 'my-*',
+        timeFieldName: '@timestamp',
+      });
     });
   });
 });

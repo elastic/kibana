@@ -16,7 +16,7 @@ import type { StoredSearchEmbeddableState } from './types';
 export { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 
 export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
-  function transformIn(state: DiscoverSessionEmbeddableState): {
+  return function transformIn(state: DiscoverSessionEmbeddableState): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
@@ -24,6 +24,5 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
       transformDrilldownsIn<DiscoverSessionEmbeddableState>(state);
 
     return discoverSessionToSavedSearchEmbeddableState(storedState, drilldownReferences);
-  }
-  return transformIn;
+  };
 }

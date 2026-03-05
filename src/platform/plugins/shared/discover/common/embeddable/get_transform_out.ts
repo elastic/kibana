@@ -15,7 +15,7 @@ import { savedSearchToDiscoverSessionEmbeddableState } from './transform_utils';
 import type { StoredSearchEmbeddableState } from './types';
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
-  function transformOut(
+  return function transformOut(
     storedState: StoredSearchEmbeddableState,
     references?: SavedObjectReference[]
   ) {
@@ -26,6 +26,5 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
     );
     const state = transformsFlow(storedState);
     return savedSearchToDiscoverSessionEmbeddableState(state, references);
-  }
-  return transformOut;
+  };
 }

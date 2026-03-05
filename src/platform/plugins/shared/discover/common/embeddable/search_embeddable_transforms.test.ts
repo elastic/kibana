@@ -130,6 +130,11 @@ describe('searchEmbeddableTransforms', () => {
         type: 'dataView',
         id: 'data-view-1',
       });
+      expect(result.columns).toEqual(result.tabs[0].columns);
+      expect(result.sort).toEqual(result.tabs[0].sort);
+      expect(result.density).toBe(DataGridDensity.COMPACT);
+      expect(result.header_row_height).toBe('auto');
+      expect(result.row_height).toBe('auto');
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
 

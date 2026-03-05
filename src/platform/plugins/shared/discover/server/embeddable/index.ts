@@ -15,6 +15,7 @@ export type {
   DiscoverSessionClassicTab,
   DiscoverSessionEsqlTab,
   DiscoverSessionTab,
+  DiscoverSessionPanelOverrides,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
