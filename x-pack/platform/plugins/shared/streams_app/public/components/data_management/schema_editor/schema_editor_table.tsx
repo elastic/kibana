@@ -19,10 +19,12 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiCheckbox,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { css } from '@emotion/css';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import type { TableColumnName } from './constants';
 import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
@@ -198,21 +200,29 @@ const createCellRenderer =
       if (!field.description) {
         return EMPTY_CONTENT;
       }
-      // Show full description with tooltip if it's long
-      const maxLength = 50;
-      if (field.description.length > maxLength) {
-        return (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <span>{field.description.substring(0, maxLength)}...</span>
-            <EuiIconTip content={field.description} position="right" />
-          </EuiFlexGroup>
-        );
-      }
-      return <>{field.description}</>;
+      return (
+        <EuiToolTip
+          content={field.description}
+          anchorClassName={css`
+            width: 100%;
+          `}
+        >
+          <div
+            tabIndex={0}
+            className={css`
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `}
+          >
+            {field.description}
+          </div>
+        </EuiToolTip>
+      );
     }
 
-    // @ts-expect-error upgrade typescript v5.9.3
-    return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
+    const value = field[columnId as keyof SchemaField];
+    return <>{typeof value === 'string' ? value || EMPTY_CONTENT : EMPTY_CONTENT}</>;
   };
 
 const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridControlColumn => ({

@@ -928,6 +928,16 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
   }
 
+  async fillFieldDescription(description: string) {
+    const textarea = this.page.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+    await expect(textarea).toBeVisible();
+    await textarea.fill(description);
+  }
+
+  async clickEditFieldButton() {
+    await this.page.getByTestId('streamsAppFieldSummaryEditButton').click();
+  }
+
   async unmapField() {
     await this.openFieldActionsMenu();
     await this.clickFieldAction('Unmap field');

@@ -142,7 +142,7 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
         description: 'original description',
       };
 
-      const { onStage, stream } = renderFlyout({ field: inheritedField });
+      const { onStage } = renderFlyout({ field: inheritedField });
 
       // Mapping controls should be read-only/hidden (no type selector, no format combo box)
       expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
@@ -165,8 +165,6 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       expect(onStage).toHaveBeenCalledWith({
         ...inheritedField,
         description: 'updated description',
-        parent: stream.name,
-        status: 'unmapped',
       });
     });
 

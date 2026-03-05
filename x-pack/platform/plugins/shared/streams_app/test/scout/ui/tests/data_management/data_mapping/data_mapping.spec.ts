@@ -293,5 +293,27 @@ test.describe(
         value: 'Mapped',
       });
     });
+
+    test('should allow adding a description when mapping a field', async ({ pageObjects }) => {
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      await pageObjects.streams.searchFields('resource.attributes.host.ip');
+      await pageObjects.streams.openFieldActionsMenu();
+      await pageObjects.streams.clickFieldAction('Edit field');
+      await pageObjects.streams.expectFieldFlyoutOpen();
+      await pageObjects.streams.setFieldMappingType('ip');
+      await pageObjects.streams.fillFieldDescription('The IP address of the host');
+      await pageObjects.streams.stageFieldMappingChanges();
+
+      await pageObjects.streams.reviewStagedFieldMappingChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
+
+      // Verify the description is visible in the table
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'description',
+        rowIndex: 0,
+        value: 'The IP address of the host',
+      });
+    });
   }
 );

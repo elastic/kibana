@@ -270,18 +270,17 @@ export const SchemaEditorFlyout = ({
 
                 const stagedField = (() => {
                   if (isDescriptionOnlyEditing) {
-                    // In description-only mode, ensure we only persist the allowed parts.
                     if (field.status === 'inherited') {
-                      // For inherited fields, keep the original field properties but update description
+                      // Keep the inherited status and original parent so the table
+                      // continues to show the correct parent stream.
+                      // buildSchemaSavePayload handles persisting the description
+                      // override for inherited fields.
                       return {
                         ...field,
                         description: nextField.description,
-                        parent: stagedParent,
-                        status: 'unmapped',
                       } as SchemaField;
                     }
 
-                    // For doc-only fields (status: 'unmapped' without type), return minimal payload
                     return {
                       name: nextField.name,
                       parent: stagedParent,
