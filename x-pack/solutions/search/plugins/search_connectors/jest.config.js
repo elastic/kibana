@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/search/plugins/search_connectors'],
   coverageDirectory:
