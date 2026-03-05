@@ -40,15 +40,6 @@ describe('HeaderTopBanner', () => {
     expect(screen.getByTestId('banner-content')).toHaveTextContent('Maintenance window active');
   });
 
-  it('renders a MountPoint-based banner content', () => {
-    const mount = (el: HTMLDivElement) => {
-      el.setAttribute('data-test-subj', 'mount-banner');
-      return () => {};
-    };
-    renderBanner({ mount });
-    expect(screen.getByTestId('mount-banner')).toBeInTheDocument();
-  });
-
   it('hides the banner when the observable emits undefined', () => {
     const { deps } = renderBanner({
       content: <span data-test-subj="banner-content">Active</span>,

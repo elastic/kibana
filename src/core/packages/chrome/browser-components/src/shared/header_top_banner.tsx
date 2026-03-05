@@ -12,7 +12,6 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { css } from '@emotion/react';
 import { useChromeComponentsDeps } from '../context';
-import { HeaderExtension } from './header_extension';
 
 export interface HeaderTopBannerProps {
   position?: 'fixed' | 'static';
@@ -58,11 +57,7 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ position = 'fixed' }
       ]}
       data-test-subj="headerTopBanner"
     >
-      <HeaderExtension
-        containerClassName="header__topBannerContainer"
-        display="block"
-        extension={headerBanner.content ?? headerBanner.mount}
-      />
+      <div className="header__topBannerContainer">{headerBanner.content}</div>
     </div>
   );
 };

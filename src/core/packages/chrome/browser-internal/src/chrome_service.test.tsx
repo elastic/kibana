@@ -593,7 +593,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.hasHeaderBanner$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHeaderBanner({ mount: () => () => undefined });
+      chrome.setHeaderBanner({ content: <></> });
       chrome.setHeaderBanner(undefined);
       service.stop();
 
