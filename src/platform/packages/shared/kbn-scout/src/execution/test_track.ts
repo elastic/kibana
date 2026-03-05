@@ -225,7 +225,6 @@ export class TestTrack {
       );
     });
 
-    const unusedRuntimePercent = (unusedRuntime / provisionedRuntime || 0) * 100;
     let runtimeOverflow = 0;
 
     if (unusedRuntime < 0) {
@@ -237,7 +236,7 @@ export class TestTrack {
       stats: {
         lane: {
           count: this.laneCount,
-          saturationPercent: parseFloat((100 - unusedRuntimePercent).toFixed(2)),
+          saturationPercent: parseFloat(((expectedRuntime / provisionedRuntime) * 100).toFixed(2)),
           longestEstimate: longestLaneEstimate,
           shortestEstimate: shortestLaneEstimate,
         },

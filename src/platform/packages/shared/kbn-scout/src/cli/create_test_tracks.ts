@@ -332,25 +332,32 @@ function displayMultiTrackSummary(
         `),
   ]);
 
-  let combinedExpectedRuntime = 0;
-  let combinedUnusedRuntime = 0;
+  const combinedRuntime = {
+    target: 0,
+    expected: 0,
+    unused: 0,
+    overflow: 0,
+  };
 
   tracks.forEach((track) => {
     const trackSpec = track.specification;
-    combinedExpectedRuntime += trackSpec.stats.combinedRuntime.expected;
-    combinedUnusedRuntime += trackSpec.stats.combinedRuntime.unused;
+    combinedRuntime.target += trackSpec.stats.combinedRuntime.target;
+    combinedRuntime.expected += trackSpec.stats.combinedRuntime.expected;
+    combinedRuntime.unused += trackSpec.stats.combinedRuntime.unused;
+    combinedRuntime.overflow += trackSpec.stats.combinedRuntime.overflow;
   });
 
   const sharedTargetRuntime = tracks[0].runtimeTarget;
-  const saturationPc = (combinedUnusedRuntime / (sharedTargetRuntime * tracks.length)) * 100;
+  const saturationPc = (combinedRuntime.expected / combinedRuntime.target) * 100;
 
   panel.push([
     dedent(`\
         Combined track stats
           Track count            : ${tracks.length}
           Shared runtime target  : ${msToHuman(sharedTargetRuntime)}
-          Expected runtime       : ${msToHuman(combinedExpectedRuntime)}
-          Unused runtime         : ${msToHuman(combinedUnusedRuntime)}
+          Expected runtime       : ${msToHuman(combinedRuntime.expected)}
+          Unused runtime         : ${msToHuman(combinedRuntime.unused)}
+          Expected overflow      : ${msToHuman(combinedRuntime.overflow)}
           Overall saturation     : ${saturationPc.toFixed(2)}%
         `),
   ]);
@@ -446,7 +453,7 @@ export const createTestTracks: Command<void> = {
 
     if (estimatedLaneSetupDuration > 0) {
       log.info(
-        `All track lanes are expected to take ~${msToHuman(estimatedLaneSetupDuration)} to set up.`
+        `Each track lane is expected to take ~${msToHuman(estimatedLaneSetupDuration)} to set up.`
       );
     } else {
       log.warning("Assuming lanes won't need any time to set up.");
