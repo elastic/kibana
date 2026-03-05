@@ -33,18 +33,21 @@ import {
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
-import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
+import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
+import { prepareAnonymization } from './prepare_anonymization';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
+  namespace: string;
   actions: ActionsPluginStart;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  anonymization?: InferenceAnonymizationOptions;
   callbackManager?: InferenceCallbackManager;
 }
 
@@ -75,11 +78,13 @@ export function createChatCompleteCallbackApi(
 
 export function createChatCompleteCallbackApi({
   request,
+  namespace,
   actions,
   logger,
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  anonymization,
   callbackManager,
 }: CreateChatCompleteApiOptions) {
   return (
@@ -125,70 +130,85 @@ export function createChatCompleteCallbackApi({
           });
 
           return from(
-            anonymizeMessages({
-              system,
-              messages,
+            prepareAnonymization({
+              namespace,
+              logger,
               anonymizationRules,
               regexWorker,
               esClient,
+              replacementsEsClient: anonymization?.replacements?.esClient,
+              replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+              usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+              requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+              saltPromise: anonymization?.saltPromise,
+              resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
+              metadata,
+              system,
+              messages,
             })
           ).pipe(
-            switchMap((anonymization) => {
-              const connector = executor.getConnector();
-              const connectorType = connector.type;
-              const inferenceAdapter = getInferenceAdapter(connectorType);
+            switchMap(
+              ({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+                const connector = executor.getConnector();
+                const connectorType = connector.type;
+                const inferenceAdapter = getInferenceAdapter(connectorType);
 
-              if (!inferenceAdapter) {
-                return throwError(() =>
-                  createInferenceRequestError(
-                    `Adapter for type ${connectorType} not implemented`,
-                    400
-                  )
-                );
-              }
-              const systemWithAnonymizationInstructions = anonymization.system
-                ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
-                : system;
-
-              return withChatCompleteSpan(
-                {
-                  system: systemWithAnonymizationInstructions,
-                  messages: anonymization.messages,
-                  tools,
-                  toolChoice,
-                  model: {
-                    id: modelName ?? getConnectorDefaultModel(connector),
-                    family: getConnectorFamily(connector),
-                    provider: getConnectorProvider(connector),
-                  },
-                  ...metadata?.attributes,
-                },
-                () => {
-                  return inferenceAdapter
-                    .chatComplete({
-                      system: systemWithAnonymizationInstructions,
-                      executor,
-                      messages: anonymization.messages,
-                      toolChoice,
-                      tools,
-                      temperature,
-                      logger,
-                      functionCalling,
-                      modelName,
-                      abortSignal,
-                      metadata,
-                      timeout,
-                      stream,
-                    })
-                    .pipe(
-                      chunksIntoMessage({
-                        toolOptions: { toolChoice, tools },
-                        logger,
-                      })
-                    );
+                if (!inferenceAdapter) {
+                  return throwError(() =>
+                    createInferenceRequestError(
+                      `Adapter for type ${connectorType} not implemented`,
+                      400
+                    )
+                  );
                 }
-              ).pipe(deanonymizeMessage(anonymization));
-            })
+                const systemWithAnonymizationInstructions = preparedAnonymization.system
+                  ? addAnonymizationInstruction(
+                      preparedAnonymization.system,
+                      anonymizationRules,
+                      effectivePolicy
+                    )
+                  : system;
+
+                return withChatCompleteSpan(
+                  {
+                    system: systemWithAnonymizationInstructions,
+                    messages: preparedAnonymization.messages,
+                    tools,
+                    toolChoice,
+                    model: {
+                      id: modelName ?? getConnectorDefaultModel(connector),
+                      family: getConnectorFamily(connector),
+                      provider: getConnectorProvider(connector),
+                    },
+                    ...metadata?.attributes,
+                  },
+                  () => {
+                    return inferenceAdapter
+                      .chatComplete({
+                        system: systemWithAnonymizationInstructions,
+                        executor,
+                        messages: preparedAnonymization.messages,
+                        toolChoice,
+                        tools,
+                        temperature,
+                        logger,
+                        functionCalling,
+                        modelName,
+                        abortSignal,
+                        metadata,
+                        timeout,
+                        stream,
+                      })
+                      .pipe(
+                        chunksIntoMessage({
+                          toolOptions: { toolChoice, tools },
+                          logger,
+                        })
+                      );
+                  }
+                ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+              }
+            )
           );
         })
       )
