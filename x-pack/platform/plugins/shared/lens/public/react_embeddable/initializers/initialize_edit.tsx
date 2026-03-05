@@ -362,7 +362,7 @@ export function initializeEditApi(
         const currentState = getState();
         return getEditPath(
           currentState.savedObjectId,
-          currentState.timeRange,
+          currentState.time_range,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()
         );
