@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 
 export class KbnClientRequesterError extends Error {
   axiosError?: AxiosError;
   constructor(message: string, error: unknown) {
     super(message);
     this.name = 'KbnClientRequesterError';
-    if (error instanceof AxiosError) this.axiosError = clean(error);
+    if (isAxiosError(error)) this.axiosError = clean(error);
   }
 }
-function clean(error: Error): AxiosError {
+function clean(error: AxiosError): AxiosError {
+  const originalStatus = error.status ?? error.response?.status;
   const _ = AxiosError.from(error);
+  // We strip `response` to avoid keeping large bodies around, but some callers
+  // depend on `status` to branch (e.g. treating 404 as "not found").
+  if (_.status == null && originalStatus != null) {
+    _.status = originalStatus;
+  }
   delete _.cause;
   delete _.config;
   delete _.request;
