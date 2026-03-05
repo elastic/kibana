@@ -81,6 +81,14 @@ export default function ({ getService }: FtrProviderContext) {
       return `${baseApiUrl}/${type}/${id}?${typesQuery}`;
     };
 
+    const sortRelations = <TRelation extends { relationship: string; type: string; id: string }>(
+      relations: TRelation[]
+    ) =>
+      [...relations].sort((a, b) =>
+        `${a.relationship}:${a.type}:${a.id}`.localeCompare(`${b.relationship}:${b.type}:${b.id}`)
+      );
+
+
     describe('validate response schema', () => {
       it('search', async () => {
         const resp = await supertestWithoutAuth
@@ -146,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: '8963ca30-3224-11e8-a572-ffca06da1357',
             type: 'index-pattern',
@@ -184,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
       it('for dashboards', async () => {
         const resp = await supertestWithoutAuth
@@ -192,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: 'add810b0-3224-11e8-a572-ffca06da1357',
             type: 'visualization',
@@ -231,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
       it('for visualizations', async () => {
         const resp = await supertestWithoutAuth
@@ -240,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -292,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
       it('for index patterns', async () => {
         const resp = await supertestWithoutAuth
@@ -301,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -344,7 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
     });
 
@@ -358,7 +366,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: '8963ca30-3224-11e8-a572-ffca06da1357',
             type: 'index-pattern',
@@ -396,7 +404,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
       it('dashboard', async () => {
         const resp = await supertestWithoutAuth
@@ -405,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: 'add810b0-3224-11e8-a572-ffca06da1357',
             type: 'visualization',
@@ -444,7 +452,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
       it('visualization', async () => {
         const resp = await supertestWithoutAuth
@@ -455,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -479,7 +487,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
       it('index-pattern', async () => {
         const resp = await supertestWithoutAuth
@@ -490,7 +498,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -514,7 +522,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ]));
       });
     });
 
@@ -557,37 +565,36 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body).to.eql({
-          invalidRelations: [
-            {
-              error: 'Saved object [visualization/invalid-vis] not found',
-              id: 'invalid-vis',
-              relationship: 'child',
-              type: 'visualization',
+        expect(resp.body.invalidRelations).to.eql([
+          {
+            error: 'Saved object [visualization/invalid-vis] not found',
+            id: 'invalid-vis',
+            relationship: 'child',
+            type: 'visualization',
+          },
+        ]);
+
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations([
+          {
+            id: 'add810b0-3224-11e8-a572-ffca06da1357',
+            meta: {
+              icon: 'visualizeApp',
+              namespaceType: 'multiple-isolated',
+              hiddenType: false,
+              title: 'Visualization',
             },
-          ],
-          relations: [
-            {
-              id: 'add810b0-3224-11e8-a572-ffca06da1357',
-              meta: {
-                icon: 'visualizeApp',
-                namespaceType: 'multiple-isolated',
-                hiddenType: false,
-                title: 'Visualization',
+            relationship: 'child',
+            type: 'visualization',
+            managed: false,
+            references: [
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
               },
-              relationship: 'child',
-              type: 'visualization',
-              managed: false,
-              references: [
-                {
-                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                  type: 'index-pattern',
-                },
-              ],
-            },
-          ],
-        });
+            ],
+          },
+        ]));
       });
     });
   });
