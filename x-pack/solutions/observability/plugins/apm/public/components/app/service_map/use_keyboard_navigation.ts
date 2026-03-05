@@ -162,12 +162,6 @@ export function useKeyboardNavigation({
 
           const nextElement = document.querySelector(`[data-id="${nextNode.id}"]`);
           if (nextElement instanceof HTMLElement) {
-            // Roving tabindex: move tabIndex={0} to new node, set previous to -1
-            const prevElement = document.querySelector(`[data-id="${currentNodeId}"]`);
-            if (prevElement instanceof HTMLElement) {
-              prevElement.tabIndex = -1;
-            }
-            nextElement.tabIndex = 0;
             nextElement.focus();
             onFocusedNodeChange?.(nextNode.id);
             setScreenReaderAnnouncement(

@@ -129,6 +129,8 @@ describe('ServiceNode', () => {
       expect(button).toHaveAttribute('aria-pressed', 'true');
     });
   });
+
+  describe('health status styling', () => {
     it('renders with warning health status', () => {
       const data = createServiceNodeData({
         serviceAnomalyStats: {

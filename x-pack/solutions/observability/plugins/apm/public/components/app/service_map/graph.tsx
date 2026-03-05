@@ -135,9 +135,9 @@ function GraphInner({
     getFitViewOptions,
   ]);
 
-  // Initialize the focused node to the first node when nodes are loaded
+  // Initialize (or reset) the focused node when nodes change
   useEffect(() => {
-    if (nodes.length > 0 && !focusedNodeId) {
+    if (nodes.length > 0 && (!focusedNodeId || !nodes.find((n) => n.id === focusedNodeId))) {
       setFocusedNodeId(nodes[0].id);
     }
   }, [nodes, focusedNodeId]);

@@ -213,5 +213,7 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     expect(instructions.textContent).toContain('Arrow keys');
     expect(instructions.textContent).not.toContain('Use Tab to navigate between service nodes');
     expect(instructions.textContent).toContain('Tab to leave');
+    expect(instructions.textContent).toContain('Enter or Space');
+    expect(instructions.textContent).toContain('Escape');
   });
 });
