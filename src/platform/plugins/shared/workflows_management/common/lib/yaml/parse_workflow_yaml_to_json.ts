@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Document } from 'yaml';
 import type { ZodSafeParseResult, ZodType } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
@@ -15,22 +16,31 @@ import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
 import { formatZodError } from '../zod/format_zod_error';
 
+export type ParseWorkflowYamlToJSONResult<T extends ZodType> = (
+  | ZodSafeParseResult<T>
+  | { success: false; error: Error }
+) & { document: Document };
+
 export function parseWorkflowYamlToJSON<T extends ZodType>(
   yamlString: string,
   schema: T
-): ZodSafeParseResult<T> | { success: false; error: Error } {
+): ParseWorkflowYamlToJSONResult<T> {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
+  const { document } = parseResult;
+
   if (!parseResult.success) {
     return {
       success: false,
       error: parseResult.error,
+      document,
     };
   }
-  const yamlDocumentErrors = getYamlDocumentErrors(parseResult.document);
+  const yamlDocumentErrors = getYamlDocumentErrors(document);
   if (yamlDocumentErrors.length > 0) {
     return {
       success: false,
       error: new InvalidYamlSyntaxError(yamlDocumentErrors.map((err) => err.message).join(', ')),
+      document,
     };
   }
   const result = schema.safeParse(parseResult.json);
@@ -61,16 +71,18 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
       return {
         success: true,
         data: parseResult.json as T['_output'],
-      } as ZodSafeParseResult<T>;
+        document,
+      } satisfies ParseWorkflowYamlToJSONResult<T>;
     }
 
     // Use custom error formatter for better user experience
     const filteredError = new ZodError(filteredIssues);
-    const { message, formattedError } = formatZodError(filteredError, schema, parseResult.document);
+    const { message, formattedError } = formatZodError(filteredError, schema, document);
     return {
       success: false,
       error: new InvalidYamlSchemaError(message, formattedError),
+      document,
     };
   }
-  return result as ZodSafeParseResult<T>;
+  return { ...result, document } satisfies ParseWorkflowYamlToJSONResult<T>;
 }

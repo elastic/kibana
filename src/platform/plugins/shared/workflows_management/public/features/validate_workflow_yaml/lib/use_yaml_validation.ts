@@ -117,7 +117,7 @@ export function useYamlValidation(
       // workflow-inputs validation still provide feedback.
       const validationResults: YamlValidationResult[] = [
         ...validateStepNameUniqueness(yamlDocument),
-        ...validateLiquidTemplate(model.getValue()),
+        ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
