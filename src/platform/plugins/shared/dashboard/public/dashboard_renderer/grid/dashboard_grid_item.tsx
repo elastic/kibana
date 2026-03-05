@@ -55,6 +55,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
     const [
+      hidePanelBorders,
       highlightPanelId,
       scrollToPanelId,
       expandedPanelId,
@@ -64,6 +65,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardContainerRef,
       arePanelsRelated,
     ] = useBatchedPublishingSubjects(
+      dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
@@ -81,6 +83,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId !== undefined &&
       focusedPanelId !== id &&
       !arePanelsRelated(id, focusedPanelId);
+    const showBorder = useMargins && !hidePanelBorders; // to do - check if useMargins is necessary here or if we can just rely on hidePanelBorders
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -114,12 +117,14 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
-    const styles = useMemoCss(dashboardGridItemStyles);
+    const styles = useMemoCss(
+      showBorder ? dashboardGridItemStyles : dashboardGridItemStylesWithHighlight
+    );
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
         showBadges: true,
-        showBorder: useMargins,
+        showBorder,
         showNotifications: true,
         showShadow: false,
         setDragHandles,
@@ -135,7 +140,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, showBorder, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;
@@ -221,6 +226,27 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
 });
 
 const dashboardGridItemStyles = {
+  item: (context: UseEuiTheme) =>
+    css([
+      {
+        height: '100%',
+        // Remove padding in fullscreen mode
+        '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
+          padding: 0,
+        },
+        '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
+          padding: 0,
+        },
+      },
+      printViewportVisStyles(context),
+    ]),
+  focusPanelBlur: css({
+    pointerEvents: 'none',
+    opacity: '0.25',
+  }),
+};
+
+const dashboardGridItemStylesWithHighlight = {
   item: (context: UseEuiTheme) =>
     css([
       {
