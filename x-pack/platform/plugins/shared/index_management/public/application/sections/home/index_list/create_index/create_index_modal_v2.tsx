@@ -30,6 +30,7 @@ import {
   useEuiTheme,
   EuiHorizontalRule,
   EuiCodeBlock,
+  type UseEuiTheme,
 } from '@elastic/eui';
 
 import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
@@ -44,6 +45,12 @@ const INVALID_INDEX_NAME_ERROR = i18n.translate(
   { defaultMessage: 'Index name is not valid' }
 );
 
+const modalHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${euiTheme.size.s};
+`;
+
 export interface CreateIndexModalProps {
   closeModal: () => void;
   loadIndices: () => void;
@@ -53,20 +60,13 @@ export const CreateIndexModalV2 = ({ closeModal, loadIndices }: CreateIndexModal
   const modalTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
 
-  const defaultIndexName = generateRandomIndexName();
-  const [indexName, setIndexName] = useState<string>(defaultIndexName);
+  const [indexName, setIndexName] = useState<string>(generateRandomIndexName);
 
   const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
   const [indexNameError, setIndexNameError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | undefined>();
   const [showApi, setShowApi] = useState(false);
-
-  const modalHeaderStyles = css`
-    flex-direction: column;
-    align-items: flex-start;
-    gap: ${euiTheme.size.s};
-  `;
 
   const apiCode = `PUT ${indexName}
 {
@@ -133,7 +133,7 @@ export const CreateIndexModalV2 = ({ closeModal, loadIndices }: CreateIndexModal
         </EuiModalHeaderTitle>
         <EuiText color="subdued" size="s">
           <FormattedMessage
-            id="xpack.idxMgmt.createYourIndex.modal.header.description"
+            id="xpack.idxMgmt.createIndex.modal.header.description"
             defaultMessage="An index stores and defines the schema of your data."
           />
         </EuiText>
