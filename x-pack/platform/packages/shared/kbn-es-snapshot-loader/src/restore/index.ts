@@ -7,7 +7,7 @@
 
 import type { RestoreConfig, LoadResult } from '../types';
 import { getErrorMessage } from '../utils';
-import { getSnapshotMetadata, deleteRepository, generateRepoName } from './repository';
+import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
 import { filterIndicesToRestore, restoreIndices } from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
