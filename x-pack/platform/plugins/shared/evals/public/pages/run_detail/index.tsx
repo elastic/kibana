@@ -40,6 +40,7 @@ interface DatasetStatsGroup {
 interface DatasetStatsAccordionProps {
   runId: string;
   group: DatasetStatsGroup;
+  totalRepetitions: number;
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   runLoading: boolean;
   onTraceClick: (traceId: string) => void;
@@ -49,6 +50,7 @@ interface DatasetStatsAccordionProps {
 const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   runId,
   group,
+  totalRepetitions,
   statsColumns,
   runLoading,
   onTraceClick,
@@ -61,7 +63,8 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     error: examplesError,
   } = useRunDatasetExamples(runId, isOpen ? group.datasetId : '');
 
-  const exampleCount = group.stats[0]?.stats.count;
+  const scoreCount = group.stats[0]?.stats.count;
+  const exampleCount = scoreCount != null ? Math.round(scoreCount / totalRepetitions) : undefined;
 
   return (
     <>
@@ -264,6 +267,7 @@ export const RunDetailPage: React.FC = () => {
             key={datasetId}
             runId={runId}
             group={{ datasetId, datasetName, stats }}
+            totalRepetitions={runDetail?.total_repetitions ?? 1}
             statsColumns={statsColumns}
             runLoading={runLoading}
             onTraceClick={setSelectedTraceId}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { DatasetStorageProperties } from './datasets_storage';
@@ -58,7 +59,13 @@ const createDatasetStorageClient = () => {
 
   const index = jest.fn(async ({ id, op_type: opType, document }: Record<string, unknown>) => {
     if (opType === 'create' && docs.has(id as string)) {
-      throw new Error('version_conflict_engine_exception');
+      throw new errors.ResponseError({
+        statusCode: 409,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      });
     }
 
     docs.set(id as string, document as DatasetStorageDocument);

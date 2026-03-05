@@ -13,6 +13,7 @@ import type {
   StorageClientBulkOperation,
   StorageIndexAdapter,
 } from '@kbn/storage-adapter';
+import { isResponseError } from '@kbn/es-errors';
 import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
@@ -120,24 +121,26 @@ export class DatasetClient {
     description: string,
     examples: DatasetExampleInput[] = []
   ): Promise<DatasetWithExamples> {
-    const existing = await this.getByName(name);
-    if (existing) {
-      throw new DatasetAlreadyExistsError(name);
-    }
-
     const datasetId = DatasetClient.getDatasetId(name);
     const now = new Date().toISOString();
 
-    await this.datasetsStorage.index({
-      id: datasetId,
-      op_type: 'create',
-      document: {
-        name,
-        description,
-        created_at: now,
-        updated_at: now,
-      },
-    });
+    try {
+      await this.datasetsStorage.index({
+        id: datasetId,
+        op_type: 'create',
+        document: {
+          name,
+          description,
+          created_at: now,
+          updated_at: now,
+        },
+      });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new DatasetAlreadyExistsError(name);
+      }
+      throw error;
+    }
 
     if (examples.length > 0) {
       await this.addExamples(datasetId, examples, { touchDataset: false });
@@ -260,11 +263,9 @@ export class DatasetClient {
       return false;
     }
 
-    const [deleteDatasetResponse] = await Promise.all([
-      this.datasetsStorage.delete({ id: datasetId }),
-      this.deleteExamplesByDatasetId(datasetId),
-    ]);
+    await this.deleteExamplesByDatasetId(datasetId);
 
+    const deleteDatasetResponse = await this.datasetsStorage.delete({ id: datasetId });
     return deleteDatasetResponse.result === 'deleted';
   }
 
