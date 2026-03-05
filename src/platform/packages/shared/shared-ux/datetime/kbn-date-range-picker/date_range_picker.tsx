@@ -61,6 +61,11 @@ export interface DateRangePickerProps {
   /** Show invalid state */
   isInvalid?: boolean;
   /**
+   * Disables the control and time window buttons.
+   * @default false
+   */
+  disabled?: boolean;
+  /**
    * Called when the editing input text changes.
    * @beta
    */

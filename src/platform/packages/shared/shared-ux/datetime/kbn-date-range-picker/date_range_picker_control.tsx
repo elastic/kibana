@@ -50,6 +50,7 @@ export function DateRangePickerControl() {
     initialFocus,
     onInputChange,
     width,
+    disabled,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -158,6 +159,7 @@ export function DateRangePickerControl() {
       <EuiFormControlLayout
         compressed={compressed}
         isInvalid={isInvalid}
+        isDisabled={disabled}
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
       >
@@ -173,6 +175,7 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
+            disabled={disabled}
             fullWidth={width !== 'auto'}
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
@@ -182,7 +185,9 @@ export function DateRangePickerControl() {
         ) : (
           <EuiToolTip
             content={
-              displayFullFormattedText !== displayText ? displayFullFormattedText : undefined
+              !disabled && displayFullFormattedText !== displayText
+                ? displayFullFormattedText
+                : undefined
             }
             display="block"
             css={tooltipStyles}
@@ -195,6 +200,7 @@ export function DateRangePickerControl() {
               value={collapsed ? '' : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
+              disabled={disabled}
               compressed={compressed}
             >
               <EuiBadge>{displayShortDuration ?? '--'}</EuiBadge>

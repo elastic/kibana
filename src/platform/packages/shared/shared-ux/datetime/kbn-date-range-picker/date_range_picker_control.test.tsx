@@ -206,6 +206,25 @@ describe('DateRangePickerControl', () => {
     });
   });
 
+  describe('disabled prop', () => {
+    it('disables the control button and suppresses tooltip', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} disabled />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toBeDisabled();
+
+      fireEvent.mouseOver(button);
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    it('does not enter editing mode when disabled', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} disabled />);
+
+      fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
+      expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+  });
+
   describe('controlled mode (value prop)', () => {
     const renderPicker = (props: DateRangePickerProps) =>
       render(<DateRangePicker {...props} />, { wrapper: EuiThemeProvider });
