@@ -54,7 +54,7 @@ import {
   createGetServiceTopologyTool,
 } from './get_service_topology/tool';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
-import { OBSERVABILITY_SEARCH_LOGS_TOOL_ID, createSearchLogsTool } from './search_logs/tool';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID, createGetLogsTool } from './get_logs/tool';
 
 export const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
@@ -78,7 +78,7 @@ export const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
-  OBSERVABILITY_SEARCH_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
 ];
 
 export async function registerTools({
@@ -107,7 +107,7 @@ export async function registerTools({
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
-    createSearchLogsTool({ core, logger }),
+    createGetLogsTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {

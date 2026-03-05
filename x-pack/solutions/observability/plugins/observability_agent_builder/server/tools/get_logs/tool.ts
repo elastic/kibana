@@ -13,8 +13,8 @@ import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { DEFAULT_KEEP_FIELDS, OBSERVABILITY_SEARCH_LOGS_TOOL_ID } from './constants';
-import { searchLogsHandler } from './handler';
+import { DEFAULT_KEEP_FIELDS, OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
+import { getLogsHandler } from './handler';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 
 const DEFAULT_TIME_RANGE = {
@@ -22,7 +22,7 @@ const DEFAULT_TIME_RANGE = {
   end: 'now',
 };
 
-const searchLogsSchema = z.object({
+const getLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().describe('Log index pattern').optional(),
   kqlFilter: z
@@ -61,15 +61,15 @@ const searchLogsSchema = z.object({
     .describe('Fields to include in log samples. Overrides the default fields when provided.'),
 });
 
-export function createSearchLogsTool({
+export function createGetLogsTool({
   core,
   logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): StaticToolRegistration<typeof searchLogsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof searchLogsSchema> = {
-    id: OBSERVABILITY_SEARCH_LOGS_TOOL_ID,
+}): StaticToolRegistration<typeof getLogsSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
+    id: OBSERVABILITY_GET_LOGS_TOOL_ID,
     type: ToolType.builtin,
     description: `Searches and filters logs, returning a histogram trend, total count, and compact log samples in a single query.
 
@@ -89,7 +89,7 @@ When NOT to use:
 - For log pattern grouping/categorization, use get_log_groups
 - For log rate spike/dip correlation analysis, use run_log_rate_analysis
 - For metrics or traces, use the dedicated metric/trace tools`,
-    schema: searchLogsSchema,
+    schema: getLogsSchema,
     tags: ['observability', 'logs', 'investigation'],
     availability: {
       cacheMode: 'space',
@@ -100,7 +100,7 @@ When NOT to use:
     handler: async (toolParams, { esClient }) => {
       try {
         const logIndexPatterns = await getLogsIndices({ core, logger });
-        const result = await searchLogsHandler({
+        const result = await getLogsHandler({
           esClient: esClient.asCurrentUser,
           params: {
             start: toolParams.start,
@@ -123,7 +123,7 @@ When NOT to use:
           ],
         };
       } catch (error) {
-        logger.error(`search_logs failed: ${error.message}`);
+        logger.error(`get_logs failed: ${error.message}`);
         logger.debug(error);
 
         return {
@@ -143,4 +143,4 @@ When NOT to use:
   return toolDefinition;
 }
 
-export { OBSERVABILITY_SEARCH_LOGS_TOOL_ID };
+export { OBSERVABILITY_GET_LOGS_TOOL_ID };

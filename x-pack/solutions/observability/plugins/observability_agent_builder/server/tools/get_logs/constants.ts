@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_SEARCH_LOGS_TOOL_ID = 'observability.search_logs';
+export const OBSERVABILITY_GET_LOGS_TOOL_ID = 'observability.get_logs';
 
 export const MAX_CELL_VALUE_LENGTH = 500;
 

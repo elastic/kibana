@@ -11,7 +11,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../types';
-import { OBSERVABILITY_SEARCH_LOGS_TOOL_ID } from '../tools/search_logs/constants';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../tools/get_logs/constants';
 import { OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID } from '../tools/get_log_groups/tool';
 import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '../tools/run_log_rate_analysis/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools/get_index_info/tool';
@@ -20,7 +20,7 @@ import { OBSERVABILITY_LOG_SEARCH_AGENT_ID } from '../../common/constants';
 import { getKqlInstructions } from './register_observability_agent';
 
 const LOG_SEARCH_TOOL_IDS = [
-  OBSERVABILITY_SEARCH_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
@@ -68,7 +68,7 @@ function buildLogSearchSystemPrompt(): string {
     You MUST follow this procedure.
 
     ### Phase 1: Initial Peek
-    ALWAYS start here. Call \`search_logs\` with breakdownField="log.level".
+    ALWAYS start here. Call \`get_logs\` with breakdownField="log.level".
     If the user mentions a specific service, host, or container, scope the query with a kqlFilter (e.g. \`service.name: "cart-service"\`). Otherwise, use no kqlFilter.
     Read three things:
     - **totalCount**: How many logs match? This is an indicator of noise.
@@ -83,7 +83,7 @@ function buildLogSearchSystemPrompt(): string {
 
     NOTE: OTel exception events (e.g. gRPC errors, uncaught exceptions) do NOT have \`log.level\`.
     They appear as "unknown" in the breakdown. If you see a large "unknown" bucket but few or no
-    error-level logs, call \`search_logs\` with kqlFilter="error.exception.message: *" to
+    error-level logs, call \`get_logs\` with kqlFilter="error.exception.message: *" to
     check for hidden exceptions. Also use breakdownField="service.name" to see which services
     produced them.
 
@@ -102,7 +102,7 @@ function buildLogSearchSystemPrompt(): string {
     Use insights from this phase to make informed filters in Phase 3.
 
     ### Phase 3: Noise Reduction (The Funnel)
-    The dataset is too large to review manually. Call \`search_logs\` repeatedly to narrow it down using two strategies:
+    The dataset is too large to review manually. Call \`get_logs\` repeatedly to narrow it down using two strategies:
 
     **Strategy A — Exclude noise** (use first): Add NOT clauses to remove obvious noise.
       Iteration 1: \`NOT message: "GET /health" AND NOT message: "heartbeat"\`
@@ -120,7 +120,7 @@ function buildLogSearchSystemPrompt(): string {
     RULES for this phase:
     - If you see a spike, narrow the time range (start/end) around it to isolate the incident window.
     - Use breakdownField (e.g. "log.level" or "service.name") to understand the shape of the data.
-    - You MUST call search_logs at least 3 times before moving on.
+    - You MUST call get_logs at least 3 times before moving on.
 
     ### Phase 4: Verify (Cross-check)
     Before answering, call \`get_log_groups\` **without a kqlFilter** (use the same time range) to get a broad view of all log patterns and exceptions.
@@ -138,14 +138,14 @@ function buildLogSearchSystemPrompt(): string {
     <critical_rules>
     ## Critical Rules
 
-    1. ALWAYS start with \`search_logs\`. Never call another tool first.
+    1. ALWAYS start with \`get_logs\`. Never call another tool first.
     2. When excluding noise (Strategy A), accumulate NOT clauses. When zooming into a specific service or pattern (Strategy B), you may replace the filter entirely.
-    3. Call \`search_logs\` at least 3 times before providing your answer.
+    3. Call \`get_logs\` at least 3 times before providing your answer.
     4. If totalCount > 10,000 after filtering, you have too much noise. Keep filtering.
     5. Before answering, ALWAYS run Phase 4 (Verify) — call \`get_log_groups\` without filters to check for error patterns you may have missed. Only then provide your answer.
     6. Before each tool call, explain what you see and why you're taking the next action.
     7. If a tool call returns an error, try a different approach. Do not retry the same failing call more than once.
-    8. If \`run_log_rate_analysis\` fails or returns no results, continue with \`search_logs\` alone.
+    8. If \`run_log_rate_analysis\` fails or returns no results, continue with \`get_logs\` alone.
     </critical_rules>
 
     ${getKqlInstructions()}
@@ -157,7 +157,7 @@ function buildLogSearchSystemPrompt(): string {
     - They have \`error.exception.message\` and optionally \`error.exception.type\` — but NO \`log.level\` or \`message\`.
     - They appear as "unknown" in \`log.level\` breakdowns and are invisible to \`log.level\`-based KQL filters.
 
-    To find them with \`search_logs\`:
+    To find them with \`get_logs\`:
     - Filter: \`error.exception.message: *\` (finds all documents with an exception message)
     - Breakdown: breakdownField="service.name" to see which services have exceptions
 
@@ -175,11 +175,11 @@ function buildLogSearchSystemPrompt(): string {
       Call: \`get_index_info(operation="get-field-values", index="logs-*", fields=["log.level"], start="now-1h", end="now")\`
       You can also scope it to a specific service: add kqlFilter="service.name: \\"checkout\\""
     - This is especially useful when Strategy B filters on \`log.level\` return no results — the values may be different from what you expect.
-    - To deep-dive into a specific log document, use \`search_logs\` with kqlFilter="_id: \\"<doc_id>\\"" and pass
+    - To deep-dive into a specific log document, use \`get_logs\` with kqlFilter="_id: \\"<doc_id>\\"" and pass
       additional field names via the \`fields\` parameter (e.g. fields=["message", "error.stack_trace", "http.response.status_code"]).
       Use \`get_index_info(operation="list-fields")\` first if you don't know which fields are available.
     - To view surrounding context for a suspicious log, note its @timestamp and entity (service.name, host.name, or container.name)
-      from the sample, then call \`search_logs\` with a tight time window (e.g. ±30s around the timestamp), scoped to that
+      from the sample, then call \`get_logs\` with a tight time window (e.g. ±30s around the timestamp), scoped to that
       entity via kqlFilter, with limit=50. This shows what happened immediately before and after the event — the same "surrounding
       documents" view that Discover provides.
     </tips>
@@ -189,16 +189,16 @@ function buildLogSearchSystemPrompt(): string {
 
     User: "Why are there errors in the checkout service?"
 
-    **Phase 1**: search_logs(start="now-1h", end="now")
+    **Phase 1**: get_logs(start="now-1h", end="now")
     → totalCount: 42,000. Histogram shows spike at 14:05-14:10. Samples dominated by "GET /health" and fluent-bit noise.
 
     **Phase 2**: run_log_rate_analysis(start="2026-02-25T13:50:00Z", end="2026-02-25T14:15:00Z")
     → Significant items: service.name="checkout" (p=0.001), error.message="OOMKilled" (p=0.003). Checkout is correlated with the spike.
 
-    **Phase 3**: search_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z", breakdownField="log.level")
+    **Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z", breakdownField="log.level")
     → totalCount: 320. Histogram shows errors concentrated at 14:07. Samples show OOMKilled events.
 
-    **Phase 3**: search_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (ERROR OR WARN)", start="2026-02-25T14:05:00Z", end="2026-02-25T14:10:00Z", bucketSize="1m")
+    **Phase 3**: get_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (ERROR OR WARN)", start="2026-02-25T14:05:00Z", end="2026-02-25T14:10:00Z", bucketSize="1m")
     → totalCount: 89. OOMKilled in checkout at 14:07, followed by connection timeouts in payment-service.
     (Note: "ERROR" and "WARN" are the exact values observed in the Phase 1 histogram breakdown.)
 
@@ -210,16 +210,16 @@ function buildLogSearchSystemPrompt(): string {
 
     User: "Something is wrong with our microservices"
 
-    **Phase 1**: search_logs(start="now-30m", end="now", breakdownField="log.level")
+    **Phase 1**: get_logs(start="now-30m", end="now", breakdownField="log.level")
     → totalCount: 15,000. Breakdown: INFO=12,000, unknown=2,800, WARN=200. No clear spike. The large "unknown" bucket is suspicious — few error-level logs but many unknowns.
 
-    **Phase 1 (follow-up)**: search_logs(start="now-30m", end="now", kqlFilter="error.exception.message: *", breakdownField="service.name")
+    **Phase 1 (follow-up)**: get_logs(start="now-30m", end="now", kqlFilter="error.exception.message: *", breakdownField="service.name")
     → totalCount: 180. Breakdown: frontend=120, checkout=55, payment=5. Samples show error.exception.message: "rpc error: code = Unavailable" in checkout and "Error: request failed" in frontend.
 
-    **Phase 3**: search_logs(kqlFilter="error.exception.message: * AND service.name: \\"checkout\\"", start="now-30m", end="now")
+    **Phase 3**: get_logs(kqlFilter="error.exception.message: * AND service.name: \\"checkout\\"", start="now-30m", end="now")
     → totalCount: 55. All samples show gRPC "Unavailable" errors calling the payment service.
 
-    **Phase 3**: search_logs(kqlFilter="error.exception.message: * AND service.name: \\"frontend\\"", start="now-30m", end="now")
+    **Phase 3**: get_logs(kqlFilter="error.exception.message: * AND service.name: \\"frontend\\"", start="now-30m", end="now")
     → totalCount: 120. Frontend errors: "Error: request to checkout failed", cascading from checkout failures.
 
     **Phase 4**: get_log_groups(start="now-30m", end="now")

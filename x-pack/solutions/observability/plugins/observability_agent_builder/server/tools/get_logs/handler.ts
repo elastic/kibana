@@ -12,7 +12,7 @@ import { groupBy, mapValues, orderBy, sortBy, sumBy } from 'lodash';
 import { parseDatemath } from '../../utils/time';
 import { MAX_CELL_VALUE_LENGTH } from './constants';
 
-interface SearchLogsParams {
+interface GetLogsParams {
   start: string;
   end: string;
   index: string;
@@ -35,19 +35,19 @@ interface LogSample {
   [key: string]: unknown;
 }
 
-interface SearchLogsResult {
+interface GetLogsResult {
   histogram: HistogramBucket[];
   totalCount: number;
   samples: LogSample[];
 }
 
-export async function searchLogsHandler({
+export async function getLogsHandler({
   esClient,
   params,
 }: {
   esClient: ElasticsearchClient;
-  params: SearchLogsParams;
-}): Promise<SearchLogsResult> {
+  params: GetLogsParams;
+}): Promise<GetLogsResult> {
   const { start, end, index, kqlFilter, limit, bucketSize, breakdownField, fields } = params;
 
   const startMs = parseDatemath(start);
@@ -127,13 +127,13 @@ const FORK_ID_HISTOGRAM = 'fork1';
 const FORK_ID_TOTAL_COUNT = 'fork2';
 const FORK_ID_SAMPLES = 'fork3';
 
-const EMPTY_RESULT: SearchLogsResult = { histogram: [], totalCount: 0, samples: [] };
+const EMPTY_RESULT: GetLogsResult = { histogram: [], totalCount: 0, samples: [] };
 
 function parseForkedResult(
   result: ESQLSearchResponse,
   breakdownField: string | undefined,
   fields: string[]
-): SearchLogsResult {
+): GetLogsResult {
   if (!result.columns?.length || !result.values?.length) {
     return EMPTY_RESULT;
   }
