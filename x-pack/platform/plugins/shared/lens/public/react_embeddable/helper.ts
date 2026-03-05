@@ -231,17 +231,13 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
     throw new Error('attributes are missing');
   }
 
-  // remove top level filters and query from the state as these are serialized inside the attributes object
-  // TODO: remove this if/when we flatten the attributes object into the state.
-  const { filters, query, ...restOfState } = state;
-
   const apiConfigAttributes = builder.toAPIFormat({
     ...attributes,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
 
   return {
-    ...restOfState,
+    ...state,
     attributes: apiConfigAttributes,
   };
 }
