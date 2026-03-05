@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import type { ESQLCommandOption, EditorError, ESQLAstQueryExpression } from '@elastic/esql/types';
-import { Parser, isColumn, isOptionNode } from '@elastic/esql';
+import type { EditorError } from '@elastic/esql/types';
+import { Parser } from '@elastic/esql';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 export interface ParseEsqlQueryResult {
   errors: EditorError[];
   isEsqlQueryAggregating: boolean;
-  hasMetadataOperator: boolean;
 }
 
-/**
- * check if esql query valid for Security rule:
- * - if it's non aggregation query it must have metadata operator
- */
 export const parseEsqlQuery = (query: string): ParseEsqlQueryResult => {
   const { root, errors } = Parser.parse(query);
   const isEsqlQueryAggregating = isAggregatingQuery(root);
@@ -26,44 +21,5 @@ export const parseEsqlQuery = (query: string): ParseEsqlQueryResult => {
   return {
     errors,
     isEsqlQueryAggregating,
-    hasMetadataOperator: computeHasMetadataOperator(root),
   };
 };
-
-/**
- * checks whether query has metadata _id operator
- */
-function computeHasMetadataOperator(astExpression: ESQLAstQueryExpression): boolean {
-  // Check whether the `from` command has `metadata` operator
-  const metadataOption = getMetadataOption(astExpression);
-  if (!metadataOption) {
-    return false;
-  }
-
-  // Check whether the `metadata` operator has `_id` argument
-  const idColumnItem = metadataOption.args.find(
-    (fromArg) => isColumn(fromArg) && fromArg.name === '_id'
-  );
-  if (!idColumnItem) {
-    return false;
-  }
-
-  return true;
-}
-
-function getMetadataOption(astExpression: ESQLAstQueryExpression): ESQLCommandOption | undefined {
-  const fromCommand = astExpression.commands.find((x) => x.name === 'from');
-
-  if (!fromCommand?.args) {
-    return undefined;
-  }
-
-  // Check whether the `from` command has `metadata` operator
-  for (const fromArg of fromCommand.args) {
-    if (isOptionNode(fromArg) && fromArg.name === 'metadata') {
-      return fromArg;
-    }
-  }
-
-  return undefined;
-}
