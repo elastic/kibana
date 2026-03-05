@@ -163,13 +163,17 @@ export async function getErrorSampleDetails({
 
   let transaction: Transaction | undefined;
   if (transactionId && traceId) {
-    transaction = await getTransaction({
-      transactionId,
-      traceId,
-      apmEventClient,
-      start,
-      end,
-    });
+    try {
+      transaction = await getTransaction({
+        transactionId,
+        traceId,
+        apmEventClient,
+        start,
+        end,
+      });
+    } catch {
+      transaction = undefined;
+    }
   }
 
   return {
