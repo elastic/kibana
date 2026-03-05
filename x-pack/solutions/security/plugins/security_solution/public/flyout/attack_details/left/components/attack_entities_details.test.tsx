@@ -179,10 +179,7 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders User and Host sections with UserDetails and HostDetails when data is present', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userEntityIdentifiers: [
-        { 'user.name': 'user1' },
-        { 'user.name': 'user2' },
-      ],
+      userEntityIdentifiers: [{ 'user.name': 'user1' }, { 'user.name': 'user2' }],
       hostEntityIdentifiers: [{ 'host.name': 'host1' }],
       loading: false,
       error: false,
@@ -215,14 +212,8 @@ describe('AttackEntitiesDetails', () => {
 
   it('renders plural Users and Hosts titles when each list has more than one item', () => {
     useAttackEntitiesLists.mockReturnValue({
-      userEntityIdentifiers: [
-        { 'user.name': 'user1' },
-        { 'user.name': 'user2' },
-      ],
-      hostEntityIdentifiers: [
-        { 'host.name': 'host1' },
-        { 'host.name': 'host2' },
-      ],
+      userEntityIdentifiers: [{ 'user.name': 'user1' }, { 'user.name': 'user2' }],
+      hostEntityIdentifiers: [{ 'host.name': 'host1' }, { 'host.name': 'host2' }],
       loading: false,
       error: false,
     });

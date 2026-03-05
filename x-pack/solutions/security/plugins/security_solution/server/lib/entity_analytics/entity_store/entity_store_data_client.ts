@@ -936,8 +936,7 @@ export class EntityStoreDataClient {
   }> {
     const { page, perPage, sortField, sortOrder, filterQuery, entityTypes } = params;
 
-    // All hosts and all users use entity store v2 (unified index .entities.v2.latest.security_default)
-    const useV2 = true;
+    const useV2 = await this.isEntityStoreV2Enabled();
     const getIndexName = useV2 ? getEntitiesIndexNameV2 : getEntitiesIndexName;
     const index = uniq(entityTypes.map((type) => getIndexName(type, this.options.namespace)));
     const from = (page - 1) * perPage;
@@ -1011,7 +1010,7 @@ export class EntityStoreDataClient {
   }): Promise<{ severityCount: Record<string, number> }> {
     const { filterQuery, entityTypes } = params;
 
-    const useV2 = true;
+    const useV2 = await this.isEntityStoreV2Enabled();
     const getIndexName = useV2 ? getEntitiesIndexNameV2 : getEntitiesIndexName;
     const index = uniq(entityTypes.map((type) => getIndexName(type, this.options.namespace)));
     const parsedQuery = filterQuery ? JSON.parse(filterQuery) : undefined;
