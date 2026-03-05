@@ -215,10 +215,14 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       .get<ScriptsLibrarySavedObjectAttributes>(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)
       .catch((error) => {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          throw new ScriptLibraryError(`Script with id ${scriptId} not found`, 404, error);
+          throw new ScriptLibraryError(`Script with id [${scriptId}] not found`, 404, error);
         }
 
-        throw new ScriptLibraryError(`Failed to retrieve script with id: ${scriptId}`, 500, error);
+        throw new ScriptLibraryError(
+          `Failed to retrieve script with id: [${scriptId}]`,
+          500,
+          error
+        );
       });
   }
 

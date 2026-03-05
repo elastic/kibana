@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { GCS_BUCKET, GCS_BUCKET_FOLDER, OTEL_DEMO_NAMESPACE } from './constants';
+import { getSigeventsSnapshotFeaturesIndex } from '../../../src/data_generators/sigevents_features_index';
 
 export function generateGcsBasePath({
   runId,
@@ -45,14 +46,35 @@ export async function registerGcsRepository(
   log.info('GCS repository registered');
 }
 
-export async function createSnapshot(
-  esClient: Client,
-  log: ToolingLog,
-  snapshotName: string,
-  runId: string
-): Promise<void> {
+export async function createSnapshot({
+  esClient,
+  log,
+  snapshotName,
+  runId,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  snapshotName: string;
+  runId: string;
+}): Promise<void> {
   const repoName = generateGcsRepoName({ runId });
-  const indices = 'logs*,.kibana_streams_features';
+  const featuresIndex = getSigeventsSnapshotFeaturesIndex(snapshotName);
+  const indices = `logs*,${featuresIndex}`;
+
+  try {
+    await esClient.snapshot.get({ repository: repoName, snapshot: snapshotName });
+    throw new Error(
+      `Snapshot "${repoName}/${snapshotName}" already exists. ` +
+        `Use a different --run-id or delete it manually:\n` +
+        `  DELETE _snapshot/${repoName}/${snapshotName}`
+    );
+  } catch (err) {
+    const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (statusCode !== 404) {
+      throw err;
+    }
+  }
+
   log.info(`Creating snapshot "${repoName}/${snapshotName}" (indices: ${indices})`);
 
   const result = await esClient.snapshot.create({

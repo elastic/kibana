@@ -14,6 +14,8 @@ import {
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -46,6 +48,8 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,

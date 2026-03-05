@@ -38,11 +38,13 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -151,6 +153,11 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getGlobalRuleEventLogList: (
     props: GlobalRuleEventLogListProps
   ) => ReactElement<GlobalRuleEventLogListProps>;
+  /**
+   * Get the alert formatter for a specific rule type.
+   * Returns the formatter function if the rule type has one registered, undefined otherwise.
+   */
+  getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
 }
 
 interface PluginsSetup {
@@ -179,6 +186,7 @@ interface PluginsStart {
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
+  cps?: CPSPluginStart;
 }
 
 export class Plugin
@@ -331,6 +339,8 @@ export class Plugin
               fieldsMetadata: pluginsStart.fieldsMetadata,
               contentManagement: pluginsStart.contentManagement,
               share: pluginsStart.share,
+              cps: pluginsStart.cps,
+              uiActions: pluginsStart.uiActions,
             });
           },
         });
@@ -411,6 +421,7 @@ export class Plugin
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
             uiActions: pluginsStart.uiActions,
+            cps: pluginsStart.cps,
           });
         },
       });
@@ -655,6 +666,12 @@ export class Plugin
             snoozeSchedule: rule.snoozeSchedule,
           }),
         };
+      },
+      getAlertFormatter: (ruleTypeId: string): AlertFormatter | undefined => {
+        if (!this.ruleTypeRegistry.has(ruleTypeId)) {
+          return undefined;
+        }
+        return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
     };
   }
