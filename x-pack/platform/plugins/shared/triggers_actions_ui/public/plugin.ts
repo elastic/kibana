@@ -226,6 +226,13 @@ export class Plugin
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
     };
 
+    const getCasesPlugin = async (): Promise<CasesService | undefined> => {
+      const { cases: casesResponse } = await core.plugins.onStart<{
+        cases: CasesService;
+      }>('cases');
+      return casesResponse.found ? casesResponse.contract : undefined;
+    };
+
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
@@ -294,11 +301,9 @@ export class Plugin
           category: DEFAULT_APP_CATEGORIES.management,
           visibleIn: ['sideNav'],
           async mount(params: AppMountParameters) {
-            const { cases: casesResponse, security: securityResponse } =
-              await core.plugins.onStart<{
-                cases: CasesService;
-                security: SecurityPluginStart;
-              }>('cases', 'security');
+            const { security } = await core.plugins.onStart<{
+              security: SecurityPluginStart;
+            }>('security');
             const [coreStart, pluginsStart] = (await core.getStartServices()) as [
               CoreStart,
               PluginsStart,
@@ -320,8 +325,8 @@ export class Plugin
             return renderRulesPageApp({
               ...coreStart,
               actions: plugins.actions,
-              cases: casesResponse.found ? casesResponse.contract : undefined,
-              securityPlugin: securityResponse.found ? securityResponse.contract : undefined,
+              getCasesPlugin,
+              securityPlugin: security.found ? security.contract : undefined,
               cloud: plugins.cloud,
               data: pluginsStart.data,
               dataViews: pluginsStart.dataViews,
