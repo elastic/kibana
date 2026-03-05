@@ -29,7 +29,7 @@ import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-postu
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
@@ -97,12 +97,22 @@ export interface UserDetailsProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Whether the panel is expanded on first render. Defaults to true (document details).
+   * Set to false for attack flyout so multiple entity panels start collapsed.
+   */
+  expandedOnFirstRender?: boolean;
 }
 
 /**
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
+export const UserDetails: React.FC<UserDetailsProps> = ({
+  userName,
+  timestamp,
+  scopeId,
+  expandedOnFirstRender = true,
+}) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -332,151 +342,140 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   );
 
   return (
-    <>
-      <EuiTitle size="xs">
-        <h3>
+    <ExpandablePanel
+      header={{
+        title: userName,
+        iconType: 'user',
+        headerContent: relatedHostsCount,
+        link: userLink,
+      }}
+      expand={{
+        expandable: true,
+        expandedOnFirstRender,
+      }}
+      data-test-subj={USER_DETAILS_TEST_ID}
+    >
+      <EuiTitle size="xxs">
+        <h4>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
-            defaultMessage="User"
+            id="xpack.securitySolution.flyout.left.insights.entities.userDetailsInfoTitle"
+            defaultMessage="User information"
           />
-        </h3>
+        </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <ExpandablePanel
-        header={{
-          title: userName,
-          iconType: 'user',
-          headerContent: relatedHostsCount,
-          link: userLink,
-        }}
-        expand={{
-          expandable: true,
-          expandedOnFirstRender: true,
-        }}
-        data-test-subj={USER_DETAILS_TEST_ID}
+      <AnomalyTableProvider
+        criteriaFields={hostToCriteria(userDetails)}
+        startDate={from}
+        endDate={to}
+        skip={isInitializing}
       >
-        <EuiTitle size="xxs">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.entities.userDetailsInfoTitle"
-              defaultMessage="User information"
-            />
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <AnomalyTableProvider
-          criteriaFields={hostToCriteria(userDetails)}
-          startDate={from}
-          endDate={to}
-          skip={isInitializing}
-        >
-          {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
-            <UserOverviewManage
-              id={userDetailsQueryId}
-              isInDetailsSidePanel={false}
-              data={userDetails}
-              anomaliesData={anomaliesData}
-              isLoadingAnomaliesData={isLoadingAnomaliesData}
-              loading={isUserLoading}
-              startDate={from}
-              endDate={to}
-              narrowDateRange={narrowDateRange}
-              setQuery={setQuery}
-              refetch={refetch}
-              inspect={inspect}
-              userName={userName}
-              indexPatterns={selectedPatterns}
-              jobNameById={jobNameById}
-              scopeId={scopeId}
-              isFlyoutOpen={true}
-            />
-          )}
-        </AnomalyTableProvider>
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule margin="s" />
-        <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
-          <AlertCountInsight
-            fieldName={'user.name'}
-            name={userName}
-            direction="column"
-            openDetailsPanel={openDetailsPanel}
-            data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
-          />
-          <MisconfigurationsInsight
-            fieldName={'user.name'}
-            name={userName}
-            direction="column"
-            openDetailsPanel={openDetailsPanel}
-            data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
-            telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
-          />
-        </EuiFlexGrid>
-        <EuiSpacer size="l" />
-        <EuiPanel hasBorder={true}>
-          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTitle"
-                    defaultMessage="Related hosts"
-                  />
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
-                    defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
-                    values={{ userName }}
-                  />
-                }
-                type="info"
-                className="eui-alignTop"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <RelatedHostsManage
-            id={relatedHostsQueryId}
-            inspect={inspectRelatedHosts}
-            loading={isRelatedHostLoading}
+        {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
+          <UserOverviewManage
+            id={userDetailsQueryId}
+            isInDetailsSidePanel={false}
+            data={userDetails}
+            anomaliesData={anomaliesData}
+            isLoadingAnomaliesData={isLoadingAnomaliesData}
+            loading={isUserLoading}
+            startDate={from}
+            endDate={to}
+            narrowDateRange={narrowDateRange}
             setQuery={setQuery}
-            deleteQuery={deleteQuery}
-            refetch={refetchRelatedHosts}
-          >
-            <EuiInMemoryTable
-              columns={relatedHostsColumns}
-              items={relatedHosts}
-              loading={isRelatedHostLoading}
-              data-test-subj={USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID}
-              pagination={pagination}
-              tableCaption={i18n.translate(
-                'xpack.securitySolution.flyout.left.insights.entities.relatedHostsCaption',
-                { defaultMessage: "User's related hosts" }
-              )}
-              noItemsMessage={
+            refetch={refetch}
+            inspect={inspect}
+            userName={userName}
+            indexPatterns={selectedPatterns}
+            jobNameById={jobNameById}
+            scopeId={scopeId}
+            isFlyoutOpen={true}
+          />
+        )}
+      </AnomalyTableProvider>
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+        <AlertCountInsight
+          fieldName={'user.name'}
+          name={userName}
+          direction="column"
+          openDetailsPanel={openDetailsPanel}
+          data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
+        />
+        <MisconfigurationsInsight
+          fieldName={'user.name'}
+          name={userName}
+          direction="column"
+          openDetailsPanel={openDetailsPanel}
+          data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+          telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
+        />
+      </EuiFlexGrid>
+      <EuiSpacer size="l" />
+      <EuiPanel hasBorder={true}>
+        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h4>
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsNoDataDescription"
-                  defaultMessage="No hosts identified"
-                />
-              }
-            />
-            <InspectButton
-              queryId={relatedHostsQueryId}
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsInspectButtonTitle"
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTitle"
                   defaultMessage="Related hosts"
                 />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
+                  defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
+                  values={{ userName }}
+                />
               }
-              inspectIndex={0}
+              type="info"
+              className="eui-alignTop"
             />
-          </RelatedHostsManage>
-        </EuiPanel>
-      </ExpandablePanel>
-    </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <RelatedHostsManage
+          id={relatedHostsQueryId}
+          inspect={inspectRelatedHosts}
+          loading={isRelatedHostLoading}
+          setQuery={setQuery}
+          deleteQuery={deleteQuery}
+          refetch={refetchRelatedHosts}
+        >
+          <EuiInMemoryTable
+            columns={relatedHostsColumns}
+            items={relatedHosts}
+            loading={isRelatedHostLoading}
+            data-test-subj={USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID}
+            pagination={pagination}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.entities.relatedHostsCaption',
+              { defaultMessage: "User's related hosts" }
+            )}
+            noItemsMessage={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsNoDataDescription"
+                defaultMessage="No hosts identified"
+              />
+            }
+          />
+          <InspectButton
+            queryId={relatedHostsQueryId}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsInspectButtonTitle"
+                defaultMessage="Related hosts"
+              />
+            }
+            inspectIndex={0}
+          />
+        </RelatedHostsManage>
+      </EuiPanel>
+    </ExpandablePanel>
   );
 };

@@ -12,7 +12,7 @@ import type {
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../../common/domain/definitions/entity_schema';
 import type { EngineDescriptor } from './constants';
-import { LogExtractionState, VersionState } from './constants';
+import { EngineLogExtractionState, VersionState } from './constants';
 import { EngineDescriptorTypeName } from './types';
 import { ENGINE_STATUS } from '../../../constants';
 
@@ -48,10 +48,7 @@ export class EngineDescriptorClient {
     return response.saved_objects[0].attributes;
   }
 
-  async init(
-    entityType: EntityType,
-    initialState: Partial<LogExtractionState>
-  ): Promise<EngineDescriptor> {
+  async init(entityType: EntityType): Promise<EngineDescriptor> {
     const engineDescriptor = await this.find(entityType);
 
     if (engineDescriptor.total > 0) {
@@ -63,7 +60,7 @@ export class EngineDescriptorClient {
     const id = this.getSavedObjectId(entityType);
     this.logger.debug(`Creating engine descriptor with id ${id}`);
 
-    const logExtractionState = LogExtractionState.parse(initialState);
+    const logExtractionState = EngineLogExtractionState.parse({});
     const defaultVersionState = VersionState.parse({});
     const { attributes } = await this.soClient.create<EngineDescriptor>(
       EngineDescriptorTypeName,
