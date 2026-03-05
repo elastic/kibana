@@ -2428,6 +2428,8 @@
       "@kbn/ts-projects/*": ["packages/kbn-ts-projects/*"],
       "@kbn/ts-type-check-cli": ["packages/kbn-ts-type-check-cli"],
       "@kbn/ts-type-check-cli/*": ["packages/kbn-ts-type-check-cli/*"],
+      "@kbn/ts-type-check-oblt-cli": ["x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli"],
+      "@kbn/ts-type-check-oblt-cli/*": ["x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/*"],
       "@kbn/tsconfig-base": ["packages/kbn-tsconfig/base"],
       "@kbn/tsconfig-base/*": ["packages/kbn-tsconfig/base/*"],
       "@kbn/typed-react-router-config": ["src/platform/packages/shared/kbn-typed-react-router-config"],

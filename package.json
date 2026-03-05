@@ -1787,6 +1787,7 @@
     "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
+    "@kbn/ts-type-check-oblt-cli": "link:x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli",
     "@kbn/tsconfig-base": "link:packages/kbn-tsconfig/base",
     "@kbn/validate-next-docs-cli": "link:packages/kbn-validate-next-docs-cli",
     "@kbn/validate-oas": "link:src/platform/packages/private/kbn-validate-oas",

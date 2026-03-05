@@ -9310,6 +9310,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ts-type-check-oblt-cli@link:x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/tsconfig-base@link:packages/kbn-tsconfig/base":
   version "0.0.0"
   uid ""
