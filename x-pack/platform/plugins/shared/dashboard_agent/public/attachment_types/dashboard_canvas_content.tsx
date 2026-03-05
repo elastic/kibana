@@ -256,7 +256,7 @@ export const normalizePanels = (
 };
 
 export interface DashboardCanvasInitialInput {
-  time_range: {
+  timeRange: {
     from: string;
     to: string;
   };
@@ -269,7 +269,7 @@ export interface DashboardCanvasInitialInput {
 export const createDashboardRendererInitialInput = (
   data: DashboardAttachmentData
 ): DashboardCanvasInitialInput => ({
-  time_range: { from: 'now-24h', to: 'now' },
+  timeRange: { from: 'now-24h', to: 'now' },
   viewMode: 'view',
   panels: normalizePanels(data.panels ?? []) as DashboardState['panels'],
   title: data.title,
@@ -294,9 +294,13 @@ export const getDashboardRendererCreationOptions = async ({
 
   return {
     useUnifiedSearchIntegration: true,
-    getInitialInput: () => ({
-      ...initialDashboardInput,
-    }),
+    getInitialInput: () => {
+      const { timeRange, ...restInitialDashboardInput } = initialDashboardInput;
+      return {
+        ...restInitialDashboardInput,
+        time_range: timeRange,
+      };
+    },
   };
 };
 
@@ -415,7 +419,7 @@ export const DashboardCanvasContent = ({
               title: initialDashboardInput.title,
               description: initialDashboardInput.description,
               panels: initialDashboardInput.panels,
-              time_range: initialDashboardInput.time_range,
+              time_range: initialDashboardInput.timeRange,
               viewMode: 'edit',
             });
           },
@@ -444,7 +448,7 @@ export const DashboardCanvasContent = ({
       dashboardApi,
       initialDashboardInput.description,
       initialDashboardInput.panels,
-      initialDashboardInput.time_range,
+      initialDashboardInput.timeRange,
       initialDashboardInput.title,
       registerActionButtons,
       data.savedObjectId,
