@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineStatusHeaderAction } from './engine_status_header_action';
-import { useEnableEntityStoreMutation } from '../../../hooks/use_entity_store';
+import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
 import { isEngineLoading } from '../helpers';
 import type { GetEntityStoreStatusResponse } from '../../../../../../../common/api/entity_analytics/entity_store/status.gen';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
@@ -19,7 +19,7 @@ import { defaultOptions } from '../../../../../../../server/lib/entity_analytics
 jest.mock('../../../hooks/use_entity_store');
 jest.mock('../helpers');
 
-const mockUseEnableEntityStoreMutation = useEnableEntityStoreMutation as jest.Mock;
+const mockUseInstallEntityStoreMutation = useInstallEntityStoreMutation as jest.Mock;
 // @ts-expect-error upgrade typescript v5.9.3
 const mockIsEngineLoading = isEngineLoading as jest.Mock;
 
@@ -39,7 +39,7 @@ const defaultEngineResponse: GetEntityStoreStatusResponse['engines'][0] = {
 
 describe('EngineStatusHeaderAction', () => {
   beforeEach(() => {
-    mockUseEnableEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityStoreMutation.mockReturnValue({
       mutate: jest.fn(),
       isLoading: false,
     });
@@ -47,7 +47,7 @@ describe('EngineStatusHeaderAction', () => {
   });
 
   it('renders loading spinner when loading', () => {
-    mockUseEnableEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityStoreMutation.mockReturnValue({
       mutate: jest.fn(),
       isLoading: true,
     });
@@ -67,7 +67,7 @@ describe('EngineStatusHeaderAction', () => {
 
   it('calls installEntityStore when install button is clicked', () => {
     const mutate = jest.fn();
-    mockUseEnableEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityStoreMutation.mockReturnValue({
       mutate,
       isLoading: false,
     });
@@ -85,7 +85,7 @@ describe('EngineStatusHeaderAction', () => {
       components: [{ ...defaultComponent, installed: false }],
     };
     const mutate = jest.fn();
-    mockUseEnableEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityStoreMutation.mockReturnValue({
       mutate,
       isLoading: false,
     });

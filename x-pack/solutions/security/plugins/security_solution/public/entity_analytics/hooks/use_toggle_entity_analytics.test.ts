@@ -48,54 +48,32 @@ jest.mock('../api/hooks/use_disable_risk_engine_mutation', () => ({
   }),
 }));
 
-const mockEnableEntityStore = jest.fn().mockResolvedValue({});
-const mockStartEntityEngine = jest.fn().mockResolvedValue({});
-const mockStopEntityEngine = jest.fn().mockResolvedValue({});
-const mockInstallEntityStoreV2 = jest.fn().mockResolvedValue({});
-const mockStartEntityStoreV2 = jest.fn().mockResolvedValue({});
-const mockStopEntityStoreV2 = jest.fn().mockResolvedValue({});
+const mockInstallEntityStore = jest.fn().mockResolvedValue({});
+const mockStartEntityStore = jest.fn().mockResolvedValue({});
+const mockStopEntityStore = jest.fn().mockResolvedValue({});
 
-let mockEntityStoreStatusV2Return: { data: { status: string; engines: unknown[] } | undefined };
+let mockEntityStoreStatusReturn: { data: { status: string; engines: unknown[] } | undefined };
 
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
-  useEnableEntityStoreMutation: () => ({
-    mutateAsync: mockEnableEntityStore,
+  useInstallEntityStoreMutation: () => ({
+    mutateAsync: mockInstallEntityStore,
     isLoading: false,
     isError: false,
     error: null,
   }),
-  useStartEntityEngineMutation: () => ({
-    mutateAsync: mockStartEntityEngine,
+  useStartEntityStoreMutation: () => ({
+    mutateAsync: mockStartEntityStore,
     isLoading: false,
     isError: false,
     error: null,
   }),
-  useStopEntityEngineMutation: () => ({
-    mutateAsync: mockStopEntityEngine,
+  useStopEntityStoreMutation: () => ({
+    mutateAsync: mockStopEntityStore,
     isLoading: false,
     isError: false,
     error: null,
   }),
   useEntityStoreStatus: () => mockEntityStoreStatusReturn,
-  useEntityStoreStatusV2: () => mockEntityStoreStatusV2Return,
-  useInstallEntityStoreMutationV2: () => ({
-    mutateAsync: mockInstallEntityStoreV2,
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
-  useStartEntityStoreMutationV2: () => ({
-    mutateAsync: mockStartEntityStoreV2,
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
-  useStopEntityStoreMutationV2: () => ({
-    mutateAsync: mockStopEntityStoreV2,
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
 }));
 
 jest.mock('./use_enabled_entity_types', () => ({
@@ -111,7 +89,6 @@ let mockRiskEngineStatusReturn: {
   data: { risk_engine_status: string } | undefined;
   isFetching: boolean;
 };
-let mockEntityStoreStatusReturn: { data: { status: string; engines: unknown[] } | undefined };
 
 const mockUseRiskEngineStatus = jest.fn(() => mockRiskEngineStatusReturn);
 jest.mock('../api/hooks/use_risk_engine_status', () => ({
@@ -127,20 +104,6 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
   },
 }));
 
-let mockIsEntityStoreV2Enabled: boolean;
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: {
-        get: (key: string) => {
-          if (key === 'securitySolution:entityStoreEnableV2') return mockIsEntityStoreV2Enabled;
-          return undefined;
-        },
-      },
-    },
-  }),
-}));
-
 const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
 const defaultOptions = {
   selectedSettingsMatchSavedSettings: true,
@@ -152,7 +115,6 @@ describe('useToggleEntityAnalytics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsEntityStoreDisabled = false;
-    mockIsEntityStoreV2Enabled = false;
     mockInitRiskEngineMutationReturn = {
       mutateAsync: mockInitRiskEngine,
       isLoading: false,
@@ -166,9 +128,6 @@ describe('useToggleEntityAnalytics', () => {
     mockEntityStoreStatusReturn = {
       data: { status: 'not_installed', engines: [] },
     };
-    mockEntityStoreStatusV2Return = {
-      data: { status: 'not_installed', engines: [] },
-    };
   });
 
   describe('toggle ON from not_installed', () => {
@@ -180,7 +139,8 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockInitRiskEngine).toHaveBeenCalledTimes(1);
-      expect(mockEnableEntityStore).toHaveBeenCalledWith({});
+      expect(mockInstallEntityStore).toHaveBeenCalledTimes(1);
+      expect(mockStartEntityStore).toHaveBeenCalledTimes(1);
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
@@ -201,7 +161,7 @@ describe('useToggleEntityAnalytics', () => {
     });
   });
 
-  describe('toggle ON from disabled', () => {
+  describe('toggle ON from disabled/stopped', () => {
     beforeEach(() => {
       mockRiskEngineStatusReturn = {
         data: { risk_engine_status: 'DISABLED' },
@@ -212,7 +172,7 @@ describe('useToggleEntityAnalytics', () => {
       };
     });
 
-    it('enables risk engine and starts stopped entity engines', async () => {
+    it('enables risk engine and starts stopped entity store', async () => {
       const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
 
       await act(async () => {
@@ -221,12 +181,31 @@ describe('useToggleEntityAnalytics', () => {
 
       expect(mockEnableRiskEngine).toHaveBeenCalledTimes(1);
       expect(mockInitRiskEngine).not.toHaveBeenCalled();
-      expect(mockStartEntityEngine).toHaveBeenCalledTimes(1);
-      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockStartEntityStore).toHaveBeenCalledTimes(1);
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
     });
   });
 
-  describe('toggle OFF from enabled', () => {
+  describe('toggle ON from error state', () => {
+    it('starts entity store without reinstalling when status is error', async () => {
+      mockRiskEngineStatusReturn = {
+        data: { risk_engine_status: 'DISABLED' },
+        isFetching: false,
+      };
+      mockEntityStoreStatusReturn = { data: { status: 'error', engines: [] } };
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
+      expect(mockStartEntityStore).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('toggle OFF from enabled/running', () => {
     beforeEach(() => {
       mockRiskEngineStatusReturn = {
         data: { risk_engine_status: 'ENABLED' },
@@ -245,7 +224,7 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockDisableRiskEngine).toHaveBeenCalledTimes(1);
-      expect(mockStopEntityEngine).toHaveBeenCalledTimes(1);
+      expect(mockStopEntityStore).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -266,8 +245,8 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockDisableRiskEngine).toHaveBeenCalledTimes(1);
-      expect(mockStopEntityEngine).not.toHaveBeenCalled();
-      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockStopEntityStore).not.toHaveBeenCalled();
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
     });
 
     it('stops entity store only when risk engine is already disabled', async () => {
@@ -286,7 +265,7 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockDisableRiskEngine).not.toHaveBeenCalled();
-      expect(mockStopEntityEngine).toHaveBeenCalledTimes(1);
+      expect(mockStopEntityStore).toHaveBeenCalledTimes(1);
       expect(mockEnableRiskEngine).not.toHaveBeenCalled();
     });
   });
@@ -304,7 +283,7 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockInitRiskEngine).toHaveBeenCalledTimes(1);
-      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
     });
 
     it('only disables risk engine on toggle OFF', async () => {
@@ -320,7 +299,7 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockDisableRiskEngine).toHaveBeenCalledTimes(1);
-      expect(mockStopEntityEngine).not.toHaveBeenCalled();
+      expect(mockStopEntityStore).not.toHaveBeenCalled();
     });
   });
 
@@ -336,10 +315,10 @@ describe('useToggleEntityAnalytics', () => {
         await result.current.toggle();
       });
 
-      expect(mockStopEntityEngine).toHaveBeenCalledTimes(1);
+      expect(mockStopEntityStore).toHaveBeenCalledTimes(1);
       expect(mockDisableRiskEngine).not.toHaveBeenCalled();
       expect(mockInitRiskEngine).not.toHaveBeenCalled();
-      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
     });
 
     it('disables risk engine when risk is enabled but store is not installed', async () => {
@@ -358,8 +337,8 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockDisableRiskEngine).toHaveBeenCalledTimes(1);
-      expect(mockStopEntityEngine).not.toHaveBeenCalled();
-      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockStopEntityStore).not.toHaveBeenCalled();
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
     });
   });
 
@@ -406,127 +385,9 @@ describe('useToggleEntityAnalytics', () => {
       });
 
       expect(mockInitRiskEngine).not.toHaveBeenCalled();
-      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockInstallEntityStore).not.toHaveBeenCalled();
       expect(mockDisableRiskEngine).not.toHaveBeenCalled();
-      expect(mockStopEntityEngine).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('entity store v2 feature flag enabled', () => {
-    beforeEach(() => {
-      mockIsEntityStoreV2Enabled = true;
-    });
-
-    describe('toggle ON from not_installed', () => {
-      it('installs and starts entity store via v2 endpoints', async () => {
-        mockEntityStoreStatusV2Return = { data: { status: 'not_installed', engines: [] } };
-
-        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
-
-        await act(async () => {
-          await result.current.toggle();
-        });
-
-        expect(mockInstallEntityStoreV2).toHaveBeenCalledTimes(1);
-        expect(mockStartEntityStoreV2).toHaveBeenCalledTimes(1);
-        expect(mockEnableEntityStore).not.toHaveBeenCalled();
-        expect(mockStartEntityEngine).not.toHaveBeenCalled();
-        expect(mockAddSuccess).toHaveBeenCalled();
-      });
-    });
-
-    describe('toggle ON from stopped', () => {
-      it('starts entity store via v2 without reinstalling', async () => {
-        mockRiskEngineStatusReturn = {
-          data: { risk_engine_status: 'DISABLED' },
-          isFetching: false,
-        };
-        mockEntityStoreStatusV2Return = { data: { status: 'stopped', engines: [] } };
-
-        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
-
-        await act(async () => {
-          await result.current.toggle();
-        });
-
-        expect(mockInstallEntityStoreV2).not.toHaveBeenCalled();
-        expect(mockStartEntityStoreV2).toHaveBeenCalledTimes(1);
-        expect(mockEnableEntityStore).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('toggle ON from running', () => {
-      it('does not call install or start when already running', async () => {
-        mockRiskEngineStatusReturn = {
-          data: { risk_engine_status: 'DISABLED' },
-          isFetching: false,
-        };
-        mockEntityStoreStatusV2Return = { data: { status: 'running', engines: [] } };
-
-        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
-
-        await act(async () => {
-          await result.current.toggle();
-        });
-
-        expect(mockInstallEntityStoreV2).not.toHaveBeenCalled();
-        expect(mockStartEntityStoreV2).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('toggle OFF from running', () => {
-      it('stops entity store via v2 endpoint', async () => {
-        mockRiskEngineStatusReturn = {
-          data: { risk_engine_status: 'ENABLED' },
-          isFetching: false,
-        };
-        mockEntityStoreStatusV2Return = { data: { status: 'running', engines: [] } };
-
-        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
-
-        await act(async () => {
-          await result.current.toggle();
-        });
-
-        expect(mockStopEntityStoreV2).toHaveBeenCalledTimes(1);
-        expect(mockStopEntityEngine).not.toHaveBeenCalled();
-        expect(mockAddSuccess).toHaveBeenCalled();
-      });
-    });
-
-    describe('v1 entity store endpoints not called when v2 is enabled', () => {
-      it('never calls v1 enable/start/stop mutations', async () => {
-        mockEntityStoreStatusV2Return = { data: { status: 'not_installed', engines: [] } };
-
-        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
-
-        await act(async () => {
-          await result.current.toggle();
-        });
-
-        expect(mockEnableEntityStore).not.toHaveBeenCalled();
-        expect(mockStartEntityEngine).not.toHaveBeenCalled();
-        expect(mockStopEntityEngine).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('toggle ON from error (v2)', () => {
-      it('starts entity store via v2 without reinstalling when status is error', async () => {
-        mockRiskEngineStatusReturn = {
-          data: { risk_engine_status: 'DISABLED' },
-          isFetching: false,
-        };
-        mockEntityStoreStatusV2Return = { data: { status: 'error', engines: [] } };
-
-        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
-
-        await act(async () => {
-          await result.current.toggle();
-        });
-
-        expect(mockInstallEntityStoreV2).not.toHaveBeenCalled();
-        expect(mockStartEntityStoreV2).toHaveBeenCalledTimes(1);
-      });
+      expect(mockStopEntityStore).not.toHaveBeenCalled();
     });
   });
 
@@ -601,8 +462,8 @@ describe('useToggleEntityAnalytics', () => {
       );
     });
 
-    it('shows error toast when v1 enableEntityStore rejects', async () => {
-      mockEnableEntityStore.mockRejectedValueOnce(new Error('store enable failed'));
+    it('shows error toast when installEntityStore rejects', async () => {
+      mockInstallEntityStore.mockRejectedValueOnce(new Error('store install failed'));
 
       const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
 

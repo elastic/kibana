@@ -94,7 +94,7 @@ jest.mock('../components/asset_criticality/use_asset_criticality', () => ({
 const mockUseEntityStoreStatus = jest.fn().mockReturnValue({
   data: { status: 'not_installed', engines: [] },
 });
-const mockUseDeleteEntityEngineMutation = jest.fn().mockReturnValue({
+const mockUseDeleteEntityStoreMutation = jest.fn().mockReturnValue({
   isLoading: false,
   isError: false,
   error: null,
@@ -102,9 +102,7 @@ const mockUseDeleteEntityEngineMutation = jest.fn().mockReturnValue({
 });
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: (...args: unknown[]) => mockUseEntityStoreStatus(...args),
-  useEnableEntityStoreMutation: () => ({ isLoading: false, isError: false, mutate: jest.fn() }),
-  useStopEntityEngineMutation: () => ({ isLoading: false, mutate: jest.fn() }),
-  useDeleteEntityEngineMutation: (...args: unknown[]) => mockUseDeleteEntityEngineMutation(...args),
+  useDeleteEntityStoreMutation: (...args: unknown[]) => mockUseDeleteEntityStoreMutation(...args),
 }));
 
 const mockUseEntityEnginePrivileges = jest.fn().mockReturnValue({
@@ -230,7 +228,7 @@ describe('EntityAnalyticsManagementPage', () => {
     mockUseEntityEnginePrivileges.mockReturnValue({
       data: { has_all_required: true },
     });
-    mockUseDeleteEntityEngineMutation.mockReturnValue({
+    mockUseDeleteEntityStoreMutation.mockReturnValue({
       isLoading: false,
       isError: false,
       error: null,

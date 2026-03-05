@@ -24,7 +24,7 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 
-import { useEnableEntityStoreMutation } from '../hooks/use_entity_store';
+import { useInstallEntityStoreMutation } from '../hooks/use_entity_store';
 import {
   ENABLEMENT_INITIALIZING_RISK_ENGINE,
   ENABLEMENT_INITIALIZING_ENTITY_STORE,
@@ -79,7 +79,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
     isSavingSettings: saveSelectedSettingsMutation.isLoading,
   });
 
-  const storeEnablement = useEnableEntityStoreMutation();
+  const storeEnablement = useInstallEntityStoreMutation();
 
   const handleConfirmEnable = async () => {
     setModalVisible(false);

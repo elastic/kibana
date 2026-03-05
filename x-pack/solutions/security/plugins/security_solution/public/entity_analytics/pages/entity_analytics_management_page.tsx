@@ -31,7 +31,7 @@ import { EngineStatus } from '../components/entity_store/components/engines_stat
 import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import {
-  useDeleteEntityEngineMutation,
+  useDeleteEntityStoreMutation,
   useEntityStoreStatus,
 } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
@@ -85,11 +85,12 @@ export const EntityAnalyticsManagementPage = () => {
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const entityStoreStatus = useEntityStoreStatus({});
+
+  const entityStoreStatus = useEntityStoreStatus();
   const entityTypes = useEntityStoreTypes();
   const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
     useEntityEnginePrivileges();
-  const deleteEntityEngineMutation = useDeleteEntityEngineMutation({ entityTypes });
+  const deleteEntityStoreMutation = useDeleteEntityStoreMutation({ entityTypes });
 
   const userHasRiskEnginePrivileges =
     !riskEnginePrivileges.isLoading &&
@@ -137,7 +138,7 @@ export const EntityAnalyticsManagementPage = () => {
     }
   }, [shouldDisplayEngineStatusTab, isStatusDataLoading, selectedTabId, history]);
 
-  const deleteError = safeErrorMessage(deleteEntityEngineMutation.error);
+  const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
 
   return (
     <>
@@ -204,9 +205,9 @@ export const EntityAnalyticsManagementPage = () => {
               <EuiFlexItem grow={false}>
                 <ClearEntityDataButton
                   onDelete={async () => {
-                    await deleteEntityEngineMutation.mutateAsync();
+                    await deleteEntityStoreMutation.mutateAsync();
                   }}
-                  isDeleting={deleteEntityEngineMutation.isLoading}
+                  isDeleting={deleteEntityStoreMutation.isLoading}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

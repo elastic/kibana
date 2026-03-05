@@ -14,10 +14,6 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 const mockUseEntityStore = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
-  useEnableEntityStoreMutation: () => ({
-    mutate: jest.fn(),
-    isLoading: false,
-  }),
 }));
 
 const mockDownloadBlob = jest.fn();

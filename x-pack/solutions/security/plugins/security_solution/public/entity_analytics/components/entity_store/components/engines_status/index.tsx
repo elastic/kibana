@@ -43,7 +43,9 @@ export const EngineStatus = () => {
     data,
     isLoading: isStatusAPILoading,
     error,
-  } = useEntityStoreStatus({ withComponents: true });
+  } = useEntityStoreStatus({
+    withComponents: true,
+  });
   const enabledEntityTypes = useEntityStoreTypes();
 
   const downloadJson = () => {
@@ -76,7 +78,7 @@ export const EngineStatus = () => {
     <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={ENGINE_STATUS_PANEL_TEST_ID}>
       {data?.engines?.length > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" onClick={downloadJson}>
                 <FormattedMessage

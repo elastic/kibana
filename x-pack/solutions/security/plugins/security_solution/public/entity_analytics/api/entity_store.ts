@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
   InitEntityStoreRequestBodyInput,
@@ -18,7 +18,6 @@ import type {
   ListEntityEnginesResponse,
   StartEntityEngineResponse,
   StopEntityEngineResponse,
-  StoreStatus,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -26,23 +25,106 @@ import { useKibana } from '../../common/lib/kibana/kibana_react';
 const ENTITY_STORE_V2_QUERY = { apiVersion: '2' } as const;
 
 export const useEntityStoreRoutes = () => {
-  const http = useKibana().services.http;
+  const { http, uiSettings } = useKibana().services;
+  const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   return useMemo(() => {
-    const enableEntityStore = async (options: InitEntityStoreRequestBodyInput = {}) => {
-      return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
-        method: 'POST',
-        version: API_VERSIONS.public.v1,
-        body: JSON.stringify(options),
-      });
-    };
-
     const getEntityStoreStatus = async (withComponents = false) => {
+      if (isV2Enabled) {
+        return http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.STATUS, {
+          method: 'GET',
+          query: { ...ENTITY_STORE_V2_QUERY, include_components: withComponents },
+        });
+      }
       return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
         method: 'GET',
         version: API_VERSIONS.public.v1,
         query: { include_components: withComponents },
       });
+    };
+
+    const installEntityStore = async (options?: InitEntityStoreRequestBodyInput) => {
+      if (isV2Enabled) {
+        return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.INSTALL, {
+          method: 'POST',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        });
+      }
+      return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
+        method: 'POST',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify(options ?? {}),
+      });
+    };
+
+    const startEntityStore = async (entityTypes?: EntityType[]) => {
+      if (isV2Enabled) {
+        return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.START, {
+          method: 'PUT',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        });
+      }
+      if (!entityTypes || entityTypes.length === 0) {
+        throw new Error('entityTypes required for v1 API');
+      }
+      const results = await Promise.all(
+        entityTypes.map((entityType) =>
+          http.fetch<StartEntityEngineResponse>(`/api/entity_store/engines/${entityType}/start`, {
+            method: 'POST',
+            version: API_VERSIONS.public.v1,
+            body: JSON.stringify({}),
+          })
+        )
+      );
+      return results;
+    };
+
+    const stopEntityStore = async (entityTypes?: EntityType[]) => {
+      if (isV2Enabled) {
+        return http.fetch<StopEntityEngineResponse>(ENTITY_STORE_ROUTES.STOP, {
+          method: 'PUT',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        });
+      }
+      if (!entityTypes || entityTypes.length === 0) {
+        throw new Error('entityTypes required for v1 API');
+      }
+      const results = await Promise.all(
+        entityTypes.map((entityType) =>
+          http.fetch<StopEntityEngineResponse>(`/api/entity_store/engines/${entityType}/stop`, {
+            method: 'POST',
+            version: API_VERSIONS.public.v1,
+            body: JSON.stringify({}),
+          })
+        )
+      );
+      return results;
+    };
+
+    const deleteEntityStore = async (entityTypes?: EntityType[], deleteData = true) => {
+      if (isV2Enabled) {
+        return http.fetch(ENTITY_STORE_ROUTES.UNINSTALL, {
+          method: 'POST',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        });
+      }
+      if (!entityTypes || entityTypes.length === 0) {
+        throw new Error('entityTypes required for v1 API');
+      }
+      const results = await Promise.all(
+        entityTypes.map((entityType) =>
+          http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
+            method: 'DELETE',
+            query: { data: deleteData },
+            version: API_VERSIONS.public.v1,
+          })
+        )
+      );
+      return results;
     };
 
     const initEntityEngine = async (entityType: EntityType) => {
@@ -53,33 +135,6 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
-    const stopEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<StopEntityEngineResponse>(`/api/entity_store/engines/${entityType}/stop`, {
-        method: 'POST',
-        version: API_VERSIONS.public.v1,
-        body: JSON.stringify({}),
-      });
-    };
-
-    const startEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<StartEntityEngineResponse>(
-        `/api/entity_store/engines/${entityType}/start`,
-        {
-          method: 'POST',
-          version: API_VERSIONS.public.v1,
-          body: JSON.stringify({}),
-        }
-      );
-    };
-
-    const deleteEntityEngine = async (entityType: EntityType, deleteData: boolean) => {
-      return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
-        method: 'DELETE',
-        query: { data: deleteData },
-        version: API_VERSIONS.public.v1,
-      });
-    };
-
     const listEntityEngines = async () => {
       return http.fetch<ListEntityEnginesResponse>(`/api/entity_store/engines`, {
         method: 'GET',
@@ -87,49 +142,14 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
-    const getEntityStoreStatusV2 = async (withComponents = false) => {
-      return http.fetch<{ status: StoreStatus; engines: unknown[] }>(ENTITY_STORE_ROUTES.STATUS, {
-        method: 'GET',
-        query: { ...ENTITY_STORE_V2_QUERY, include_components: withComponents },
-      });
-    };
-
-    const installEntityStoreV2 = async () => {
-      return http.fetch(ENTITY_STORE_ROUTES.INSTALL, {
-        method: 'POST',
-        query: ENTITY_STORE_V2_QUERY,
-        body: JSON.stringify({}),
-      });
-    };
-
-    const startEntityStoreV2 = async () => {
-      return http.fetch(ENTITY_STORE_ROUTES.START, {
-        method: 'PUT',
-        query: ENTITY_STORE_V2_QUERY,
-        body: JSON.stringify({}),
-      });
-    };
-
-    const stopEntityStoreV2 = async () => {
-      return http.fetch(ENTITY_STORE_ROUTES.STOP, {
-        method: 'PUT',
-        query: ENTITY_STORE_V2_QUERY,
-        body: JSON.stringify({}),
-      });
-    };
-
     return {
-      enableEntityStore,
       getEntityStoreStatus,
+      installEntityStore,
+      startEntityStore,
+      stopEntityStore,
+      deleteEntityStore,
       initEntityEngine,
-      startEntityEngine,
-      stopEntityEngine,
-      deleteEntityEngine,
       listEntityEngines,
-      getEntityStoreStatusV2,
-      installEntityStoreV2,
-      startEntityStoreV2,
-      stopEntityStoreV2,
     };
-  }, [http]);
+  }, [http, isV2Enabled]);
 };
