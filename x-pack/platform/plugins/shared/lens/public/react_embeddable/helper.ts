@@ -14,7 +14,6 @@ import {
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import fastIsEqual from 'fast-deep-equal';
-import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
   DatasourceStates,
   FormBasedPersistedState,
