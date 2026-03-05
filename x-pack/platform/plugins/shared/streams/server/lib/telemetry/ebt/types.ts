@@ -60,6 +60,9 @@ interface StreamsFeaturesIdentifiedProps {
   input_tokens_used: number;
   output_tokens_used: number;
   total_tokens_used: number;
+  deleted_features_count: number;
+  llm_ignored_count: number;
+  code_ignored_count: number;
   stream_name: string;
   stream_type: StreamType;
   state: 'success' | 'failure' | 'canceled';
