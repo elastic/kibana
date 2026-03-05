@@ -6,11 +6,19 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_PROMOTE_ATTACK_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
 
 export const dsl = {
   isAttack: (): estypes.QueryDslQueryContainer => ({
-    term: { 'kibana.alert.rule.rule_type_id': ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID },
+    terms: {
+      'kibana.alert.rule.rule_type_id': [
+        ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+        ATTACK_DISCOVERY_PROMOTE_ATTACK_RULE_TYPE_ID,
+      ],
+    },
   }),
   isNotAttack: (): estypes.QueryDslQueryContainer => ({
     bool: { must_not: dsl.isAttack() },

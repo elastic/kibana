@@ -178,6 +178,33 @@ export interface PublicAlertsClient<
   getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
 }
 
+export interface IAdHocAlertsClient<
+  AlertData extends RuleAlertData,
+  LegacyState extends AlertInstanceState,
+  LegacyContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  report(
+    alert: ReportedAlert<
+      AlertData,
+      LegacyState,
+      LegacyContext,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >
+  ): ReportedAlertData<AlertData>;
+  setAlertData(
+    alert: UpdateableAlert<
+      AlertData,
+      LegacyState,
+      LegacyContext,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >
+  ): void;
+  processAlerts(): void;
+  persistAlerts(): Promise<void>;
+}
+
 export interface ReportedAlert<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,

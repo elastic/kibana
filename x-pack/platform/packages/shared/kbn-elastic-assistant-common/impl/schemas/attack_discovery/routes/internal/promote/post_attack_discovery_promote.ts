@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export const PostAttackDiscoveryPromoteRequestBody = z.object({
   attack_ids: z.array(z.string()).min(1),

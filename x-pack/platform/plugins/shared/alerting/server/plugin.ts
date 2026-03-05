@@ -102,6 +102,7 @@ import {
   AlertsService,
   type PublicFrameworkAlertsService,
   type InitializationPromise,
+  type CreateAdHocAlertsClientParams,
   errorResult,
 } from './alerts_service';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
@@ -589,6 +590,12 @@ export class AlertingPlugin {
           }
 
           return Promise.resolve(errorResult(`Framework alerts service not available`));
+        },
+        createAdHocAlertsClient: (opts: CreateAdHocAlertsClientParams) => {
+          if (this.alertsService) {
+            return this.alertsService.createAdHocAlertsClient(opts);
+          }
+          return Promise.resolve(null);
         },
       },
       getDataStreamAdapter: () => this.dataStreamAdapter!,
