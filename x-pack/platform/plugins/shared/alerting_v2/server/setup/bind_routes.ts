@@ -18,6 +18,7 @@ import { CreateNotificationPolicyRoute } from '../routes/notification_policies/c
 import { GetNotificationPolicyRoute } from '../routes/notification_policies/get_notification_policy_route';
 import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
 import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
+import { ListNotificationPoliciesRoute } from '../routes/notification_policies/list_notification_policies_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -31,4 +32,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(GetNotificationPolicyRoute);
   bind(Route).toConstantValue(UpdateNotificationPolicyRoute);
   bind(Route).toConstantValue(DeleteNotificationPolicyRoute);
+  bind(Route).toConstantValue(ListNotificationPoliciesRoute);
 }

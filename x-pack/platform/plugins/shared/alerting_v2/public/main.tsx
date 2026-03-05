@@ -53,6 +53,8 @@ export const mountAlertingV2App = ({
   const { element, history } = params;
   const queryClient = new QueryClient();
 
+  const queryClient = new QueryClient();
+
   ReactDOM.render(
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>

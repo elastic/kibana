@@ -14,3 +14,14 @@ export const ruleKeys = {
   update: () => [...ruleKeys.all, 'update'] as const,
   delete: () => [...ruleKeys.all, 'delete'] as const,
 };
+
+export const notificationPolicyKeys = {
+  all: ['notificationPolicy'] as const,
+  create: () => [...notificationPolicyKeys.all, 'create'] as const,
+  update: () => [...notificationPolicyKeys.all, 'update'] as const,
+  delete: () => [...notificationPolicyKeys.all, 'delete'] as const,
+  detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
+  lists: () => [...notificationPolicyKeys.all, 'list'] as const,
+  list: (filters: { page: number; perPage: number }) =>
+    [...notificationPolicyKeys.lists(), filters] as const,
+};
