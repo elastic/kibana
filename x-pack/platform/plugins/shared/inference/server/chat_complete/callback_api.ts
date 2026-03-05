@@ -45,7 +45,7 @@ import { addAnonymizationInstruction } from './anonymization/add_anonymization_i
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
-import { anonymizeMessages } from './anonymization/anonymize_messages';
+import { prepareAnonymization } from './prepare_anonymization';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
