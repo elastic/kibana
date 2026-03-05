@@ -333,6 +333,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                 />
               </h3>
             }
+            titleSize="xs"
           />
         ) : (
           <NoDataFoundWarning />

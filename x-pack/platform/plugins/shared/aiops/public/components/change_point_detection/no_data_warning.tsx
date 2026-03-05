@@ -24,6 +24,7 @@ export const NoDataFoundWarning = (props: { onRenderComplete?: () => void }) => 
           />
         </h3>
       }
+      titleSize="xs"
       body={
         <p>
           <FormattedMessage
