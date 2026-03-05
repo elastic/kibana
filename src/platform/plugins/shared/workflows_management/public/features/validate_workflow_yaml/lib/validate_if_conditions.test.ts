@@ -208,8 +208,8 @@ steps:
     const results = validateIfConditions(workflowLookup, lineCounter);
 
     expect(results).toHaveLength(2);
-    expect(results.find((r) => r.message.includes('=='))).toBeTruthy();
-    expect(results.find((r) => r.message.includes('!='))).toBeTruthy();
+    expect(results.find((r) => r.message?.includes('=='))).toBeTruthy();
+    expect(results.find((r) => r.message?.includes('!='))).toBeTruthy();
   });
 
   it('should skip template conditions but report non-template errors in same workflow', () => {
