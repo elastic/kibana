@@ -51,6 +51,16 @@ async function hmacSha256(key: BufferSource, message: string): Promise<ArrayBuff
   return await crypto.subtle.sign('HMAC', cryptoKey, messageData);
 }
 
+/**
+ * Calculates the AWS Signature V4 signature for the given input.
+ * TODO: Extract this to a shared utility function, when we introduce more AWS connectors.
+ * @param secretAccessKey - The AWS Secret Access Key.
+ * @param dateStamp - The date stamp in the format YYYYMMDD.
+ * @param region - The AWS region.
+ * @param service - The AWS service.
+ * @param stringToSign - The string to sign.
+ * @returns The AWS Signature V4 signature.
+ */
 async function calculateSignature(
   secretAccessKey: string,
   dateStamp: string,
