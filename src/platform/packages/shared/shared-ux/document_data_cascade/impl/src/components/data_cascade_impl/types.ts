@@ -61,11 +61,6 @@ export interface CascadeRowCellNestedVirtualizationAnchorProps<G extends GroupNo
   extends Pick<CascadeVirtualizerProps<G>, 'getScrollElement'> {
   getScrollOffset: () => number;
   getScrollMargin: () => number;
-  /**
-   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
-   * This is only required if the nested virtualization implementation used here measures its rows.
-   */
-  preventSizeChangePropagation: () => () => void;
 }
 
 export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode>
@@ -238,10 +233,6 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
   extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
-   * The data to be displayed in the cascade. It should be an array of group nodes.
-   */
-  data: G[];
-  /**
    * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
    */
   onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
@@ -258,9 +249,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   allowMultipleRowToggle?: boolean;
   /**
-   * Initial vertical scroll position in pixels. When set, the list and scroll container start at this offset.
+   * Index of the initial vertical item visible in within the scroll container. When set the list more or less starts at this item.
    */
-  initialScrollOffset?: number;
+  initialAnchorItemIndex?: number;
   /**
    * Initial scroll rectangle dimensions. When set, the list and scroll container start at this size.
    */

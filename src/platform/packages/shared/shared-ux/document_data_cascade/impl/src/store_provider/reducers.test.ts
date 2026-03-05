@@ -34,29 +34,16 @@ describe('createStoreReducers', () => {
   });
 
   it('should return the expected correct reducers', () => {
-    expect(Object.keys(reducers)).toHaveLength(7);
     expect(reducers).toMatchInlineSnapshot(`
       Object {
         "resetActiveCascadeGroups": [Function],
         "setActiveCascadeGroups": [Function],
         "setExpandedRows": [Function],
-        "setInitialState": [Function],
         "setRowGroupLeafData": [Function],
         "setRowGroupNodeData": [Function],
         "setSelectedRows": [Function],
       }
     `);
-  });
-
-  describe('setInitialState', () => {
-    it('should set the initial state correctly', () => {
-      const groupNodes = Array.from<GroupNode>(
-        new Array(3).fill(null).map((_, i) => ({ id: `group-${i}` }))
-      );
-
-      const newState = reducers.setInitialState(initialState, groupNodes);
-      expect(newState.groupNodes).toStrictEqual(groupNodes);
-    });
   });
 
   describe('setExpandedRows', () => {

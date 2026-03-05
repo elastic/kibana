@@ -51,6 +51,7 @@ import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
 import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
+import type { CascadedDocumentsDataGridUiState } from '../../components/layout/cascaded_documents';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -407,6 +408,27 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.docViewer = action.payload.docViewerUiState;
+      }),
+
+    setDataCascadeUiState: (
+      state,
+      action: TabAction<{ dataCascadeUiState: TabState['uiState']['dataCascade'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.dataCascade = action.payload.dataCascadeUiState;
+      }),
+
+    setCascadedDocumentsDataGridUiState: (
+      state,
+      action: TabAction<{
+        nodeId: string;
+        dataGridUiState: Partial<CascadedDocumentsDataGridUiState>;
+      }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.cascadedDocumentsDataGridMap ??= {};
+        tab.uiState.cascadedDocumentsDataGridMap[action.payload.nodeId] =
+          action.payload.dataGridUiState;
       }),
   },
   extraReducers: (builder) => {

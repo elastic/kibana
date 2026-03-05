@@ -1035,6 +1035,55 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async getCascadeLayoutRowIds() {
+    const rootRows = await this.find.allByCssSelector('[data-row-type="root"]');
+    return await Promise.all(rootRows.map(async (row) => (await row.getAttribute('id')) ?? ''));
+  }
+
+  public async isCascadeLayoutRowExpanded(rowId: string) {
+    const row = await this.find.byCssSelector(`[id="${rowId}"]`);
+    return ((await row.getAttribute('aria-expanded')) ?? 'false') === 'true';
+  }
+
+  public async toggleCascadeLayoutRow(rowId: string) {
+    const isTargetRowExpanded = await this.isCascadeLayoutRowExpanded(rowId);
+    const toggleButtons = await this.testSubjects.findAll(`toggle-row-${rowId}-button`);
+    const targetButton = toggleButtons[0];
+
+    if (!targetButton) {
+      throw new Error(`Toggle button for row ${rowId} not found`);
+    }
+
+    await targetButton.click();
+
+    if (isTargetRowExpanded) {
+      await this.retry.waitFor('row to be collapsed', async () => {
+        return !(await this.isCascadeLayoutRowExpanded(rowId));
+      });
+    } else {
+      await this.retry.waitFor('row to be expanded', async () => {
+        return await this.isCascadeLayoutRowExpanded(rowId);
+      });
+      await this.waitForDocTableLoadingComplete();
+    }
+  }
+
+  public async getCascadeLayoutScrollTop(): Promise<number> {
+    const el = await this.testSubjects.find('data-cascade-scroll-container');
+    const scrollTop = await this.browser.execute('return arguments[0].scrollTop;', el._webElement);
+
+    if (typeof scrollTop !== 'number') {
+      throw new Error(`Expected cascade scrollTop to be a number but got ${typeof scrollTop}`);
+    }
+
+    return scrollTop;
+  }
+
+  public async scrollCascadeLayoutBy(delta: number): Promise<void> {
+    const el = await this.testSubjects.find('data-cascade-scroll-container');
+    await this.browser.execute('arguments[0].scrollTop += arguments[1];', el._webElement, delta);
+  }
+
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {

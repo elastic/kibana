@@ -15,6 +15,9 @@ export { useGetGroupBySelectorRenderer } from './blocks/use_table_header_compone
 export type { ESQLDataCascadeProps } from './cascaded_document_layout';
 export {
   type CascadedDocumentsContext,
+  type DataCascadeUiState,
+  type CascadedDocumentsDataGridUiState,
+  type CascadedDocumentsDataGridUiStateMap,
   CascadedDocumentsProvider,
   isCascadedDocumentsVisible,
   useCascadedDocumentsContext,

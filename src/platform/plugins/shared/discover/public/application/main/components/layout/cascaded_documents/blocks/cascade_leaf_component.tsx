@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
@@ -17,12 +16,19 @@ import {
   DataGridDensity,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
+import {
+  type DataCascadeRowCellProps,
+  useCascadeVirtualizer,
+  type CascadeVirtualizerProps,
+} from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import debounce from 'lodash/debounce';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
+import type { CascadedDocumentsDataGridUiState } from '../cascaded_documents_provider';
+import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
 interface ESQLDataCascadeLeafCellProps
   extends Pick<
@@ -37,7 +43,7 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset' | 'preventSizeChangePropagation'
+      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset'
     > {
   cellData: DataTableRecord[];
   cellId: string;
@@ -45,13 +51,16 @@ interface ESQLDataCascadeLeafCellProps
 
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
-    Pick<
-      ESQLDataCascadeLeafCellProps,
-      'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
-    > {
+    Pick<ESQLDataCascadeLeafCellProps, 'getScrollElement' | 'getScrollMargin'> {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   initialOffset: () => number;
+  initialVirtualizationMetadata:
+    | CascadedDocumentsDataGridUiState['virtualizationMetadata']
+    | undefined;
+  propagateVirtualizationMetadata: (
+    virtualizationMetadata: NonNullable<CascadedDocumentsDataGridUiState['virtualizationMetadata']>
+  ) => void;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -61,17 +70,17 @@ const EMPTY_SORT: SortOrder[] = [];
  * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
  *
  * Key optimizations:
- * - Fixed row heights prevent measurement-triggered recalculations
+ * - Disable propagation of size changes to the parent virtualizer
  * - Stable scroll margin captured once to prevent position jumps
- * - Total size calculated from fixed heights (count * ROW_HEIGHT) for stability
  */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
   initialOffset,
+  initialVirtualizationMetadata,
   data,
   getScrollElement,
   getScrollMargin,
-  preventSizeChangePropagation,
+  propagateVirtualizationMetadata,
   Cell,
   visibleColumns,
   visibleRowData,
@@ -82,6 +91,9 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
+
+  const virtualizerRef = useRef<ReturnType<typeof useCascadeVirtualizer> | null>(null);
+  const initialVirtualizationMetadataRef = useRef(initialVirtualizationMetadata);
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -94,9 +106,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   // create scroll element reference for custom nested virtualized grid
   const virtualizerScrollElementRef = useRef<Element | null>(getScrollElement());
 
-  const scrollElementGetter = useCallback(() => virtualizerScrollElementRef.current, []);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const defaultScrollElement = getScrollElement();
 
     if (
@@ -115,32 +125,50 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     }
   }, [getScrollElement, isFullScreenMode]);
 
-  const virtualizer = useVirtualizer({
-    count: visibleRows.length,
-    estimateSize: () => 50,
+  const scrollElementGetter = useCallback(() => virtualizerScrollElementRef.current, []);
+
+  const onVirtualizerChange = useMemo(
+    () =>
+      debounce<NonNullable<CascadeVirtualizerProps<DataTableRecord>['onStateChange']>>(
+        (instance, didRestoreScrollPositionRef) => {
+          if (!didRestoreScrollPositionRef && initialVirtualizationMetadataRef.current) return;
+
+          const index = instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null;
+          if (index != null) {
+            propagateVirtualizationMetadata({
+              initialDisplayedItemIndex: index,
+              scrollRect: instance.scrollRect!,
+            });
+          }
+        },
+        50
+      ),
+    [propagateVirtualizationMetadata]
+  );
+
+  virtualizerRef.current = useCascadeVirtualizer<DataTableRecord>({
+    // @ts-expect-error -- it's fine to do this as long as we're not using the sticky group header functionality, see issue https://github.com/elastic/kibana/issues/255075
+    rows: visibleRows,
+    enableStickyGroupHeader: false,
+    estimatedRowHeight: 60,
     overscan: 10, // use a larger overscan since we are expecting large number of rows to be rendered
     initialOffset,
     scrollMargin: getScrollMargin(),
     getScrollElement: scrollElementGetter,
+    onStateChange: onVirtualizerChange,
+    initialRect: initialVirtualizationMetadataRef.current?.scrollRect,
+    initialAnchorItemIndex:
+      initialVirtualizationMetadataRef.current?.initialDisplayedItemIndex ?? 0,
   });
 
-  /**
-   * Register/unregister this nested virtualizer with the parent based on fullscreen mode.
-   * When registered (not fullscreen), the parent won't adjust scroll position when this row resizes.
-   * When unregistered (fullscreen), scroll adjustments don't matter since we have our own scroll container.
-   */
-  useEffect(() => {
-    let unregister: (() => void) | null = null;
+  useEffect(
+    () => () => {
+      onVirtualizerChange.cancel();
+    },
+    [onVirtualizerChange]
+  );
 
-    if (virtualizer.scrollElement?.isSameNode(scrollElementGetter())) {
-      // Only register when using the parent's scroll element (not in fullscreen mode)
-      unregister = preventSizeChangePropagation();
-    }
-
-    return () => unregister?.();
-  }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
-
-  const items = virtualizer.getVirtualItems();
+  const items = virtualizerRef.current?.getVirtualItems();
 
   // Calculate transform using current scroll margin (now reactive from parent)
   const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
@@ -156,7 +184,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
       >
-        <div style={{ height: virtualizer.getTotalSize() }}>
+        <div style={{ height: virtualizerRef.current?.getTotalSize() }}>
           <div
             css={customCascadeGridBodyStyle.virtualizerInner}
             style={{ transform: `translateY(${translateY}px)` }}
@@ -165,7 +193,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
               <div
                 key={virtualRow.key}
                 data-index={virtualRow.index}
-                ref={virtualizer.measureElement}
+                ref={virtualizerRef.current?.measureElement}
                 className="euiDataGridRow"
                 css={customCascadeGridBodyStyle.displayFlex}
               >
@@ -196,18 +224,51 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showTimeCol,
     dataView,
     showKeyboardShortcuts,
-    renderDocumentView,
     externalCustomRenderers,
+    renderDocumentView,
     getScrollElement,
     getScrollMargin,
     getScrollOffset,
-    preventSizeChangePropagation,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
+    );
+
+    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
+
+    const initialGridState = useMemo(() => {
+      return getDataGridUiStateMap()?.[cellId];
+    }, [cellId, getDataGridUiStateMap]);
+
+    const initialVirtualizationMetadata = useRef<
+      CascadedDocumentsDataGridUiState['virtualizationMetadata']
+    >(
+      initialGridState?.virtualizationMetadata ?? {
+        initialDisplayedItemIndex: 0,
+        scrollRect: { width: 0, height: 0 },
+      }
+    );
+
+    const setInitialInViewVirtualItemIndex = useCallback(
+      (meta: NonNullable<CascadedDocumentsDataGridUiState['virtualizationMetadata']>) => {
+        initialVirtualizationMetadata.current = meta;
+      },
+      []
+    );
+
+    const onInitialStateChange = useCallback<
+      NonNullable<UnifiedDataTableProps['onInitialStateChange']>
+    >(
+      (newInitialGridState) => {
+        setDataGridUiState(cellId, {
+          ...newInitialGridState,
+          virtualizationMetadata: initialVirtualizationMetadata.current,
+        });
+      },
+      [cellId, setDataGridUiState]
     );
 
     // TODO: Implement column selection logic,
@@ -270,19 +331,21 @@ export const ESQLDataCascadeLeafCell = React.memo(
           getScrollMargin={getScrollMargin}
           setCustomGridBodyProps={setCustomGridBodyProps}
           getScrollElement={getScrollElement}
-          preventSizeChangePropagation={preventSizeChangePropagation}
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
+          propagateVirtualizationMetadata={setInitialInViewVirtualItemIndex}
+          initialVirtualizationMetadata={initialGridState?.virtualizationMetadata}
         />
       ),
       [
-        cellData,
-        cellId,
-        preventSizeChangePropagation,
-        getScrollElement,
-        getScrollMargin,
-        getScrollOffset,
         isCellInFullScreenMode,
+        cellId,
+        cellData,
+        getScrollMargin,
+        getScrollElement,
+        getScrollOffset,
+        setInitialInViewVirtualItemIndex,
+        initialGridState?.virtualizationMetadata,
       ]
     );
 
@@ -298,6 +361,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           isSortEnabled={false}
           enableInTableSearch
           ariaLabelledBy="data-cascade-leaf-cell"
+          // TODO: I think this will pollute local storage
           consumer={`discover_esql_cascade_row_leaf_${cellId}`}
           rows={cellData}
           loadingState={DataLoadingState.loaded}
@@ -314,6 +378,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
           externalCustomRenderers={externalCustomRenderers}
           paginationMode="infinite"
           sampleSizeState={cellData.length}
+          initialState={initialGridState}
+          onInitialStateChange={onInitialStateChange}
         />
       </EuiPanel>
     );

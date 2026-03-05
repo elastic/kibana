@@ -23,7 +23,9 @@ describe('useExposePublicApi', () => {
       () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
       {
         wrapper: ({ children }) => (
-          <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+          <DataCascadeProvider data={[]} cascadeGroups={[]}>
+            {children}
+          </DataCascadeProvider>
         ),
       }
     );
@@ -43,7 +45,9 @@ describe('useExposePublicApi', () => {
         () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
         {
           wrapper: ({ children }) => (
-            <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+            <DataCascadeProvider data={[]} cascadeGroups={[]}>
+              {children}
+            </DataCascadeProvider>
           ),
         }
       );
@@ -63,6 +67,7 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
+        scrollAnchorItemIndex: null,
       });
     });
 
@@ -75,7 +80,9 @@ describe('useExposePublicApi', () => {
         () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
         {
           wrapper: ({ children }) => (
-            <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+            <DataCascadeProvider data={[]} cascadeGroups={[]}>
+              {children}
+            </DataCascadeProvider>
           ),
         }
       );
@@ -93,6 +100,7 @@ describe('useExposePublicApi', () => {
         range: { startIndex: 0, endIndex: 10 },
         scrollOffset: 100,
         isScrolling: false,
+        getVirtualItemForOffset: jest.fn(() => ({ index: 0 })),
         // it's fine to cast to unknown
         // because we only need a minimal implementation of the virtualizer instance for the test
       } as unknown as UseVirtualizerReturnType;
@@ -112,6 +120,7 @@ describe('useExposePublicApi', () => {
       expect(updatedUISnapshot).toHaveProperty('scrollOffset', virtualizerInstance.scrollOffset);
       expect(updatedUISnapshot).toHaveProperty('range', virtualizerInstance.range);
       expect(updatedUISnapshot).toHaveProperty('isScrolling', virtualizerInstance.isScrolling);
+      expect(updatedUISnapshot).toHaveProperty('scrollAnchorItemIndex', 0);
 
       // these properties did not change because we did not provide updates for them
       expect(updatedUISnapshot).toHaveProperty('activeStickyIndex', null);
@@ -133,7 +142,9 @@ describe('useExposePublicApi', () => {
         () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
         {
           wrapper: ({ children }) => (
-            <DataCascadeProvider cascadeGroups={[]}>{children}</DataCascadeProvider>
+            <DataCascadeProvider data={[]} cascadeGroups={[]}>
+              {children}
+            </DataCascadeProvider>
           ),
         }
       );
@@ -161,6 +172,7 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
+        scrollAnchorItemIndex: null,
       });
 
       act(() => {
@@ -170,6 +182,7 @@ describe('useExposePublicApi', () => {
           isScrolling: false,
           scrollRect: { width: 0, height: 0 },
           getTotalSize: () => 0,
+          getVirtualItemForOffset: jest.fn(() => ({ index: 0 })),
         } as unknown as UseVirtualizerReturnType);
       });
 
@@ -184,6 +197,7 @@ describe('useExposePublicApi', () => {
           expanded: {},
           rowSelection: {},
           scrollRect: { width: 0, height: 0 },
+          scrollAnchorItemIndex: 0,
         });
       });
     });

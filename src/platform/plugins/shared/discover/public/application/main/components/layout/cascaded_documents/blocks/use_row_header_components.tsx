@@ -371,6 +371,10 @@ const textSlotStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noValue', {
+  defaultMessage: '(blank)',
+});
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
@@ -400,15 +404,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
       return (
         <EuiText size="s">
-          <EuiTextTruncate
-            truncation="end"
-            text={
-              rowData.groupValue ||
-              i18n.translate('discover.dataCascade.row.action.noValue', {
-                defaultMessage: '(blank)',
-              })
-            }
-          >
+          <EuiTextTruncate truncation="end" text={rowData.groupValue || NO_VALUE_PLACEHOLDER}>
             {(truncatedText) => {
               return <h4 css={rowHeaderTitleStyles.textInner}>{truncatedText}</h4>;
             }}
@@ -433,11 +429,13 @@ export function useEsqlDataCascadeRowHeaderComponents(
             return null;
           }
 
+          const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <FormattedMessage
                 id="discover.dataCascade.grouping.function"
-                defaultMessage="<bold>{selectedColumn}:</bold> <badge></badge>"
+                defaultMessage="<bold>{selectedColumn}:</bold> {badge}"
                 values={{
                   selectedColumn,
                   bold: (chunks) => (
@@ -445,30 +443,19 @@ export function useEsqlDataCascadeRowHeaderComponents(
                       <span css={rowHeaderTitleStyles.textInner}>{chunks}</span>
                     </EuiFlexItem>
                   ),
-                  badge: () => {
-                    const aggregatedValue = rowData.aggregatedValues[selectedColumn];
-
-                    return (
-                      <EuiFlexItem grow={false}>
-                        {typeof aggregatedValue === 'number' ? (
-                          <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
-                        ) : (
-                          <EuiBadge color="hollow" css={textSlotStyles}>
-                            {aggregatedValue
-                              .map((value) => {
-                                return (
-                                  value ||
-                                  i18n.translate('discover.dataCascade.row.action.noValue', {
-                                    defaultMessage: '(blank)',
-                                  })
-                                );
-                              })
-                              .join(', ')}
-                          </EuiBadge>
-                        )}
-                      </EuiFlexItem>
-                    );
-                  },
+                  badge: (
+                    <EuiFlexItem grow={false}>
+                      {aggregatedValue == null ? (
+                        NO_VALUE_PLACEHOLDER
+                      ) : typeof aggregatedValue === 'number' ? (
+                        <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
+                      ) : (
+                        <EuiBadge color="hollow" css={textSlotStyles}>
+                          {aggregatedValue.map((value) => value || NO_VALUE_PLACEHOLDER).join(', ')}
+                        </EuiBadge>
+                      )}
+                    </EuiFlexItem>
+                  ),
                 }}
               />
             </EuiFlexGroup>

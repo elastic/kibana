@@ -53,11 +53,6 @@ export interface IStoreState<G extends GroupNode, L extends LeafNode> {
 
 export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
   return {
-    setInitialState(state: IStoreState<G, L>, payload: G[]) {
-      return produce(state, (draft) => {
-        draft.groupNodes = [...castDraft(payload)];
-      });
-    },
     setActiveCascadeGroups(state: IStoreState<G, L>, payload: ColumnGroups) {
       return produce(state, (draft) => {
         // verify the payload columns exist in the available groupByColumns

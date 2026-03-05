@@ -31,7 +31,11 @@ const renderComponent = ({
     'cascadeGroups' | 'initialGroupColumn'
   >) => {
   return render(
-    <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
+    <DataCascadeProvider
+      data={[]}
+      cascadeGroups={cascadeGroups}
+      initialGroupColumn={initialGroupColumn}
+    >
       {/* @ts-expect-error -- we don't need to provide all the props */}
       <CascadeRowCellPrimitive
         size="m"
@@ -169,70 +173,9 @@ describe('CascadeRowCellPrimitive', () => {
             getScrollElement: expect.any(Function),
             getScrollOffset: expect.any(Function),
             getScrollMargin: expect.any(Function),
-            preventSizeChangePropagation: expect.any(Function),
           })
         );
       });
-    });
-
-    it('should provide a working preventSizeChangePropagation function that calls the virtualizer method', async () => {
-      const cascadeGroups = ['group1', 'group2'];
-      let capturedPreventSizeChangePropagation: (() => () => void) | null = null;
-      const mockCleanup = jest.fn();
-      const mockPreventRowSizeChangePropagation = jest.fn(() => mockCleanup);
-      const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
-
-      const customMockVirtualizerGetter = jest.fn(
-        () =>
-          ({
-            getVirtualItems: jest.fn(() => []),
-            getTotalSize: jest.fn(() => 0),
-            isScrolling: false,
-            measureElement: jest.fn(),
-            scrollOffset: 0,
-            scrollElement: null,
-            activeStickyIndex: null,
-            virtualizedRowComputedTranslateValue: new Map(),
-            preventRowSizeChangePropagation: mockPreventRowSizeChangePropagation,
-          } as unknown as CascadeVirtualizerReturnValue)
-      );
-
-      const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
-        id: '1',
-        randomField: 'randomValue',
-      });
-
-      const rowIndex = 5;
-
-      renderComponent({
-        cascadeGroups,
-        initialGroupColumn: [cascadeGroups[0]],
-        row: {
-          id: '1',
-          index: rowIndex,
-          depth: 0,
-          original: rowData,
-          getToggleSelectedHandler: jest.fn(),
-          getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
-        children: (props) => {
-          capturedPreventSizeChangePropagation = props.preventSizeChangePropagation;
-          return <div>Test Child</div>;
-        },
-        onCascadeLeafNodeExpanded: mockOnCascadeLeafNodeExpanded,
-        getVirtualizer: customMockVirtualizerGetter,
-      });
-
-      await waitFor(() => {
-        expect(capturedPreventSizeChangePropagation).not.toBeNull();
-      });
-
-      // Call the function and verify it delegates to the virtualizer
-      const cleanup = capturedPreventSizeChangePropagation!();
-      expect(mockPreventRowSizeChangePropagation).toHaveBeenCalledWith(rowIndex);
-
-      // Verify the cleanup function is returned
-      expect(cleanup).toBe(mockCleanup);
     });
 
     it('should provide getScrollElement that returns the virtualizer scrollElement', async () => {

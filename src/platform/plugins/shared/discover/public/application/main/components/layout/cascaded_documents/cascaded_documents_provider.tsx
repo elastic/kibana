@@ -11,6 +11,9 @@ import { isOfAggregateQueryType, type AggregateQuery, type TimeRange } from '@kb
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataCascadeUISnapshot } from '@kbn/shared-ux-document-data-cascade/src/components';
+import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type {
   CascadedDocumentsState,
   DiscoverAppState,
@@ -18,6 +21,21 @@ import type {
 } from '../../../state_management/redux';
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
+import type { ESQLDataGroupNode } from './blocks';
+
+export type DataCascadeUiState = DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>;
+
+export type CascadedDocumentsDataGridUiState = UnifiedDataTableRestorableState & {
+  virtualizationMetadata: {
+    initialDisplayedItemIndex: number;
+    scrollRect: { width: number; height: number };
+  };
+};
+
+export type CascadedDocumentsDataGridUiStateMap = Record<
+  string,
+  Partial<CascadedDocumentsDataGridUiState>
+>;
 
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
@@ -26,6 +44,10 @@ export interface CascadedDocumentsContext
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
   viewModeToggle: ReactElement | undefined;
+  getDataCascadeUiState: () => DataCascadeUiState | undefined;
+  getDataGridUiStateMap: () => CascadedDocumentsDataGridUiStateMap | undefined;
+  setDataCascadeUiState: (uiState: DataCascadeUiState | undefined) => void;
+  setDataGridUiState: (nodeId: string, uiState: Partial<CascadedDocumentsDataGridUiState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;

@@ -34,6 +34,10 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
+import type {
+  CascadedDocumentsDataGridUiStateMap,
+  DataCascadeUiState,
+} from '../../components/layout/cascaded_documents';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -177,6 +181,8 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: DataCascadeUiState;
+    cascadedDocumentsDataGridMap?: CascadedDocumentsDataGridUiStateMap;
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;

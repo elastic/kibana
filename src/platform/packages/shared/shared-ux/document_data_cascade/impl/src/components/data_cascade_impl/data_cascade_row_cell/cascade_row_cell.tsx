@@ -115,18 +115,9 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     rowIndex: row.index,
   });
 
-  // Keep a reference to the virtualizer for cleanup and scroll-to operations
   const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
 
   const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
-
-  /**
-   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
-   * Returns an unregister function.
-   */
-  const preventSizeChangePropagation = useCallback(() => {
-    return rootVirtualizer.preventRowSizeChangePropagation(row.index);
-  }, [rootVirtualizer, row.index]);
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {
@@ -137,7 +128,6 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       getScrollElement,
       getScrollOffset,
       getScrollMargin,
-      preventSizeChangePropagation,
     });
   }, [
     children,
@@ -147,7 +137,6 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     getScrollElement,
     getScrollOffset,
     getScrollMargin,
-    preventSizeChangePropagation,
   ]);
 
   return (
