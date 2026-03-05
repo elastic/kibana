@@ -19,21 +19,18 @@ import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import type { AgentBuilderPluginSetupContract } from '../types';
 import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
-interface RegisterWorkflowAiIntegrationParams {
+interface RegisterWorkflowAgentBuilderIntegrationParams {
   agentBuilder: AgentBuilderPluginSetupContract;
   logger: Logger;
   api: WorkflowsManagementApi;
 }
 
-/**
- * Registers all AI integration components for the Workflows plugin.
- */
-export function registerWorkflowAiIntegration({
+export function registerWorkflowAgentBuilderIntegration({
   agentBuilder,
   logger,
   api,
-}: RegisterWorkflowAiIntegrationParams): void {
-  logger.debug('Registering workflow AI integration components');
+}: RegisterWorkflowAgentBuilderIntegrationParams): void {
+  logger.debug('Registering workflow Agent Builder integration components');
 
   registerValidateWorkflowTool(agentBuilder, api);
   registerGetStepDefinitionsTool(agentBuilder);
@@ -45,5 +42,5 @@ export function registerWorkflowAiIntegration({
 
   agentBuilder.skills.register(workflowAuthoringSkill);
 
-  logger.debug('Workflow AI integration components registered');
+  logger.debug('Workflow Agent Builder integration components registered');
 }

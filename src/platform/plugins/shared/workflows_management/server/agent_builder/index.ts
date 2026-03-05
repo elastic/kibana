@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerWorkflowAiIntegration } from './register_workflow_ai_integration';
+export { registerWorkflowAgentBuilderIntegration } from './register_workflow_agent_builder_integration';

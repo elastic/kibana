@@ -18,7 +18,7 @@ import type {
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import { registerWorkflowAiIntegration } from './agent_builder/register_workflow_ai_integration';
+import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -166,18 +166,23 @@ export class WorkflowsPlugin
 
     const api = this.api;
 
+    core.plugins
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .then(({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          this.logger.debug(
+            'Workflows Management: Agent Builder found, registering AI integration'
+          );
+          registerWorkflowAgentBuilderIntegration({
+            agentBuilder: agentBuilder.contract,
+            logger: this.logger,
+            api,
+          });
+        }
+      });
+
     return {
       management: api,
-      registerAgentBuilder: (agentBuilder: AgentBuilderPluginSetupContract) => {
-        this.logger.debug(
-          'Workflows Management: Agent Builder registered via registerAgentBuilder'
-        );
-        registerWorkflowAiIntegration({
-          agentBuilder,
-          logger: this.logger,
-          api,
-        });
-      },
     };
   }
 

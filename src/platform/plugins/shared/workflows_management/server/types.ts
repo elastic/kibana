@@ -42,13 +42,6 @@ import type { WorkflowsManagementApi } from './workflows_management/workflows_ma
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
-  /**
-   * Register the Agent Builder plugin with Workflows Management.
-   * Called by the agentBuilder plugin during its setup phase so that
-   * workflowsManagement can register agents, tools, and attachments
-   * without creating a circular dependency.
-   */
-  registerAgentBuilder: (agentBuilder: AgentBuilderPluginSetupContract) => void;
 }
 
 export type WorkflowsServerPluginStart = Record<string, never>;
