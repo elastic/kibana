@@ -14,6 +14,8 @@ import {
   uniq,
   map,
   mapKeys,
+  has,
+  unset,
   difference,
   intersection,
   flatMap,
@@ -25,12 +27,32 @@ import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
-// @ts-expect-error update types
-export const convertPackQueriesToSO = (queries) =>
+export interface PackQueryInput {
+  name?: string;
+  query: string;
+  interval: number;
+  platform?: string;
+  version?: string;
+  snapshot?: boolean;
+  removed?: boolean;
+  timeout?: number;
+  schedule_id?: string;
+  start_date?: string;
+  ecs_mapping?: Record<string, unknown>;
+}
+
+export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
+  id: string;
+  name: string;
+}
+
+export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>): SOPackQuery[] =>
   reduce(
     queries,
-    (acc, value, key: string) => {
-      const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
+    (acc: SOPackQuery[], value: PackQueryInput, key: string) => {
+      const ecsMapping = value.ecs_mapping
+        ? convertECSMappingToArray(value.ecs_mapping as Record<string, object>)
+        : undefined;
       acc.push({
         id: key,
         ...pick(value, [
@@ -42,32 +64,26 @@ export const convertPackQueriesToSO = (queries) =>
           'snapshot',
           'removed',
           'timeout',
+          'schedule_id',
+          'start_date',
         ]),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
-      });
+      } as SOPackQuery);
 
       return acc;
     },
-    [] as Array<{
-      id: string;
-      name: string;
-      query: string;
-      interval: number;
-      timeout?: number;
-      snapshot?: boolean;
-      removed?: boolean;
-      ecs_mapping?: Record<string, unknown>;
-    }>
+    []
   );
 
-export const convertSOQueriesToPack = (
-  // @ts-expect-error update types
-  queries
-) =>
+export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, PackQueryInput>) =>
   reduce(
-    queries,
-    (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
-      const index = queryId ? queryId : key;
+    queries as Record<string, SOPackQuery>,
+    (
+      acc: Record<string, PackQueryInput>,
+      { id: queryId, ecs_mapping, query, platform, ...rest }: SOPackQuery,
+      key: string
+    ) => {
+      const index = queryId ?? key;
       acc[index] = {
         ...rest,
         query,
@@ -81,16 +97,21 @@ export const convertSOQueriesToPack = (
 
       return acc;
     },
-    {} as Record<string, any>
+    {} as Record<string, PackQueryInput>
   );
 
 export const convertSOQueriesToPackConfig = (
-  // @ts-expect-error update types
-  queries
+  queries: SOPackQuery[] | Record<string, PackQueryInput>,
+  spaceId?: string,
+  packId?: string
 ) =>
   reduce(
-    queries,
-    (acc, { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }, key) => {
+    queries as SOPackQuery[],
+    (
+      acc: Record<string, Record<string, unknown>>,
+      { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }: SOPackQuery,
+      key: number
+    ) => {
       const resultType = snapshot === false ? { removed, snapshot } : {};
       const index = queryId ? queryId : key;
       acc[index] = {
@@ -103,13 +124,33 @@ export const convertSOQueriesToPackConfig = (
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...resultType,
+        ...(spaceId ? { space_id: spaceId } : {}),
+        ...(packId ? { pack_id: packId } : {}),
       };
 
       return acc;
     },
-    {} as Record<string, any>
+    {} as Record<string, Record<string, unknown>>
   );
 
+export const policyHasPack = (
+  packagePolicy: PackagePolicy,
+  packName: string,
+  spaceId: string
+): boolean =>
+  has(packagePolicy, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`) ||
+  has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`);
+
+export const removePackFromPolicy = (
+  draft: PackagePolicy,
+  packName: string,
+  spaceId: string
+): void => {
+  unset(draft, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`);
+  unset(draft, `inputs[0].config.osquery.value.packs.${packName}`);
+};
+
+export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
 export const getInitialPolicies = (
   packagePolicies: PackagePolicy[] | never[],
   policyIds: string[] = [],

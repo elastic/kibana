@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { convertSOQueriesToPack, convertSOQueriesToPackConfig } from './utils';
+import {
+  convertSOQueriesToPack,
+  convertSOQueriesToPackConfig,
+  convertPackQueriesToSO,
+} from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
   [packName]: {
@@ -98,6 +102,77 @@ describe('Pack utils', () => {
         getTestQueries({ snapshot: false, removed: false })
       );
       expect(convertedQueries).toStrictEqual(getOneLiner({ removed: false, snapshot: false }));
+    });
+
+    test('passes through schedule_id and start_date', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(
+        getTestQueries({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
+      );
+      expect(convertedQueries).toStrictEqual(
+        getOneLiner({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
+      );
+    });
+
+    test('injects space_id when provided', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
+      expect(convertedQueries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
+    });
+
+    test('injects pack_id when provided', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(
+        getTestQueries(),
+        undefined,
+        'pack-so-id-123'
+      );
+      expect(convertedQueries).toStrictEqual(getOneLiner({ pack_id: 'pack-so-id-123' }));
+    });
+
+    test('injects both space_id and pack_id when provided', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(
+        getTestQueries(),
+        'my-space',
+        'pack-so-id-456'
+      );
+      expect(convertedQueries).toStrictEqual(
+        getOneLiner({ space_id: 'my-space', pack_id: 'pack-so-id-456' })
+      );
+    });
+  });
+
+  describe('convertSOQueriesToPack — schedule_id preservation', () => {
+    test('preserves schedule_id and start_date from SO format to pack format', () => {
+      const soQueries = [
+        {
+          id: 'q1',
+          name: 'q1',
+          query: 'SELECT 1',
+          interval: 60,
+          schedule_id: 'uuid-preserved',
+          start_date: '2024-03-01T00:00:00.000Z',
+        },
+      ];
+      const result = convertSOQueriesToPack(soQueries);
+
+      expect(result.q1).toBeDefined();
+      expect(result.q1.schedule_id).toBe('uuid-preserved');
+      expect(result.q1.start_date).toBe('2024-03-01T00:00:00.000Z');
+    });
+  });
+
+  describe('convertPackQueriesToSO', () => {
+    test('preserves schedule_id and start_date in converted queries', () => {
+      const packQueries = getOneLiner({
+        schedule_id: 'uuid-xyz',
+        start_date: '2024-06-15T12:00:00.000Z',
+      });
+      const result = convertPackQueriesToSO(packQueries);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 'default',
+        schedule_id: 'uuid-xyz',
+        start_date: '2024-06-15T12:00:00.000Z',
+      });
     });
   });
 });

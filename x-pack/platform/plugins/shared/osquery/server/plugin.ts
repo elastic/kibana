@@ -48,6 +48,7 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
+import { backfillScheduleIds } from './lib/backfill_schedule_ids';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -157,6 +158,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           // we do not want to wait for it
         });
 
+        backfillScheduleIds({
+          coreStart: core,
+          osqueryContext: this.osqueryAppContextService,
+          logger: this.logger,
+        }).catch((err) => {
+          this.logger.warn(`backfillScheduleIds failed: ${err.message}`);
+        });
+
         if (registerIngestCallback) {
           registerIngestCallback(
             'packagePolicyCreate',
@@ -189,7 +198,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     newPackagePolicy,
                     spaceScopedClient,
                     allPacks.saved_objects,
-                    this.osqueryAppContextService
+                    this.osqueryAppContextService,
+                    soClient.getCurrentNamespace()
                   );
                 }
               }
