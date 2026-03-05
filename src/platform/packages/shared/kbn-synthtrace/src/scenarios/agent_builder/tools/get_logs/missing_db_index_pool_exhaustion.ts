@@ -75,7 +75,7 @@
  *   3. Scoped:   "The inventory service seems to be having issues. What's going on?"
  */
 
-import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
+import type { LogDocument, SynthtraceGenerator, Timerange } from '@kbn/synthtrace-client';
 import { log } from '@kbn/synthtrace-client';
 import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
@@ -114,7 +114,7 @@ function isAfter(timestamp: number, point: number): boolean {
 // Noise generators (high volume, present throughout the entire range)
 // ---------------------------------------------------------------------------
 
-function healthCheckLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function healthCheckLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   const services = [
     { name: 'api-gateway', host: 'gateway-pod-1', pod: 'gateway-6a7b8c9-xk2m9' },
     { name: 'checkout-service', host: 'checkout-pod-1', pod: 'checkout-7f8b9c-abc12' },
@@ -141,7 +141,7 @@ function healthCheckLogs(range: Timerange): ReturnType<Timerange['interval']> {
     );
 }
 
-function loadBalancerLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function loadBalancerLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   const paths = [
     'GET /api/products',
     'GET /api/cart',
@@ -169,7 +169,7 @@ function loadBalancerLogs(range: Timerange): ReturnType<Timerange['interval']> {
     );
 }
 
-function fluentBitLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function fluentBitLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('15s')
     .rate(4)
@@ -190,7 +190,7 @@ function fluentBitLogs(range: Timerange): ReturnType<Timerange['interval']> {
     );
 }
 
-function cronLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function cronLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('1m')
     .rate(2)
@@ -215,7 +215,7 @@ function cronLogs(range: Timerange): ReturnType<Timerange['interval']> {
 // Normal application logs (moderate volume, present throughout)
 // ---------------------------------------------------------------------------
 
-function checkoutNormalLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function checkoutNormalLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('30s')
     .rate(3)
@@ -236,7 +236,7 @@ function checkoutNormalLogs(range: Timerange): ReturnType<Timerange['interval']>
     );
 }
 
-function inventoryNormalLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function inventoryNormalLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('30s')
     .rate(3)
@@ -257,7 +257,7 @@ function inventoryNormalLogs(range: Timerange): ReturnType<Timerange['interval']
     );
 }
 
-function paymentNormalLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function paymentNormalLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('30s')
     .rate(2)
@@ -278,7 +278,7 @@ function paymentNormalLogs(range: Timerange): ReturnType<Timerange['interval']> 
     );
 }
 
-function notificationNormalLogs(range: Timerange): ReturnType<Timerange['interval']> {
+function notificationNormalLogs(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('1m')
     .rate(1)
@@ -303,7 +303,7 @@ function notificationNormalLogs(range: Timerange): ReturnType<Timerange['interva
 // Red herring (low volume, throughout — unrelated to the incident)
 // ---------------------------------------------------------------------------
 
-function notificationWarnings(range: Timerange): ReturnType<Timerange['interval']> {
+function notificationWarnings(range: Timerange): SynthtraceGenerator<LogDocument> {
   return range
     .interval('5m')
     .rate(1)
@@ -331,7 +331,7 @@ function notificationWarnings(range: Timerange): ReturnType<Timerange['interval'
 function inventoryPoolWarnings(
   range: Timerange,
   window: TimeWindow
-): ReturnType<Timerange['interval']> {
+): SynthtraceGenerator<LogDocument> {
   const thresholds = [85, 90, 92, 95, 97, 98];
   return range
     .interval('30s')
@@ -342,7 +342,9 @@ function inventoryPoolWarnings(
       return log
         .create()
         .message(
-          `Connection pool utilization at ${pct}% (38/${Math.round(40 * (pct / 100))} connections in use)`
+          `Connection pool utilization at ${pct}% (38/${Math.round(
+            40 * (pct / 100)
+          )} connections in use)`
         )
         .logLevel('warn')
         .service('inventory-service')
@@ -360,7 +362,7 @@ function inventoryPoolWarnings(
 function inventoryPoolExhaustedErrors(
   range: Timerange,
   incidentStart: number
-): ReturnType<Timerange['interval']> {
+): SynthtraceGenerator<LogDocument> {
   return range
     .interval('15s')
     .rate(3)
@@ -388,7 +390,7 @@ function inventoryPoolExhaustedErrors(
 function inventorySlowQueryErrors(
   range: Timerange,
   incidentStart: number
-): ReturnType<Timerange['interval']> {
+): SynthtraceGenerator<LogDocument> {
   return range
     .interval('30s')
     .rate(1)
@@ -403,8 +405,7 @@ function inventorySlowQueryErrors(
         .service('inventory-service')
         .defaults({
           'service.environment': 'production',
-          'error.message':
-            'Query timeout: full table scan detected, missing index on category_id',
+          'error.message': 'Query timeout: full table scan detected, missing index on category_id',
           'host.name': 'inventory-pod-2',
           'kubernetes.namespace': 'default',
           'kubernetes.pod.name': 'inventory-4d5e6f-yz789',
@@ -417,7 +418,7 @@ function inventorySlowQueryErrors(
 function checkoutTimeoutErrors(
   range: Timerange,
   incidentStart: number
-): ReturnType<Timerange['interval']> {
+): SynthtraceGenerator<LogDocument> {
   return range
     .interval('30s')
     .rate(2)
@@ -445,7 +446,7 @@ function checkoutTimeoutErrors(
 function checkoutStockValidationErrors(
   range: Timerange,
   cascadeStart: number
-): ReturnType<Timerange['interval']> {
+): SynthtraceGenerator<LogDocument> {
   return range
     .interval('30s')
     .rate(1)
@@ -470,10 +471,7 @@ function checkoutStockValidationErrors(
     });
 }
 
-function gatewayErrors(
-  range: Timerange,
-  cascadeStart: number
-): ReturnType<Timerange['interval']> {
+function gatewayErrors(range: Timerange, cascadeStart: number): SynthtraceGenerator<LogDocument> {
   return range
     .interval('15s')
     .rate(2)
@@ -483,7 +481,9 @@ function gatewayErrors(
       return log
         .create()
         .message(
-          `${status} ${status === 504 ? 'Gateway Timeout' : 'Bad Gateway'} - POST /api/checkout (upstream: checkout-service)`
+          `${status} ${
+            status === 504 ? 'Gateway Timeout' : 'Bad Gateway'
+          } - POST /api/checkout (upstream: checkout-service)`
         )
         .logLevel('error')
         .service('api-gateway')
