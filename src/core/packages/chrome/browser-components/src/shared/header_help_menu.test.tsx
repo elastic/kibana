@@ -55,9 +55,7 @@ describe('HeaderHelpMenu', () => {
   });
 
   test('it renders content and passes hideHelpMenu action', () => {
-    const content = jest.fn(() => (
-      <span data-test-subj="react-content-node">React Content</span>
-    ));
+    const content = jest.fn(() => <span data-test-subj="react-content-node">React Content</span>);
     const component = renderAndOpenMenu({
       helpExtension$: new BehaviorSubject<ChromeHelpExtension | undefined>({
         appName: 'Test App',

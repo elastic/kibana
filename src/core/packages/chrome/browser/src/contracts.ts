@@ -54,7 +54,7 @@ export interface ChromeSetup {
  * ```tsx
  * core.chrome.setHelpExtension({
  *   appName: 'My App',
-   *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+ *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
