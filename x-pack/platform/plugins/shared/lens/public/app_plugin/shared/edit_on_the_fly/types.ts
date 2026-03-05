@@ -79,8 +79,10 @@ export interface EditConfigPanelProps {
   isNewPanel?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
-  /** Apply button handler */
-  onApply?: (attrs: TypedLensSerializedState['attributes']) => void | Promise<void>;
+  /** Apply button handler — may return updated attributes (e.g. with synced __lastSaved) */
+  onApply?: (
+    attrs: TypedLensSerializedState['attributes']
+  ) => Promise<TypedLensSerializedState['attributes'] | void>;
   /** Cancel button handler */
   onCancel?: () => void;
   // Lens panels allow read-only "edit" where the user can look and tweak the existing chart, without

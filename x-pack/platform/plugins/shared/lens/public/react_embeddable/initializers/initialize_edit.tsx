@@ -245,14 +245,20 @@ export function initializeEditApi(
       onApply: !canEdit()
         ? noop
         : async (attributes: LensRuntimeState['attributes']) => {
+            let appliedAttributes = attributes;
             if (attributes.visualizationType === 'lnsXY') {
-              await saveUpdatedLinkedAnnotationsToLibrary(
+              const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
                 attributes.state.visualization,
                 startDependencies.eventAnnotationService
               );
+              appliedAttributes = {
+                ...attributes,
+                state: { ...attributes.state, visualization: updatedVizState },
+              };
             }
             internalApi.updateEditingState(false);
-            updateState({ ...getState(), attributes });
+            updateState({ ...getState(), attributes: appliedAttributes });
+            return appliedAttributes;
           },
       closeFlyout: () => {
         internalApi.updateEditingState(false);

@@ -327,15 +327,22 @@ export function updateAttributesWithAnnotation(
  * Saves all modified linked (by-reference) annotation layers to the library.
  * Each layer with local changes is committed via `updateAnnotationGroup`, which
  * also fires `annotationGroupUpdated$` to notify other panels.
+ *
+ * Returns an immutably-updated viz state with `__lastSaved` synced on each
+ * saved layer, so serialization produces clean by-reference layers rather than
+ * "linked with local changes" layers.
  */
 export async function saveUpdatedLinkedAnnotationsToLibrary(
   vizState: unknown,
   eventAnnotationService: EventAnnotationServiceType
-): Promise<void> {
+): Promise<unknown> {
   const xyState = vizState as XYState | undefined;
-  if (!xyState?.layers) return;
+  if (!xyState?.layers) return vizState;
 
-  for (const layer of xyState.layers) {
+  let updatedLayers: XYState['layers'] | undefined;
+
+  for (let i = 0; i < xyState.layers.length; i++) {
+    const layer = xyState.layers[i];
     if (
       'annotationGroupId' in layer &&
       '__lastSaved' in layer &&
@@ -363,10 +370,17 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
         tags: refLayer.__lastSaved.tags,
         dataViewSpec: refLayer.__lastSaved.dataViewSpec,
       };
+
       await eventAnnotationService.updateAnnotationGroup(groupConfig, refLayer.annotationGroupId);
-      // Sync __lastSaved so serialization produces a clean by-reference layer
-      // rather than a "linked with local changes" layer.
-      refLayer.__lastSaved = groupConfig;
+
+      if (!updatedLayers) {
+        updatedLayers = [...xyState.layers];
+      }
+      updatedLayers[i] = { ...refLayer, __lastSaved: groupConfig };
     }
   }
+
+  if (!updatedLayers) return vizState;
+
+  return { ...xyState, layers: updatedLayers };
 }

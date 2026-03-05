@@ -32,6 +32,7 @@ import {
   useLensDispatch,
   selectHideTextBasedEditor,
 } from '../../../state_management';
+import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   getAbsoluteDateRange,
@@ -210,6 +211,27 @@ export function LensEditConfigurationFlyout({
       return;
     }
 
+    let attributesToSave: TypedLensSerializedState['attributes'];
+    try {
+      // Run the apply callback first so auto-save operations (e.g. linked annotations)
+      // complete before the visualization is persisted via saveByRef.
+      const updatedAttributes = await onApplyCallback?.(currentAttributes);
+      attributesToSave = updatedAttributes ?? currentAttributes;
+    } catch (err) {
+      coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.translate('xpack.lens.config.applyError', {
+          defaultMessage: 'Failed to apply changes',
+        }),
+      });
+      return;
+    }
+
+    if (savedObjectId) {
+      const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
+      saveByRef?.(serializedAttrs);
+      updateByRefInput?.(savedObjectId);
+    }
+
     // check if visualization type changed, if it did, don't pass the previous visualization state
     const prevVisState =
       previousAttributes.current.visualizationType === visualization.activeId
@@ -223,16 +245,6 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    // Run the apply callback first so auto-save operations (e.g. linked annotations)
-    // complete before the visualization is persisted via saveByRef.
-    await onApplyCallback?.(currentAttributes);
-
-    if (savedObjectId) {
-      saveByRef?.(currentAttributes);
-      updateByRefInput?.(savedObjectId);
-    }
-
-    // Remove the user's preferred chart type from sessionStorage
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
@@ -243,6 +255,7 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     currentAttributes,
+    coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
   ]);
