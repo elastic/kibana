@@ -428,7 +428,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         ? grepSpecPattern // use the returned concrete file paths
         : globby.sync(specPattern); // convert the glob pattern to concrete file paths
 
-      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths, DW_LOAD_BALANCER_CONFIG);
+      const orderedFilePaths = orderSpecFilesForLoadBalance(
+        concreteFilePaths,
+        DW_LOAD_BALANCER_CONFIG
+      );
       const files = retrieveIntegrations(orderedFilePaths, DW_LOAD_BALANCER_CONFIG);
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
