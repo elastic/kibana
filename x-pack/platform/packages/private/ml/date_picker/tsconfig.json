@@ -27,5 +27,6 @@
     "@kbn/ml-is-populated-object",
     "@kbn/ml-query-utils",
     "@kbn/react-kibana-mount",
+    "@kbn/cps",
   ]
 }
