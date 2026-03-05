@@ -11,13 +11,20 @@ import { z } from '@kbn/zod/v4';
 import { BooleanFromString, isBooleanFromString } from './boolean_from_string';
 
 describe('BooleanFromString', () => {
-  it.each([
-    ['true', true, 'string'],
-    ['false', false, 'string'],
-    [true, true, 'boolean'],
-    [false, false, 'boolean'],
-  ])('should return %s when input is %s of type %s', (input, expected, _type) => {
-    expect(BooleanFromString.parse(input)).toBe(expected);
+  it('parses string "true" to boolean true', () => {
+    expect(BooleanFromString.parse('true')).toBe(true);
+  });
+
+  it('parses string "false" to boolean false', () => {
+    expect(BooleanFromString.parse('false')).toBe(false);
+  });
+
+  it('passes through boolean true as-is', () => {
+    expect(BooleanFromString.parse(true)).toBe(true);
+  });
+
+  it('passes through boolean false as-is', () => {
+    expect(BooleanFromString.parse(false)).toBe(false);
   });
 
   it('has the default description', () => {
