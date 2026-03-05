@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-const arrayWithNonEmptyString = (field: string, maxSize: number) =>
+const arrayWithNonEmptyString = (field: string, options: { maxSize: number }) =>
   schema.arrayOf(
     schema.string({
       minLength: 1,
@@ -17,7 +17,7 @@ const arrayWithNonEmptyString = (field: string, maxSize: number) =>
         }
       },
     }),
-    { maxSize }
+    options
   );
 
 export const UpdateWorkflowInsightRequestSchema = {
@@ -53,7 +53,7 @@ export const UpdateWorkflowInsightRequestSchema = {
     target: schema.maybe(
       schema.object({
         type: schema.maybe(schema.oneOf([schema.literal('endpoint')])),
-        ids: schema.maybe(arrayWithNonEmptyString('target.id', 50)),
+        ids: schema.maybe(arrayWithNonEmptyString('target.id', { maxSize: 50 })),
       })
     ),
     action: schema.maybe(
@@ -79,8 +79,8 @@ export const UpdateWorkflowInsightRequestSchema = {
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
               entries: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 250 })),
-              tags: schema.maybe(arrayWithNonEmptyString('tag', 50)),
-              os_types: schema.maybe(arrayWithNonEmptyString('os_type', 20)),
+              tags: schema.maybe(arrayWithNonEmptyString('tag', { maxSize: 50 })),
+              os_types: schema.maybe(arrayWithNonEmptyString('os_type', { maxSize: 20 })),
             }),
             { maxSize: 100 }
           )
@@ -92,7 +92,7 @@ export const UpdateWorkflowInsightRequestSchema = {
     metadata: schema.maybe(
       schema.object({
         notes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-        message_variables: schema.maybe(arrayWithNonEmptyString('message_variable', 50)),
+        message_variables: schema.maybe(arrayWithNonEmptyString('message_variable', { maxSize: 50 })),
       })
     ),
   }),
@@ -102,7 +102,7 @@ export const GetWorkflowInsightsRequestSchema = {
   query: schema.object({
     size: schema.maybe(schema.number()),
     from: schema.maybe(schema.number()),
-    ids: schema.maybe(arrayWithNonEmptyString('ids', 50)),
+    ids: schema.maybe(arrayWithNonEmptyString('ids', { maxSize: 50 })),
     categories: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal('endpoint')]), { maxSize: 20 })
     ),
@@ -119,11 +119,11 @@ export const GetWorkflowInsightsRequestSchema = {
     sourceTypes: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal('llm-connector')]), { maxSize: 20 })
     ),
-    sourceIds: schema.maybe(arrayWithNonEmptyString('sourceId', 50)),
+    sourceIds: schema.maybe(arrayWithNonEmptyString('sourceId', { maxSize: 50 })),
     targetTypes: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal('endpoint')]), { maxSize: 20 })
     ),
-    targetIds: schema.maybe(arrayWithNonEmptyString('targetId', 50)),
+    targetIds: schema.maybe(arrayWithNonEmptyString('targetId', { maxSize: 50 })),
     actionTypes: schema.maybe(
       schema.arrayOf(
         schema.oneOf([
