@@ -34,7 +34,9 @@ If the execution is still running, call this tool again after a short wait.`,
     schema: z.object({
       executionId: z
         .string()
-        .describe('The workflow execution ID returned by execute_workflow or execute_workflow_step'),
+        .describe(
+          'The workflow execution ID returned by execute_workflow or execute_workflow_step'
+        ),
       includeOutput: z
         .boolean()
         .optional()

@@ -47,6 +47,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
+  `${internalNamespaces.workflows}.execute_workflow`,
+  `${internalNamespaces.workflows}.execute_workflow_step`,
+  `${internalNamespaces.workflows}.get_workflow_execution_status`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
