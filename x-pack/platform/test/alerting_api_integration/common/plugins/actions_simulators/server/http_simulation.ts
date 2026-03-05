@@ -33,6 +33,7 @@ export async function initPlugin() {
 
 function createServerCallback() {
   let payloads: string[] = [];
+  let abortedCount = 0;
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
@@ -49,6 +50,19 @@ function createServerCallback() {
 
     // return the payloads that were posted to be remembered (e.g. from header_as_payload)
     if (request.method === 'GET') {
+      if (request.url?.includes('reset_aborted_count')) {
+        abortedCount = 0;
+        response.statusCode = 200;
+        response.end('OK');
+        return;
+      }
+      if (request.url?.includes('aborted_count')) {
+        response.statusCode = 200;
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify({ abortedCount }));
+        return;
+      }
+
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(payloads, null, 4));
@@ -100,10 +114,28 @@ function createServerCallback() {
         return;
       }
 
+      const delayMatch = data.match(/^delay_(\d+)$/);
+      if (delayMatch) {
+        const delayMs = parseInt(delayMatch[1], 10);
+        let aborted = false;
+        response.on('close', () => {
+          if (!response.writableEnded) {
+            aborted = true;
+            abortedCount++;
+          }
+        });
+        setTimeout(() => {
+          if (!aborted) {
+            response.statusCode = 200;
+            response.end('OK');
+          }
+        }, delayMs);
+        return;
+      }
+
       response.statusCode = 400;
       response.end(`unexpected body ${data}`);
-      // eslint-disable-next-line no-console
-      console.log(`http simulator received unexpected body: ${data}`);
+
       return;
     });
   };
