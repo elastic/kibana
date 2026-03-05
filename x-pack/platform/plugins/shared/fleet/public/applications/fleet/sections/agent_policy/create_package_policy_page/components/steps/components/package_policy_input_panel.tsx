@@ -106,7 +106,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
       () =>
-        isSingleInputAndStreams ||
+        (isSingleInputAndStreams && packageInfo.type !== 'input') ||
         shouldShowStreamsByDefault(
           packageInput,
           packageInputStreams,
@@ -368,7 +368,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              {!isSingleInputAndStreams && (
+              {(!isSingleInputAndStreams || packageInfo.type === 'input') && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color={hasErrors ? 'danger' : 'primary'}
