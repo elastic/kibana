@@ -24,7 +24,6 @@ import {
   getFilterOperator,
   getFilterValue,
   isArrayOperator,
-  isCondition,
   isConditionStrict,
   type OperatorKeys,
 } from '@kbn/streamlang';
@@ -69,7 +68,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
   } = props;
   const { core } = useKibana();
 
-  const isInvalidCondition = !isCondition(props.condition);
+  const isInvalidCondition = !isConditionStrict(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
 
