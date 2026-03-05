@@ -199,7 +199,7 @@ POST, PUT, and GET requests should return complete data. Apply defaults in your 
 Any key that has a `defaultValue` should not be wrapped
 in a `schema.maybe`, as this will cause the defaults to not be applied at validation time.
 
-When a field is required with a default, Instead of failing the requiest for not supplying a required field, route validation supplies the default value to the handler. 
+When a field is required with a default, instead of failing the request for not supplying a required field, route validation supplies the default value to the handler. 
 
 ```
 //
