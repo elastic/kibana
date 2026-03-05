@@ -160,6 +160,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { createInitializationFlowRegistry } from './lib/initialization';
 import type { InitializationFlowRegistry } from './lib/initialization';
+import { createListIndicesInitializationFlow } from './lib/initialization/flows/create_list_indices';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -240,6 +241,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('plugin initialized');
 
     this.initializationFlowRegistry = createInitializationFlowRegistry(this.logger);
+    this.initializationFlowRegistry.register(createListIndicesInitializationFlow);
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
     this.trialCompanionMilestoneService = new TrialCompanionMilestoneServiceImpl(this.logger);
   }

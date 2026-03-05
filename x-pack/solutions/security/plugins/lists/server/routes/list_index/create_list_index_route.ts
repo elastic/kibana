@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 import {
   type CreateListIndexResponse,
@@ -14,24 +13,6 @@ import {
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
-import { buildSiemResponse } from '../utils';
-import { getInternalListClient } from '..';
-
-const getAcknowledgedResponse = (): { body: CreateListIndexResponse } => ({
-  body: ResponseSchema.parse({ acknowledged: true }),
-});
-
-const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Promise<void> => {
-  try {
-    await runFn();
-  } catch (err) {
-    const isResourceAlreadyExistError =
-      typeof err?.message === 'string' && err.message.includes('resource_already_exists_exception');
-    if (!isResourceAlreadyExistError) {
-      throw err;
-    }
-  }
-};
 
 export const createListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -44,55 +25,27 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
         },
       },
     })
-    .addVersion({ validate: false, version: '2023-10-31' }, async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
-
-      try {
-        const lists = await getInternalListClient(context);
-
-        const listDataStreamExists = await lists.getListDataStreamExists();
-        const listItemDataStreamExists = await lists.getListItemDataStreamExists();
-
-        const templateListExists = await lists.getListTemplateExists();
-        const templateListItemsExists = await lists.getListItemTemplateExists();
-
-        if (!templateListExists || !listDataStreamExists) {
-          await lists.setListTemplate();
-        }
-
-        if (!templateListItemsExists || !listItemDataStreamExists) {
-          await lists.setListItemTemplate();
-        }
-
-        if (listDataStreamExists && listItemDataStreamExists) {
-          return response.ok(getAcknowledgedResponse());
-        }
-
-        if (!listDataStreamExists) {
-          await ignoreResourceAlreadyExistsError(async () => {
-            const listIndexExists = await lists.getListIndexExists();
-            await (listIndexExists
-              ? lists.migrateListIndexToDataStream()
-              : lists.createListDataStream());
-          });
-        }
-
-        if (!listItemDataStreamExists) {
-          await ignoreResourceAlreadyExistsError(async () => {
-            const listItemIndexExists = await lists.getListItemIndexExists();
-            await (listItemIndexExists
-              ? lists.migrateListItemIndexToDataStream()
-              : lists.createListItemDataStream());
-          });
-        }
-
-        return response.ok(getAcknowledgedResponse());
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+    .addVersion(
+      {
+        validate: false,
+        version: '2023-10-31',
+        options: {
+          deprecated: {
+            documentationUrl: '',
+            severity: 'warning',
+            message:
+              'List index creation is now handled automatically by the Security Solution initialization framework via POST /internal/security_solution/initialize.',
+            reason: {
+              type: 'migrate',
+              newApiPath: '/internal/security_solution/initialize',
+              newApiMethod: 'POST',
+            },
+          },
+        },
+      },
+      async (_, __, response) => {
+        const body: CreateListIndexResponse = ResponseSchema.parse({ acknowledged: true });
+        return response.ok({ body });
       }
-    });
+    );
 };

@@ -54,7 +54,6 @@ const RulesPageContent = () => {
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
-    canCreateIndex: canCreateListsIndex,
     needsConfiguration: needsListsConfiguration,
     needsIndex: needsListsIndex,
   } = useListsConfig();
@@ -80,13 +79,8 @@ const RulesPageContent = () => {
     return null;
   }
 
-  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
-  // lists button should be disabled
-  // - if data stream exists and user doesn't have enough privileges to create it,
-  // user still can import value lists, so button should not be disabled if user has enough other privileges
-  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
   const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
+    needsListsIndex || !canWriteListsIndex || !canEditRules || loading;
 
   return (
     <>
