@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
@@ -50,20 +50,8 @@ export const panelGridSchema = schema.object({
   }),
 });
 
-export function getPanelSchema() {
-  return schema.object({
-    config: schema.oneOf([
-      ...((embeddableService ? embeddableService.getAllEmbeddableSchemas() : []) as [
-        ObjectType<{}>
-      ]),
-      schema.object(
-        {},
-        {
-          unknowns: 'allow',
-        }
-      ),
-    ]) as ObjectType<{}>,
-    type: schema.string({ meta: { description: 'The embeddable type' } }),
+export function getPanelSchema(isDashboardAppRequest: boolean) {
+  const basePanelProps = {
     grid: panelGridSchema,
     /**
      * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
@@ -75,23 +63,58 @@ export function getPanelSchema() {
         meta: { description: 'The unique ID of the panel.' },
       })
     ),
-    version: schema.maybe(
-      schema.string({
+  };
+
+  // looser route validation for dashboard application requests
+  // TODO remove when all embeddables register schemas
+  if (isDashboardAppRequest) {
+    return schema.object({
+      ...basePanelProps,
+      type: schema.string(),
+      config: schema.object(
+        {},
+        {
+          unknowns: 'allow',
+        }
+      ),
+    });
+  }
+
+  const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+  const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
+    schema.object(
+      {
+        ...basePanelProps,
+        type: schema.literal(type),
+        config: configSchema,
+      },
+      {
         meta: {
-          description:
-            "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (config in this type).",
-          deprecated: true,
+          id: `kbn-dashboard-panel-${type}`,
         },
-      })
-    ),
-  });
+      }
+    )
+  );
+
+  return schema.discriminatedUnion(
+    'type',
+    panelSchemas as [
+      ObjectType<{
+        grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
+        uid: Type<string | undefined>;
+        version: Type<string | undefined>;
+        type: Type<string>;
+        config: ObjectType<{}>;
+      }>
+    ]
+  );
 }
 
 const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
 });
 
-export function getSectionSchema() {
+export function getSectionSchema(isDashboardAppRequest: boolean) {
   return schema.object({
     title: schema.string({
       meta: { description: 'The title of the section.' },
@@ -103,7 +126,7 @@ export function getSectionSchema() {
       })
     ),
     grid: sectionGridSchema,
-    panels: schema.arrayOf(getPanelSchema(), {
+    panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
       meta: { description: 'The panels that belong to the section.' },
       defaultValue: [],
     }),
@@ -171,16 +194,22 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema() {
+export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object({
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: schema.maybe(optionsSchema),
     panels: schema.maybe(
-      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
-        defaultValue: [],
-      })
+      schema.arrayOf(
+        schema.oneOf([
+          getPanelSchema(isDashboardAppRequest),
+          getSectionSchema(isDashboardAppRequest),
+        ]),
+        {
+          defaultValue: [],
+        }
+      )
     ),
     project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),

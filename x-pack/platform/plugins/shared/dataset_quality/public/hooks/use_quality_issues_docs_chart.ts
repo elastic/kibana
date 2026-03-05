@@ -123,7 +123,7 @@ export const useQualityIssuesDocsChart = () => {
       trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
       lens.navigateToPrefilledEditor({
         id: '',
-        timeRange,
+        time_range: timeRange,
         attributes,
       });
     }
