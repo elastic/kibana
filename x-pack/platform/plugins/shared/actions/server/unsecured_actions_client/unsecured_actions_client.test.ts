@@ -69,6 +69,7 @@ beforeEach(() => {
     kibanaIndices: ['.kibana'],
     logger,
     connectorTypeRegistry,
+    authorizationCodeEnabled: false,
   });
 });
 
@@ -101,6 +102,7 @@ describe('getAll()', () => {
       internalSavedObjectsRepository,
       spaceId: 'default',
       connectorTypeRegistry,
+      authorizationCodeEnabled: false,
     });
   });
 
@@ -119,6 +121,7 @@ describe('getAll()', () => {
       internalSavedObjectsRepository,
       spaceId: 'customSpace',
       connectorTypeRegistry,
+      authorizationCodeEnabled: false,
     });
   });
 });

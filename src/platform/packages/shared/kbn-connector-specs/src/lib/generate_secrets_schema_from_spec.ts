@@ -8,17 +8,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../connector_spec';
+import type { AuthMode, ConnectorSpec } from '../connector_spec';
+import * as authTypeSpecs from '../all_auth_types';
 import { getSchemaForAuthType } from '.';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
   authorizationCodeEnabled?: boolean;
+  authMode?: AuthMode;
 }
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { isPfxEnabled, authorizationCodeEnabled }: GenerateOptions = {
+  { isPfxEnabled, authMode, authorizationCodeEnabled }: GenerateOptions = {
     isPfxEnabled: true,
     authorizationCodeEnabled: false,
   }
@@ -29,6 +31,14 @@ export const generateSecretsSchemaFromSpec = (
     if (schema.id === 'pfx_certificate' && !isPfxEnabled) {
       continue;
     }
+
+    const authTypeSpec = Object.values(authTypeSpecs).find((spec) => spec.id === schema.id);
+    const authTypeMode = authTypeSpec?.authMode ?? 'shared';
+
+    if (authMode && authTypeMode !== authMode) {
+      continue;
+    }
+
     if (schema.id === 'oauth_authorization_code' && !authorizationCodeEnabled) {
       continue;
     }

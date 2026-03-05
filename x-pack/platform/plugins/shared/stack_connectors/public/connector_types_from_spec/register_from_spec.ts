@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
+import { lazy, useMemo } from 'react';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getIcon } from './get_icon';
 import {
   createConnectorFormSerializer,
@@ -64,6 +65,29 @@ export function registerConnectorTypesFromSpecs({
   });
 }
 
+const createConnectorFields = (
+  spec: ConnectorSpec,
+  generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
+  generateSchema: typeof import('./generate_schema').generateSchema,
+  authorizationCodeEnabled: boolean
+) => {
+  const ConnectorFields = (props: { readOnly: boolean; isEdit: boolean }) => {
+    const [formData] = useFormData();
+
+    const dynamicSchema = useMemo(
+      () => generateSchema(spec, { authMode: formData?.authMode, authorizationCodeEnabled }),
+      [formData?.authMode]
+    );
+
+    return generateFormFields({
+      schema: dynamicSchema,
+      formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
+    });
+  };
+
+  return ConnectorFields;
+};
+
 const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   ref: { uiSettings?: IUiSettingsClient },
@@ -86,18 +110,18 @@ const createConnectorTypeFromSpec = (
         spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
       ) {
         // @ts-expect-error upgrade typescript v5.9.3
-        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled', false) ?? false;
+        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled') ?? false;
       }
       return false;
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: (props) => {
-          return generateFormFields({
-            schema,
-            formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
-          });
-        },
+        default: createConnectorFields(
+          spec,
+          generateFormFields,
+          generateSchema,
+          authorizationCodeEnabled
+        ),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),

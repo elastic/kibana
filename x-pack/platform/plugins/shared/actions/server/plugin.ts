@@ -626,6 +626,8 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
+        authorizationCodeEnabled:
+          this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false,
       });
     };
 
