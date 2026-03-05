@@ -166,7 +166,7 @@ export class WorkflowsPlugin
 
     const api = this.api;
 
-    core.plugins
+    void core.plugins
       .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
       .then(({ agentBuilder }) => {
         if (agentBuilder.found) {
@@ -179,6 +179,12 @@ export class WorkflowsPlugin
             api,
           });
         }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(
+          `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
+        );
       });
 
     return {
