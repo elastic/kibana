@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { EngineDescriptor } from './definitions/saved_objects';
+import { z } from '@kbn/zod/v4';
+import type {
+  EngineDescriptor,
+  LogExtractionConfig,
+  HistorySnapshotState,
+} from './definitions/saved_objects';
 import type { EntityStoreStatus } from '../../common';
+import type { ENTITY_STORE_STATUS } from './constants';
+
 export type { EntityStoreStatus };
 
 export const EngineComponentResource = z.enum([
@@ -39,7 +45,17 @@ export const TaskComponentStatus = BaseComponentStatus.merge(
 
 export type EngineComponentStatus = BaseComponentStatus | TaskComponentStatus;
 
-export interface GetStatusResult {
+export interface GetStatusSuccessResult {
   status: EntityStoreStatus;
   engines: Array<EngineDescriptor | (EngineDescriptor & { components: EngineComponentStatus[] })>;
+  historySnapshot: HistorySnapshotState;
+  logsExtractionConfig: LogExtractionConfig;
 }
+
+export interface GetStatusNotInstalledResult {
+  status: typeof ENTITY_STORE_STATUS.NOT_INSTALLED;
+  // Should be empty array, but we keep it for simplicity
+  engines: GetStatusSuccessResult['engines'][number][];
+}
+
+export type GetStatusResult = GetStatusSuccessResult | GetStatusNotInstalledResult;

@@ -12,6 +12,7 @@ import { TransactionDetails } from '.';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 jest.mock('../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: jest.fn(),
@@ -67,9 +68,17 @@ jest.mock('../../../context/chart_pointer_event/chart_pointer_event_context', ()
   ),
 }));
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: jest.fn(),
+}));
+
 const mockUseAnyOfApmParams = useAnyOfApmParams as jest.Mock;
 const mockUseApmRoutePath = useApmRoutePath as jest.Mock;
 const mockUseApmRouter = useApmRouter as jest.Mock;
+const mockUseApmPluginContext = useApmPluginContext as jest.Mock;
+
+const mockSetConversationFlyoutActiveConfig = jest.fn();
+const mockClearConversationFlyoutActiveConfig = jest.fn();
 
 const baseQuery = {
   rangeFrom: 'now-15m',
@@ -92,6 +101,7 @@ describe('TransactionDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseApmRouter.mockReturnValue({ link: mockLink });
+    mockUseApmPluginContext.mockReturnValue({ agentBuilder: undefined });
   });
 
   it('redirects to transaction list when transactionName is undefined', () => {
@@ -194,5 +204,97 @@ describe('TransactionDetails', () => {
     expect(redirectCalls).toHaveLength(0);
     // Should render the transaction name in the heading
     expect(screen.getByRole('heading', { name: 'GET /api/users', level: 2 })).toBeInTheDocument();
+  });
+
+  it('renders without errors when agentBuilder is not available', () => {
+    mockUseAnyOfApmParams.mockReturnValue({
+      path: { serviceName: 'my-service' },
+      query: {
+        ...baseQuery,
+        transactionName: 'GET /api/users',
+        transactionType: 'request',
+      },
+    });
+    mockUseApmRoutePath.mockReturnValue('/services/{serviceName}/transactions/view');
+    mockUseApmPluginContext.mockReturnValue({ agentBuilder: undefined });
+
+    render(
+      <MemoryRouter>
+        <TransactionDetails />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('heading', { name: 'GET /api/users', level: 2 })).toBeInTheDocument();
+    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+  });
+
+  it('configures agent builder with transaction attachment when agentBuilder is available', () => {
+    mockUseAnyOfApmParams.mockReturnValue({
+      path: { serviceName: 'my-service' },
+      query: {
+        ...baseQuery,
+        transactionName: 'GET /api/users',
+        transactionType: 'request',
+        traceId: 'trace-123',
+        transactionId: 'tx-456',
+      },
+    });
+    mockUseApmRoutePath.mockReturnValue('/services/{serviceName}/transactions/view');
+    mockUseApmPluginContext.mockReturnValue({
+      agentBuilder: {
+        setConversationFlyoutActiveConfig: mockSetConversationFlyoutActiveConfig,
+        clearConversationFlyoutActiveConfig: mockClearConversationFlyoutActiveConfig,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <TransactionDetails />
+      </MemoryRouter>
+    );
+
+    expect(mockSetConversationFlyoutActiveConfig).toHaveBeenCalledWith({
+      agentId: 'observability.agent',
+      attachments: [
+        expect.objectContaining({
+          type: 'observability.transaction',
+          data: expect.objectContaining({
+            serviceName: 'test-service',
+            transactionName: 'GET /api/users',
+            transactionType: 'request',
+            traceId: 'trace-123',
+            transactionId: 'tx-456',
+          }),
+        }),
+      ],
+    });
+  });
+
+  it('clears agent builder config on unmount', () => {
+    mockUseAnyOfApmParams.mockReturnValue({
+      path: { serviceName: 'my-service' },
+      query: {
+        ...baseQuery,
+        transactionName: 'GET /api/users',
+        transactionType: 'request',
+      },
+    });
+    mockUseApmRoutePath.mockReturnValue('/services/{serviceName}/transactions/view');
+    mockUseApmPluginContext.mockReturnValue({
+      agentBuilder: {
+        setConversationFlyoutActiveConfig: mockSetConversationFlyoutActiveConfig,
+        clearConversationFlyoutActiveConfig: mockClearConversationFlyoutActiveConfig,
+      },
+    });
+
+    const { unmount } = render(
+      <MemoryRouter>
+        <TransactionDetails />
+      </MemoryRouter>
+    );
+
+    unmount();
+
+    expect(mockClearConversationFlyoutActiveConfig).toHaveBeenCalled();
   });
 });
