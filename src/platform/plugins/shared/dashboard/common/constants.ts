@@ -12,7 +12,8 @@ import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
 /** The base API path for dashboard endpoints. */
 export const DASHBOARD_API_PATH = '/api/dashboards';
 export const DASHBOARD_APP_API_PATH = '/internal/dashboards/app';
-export const DASHBOARD_API_VERSION = '1';
+export const DASHBOARD_API_VERSION = '2023-10-31';
+export const DASHBOARD_APP_API_VERSION = '1';
 
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 

@@ -9,12 +9,13 @@
 
 /** The base API path for dashboard endpoints (no leading slash for apiClient). */
 export const DASHBOARD_API_PATH = 'api/dashboards';
+export const DASHBOARD_API_VERSION = '2023-10-31';
 
 /** Common headers for Dashboard API requests (internal API version 1) */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
+  'elastic-api-version': DASHBOARD_API_VERSION,
 } as const;
 
 /** Test data paths */
