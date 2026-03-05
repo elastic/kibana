@@ -21,6 +21,7 @@ import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
  * See README.md for usage instructions.
  */
 // Failing: See https://github.com/elastic/kibana/issues/256140
+// describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
 // eslint-disable-next-line playwright/no-skipped-test
 describe.skip('dashboard REST schema', () => {
   let viewerCredentials: RoleApiCredentials;
