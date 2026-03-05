@@ -413,7 +413,7 @@ describe('scripts library client', () => {
           id: 'non-existent',
           name: 'test',
         })
-      ).rejects.toThrow('Script with id non-existent not found');
+      ).rejects.toThrow('Script with id [non-existent] not found');
     });
 
     it('should throw error when uploading new file with `version` that is no longer valid', async () => {
@@ -611,7 +611,7 @@ describe('scripts library client', () => {
       soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
       await expect(scriptsClient.download('non-existent')).rejects.toThrow(
-        'Script with id non-existent not found'
+        'Script with id [non-existent] not found'
       );
     });
   });
@@ -635,7 +635,7 @@ describe('scripts library client', () => {
       soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
       await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
-        'Script with id non-existent not found'
+        'Script with id [non-existent] not found'
       );
     });
 
