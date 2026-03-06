@@ -121,4 +121,11 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
 ]);
