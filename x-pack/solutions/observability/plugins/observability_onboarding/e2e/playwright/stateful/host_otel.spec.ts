@@ -10,8 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
-import { DiscoverValidationPage } from './pom/pages/discover_validation.page';
-import { StreamsValidationPage } from './pom/pages/streams_validation.page';
+import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
@@ -65,27 +64,26 @@ test('Otel Host', async ({
    */
   await page.waitForTimeout(3 * 60000);
 
+  /**
+   * Wired streams only reroutes logs (to logs.otel); metrics and traces are
+   * unaffected. So for wired streams we validate log delivery via Discover and
+   * the Streams page, and intentionally skip the Hosts Overview dashboard
+   * check. Dashboard validation is already covered by the non-wired test
+   * variants.
+   *
+   * Both "wired streams" and "wired streams + logs essentials" fall into this
+   * single branch because the validation path is identical for both.
+   */
   if (useWiredStreams) {
     await otelHostFlowPage.clickLogsExplorationCTA();
-
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
-    await discoverValidation.assertHitCountGreaterThanZero();
-
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const streamsValidation = new StreamsValidationPage(page);
-    await streamsValidation.waitForStreamsToLoad();
-    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.otel');
+    await assertDiscoverHasData(page, { assertHitCount: true });
+    await assertStreamHasData(page, 'logs.otel');
   } else if (!isLogsEssentialsMode) {
     await otelHostFlowPage.clickHostsOverviewCTA();
     const hostname = os.hostname();
     await hostsOverviewPage.assertHostCpuNotEmpty(hostname);
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
-
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    await assertDiscoverHasData(page);
   }
 });

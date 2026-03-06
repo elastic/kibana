@@ -11,7 +11,7 @@ import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
 import { ApmServiceInventoryPage } from './pom/pages/apm_service_inventory.page';
-import { StreamsValidationPage } from './pom/pages/streams_validation.page';
+import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
 /**
  * In case you need to run this test locally, you can use https://github.com/elastic/oblt-reference-stack
@@ -96,17 +96,20 @@ test('Otel Kubernetes', async ({
    */
   await page.waitForTimeout(5 * 60000);
 
+  /**
+   * Wired streams only reroutes logs (to logs.otel); metrics and traces are
+   * unaffected. So for wired streams we validate log delivery via Discover and
+   * the Streams page, and intentionally skip the Cluster Overview dashboard
+   * and APM Service Inventory checks. Dashboard/APM validation is already
+   * covered by the non-wired test variants.
+   *
+   * Both "wired streams" and "wired streams + logs essentials" fall into this
+   * single branch because the validation path is identical for both.
+   */
   if (useWiredStreams) {
-    const discoverValidation =
-      await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
-    await discoverValidation.assertHitCountGreaterThanZero();
-
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const streamsValidation = new StreamsValidationPage(page);
-    await streamsValidation.waitForStreamsToLoad();
-    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.otel');
+    await otelKubernetesFlowPage.clickExploreLogsCTA();
+    await assertDiscoverHasData(page, { assertHitCount: true });
+    await assertStreamHasData(page, 'logs.otel');
   } else if (!isLogsEssentialsMode) {
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
@@ -123,9 +126,7 @@ test('Otel Kubernetes', async ({
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    const discoverValidation =
-      await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    await otelKubernetesFlowPage.clickExploreLogsCTA();
+    await assertDiscoverHasData(page);
   }
 });

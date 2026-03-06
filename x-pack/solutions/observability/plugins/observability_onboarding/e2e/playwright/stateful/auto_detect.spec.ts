@@ -9,9 +9,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { HostDetailsPage } from './pom/pages/host_details.page';
-import { DiscoverValidationPage } from './pom/pages/discover_validation.page';
-import { StreamsValidationPage } from './pom/pages/streams_validation.page';
 import { assertEnv } from '../lib/assert_env';
+import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
@@ -66,19 +65,21 @@ test('Auto-detect logs and metrics', async ({
    */
   await page.waitForTimeout(2 * 60000);
 
+  /**
+   * Wired streams only reroutes logs (to logs.ecs); metrics are unaffected.
+   * So for wired streams we validate log delivery via Discover and the Streams
+   * page, and intentionally skip the Host Details dashboard check. Dashboard
+   * validation is already covered by the non-wired test variants.
+   *
+   * Both "wired streams" and "wired streams + logs essentials" fall into this
+   * single branch because the validation path is identical for both.
+   */
   if (useWiredStreams) {
     if (await autoDetectFlowPage.hasCustomLogsExploreButtons()) {
-      const discoverValidation =
-        await autoDetectFlowPage.clickCustomLogsExploreAndGetDiscoverValidation();
-      await discoverValidation.waitForDiscoverToLoad();
-      await discoverValidation.assertHasAnyLogData();
-      await discoverValidation.assertHitCountGreaterThanZero();
+      const popupPage = await autoDetectFlowPage.clickCustomLogsExploreInPopup();
+      await assertDiscoverHasData(popupPage, { assertHitCount: true });
     }
-
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const streamsValidation = new StreamsValidationPage(page);
-    await streamsValidation.waitForStreamsToLoad();
-    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
+    await assertStreamHasData(page, 'logs.ecs');
   } else {
     await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
 
@@ -92,12 +93,8 @@ test('Auto-detect logs and metrics', async ({
       await hostDetailsPage.assertCpuPercentageNotEmpty();
     } else {
       await autoDetectFlowPage.assertReceivedDataIndicator();
-
       await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
-
-      const discoverValidation = new DiscoverValidationPage(page);
-      await discoverValidation.waitForDiscoverToLoad();
-      await discoverValidation.assertHasAnyLogData();
+      await assertDiscoverHasData(page);
     }
   }
 });

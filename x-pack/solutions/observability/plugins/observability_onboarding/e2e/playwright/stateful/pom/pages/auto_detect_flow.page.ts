@@ -6,7 +6,6 @@
  */
 
 import { expect, type Page, type Locator } from '@playwright/test';
-import { DiscoverValidationPage } from './discover_validation.page';
 
 export class AutoDetectFlowPage {
   page: Page;
@@ -68,12 +67,11 @@ export class AutoDetectFlowPage {
     return (await this.customLogsExploreButton.count()) > 0;
   }
 
-  public async clickCustomLogsExploreAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
+  public async clickCustomLogsExploreInPopup(): Promise<Page> {
     const [newPage] = await Promise.all([
       this.page.waitForEvent('popup'),
       this.customLogsExploreButton.first().click(),
     ]);
-
-    return new DiscoverValidationPage(newPage);
+    return newPage;
   }
 }

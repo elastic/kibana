@@ -9,8 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
-import { DiscoverValidationPage } from './pom/pages/discover_validation.page';
-import { StreamsValidationPage } from './pom/pages/streams_validation.page';
+import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
@@ -53,37 +52,30 @@ test('Kubernetes EA', async ({
    */
   fs.writeFileSync(outputPath, clipboardData);
 
+  /**
+   * Wired streams only reroutes logs (to logs.ecs); metrics are unaffected.
+   * So for wired streams we validate log delivery via Discover and the Streams
+   * page, and intentionally skip the Kubernetes Overview dashboard check.
+   * Dashboard validation is already covered by the non-wired test variants.
+   *
+   * The logs essentials sub-case skips the data indicator and navigates to
+   * Discover directly because the K8s EA has-data API relies on
+   * fields.onboarding_id, which is unreliable when metrics are disabled in
+   * the logs essentials tier.
+   */
   if (useWiredStreams && !isLogsEssentialsMode) {
     await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
-
     await page.waitForTimeout(2 * 60000);
-
-    const discoverValidation =
-      await kubernetesEAFlowPage.clickExploreLogsAndGetDiscoverValidation();
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
-    await discoverValidation.assertHitCountGreaterThanZero();
-
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const streamsValidation = new StreamsValidationPage(page);
-    await streamsValidation.waitForStreamsToLoad();
-    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
+    await kubernetesEAFlowPage.clickExploreLogsCTA();
+    await assertDiscoverHasData(page, { assertHitCount: true });
+    await assertStreamHasData(page, 'logs.ecs');
   } else if (useWiredStreams && isLogsEssentialsMode) {
     await page.waitForTimeout(5 * 60000);
-
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
-    await discoverValidation.assertHitCountGreaterThanZero();
-
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-    const streamsValidation = new StreamsValidationPage(page);
-    await streamsValidation.waitForStreamsToLoad();
-    await streamsValidation.assertStreamDocCountGreaterThanZero('logs.ecs');
+    await assertDiscoverHasData(page, { assertHitCount: true });
+    await assertStreamHasData(page, 'logs.ecs');
   } else if (!isLogsEssentialsMode) {
     await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
-
     /**
      * There might be a case that dashboard still does not show
      * the data even though it was ingested already. This usually
@@ -94,15 +86,11 @@ test('Kubernetes EA', async ({
      * for the data to propagate everywhere.
      */
     await page.waitForTimeout(2 * 60000);
-
     await kubernetesEAFlowPage.clickKubernetesAgentCTA();
     await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
   } else {
     await page.waitForTimeout(5 * 60000);
-
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    await assertDiscoverHasData(page);
   }
 });
