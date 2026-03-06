@@ -24,7 +24,8 @@ export function toSlugIdentifier(value = ''): string {
   return value
     .toLowerCase()
     .replace(/[^a-z0-9_]/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
 }
 
 /**
