@@ -100,7 +100,7 @@ describe('DeepStrict', () => {
     )
   );
 
-  it('intersection with optional', () => {
+  it('matches intersection with optional', () => {
     wrap(
       z
         .intersection(
@@ -115,7 +115,7 @@ describe('DeepStrict', () => {
       .fails({ foo: '', bar: '', unknownKey: '' });
   });
 
-  it('object with union types', () => {
+  it('matches object with union types', () => {
     wrap(
       z.object({
         path: z.union([
@@ -132,7 +132,7 @@ describe('DeepStrict', () => {
       .fails({ path: { serviceName: '' }, unknownKey: '' });
   });
 
-  it('object with deep optional keys', () => {
+  it('matches object with deep optional keys', () => {
     wrap(
       z.intersection(
         z.object({ query: z.object({ bar: z.string() }) }),
@@ -143,7 +143,7 @@ describe('DeepStrict', () => {
       .fails({ query: { _inspect: true } });
   });
 
-  it('complex object', () => {
+  it('matches complex object', () => {
     const fromSchema = z
       .object({
         from: z.string().optional(),
@@ -217,7 +217,7 @@ describe('DeepStrict', () => {
       });
   });
 
-  it('refinements', () => {
+  it('matches refinements', () => {
     wrap(z.object({ body: timeWindowRt }))
       .passes({ body: { duration: '1d' } })
       .passes({ body: { start_time: '2022-05-20T08:10:15.000Z' } })
@@ -229,7 +229,7 @@ describe('DeepStrict', () => {
       .fails({ body: { duration: false } });
   });
 
-  it('arrays', () => {
+  it('matches arrays', () => {
     const schema = z.array(z.object({ foo: z.string() }));
 
     wrap(schema)
@@ -238,7 +238,7 @@ describe('DeepStrict', () => {
       .fails([{ foo: 'bar', bar: 'foo' }]);
   });
 
-  it('nested arrays', () => {
+  it('matches nested arrays', () => {
     wrap(
       z.object({
         nestedArray: z.array(
@@ -268,7 +268,7 @@ describe('DeepStrict', () => {
       });
   });
 
-  it('deals with union types', () => {
+  it('matches union types', () => {
     const type = z.intersection(
       z.object({
         required: z.string(),
