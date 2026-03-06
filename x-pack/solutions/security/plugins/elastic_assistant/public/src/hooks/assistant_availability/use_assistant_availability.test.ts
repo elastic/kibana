@@ -12,6 +12,7 @@ import type { LicenseService } from '../licence/license_service';
 import { renderHook } from '@testing-library/react';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
+import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { useIsNavControlVisible } from '../is_nav_control_visible/use_is_nav_control_visible';
 
 jest.mock('../licence/use_licence');
@@ -86,6 +87,49 @@ describe('useAssistantAvailability', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
+  });
+
+  it('returns hasAgentBuilderManagePrivilege when manageAgents and advanced settings save are true', () => {
+    mockUseLicense.mockReturnValue({
+      isEnterprise: jest.fn().mockReturnValue(true),
+    } as unknown as LicenseService);
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [ASSISTANT_FEATURE_ID]: {
+              'ai-assistant': true,
+              updateAIAssistantAnonymization: true,
+              manageGlobalKnowledgeBaseAIAssistant: true,
+            },
+            [SECURITY_FEATURE_ID]: {
+              configurations: true,
+            },
+            [AGENTBUILDER_FEATURE_ID]: {
+              show: true,
+              manageAgents: true,
+            },
+            advancedSettings: {
+              save: true,
+            },
+            actions: {
+              show: true,
+              execute: true,
+              save: true,
+              delete: true,
+            },
+          },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useAssistantAvailability());
+
+    expect(result.current.hasAgentBuilderManagePrivilege).toBe(true);
   });
 
   it('returns correct values when all privileges are available but assistant his hidden', () => {
