@@ -22,10 +22,10 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getEditorExtensions } from '@kbn/esql-utils';
 import {
   type RecommendedQuery,
-  REGISTRY_EXTENSIONS_ROUTE,
+  type ESQLRegistrySolutionId,
   QuerySource,
   ESQL_CLASSIC_SOLUTION_ID,
 } from '@kbn/esql-types';
@@ -143,16 +143,21 @@ export const HelpPopover: React.FC<{
     let cancelled = false;
     const getESQLExtensions = async () => {
       if (!activeSolutionId || !queryForRecommendedQueries) {
-        return; // Don't fetch if we don't have the active solution or query
+        return;
       }
 
       try {
-        const extensions: { recommendedQueries: RecommendedQuery[] } = await http.get(
-          `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
+        // Use the actual user query so the cursor-based isSourceComplete check
+        // works naturally, and the result shares the same cache key as the
+        // autocomplete pipeline (both extract the same index pattern).
+        const query = currentQueryRef.current || queryForRecommendedQueries;
+        const extensions = await getEditorExtensions(
+          http,
+          query,
+          activeSolutionId as ESQLRegistrySolutionId
         );
 
         if (cancelled) return;
-        // Only update state if the new data is actually different from the *last successfully set* data
         if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
           setSolutionsRecommendedQueries(extensions.recommendedQueries);
           lastFetchedQueries.current = extensions.recommendedQueries;

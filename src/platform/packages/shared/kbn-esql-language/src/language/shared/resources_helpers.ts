@@ -8,6 +8,8 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { isSource } from '@elastic/esql';
 
 export function getPolicyHelper(resourceRetriever?: ESQLCallbacks) {
   const getPolicies = async () => {
@@ -30,6 +32,20 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
     return (await resourceRetriever?.getSources?.()) || [];
   };
 }
+
+/**
+ * Checks whether the cursor offset is past the last source node in the given
+ * command, meaning the user has finished typing the source (e.g. pressed space).
+ */
+export const isCursorPastSources = (command: ESQLAstAllCommands, cursorOffset: number): boolean => {
+  let lastSourceMax = -1;
+  for (const arg of command.args) {
+    if (!Array.isArray(arg) && isSource(arg)) {
+      lastSourceMax = Math.max(lastSourceMax, arg.location.max);
+    }
+  }
+  return lastSourceMax >= 0 && cursorOffset > lastSourceMax + 1;
+};
 
 export async function getFromCommandHelper(resourceRetriever?: ESQLCallbacks): Promise<string> {
   const getSources = getSourcesHelper(resourceRetriever);

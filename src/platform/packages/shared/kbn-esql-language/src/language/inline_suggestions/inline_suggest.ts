@@ -106,15 +106,17 @@ async function getFromCommand(
 }
 
 /**
- * Fetches extension-based suggestions
+ * Fetches extension-based suggestions using the user's query text so
+ * the centralized source-completeness check in getEditorExtensions can
+ * correctly decide whether to fetch or return empty.
  */
 async function getExtensionSuggestions(
-  fromCommand: string,
+  queryText: string,
   range: InlineSuggestionItem['range'],
   callbacks?: ESQLCallbacks
 ): Promise<InlineSuggestionItem[]> {
   const editorExtensions = await callbacks
-    ?.getEditorExtensions?.(fromCommand)
+    ?.getEditorExtensions?.(queryText)
     .then((result) => result ?? { recommendedQueries: [] });
 
   return (editorExtensions?.recommendedQueries || []).map((query) => ({
@@ -178,10 +180,11 @@ async function fetchAllSuggestions(
   timeField: string,
   categorizationField: string | undefined,
   range: InlineSuggestionItem['range'],
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  queryText: string = fromCommand
 ): Promise<InlineSuggestionItem[]> {
   const [extensionSuggestions, historySuggestions] = await Promise.all([
-    getExtensionSuggestions(fromCommand, range, callbacks),
+    getExtensionSuggestions(queryText, range, callbacks),
     getHistorySuggestions(range, callbacks),
   ]);
 
@@ -246,13 +249,15 @@ export async function inlineSuggest(
       callbacks
     );
 
-    // Fetch all suggestions
+    // Fetch all suggestions — pass the user's query text so the centralized
+    // isSourceComplete check in getEditorExtensions can gate the HTTP call.
     const allSuggestions = await fetchAllSuggestions(
       fromCommand,
       timeField,
       categorizationField,
       range,
-      callbacks
+      callbacks,
+      textBeforeCursor
     );
 
     // Process suggestions: remove duplicates, filter by prefix, and trim prefix
