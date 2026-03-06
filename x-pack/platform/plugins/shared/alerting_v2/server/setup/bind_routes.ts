@@ -7,13 +7,13 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Route } from '@kbn/core-di-server';
-import { CreateRuleRoute } from '../routes/create_rule_route';
-import { UpdateRuleRoute } from '../routes/update_rule_route';
-import { GetRulesRoute } from '../routes/get_rules_route';
-import { GetRuleRoute } from '../routes/get_rule_route';
-import { DeleteRuleRoute } from '../routes/delete_rule_route';
-import { CreateAlertActionRoute } from '../routes/create_alert_action_route';
-import { BulkCreateAlertActionRoute } from '../routes/bulk_create_alert_action_route';
+import { CreateRuleRoute } from '../routes/rules/create_rule_route';
+import { UpdateRuleRoute } from '../routes/rules/update_rule_route';
+import { GetRulesRoute } from '../routes/rules/get_rules_route';
+import { GetRuleRoute } from '../routes/rules/get_rule_route';
+import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
+import { CreateAlertActionRoute } from '../routes/alert_actions/create_alert_action_route';
+import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
 import { CreateNotificationPolicyRoute } from '../routes/notification_policies/create_notification_policy_route';
 import { GetNotificationPolicyRoute } from '../routes/notification_policies/get_notification_policy_route';
 import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
