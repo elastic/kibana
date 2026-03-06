@@ -115,7 +115,12 @@ export const getRulesBaseKibanaFeature = (
         read: params.savedObjects,
       },
       alerting: {
-        rule: { all: alertingFeatures },
+        rule: {
+          all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
+        },
         alert: { all: alertingFeatures },
       },
       management: {

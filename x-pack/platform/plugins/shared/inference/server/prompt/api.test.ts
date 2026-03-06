@@ -83,6 +83,7 @@ describe('createPromptApi', () => {
 
     const callbackApi = createChatCompleteCallbackApi({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
@@ -101,6 +102,7 @@ describe('createPromptApi', () => {
   it('initializes createChatCompleteCallbackApi with correct options', () => {
     expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),

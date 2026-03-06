@@ -30,9 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/255931
-  describe.skip('ES|QL Editor autocomplete', function () {
+  describe('ES|QL Editor autocomplete', function () {
     beforeEach(async () => {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await esql.setEsqlEditorQuery('');
     });
 
@@ -69,8 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open timepicker and insert date when selecting a day', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE @timestamp > `);
-      await waitForSuggestionWidget(true);
-      await browser.pressKeys(browser.keys.ENTER);
+      await esql.selectEsqlSuggestionByLabel('time picker');
 
       const todayButton = await find.byCssSelector('.react-datepicker__day--today');
       await todayButton.click();
@@ -91,8 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
 
-      await testSubjects.click('ESQLEditor-toggleWordWrap');
+      await browser.pressKeys(browser.keys.ESCAPE);
       await waitForSuggestionWidget(false);
+
+      await testSubjects.click('ESQLEditor-toggleWordWrap');
 
       await esql.focusEditor();
       await waitForSuggestionWidget(true);
