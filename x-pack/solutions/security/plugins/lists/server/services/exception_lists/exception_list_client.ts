@@ -33,6 +33,7 @@ import type {
 } from '../extension_points';
 
 import type {
+  BulkDeleteExceptionListItemsOptions,
   ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
@@ -100,6 +101,7 @@ import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_l
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 import { updateOverwriteExceptionListItem } from './update_overwrite_exception_list_item';
+import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -829,6 +831,32 @@ export class ExceptionListClient {
       namespaceType,
       savedObjectsClient,
     });
+  };
+
+  /**
+   * Bulk delete exception list items by an `id` array
+   * @param options
+   * @param options.ids the array of ids of exception list items to delete
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   */
+  public bulkDeleteExceptionListItems = async ({
+    ids,
+    namespaceType,
+  }: BulkDeleteExceptionListItemsOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      // todo: optimize
+      for (const id of ids) {
+        await this.serverExtensionsClient.pipeRun(
+          'exceptionsListPreDeleteItem',
+          { id, itemId: undefined, namespaceType },
+          this.getServerExtensionCallbackContext()
+        );
+      }
+    }
+
+    return bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
   };
 
   /**
