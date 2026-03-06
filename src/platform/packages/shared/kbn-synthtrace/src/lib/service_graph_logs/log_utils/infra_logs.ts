@@ -100,7 +100,9 @@ export function generateInfraLog({
   failingErrorType,
 }: InfraLogOptions): Array<Partial<LogDocument>> {
   const category = DEP_TO_CATEGORY[infraDep];
-  if (!category) return [];
+  if (!category) {
+    return [];
+  }
 
   const { condition, level } = resolveInfraCondition(
     failingErrorType,

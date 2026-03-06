@@ -40,8 +40,12 @@ export const resolveLogLevel = (
     ? HEALTH_PROBS.failing
     : HEALTH_PROBS.normal;
   const roll = rng();
-  if (roll < errorThreshold) return 'error';
-  if (roll < warnThreshold) return 'warn';
+  if (roll < errorThreshold) {
+    return 'error';
+  }
+  if (roll < warnThreshold) {
+    return 'warn';
+  }
   return 'info';
 };
 

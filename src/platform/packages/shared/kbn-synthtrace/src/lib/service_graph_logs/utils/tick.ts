@@ -89,7 +89,9 @@ function resolveSpikes(
   ctx: GeneratorContext,
   serviceName?: string
 ): number {
-  if (!spikes || spikes.length === 0) return 1;
+  if (!spikes || spikes.length === 0) {
+    return 1;
+  }
   const ts =
     ctx.cycleMs != null && ctx.cycleOriginMs != null
       ? cycleTimestamp(timestamp, ctx.cycleMs, ctx.cycleOriginMs)
@@ -97,7 +99,9 @@ function resolveSpikes(
 
   for (const spike of spikes) {
     if (spike.services && (!serviceName || !spike.services.includes(serviceName))) {
-      continue;
+      {
+        continue;
+      }
     }
 
     const afterStart = spike.start === undefined || ts >= spike.start;
@@ -158,7 +162,9 @@ export function resolveTickState({
   const failingDeps = new Set<string>(
     Object.entries(currentFailures?.infra ?? {})
       .filter(([, cfg]) => {
-        if (!cfg) return false;
+        if (!cfg) {
+          return false;
+        }
         const rate = (cfg as { rate?: number }).rate;
         return typeof rate !== 'number' || rate > 0;
       })
@@ -169,7 +175,9 @@ export function resolveTickState({
     Object.entries(currentFailures?.services ?? {})
       .filter((entry): entry is [string, ServiceFailure] => {
         const failure = entry[1] as ServiceFailure | null | undefined;
-        if (!failure) return false;
+        if (!failure) {
+          return false;
+        }
         const rate = (failure as { rate?: number }).rate;
         return typeof rate !== 'number' || rate > 0;
       })
@@ -193,10 +201,18 @@ export function collectServiceDocs({
   const { currentFailures } = tickState;
 
   const entryCfg = volume?.[entryService];
-  if (!resolveChannelEvery(entryCfg?.every, index)) return [];
+  if (!resolveChannelEvery(entryCfg?.every, index)) {
+    {
+      return [];
+    }
+  }
 
   const spikeMultiplier = resolveSpikes(entryCfg?.spikes, timestamp, ctx);
-  if (spikeMultiplier === 0) return [];
+  if (spikeMultiplier === 0) {
+    {
+      return [];
+    }
+  }
 
   const baseRate = entryCfg?.rate ?? 1;
   const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
@@ -230,21 +246,23 @@ export function collectVolumeSkewDocs({
   timestamp: number;
 }): Array<Partial<LogDocument>> {
   const { serviceGraph, entryService, volume, metadataCache, seed } = ctx;
-  if (!volume) return [];
+  if (!volume) {
+    return [];
+  }
 
   const docs: Array<Partial<LogDocument>> = [];
 
   for (const svc of serviceGraph.services) {
-    if (svc.name === entryService) continue;
-
     const svcCfg = volume[svc.name];
-    if (!svcCfg) continue;
-
-    if (!resolveChannelEvery(svcCfg.every, index)) continue;
+    if (svc.name === entryService || !svcCfg || !resolveChannelEvery(svcCfg.every, index)) {
+      continue;
+    }
 
     const spikeMultiplier = resolveSpikes(svcCfg.spikes, timestamp, ctx, svc.name);
     const effectiveWeight = (svcCfg.rate ?? 1) * spikeMultiplier;
-    if (effectiveWeight <= 0) continue;
+    if (effectiveWeight <= 0) {
+      continue;
+    }
 
     const tickSeed = resolveEffectiveSeed(seed, index, timestamp);
     const rng = mulberry32(deriveSeed(tickSeed, svc.name));
@@ -282,7 +300,9 @@ export function collectInfraDocs({
   const { volume, allDeps, metadataCache, seed } = ctx;
   const { failingDeps, failingServiceErrors, currentFailures } = tickState;
   if (allDeps.length === 0) {
-    return [];
+    {
+      return [];
+    }
   }
 
   const priorityPairs = allDeps.filter(({ svc, dep }) => {
@@ -371,13 +391,18 @@ export function collectNoiseDocs({
   timestamp: number;
 }): Array<Partial<LogDocument>> {
   const { noise, serviceGraph, metadataCache, seed } = ctx;
-  if (!noise) return [];
+  if (!noise) {
+    return [];
+  }
   const { volume } = noise;
-
-  if (!resolveChannelEvery(volume?.every, index)) return [];
+  if (!resolveChannelEvery(volume?.every, index)) {
+    return [];
+  }
 
   const spikeMultiplier = resolveSpikes(volume?.spikes, timestamp, ctx);
-  if (spikeMultiplier === 0) return [];
+  if (spikeMultiplier === 0) {
+    return [];
+  }
 
   const rawRate = volume?.rate;
   const baseRate =

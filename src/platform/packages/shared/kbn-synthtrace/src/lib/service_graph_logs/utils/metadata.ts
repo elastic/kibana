@@ -91,7 +91,9 @@ export function getOrBuildMetadata(
   seed: number,
   cache?: MetadataCache
 ): Record<string, string | undefined> {
-  if (!cache) return generateDeploymentMetadata({ service, seed });
+  if (!cache) {
+    return generateDeploymentMetadata({ service, seed });
+  }
   let entry = cache.get(service.name);
   if (!entry) {
     entry = generateDeploymentMetadata({ service, seed });

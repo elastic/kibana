@@ -93,7 +93,9 @@ export function generateInfraNoiseLog({
   cachedMetadata,
 }: InfraNoiseLogOptions): Partial<LogDocument> | null {
   const category = DEP_TO_CATEGORY[dep];
-  if (!category) return null;
+  if (!category) {
+    return null;
+  }
 
   // Use an offset seed so the level roll is independent from the message-pick seed.
   const level = resolveLogLevelFromSeed(degraded, seed);

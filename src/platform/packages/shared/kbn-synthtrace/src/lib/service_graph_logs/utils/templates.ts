@@ -38,7 +38,9 @@ export function getStackTrace({
   serviceName?: string;
 }): string {
   const pool = SERVICE.stackTraces[runtime];
-  if (!pool || pool.length === 0) return '';
+  if (!pool || pool.length === 0) {
+    return '';
+  }
   const template = pool[Math.abs(seed) % pool.length];
   return fillPlaceholders(template, seed, { serviceName });
 }
@@ -88,7 +90,9 @@ function resolveMessagePool(
   sourceDep?: InfraDependency
 ): string[] {
   const pool = SERVICE.request.messages[errorType as ServiceErrorType];
-  if (!pool) return [];
+  if (!pool) {
+    return [];
+  }
 
   if (TECH_KEYED_ERROR_TYPES.has(errorType as ServiceErrorType)) {
     const techKeyed = pool as Record<string, Record<Runtime, ConditionPool>>;
@@ -206,8 +210,12 @@ export function pickNoiseMessage({
 }
 
 function deriveErrorCategory(httpStatus: number): OutboundErrorCategory | undefined {
-  if (httpStatus === 504) return 'timeout';
-  if (httpStatus === 502 || httpStatus === 503) return 'unavailable';
+  if (httpStatus === 504) {
+    return 'timeout';
+  }
+  if (httpStatus === 502 || httpStatus === 503) {
+    return 'unavailable';
+  }
   return undefined;
 }
 

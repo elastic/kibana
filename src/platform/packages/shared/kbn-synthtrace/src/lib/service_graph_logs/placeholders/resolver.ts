@@ -45,7 +45,9 @@ export function fillPlaceholders(
   const ctx: ResolverCtx = { rng, svc, cache };
 
   return template.replace(/\{(\w+)\}/g, (_match, key: string) => {
-    if (key in cache) return cache[key];
+    if (key in cache) {
+      return cache[key];
+    }
 
     const resolve = RESOLVERS[key];
     const val = resolve ? resolve(ctx) : `{${key}}`;
