@@ -3,8 +3,8 @@
 This folder contains a small CLI + helper modules for producing **repeatable Elasticsearch snapshots** that can be used as datasets for **Streams Significant Events** evaluation and experimentation.
 
 The snapshots are written to **GCS** (bucket: `significant-events-datasets`) under a run-specific base path, and each scenario snapshot contains:
-- `logs*` — OTel demo log data generated during the run
-- `sigevents-streams-features-<scenario>` — extracted features produced by Streams feature extraction (copied out of system indices so it can be snapshotted)
+- `logs*` - OTel demo log data generated during the run
+- `sigevents-streams-features-<scenario>` - extracted features produced by Streams feature extraction (copied out of system indices so it can be snapshotted)
 
 ## What this does
 
@@ -22,7 +22,7 @@ The per-scenario deploy/teardown + data cleanup is intentional as each snapshot 
 
 ### Prerequisites
 
-- **minikube** + **kubectl** — the script will automatically start minikube if it is not already running, using `--cpus=4 --memory=8g`. Ensure your system can spare these resources before running the script.
+- **minikube** + **kubectl** - the script will automatically start minikube if it is not already running, using `--cpus=4 --memory=8g`. Ensure your system can spare these resources before running the script.
 - Local **Elasticsearch** running with access to GCS credentials: `yarn es snapshot --license trial --secure-files gcs.client.default.credentials_file=/path/to/creds.json`
 - Local **Kibana** running
 - GCS repository access configured in Elasticsearch (so ES can write snapshots to the bucket)
