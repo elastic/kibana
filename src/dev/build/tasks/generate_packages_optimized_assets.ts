@@ -130,6 +130,7 @@ function categorizeAssets(assetDirs: string[]) {
 
   for (const { path, category } of assets) {
     if (category === 'euiTheme') {
+      // only track borealis.light theme
       if (path.includes('borealis.light')) {
         add('css', path);
       }
@@ -154,8 +155,10 @@ export const GeneratePackagesOptimizedAssets: Task = {
     );
     const assetDirs = [npmAssetDir, srcAssetDir];
 
+    // process assets in each ui-shared-deps package
     await Promise.all(assetDirs.map((dir) => optimizeAssets(log, dir)));
 
+    // analyze assets to produce metrics.json file
     const groups = categorizeAssets(assetDirs);
     log.verbose('categorized assets', groups);
     const metrics = [
@@ -182,6 +185,7 @@ export const GeneratePackagesOptimizedAssets: Task = {
     ];
     log.verbose('metrics:', metrics);
 
+    // write unified metrics to the @kbn/ui-shared-deps-src asset dir
     log.debug('Create metrics.json');
     await write(Path.resolve(srcAssetDir, 'metrics.json'), JSON.stringify(metrics, null, 2));
   },

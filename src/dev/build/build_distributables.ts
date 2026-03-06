@@ -81,6 +81,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
 
+    // Run on all source files
     // **/packages need to be read before DeletePackagesFromBuildRoot
     await Promise.all([globalRun(Tasks.CreateNoticeFile), globalRun(Tasks.CreateXPackNoticeFile)]);
 
