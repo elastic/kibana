@@ -89,5 +89,4 @@ export class OtelKubernetesFlowPage {
   public async clickExploreLogsCTA() {
     await this.exploreLogsButton.click();
   }
-
 }

@@ -66,5 +66,4 @@ export class KubernetesEAFlowPage {
   public async clickExploreLogsCTA() {
     await this.exploreLogsButton.click();
   }
-
 }
