@@ -7,8 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -17,6 +20,7 @@ import {
   EuiSkeletonTitle,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -34,6 +38,7 @@ import type { YamlEditorFormValues } from './template_form';
 import { TemplateYamlEditor } from './template_form';
 import { TemplatePreview } from './template_preview';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
+import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
 import { componentStyles } from './template_form_layout.styles';
 import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH, TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
@@ -63,6 +68,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 }) => {
   const styles = useMemoCss(componentStyles);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const modalTitleId = useGeneratedHtmlId();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
   const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
@@ -71,6 +77,35 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   );
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+
+  const {
+    value: yamlValue,
+    onChange: onYamlChange,
+    handleReset,
+    isSaving: isYamlSaving,
+    isSaved: isYamlSaved,
+  } = useDebouncedYamlEdit(
+    storageKey,
+    initialValue,
+    (newValue) => form.setValue('definition', newValue),
+    templateId
+  );
+
+  const hasChanges = yamlValue !== initialValue;
+
+  const handleResetClick = useCallback(() => {
+    setIsResetModalVisible(true);
+  }, []);
+
+  const handleResetConfirm = useCallback(() => {
+    handleReset();
+    setIsResetModalVisible(false);
+  }, [handleReset]);
+
+  const handleResetCancel = useCallback(() => {
+    setIsResetModalVisible(false);
+  }, []);
 
   const handleCreate = useCallback(() => {
     setSubmitError(null);
@@ -83,7 +118,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         }
       },
       () => {
-        setSubmitError('Please fix validation errors before saving.');
+        setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
   }, [form, onCreate]);
@@ -129,24 +164,49 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
                       </EuiTitle>
                     </EuiSkeletonTitle>
                   </EuiFlexItem>
+                  {hasChanges && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="warning">{i18n.UNSAVED_CHANGES}</EuiBadge>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiPageHeaderSection>
 
               <EuiPageHeaderSection>
-                <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
-                  <EuiToolTip content={saveTooltipContent}>
-                    <EuiButton
-                      fill
-                      color="primary"
-                      size="s"
-                      onClick={handleCreate}
-                      disabled={isLoading || isSaving}
-                      isLoading={isSaving}
-                      data-test-subj="saveTemplateHeaderButton"
-                    >
-                      {isEdit ? i18n.SAVE_TEMPLATE : i18n.CREATE_TEMPLATE}
-                    </EuiButton>
-                  </EuiToolTip>
+                <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+                  {hasChanges && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="refresh"
+                          onClick={handleResetClick}
+                          disabled={isLoading || isSaving}
+                          aria-label={isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT}
+                          data-test-subj="resetTemplateButton"
+                          display="base"
+                          size="s"
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={saveTooltipContent}>
+                      <EuiButton
+                        fill
+                        color="primary"
+                        size="s"
+                        onClick={handleCreate}
+                        disabled={isLoading || isSaving}
+                        isLoading={isSaving}
+                        data-test-subj="saveTemplateHeaderButton"
+                      >
+                        {isEdit ? i18n.SAVE_TEMPLATE : i18n.CREATE_TEMPLATE}
+                      </EuiButton>
+                    </EuiToolTip>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageHeaderSection>
             </EuiPageTemplate.Header>
@@ -164,9 +224,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
               flexPanel={
                 <div css={styles.editorPanel}>
                   <TemplateYamlEditor
-                    storageKey={storageKey}
-                    initialValue={initialValue}
-                    templateId={templateId}
+                    value={yamlValue}
+                    onChange={onYamlChange}
+                    isSaving={isYamlSaving}
+                    isSaved={isYamlSaved}
+                    hasUnsavedChanges={hasChanges}
                   />
                 </div>
               }
@@ -188,6 +250,22 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {isResetModalVisible && (
+        <EuiConfirmModal
+          title={i18n.REVERT_MODAL_TITLE}
+          onCancel={handleResetCancel}
+          onConfirm={handleResetConfirm}
+          cancelButtonText={i18n.REVERT_MODAL_CANCEL}
+          confirmButtonText={i18n.REVERT_MODAL_CONFIRM}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
+        >
+          {i18n.REVERT_MODAL_BODY}
+        </EuiConfirmModal>
+      )}
     </FormProvider>
   );
 };

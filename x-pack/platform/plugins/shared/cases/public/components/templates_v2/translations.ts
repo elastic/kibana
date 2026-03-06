@@ -83,3 +83,11 @@ export const REVERT_MODAL_CONFIRM = i18n.translate('xpack.cases.templates.revert
 export const REVERT_MODAL_CANCEL = i18n.translate('xpack.cases.templates.revertModalCancel', {
   defaultMessage: 'Cancel',
 });
+
+export const FIX_VALIDATION_ERRORS = i18n.translate('xpack.cases.templates.fixValidationErrors', {
+  defaultMessage: 'Please fix validation errors before saving.',
+});
+
+export const UNSAVED_CHANGES = i18n.translate('xpack.cases.templates.unsavedChanges', {
+  defaultMessage: 'Unsaved changes',
+});

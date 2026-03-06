@@ -29,7 +29,6 @@ export const useDebouncedYamlEdit = (
     storageKey,
     templateId ? { templateId, definition: initialValue } : initialValue
   );
-
   const valueFromStorage = typeof storedState === 'string' ? storedState : storedState?.definition;
   const shouldUseStoredValue =
     typeof storedState === 'string' || storedState?.templateId === templateId;
@@ -65,6 +64,12 @@ export const useDebouncedYamlEdit = (
     [setStoredState, onChangeCallback, templateId]
   );
 
+  const handleReset = useCallback(() => {
+    const stateToSave = templateId ? { templateId, definition: initialValue } : initialValue;
+    setStoredState(stateToSave);
+    onChangeCallback(initialValue);
+  }, [setStoredState, onChangeCallback, initialValue, templateId]);
+
   const debouncedSave = useRef(debounce(handleSave, DEBOUNCE_DELAY_MS));
 
   useEffect(() => {
@@ -90,6 +95,7 @@ export const useDebouncedYamlEdit = (
   return {
     value,
     onChange,
+    handleReset,
     isSaving,
     isSaved,
   };

@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useForm, FormProvider } from 'react-hook-form';
 import { TemplateYamlEditor } from './template_form';
 import { TestProviders } from '../../../common/mock';
-import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
@@ -23,29 +21,18 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 describe('TemplateFormFields', () => {
-  const renderFields = (definition: string) => {
-    const Wrapper = () => {
-      const form = useForm({
-        defaultValues: {
-          name: '',
-          owner: '',
-          definition,
-        },
-      });
+  const mockOnChange = jest.fn();
 
-      return (
-        <TestProviders>
-          <FormProvider {...form}>
-            <TemplateYamlEditor
-              storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}
-              initialValue={definition}
-            />
-          </FormProvider>
-        </TestProviders>
-      );
-    };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    return render(<Wrapper />);
+  const renderFields = (definition: string, onChange = mockOnChange) => {
+    return render(
+      <TestProviders>
+        <TemplateYamlEditor value={definition} onChange={onChange} />
+      </TestProviders>
+    );
   };
 
   it('renders the YAML code editor with the provided definition', () => {
@@ -57,7 +44,7 @@ describe('TemplateFormFields', () => {
     );
   });
 
-  it('updates the form value when the editor content changes', async () => {
+  it('calls onChange when the editor content changes', async () => {
     renderFields('initial: value');
 
     fireEvent.change(screen.getByTestId('code-editor'), {
@@ -65,7 +52,17 @@ describe('TemplateFormFields', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('code-editor')).toHaveValue('updated: value');
+      expect(mockOnChange).toHaveBeenCalledWith('updated: value');
     });
+  });
+
+  it('shows saved check icon when isSaved is true', () => {
+    render(
+      <TestProviders>
+        <TemplateYamlEditor value="test: value" onChange={mockOnChange} isSaved={true} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTitle('Template saved')).toBeInTheDocument();
   });
 });

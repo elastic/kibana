@@ -8,10 +8,8 @@
 import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiBadge, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useFormContext } from 'react-hook-form';
-import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import {
   getTemplateDefinitionJsonSchema,
   TEMPLATE_SCHEMA_URI,
@@ -19,16 +17,17 @@ import {
 import { TemplateYamlEditorBase } from './template_yaml_editor';
 import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
 import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
-import * as i18n from '../translations';
 
 export interface YamlEditorFormValues {
   definition: string;
 }
 
 export interface TemplateYamlEditorProps {
-  storageKey: string;
-  initialValue: string;
-  templateId?: string;
+  value: string;
+  onChange: (value: string) => void;
+  isSaving?: boolean;
+  isSaved?: boolean;
+  hasUnsavedChanges?: boolean;
 }
 
 const styles = {
@@ -59,12 +58,13 @@ const styles = {
 };
 
 export const TemplateYamlEditor = ({
-  storageKey,
-  initialValue,
-  templateId,
+  value,
+  onChange,
+  isSaving = false,
+  isSaved = false,
+  hasUnsavedChanges = false,
 }: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
-  const { setValue } = useFormContext<YamlEditorFormValues>();
 
   const {
     containerRef,
@@ -78,13 +78,6 @@ export const TemplateYamlEditor = ({
     handleEditorMount,
     handleErrorClick,
   } = useValidationAccordionPositioning();
-
-  const { value, onChange, isSaving, isSaved } = useDebouncedYamlEdit(
-    storageKey,
-    initialValue,
-    (newValue) => setValue('definition', newValue),
-    templateId
-  );
 
   const schemas = useMemo(() => {
     const jsonSchema = getTemplateDefinitionJsonSchema();
@@ -114,9 +107,9 @@ export const TemplateYamlEditor = ({
             <EuiLoadingSpinner size="m" />
           </div>
         )}
-        {isSaved && (
+        {!isSaving && isSaved && (
           <div css={styles.statusIndicator(euiTheme)}>
-            <EuiBadge color="success">{i18n.TEMPLATE_SAVED}</EuiBadge>
+            <EuiIcon type="check" color="success" size="l" title="Template saved" />
           </div>
         )}
         <TemplateYamlEditorBase
