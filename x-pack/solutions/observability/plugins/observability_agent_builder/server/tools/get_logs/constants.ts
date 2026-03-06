@@ -5,24 +5,39 @@
  * 2.0.
  */
 
+import {
+  AGENT_NAME,
+  CONTAINER_ID,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_MESSAGE,
+  HOST_NAME,
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_POD_NAME,
+  LOG_LEVEL,
+  SERVICE_NAME,
+  TRACE_ID,
+} from '@kbn/apm-types';
+
 export const OBSERVABILITY_GET_LOGS_TOOL_ID = 'observability.get_logs';
 
 export const MAX_FIELD_VALUE_LENGTH = 500;
 
 export const DEFAULT_KEEP_FIELDS = [
   'message',
-  'error.message',
-  'error.exception.message',
-  'error.exception.type',
-  'service.name',
-  'container.name',
-  'host.name',
-  'container.id',
-  'trace.id',
-  'agent.name',
-  'kubernetes.container.name',
-  'kubernetes.node.name',
-  'kubernetes.namespace',
-  'kubernetes.pod.name',
-  'log.level',
+  ERROR_MESSAGE,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  SERVICE_NAME,
+  HOST_NAME,
+  CONTAINER_ID,
+  TRACE_ID,
+  AGENT_NAME,
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_POD_NAME,
+  LOG_LEVEL,
 ];

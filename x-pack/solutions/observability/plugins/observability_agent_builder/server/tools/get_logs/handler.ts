@@ -99,14 +99,11 @@ function buildEsqlQuery({
   bucketSize: string;
   groupBy?: string;
 }): string {
-  const SAFE_INDEX_PATTERN = /^[a-zA-Z0-9_.*,:\-]+$/;
-  if (!SAFE_INDEX_PATTERN.test(index)) {
+  if (!isValidIndexPattern(index)) {
     throw new Error(`Invalid index pattern: "${index}"`);
   }
 
-  const SAFE_BUCKET_SIZE =
-    /^\d+(milliseconds?|ms|seconds?|s|minutes?|m|hours?|h|days?|d|weeks?|w|months?|mo|quarters?|q|years?|y)$/i;
-  if (!SAFE_BUCKET_SIZE.test(bucketSize)) {
+  if (!isValidBucketSize(bucketSize)) {
     throw new Error(`Invalid bucket size: "${bucketSize}"`);
   }
 
@@ -267,6 +264,17 @@ function splitResultByForkId(
     columns: columnsWithoutFork,
     values: rows.map((row) => row.filter((_, i) => i !== forkColumnIndex)),
   }));
+}
+
+const SAFE_INDEX_PATTERN = /^[a-zA-Z0-9_.*,:\-]+$/;
+function isValidIndexPattern(index: string): boolean {
+  return SAFE_INDEX_PATTERN.test(index);
+}
+
+const SAFE_BUCKET_SIZE =
+  /^\d+(milliseconds?|ms|seconds?|s|minutes?|m|hours?|h|days?|d|weeks?|w|months?|mo|quarters?|q|years?|y)$/i;
+function isValidBucketSize(bucketSize: string): boolean {
+  return SAFE_BUCKET_SIZE.test(bucketSize);
 }
 
 function truncateFieldValue(value: unknown): unknown {
