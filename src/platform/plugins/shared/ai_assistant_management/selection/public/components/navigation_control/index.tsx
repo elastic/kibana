@@ -114,39 +114,45 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       defaultMessage: 'Open AI Assistant',
     }
   );
+  const AiAssistantHeaderButton = () => {
+    return (
+      <>
+        <EuiShowFor sizes={['m', 'l', 'xl']}>
+          <EuiToolTip content={tooltipContent}>
+            <AiButton
+              onClick={() => setModalOpen(true)}
+              iconType="aiAssistantLogo"
+              variant="base"
+              size="s"
+              data-test-subj="aiAssistantHeaderButton"
+            >
+              {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
+                defaultMessage: 'AI Assistant',
+              })}
+            </AiButton>
+          </EuiToolTip>
+        </EuiShowFor>
+        <EuiShowFor sizes={['xs', 's']}>
+          <EuiToolTip content={tooltipContent}>
+            <AiButton
+              iconOnly
+              iconType="aiAssistantLogo"
+              onClick={() => setModalOpen(true)}
+              aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
+                defaultMessage: 'Open the AI Assistant selector',
+              })}
+              variant="base"
+              size="s"
+              data-test-subj="aiAssistantHeaderButtonIcon"
+            />
+          </EuiToolTip>
+        </EuiShowFor>
+      </>
+    );
+  };
   return (
     <>
-      <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={tooltipContent}>
-          <AiButton
-            onClick={() => setModalOpen(true)}
-            iconType="aiAssistantLogo"
-            variant="base"
-            size="s"
-            data-test-subj="aiAssistantHeaderButton"
-          >
-            {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
-              defaultMessage: 'AI Assistant',
-            })}
-          </AiButton>
-        </EuiToolTip>
-      </EuiShowFor>
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip content={tooltipContent}>
-          <AiButton
-            iconOnly
-            iconType="aiAssistantLogo"
-            onClick={() => setModalOpen(true)}
-            aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
-              defaultMessage: 'Open the AI Assistant selector',
-            })}
-            variant="base"
-            size="s"
-            data-test-subj="aiAssistantHeaderButtonIcon"
-          />
-        </EuiToolTip>
-      </EuiShowFor>
-
+      <AiAssistantHeaderButton />
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>

@@ -71,41 +71,47 @@ export function AgentBuilderNavControl() {
       <span>{shortcutLabel}</span>
     </div>
   );
+  const AgentBuilderButton = () => {
+    return (
+      <>
+        <EuiShowFor sizes={['m', 'l', 'xl']}>
+          <EuiToolTip content={tooltipContent}>
+            <AiButton
+              variant="base"
+              size="s"
+              iconType="productAgent"
+              onClick={toggleSidebar}
+              aria-label={buttonLabel}
+              data-test-subj="AgentBuilderNavControlButton"
+            >
+              <FormattedMessage
+                id="xpack.agentBuilder.navControl.linkLabel"
+                defaultMessage="AI Agent"
+              />
+            </AiButton>
+          </EuiToolTip>
+        </EuiShowFor>
 
+        <EuiShowFor sizes={['xs', 's']}>
+          <EuiToolTip content={tooltipContent}>
+            <AiButton
+              iconOnly
+              variant="base"
+              size="s"
+              iconType="productAgent"
+              onClick={toggleSidebar}
+              aria-label={buttonLabel}
+              data-test-subj="AgentBuilderNavControlButtonIcon"
+            />
+          </EuiToolTip>
+        </EuiShowFor>
+      </>
+    );
+  };
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={tooltipContent}>
-          <AiButton
-            variant="base"
-            size="s"
-            iconType="productAgent"
-            onClick={toggleSidebar}
-            aria-label={buttonLabel}
-            data-test-subj="AgentBuilderNavControlButton"
-          >
-            <FormattedMessage
-              id="xpack.agentBuilder.navControl.linkLabel"
-              defaultMessage="AI Agent"
-            />
-          </AiButton>
-        </EuiToolTip>
-      </EuiShowFor>
-
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip content={tooltipContent}>
-          <AiButton
-            iconOnly
-            variant="base"
-            size="s"
-            iconType="productAgent"
-            onClick={toggleSidebar}
-            aria-label={buttonLabel}
-            data-test-subj="AgentBuilderNavControlButtonIcon"
-          />
-        </EuiToolTip>
-      </EuiShowFor>
+      <AgentBuilderButton />
     </>
   );
 }
