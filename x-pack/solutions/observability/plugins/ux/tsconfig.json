@@ -51,8 +51,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-rendering-browser",
-    "@kbn/scout-oblt"
+    "@kbn/scout-oblt",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }
