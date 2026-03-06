@@ -23,3 +23,10 @@ export const headerStyles = css`
     text-decoration: underline;
   }
 `;
+
+export const spacesLoadingSpinnerStyles = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;

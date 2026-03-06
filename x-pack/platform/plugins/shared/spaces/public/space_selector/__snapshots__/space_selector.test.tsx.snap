@@ -53,11 +53,16 @@ exports[`it renders with custom logo 1`] = `
         <div
           class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
         />
-        <span
-          aria-label="Loading"
-          class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
-          role="progressbar"
-        />
+        <div
+          class="css-9yumq1-spacesLoadingSpinnerStyles"
+          data-test-subj="spacesLoadingSpinner"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+            role="progressbar"
+          />
+        </div>
       </div>
     </section>
   </main>

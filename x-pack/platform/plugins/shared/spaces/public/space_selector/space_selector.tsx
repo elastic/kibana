@@ -239,7 +239,9 @@ export const SpaceSelector = ({
           {renderListFilterControls()}
           <Fragment>
             {isLoading ? (
-              <EuiLoadingSpinner size="xl" />
+              <div css={styles.spacesLoadingSpinnerStyles} data-test-subj="spacesLoadingSpinner">
+                <EuiLoadingSpinner size="xl" />
+              </div>
             ) : (
               <Fragment>
                 {!error ? (
