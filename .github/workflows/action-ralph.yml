@@ -28,7 +28,7 @@ on:
     types: [created]
 
 env:
-  BETA_TESTERS: '["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'
+  BETA_TESTERS: '["flash1293","achyutjhunjhunwala","klacabane","rStelmach","dominiqueclarke"]'
 
 # Prevent parallel runs from the same trigger to avoid wasted spend
 concurrency:
@@ -52,12 +52,12 @@ jobs:
       || (
         github.event_name == 'issue_comment'
         && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
-        && contains(fromJSON('["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'), github.event.comment.user.login)
+        && contains(fromJSON('["flash1293","achyutjhunjhunwala","klacabane","rStelmach","dominiqueclarke"]'), github.event.comment.user.login)
       )
       || (
         github.event_name == 'pull_request_review_comment'
         && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
-        && contains(fromJSON('["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'), github.event.comment.user.login)
+        && contains(fromJSON('["flash1293","achyutjhunjhunwala","klacabane","rStelmach","dominiqueclarke"]'), github.event.comment.user.login)
       )
     permissions:
       contents: read
