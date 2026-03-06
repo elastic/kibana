@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
-
-export { regenerateMoonProjects };
-export { runListAffected } from './cli/run_list_affected';
-export {
-  getAffectedPackages,
-  filterFilesByAffectedPackages,
-  findPackageForPath,
-  getPackageLookup,
-  getAffectedPackagesGit,
-  getAffectedPackagesMoon,
-} from './affected';
-export type { AffectedPackagesConfig, AffectedPackagesLog } from './affected';
+require('@kbn/setup-node-env');
+require('@kbn/moon').runListAffected();

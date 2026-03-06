@@ -52,6 +52,7 @@
     "lint:es": "node --no-experimental-require-module scripts/eslint_all_files",
     "lint:oxc": "node --no-experimental-require-module scripts/lint",
     "lint:style": "node --no-experimental-require-module scripts/stylelint",
+    "list-affected-packages": "node --no-experimental-require-module scripts/list_affected_packages",
     "makelogs": "node --no-experimental-require-module scripts/makelogs",
     "quick-checks": "node --no-experimental-require-module scripts/quick_checks",
     "serverless": "node --no-experimental-require-module scripts/kibana --dev --serverless",

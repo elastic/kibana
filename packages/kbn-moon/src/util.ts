@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execSync } from 'child_process';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import path from 'path';
 
@@ -16,6 +17,20 @@ import _ from 'lodash';
 import jsYaml from 'js-yaml';
 
 import type { Package } from '@kbn/repo-packages';
+
+const getKibanaDirCached = (() => {
+  let kibanaDir: string | undefined;
+  return (): string => {
+    if (!kibanaDir) {
+      kibanaDir = execSync('git rev-parse --show-toplevel', { encoding: 'utf-8' }).trim();
+    }
+    return kibanaDir;
+  };
+})();
+
+export function getKibanaDir(): string {
+  return getKibanaDirCached();
+}
 
 export function readFile(filePath: string) {
   return readFileSync(filePath, 'utf8');

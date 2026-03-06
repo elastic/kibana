@@ -15,6 +15,7 @@ import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
+import { getAffectedPackages, filterFilesByAffectedPackages } from '@kbn/moon';
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
@@ -24,10 +25,7 @@ import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
-import {
-  getAffectedPackagesForFiltering,
-  filterFilesByAffectedPackages,
-} from '../affected-packages';
+import { doAnyChangesMatch } from '../github';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const SHARD_ANNOTATION_SEP = '||shard=';
@@ -226,7 +224,34 @@ export async function pickTestGroupRunOrder() {
   const jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
 
   // Apply affected package filtering
-  const affectedPackages = await getAffectedPackagesForFiltering(process.env.GITHUB_PR_MERGE_BASE);
+  const mergeBase = process.env.GITHUB_PR_MERGE_BASE;
+  let affectedPackages: Set<string> | null = null;
+
+  if (mergeBase) {
+    // TODO: review
+    const criticalPaths = [
+      'scripts/jest.js',
+      'scripts/jest_all.js',
+      'package.json',
+      'yarn.lock',
+      'tsconfig.json',
+      'tsconfig.base.json',
+      '.moon/workspace.yml',
+      '.moon/tasks/tag-jest-unit-tests.yml',
+      'src/platform/packages/shared/kbn-test/',
+    ];
+    const skipFiltering =
+      process.env.GITHUB_LABELS?.includes('ci:no-selective-tests') ||
+      (await doAnyChangesMatch(criticalPaths.map((p) => new RegExp(p))));
+
+    if (!skipFiltering) {
+      try {
+        affectedPackages = await getAffectedPackages(mergeBase);
+      } catch (error) {
+        console.warn('Failed to detect affected packages, running all tests', error);
+      }
+    }
+  }
   const filteredJestUnitConfigs = filterFilesByAffectedPackages(jestUnitConfigs, affectedPackages);
   console.warn(
     `Filtering Jest unit tests for affected packages: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`

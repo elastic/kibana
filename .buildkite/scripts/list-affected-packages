@@ -1,105 +1,14 @@
-#!/usr/bin/env node
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-/**
- * CLI script to list affected packages
- * 
- * Usage:
- *   .buildkite/scripts/list-affected-packages [options]
- * 
- * Options:
- *   --deep         Include downstream dependencies (default: false)
- *   --json         Output as JSON array
- *   --merge-base   Git commit to compare against (default: GITHUB_PR_MERGE_BASE env var or 'main')
- *   --strategy     Strategy to use: git or moon (default: git)
- * 
- * Examples:
- *   .buildkite/scripts/list-affected-packages
- *   .buildkite/scripts/list-affected-packages --deep
- *   .buildkite/scripts/list-affected-packages --deep --json
- *   .buildkite/scripts/list-affected-packages --merge-base HEAD~5
- *   .buildkite/scripts/list-affected-packages --strategy moon --deep
- */
-
-// Must be before imports to suppress logging
-process.env.AFFECTED_LOGGING = 'false';
-
-const path = require('path');
-
-// Add the parent directories to the require path so we can load TypeScript via ts-node
-require('ts-node').register({
-  transpileOnly: true,
-  compilerOptions: {
-    module: 'commonjs',
-  },
-  project: path.join(__dirname, '../tsconfig.json'),
-});
-
-const affectedPackages = require(path.join(__dirname, '../pipeline-utils/affected-packages'));
-const getAffectedPackages = affectedPackages.getAffectedPackages;
-
-async function main() {
-  const args = process.argv.slice(2);
-  
-  // Parse flags
-  const flags = {
-    deep: args.includes('--deep'),
-    json: args.includes('--json'),
-    mergeBase: undefined,
-    strategy: 'git',
-  };
-
-  // Parse --merge-base value
-  const mergeBaseIndex = args.indexOf('--merge-base');
-  if (mergeBaseIndex !== -1 && args[mergeBaseIndex + 1]) {
-    flags.mergeBase = args[mergeBaseIndex + 1];
-  } else {
-    // Default to GITHUB_PR_MERGE_BASE env var or 'main'
-    flags.mergeBase = process.env.GITHUB_PR_MERGE_BASE || 'main';
-  }
-
-  // Parse --strategy value
-  const strategyIndex = args.indexOf('--strategy');
-  if (strategyIndex !== -1 && args[strategyIndex + 1]) {
-    const strategy = args[strategyIndex + 1];
-    if (strategy !== 'git' && strategy !== 'moon') {
-      console.error(`Invalid strategy: ${strategy}. Must be 'git' or 'moon'.`);
-      process.exit(1);
-    }
-    flags.strategy = strategy;
-  }
-
-  try {
-    // Get affected packages with logging disabled
-    const affectedPackages = await getAffectedPackages(flags.mergeBase, {
-      strategy: flags.strategy,
-      includeDownstream: flags.deep,
-      logging: false,
-    });
-
-    const packageList = Array.from(affectedPackages).sort();
-
-    if (flags.json) {
-      // Output as JSON array
-      console.log(JSON.stringify(packageList, null, 2));
-    } else {
-      // Output one package per line
-      packageList.forEach(pkg => console.log(pkg));
-    }
-
-    process.exit(0);
-  } catch (error) {
-    console.error('Error getting affected packages:', error.message);
-    process.exit(1);
-  }
-}
-
-main();
+#!/usr/bin/env bash
+#
+# List packages affected by changes (compared to merge base).
+# Delegates to the repo script scripts/list_affected_packages.js.
+#
+# Usage:
+#   .buildkite/scripts/list-affected-packages [options]
+#
+# Options: --deep, --json, --merge-base <commit>, --strategy <git|moon>
+# See: yarn list-affected-packages --help (or scripts/list_affected_packages.js)
+#
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+exec node --no-experimental-require-module scripts/list_affected_packages.js "$@"

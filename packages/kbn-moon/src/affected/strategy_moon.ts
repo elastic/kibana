@@ -8,23 +8,24 @@
  */
 
 import { execSync } from 'child_process';
-import { getKibanaDir } from '../utils';
+import { getKibanaDir } from '../util';
 
-const REPO_ROOT = getKibanaDir();
+function getRepoRoot(): string {
+  return getKibanaDir();
+}
 
 /**
- * Moon-based strategy: Use moon query to get affected projects
+ * Moon-based strategy: use moon query to get affected projects.
  */
 export function getAffectedPackagesMoon(
   mergeBase: string,
   includeDownstream: boolean
 ): Set<string> {
-  // Build the moon query command
   const downstreamFlag = includeDownstream ? '--downstream deep' : '';
   const command = `moon query projects --affected ${downstreamFlag} --json`;
 
   const output = execSync(command, {
-    cwd: REPO_ROOT,
+    cwd: getRepoRoot(),
     encoding: 'utf8',
     maxBuffer: 50 * 1024 * 1024, // 50MB buffer
     env: {
@@ -34,9 +35,7 @@ export function getAffectedPackagesMoon(
     timeout: 120000, // 2 minutes (moon can be slow)
   });
 
-  const result = JSON.parse(output);
-
-  // Extract project IDs from the response
+  const result = JSON.parse(output) as { projects?: Array<{ id?: string }> };
   const packageIds = new Set<string>();
   if (result.projects && Array.isArray(result.projects)) {
     for (const project of result.projects) {

@@ -8,10 +8,7 @@
  */
 
 import * as path from 'path';
-import * as fs from 'fs';
-import { getKibanaDir } from '../utils';
-
-const REPO_ROOT = getKibanaDir();
+import { getKibanaDir, readFile } from '../util';
 
 let cachedPackageLookup: Map<string, string> | null = null;
 
@@ -24,15 +21,15 @@ export function getPackageLookup(): Map<string, string> {
     return cachedPackageLookup;
   }
 
-  const packageJsonPath = path.join(REPO_ROOT, 'package.json');
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  const packageJsonPath = path.join(getKibanaDir(), 'package.json');
+  const packageJson = JSON.parse(readFile(packageJsonPath));
   const allDependencies = {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
   };
 
   const packageLookup = new Map<string, string>();
-  for (const [packageName, packageLink] of Object.entries<string>(allDependencies)) {
+  for (const [packageName, packageLink] of Object.entries(allDependencies) as [string, string][]) {
     if (packageName.startsWith('@kbn/')) {
       const packageDir = packageLink.replace(/^link:/, '');
       packageLookup.set(packageDir, packageName);
@@ -45,12 +42,12 @@ export function getPackageLookup(): Map<string, string> {
 }
 
 /**
- * Find the package that contains a given file path
+ * Find the package that contains a given file path.
+ * Uses the longest prefix of the path that is a key in the package lookup.
  */
 export function findPackageForPath(filePath: string): string | undefined {
   const packageLookup = getPackageLookup();
 
-  // Find the longest prefix of the path that is a key in the packageLookup
   let longestPrefix = '';
   for (const packageDir of packageLookup.keys()) {
     if (filePath.startsWith(packageDir)) {
