@@ -338,10 +338,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
   /**
-   * SPA navigation config for the alert details page.
-   * When provided, the "View alert details" action and flyout footer use
-   * `navigateToApp` for client-side routing instead of opening the flyout
-   * or using full-page `href` navigation.
+   * Navigation config for the alert details page.
+   * When provided, the "View alert details" row action and the flyout footer
+   * render as `href` links to the alert details page instead of opening
+   * the flyout.
    */
   alertDetailsNavigation?: AlertDetailsNavigation;
   /**
@@ -636,19 +636,15 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
       key?: Key;
       alert: Alert;
       onActionExecuted?: () => void;
-      isAlertDetailsEnabled?: boolean;
       /**
        * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
        */
       resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
       /**
-       * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
-       */
-      resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
-      /**
        * SPA navigation config for the alert details page.
-       * When provided, the "View alert details" action uses `navigateToApp` for
-       * client-side routing instead of a full-page `href` navigation.
+       * When provided, the "View alert details" row action and flyout footer
+       * render as `href` links to the alert details page instead of opening
+       * the flyout.
        */
       alertDetailsNavigation?: AlertDetailsNavigation;
       /**

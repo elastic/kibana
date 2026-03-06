@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlyout,
@@ -62,14 +62,12 @@ export const AlertDetailFlyout = ({
 
   const alertId = (alert?.[ALERT_UUID]?.[0] as string) ?? null;
 
-  const handleNavigateToAlertDetails = useCallback(() => {
-    if (alertDetailsNavigation && alertId) {
-      services.application.navigateToApp(alertDetailsNavigation.appId, {
-        path: alertDetailsNavigation.getPath(alertId),
-        openInNewTab: openLinksInNewTab,
-      });
-    }
-  }, [alertDetailsNavigation, alertId, services.application, openLinksInNewTab]);
+  const alertDetailsHref =
+    alertDetailsNavigation && alertId
+      ? services.application.getUrlForApp(alertDetailsNavigation.appId, {
+          path: alertDetailsNavigation.getPath(alertId),
+        })
+      : null;
 
   const overviewTab = useMemo(
     () => ({
@@ -192,14 +190,15 @@ export const AlertDetailFlyout = ({
         )
       )}
 
-      {alertDetailsNavigation && alertId && (
+      {alertDetailsHref && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="alertFlyoutAlertDetailsButton"
                 fill
-                onClick={handleNavigateToAlertDetails}
+                href={alertDetailsHref}
+                target={openLinksInNewTab ? '_blank' : undefined}
               >
                 {i18n.ALERT_FLYOUT_ALERT_DETAILS_BUTTON}
               </EuiButton>

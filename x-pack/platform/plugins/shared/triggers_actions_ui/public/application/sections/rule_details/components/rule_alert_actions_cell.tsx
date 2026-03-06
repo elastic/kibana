@@ -62,7 +62,6 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
       key="defaultRowActions"
       onActionExecuted={closeActionsPopover}
       onExpandedAlertIndexChange={onExpandedAlertIndexChange}
-      isAlertDetailsEnabled={Boolean(alertDetailsNavigation)}
       alertDetailsNavigation={alertDetailsNavigation}
       resolveRulePagePath={(alertRuleId) =>
         alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null

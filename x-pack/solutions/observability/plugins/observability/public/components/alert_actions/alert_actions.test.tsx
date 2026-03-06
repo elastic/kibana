@@ -30,7 +30,11 @@ import { createMemoryHistory } from 'history';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import type { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AdditionalContext,
+  AlertDetailsNavigation,
+  RenderContext,
+} from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -123,6 +127,11 @@ describe('ObservabilityActions component', () => {
       },
     });
 
+    const alertDetailsNavigation: AlertDetailsNavigation = {
+      appId: 'observability',
+      getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+    };
+
     const props: Pick<
       ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>,
       | 'tableId'
@@ -135,6 +144,7 @@ describe('ObservabilityActions component', () => {
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
       | 'refresh'
+      | 'alertDetailsNavigation'
     > = {
       tableId: pageId,
       config,
@@ -146,6 +156,7 @@ describe('ObservabilityActions component', () => {
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       refresh,
+      alertDetailsNavigation,
     };
 
     const services = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
@@ -22,50 +22,23 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     rowIndex,
     onExpandedAlertIndexChange,
     onActionExecuted,
-    isAlertDetailsEnabled,
-    resolveAlertPagePath,
     alertDetailsNavigation,
-    tableId,
     openLinksInNewTab,
   }: AlertActionsProps<AC>) => {
     const {
       services: {
-        http: {
-          basePath: { prepend },
-        },
-        application: { navigateToApp },
+        application: { getUrlForApp },
       },
     } = useAlertsTableContext();
     const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
-    const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
-    const linkToAlert = pagePath ? prepend(pagePath) : null;
+    const linkToAlert =
+      alertDetailsNavigation && alertId
+        ? getUrlForApp(alertDetailsNavigation.appId, {
+            path: alertDetailsNavigation.getPath(alertId),
+          })
+        : null;
 
-    const handleNavigateToApp = useCallback(() => {
-      if (alertDetailsNavigation && alertId) {
-        onActionExecuted?.();
-        navigateToApp(alertDetailsNavigation.appId, {
-          path: alertDetailsNavigation.getPath(alertId),
-          openInNewTab: openLinksInNewTab,
-        });
-      }
-    }, [alertDetailsNavigation, alertId, onActionExecuted, navigateToApp, openLinksInNewTab]);
-
-    if (alertDetailsNavigation && alertId) {
-      return (
-        <EuiContextMenuItem
-          data-test-subj="viewAlertDetailsPage"
-          key="viewAlertDetailsPage"
-          size="s"
-          onClick={handleNavigateToApp}
-        >
-          {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
-            defaultMessage: 'View alert details',
-          })}
-        </EuiContextMenuItem>
-      );
-    }
-
-    if (isAlertDetailsEnabled && linkToAlert) {
+    if (linkToAlert) {
       return (
         <EuiContextMenuItem
           data-test-subj="viewAlertDetailsPage"
