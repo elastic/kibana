@@ -242,7 +242,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should enter and exit fullscreen mode', async ({ pageObjects }) => {
+  test('should enter and exit fullscreen mode', async ({ page, pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
@@ -255,6 +255,8 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await test.step('exit fullscreen via Escape', async () => {
       await pageObjects.dashboard.exitFullscreen();
     });
+
+    await expect(page.testSubj.locator('dashboardFullScreenMode')).toBeVisible();
   });
 
   test('should update dashboard settings', async ({ page, pageObjects }) => {
@@ -292,10 +294,11 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       const syncCursorSwitch = page.testSubj.locator('dashboardSyncCursorCheckbox');
       const syncTooltipsSwitch = page.testSubj.locator('dashboardSyncTooltipsCheckbox');
 
-      if ((await syncCursorSwitch.getAttribute('aria-checked')) !== 'true') {
+      const cursorWasChecked = (await syncCursorSwitch.getAttribute('aria-checked')) === 'true';
+      if (!cursorWasChecked) {
         await syncCursorSwitch.click();
-        await expect(syncCursorSwitch).toHaveAttribute('aria-checked', 'true');
       }
+      await expect(syncCursorSwitch).toHaveAttribute('aria-checked', 'true');
 
       await expect(syncTooltipsSwitch).toBeEnabled();
       const tooltipsWasChecked = (await syncTooltipsSwitch.getAttribute('aria-checked')) === 'true';
@@ -387,7 +390,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should maximize a panel', async ({ pageObjects }) => {
+  test('should maximize a panel', async ({ page, pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
@@ -396,6 +399,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await test.step('maximize a panel', async () => {
       await pageObjects.dashboard.maximizePanel();
     });
+    await expect(page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
   });
 
   test('should display created by for a newly created dashboard', async ({ page, pageObjects }) => {

@@ -986,7 +986,7 @@ export class DashboardApp {
     if (title) {
       await this.clickPanelAction('embeddablePanelAction-togglePanel', title);
     } else {
-      const panelWrapper = this.getPanelHoverActionsLocator().first();
+      const panelWrapper = this.page.locator('.embPanel__hoverActionsAnchor >> nth=0');
       await panelWrapper.scrollIntoViewIfNeeded();
       await panelWrapper.hover();
       const toggleAction = panelWrapper.locator(
