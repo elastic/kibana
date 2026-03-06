@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { loadJsonFile } from '@kbn/utils';
 
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -106,9 +107,7 @@ describe('scripts/generate_plugin', () => {
   `);
 
     expect(
-      JSON.parse(
-        Fs.readFileSync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'), 'utf-8')
-      )
+      loadJsonFile(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'))
     ).toMatchInlineSnapshot(`
     Object {
       "description": "",

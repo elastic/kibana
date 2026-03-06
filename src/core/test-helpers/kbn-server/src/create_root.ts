@@ -8,7 +8,6 @@
  */
 
 import { join } from 'path';
-import { readFileSync } from 'fs';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -27,6 +26,7 @@ import {
 } from '@kbn/test';
 import type { CliArgs, RawPackageInfo } from '@kbn/config';
 import { Env } from '@kbn/config';
+import { loadJsonFile } from '@kbn/utils';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -74,7 +74,7 @@ export function createRootWithSettings(
 ) {
   let pkg: RawPackageInfo | undefined;
   if (customKibanaVersion) {
-    pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+    pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
     pkg.version = customKibanaVersion;
   }
 
