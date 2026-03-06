@@ -79,9 +79,6 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
   };
 
   const getBody = () => {
-    const byValueMessage =
-      "<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it.";
-
     const editInDiscoverLink = (chunks: React.ReactNode) => (
       <EuiLink
         data-test-subj="discoverEmbeddableMissingDataViewEditInDiscoverLink"
@@ -109,7 +106,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
         <p>
           <FormattedMessage
             id="discover.embeddable.missingDataView.viewModeWarningDescriptionEditableByValue"
-            defaultMessage={byValueMessage}
+            defaultMessage="<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it."
             values={{ EditInDiscoverLink: editInDiscoverLink }}
           />
         </p>
