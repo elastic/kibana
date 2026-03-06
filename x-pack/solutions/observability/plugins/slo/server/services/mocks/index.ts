@@ -8,6 +8,7 @@
 import type { ResourceInstaller } from '../resource_installer';
 import type { BurnRatesClient } from '../burn_rates_client';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SLOTemplateRepository } from '../slo_template_repository';
 import type { SummaryClient } from '../summary_client';
 import type { SummarySearchClient } from '../summary_search_client/types';
 import type { TransformManager } from '../transform_manager';
@@ -71,11 +72,20 @@ const createBurnRatesClientMock = (): jest.Mocked<BurnRatesClient> => {
   };
 };
 
+const createSLOTemplateRepositoryMock = (): jest.Mocked<SLOTemplateRepository> => {
+  return {
+    findById: jest.fn(),
+    search: jest.fn(),
+    tags: jest.fn(),
+  };
+};
+
 export {
   createResourceInstallerMock,
   createTransformManagerMock,
   createSummaryTransformManagerMock,
   createSLODefinitionRepositoryMock as createSLORepositoryMock,
+  createSLOTemplateRepositoryMock,
   createSummaryClientMock,
   createSummarySearchClientMock,
   createBurnRatesClientMock,
