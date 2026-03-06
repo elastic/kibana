@@ -217,13 +217,13 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: my-data-source.source.test_type.search');
+    expect(createdYaml).toContain('name: my-data-source.test_type.source.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-data-source.source.search',
+        id: 'my-data-source.test_type.source.search',
         type: 'workflow',
         description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
@@ -294,9 +294,9 @@ tags:
     });
 
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: notion_source.source.test_type.search');
+    expect(createdYaml).toContain('name: notion_source.test_type.source.search');
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'test_type.notion_source.source.search' })
+      expect.objectContaining({ id: 'notion_source.test_type.source.search' })
     );
   });
 
@@ -451,7 +451,7 @@ tags:
             description: 'List repository issues List issues',
           },
         ],
-        namespace: 'test_type.my-mcp-connector',
+        namespace: 'my-mcp-connector.test_type',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,

@@ -7,35 +7,40 @@
 
 import { getWorkflowPrefix, getToolPrefix } from './data_source_prefixes';
 
-describe('getWorkflowPrefix', () => {
-  it('produces slugified-name.source.type', () => {
-    expect(getWorkflowPrefix('SPO_connect', 'sharepoint-online')).toBe(
-      'spo_connect.source.sharepoint-online'
-    );
+describe('getToolPrefix', () => {
+  it('produces name.type', () => {
+    expect(getToolPrefix('SPO_connect', 'sharepoint-online')).toBe('spo_connect.sharepoint-online');
   });
 
   it('handles names with spaces', () => {
-    expect(getWorkflowPrefix('Random Thoughts', 'github')).toBe('random-thoughts.source.github');
+    expect(getToolPrefix('Random Thoughts', 'github')).toBe('random-thoughts.github');
   });
 
   it('propagates the error from slugify for invalid names', () => {
-    expect(() => getWorkflowPrefix('!!!', 'github')).toThrow(
+    expect(() => getToolPrefix('!!!', 'github')).toThrow(
       'must contain at least one alphanumeric character'
     );
   });
 });
 
-describe('getToolPrefix', () => {
-  it('produces type.slugified-name', () => {
-    expect(getToolPrefix('SPO_connect', 'sharepoint-online')).toBe('sharepoint-online.spo_connect');
+describe('getWorkflowPrefix', () => {
+  it('produces name.type.source', () => {
+    expect(getWorkflowPrefix('SPO_connect', 'sharepoint-online')).toBe(
+      'spo_connect.sharepoint-online.source'
+    );
   });
 
   it('handles names with spaces', () => {
-    expect(getToolPrefix('Random Thoughts', 'github')).toBe('github.random-thoughts');
+    expect(getWorkflowPrefix('Random Thoughts', 'github')).toBe('random-thoughts.github.source');
+  });
+
+  it('extends the tool prefix with .source', () => {
+    const toolPrefix = getToolPrefix('my-source', 'github');
+    expect(getWorkflowPrefix('my-source', 'github')).toBe(`${toolPrefix}.source`);
   });
 
   it('propagates the error from slugify for invalid names', () => {
-    expect(() => getToolPrefix('!!!', 'github')).toThrow(
+    expect(() => getWorkflowPrefix('!!!', 'github')).toThrow(
       'must contain at least one alphanumeric character'
     );
   });
