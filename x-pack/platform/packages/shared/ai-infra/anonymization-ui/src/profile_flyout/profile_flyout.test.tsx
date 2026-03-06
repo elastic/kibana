@@ -31,7 +31,7 @@ const createBaseTargetIdField = (): UseTargetIdFieldResult => ({
 let mockTargetIdField = createBaseTargetIdField();
 
 jest.mock('../profile_form/profile_form_provider', () => {
-  const mockReact = jest.requireActual('react');
+  const mockReact: typeof import('react') = jest.requireActual('react');
   const { ProfileFormContextProvider } = jest.requireActual('../profile_form/profile_form_context');
   type MockProfileFormProviderProps = React.PropsWithChildren<ProfileFormProps>;
 

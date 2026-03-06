@@ -83,9 +83,23 @@ describe('ProfilesTable', () => {
             targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
             rules: {
               fieldRules: [],
-              regexRules: [{ id: 'regex-1', type: 'regex', pattern: 'foo', entityClass: 'OTHER' }],
+              regexRules: [
+                {
+                  id: 'regex-1',
+                  type: 'regex',
+                  pattern: 'foo',
+                  entityClass: 'PER',
+                  enabled: true,
+                },
+              ],
               nerRules: [
-                { id: 'ner-1', type: 'ner', modelId: 'model', allowedEntities: ['PERSON'] },
+                {
+                  id: 'ner-1',
+                  type: 'ner',
+                  modelId: 'model',
+                  allowedEntityClasses: ['PER'],
+                  enabled: true,
+                },
               ],
             },
           },
