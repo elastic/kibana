@@ -47,6 +47,20 @@ const enableOperations: Record<AlertingEntity, string[]> = {
   alert: [],
 };
 
+const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
+  rule: [
+    'getGapAutoFillScheduler',
+    'findGapAutoFillSchedulerLogs',
+    'createGapAutoFillScheduler',
+    'updateGapAutoFillScheduler',
+    'deleteGapAutoFillScheduler',
+    'find',
+    'findBackfill',
+    'scheduleBackfill',
+  ],
+  alert: [],
+};
+
 const writeOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'create',
@@ -62,19 +76,11 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'bulkDelete',
     'unsnooze',
     'runSoon',
-    'createGapAutoFillScheduler',
-    'updateGapAutoFillScheduler',
-    'deleteGapAutoFillScheduler',
   ],
   alert: ['update'],
 };
 const allOperations: Record<AlertingEntity, string[]> = {
-  rule: [
-    ...readOperations.rule,
-    ...writeOperations.rule,
-    ...enableOperations.rule,
-    ...manualRunOperations.rule,
-  ],
+  rule: [...readOperations.rule, ...writeOperations.rule],
   alert: [...readOperations.alert, ...writeOperations.alert],
 };
 
@@ -100,6 +106,8 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       const all = get(privilegeDefinition.alerting, `${entity}.all`) ?? [];
       const enable = get(privilegeDefinition.alerting, `${entity}.enable`) ?? [];
       const manualRun = get(privilegeDefinition.alerting, `${entity}.manual_run`) ?? [];
+      const manageRuleSettings =
+        get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
@@ -107,6 +115,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
         ...getAlertingPrivilege(readOperations[entity], read, entity),
         ...getAlertingPrivilege(enableOperations[entity], enable, entity),
         ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
+        ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),
       ]);
     };
 
