@@ -8,13 +8,20 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, simpleTrace } from '../fixtures/traces_experience';
+import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
-  async ({ esClient, esArchiver, apmSynthtraceEsClient, apiServices, config, log }) => {
+  async ({
+    esClient,
+    esArchiver,
+    apmSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apiServices,
+    config,
+    log,
+  }) => {
     // Logstash data for flyout stability tests
     log.debug(
       '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
@@ -41,12 +48,25 @@ globalSetupHook(
       log.debug('[setup:traces] Fleet agents setup completed');
     }
 
-    const traceData: SynthtraceGenerator<ApmFields> = simpleTrace({
+    const timeRange = {
       from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
       to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
+    };
+
+    const { apmData, correlationIds } = richTrace(timeRange);
+
+    await apmSynthtraceEsClient.index(apmData);
+    log.debug('[setup:traces] Rich APM trace data indexed');
+
+    const logData = traceCorrelatedLogs({
+      ...timeRange,
+      traceId: correlationIds.richTraceId,
+      transactionId: correlationIds.transactionId,
+      dbSpanId: correlationIds.dbSpanId,
+      processOrderSpanId: correlationIds.processOrderSpanId,
     });
 
-    await apmSynthtraceEsClient.index(traceData);
-    log.debug('[setup:traces] APM trace data indexed');
+    await logsSynthtraceEsClient.index(logData);
+    log.debug('[setup:traces] Correlated log data indexed');
   }
 );
