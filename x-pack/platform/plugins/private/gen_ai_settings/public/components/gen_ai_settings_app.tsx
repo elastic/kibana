@@ -89,12 +89,12 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     const breadcrumbs = [
       ...(showAiBreadcrumb
         ? [
-          {
-            text: i18n.translate('genAiSettings.breadcrumbs.ai', {
-              defaultMessage: 'AI',
-            }),
-          },
-        ]
+            {
+              text: i18n.translate('genAiSettings.breadcrumbs.ai', {
+                defaultMessage: 'AI',
+              }),
+            },
+          ]
         : []),
       {
         text: i18n.translate('genAiSettings.breadcrumbs.genAiSettings', {
@@ -165,10 +165,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       <p>
         <FormattedMessage
           id="genAiSettings.aiConnectorDescriptionWithLink"
-          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${showSpacesNote
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+            showSpacesNote
               ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
               : ''
-            } {manageConnectors}`}
+          } {manageConnectors}`}
           values={{
             link: (
               <EuiLink
