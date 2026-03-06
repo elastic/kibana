@@ -10,7 +10,7 @@
 import {
   getScrollDirection,
   getMonthFromIndex,
-  getTodayPosition,
+  getIndexFromDate,
   getScrollDirectionIcon,
 } from './calendar.utils';
 
@@ -90,19 +90,33 @@ describe('Calendar utility functions', () => {
     });
   });
 
-  describe('getTodayPosition', () => {
-    it('returns correct position when today is in the middle', () => {
-      const firstItemIndex = TODAY_INDEX - 6;
-      expect(getTodayPosition(firstItemIndex, TODAY_INDEX)).toBe(6);
+  describe('getIndexFromDate', () => {
+    const referenceDate = new Date(2026, 2, 15); // March 2026
+
+    it('returns TODAY_INDEX for the same month as reference', () => {
+      const sameMonth = new Date(2026, 2, 1);
+      expect(getIndexFromDate(sameMonth, TODAY_INDEX, referenceDate)).toBe(TODAY_INDEX);
     });
 
-    it('returns 0 when firstItemIndex equals TODAY_INDEX', () => {
-      expect(getTodayPosition(TODAY_INDEX, TODAY_INDEX)).toBe(0);
+    it('returns TODAY_INDEX - 1 for previous month', () => {
+      const prevMonth = new Date(2026, 1, 15); // February 2026
+      expect(getIndexFromDate(prevMonth, TODAY_INDEX, referenceDate)).toBe(TODAY_INDEX - 1);
     });
 
-    it('returns negative when today is before the loaded range', () => {
-      const firstItemIndex = TODAY_INDEX + 5;
-      expect(getTodayPosition(firstItemIndex, TODAY_INDEX)).toBe(-5);
+    it('returns TODAY_INDEX + 1 for next month', () => {
+      const nextMonth = new Date(2026, 3, 10); // April 2026
+      expect(getIndexFromDate(nextMonth, TODAY_INDEX, referenceDate)).toBe(TODAY_INDEX + 1);
+    });
+
+    it('handles year differences correctly', () => {
+      const twoYearsAgo = new Date(2024, 2, 15); // March 2024
+      expect(getIndexFromDate(twoYearsAgo, TODAY_INDEX, referenceDate)).toBe(TODAY_INDEX - 24);
+    });
+
+    it('is inverse of getMonthFromIndex', () => {
+      const index = TODAY_INDEX - 5;
+      const month = getMonthFromIndex(index, TODAY_INDEX, referenceDate);
+      expect(getIndexFromDate(month, TODAY_INDEX, referenceDate)).toBe(index);
     });
   });
 

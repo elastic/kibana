@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Virtuoso, type VirtuosoHandle, type ListRange } from 'react-virtuoso';
 import type { DateRange } from 'react-day-picker';
@@ -18,7 +18,7 @@ import { calendarTexts } from '../translations';
 import {
   getScrollDirection,
   getMonthFromIndex,
-  getTodayPosition,
+  getIndexFromDate,
   getScrollDirectionIcon,
   type ScrollDirection,
 } from './calendar.utils';
@@ -35,8 +35,13 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
+  // Center the loaded range around the start date (if present) or today
+  const [firstItemIndex, setFirstItemIndex] = useState(() => {
+    const targetIndex = range?.from ? getIndexFromDate(range.from, TODAY_INDEX) : TODAY_INDEX;
+    return targetIndex - HALF_MONTHS_TO_LOAD;
+  });
+
   const [scrollDirection, setScrollDirection] = useState<ScrollDirection>('none');
-  const [firstItemIndex, setFirstItemIndex] = useState(TODAY_INDEX - HALF_MONTHS_TO_LOAD);
   const [totalCount, setTotalCount] = useState(MONTHS_TO_LOAD);
 
   const handleStartReached = useCallback(() => {
@@ -59,7 +64,7 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
 
   const scrollToToday = useCallback(() => {
     virtuosoRef.current?.scrollToIndex({
-      index: getTodayPosition(firstItemIndex, TODAY_INDEX),
+      index: TODAY_INDEX - firstItemIndex,
       behavior: 'smooth',
       align: 'center',
     });
@@ -73,23 +78,12 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
     [range, onRangeChange]
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      virtuosoRef.current?.scrollToIndex({
-        index: HALF_MONTHS_TO_LOAD,
-        behavior: 'auto',
-        align: 'center',
-      });
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div css={styles.container}>
       <Virtuoso
         ref={virtuosoRef}
         firstItemIndex={firstItemIndex}
+        initialTopMostItemIndex={{ index: HALF_MONTHS_TO_LOAD, align: 'center' }}
         totalCount={totalCount}
         itemContent={renderMonth}
         startReached={handleStartReached}

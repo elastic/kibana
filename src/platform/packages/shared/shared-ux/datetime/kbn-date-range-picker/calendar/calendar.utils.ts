@@ -35,11 +35,14 @@ export function getMonthFromIndex(index: number, todayIndex: number, referenceDa
 }
 
 /**
- * Calculates the position of today within the loaded item range.
- * Used for `scrollToIndex` calls.
+ * Converts a date to its corresponding virtual index.
+ * Inverse of `getMonthFromIndex`.
  */
-export function getTodayPosition(firstItemIndex: number, todayIndex: number): number {
-  return todayIndex - firstItemIndex;
+export function getIndexFromDate(date: Date, todayIndex: number, referenceDate?: Date): number {
+  const today = referenceDate ?? new Date();
+  const monthDiff =
+    (date.getFullYear() - today.getFullYear()) * 12 + (date.getMonth() - today.getMonth());
+  return todayIndex + monthDiff;
 }
 
 /**
