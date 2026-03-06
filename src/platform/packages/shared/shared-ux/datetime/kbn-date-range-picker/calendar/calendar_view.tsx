@@ -31,13 +31,13 @@ export function CalendarView({ month, range, setRange }: CalendarViewProps) {
 
   return (
     <DayPicker
-      mode="range"
-      month={month}
-      selected={range}
-      onSelect={setRange}
-      required={false}
       disableNavigation
       hideNavigation
+      mode="range"
+      month={month}
+      onSelect={setRange}
+      required={false}
+      selected={range}
       styles={styles.dayPicker}
     />
   );

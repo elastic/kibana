@@ -17,21 +17,14 @@ import { calendarStyles } from './calendar.styles';
 import { calendarTexts } from '../translations';
 
 const MONTHS_TO_LOAD = 12;
-const INITIAL_PAST_MONTHS = 50;
-const INITIAL_FUTURE_MONTHS = 50;
-const SCROLL_TO_TODAY_TIMEOUT_MS = 1500;
 /**
  * Base index representing "today" (current month).
  * Using a high value allows prepending past months without going negative.
- * Negative indices will trigger a Virtuoso console warning.
+ * Technically, negative indices will work but will also trigger a Virtuoso console warning.
  */
 export const TODAY_INDEX = 100000;
 
-/** Returns the first day of the current month, computed at call time. */
-function getCurrentMonthStart(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1);
-}
+export type ScrollDirection = 'forward' | 'backward' | 'none';
 
 interface CalendarProps {
   range: DateRange | undefined;
@@ -43,74 +36,37 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
   const styles = calendarStyles(euiThemeContext);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
-  const isScrollingToTodayRef = useRef(false);
-  const startDateRef = useRef<Date | null>(null);
-  const initialTopIndexRef = useRef<number | null>(null);
 
-  if (!startDateRef.current) {
-    startDateRef.current = getCurrentMonthStart();
-  }
+  const [scrollDirection, setScrollDirection] = useState<ScrollDirection>('none');
+  const [firstItemIndex, setFirstItemIndex] = useState(TODAY_INDEX - MONTHS_TO_LOAD / 2);
+  const [totalCount, setTotalCount] = useState(MONTHS_TO_LOAD);
 
-  if (initialTopIndexRef.current === null) {
-    const from = range?.from;
-    const monthOffset =
-      from && startDateRef.current
-        ? (from.getFullYear() - startDateRef.current.getFullYear()) * 12 +
-          from.getMonth() -
-          startDateRef.current.getMonth()
-        : 0;
-    initialTopIndexRef.current = INITIAL_PAST_MONTHS + monthOffset;
-  }
-
-  const initialTopIndex = initialTopIndexRef.current;
-
-  const [firstItemIndex, setFirstItemIndex] = useState(TODAY_INDEX - INITIAL_PAST_MONTHS);
-  const [totalCount, setTotalCount] = useState(INITIAL_PAST_MONTHS + INITIAL_FUTURE_MONTHS);
-  const [isTodayVisible, setIsTodayVisible] = useState(true);
-
-  // Center the initial month after first render (initialTopMostItemIndex only puts it at top)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      virtuosoRef.current?.scrollToIndex({
-        index: initialTopIndex,
-        align: 'center',
-      });
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [initialTopIndex]);
-
+  // Prepend MONTHS_TO_LOAD months
   const handleStartReached = useCallback(() => {
-    if (isScrollingToTodayRef.current) return;
-
     setFirstItemIndex((prev) => prev - MONTHS_TO_LOAD);
     setTotalCount((prev) => prev + MONTHS_TO_LOAD);
   }, []);
 
+  // Append MONTHS_TO_LOAD months
   const handleEndReached = useCallback(() => {
-    if (isScrollingToTodayRef.current) return;
-
     setTotalCount((prev) => prev + MONTHS_TO_LOAD);
   }, []);
 
   const handleRangeChanged = useCallback((visibleRange: ListRange) => {
-    const visibleCount = visibleRange.endIndex - visibleRange.startIndex;
-    const centerIndex = visibleRange.startIndex + Math.floor(visibleCount / 2);
-    const isTodayCentered = Math.abs(centerIndex - TODAY_INDEX) <= 1;
+    const { startIndex, endIndex } = visibleRange;
+    const hasScrolledIntoFuture = endIndex < TODAY_INDEX;
+    const hasScrolledIntoPast = startIndex > TODAY_INDEX;
 
-    setIsTodayVisible(isTodayCentered);
-
-    if (isTodayCentered && isScrollingToTodayRef.current) {
-      isScrollingToTodayRef.current = false;
+    if (hasScrolledIntoFuture) {
+      setScrollDirection('forward');
+    } else if (hasScrolledIntoPast) {
+      setScrollDirection('backward');
+    } else {
+      setScrollDirection('none');
     }
   }, []);
 
   const scrollToToday = useCallback(() => {
-    isScrollingToTodayRef.current = true;
-
-    setTimeout(() => {
-      isScrollingToTodayRef.current = false;
-    }, SCROLL_TO_TODAY_TIMEOUT_MS);
-
     virtuosoRef.current?.scrollToIndex({
       index: TODAY_INDEX - firstItemIndex,
       behavior: 'smooth',
@@ -120,21 +76,31 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
 
   const renderMonth = useCallback(
     (index: number) => {
-      const startDate = startDateRef.current!;
-      const monthOffset = index - TODAY_INDEX;
-      const month = new Date(startDate.getFullYear(), startDate.getMonth() + monthOffset, 1);
-
+      const today = new Date();
+      const month = new Date(today.getFullYear(), today.getMonth() + (index - TODAY_INDEX), 1);
       return <CalendarView month={month} range={range} setRange={onRangeChange} />;
     },
     [range, onRangeChange]
   );
+
+  // Scroll current month into center on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      virtuosoRef.current?.scrollToIndex({
+        index: MONTHS_TO_LOAD / 2,
+        behavior: 'auto',
+        align: 'center',
+      });
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div css={styles.container}>
       <Virtuoso
         ref={virtuosoRef}
         firstItemIndex={firstItemIndex}
-        initialTopMostItemIndex={initialTopIndex}
         totalCount={totalCount}
         itemContent={renderMonth}
         startReached={handleStartReached}
@@ -142,8 +108,19 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
         rangeChanged={handleRangeChanged}
         overscan={2}
       />
-      {!isTodayVisible && (
-        <EuiButtonEmpty css={styles.todayButton} size="s" onClick={scrollToToday}>
+      {scrollDirection !== 'none' && (
+        <EuiButtonEmpty
+          css={styles.todayButton}
+          size="s"
+          iconType={
+            scrollDirection === 'backward'
+              ? 'sortUp'
+              : scrollDirection === 'forward'
+              ? 'sortDown'
+              : undefined
+          }
+          onClick={scrollToToday}
+        >
           {calendarTexts.todayButton}
         </EuiButtonEmpty>
       )}

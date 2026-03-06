@@ -23,12 +23,14 @@ export const calendarStyles = ({ euiTheme }: UseEuiTheme) => {
   `;
 
   const todayButton = css`
-    position: absolute;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    /* TODO: there is no such border radius token in EUI, even scoped to badges */
+    border-radius: ${euiTheme.size.base};
     bottom: ${euiTheme.size.s};
+    box-shadow: ${euiTheme.shadows.m.down};
     left: 50%;
+    position: absolute;
     transform: translateX(-50%);
-    background: ${euiTheme.colors.emptyShade};
-    box-shadow: ${euiTheme.levels.menu};
     z-index: ${euiTheme.levels.mask};
   `;
 
