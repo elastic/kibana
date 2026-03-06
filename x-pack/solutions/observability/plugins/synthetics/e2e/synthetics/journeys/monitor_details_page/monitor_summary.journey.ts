@@ -6,7 +6,6 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
 import { byTestId } from '../../../page_objects/utils';
