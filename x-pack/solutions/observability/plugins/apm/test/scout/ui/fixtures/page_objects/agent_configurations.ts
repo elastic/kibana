@@ -47,15 +47,9 @@ export class AgentConfigurationsPage {
   }
 
   async hasPermissionsError() {
-    try {
-      this.page.getByRole('heading', { name: 'Configurations', exact: true });
-
-      return await this.page
-        .getByText('Your user may not have the sufficient permissions')
-        .isVisible();
-    } catch {
-      return false;
-    }
+    return await this.page
+      .getByText('Your user may not have the sufficient permissions')
+      .isVisible({ timeout: 2500 });
   }
 
   async clickCreateConfiguration() {

@@ -56,7 +56,9 @@ export class AnomalyDetectionPage {
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    this.page.getByText('Anomaly detection jobs created');
+    await this.page
+      .getByText('Anomaly detection jobs created')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async deleteMlJob() {
