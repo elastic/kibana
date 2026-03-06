@@ -46,10 +46,7 @@ export function deserializeLayout(
     if (isDashboardSection(widget)) {
       const { panels: sectionPanels, uid, ...restOfSection } = widget;
       const sectionId = uid ?? v4();
-      layout.sections[sectionId] = {
-        collapsed: false,
-        ...restOfSection,
-      };
+      layout.sections[sectionId] = restOfSection;
       sectionPanels.forEach((panel) => {
         pushPanel(panel, sectionId);
       });

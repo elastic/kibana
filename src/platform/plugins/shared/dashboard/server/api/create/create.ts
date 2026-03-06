@@ -15,9 +15,11 @@ import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from '.
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function create(
   requestCtx: RequestHandlerContext,
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
   createParams?: DashboardCreateRequestParams,
   isDashboardAppRequest: boolean = false
@@ -53,5 +55,5 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'create', isDashboardAppRequest);
+  return getDashboardCRUResponseBody(savedObject, 'create', dashboardStateSchema, isDashboardAppRequest);
 }

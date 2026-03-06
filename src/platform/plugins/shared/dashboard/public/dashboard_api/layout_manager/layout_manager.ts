@@ -77,7 +77,7 @@ export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
-  initialPinnedPanels: DashboardState['pinned_panels'] | undefined,
+  initialPinnedPanels: DashboardState['pinned_panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>
 ) {
   // --------------------------------------------------------------------------------------
