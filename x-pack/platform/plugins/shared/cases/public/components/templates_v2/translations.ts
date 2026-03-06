@@ -59,3 +59,27 @@ export const VALIDATION_LOADING_EDITOR = i18n.translate(
 export const VALIDATION_NO_ERRORS = i18n.translate('xpack.cases.templates.validation.noErrors', {
   defaultMessage: 'No validation errors',
 });
+
+export const REVERT_TO_DEFAULT = i18n.translate('xpack.cases.templates.revertToDefault', {
+  defaultMessage: 'Revert to default template',
+});
+
+export const REVERT_TO_LAST_SAVED = i18n.translate('xpack.cases.templates.revertToLastSaved', {
+  defaultMessage: 'Revert to last saved version',
+});
+
+export const REVERT_MODAL_TITLE = i18n.translate('xpack.cases.templates.revertModalTitle', {
+  defaultMessage: 'Revert changes?',
+});
+
+export const REVERT_MODAL_BODY = i18n.translate('xpack.cases.templates.revertModalBody', {
+  defaultMessage: 'All unsaved changes will be lost. This action cannot be undone.',
+});
+
+export const REVERT_MODAL_CONFIRM = i18n.translate('xpack.cases.templates.revertModalConfirm', {
+  defaultMessage: 'Revert',
+});
+
+export const REVERT_MODAL_CANCEL = i18n.translate('xpack.cases.templates.revertModalCancel', {
+  defaultMessage: 'Cancel',
+});

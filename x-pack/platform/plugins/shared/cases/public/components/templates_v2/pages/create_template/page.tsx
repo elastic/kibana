@@ -17,6 +17,7 @@ import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesTemplatesNavigation } from '../../../../common/navigation';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
 
 import * as i18n from '../../translations';
 
@@ -34,6 +35,10 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const availableOwners = useAvailableCasesOwners();
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const [, setYamlEditorState] = useCasesLocalStorage<string>(
+    LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState,
+    exampleTemplateDefinition
+  );
 
   useEffect(() => {
     form.reset();
@@ -47,9 +52,10 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
           definition: data.definition,
         },
       });
+      setYamlEditorState(exampleTemplateDefinition);
       navigateToCasesTemplates();
     },
-    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates]
+    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates, setYamlEditorState]
   );
 
   return (

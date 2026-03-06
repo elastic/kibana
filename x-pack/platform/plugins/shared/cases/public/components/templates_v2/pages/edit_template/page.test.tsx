@@ -36,6 +36,10 @@ jest.mock('../../components/template_preview', () => ({
   TemplatePreview: () => <div data-test-subj="template-preview" />,
 }));
 
+jest.mock('../../../../common/use_cases_local_storage', () => ({
+  useCasesLocalStorage: () => ['', jest.fn()],
+}));
+
 const mockTemplateFormLayout = jest.fn();
 jest.mock('../../components/template_form_layout', () => ({
   TemplateFormLayout: (props: { title: string; isLoading?: boolean }) =>

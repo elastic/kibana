@@ -25,7 +25,7 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
     access: 'internal',
     summary: 'Get all case templates',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, logger }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
@@ -43,21 +43,26 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
         isDeleted: String(isDeleted) === 'true',
       });
 
+      const parsedTemplates = templates
+        .map((template) => {
+          try {
+            return {
+              ...parseTemplate(template),
+              fieldSearchMatches: template.fieldSearchMatches,
+            };
+          } catch (parseError) {
+            logger.warn(
+              `Skipping invalid template "${template.name}" (ID: ${template.templateId}): ${parseError}`
+            );
+            return null;
+          }
+        })
+        .filter((template): template is NonNullable<typeof template> => template !== null);
+
       return response.ok({
         body: {
           ...pagination,
-          templates: templates.map((template) => {
-            try {
-              return {
-                ...parseTemplate(template),
-                fieldSearchMatches: template.fieldSearchMatches,
-              };
-            } catch (parseError) {
-              throw new Error(
-                `Failed to parse template "${template.name}" (ID: ${template.templateId}): ${parseError}`
-              );
-            }
-          }),
+          templates: parsedTemplates,
         },
       });
     } catch (error) {
