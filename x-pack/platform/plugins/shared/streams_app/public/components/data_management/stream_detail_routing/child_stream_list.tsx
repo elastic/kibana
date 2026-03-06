@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   euiDragDropReorder,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
   EuiButtonGroup,
 } from '@elastic/eui';
@@ -482,6 +483,18 @@ function QueryModeChildrenList() {
         overflow: auto;
       `}
     >
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          <p>
+            {i18n.translate('xpack.streams.queryModeChildrenList.isolationGuidance', {
+              defaultMessage:
+                'Query streams have their own data, separate from this stream. Select one below or open it in Discover to view its data.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
       {/* Scrollable query streams container */}
       <EuiFlexItem
         grow={false}
@@ -513,7 +526,6 @@ function QueryModeChildrenList() {
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-
       {/* Create button */}
       {!isCreating && (
         <EuiFlexItem grow={false}>
