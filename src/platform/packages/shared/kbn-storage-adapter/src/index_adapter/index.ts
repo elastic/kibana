@@ -10,6 +10,7 @@
 import type {
   BulkOperationContainer,
   BulkOperationType,
+  FieldValue,
   IndexResponse,
   IndicesIndexState,
   IndicesIndexTemplate,
@@ -37,11 +38,15 @@ import type {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
+  StorageClientMigrateDocuments,
+  StorageClientMigrateDocumentsOptions,
+  StorageClientMigrateDocumentsResponse,
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
 import { BulkOperationError } from '../errors';
+import { VERSION_FIELD, getSchemaPaths, type StorageSchemaVersioning } from '../schema_versioning';
 
 function getAliasName(name: string) {
   return name;
@@ -59,6 +64,20 @@ function getIndexName(name: string, count: number) {
 
 function getIndexTemplateName(name: string) {
   return `${name}`;
+}
+
+function flattenMappingPaths(
+  mappings: Record<string, StorageMappingProperty>,
+  prefix: string = ''
+): string[] {
+  return Object.entries(mappings).flatMap(([key, value]) => {
+    const fullPath = prefix ? `${prefix}.${key}` : key;
+    const nested =
+      'properties' in value && value.properties
+        ? flattenMappingPaths(value.properties as Record<string, StorageMappingProperty>, fullPath)
+        : [];
+    return [fullPath, ...nested];
+  });
 }
 
 // TODO: this function is here to strip properties when we add back optional/multi-value
@@ -101,22 +120,37 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
    * If this callback is provided, it will be called on every _source before returned to the caller of the search or get methods.
    * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
    * This should be used as rarely as possible - in most cases, new properties should be added as optional.
+   *
+   * When `versioning` is also provided, `migrateSource` is only called for legacy documents
+   * that do not have a `__version` field (i.e. documents written before versioning was enabled).
+   * @deprecated Prefer using `versioning` with `defineVersioning()` for type-safe, incremental schema migrations.
    */
   migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+
+  /**
+   * When provided, enables per-document schema versioning.
+   *
+   * - On write: documents are validated against the latest schema and stamped with the current version.
+   * - On read: documents are migrated through the version chain from their persisted version to the latest.
+   * - Documents without a version field (legacy) go through `migrateSource` (if provided) or the full migration chain from version 1.
+   *
+   * Built with `defineVersioning(initialSchema).addVersion({ schema, migrate }).build()`.
+   */
+  versioning?: StorageSchemaVersioning<TApplicationType>;
 }
 
 /**
  * Adapter for writing and reading documents to/from Elasticsearch,
  * using plain indices.
- *
- * TODO:
- * - Schema upgrades w/ fallbacks
  */
 export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
   TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
 > {
   private readonly logger: Logger;
+  private readonly schemaVersion: string;
+  private initPromise: Promise<void> | undefined;
+
   constructor(
     private readonly esClient: ElasticsearchClient,
     logger: Logger,
@@ -124,10 +158,66 @@ export class StorageIndexAdapter<
     private readonly options: StorageIndexAdapterOptions<TApplicationType> = {}
   ) {
     this.logger = logger.get('storage').get(this.storage.name);
+    this.schemaVersion = getSchemaVersion(this.storage);
+
+    if (this.options.versioning) {
+      this.validateVersioningSchema(this.options.versioning);
+    }
+  }
+
+  private validateVersioningSchema(versioning: StorageSchemaVersioning<unknown>): void {
+    if (VERSION_FIELD in this.storage.schema.properties) {
+      throw new Error(
+        `The field "${VERSION_FIELD}" is reserved for schema versioning and must not be defined in the schema properties`
+      );
+    }
+
+    const schemaPaths = getSchemaPaths(versioning.latestSchema);
+    if (!schemaPaths) {
+      return;
+    }
+
+    const mappingPaths = new Set(flattenMappingPaths(this.storage.schema.properties));
+    const missing = schemaPaths.filter((path) => !mappingPaths.has(path));
+    if (missing.length > 0) {
+      throw new Error(
+        `Versioning schema properties [${missing.join(
+          ', '
+        )}] are not defined in storageSettings.schema.properties`
+      );
+    }
+  }
+
+  /**
+   * Ensures the index template, index, and mappings are up-to-date.
+   * Runs the full setup once per adapter instance. If the initial setup
+   * fails, the next call retries.
+   */
+  private ensureInitialized(): Promise<void> {
+    if (!this.initPromise) {
+      this.initPromise = this.initialize().catch((error) => {
+        this.initPromise = undefined;
+        throw error;
+      });
+    }
+    return this.initPromise;
+  }
+
+  private async initialize(): Promise<void> {
+    await this.createOrUpdateIndexTemplate();
+
+    const writeIndex = await this.getCurrentWriteIndex();
+    if (!writeIndex) {
+      this.logger.debug(`Creating index`);
+      await this.createIndex();
+    } else if (this.needsMappingUpdate(writeIndex.state.mappings?._meta)) {
+      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
+      await this.updateMappingsOfExistingIndex({ name: writeIndex.name });
+    }
   }
 
   private getSearchIndexPattern(): string {
-    return `${getAliasName(this.storage.name)}`;
+    return getAliasName(this.storage.name);
   }
 
   private getWriteTarget(): string {
@@ -135,17 +225,22 @@ export class StorageIndexAdapter<
   }
 
   private async createOrUpdateIndexTemplate(): Promise<void> {
-    const version = getSchemaVersion(this.storage);
+    const properties: Record<string, MappingProperty> = {
+      ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+    };
+
+    const meta: Record<string, unknown> = { version: this.schemaVersion };
+
+    if (this.options.versioning) {
+      properties[VERSION_FIELD] = { type: 'long' };
+      meta.schemaVersion = this.options.versioning.latestVersion;
+    }
 
     const template: IndicesPutIndexTemplateIndexTemplateMapping = {
       mappings: {
-        _meta: {
-          version,
-        },
+        _meta: meta,
         dynamic: 'strict',
-        properties: {
-          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-        },
+        properties,
       },
       aliases: {
         [getAliasName(this.storage.name)]: {
@@ -160,9 +255,7 @@ export class StorageIndexAdapter<
         create: false,
         allow_auto_create: false,
         index_patterns: getIndexPattern(this.storage.name),
-        _meta: {
-          version,
-        },
+        _meta: meta,
         template,
       })
     ).catch(catchConflictError);
@@ -259,29 +352,31 @@ export class StorageIndexAdapter<
     }
   }
 
-  /**
-   * Validates whether:
-   * - an index template exists
-   * - the index template has the right version (if not, update it)
-   * - the index exists (if it doesn't, create it)
-   * - the index has the right version (if not, update it)
-   */
-  private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
-    const expectedSchemaVersion = getSchemaVersion(this.storage);
-    await this.createOrUpdateIndexTemplate();
-
-    const writeIndex = await this.getCurrentWriteIndex();
-    if (!writeIndex) {
-      this.logger.debug(`Creating index`);
-      await this.createIndex();
-    } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
-      await this.updateMappingsOfExistingIndex({
-        name: writeIndex.name,
-      });
+  private needsMappingUpdate(indexMeta: Record<string, unknown> | undefined): boolean {
+    if (indexMeta?.version !== this.schemaVersion) {
+      return true;
     }
+    if (
+      this.options.versioning &&
+      indexMeta?.schemaVersion !== this.options.versioning.latestVersion
+    ) {
+      return true;
+    }
+    return false;
+  }
 
-    return await cb();
+  private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
+    await this.ensureInitialized();
+    try {
+      return await cb();
+    } catch (error) {
+      if (isNotFoundError(error as Error)) {
+        this.initPromise = undefined;
+        await this.ensureInitialized();
+        return await cb();
+      }
+      throw error;
+    }
   }
 
   private search: StorageClientSearch<TApplicationType> = async (request) => {
@@ -292,15 +387,18 @@ export class StorageIndexAdapter<
           index: this.getSearchIndexPattern(),
           allow_no_indices: true,
         })
-        .then((response) => {
+        .then(async (response) => {
+          const migratedHits = await Promise.all(
+            response.hits.hits.map(async (hit) => ({
+              ...hit,
+              _source: await this.maybeMigrateSource(hit._source),
+            }))
+          );
           return {
             ...response,
             hits: {
               ...response.hits,
-              hits: response.hits.hits.map((hit) => ({
-                ...hit,
-                _source: this.maybeMigrateSource(hit._source),
-              })),
+              hits: migratedHits,
             },
           };
         })
@@ -331,12 +429,16 @@ export class StorageIndexAdapter<
   private index: StorageClientIndex<TApplicationType> = async ({
     id,
     refresh = 'wait_for',
+    document: userDocument,
     ...request
   }): Promise<StorageClientIndexResponse> => {
+    const document = this.prepareDocumentForWrite(userDocument as Record<string, unknown>);
+
     const attemptIndex = async (): Promise<IndexResponse> => {
       const indexResponse = await wrapEsCall(
         this.esClient.index({
           ...request,
+          document,
           id,
           refresh,
           index: this.getWriteTarget(),
@@ -374,13 +476,16 @@ export class StorageIndexAdapter<
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
       if ('index' in operation) {
+        const document = this.prepareDocumentForWrite(
+          operation.index.document as Record<string, unknown>
+        );
         return [
           {
             index: {
               _id: operation.index._id,
             },
           },
-          operation.index.document as {},
+          document as {},
         ];
       }
 
@@ -530,7 +635,7 @@ export class StorageIndexAdapter<
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: this.maybeMigrateSource(hit._source),
+      _source: await this.maybeMigrateSource(hit._source),
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -540,21 +645,137 @@ export class StorageIndexAdapter<
     };
   };
 
-  private maybeMigrateSource = (_source: unknown): TApplicationType => {
-    // check whether source is an object, if not fail
+  private prepareDocumentForWrite(document: Record<string, unknown>): Record<string, unknown> {
+    if (!this.options.versioning) {
+      return document;
+    }
+    this.options.versioning.latestSchema.parse(document);
+    return { ...document, [VERSION_FIELD]: this.options.versioning.latestVersion };
+  }
+
+  private maybeMigrateSource = async (_source: unknown): Promise<TApplicationType> => {
     if (typeof _source !== 'object' || _source === null) {
       throw new Error(`Source must be an object, got ${typeof _source}`);
     }
-    if (this.options.migrateSource) {
-      return this.options.migrateSource(_source as Record<string, unknown>);
+
+    const source = _source as Record<string, unknown>;
+
+    if (this.options.versioning) {
+      const docVersion = source[VERSION_FIELD] as number | undefined;
+      const { [VERSION_FIELD]: _, ...docWithoutVersion } = source;
+
+      if (docVersion !== undefined) {
+        return this.options.versioning.migrate(docWithoutVersion, docVersion);
+      }
+
+      if (this.options.migrateSource) {
+        const migrated = this.options.migrateSource(docWithoutVersion);
+        return this.options.versioning.latestSchema.parse(migrated) as TApplicationType;
+      }
+
+      return this.options.versioning.migrate(docWithoutVersion, 1);
     }
-    return _source as TApplicationType;
+
+    if (this.options.migrateSource) {
+      return this.options.migrateSource(source);
+    }
+    return source as TApplicationType;
   };
 
   private existsIndex: StorageClientExistsIndex = () => {
     return this.esClient.indices.exists({
       index: this.getSearchIndexPattern(),
     });
+  };
+
+  private migrateDocuments: StorageClientMigrateDocuments = async (
+    options?: StorageClientMigrateDocumentsOptions
+  ): Promise<StorageClientMigrateDocumentsResponse> => {
+    if (!this.options.versioning) {
+      return { migrated: 0, total: 0 };
+    }
+
+    const { versioning } = this.options;
+
+    await this.ensureInitialized();
+
+    const writeIndex = await this.getCurrentWriteIndex();
+    if (!writeIndex) {
+      return { migrated: 0, total: 0 };
+    }
+
+    let migrated = 0;
+    let total = 0;
+    const batchSize = options?.batchSize ?? 1000;
+    let searchAfter: FieldValue[] | undefined;
+
+    while (true) {
+      const response = await wrapEsCall(
+        this.esClient.search({
+          index: this.getSearchIndexPattern(),
+          size: batchSize,
+          sort: [{ _id: 'asc' as const }],
+          track_total_hits: false,
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+          query: {
+            bool: {
+              should: [
+                { bool: { must_not: [{ exists: { field: VERSION_FIELD } }] } },
+                { range: { [VERSION_FIELD]: { lt: versioning.latestVersion } } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        })
+      );
+
+      const hits = response.hits.hits;
+      if (hits.length === 0) break;
+
+      total += hits.length;
+
+      const migratedDocs = await Promise.all(
+        hits.map(async (hit) => ({
+          _id: hit._id!,
+          _index: hit._index,
+          doc: await this.maybeMigrateSource(hit._source),
+        }))
+      );
+
+      const operations = migratedDocs.flatMap<BulkOperationContainer>(({ _id, _index, doc }) => [
+        { index: { _id, _index } },
+        { ...(doc as Record<string, unknown>), [VERSION_FIELD]: versioning.latestVersion } as {},
+      ]);
+
+      const bulkResponse = await wrapEsCall(
+        this.esClient.bulk({
+          operations,
+          refresh: false,
+        })
+      );
+
+      if (bulkResponse.errors) {
+        const failedItems = bulkResponse.items.filter((item) => Object.values(item)[0]?.error);
+        this.logger.warn(
+          `Bulk migration encountered ${failedItems.length} errors in batch of ${hits.length}`
+        );
+      }
+      migrated += hits.length;
+
+      this.logger.debug(`Migrated ${migrated} documents so far`);
+
+      searchAfter = hits.at(-1)!.sort as FieldValue[] | undefined;
+    }
+
+    if (migrated > 0) {
+      await wrapEsCall(
+        this.esClient.indices.refresh({
+          index: this.getSearchIndexPattern(),
+        })
+      );
+    }
+
+    return { migrated, total };
   };
 
   getClient(): InternalIStorageClient<TApplicationType> {
@@ -566,6 +787,7 @@ export class StorageIndexAdapter<
       search: this.search,
       get: this.get,
       existsIndex: this.existsIndex,
+      migrateDocuments: this.migrateDocuments,
     };
   }
 }
