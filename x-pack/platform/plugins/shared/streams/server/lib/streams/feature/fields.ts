@@ -22,3 +22,4 @@ export const FEATURE_LAST_SEEN = 'feature.last_seen';
 export const FEATURE_TAGS = 'feature.tags';
 export const FEATURE_META = 'feature.meta';
 export const FEATURE_EXPIRES_AT = 'feature.expires_at';
+export const FEATURE_FILTER = 'feature.filter';
