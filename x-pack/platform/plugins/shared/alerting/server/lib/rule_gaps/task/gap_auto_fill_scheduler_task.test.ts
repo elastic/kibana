@@ -1455,5 +1455,100 @@ describe('Gap Auto Fill Scheduler Task', () => {
       );
       expect(mockedFindGaps.findGapsSearchAfter).not.toHaveBeenCalled();
     });
+
+    it('excludes rule from subsequent gap fetches after scheduling one backfill for it', async () => {
+      const gapPage1 = buildGap(
+        'rule-1',
+        '2024-01-01T00:00:00.000Z',
+        '2024-01-01T01:00:00.000Z',
+        gapStatus.UNFILLED
+      );
+      const gapPage2 = buildGap(
+        'rule-2',
+        '2024-01-01T01:00:00.000Z',
+        '2024-01-01T02:00:00.000Z',
+        gapStatus.UNFILLED
+      );
+
+      mockedFindGaps.findGapsSearchAfter
+        .mockResolvedValueOnce({
+          total: 1,
+          data: [gapPage1],
+          searchAfter: [['cursor1']],
+          pitId: 'pit-1',
+        })
+        .mockResolvedValueOnce({
+          total: 1,
+          data: [gapPage2],
+          searchAfter: undefined,
+          pitId: 'pit-1',
+        })
+        .mockResolvedValue({ total: 0, data: [], searchAfter: undefined, pitId: 'pit-1' });
+
+      mockedProcessGapsBatch.processGapsBatch
+        .mockResolvedValueOnce({
+          processedGapsCount: 1,
+          hasErrors: false,
+          results: [
+            {
+              ruleId: 'rule-1',
+              processedGaps: 1,
+              status: GapFillSchedulePerRuleStatus.SUCCESS,
+            },
+          ],
+          truncatedRuleIds: [],
+        })
+        .mockResolvedValueOnce({
+          processedGapsCount: 1,
+          hasErrors: false,
+          results: [
+            {
+              ruleId: 'rule-2',
+              processedGaps: 1,
+              status: GapFillSchedulePerRuleStatus.SUCCESS,
+            },
+          ],
+          truncatedRuleIds: [],
+        });
+
+      const result = await processGapsForRules({
+        abortController,
+        aggregatedByRule: new Map(),
+        endISO,
+        gapsPerPage: 1,
+        gapFetchMaxIterations: 5,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 10,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        taskInstanceId: 'test-task',
+        toProcessRuleIds: ['rule-1', 'rule-2'],
+        numRetries: mockSchedulerConfig.numRetries,
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.COMPLETED);
+      expect(mockedFindGaps.findGapsSearchAfter).toHaveBeenCalledTimes(2);
+      const findGapsCalls = mockedFindGaps.findGapsSearchAfter.mock.calls;
+      expect(findGapsCalls[0][0].params.ruleIds).toEqual(['rule-1', 'rule-2']);
+      expect(findGapsCalls[1][0].params.ruleIds).toEqual(['rule-2']);
+      expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(2);
+      expect(result.aggregatedByRule.get('rule-1')).toEqual(
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          processedGaps: 1,
+          status: GapFillSchedulePerRuleStatus.SUCCESS,
+        })
+      );
+      expect(result.aggregatedByRule.get('rule-2')).toEqual(
+        expect.objectContaining({
+          ruleId: 'rule-2',
+          processedGaps: 1,
+          status: GapFillSchedulePerRuleStatus.SUCCESS,
+        })
+      );
+    });
   });
 });

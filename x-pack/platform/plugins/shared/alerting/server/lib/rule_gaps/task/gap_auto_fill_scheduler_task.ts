@@ -281,8 +281,15 @@ export async function processGapsForRules({
         }
       }
 
-      if (truncatedRuleIds.length > 0) {
-        toProcessRuleIds = toProcessRuleIds.filter((id) => !truncatedRuleIds.includes(id));
+      const completedRuleIds = new Set(truncatedRuleIds);
+      for (const result of chunkResults) {
+        if (result.status === GapFillSchedulePerRuleStatus.SUCCESS) {
+          completedRuleIds.add(result.ruleId);
+        }
+      }
+
+      if (completedRuleIds.size > 0) {
+        toProcessRuleIds = toProcessRuleIds.filter((id) => !completedRuleIds.has(id));
         if (toProcessRuleIds.length === 0) {
           break;
         }
