@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as i18n from './translations';
 import type { State } from '../../../common/store';
-import { selectTitleByTimelineById } from '../../store/selectors';
-import { AddTimelineButton } from './add_timeline_button';
 import { timelineActions } from '../../store';
-import { TimelineSaveStatus } from '../save_status';
+import { selectTitleByTimelineById } from '../../store/selectors';
 import { AddToFavoritesButton } from '../add_to_favorites';
+import { TimelineSaveStatus } from '../save_status';
 import TimelineQueryTabEventsCount from '../timeline/tabs/query/events_count';
+import { AddTimelineButton } from './add_timeline_button';
+import * as i18n from './translations';
+
+const BOTTOM_BAR_STYLE = {
+  overflowX: 'auto',
+  overflowY: 'hidden',
+} as const;
+
+const TITLE_BUTTON_STYLE = {
+  whiteSpace: 'nowrap',
+  display: 'inline-block',
+} as const;
 
 interface TimelineBottomBarProps {
   /**
@@ -45,7 +55,12 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
     const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
 
     return (
-      <EuiPanel borderRadius="none" hasShadow={false} data-test-subj="timeline-bottom-bar">
+      <EuiPanel
+        borderRadius="none"
+        hasShadow={false}
+        data-test-subj="timeline-bottom-bar"
+        style={BOTTOM_BAR_STYLE}
+      >
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <AddTimelineButton timelineId={timelineId} />
@@ -59,6 +74,7 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
               onClick={openTimeline}
               data-test-subj="timeline-bottom-bar-title-button"
               ref={openToggleRef}
+              style={TITLE_BUTTON_STYLE}
             >
               {title}
             </EuiLink>
