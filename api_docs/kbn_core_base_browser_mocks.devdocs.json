@@ -15,7 +15,7 @@
         "label": "coreContextMock",
         "description": [],
         "path": "src/core/packages/base/browser-mocks/src/core_context.mock.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -41,7 +41,7 @@
               "; }"
             ],
             "path": "src/core/packages/base/browser-mocks/src/core_context.mock.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

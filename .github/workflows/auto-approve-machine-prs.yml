@@ -1,5 +1,7 @@
 # Generic auto-approve for machine-created PRs.
 # Add new rules to the whitelist in the check step; approval runs when any rule matches.
+name: Auto-approve machine PRs
+
 on:
   pull_request_target:
     types:
