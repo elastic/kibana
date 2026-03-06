@@ -138,6 +138,34 @@ describe('RulesListPage', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
+  it('shows "Showing 0-0 of 0 Rules" when there are no rules', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const showingLabel = screen.getByTestId('rulesListShowingLabel');
+    expect(showingLabel).toHaveTextContent('Showing 0-0 of 0 Rules');
+  });
+
+  it('shows correct "Showing" range when rules exist', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const showingLabel = screen.getByTestId('rulesListShowingLabel');
+    expect(showingLabel).toHaveTextContent('Showing 1-2 of 2 Rules');
+  });
+
   it('navigates to create page when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: [], total: 0, page: 1, perPage: 20 },

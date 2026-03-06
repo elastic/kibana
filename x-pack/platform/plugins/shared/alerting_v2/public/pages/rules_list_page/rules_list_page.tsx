@@ -266,7 +266,8 @@ export const RulesListPage = () => {
               values={{
                 rangeBold: (
                   <strong>
-                    {(page - 1) * perPage + 1}-{Math.min(page * perPage, data.total)}
+                    {Math.min((page - 1) * perPage + 1, data.total)}-
+                    {Math.min(page * perPage, data.total)}
                   </strong>
                 ),
                 totalBold: (
