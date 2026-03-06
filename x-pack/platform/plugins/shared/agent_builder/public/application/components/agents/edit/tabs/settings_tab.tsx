@@ -26,7 +26,11 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentVisibility } from '@kbn/agent-builder-common';
+import {
+  AgentVisibility,
+  VISIBILITY_ICON,
+  type AgentVisibilityIcon,
+} from '@kbn/agent-builder-common';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { labels } from '../../../../utils/i18n';
@@ -69,7 +73,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     icon,
     label,
   }: {
-    icon: 'globe' | 'users' | 'lock';
+    icon: AgentVisibilityIcon;
     label: string;
   }) => (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -83,7 +87,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     {
       value: AgentVisibility.Public,
       inputDisplay: renderVisibilityOption({
-        icon: 'globe',
+        icon: VISIBILITY_ICON[AgentVisibility.Public],
         label: i18n.translate('xpack.agentBuilder.agents.form.visibility.public', {
           defaultMessage: 'Public',
         }),
@@ -92,7 +96,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     {
       value: AgentVisibility.Shared,
       inputDisplay: renderVisibilityOption({
-        icon: 'users',
+        icon: VISIBILITY_ICON[AgentVisibility.Shared],
         label: i18n.translate('xpack.agentBuilder.agents.form.visibility.shared', {
           defaultMessage: 'Shared',
         }),
@@ -101,7 +105,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     {
       value: AgentVisibility.Private,
       inputDisplay: renderVisibilityOption({
-        icon: 'lock',
+        icon: VISIBILITY_ICON[AgentVisibility.Private],
         label: i18n.translate('xpack.agentBuilder.agents.form.visibility.private', {
           defaultMessage: 'Private',
         }),

@@ -6,7 +6,6 @@
  */
 
 import type {
-  EuiBadgeProps,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -24,10 +23,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentVisibility, type AgentDefinition } from '@kbn/agent-builder-common';
+import { AgentVisibility, VISIBILITY_ICON, type AgentDefinition } from '@kbn/agent-builder-common';
 import { useQuery } from '@kbn/react-query';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
+import { VISIBILITY_BADGE_COLOR } from '@kbn/agent-builder-common/agents/visibility';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -71,48 +71,16 @@ const actionLabels = {
   }),
 };
 
-const getAgentVisibility = (agent: AgentDefinition): NonNullable<AgentDefinition['visibility']> =>
-  agent.visibility ?? AgentVisibility.Public;
-
-const getVisibilityBadgeLabel = (visibility: NonNullable<AgentDefinition['visibility']>) => {
-  switch (visibility) {
-    case AgentVisibility.Private:
-      return i18n.translate('xpack.agentBuilder.agents.visibility.private', {
-        defaultMessage: 'Private',
-      });
-    case AgentVisibility.Shared:
-      return i18n.translate('xpack.agentBuilder.agents.visibility.shared', {
-        defaultMessage: 'Shared',
-      });
-    case AgentVisibility.Public:
-      return i18n.translate('xpack.agentBuilder.agents.visibility.public', {
-        defaultMessage: 'Public',
-      });
-  }
-};
-
-const getVisibilityBadgeColor = (
-  visibility: NonNullable<AgentDefinition['visibility']>
-): EuiBadgeProps['color'] => {
-  switch (visibility) {
-    case AgentVisibility.Private:
-      return 'hollow';
-    case AgentVisibility.Shared:
-      return 'primary';
-    case AgentVisibility.Public:
-      return 'default';
-  }
-};
-
-const getVisibilityBadgeIcon = (visibility: NonNullable<AgentDefinition['visibility']>) => {
-  switch (visibility) {
-    case AgentVisibility.Private:
-      return 'lock';
-    case AgentVisibility.Shared:
-      return 'users';
-    case AgentVisibility.Public:
-      return 'globe';
-  }
+const visibilityBadgeLabels: Record<AgentVisibility, string> = {
+  [AgentVisibility.Private]: i18n.translate('xpack.agentBuilder.agents.visibility.private', {
+    defaultMessage: 'Private',
+  }),
+  [AgentVisibility.Shared]: i18n.translate('xpack.agentBuilder.agents.visibility.shared', {
+    defaultMessage: 'Shared',
+  }),
+  [AgentVisibility.Public]: i18n.translate('xpack.agentBuilder.agents.visibility.public', {
+    defaultMessage: 'Public',
+  }),
 };
 
 const getVisibilityBadgeTooltipContent = (
@@ -155,16 +123,16 @@ const renderAgentVisibilityBadge = (agent: AgentDefinition) => {
     );
   }
 
-  const visibility = getAgentVisibility(agent);
-  const visibilityLabel = getVisibilityBadgeLabel(visibility);
-  const visibilityColor = getVisibilityBadgeColor(visibility);
+  const visibility = agent.visibility ?? AgentVisibility.Public;
+  const visibilityLabel = visibilityBadgeLabels[visibility];
+  const visibilityColor = VISIBILITY_BADGE_COLOR[visibility];
   const visibilityTooltip = getVisibilityBadgeTooltipContent(visibility);
 
   return (
     <EuiToolTip content={visibilityTooltip}>
       <EuiBadge
         tabIndex={0}
-        iconType={getVisibilityBadgeIcon(visibility)}
+        iconType={VISIBILITY_ICON[visibility]}
         color={visibilityColor}
         data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
       >

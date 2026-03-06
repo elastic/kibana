@@ -7,6 +7,7 @@
 
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
+import type { AgentVisibility } from './visibility';
 
 /**
  * The type of an agent.
@@ -14,12 +15,6 @@ import type { UserIdAndName } from '../base/users';
  */
 export enum AgentType {
   chat = 'chat',
-}
-
-export enum AgentVisibility {
-  Private = 'private',
-  Public = 'public',
-  Shared = 'shared',
 }
 
 /**

@@ -98,6 +98,8 @@ export {
   agentBuilderDefaultAgentId,
   AgentType,
   AgentVisibility,
+  AgentVisibilityIcon,
+  VISIBILITY_ICON,
   AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,

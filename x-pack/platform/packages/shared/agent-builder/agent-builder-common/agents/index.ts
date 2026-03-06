@@ -7,7 +7,6 @@
 
 export {
   AgentType,
-  AgentVisibility,
   agentBuilderDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
@@ -16,6 +15,7 @@ export {
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
+export { AgentVisibilityIcon, VISIBILITY_ICON, AgentVisibility } from './visibility';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,
