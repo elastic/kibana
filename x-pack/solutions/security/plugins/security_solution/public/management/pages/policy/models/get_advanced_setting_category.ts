@@ -13,59 +13,45 @@ import type { AdvancedSettingCategory } from './advanced_policy_schema';
  * Uses key path patterns; can be replaced later with explicit category per schema entry.
  */
 export function getCategory(key: string): AdvancedSettingCategory {
-  const k = key;
-
-  // Logs: logging configuration
-  if (k.includes('.logging.')) {
-    return 'logs';
+  const advancedIndex = key.indexOf('.advanced.');
+  if (advancedIndex === -1) {
+    return 'others';
   }
+  const afterAdvanced = key.slice(advancedIndex + '.advanced.'.length);
+  const segment = afterAdvanced.split('.')[0];
 
-  // Configs: artifacts, elasticsearch, agent, event_filter, flags, proxy
-  if (
-    k.includes('.artifacts.') ||
-    k.includes('.elasticsearch.') ||
-    k.includes('.agent.') ||
-    k.includes('.event_filter.') ||
-    k.endsWith('.flags')
-  ) {
-    return 'configs';
+  switch (segment) {
+    case 'logging':
+      return 'logs';
+    case 'artifacts':
+    case 'elasticsearch':
+    case 'agent':
+    case 'event_filter':
+    case 'flags':
+      return 'configs';
+    case 'utilization_limits':
+    case 'tty_io':
+    case 'file_cache':
+      return 'performance';
+    case 'events':
+      return key.includes('deduplicate') || key.includes('aggregate_')
+        ? 'performance'
+        : 'product_features';
+    case 'malware':
+    case 'ransomware':
+    case 'memory_protection':
+    case 'kernel':
+    case 'alerts':
+    case 'diagnostic':
+    case 'device_control':
+    case 'harden':
+    case 'fanotify':
+    case 'host_isolation':
+    case 'mitigations':
+    case 'document_enrichment':
+    case 'firewall_anti_tamper':
+      return 'product_features';
+    default:
+      return 'others';
   }
-
-  // Performance: utilization, tty_io, file_cache, deduplicate, aggregate
-  if (
-    k.includes('.utilization_limits.') ||
-    k.includes('.tty_io.') ||
-    k.includes('.file_cache.') ||
-    k.includes('deduplicate') ||
-    k.includes('aggregate_')
-  ) {
-    return 'performance';
-  }
-
-  // Product Features: malware, ransomware, memory_protection, kernel, alerts, diagnostic,
-  // device_control, harden, fanotify, host_isolation, mitigations, document_enrichment,
-  // firewall, etc.
-  if (
-    k.includes('.malware.') ||
-    k.includes('.ransomware.') ||
-    k.includes('.memory_protection.') ||
-    k.includes('.kernel.') ||
-    k.includes('.alerts.') ||
-    k.includes('.diagnostic.') ||
-    k.includes('.device_control.') ||
-    k.includes('.harden.') ||
-    k.includes('.fanotify.') ||
-    k.includes('.host_isolation.') ||
-    k.includes('.mitigations.') ||
-    k.includes('.document_enrichment.') ||
-    k.includes('firewall_anti_tamper') ||
-    k.includes('.events.') ||
-    k.includes('.kernel.') ||
-    k.includes('.ppl.') ||
-    k.includes('dev_drives.')
-  ) {
-    return 'product_features';
-  }
-
-  return 'others';
 }
