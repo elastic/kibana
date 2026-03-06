@@ -11,7 +11,7 @@ import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_
 import {
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
-} from '../workflow_test_helpers';
+} from '../workflow.test_helpers';
 import { githubDataSource } from './data_type';
 
 const MCP_CONNECTOR_NAME = 'fake-mcp-connector';

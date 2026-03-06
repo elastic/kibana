@@ -12,7 +12,7 @@ import {
   loadWorkflowsThroughProductionPath,
   registerExtensionSteps,
   type ProcessedWorkflow,
-} from '../workflow_test_helpers';
+} from '../workflow.test_helpers';
 import { googleDriveDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-google-drive-connector';

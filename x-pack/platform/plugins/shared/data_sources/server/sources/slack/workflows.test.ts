@@ -11,7 +11,7 @@ import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_
 import {
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
-} from '../workflow_test_helpers';
+} from '../workflow.test_helpers';
 import { slackDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-slack-connector';
