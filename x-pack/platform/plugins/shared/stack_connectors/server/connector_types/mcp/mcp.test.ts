@@ -62,6 +62,13 @@ jest.mock('./auth_helpers', () => ({
   buildHeadersFromSecrets: jest.fn().mockReturnValue({}),
 }));
 
+// Mock the build_custom_fetch module
+jest.mock('./build_custom_fetch', () => ({
+  buildCustomFetch: jest.fn().mockReturnValue(jest.fn()),
+}));
+
+import { buildCustomFetch } from './build_custom_fetch';
+
 // Mock the retry utils
 jest.mock('./retry_utils', () => ({
   retryWithRecovery: jest.fn(async (fn) => {
@@ -126,11 +133,32 @@ describe('McpConnector', () => {
     });
 
     it('should register sub-actions', () => {
-      // The sub-actions are registered in the constructor
-      // We can verify this by checking that the methods exist
       expect(typeof connector.testConnector).toBe('function');
       expect(typeof connector.listTools).toBe('function');
       expect(typeof connector.callTool).toBe('function');
+    });
+
+    it('should build a custom fetch from configurationUtilities and pass it to McpClient', () => {
+      const mockBuildCustomFetch = buildCustomFetch as jest.Mock;
+      expect(mockBuildCustomFetch).toHaveBeenCalledWith(
+        expect.anything(),
+        logger,
+        defaultConfig.serverUrl
+      );
+
+      const returnedFetch = mockBuildCustomFetch.mock.results[0].value;
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { McpClient } = require('@kbn/mcp-client');
+      expect(McpClient).toHaveBeenCalledWith(
+        logger,
+        expect.objectContaining({
+          url: defaultConfig.serverUrl,
+        }),
+        expect.objectContaining({
+          fetch: returnedFetch,
+        })
+      );
     });
   });
 
