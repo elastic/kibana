@@ -113,7 +113,6 @@ export class AssetManagerClient {
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
         ...entityTypes.map((type) =>
           stopAndRemoveV1({
             type,
