@@ -66,7 +66,7 @@ const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'))
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
   getCasesPlugin?: () => Promise<CasesService | undefined>;
-  securityPlugin?: SecurityPluginStart;
+  security: SecurityPluginStart;
   cloud?: CloudSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -112,7 +112,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
   return deps.rendering.addContext(
-    <KibanaContextProvider services={{ ...deps, security: deps.securityPlugin ?? deps.security }}>
+    <KibanaContextProvider services={{ ...deps }}>
       <Router history={deps.history}>
         <QueryClientProvider client={queryClient}>
           <AppWithoutRouter sectionsRegex={sectionsRegex} />
