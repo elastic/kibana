@@ -12,7 +12,9 @@ export class ExploratoryViewPage {
   public readonly echLegendItemLocator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.echLegendItemLocator = this.page.locator('[data-testid="echLegendItemLabel"]');
+    this.echLegendItemLocator = this.page.locator(
+      '.echLegendItem__label, [data-testid="echLegendItemLabel"]'
+    );
   }
 
   async goto(urlPath: string): Promise<void> {
