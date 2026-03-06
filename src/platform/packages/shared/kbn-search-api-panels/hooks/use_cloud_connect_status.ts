@@ -8,14 +8,15 @@
  */
 
 import { useMemo } from 'react';
-
 export interface CloudConnectStatus {
   isCloudConnected: boolean;
   isCloudConnectEisEnabled: boolean;
   isCloudConnectAutoopsEnabled: boolean;
-  isCloudConnectedWithEisEnabled?: boolean;
   isLoading: boolean;
   error: Error | null;
+}
+export interface CloudConnectStatusWithDerived extends CloudConnectStatus {
+  isCloudConnectedWithEisEnabled: boolean;
 }
 
 export type UseCloudConnectStatusHook = () => CloudConnectStatus;
@@ -24,12 +25,13 @@ const defaultCloudConnectStatusHook: UseCloudConnectStatusHook = () => ({
   isCloudConnected: false,
   isCloudConnectEisEnabled: false,
   isCloudConnectAutoopsEnabled: false,
-  isCloudConnectedWithEisEnabled: false,
   isLoading: false,
   error: null,
 });
 
-export const useCloudConnectStatus = (hook?: UseCloudConnectStatusHook) => {
+export const useCloudConnectStatus = (
+  hook?: UseCloudConnectStatusHook
+): CloudConnectStatusWithDerived => {
   const cloudConnectStatusHook = useMemo(() => hook ?? defaultCloudConnectStatusHook, [hook]);
 
   const status = cloudConnectStatusHook();
