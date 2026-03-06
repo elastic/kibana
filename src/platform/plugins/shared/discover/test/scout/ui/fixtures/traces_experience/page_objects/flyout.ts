@@ -43,9 +43,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     overviewTab: page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview'),
 
     aboutSection: page.testSubj.locator('UnifiedDocViewerTableGrid'),
-    serviceNameLink: page.testSubj.locator(
-      'unifiedDocViewerObservabilityTracesServiceNameLink'
-    ),
+    serviceNameLink: page.testSubj.locator('unifiedDocViewerObservabilityTracesServiceNameLink'),
     transactionNameLink: page.testSubj.locator(
       'unifiedDocViewerObservabilityTracesTransactionNameLink'
     ),
@@ -78,13 +76,9 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     errorsOpenInDiscoverButton: page.testSubj.locator('docViewerErrorsOpenInDiscoverButton'),
 
     logsSection: page.testSubj.locator('unifiedDocViewerLogsSection'),
-    logsOpenInDiscoverButton: page.testSubj.locator(
-      'unifiedDocViewerLogsOpenInDiscoverButton'
-    ),
+    logsOpenInDiscoverButton: page.testSubj.locator('unifiedDocViewerLogsOpenInDiscoverButton'),
 
     spanLinksSection: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
-    spanLinksOpenInDiscoverButton: page.testSubj.locator(
-      'docViewerSpanLinksOpenInDiscoverButton'
-    ),
+    spanLinksOpenInDiscoverButton: page.testSubj.locator('docViewerSpanLinksOpenInDiscoverButton'),
   };
 }
