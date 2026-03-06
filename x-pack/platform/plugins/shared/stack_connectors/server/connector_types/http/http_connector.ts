@@ -11,11 +11,11 @@ import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import type { ProxySettings } from '@kbn/actions-utils';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-import { SecretConfigurationSchema } from '@kbn/connector-schemas/common/auth';
 import type { ActionParamsType } from '@kbn/connector-schemas/http';
 import {
   CONNECTOR_ID,
@@ -25,6 +25,7 @@ import {
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
+import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,
@@ -35,7 +36,7 @@ import type { Result } from '../lib/result_type';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
-import { validateConnectorTypeConfig } from './validations';
+import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
 import {
   errorResultRequestFailed,
   errorResultUnexpectedNullResponse,
@@ -71,10 +72,28 @@ export const getConnectorType = (): HttpConnectorType => ({
   validate: {
     config: {
       schema: ConfigSchema,
-      customValidator: validateConnectorTypeConfig,
+      customValidator: (config, validatorServices) => {
+        validateConnectorTypeConfig(config, validatorServices);
+        if (config.proxyUrl) {
+          ensureUriAllowed(config.proxyUrl, validatorServices.configurationUtilities);
+        }
+        return null;
+      },
     },
     secrets: {
-      schema: SecretConfigurationSchema,
+      schema: SecretsSchema,
+      customValidator: (secrets) => {
+        const { proxyUsername, proxyPassword } = secrets;
+        if ((proxyUsername && !proxyPassword) || (!proxyUsername && proxyPassword)) {
+          throw new Error('proxyUrl is required when proxyUsername or proxyPassword is provided');
+        }
+      },
+    },
+    connector: (config, secrets) => {
+      if ((secrets.proxyUsername || secrets.proxyPassword) && !config.proxyUrl) {
+        return 'proxyUrl is required when proxyUsername or proxyPassword is provided';
+      }
+      return null;
     },
     params: {
       schema: ParamsSchema,
@@ -208,6 +227,24 @@ export async function executor(
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
 
+  // Build connector-level proxy settings if configured
+  let proxySettings: ProxySettings | undefined;
+  if (config.proxyUrl) {
+    const parsedUrl = new URL(config.proxyUrl);
+    if (execOptions.secrets.proxyUsername && execOptions.secrets.proxyPassword) {
+      parsedUrl.username = execOptions.secrets.proxyUsername;
+      parsedUrl.password = execOptions.secrets.proxyPassword;
+    }
+    proxySettings = {
+      proxyUrl: parsedUrl.toString(),
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      proxySSLSettings: {
+        verificationMode: config.proxyVerificationMode ?? 'full',
+      },
+    };
+  }
+
   // Handle fetcher options
   let sslOverrides = baseSslOverrides;
   let maxRedirects: number | undefined;
@@ -238,6 +275,7 @@ export async function executor(
       data: body,
       configurationUtilities,
       sslOverrides,
+      proxySettings,
       connectorUsageCollector,
       keepAlive,
       maxRedirects,

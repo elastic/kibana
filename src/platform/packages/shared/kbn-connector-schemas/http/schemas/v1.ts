@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod/v4';
+import { SecretConfigurationSchema as CommonSecretConfigurationSchema } from '../../common/auth/schemas/v1';
 import { AuthConfiguration } from '../../common/auth';
 
 export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
@@ -26,8 +27,15 @@ export const ConfigSchema = z
     clientId: AuthConfiguration.clientId,
     scope: AuthConfiguration.scope,
     additionalFields: AuthConfiguration.additionalFields,
+    proxyUrl: z.string().url().optional(),
+    proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
   })
   .strict();
+
+export const SecretsSchema = CommonSecretConfigurationSchema.extend({
+  proxyUsername: z.string().nullable().default(null),
+  proxyPassword: z.string().nullable().default(null),
+});
 
 export const ParamsSchema = z
   .object({

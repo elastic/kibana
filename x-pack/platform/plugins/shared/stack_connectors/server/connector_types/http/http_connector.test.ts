@@ -9,7 +9,12 @@
 
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import {
+  validateConfig,
+  validateParams,
+  validateSecrets,
+  validateConnector,
+} from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/core/server';
@@ -100,6 +105,8 @@ describe('secrets validation', () => {
       pfx: null,
       clientSecret: null,
       secretHeaders: null,
+      proxyUsername: null,
+      proxyPassword: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
@@ -121,6 +128,8 @@ describe('secrets validation', () => {
       user: null,
       clientSecret: null,
       secretHeaders: null,
+      proxyUsername: null,
+      proxyPassword: null,
     });
   });
 
@@ -133,6 +142,8 @@ describe('secrets validation', () => {
       user: null,
       clientSecret: null,
       secretHeaders: null,
+      proxyUsername: null,
+      proxyPassword: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -144,6 +155,8 @@ describe('secrets validation', () => {
       password: null,
       clientSecret: null,
       secretHeaders: null,
+      proxyUsername: null,
+      proxyPassword: null,
     };
 
     expect(
@@ -160,6 +173,8 @@ describe('secrets validation', () => {
       key: null,
       clientSecret: null,
       secretHeaders: null,
+      proxyUsername: null,
+      proxyPassword: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -171,6 +186,8 @@ describe('secrets validation', () => {
       key: null,
       clientSecret: null,
       secretHeaders: null,
+      proxyUsername: null,
+      proxyPassword: null,
     };
 
     expect(
@@ -189,6 +206,65 @@ describe('secrets validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
+  });
+
+  test('fails when proxyUsername is provided but proxyPassword is omitted', () => {
+    expect(() => {
+      validateSecrets(
+        connectorType,
+        {
+          user: 'bob',
+          password: 'supersecret',
+          crt: null,
+          key: null,
+          pfx: null,
+          clientSecret: null,
+          secretHeaders: null,
+          proxyUsername: 'proxyuser',
+          proxyPassword: null,
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: ✖ proxyUsername and proxyPassword must both be provided, or neither"`
+    );
+  });
+
+  test('fails when proxyPassword is provided but proxyUsername is omitted', () => {
+    expect(() => {
+      validateSecrets(
+        connectorType,
+        {
+          user: 'bob',
+          password: 'supersecret',
+          crt: null,
+          key: null,
+          pfx: null,
+          clientSecret: null,
+          secretHeaders: null,
+          proxyUsername: null,
+          proxyPassword: 'proxypass',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: ✖ proxyUsername and proxyPassword must both be provided, or neither"`
+    );
+  });
+
+  test('succeeds when proxyUsername and proxyPassword are both provided', () => {
+    const secrets = {
+      user: 'bob',
+      password: 'supersecret',
+      crt: null,
+      key: null,
+      pfx: null,
+      clientSecret: null,
+      secretHeaders: null,
+      proxyUsername: 'proxyuser',
+      proxyPassword: 'proxypass',
+    };
+    expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
 });
 
@@ -289,6 +365,82 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating connector type config: error validation http action config: target url is not present in allowedHosts"`
     );
+  });
+
+  test('config validation returns an error if proxyUrl is not in allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (url: string) => {
+        if (url.includes('proxy.example.com')) {
+          throw new Error('proxy url is not present in allowedHosts');
+        }
+      },
+    };
+
+    const config = {
+      url: 'http://mylisteningserver.com:9200/endpoint',
+      authType: AuthType.Basic,
+      hasAuth: true,
+      headers: null,
+      proxyUrl: 'http://proxy.example.com:8080',
+    };
+
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtils });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: error validation http action config: proxy url is not present in allowedHosts"`
+    );
+  });
+
+  describe('connector validation', () => {
+    test('returns error when proxyUsername is set but proxyUrl is missing', () => {
+      const config = {
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.Basic,
+        hasAuth: true,
+        headers: null,
+      };
+      const secrets = {
+        user: 'bob',
+        password: 'supersecret',
+        crt: null,
+        key: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: proxyUrl is required when proxyUsername or proxyPassword is provided"`
+      );
+    });
+
+    test('succeeds when proxyUrl is set and proxy credentials are provided', () => {
+      const config = {
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.Basic,
+        hasAuth: true,
+        headers: null,
+        proxyUrl: 'http://proxy.example.com:8080',
+      };
+      const secrets = {
+        user: 'bob',
+        password: 'supersecret',
+        crt: null,
+        key: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
   });
 
   test('config validation fails when using disabled pfx certType', () => {
@@ -535,6 +687,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
+      proxySettings: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -588,6 +741,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
+      proxySettings: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -640,6 +794,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
+      proxySettings: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -1152,6 +1307,82 @@ describe('execute()', () => {
     });
 
     expect(requestMock.mock.calls[0][0].signal).toBe(controller.signal);
+  });
+
+  test('execute passes proxySettings to request when config.proxyUrl is set', async () => {
+    const config = {
+      url: 'https://abc.def',
+      authType: AuthType.Basic,
+      hasAuth: true,
+      proxyUrl: 'http://proxy.example.com:8080',
+      proxyVerificationMode: 'certificate' as const,
+    } as ConnectorTypeConfigType;
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: 'some data',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].proxySettings).toEqual({
+      proxyUrl: 'http://proxy.example.com:8080',
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      proxySSLSettings: { verificationMode: 'certificate' },
+    });
+  });
+
+  test('execute passes proxySettings with credentials in URL when proxy auth is set', async () => {
+    const config = {
+      url: 'https://abc.def',
+      authType: AuthType.Basic,
+      hasAuth: true,
+      proxyUrl: 'http://proxy.example.com:8080',
+    } as ConnectorTypeConfigType;
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
+      },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: 'some data',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const proxySettings = requestMock.mock.calls[0][0].proxySettings;
+    expect(proxySettings?.proxyUrl).toBe('http://proxyuser:proxypass@proxy.example.com:8080/');
+    expect(proxySettings?.proxySSLSettings).toEqual({ verificationMode: 'full' });
   });
 
   test('execute returns response with status, statusText, headers, and data', async () => {

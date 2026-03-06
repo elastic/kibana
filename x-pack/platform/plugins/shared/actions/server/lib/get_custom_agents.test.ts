@@ -61,6 +61,25 @@ describe('getCustomAgents', () => {
     expect(httpsAgent instanceof HttpsAgent).toBeTruthy();
   });
 
+  test('uses provided proxySettings override instead of global config', () => {
+    configurationUtilities.getProxySettings.mockReturnValue(undefined);
+    const connectorProxySettings = {
+      proxyUrl: 'http://connector-proxy:3128',
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      proxySSLSettings: { verificationMode: 'full' as const },
+    };
+    const { httpAgent, httpsAgent } = getCustomAgents(
+      configurationUtilities,
+      logger,
+      targetUrl,
+      undefined,
+      connectorProxySettings
+    );
+    expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+  });
+
   test('returns non-proxy agents for matching proxyBypassHosts', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
