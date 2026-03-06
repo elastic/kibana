@@ -7,6 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
   INFERENCE_SETTINGS_ID,
@@ -109,7 +110,9 @@ export const defineInferenceSettingsRoutes = ({
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {
-              message: 'Invalid inference settings',
+              message: i18n.translate('xpack.searchInferenceEndpoints.settings.validationError', {
+                defaultMessage: 'Invalid inference settings',
+              }),
               attributes: { errors: validationErrors },
             },
           });
