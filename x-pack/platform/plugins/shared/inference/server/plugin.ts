@@ -248,7 +248,12 @@ export class InferencePlugin
       },
       getDefaultConnector: async (request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
-        return loadDefaultConnector({ actions: pluginsStart.actions, request, esClient, logger: this.logger });
+        return loadDefaultConnector({
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;

@@ -325,7 +325,7 @@ function resolveAndCreatePipeline({
               request,
               actions,
               esClient,
-              logger
+              logger,
             });
             const connector = executor.getConnector();
             const connectorType = connector.type;

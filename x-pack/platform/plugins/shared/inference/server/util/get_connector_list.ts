@@ -19,7 +19,7 @@ export const getConnectorList = async ({
   actions,
   request,
   esClient,
-  logger
+  logger,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
@@ -34,7 +34,7 @@ export const getConnectorList = async ({
   if (connectorsResult.status === 'rejected' && endpointsResult.status === 'rejected') {
     throw new Error(
       `Failed to retrieve connectors and inference endpoints: ${connectorsResult.reason}, ${endpointsResult.reason}`
-    )
+    );
   }
 
   if (connectorsResult.status === 'rejected') {
@@ -50,20 +50,19 @@ export const getConnectorList = async ({
   const connectors = connectorsResult.status === 'fulfilled' ? connectorsResult.value : [];
   const endpoints = endpointsResult.status === 'fulfilled' ? endpointsResult.value : [];
 
-  const inferenceEndpointConnectors: InferenceConnector[] = endpoints
-    .map((ep) => ({
-      type: InferenceConnectorType.Inference,
-      name: ep.inferenceId,
-      connectorId: ep.inferenceId,
-      config: {
-        inferenceId: ep.inferenceId,
-        taskType: ep.taskType,
-        service: ep.service,
-        serviceSettings: ep.serviceSettings,
-      },
-      capabilities: {},
-      isInferenceEndpoint: true,
-    }));
+  const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
+    type: InferenceConnectorType.Inference,
+    name: ep.inferenceId,
+    connectorId: ep.inferenceId,
+    config: {
+      inferenceId: ep.inferenceId,
+      taskType: ep.taskType,
+      service: ep.service,
+      serviceSettings: ep.serviceSettings,
+    },
+    capabilities: {},
+    isInferenceEndpoint: true,
+  }));
 
   return [...connectors, ...inferenceEndpointConnectors];
 };
@@ -75,13 +74,13 @@ const getStackConnectors = async ({
   actions: ActionsPluginStart;
   request: KibanaRequest;
 }): Promise<InferenceConnector[]> => {
-    const actionClient = await actions.getActionsClientWithRequest(request);
+  const actionClient = await actions.getActionsClientWithRequest(request);
 
-    const allConnectors = await actionClient.getAll({
-      includeSystemActions: false,
-    });
+  const allConnectors = await actionClient.getAll({
+    includeSystemActions: false,
+  });
 
-    return allConnectors
-      .filter((connector) => isSupportedConnector(connector))
-      .map(connectorToInference);
+  return allConnectors
+    .filter((connector) => isSupportedConnector(connector))
+    .map(connectorToInference);
 };

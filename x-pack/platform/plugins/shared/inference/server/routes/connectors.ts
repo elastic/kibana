@@ -12,7 +12,7 @@ import type { InferenceServerStart, InferenceStartDependencies } from '../types'
 export function registerConnectorsRoute({
   coreSetup,
   router,
-  logger
+  logger,
 }: {
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
   router: IRouter<RequestHandlerContext>;

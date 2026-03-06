@@ -15,7 +15,7 @@ export const loadDefaultConnector = async ({
   actions,
   request,
   esClient,
-  logger
+  logger,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
