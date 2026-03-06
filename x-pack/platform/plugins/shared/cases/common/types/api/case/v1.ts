@@ -134,7 +134,7 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      */
     settings: CaseSettingsRt,
     template: rt.union([CaseTemplate, rt.null]),
-    [CASE_EXTENDED_FIELDS]: rt.any,
+    [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
   })
 );
 
@@ -223,7 +223,7 @@ export const CasePostRequestRt = rt.intersection([
        */
       customFields: CaseRequestCustomFieldsRt,
       template: rt.union([CaseTemplate, rt.null]),
-      [CASE_EXTENDED_FIELDS]: rt.any,
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);

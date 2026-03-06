@@ -18,5 +18,7 @@ export const casesSchema = casesSchemaV8.extends({
       })
     )
   ),
-  [CASE_EXTENDED_FIELDS]: schema.maybe(schema.nullable(schema.object({}, { unknowns: 'allow' }))),
+  [CASE_EXTENDED_FIELDS]: schema.maybe(
+    schema.nullable(schema.recordOf(schema.string(), schema.string()))
+  ),
 });

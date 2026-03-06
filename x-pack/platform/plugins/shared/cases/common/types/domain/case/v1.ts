@@ -149,7 +149,7 @@ export const CaseAttributesRt = rt.intersection([
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
       template: rt.union([rt.null, CaseTemplate]),
-      [CASE_EXTENDED_FIELDS]: rt.any,
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
