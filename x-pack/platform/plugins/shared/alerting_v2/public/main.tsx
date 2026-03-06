@@ -51,7 +51,6 @@ export const mountAlertingV2App = ({
   container: Container;
 }): AppUnmount => {
   const { element, history } = params;
-  const queryClient = new QueryClient();
 
   const queryClient = new QueryClient();
 
