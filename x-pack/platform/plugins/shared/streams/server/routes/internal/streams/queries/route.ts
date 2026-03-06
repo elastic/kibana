@@ -174,7 +174,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
-        filters: status ? { ruleUnbacked: toRuleUnbackedFilter(status) } : undefined,
+        filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
       },
       { queryClient, scopedClusterClient }
     );

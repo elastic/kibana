@@ -6,18 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { QUERY_STATUSES } from '../../../common/queries';
 import type { QueryStatus } from '../../../common/queries';
 import type { RuleUnbackedFilter } from '../../lib/streams/assets/query/query_client';
 
 export const queryStatusSchema = z
-  .preprocess(
-    (val) => (typeof val === 'string' ? [val] : val),
-    z.array(z.enum(['active', 'draft']))
-  )
+  .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.enum(QUERY_STATUSES)))
   .optional()
   .describe('Filter queries by status: active (promoted) or draft (unbacked)');
 
-export function toRuleUnbackedFilter(statuses: QueryStatus[]): RuleUnbackedFilter {
+export function toRuleUnbackedFilter(statuses: QueryStatus[] = []): RuleUnbackedFilter {
   const hasActive = statuses.includes('active');
   const hasDraft = statuses.includes('draft');
 
