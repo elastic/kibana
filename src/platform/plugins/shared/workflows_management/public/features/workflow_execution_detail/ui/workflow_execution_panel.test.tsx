@@ -61,7 +61,7 @@ describe('WorkflowExecutionPanel', () => {
     isTestRun: false,
     spaceId: 'default',
     status: ExecutionStatus.RUNNING,
-    error: null,
+    error: undefined,
     startedAt: '2024-01-01T10:00:00Z',
     finishedAt: '',
     workflowId: 'workflow-123',

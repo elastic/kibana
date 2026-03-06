@@ -41,7 +41,7 @@ describe('cancelWorkflowIfRequested', () => {
     } as EsWorkflowExecution;
 
     executionStateRepository = {
-      getExecutions: jest.fn().mockResolvedValue({}),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({}),
     } as unknown as jest.Mocked<ExecutionStateRepository>;
 
     workflowExecutionState = {

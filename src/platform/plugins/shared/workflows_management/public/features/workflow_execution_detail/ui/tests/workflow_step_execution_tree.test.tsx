@@ -125,6 +125,7 @@ describe('WorkflowStepExecutionTree', () => {
     workflowRunId: 'workflow-run-1',
     workflowId: 'workflow-1',
     status: ExecutionStatus.COMPLETED,
+    createdAt: '2024-01-01T10:00:00Z',
     startedAt: '2024-01-01T10:00:00Z',
     topologicalIndex: 0,
     globalExecutionIndex: 0,
@@ -143,7 +144,7 @@ describe('WorkflowStepExecutionTree', () => {
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-01T10:00:00Z',
     finishedAt: '',
-    error: null,
+    error: undefined,
     workflowId: 'workflow-123',
     workflowName: 'Test Workflow',
     workflowDefinition: {

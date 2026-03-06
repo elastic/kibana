@@ -16,8 +16,6 @@ import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { UrlValidator } from '../lib/url_validator';
 import { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
-import { createStepExecutionRepository } from '../repositories/step_execution_repository/create_step_execution_repository';
-import { createWorkflowExecutionRepository } from '../repositories/workflow_execution_repository/create_workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';

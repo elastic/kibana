@@ -58,7 +58,7 @@ describe('WorkflowExecutionState', () => {
 
     underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-    expect(underTest.getWorkflowExecution()).toEqual(updatedWorkflowExecution);
+    expect(underTest.getWorkflowExecution()).toMatchObject(updatedWorkflowExecution);
   });
 
   it('should not call executionStateRepository before flush', () => {
@@ -95,6 +95,7 @@ describe('WorkflowExecutionState', () => {
       stepId: 'test-step-execution-id',
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
+      createdAt: '2025-08-05T20:00:00.000Z',
       stepExecutionIndex: 0,
       globalExecutionIndex: 0,
       spaceId: 'default',
