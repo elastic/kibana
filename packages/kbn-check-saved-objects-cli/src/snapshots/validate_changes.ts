@@ -15,9 +15,16 @@ import type { MigrationInfoRecord, ModelVersionSummary } from '../types';
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
   to: MigrationInfoRecord;
+  registeredType?: SavedObjectsType;
+  log?: (message: string) => void;
 }
 
-export function validateChangesExistingType({ from, to }: ValidateChangesExistingTypeParams): void {
+export function validateChangesExistingType({
+  from,
+  to,
+  registeredType,
+  log,
+}: ValidateChangesExistingTypeParams): void {
   const name = to.name;
 
   // check that no migrations have been removed
@@ -46,9 +53,24 @@ export function validateChangesExistingType({ from, to }: ValidateChangesExistin
   // check that existing model versions have not been mutated
   const mutatedModelVersions = getMutatedModelVersions(from, to);
   if (mutatedModelVersions.length > 0) {
-    throw new Error(
-      `❌ Some modelVersions have been updated for SO type '${name}' after they were defined: ${mutatedModelVersions}.`
-    );
+    if (!mappingsUpdated(from, to) && isOnlyLatestModelVersionSchemaMutated(from, to)) {
+      // Schema-only changes to the latest model version are allowed when mappings are not affected.
+      // This covers cases where a schema validation constraint (e.g. maxSize) is added or tightened
+      // without altering the underlying ES mappings. A new model version would only be required if
+      // the mappings changed, since that is what triggers index operations during upgrades.
+      if (registeredType) {
+        validateAllMappingsInModelVersion(name, to, registeredType);
+      }
+      log?.(
+        `⚠️  WARNING: Schema-only changes detected in the latest model version of SO type '${name}'. ` +
+          `This is an exceptional case where schema changes are allowed because the mappings have not been modified. ` +
+          `Any future changes to the mappings will still require a proper model version bump.`
+      );
+    } else {
+      throw new Error(
+        `❌ Some modelVersions have been updated for SO type '${name}' after they were defined: ${mutatedModelVersions}.`
+      );
+    }
   }
 
   // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
@@ -183,6 +205,40 @@ function getMutatedModelVersions(
     }
   });
   return mutatedModelVersions.map(({ version }) => `10.${version}.0`);
+}
+
+/**
+ * Returns true if the only difference between two snapshots is that the latest model version's
+ * schemas (create and/or forwardCompatibility) have changed. Structural fields such as changeTypes,
+ * hasTransformation, and newMappings must be identical for all versions.
+ */
+function isOnlyLatestModelVersionSchemaMutated(
+  infoBefore: MigrationInfoRecord,
+  infoAfter: MigrationInfoRecord
+): boolean {
+  if (infoBefore.modelVersions.length === 0) return false;
+
+  const latestIndex = infoBefore.modelVersions.length - 1;
+
+  // All versions prior to the latest must be unchanged
+  const olderVersionsMutated = infoBefore.modelVersions
+    .slice(0, latestIndex)
+    .some((summaryBefore, idx) => !equal(summaryBefore, infoAfter.modelVersions[idx]));
+  if (olderVersionsMutated) return false;
+
+  const latestBefore = infoBefore.modelVersions[latestIndex];
+  const latestAfter = infoAfter.modelVersions[latestIndex];
+
+  // The latest version must actually differ
+  if (equal(latestBefore, latestAfter)) return false;
+
+  // Only the schemas (and consequently the modelVersionHash) may differ - structural fields must be unchanged
+  return (
+    latestBefore.version === latestAfter.version &&
+    equal(latestBefore.changeTypes, latestAfter.changeTypes) &&
+    latestBefore.hasTransformation === latestAfter.hasTransformation &&
+    equal(latestBefore.newMappings, latestAfter.newMappings)
+  );
 }
 
 function mappingsUpdated(infoBefore: MigrationInfoRecord, infoAfter: MigrationInfoRecord): boolean {

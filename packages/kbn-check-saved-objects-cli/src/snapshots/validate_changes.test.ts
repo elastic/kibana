@@ -45,14 +45,16 @@ describe('validateChangesExistingType', () => {
     from,
     to,
     name,
+    log,
   }: {
     from: MigrationSnapshot;
     to: MigrationSnapshot;
     name: string;
+    log?: (msg: string) => void;
   }) => {
     const typeFrom = from.typeDefinitions[name];
     const typeTo = to.typeDefinitions[name];
-    return validateChangesExistingType({ from: typeFrom, to: typeTo });
+    return validateChangesExistingType({ from: typeFrom, to: typeTo, log });
   };
 
   it('should throw if migrations are deleted', () => {
@@ -97,6 +99,38 @@ describe('validateChangesExistingType', () => {
     expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
     );
+  });
+
+  describe('schema-only changes in the latest model version', () => {
+    it('should not throw and emit a warning when only the latest model version schemas changed and mappings are unchanged', () => {
+      const from = loadSnapshot('schema_only_change_in_latest_model_version.json');
+      const to = loadSnapshot('schema_only_change_in_latest_model_version_updated.json');
+      const log = jest.fn();
+
+      expect(() => validateChangesWrapper({ from, to, name: 'task', log })).not.toThrow();
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('WARNING'));
+      expect(log).toHaveBeenCalledWith(expect.stringContaining("'task'"));
+    });
+
+    it('should throw when a schema change is detected in an older (non-latest) model version', () => {
+      const from = loadSnapshot('schema_only_change_in_latest_model_version.json');
+      const to = loadSnapshot('schema_only_change_in_older_model_version.json');
+
+      expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
+        `❌ Some modelVersions have been updated for SO type 'task' after they were defined`
+      );
+    });
+
+    it('should throw when schema changes in the latest model version are accompanied by mapping changes', () => {
+      const from = loadSnapshot('schema_only_change_in_latest_model_version.json');
+      const to = loadSnapshot('schema_and_mapping_change_in_latest_model_version.json');
+
+      // When both schema and mappings change simultaneously, the model version mutation check fires
+      // first (before the mappings-without-bump check), since both are mutations.
+      expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
+        `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.3.0.`
+      );
+    });
   });
 
   it('should throw if model versions are not consecutive integers starting at 1', () => {

@@ -29,12 +29,16 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Validating changes in updated types',
       task: (_, subtask) => {
-        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map(({ name }) => ({
-          title: `Checking updates on type '${name}'`,
-          task: () =>
+        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => ({
+          title: `Checking updates on type '${type.name}'`,
+          task: (__, typeTask) =>
             validateChangesExistingType({
-              from: ctx.from!.typeDefinitions[name],
-              to: ctx.to?.typeDefinitions[name]!,
+              from: ctx.from!.typeDefinitions[type.name],
+              to: ctx.to?.typeDefinitions[type.name]!,
+              registeredType: type,
+              log: (msg) => {
+                typeTask.output = msg;
+              },
             }),
         }));
 
