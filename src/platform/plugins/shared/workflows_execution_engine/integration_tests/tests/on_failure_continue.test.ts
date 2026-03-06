@@ -69,7 +69,7 @@ steps:
 
         it('should successfully complete workflow despite error in constantlyFailingStep', async () => {
           const workflowExecutionDoc =
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
               'fake_workflow_execution_id'
             );
           expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -79,7 +79,7 @@ steps:
 
         it('should execute constantlyFailingStep once and record its failure', async () => {
           const failingStepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter(
             (se) =>
               se.stepId === 'constantlyFailingStep' &&
@@ -95,7 +95,7 @@ steps:
 
         it('should execute finalStep successfully after the failing step', async () => {
           const finalStepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter((se) => se.stepId === 'finalStep');
           expect(finalStepExecutions.length).toBe(1);
           expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -104,14 +104,14 @@ steps:
 
         it('should execute finalStep after constantlyFailingStep', async () => {
           const failingStepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter(
             (se) =>
               se.stepId === 'constantlyFailingStep' &&
               se.stepType === FakeConnectors.constantlyFailing.actionTypeId
           );
           const finalStepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter((se) => se.stepId === 'finalStep');
 
           expect(failingStepExecutions.length).toBe(1);
@@ -137,7 +137,7 @@ steps:
 
         it('should fail the workflow due to error in constantlyFailingStep', async () => {
           const workflowExecutionDoc =
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
               'fake_workflow_execution_id'
             );
           expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
@@ -150,7 +150,7 @@ steps:
 
         it('should execute constantlyFailingStep once and record its failure', async () => {
           const failingStepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter(
             (se) =>
               se.stepId === 'constantlyFailingStep' &&
@@ -166,7 +166,7 @@ steps:
 
         it('should not execute finalStep', async () => {
           const finalStepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter((se) => se.stepId === 'finalStep');
           expect(finalStepExecutions.length).toBe(0);
         });

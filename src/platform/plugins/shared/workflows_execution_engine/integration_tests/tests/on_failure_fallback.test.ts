@@ -84,7 +84,7 @@ steps:
 
       it('should fail the workflow despite fallback step execution', async () => {
         const workflowExecutionDoc =
-          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
             'fake_workflow_execution_id'
           );
         expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
@@ -97,7 +97,7 @@ steps:
 
       it('should execute constantlyFailingStep once and record its failure', async () => {
         const failingStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
         ).filter(
           (se) =>
             se.stepId === 'constantlyFailingStep' &&
@@ -116,7 +116,7 @@ steps:
       // The following tests document the current behavior
       it('should execute fallback step', async () => {
         const fallbackStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
         ).filter((se) => se.stepType === 'fallback');
 
         // Currently, fallback is not executed without retry
@@ -125,7 +125,7 @@ steps:
 
       it('should not execute finalStep after failing step', async () => {
         const finalStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
         ).filter((se) => se.stepId === 'finalStep');
         expect(finalStepExecutions.length).toBe(0);
       });

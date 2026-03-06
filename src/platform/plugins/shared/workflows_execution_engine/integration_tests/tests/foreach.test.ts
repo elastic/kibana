@@ -55,7 +55,7 @@ steps:
       inputs: { innerArray },
     });
     const workflowExecutionDoc =
-      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
       );
     expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -78,7 +78,7 @@ steps:
         inputs: { innerArray },
       });
       const outerForeachChildConnectorStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
       expect(outerForeachChildConnectorStepExecutions.length).toBe(2);
       outerArray.forEach((item, index) => {
@@ -124,7 +124,7 @@ steps:
         inputs: { innerArray },
       });
       const stepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'innerForeachChildConnectorStep');
       expect(stepExecutions.length).toBe(6);
     });
@@ -135,7 +135,7 @@ steps:
         inputs: { innerArray },
       });
       const stepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'innerForeachStep');
       expect(stepExecutions.length).toBe(outerArray.length);
     });
@@ -174,11 +174,11 @@ steps:
 
       it('should fail the workflow with appropriate error message', async () => {
         const workflowExecution =
-          await workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          await workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
             'fake_workflow_execution_id'
           );
         const error =
-          await workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          await workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
             'fake_workflow_execution_id'
           )?.error;
         expect(error).toBeDefined();
@@ -187,7 +187,7 @@ steps:
 
       it('should have only one step execution for outerForeachStep with failed status', async () => {
         const outerForeachStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
         ).filter((se) => se.stepId === 'outerForeachStep');
         expect(outerForeachStepExecutions.length).toBe(1);
         expect(outerForeachStepExecutions[0].status).toBe(ExecutionStatus.FAILED);

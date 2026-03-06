@@ -62,7 +62,7 @@ steps:
       workflowYaml: buildYaml(),
     });
     const workflowExecutionDoc =
-      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
       );
     expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -75,7 +75,7 @@ steps:
       workflowYaml: buildYaml(),
     });
     const debugStep = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).find((x) => x.stepId === 'debug');
     expect(debugStep).toBeDefined();
     const parsedMessage = JSON.parse(debugStep?.output as string);

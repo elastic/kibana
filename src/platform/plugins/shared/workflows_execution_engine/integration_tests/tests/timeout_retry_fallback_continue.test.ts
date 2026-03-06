@@ -62,7 +62,7 @@ steps:
 
     it('should successfully execute workflow despite errors in constantlyFailingStep', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -72,7 +72,7 @@ steps:
 
     it('should execute final step', async () => {
       const finalStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'finalStep');
       expect(finalStepExecutions.length).toBe(1);
       expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -81,7 +81,7 @@ steps:
 
     it('should execute failingStepByTimeout twice (1 initial + 1 retry)', async () => {
       const failingStepByTimeoutExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter(
         (se) =>
           se.stepId === 'failingStepByTimeout' &&
@@ -92,7 +92,7 @@ steps:
 
     it('should set timeout error for each execution of failingStepByTimeout', async () => {
       const failingStepByTimeoutExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter(
         (se) =>
           se.stepId === 'failingStepByTimeout' &&
@@ -109,7 +109,7 @@ steps:
 
     it('should execute fallback step once', async () => {
       const fallbackStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'fallbackStep');
       expect(fallbackStepExecutions.length).toBe(1);
       expect(fallbackStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -118,7 +118,7 @@ steps:
 
     it('should execute logErrorStep once and be able to access error from failingStepByTimeout', async () => {
       const logErrorStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'logErrorStep');
       expect(logErrorStepExecutions.length).toBe(1);
       expect(logErrorStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -138,7 +138,7 @@ steps:
 
     it('should fail the workflow due to error in failingStepByTimeout', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
@@ -151,7 +151,7 @@ steps:
 
     it('should not execute final step', async () => {
       const finalStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'finalStep');
       expect(finalStepExecutions.length).toBe(0);
     });
