@@ -10,5 +10,5 @@ import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 //
 // Do not change constant value - part of public REST APIs
 //
-export const SLO_OVERVIEW_EMBEDDABLE_ID = 'slo';
+export const SLO_OVERVIEW_EMBEDDABLE_ID = 'slo_overview';
 export const SLO_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
