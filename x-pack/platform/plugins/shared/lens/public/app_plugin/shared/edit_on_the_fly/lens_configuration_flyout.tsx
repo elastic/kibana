@@ -118,7 +118,7 @@ export function LensEditConfigurationFlyout({
     const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
     // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
     // formBased attributes are already persistable and getPersistableState expects private state.
-    let previousPersistable: { state: unknown; references: Reference[] } | null = null;
+    let previousPersistable: typeof currentPersistable = null;
     if (previousDsState) {
       previousPersistable =
         datasourceId === 'textBased'
