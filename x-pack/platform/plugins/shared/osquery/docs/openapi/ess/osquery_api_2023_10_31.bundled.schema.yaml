@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  description: Run live queries, manage packs and saved queries, and view unified query history.
+  description: Run live queries, manage packs and saved queries.
   title: Security Osquery API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
@@ -11,6 +11,78 @@ servers:
       port:
         default: '5601'
 paths:
+  /api/osquery/history:
+    get:
+      description: >
+        Get a unified, time-sorted history of live, rule-triggered, and
+        scheduled osquery executions. The response uses cursor-based pagination.
+      operationId: OsqueryGetUnifiedHistory
+      parameters:
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            default: 20
+            description: The number of results to return per page. The default is 20.
+            maximum: 100
+            minimum: 1
+            type: integer
+        - in: query
+          name: nextPage
+          required: false
+          schema:
+            description: >-
+              A base64-encoded cursor for pagination. Use the value from the
+              previous response to fetch the next page.
+            type: string
+        - in: query
+          name: kuery
+          required: false
+          schema:
+            description: >-
+              A search string to filter history entries by pack name, query
+              text, or query ID.
+            type: string
+        - in: query
+          name: userIds
+          required: false
+          schema:
+            description: Comma-separated list of user IDs to filter live query history.
+            example: elastic,admin
+            type: string
+        - in: query
+          name: sourceFilters
+          required: false
+          schema:
+            description: >-
+              Comma-separated list of source types to include. Valid values are
+              `live`, `rule`, and `scheduled`.
+            example: live,scheduled
+            type: string
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            description: The start of the time range filter (ISO 8601).
+            example: '2024-01-01T00:00:00Z'
+            type: string
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            description: The end of the time range filter (ISO 8601).
+            example: '2024-12-31T23:59:59Z'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUnifiedHistoryResponse'
+          description: OK
+      summary: Get unified query history
+      tags:
+        - Security Osquery API
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -144,78 +216,6 @@ paths:
                 $ref: '#/components/schemas/GetLiveQueryResultsResponse'
           description: OK
       summary: Get live query results
-      tags:
-        - Security Osquery API
-  /api/osquery/history:
-    get:
-      description: >-
-        Get a unified, time-sorted history of live, rule-triggered, and scheduled
-        osquery executions. The response uses cursor-based pagination.
-      operationId: OsqueryGetUnifiedHistory
-      parameters:
-        - in: query
-          name: pageSize
-          required: false
-          schema:
-            default: 20
-            description: The number of results to return per page. The default is 20.
-            maximum: 100
-            minimum: 1
-            type: integer
-        - in: query
-          name: nextPage
-          required: false
-          schema:
-            description: >-
-              A base64-encoded cursor for pagination. Use the value from the
-              previous response to fetch the next page.
-            type: string
-        - in: query
-          name: kuery
-          required: false
-          schema:
-            description: >-
-              A search string to filter history entries by pack name, query text,
-              or query ID.
-            type: string
-        - in: query
-          name: userIds
-          required: false
-          schema:
-            description: Comma-separated list of user IDs to filter live query history.
-            example: elastic,admin
-            type: string
-        - in: query
-          name: sourceFilters
-          required: false
-          schema:
-            description: >-
-              Comma-separated list of source types to include. Valid values are
-              `live`, `rule`, and `scheduled`.
-            example: live,scheduled
-            type: string
-        - in: query
-          name: startDate
-          required: false
-          schema:
-            description: The start of the time range filter (ISO 8601).
-            example: '2024-01-01T00:00:00Z'
-            type: string
-        - in: query
-          name: endDate
-          required: false
-          schema:
-            description: The end of the time range filter (ISO 8601).
-            example: '2024-12-31T23:59:59Z'
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetUnifiedHistoryResponse'
-          description: OK
-      summary: Get unified query history
       tags:
         - Security Osquery API
   /api/osquery/packs:
@@ -877,11 +877,49 @@ components:
         total: 11
       type: object
       properties: {}
-    GetUnifiedHistoryResponse:
+    GetLiveQueryResultsResponse:
+      description: The response for getting live query results.
+      example:
+        data:
+          edges:
+            - {}
+            - {}
+          total: 2
       type: object
-      required:
-        - data
-        - hasMore
+      properties: {}
+    GetUnifiedHistoryResponse:
+      example:
+        data:
+          - actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            agentCount: 5
+            errorCount: 0
+            id: 3c42c847-eb30-4452-80e0-728584042334
+            queryName: uptime_query
+            queryText: select * from uptime;
+            source: Live
+            sourceType: live
+            successCount: 5
+            timestamp: '2024-07-26T09:59:32.220Z'
+            totalRows: 42
+            userId: elastic
+          - agentCount: 10
+            errorCount: 1
+            executionCount: 3
+            id: pack_my_pack_uptime_3
+            packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            packName: My Pack
+            plannedTime: '2024-07-26T09:00:00.000Z'
+            queryName: uptime
+            queryText: select * from uptime;
+            scheduleId: pack_my_pack_uptime
+            source: Scheduled
+            sourceType: scheduled
+            successCount: 9
+            timestamp: '2024-07-26T09:00:00.000Z'
+            totalRows: 100
+        hasMore: true
+        nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
+      type: object
       properties:
         data:
           description: The list of unified history rows for the current page.
@@ -896,47 +934,9 @@ components:
             A base64-encoded cursor to fetch the next page. Absent when there
             are no more results.
           type: string
-      example:
-        data:
-          - id: 3c42c847-eb30-4452-80e0-728584042334
-            sourceType: live
-            source: Live
-            timestamp: '2024-07-26T09:59:32.220Z'
-            queryText: select * from uptime;
-            queryName: uptime_query
-            agentCount: 5
-            successCount: 5
-            errorCount: 0
-            totalRows: 42
-            actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
-            userId: elastic
-          - id: pack_my_pack_uptime_3
-            sourceType: scheduled
-            source: Scheduled
-            timestamp: '2024-07-26T09:00:00.000Z'
-            plannedTime: '2024-07-26T09:00:00.000Z'
-            queryText: select * from uptime;
-            queryName: uptime
-            packName: My Pack
-            packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            agentCount: 10
-            successCount: 9
-            errorCount: 1
-            totalRows: 100
-            scheduleId: pack_my_pack_uptime
-            executionCount: 3
-        nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
-        hasMore: true
-    GetLiveQueryResultsResponse:
-      description: The response for getting live query results.
-      example:
-        data:
-          edges:
-            - {}
-            - {}
-          total: 2
-      type: object
-      properties: {}
+      required:
+        - data
+        - hasMore
     Interval:
       description: An interval, in seconds, on which to run the query.
       example: '60'
@@ -944,14 +944,19 @@ components:
     IntervalOrUndefined:
       $ref: '#/components/schemas/Interval'
       nullable: true
+    KueryOrUndefined:
+      description: The kuery to filter the results by.
+      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+      nullable: true
+      type: string
     LiveHistoryRow:
       allOf:
         - $ref: '#/components/schemas/UnifiedHistoryRowBase'
         - type: object
-          required:
-            - sourceType
-            - source
           properties:
+            actionId:
+              description: The Fleet action ID for the live query.
+              type: string
             agentAll:
               description: Whether the query targeted all agents.
               type: boolean
@@ -970,9 +975,6 @@ components:
               items:
                 type: string
               type: array
-            actionId:
-              description: The Fleet action ID for the live query.
-              type: string
             ecsMapping:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
@@ -1010,11 +1012,9 @@ components:
             userProfileUid:
               description: The user profile UID of the user who ran the query.
               type: string
-    KueryOrUndefined:
-      description: The kuery to filter the results by.
-      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
-      nullable: true
-      type: string
+          required:
+            - sourceType
+            - source
     ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
@@ -1105,13 +1105,24 @@ components:
     RemovedOrUndefined:
       $ref: '#/components/schemas/Removed'
       nullable: true
+    SavedQueryDescription:
+      description: The saved query description.
+      example: Saved query description
+      type: string
+    SavedQueryDescriptionOrUndefined:
+      $ref: '#/components/schemas/SavedQueryDescription'
+      nullable: true
+    SavedQueryId:
+      description: The ID of a saved query.
+      example: 3c42c847-eb30-4452-80e0-728584042334
+      type: string
+    SavedQueryIdOrUndefined:
+      $ref: '#/components/schemas/SavedQueryId'
+      nullable: true
     ScheduledHistoryRow:
       allOf:
         - $ref: '#/components/schemas/UnifiedHistoryRowBase'
         - type: object
-          required:
-            - sourceType
-            - source
           properties:
             executionCount:
               description: The execution count for this scheduled query run.
@@ -1132,20 +1143,9 @@ components:
               enum:
                 - scheduled
               type: string
-    SavedQueryDescription:
-      description: The saved query description.
-      example: Saved query description
-      type: string
-    SavedQueryDescriptionOrUndefined:
-      $ref: '#/components/schemas/SavedQueryDescription'
-      nullable: true
-    SavedQueryId:
-      description: The ID of a saved query.
-      example: 3c42c847-eb30-4452-80e0-728584042334
-      type: string
-    SavedQueryIdOrUndefined:
-      $ref: '#/components/schemas/SavedQueryId'
-      nullable: true
+          required:
+            - sourceType
+            - source
     Shards:
       additionalProperties:
         type: number
@@ -1182,11 +1182,6 @@ components:
         - $ref: '#/components/schemas/ScheduledHistoryRow'
     UnifiedHistoryRowBase:
       type: object
-      required:
-        - id
-        - timestamp
-        - queryText
-        - agentCount
       properties:
         agentCount:
           description: The number of agents targeted by the query.
@@ -1224,6 +1219,11 @@ components:
           description: The total number of result rows returned across all agents.
           nullable: true
           type: integer
+      required:
+        - id
+        - timestamp
+        - queryText
+        - agentCount
     UpdatePacksRequestBody:
       example:
         name: updated_my_pack_name
@@ -1313,6 +1313,6 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: Run live queries, manage packs and saved queries, and view unified query history.
+  - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
