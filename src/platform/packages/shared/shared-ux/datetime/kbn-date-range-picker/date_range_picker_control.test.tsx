@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { fireEvent, screen, waitFor, act } from '@testing-library/react';
+import React, { useState } from 'react';
+import { fireEvent, render, screen, waitFor, act, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
 import { DateRangePicker, type DateRangePickerProps } from './date_range_picker';
@@ -279,6 +280,92 @@ describe('DateRangePickerControl', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
+    });
+
+    it('preserves text when controlled value is removed', () => {
+      const Harness = () => {
+        const [controlled, setControlled] = useState(true);
+        return (
+          <EuiThemeProvider>
+            <button data-test-subj="toggle" onClick={() => setControlled(false)} />
+            <DateRangePicker
+              {...(controlled ? { value: 'last 1 hour' } : {})}
+              onChange={() => {}}
+            />
+          </EuiThemeProvider>
+        );
+      };
+      render(<Harness />);
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
+
+      fireEvent.click(screen.getByTestId('toggle'));
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
+    });
+  });
+
+  describe('width prop', () => {
+    it('auto (default)', () => {
+      const { container } = renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      const computedStyles = getComputedStyle(container.firstElementChild!);
+      expect(computedStyles.display).toBe('inline-flex');
+      expect(computedStyles.inlineSize).toBe('auto');
+    });
+
+    it('restricted', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} width="restricted" />);
+      const wrapper = screen.getByTestId('dateRangePickerControlWrapper');
+      expect(wrapper).toHaveStyle({
+        'inline-size': 'var(--kbnDateRangePickerWidth, 21.25rem)',
+      });
+    });
+
+    it('full', () => {
+      const { container } = renderWithEuiTheme(<DateRangePicker {...defaultProps} width="full" />);
+      expect(container.firstElementChild).toHaveStyle({ display: 'flex', 'inline-size': '100%' });
+      const popover = screen.getByTestId('dateRangePickerDialogTriggerWrapper');
+      expect(popover).toHaveStyle({ 'inline-size': '100%' });
+    });
+  });
+
+  describe('isLoading prop', () => {
+    it('shows a loading spinner when isLoading is true', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} isLoading />);
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('does not show a spinner when isLoading is false (default)', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('layout passthrough props', () => {
+    it('passes className to the outer container', () => {
+      const { container } = renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} className="my-custom-class" />
+      );
+      expect(container.firstElementChild).toHaveClass('my-custom-class');
+    });
+
+    it('passes data-test-subj to the outer container', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} data-test-subj="myPicker" />);
+      expect(screen.getByTestId('myPicker')).toBeInTheDocument();
+    });
+  });
+
+  describe('badge fallback', () => {
+    it('renders "--" when the duration cannot be computed', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="invalid input" />);
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      const badge = within(button).getByText('--');
+      expect(badge).toBeInTheDocument();
+    });
+
+    it('renders a duration label when the range is valid', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      const badge = within(button).getByText('20min');
+      expect(badge).toBeInTheDocument();
     });
   });
 });
