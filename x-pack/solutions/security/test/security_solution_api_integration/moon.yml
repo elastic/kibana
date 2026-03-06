@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/cloud-security-posture-common'
   - '@kbn/detections-response-ftr-services'
   - '@kbn/connector-schemas'
+  - '@kbn/event-log-plugin'
 tags:
   - functional-tests
   - package
