@@ -100,7 +100,7 @@ node scripts/evals run \
 | Flag | Description |
 |---|---|
 | `--suite` | Suite ID (`observability-ai`) |
-| `--evaluation-connector-id` | Connector ID for the LLM judge (required) |
+| `--judge` | Connector ID for the LLM judge (required) |
 | `--project` | Connector/model project to evaluate against |
 | `--repetitions` | Number of times to repeat each example |
 | `--trace-es-url` | Elasticsearch cluster for trace storage (e.g., `https://user:pass@trace-cluster:9200`) |
