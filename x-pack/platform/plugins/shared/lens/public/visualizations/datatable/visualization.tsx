@@ -167,11 +167,10 @@ export const getDatatableVisualization = ({
         if (!showColorByTerms && newColumn.colorMapping) {
           delete newColumn.colorMapping;
           if (!newColumn.palette) {
-            const { palette } = getColorByValuePalette(
+            newColumn.palette = getColorByValuePalette(
               paletteService,
               dataBounds ?? getFallbackDataBounds()
             );
-            newColumn.palette = palette;
           }
         }
 
@@ -189,7 +188,7 @@ export const getDatatableVisualization = ({
         // Replace them with default color-by-value palette
         const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
         if (paletteEntry && !showColorByTerms && !paletteEntry.canDynamicColoring && dataBounds) {
-          const { palette } = getColorByValuePalette(paletteService, dataBounds);
+          const palette = getColorByValuePalette(paletteService, dataBounds);
           return { ...newColumn, palette };
         }
       }

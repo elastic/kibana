@@ -418,10 +418,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           appliedPalette = undefined;
         } else {
           const dataBounds = minMaxByColumnId.get(originalId) ?? getFallbackDataBounds();
-          const { palette: defaultPalette } = getColorByValuePalette(
-            props.paletteService,
-            dataBounds
-          );
+          const defaultPalette = getColorByValuePalette(props.paletteService, dataBounds);
           const stops = defaultPalette.params?.stops || [];
           appliedPalette = {
             type: 'palette',

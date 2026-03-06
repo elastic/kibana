@@ -102,7 +102,6 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
     getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
 
   let activePalette: PaletteOutput<CustomPaletteParams>;
-  let displayStops: Array<{ color: string; stop: number }>;
 
   if (showColorByTerms) {
     // Terms coloring uses the existing palette or the 'default' categorical palette
@@ -110,12 +109,9 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
       type: 'palette',
       name: column?.palette?.name ?? 'default',
     };
-    displayStops = [];
   } else {
     // Value coloring uses the existing palette or the 'positive' color by value palette
-    const result = getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
-    activePalette = result.palette;
-    displayStops = result.displayStops;
+    activePalette = getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
   }
 
   // Check if a legacy palette is used for terms coloring instead of a color mapping
@@ -224,13 +220,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                     }
                   } else {
                     if (!column?.palette) {
-                      params.palette = {
-                        ...activePalette,
-                        params: {
-                          ...activePalette.params,
-                          stops: displayStops,
-                        },
-                      };
+                      params.palette = activePalette;
                     }
                   }
                 }

@@ -75,10 +75,7 @@ export function getColorByValuePalette(
   paletteService: PaletteRegistry,
   dataBounds: DataBounds,
   existingPalette?: PaletteOutput<CustomPaletteParams>
-): {
-  palette: PaletteOutput<CustomPaletteParams>;
-  displayStops: Array<{ color: string; stop: number }>;
-} {
+): PaletteOutput<CustomPaletteParams> {
   // Use existing palette or create default
   const activePalette: PaletteOutput<CustomPaletteParams> = existingPalette
     ? {
@@ -92,17 +89,17 @@ export function getColorByValuePalette(
         params: { ...defaultPaletteParams },
       };
 
-  const displayStops = applyPaletteParams(paletteService, activePalette, dataBounds);
+  const computedStops = applyPaletteParams(paletteService, activePalette, dataBounds);
 
   // For non-custom palettes -> update the stops with computed values
   if (activePalette.name !== CUSTOM_PALETTE) {
     activePalette.params = {
       ...activePalette.params,
-      stops: displayStops,
+      stops: computedStops,
     };
   }
 
-  return { palette: activePalette, displayStops };
+  return activePalette;
 }
 
 /**
@@ -127,6 +124,6 @@ export function getColorDefaults({
     };
   }
 
-  const { palette: defaultPalette } = getColorByValuePalette(paletteService, dataBounds);
-  return { palette: defaultPalette, colorMapping: undefined };
+  const palette = getColorByValuePalette(paletteService, dataBounds);
+  return { palette, colorMapping: undefined };
 }
