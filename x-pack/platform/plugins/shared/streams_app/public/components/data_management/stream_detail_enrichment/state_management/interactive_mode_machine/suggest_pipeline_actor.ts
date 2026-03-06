@@ -18,7 +18,7 @@ import {
 } from '@kbn/grok-heuristics';
 
 import { i18n } from '@kbn/i18n';
-import { isRequestAbortedError } from '@kbn/server-route-repository-client';
+import { isRequestAbortedError, isHttpFetchError } from '@kbn/server-route-repository-client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
@@ -117,18 +117,36 @@ export async function schedulePipelineSuggestionTaskLogic(
         : null,
   };
 
-  await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
-    signal,
-    params: {
-      path: { name: streamName },
-      body: {
-        action: 'schedule' as const,
-        connectorId,
-        documents,
-        extractedPatterns,
-      },
-    },
-  });
+  const maxRetries = 10;
+  const retryIntervalMs = 1000;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_pipeline_suggestion/_task',
+        {
+          signal,
+          params: {
+            path: { name: streamName },
+            body: {
+              action: 'schedule' as const,
+              connectorId,
+              documents,
+              extractedPatterns,
+            },
+          },
+        }
+      );
+      return;
+    } catch (error) {
+      const isCancellationInProgress = isHttpFetchError(error) && error.response?.status === 409;
+      if (isCancellationInProgress && attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryIntervalMs));
+        continue;
+      }
+      throw error;
+    }
+  }
 }
 
 // --- Schedule Suggestion Task Actor ---
@@ -180,7 +198,7 @@ export async function getPipelineSuggestionStatusLogic({
   streamsRepositoryClient: StreamsRepositoryClient;
 }): Promise<PipelineSuggestionTaskStatusResult> {
   return await streamsRepositoryClient.fetch(
-    'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+    'GET /internal/streams/{name}/_pipeline_suggestion/_status',
     {
       signal,
       params: {
@@ -267,7 +285,7 @@ export async function loadExistingSuggestionLogic(
 
   const getStatus = async () => {
     return streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+      'GET /internal/streams/{name}/_pipeline_suggestion/_status',
       {
         signal,
         params: {

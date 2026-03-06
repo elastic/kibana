@@ -28,6 +28,7 @@ export type TaskResult<TPayload> =
         | TaskStatus.Stale
         | TaskStatus.BeingCanceled
         | TaskStatus.Canceled;
+      created_at?: string;
     }
-  | { status: TaskStatus.Failed; error: string }
-  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);
+  | { status: TaskStatus.Failed; error: string; created_at?: string }
+  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged; created_at?: string } & TPayload);
