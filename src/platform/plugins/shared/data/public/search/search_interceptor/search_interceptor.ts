@@ -65,7 +65,6 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -79,6 +78,7 @@ import {
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
+  strategyToString,
   UI_SETTINGS,
 } from '../../../common';
 import type { SearchUsageCollector } from '../collectors';
@@ -310,7 +310,7 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
-      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
+      const projectRouting = this.deps.getCPSManager?.()?.getProjectRouting(options.projectRouting);
       return this.runSearch(
         { id, ...request },
         {
@@ -367,7 +367,9 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(`/internal/search/${strategyToString(strategy)}/${id}`, {
+        version: '1',
+      })
     );
 
     const cancel = async () => {
@@ -487,10 +489,9 @@ export class SearchInterceptor {
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
-
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+        `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,
         {
           version: '1',
           signal: abortSignal,

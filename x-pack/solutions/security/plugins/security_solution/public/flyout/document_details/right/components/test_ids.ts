@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { INVESTIGATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/investigation_section'; /* Table */
+import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/about_section'; /* Table */
+import {
+  CONTENT_TEST_ID,
+  HEADER_TEST_ID,
+} from '../../../../flyout_v2/shared/components/expandable_section';
 import { PREFIX } from '../../../shared/test_ids';
-import { CONTENT_TEST_ID, HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 
 /* Table */
 
@@ -59,25 +64,14 @@ export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAd
 
 /* About section */
 
-export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
-
-export const RULE_SUMMARY_BUTTON_TEST_ID = `${PREFIX}RuleSummaryButton` as const;
-const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
-export const ALERT_DESCRIPTION_TITLE_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Title` as const;
-export const ALERT_DESCRIPTION_DETAILS_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Details` as const;
 
 export const EVENT_CATEGORY_DESCRIPTION_TEST_ID = `${PREFIX}EventCategoryDescription` as const;
 export const EVENT_KIND_DESCRIPTION_TEST_ID = `${PREFIX}EventKindDescription` as const;
 export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TEST_ID}Text` as const;
 export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
   `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
-
-const REASON_TEST_ID = `${PREFIX}Reason` as const;
-export const REASON_TITLE_TEST_ID = `${REASON_TEST_ID}Title` as const;
-export const REASON_DETAILS_TEST_ID = `${REASON_TEST_ID}Details` as const;
-export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewButton` as const;
 
 const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
 export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
@@ -91,14 +85,9 @@ export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Detail
 
 /* Investigation section */
 
-export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_ID + HEADER_TEST_ID;
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
-
-export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
-export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
-export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
 
 const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
 export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;

@@ -7,7 +7,6 @@
 export type {
   ApproveIntegrationRequest,
   CreateAutoImportIntegrationResponse,
-  DeleteAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
   GetAllAutoImportIntegrationsResponse,
   UpdateAutoImportIntegrationRequestBody,
@@ -18,6 +17,7 @@ export {
   ApproveAutoImportIntegrationRequestBody,
   ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
+  DeleteAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
@@ -26,6 +26,8 @@ export {
   UploadSamplesToDataStreamRequestParams,
   UploadSamplesToDataStreamResponse,
   DeleteDataStreamRequestParams,
+  ReanalyzeDataStreamRequestParams,
+  ReanalyzeDataStreamRequestBody,
 } from './model/api/data_streams/data_stream.gen';
 
 export type {

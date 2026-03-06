@@ -7,44 +7,94 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiSkeletonText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
+import type {
+  SidebarApp,
+  SidebarAppDefinition,
+  SidebarAppId,
+  SidebarComponentType,
+} from '@kbn/core-chrome-sidebar';
 import { SidebarPanel } from './sidebar_panel';
-import { SidebarAppRenderer } from './sidebar_app_renderer';
+import { SidebarBody } from './sidebar_panel_body';
 import { useSidebar } from '../hooks';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SidebarProps {}
 
 /**
  * @internal
  */
-export function Sidebar(props: SidebarProps) {
+export function Sidebar() {
   const { isOpen, currentAppId } = useSidebar();
   const sidebarService = useSidebarService();
 
-  if (!isOpen) {
+  if (!isOpen || !currentAppId || !sidebarService.hasApp(currentAppId)) {
     return null;
   }
 
-  if (!currentAppId || !sidebarService.hasApp(currentAppId)) {
-    return null;
-  }
+  return <SidebarContent key={currentAppId} appId={currentAppId} />;
+}
 
-  const currentApp = sidebarService.getAppDefinition(currentAppId);
+interface SidebarContentProps {
+  appId: SidebarAppId;
+}
 
-  if (currentApp.status === 'inaccessible') {
-    // most likely we're trying to render an app that hasn't become accessible yet after initial restoration
-    return null;
-  }
+function SidebarContent({ appId }: SidebarContentProps) {
+  const sidebarService = useSidebarService();
+  const appApi = sidebarService.getApp(appId);
+  const appDef = sidebarService.getAppDefinition(appId);
+
+  const status = useObservable(appApi.getStatus$(), appApi.getStatus());
+  const isLoading = status === 'pending';
+  const loading = <SidebarLoadingSkeleton />;
 
   return (
     <SidebarPanel>
-      <SidebarAppRenderer
-        key={currentAppId}
-        appId={currentAppId}
-        loadComponent={currentApp.loadComponent}
-      />
+      <Suspense fallback={loading}>
+        {isLoading ? loading : <SidebarLoadedContent appApi={appApi} appDef={appDef} />}
+      </Suspense>
     </SidebarPanel>
   );
 }
+
+/** Module-level cache: one React.lazy wrapper per loadComponent function. Survives component remounts. */
+const lazyComponentCache = new WeakMap<Function, React.LazyExoticComponent<SidebarComponentType>>();
+
+const getLazyComponent = (
+  loadComponent: () => Promise<SidebarComponentType>
+): React.LazyExoticComponent<SidebarComponentType> => {
+  let cached = lazyComponentCache.get(loadComponent);
+  if (!cached) {
+    cached = lazy(async () => ({ default: await loadComponent() }));
+    lazyComponentCache.set(loadComponent, cached);
+  }
+  return cached;
+};
+
+interface SidebarLoadedContentProps {
+  appApi: SidebarApp;
+  appDef: SidebarAppDefinition;
+}
+
+function SidebarLoadedContent({ appApi, appDef }: SidebarLoadedContentProps) {
+  const state = useObservable(appApi.getState$(), appApi.getState());
+  const hasStore = appDef.store != null;
+  const LazyComponent = getLazyComponent(appDef.loadComponent);
+  const storeProps = hasStore ? { state, actions: appApi.actions } : {};
+
+  return <LazyComponent onClose={appApi.close} {...storeProps} />;
+}
+
+const loadingContentAriaLabel = i18n.translate(
+  'core.ui.chrome.sidebar.loadingSidebarPanelAriaLabel',
+  {
+    defaultMessage: 'side panel',
+  }
+);
+
+const SidebarLoadingSkeleton = () => (
+  <SidebarBody>
+    <EuiSkeletonText lines={8} contentAriaLabel={loadingContentAriaLabel} />
+  </SidebarBody>
+);

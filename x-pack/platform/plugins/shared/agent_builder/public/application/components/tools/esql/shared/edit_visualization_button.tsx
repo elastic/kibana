@@ -69,7 +69,7 @@ export function EditVisualizationButton({
         aria-label={editButtonLabel}
         onClick={() => {
           if (editModalOptions) {
-            uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(editModalOptions);
+            uiActions.executeTriggerActions('IN_APP_EMBEDDABLE_EDIT_TRIGGER', editModalOptions);
           }
         }}
       />

@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Parser,
-  BasicPrettyPrinter,
-  isCommand,
-  isFunctionExpression,
-  type ESQLAstQueryExpression,
-} from '@kbn/esql-language';
+import { Parser, BasicPrettyPrinter, isCommand, isFunctionExpression } from '@elastic/esql';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { replaceParameters } from '@kbn/esql-composer';
 import type { MetricField } from '../../../types';
+import { isLegacyHistogram } from '../legacy_histogram';
 
 type Params = Record<string, string | number | boolean | null>;
 interface AggegationTemplateParams {
@@ -80,7 +76,7 @@ export function replaceFunctionParams(functionString: string, params: Params): s
  * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
  * @param placeholderName - The name of the placeholder to use in the template.
  * @param customFunction - Optional custom aggregation function to use.
- * @returns The ES|QL aggregation function template string.
+ * @returns The ES|QL aggregation function template string. Legacy histograms (type + instrument both histogram) use PERCENTILE(TO_TDIGEST(...), 95).
  */
 export function getAggregationTemplate({
   type,
@@ -90,6 +86,10 @@ export function getAggregationTemplate({
 }: AggegationTemplateParams): string {
   if (customFunction) {
     return `${customFunction}(??${placeholderName})`;
+  }
+
+  if (isLegacyHistogram({ type, instrument })) {
+    return `PERCENTILE(TO_TDIGEST(??${placeholderName}), 95)`;
   }
 
   if (type === 'exponential_histogram' || type === 'tdigest') {
@@ -106,8 +106,8 @@ export function getAggregationTemplate({
 /**
  * Creates the metric aggregation part of an ES|QL query.
  * It returns:
- * - For `histogram` instrument:
- *   - `PERCENTILE(..., 95)` if type is `exponential_histogram or tdigest`
+ * - For legacy histogram (field type + instrument both histogram): `PERCENTILE(TO_TDIGEST(...), 95)`
+ * - For `histogram` instrument: `PERCENTILE(..., 95)` if type is `exponential_histogram` or `tdigest`
  * - `SUM(RATE(...))` for counter instruments
  * - `AVG(...)` for other metric types
  *

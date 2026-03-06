@@ -36,6 +36,7 @@ import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
+import { getUpdatedFrameWithDatasourceState } from './utils';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import type { LensSerializedState, LayerType, Suggestion, Visualization } from '..';
 
@@ -277,6 +278,14 @@ export const setLayerDefaultDimension = createAction<{
   columnId: string;
   groupId: string;
 }>('lens/setLayerDefaultDimension');
+export const setDimensionAndUpdateDatasource = createAction<{
+  visualizationId: string;
+  datasourceId: string;
+  newDatasourceState: unknown;
+  layerId: string;
+  groupId: string;
+  columnId: string;
+}>('lens/setDimensionAndUpdateDatasource');
 
 export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
   'lens/updateIndexPatterns'
@@ -330,6 +339,7 @@ export const lensActions = {
   setSelectedLayerId,
   addLayer,
   onDropToDimension,
+  setDimensionAndUpdateDatasource,
   cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
@@ -691,6 +701,71 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
         state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
         state.visualization.state = syncedVisualizationState;
+      })
+      .addCase(setDimensionAndUpdateDatasource, (state, { payload }) => {
+        if (!state.visualization.activeId) {
+          return state;
+        }
+        // This is a safeguard that prevents us from accidentally updating the
+        // wrong visualization. This occurs in some cases due to the uncoordinated
+        // way we manage state across plugins.
+        if (state.visualization.activeId !== payload.visualizationId) {
+          return state;
+        }
+
+        const layerDatasource = datasourceMap[payload.datasourceId];
+        if (!layerDatasource) {
+          return state;
+        }
+
+        const currentDatasourceState = state.datasourceStates[payload.datasourceId]?.state;
+        if (currentDatasourceState === undefined) {
+          return state;
+        }
+
+        const activeVisualization = visualizationMap[state.visualization.activeId];
+        const newDatasourceState =
+          typeof payload.newDatasourceState === 'function'
+            ? (payload.newDatasourceState as (previousState: unknown) => unknown)(
+                currentDatasourceState
+              )
+            : payload.newDatasourceState;
+
+        const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+        const updatedFramePublicAPI = getUpdatedFrameWithDatasourceState(
+          framePublicAPI,
+          layerDatasource,
+          newDatasourceState,
+          payload.layerId
+        );
+
+        state.visualization.state = activeVisualization.setDimension({
+          layerId: payload.layerId,
+          groupId: payload.groupId,
+          columnId: payload.columnId,
+          prevState: state.visualization.state,
+          frame: updatedFramePublicAPI,
+        });
+        state.datasourceStates[payload.datasourceId] = {
+          state: newDatasourceState,
+          isLoading: false,
+        };
+
+        const {
+          datasourceState: syncedDatasourceState,
+          visualizationState: syncedVisualizationState,
+          frame,
+        } = syncLinkedDimensions(
+          current(state),
+          visualizationMap,
+          datasourceMap,
+          payload.datasourceId
+        );
+
+        state.visualization.state =
+          activeVisualization.onDatasourceUpdate?.(syncedVisualizationState, frame) ??
+          syncedVisualizationState;
+        state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
       })
 
       .addCase(switchVisualization, (state, { payload }) => {
@@ -1057,11 +1132,23 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           state.datasourceStates[layerDatasourceId].state = newDatasourceState;
         }
 
+        // Create an updated frame with the new datasource state so that
+        // setDimension (called by onDrop) has access to the updated operation info
+        const updatedFramePublicAPI =
+          newDatasourceState && layerDatasource
+            ? getUpdatedFrameWithDatasourceState(
+                framePublicAPI,
+                layerDatasource,
+                newDatasourceState,
+                target.layerId
+              )
+            : framePublicAPI;
+
         activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
         const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
           {
             prevState: state.visualization.state,
-            frame: framePublicAPI,
+            frame: updatedFramePublicAPI,
             target,
             source,
             dropType,

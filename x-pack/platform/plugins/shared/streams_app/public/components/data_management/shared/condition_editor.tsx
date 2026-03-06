@@ -20,15 +20,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Condition, RangeCondition } from '@kbn/streamlang';
 import {
   type FilterCondition,
+  getConditionMonacoSchemaConfig,
   getFilterOperator,
   getFilterValue,
   isArrayOperator,
-  isCondition,
+  isConditionStrict,
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import debounce from 'lodash/debounce';
+import type { monaco } from '@kbn/monaco';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import yaml from 'yaml';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   alwaysToEmptyEquals,
@@ -39,28 +43,106 @@ import {
 } from '../../../util/condition';
 import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
+import { conditionYamlService } from './condition_yaml_service';
 import { OperatorSelector } from './operator_selector';
 import { RangeInput } from './range_input';
+
+const SYNTAX_EDITOR_CONDITION_CHANGE_DEBOUNCE_MS = 300;
 
 export interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
+  onValidityChange: (isValid: boolean) => void;
   fieldSuggestions?: Suggestion[];
   valueSuggestions?: Suggestion[];
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
+  const {
+    status,
+    onConditionChange,
+    onValidityChange,
+    fieldSuggestions = [],
+    valueSuggestions = [],
+  } = props;
   const { core } = useKibana();
 
-  const isInvalidCondition = !isCondition(props.condition);
+  const isInvalidCondition = !isConditionStrict(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
 
   const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
+
+  const serializedCondition = useMemo(() => yaml.stringify(condition), [condition]);
+  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
+
+  const schemas = useMemo(() => {
+    const schemaConfig = getConditionMonacoSchemaConfig();
+    return schemaConfig ? [schemaConfig] : [];
+  }, []);
+
+  useEffect(() => {
+    conditionYamlService.register(schemas).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to configure condition schema validation:', error);
+    });
+
+    return () => {
+      conditionYamlService.release();
+    };
+  }, [schemas]);
+  const syntaxEditorValueRef = useRef(syntaxEditorValue);
+  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
+  const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
+  const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
+  const onValidityChangeRef = useRef(onValidityChange ?? (() => {}));
+
+  const reportValidityChange = useCallback((isValid: boolean) => {
+    if (lastReportedValidityRef.current === isValid) {
+      return;
+    }
+    lastReportedValidityRef.current = isValid;
+    onValidityChangeRef.current(isValid);
+  }, []);
+
+  useEffect(() => {
+    onValidityChangeRef.current = onValidityChange ?? (() => {});
+  }, [onValidityChange]);
+
+  useEffect(() => {
+    // Ensure consumers start in a valid state.
+    reportValidityChange(true);
+  }, [reportValidityChange]);
+
+  useEffect(() => {
+    // When switching modes, reset validity and ensure the editor starts from the canonical condition.
+    if (prevUsingSyntaxEditorRef.current !== usingSyntaxEditor) {
+      reportValidityChange(true);
+      prevUsingSyntaxEditorRef.current = usingSyntaxEditor;
+    }
+  }, [reportValidityChange, usingSyntaxEditor]);
+
+  useEffect(() => {
+    if (!usingSyntaxEditor) {
+      // Keep syntax editor text in sync while in UI mode so switching to syntax starts
+      // from the current canonical condition.
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+      lastSyncedSerializedConditionRef.current = serializedCondition;
+      return;
+    }
+
+    // If the parent updates the condition while the user hasn't edited the syntax editor,
+    // sync the text. If the user has edited locally, keep their text to avoid clobbering.
+    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+    }
+    lastSyncedSerializedConditionRef.current = serializedCondition;
+  }, [serializedCondition, usingSyntaxEditor]);
 
   // Check if the selected field is a date type AND the operator is "in range"
   const isDateFieldWithRange = useMemo(() => {
@@ -79,9 +161,48 @@ export function ConditionEditor(props: ConditionEditorProps) {
     return fieldSuggestion?.type === 'date';
   }, [condition, conditionEditableInUi, fieldSuggestions]);
 
-  const handleConditionChange = (updatedCondition: Condition) => {
-    onConditionChange(emptyEqualsToAlways(updatedCondition));
-  };
+  const handleConditionChange = useCallback(
+    (updatedCondition: Condition) => {
+      onConditionChange(emptyEqualsToAlways(updatedCondition));
+    },
+    [onConditionChange]
+  );
+
+  const debouncedEmitConditionChange = useMemo(() => {
+    return debounce(
+      (nextCondition: Condition) => {
+        handleConditionChange(nextCondition);
+      },
+      SYNTAX_EDITOR_CONDITION_CHANGE_DEBOUNCE_MS,
+      { trailing: true }
+    );
+  }, [handleConditionChange]);
+
+  useEffect(() => {
+    return () => {
+      // Make sure the last valid condition is not lost on unmount.
+      debouncedEmitConditionChange.flush();
+      debouncedEmitConditionChange.cancel();
+    };
+  }, [debouncedEmitConditionChange]);
+
+  const flushSyntaxEditorCondition = useCallback(() => {
+    const currentValue = syntaxEditorValueRef.current;
+    if (currentValue === lastSyncedSerializedConditionRef.current) {
+      debouncedEmitConditionChange.cancel();
+      return;
+    }
+    try {
+      const parsed = yaml.parse(currentValue);
+      if (!isConditionStrict(parsed)) {
+        return;
+      }
+      debouncedEmitConditionChange.cancel();
+      handleConditionChange(parsed);
+    } catch (error: unknown) {
+      // do nothing
+    }
+  }, [debouncedEmitConditionChange, handleConditionChange]);
 
   return (
     <EuiFormRow
@@ -144,18 +265,48 @@ export function ConditionEditor(props: ConditionEditorProps) {
         <CodeEditor
           dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
-          languageId="json"
-          value={JSON.stringify(condition, null, 2)}
+          languageId="yaml"
+          value={syntaxEditorValue}
+          editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+            editor.onDidFocusEditorText(() => {
+              const model = editor.getModel();
+              if (model && model.getValue().trim() === '') {
+                editor.trigger('focus', 'editor.action.triggerSuggest', {});
+              }
+            });
+          }}
           onChange={(value) => {
+            syntaxEditorValueRef.current = value;
+            setSyntaxEditorValue(value);
             try {
-              handleConditionChange(JSON.parse(value));
+              const parsed = yaml.parse(value);
+              if (!isConditionStrict(parsed)) {
+                reportValidityChange(false);
+                debouncedEmitConditionChange.cancel();
+                return;
+              }
+              reportValidityChange(true);
+              debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {
-              // do nothing
+              reportValidityChange(false);
+              debouncedEmitConditionChange.cancel();
             }
           }}
+          onBlur={flushSyntaxEditorCondition}
           options={{
             readOnly: status === 'disabled',
             automaticLayout: true,
+            tabSize: 2,
+            insertSpaces: true,
+            quickSuggestions: {
+              other: true,
+              comments: false,
+              strings: true,
+            },
+            suggest: {
+              snippetsPreventQuickSuggestions: false,
+              showSnippets: true,
+            },
           }}
         />
       ) : conditionEditableInUi ? (
@@ -167,8 +318,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
           valueSuggestions={valueSuggestions}
         />
       ) : (
-        <EuiCodeBlock language="json" paddingSize="m" isCopyable>
-          {JSON.stringify(condition, null, 2)}
+        <EuiCodeBlock language="yaml" paddingSize="m" isCopyable>
+          {yaml.stringify(condition)}
         </EuiCodeBlock>
       )}
     </EuiFormRow>

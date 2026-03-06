@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 
 export const findLiveQueryRequestQuerySchema = t.type({
   kuery: t.union([t.string, t.undefined]),
@@ -14,6 +14,7 @@ export const findLiveQueryRequestQuerySchema = t.type({
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.union([t.literal('asc'), t.literal('desc')]), t.undefined]),
+  withResultCounts: t.union([toBooleanRt, t.undefined]),
 });
 
 export type FindLiveQueryRequestQuerySchema = t.OutputOf<typeof findLiveQueryRequestQuerySchema>;

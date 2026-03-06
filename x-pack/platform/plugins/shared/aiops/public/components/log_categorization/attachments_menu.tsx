@@ -145,7 +145,7 @@ export const AttachmentsMenu = ({
                       minimumTimeRangeOption: 'No minimum',
                       randomSamplerMode,
                       randomSamplerProbability,
-                      timeRange,
+                      time_range: timeRange,
                     });
                   },
                 },

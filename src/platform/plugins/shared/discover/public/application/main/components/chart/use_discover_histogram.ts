@@ -26,7 +26,6 @@ import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { Filter } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -34,7 +33,11 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { type DiscoverAppState, useAppStateSelector } from '../../state_management/redux';
+import {
+  type DiscoverAppState,
+  selectTabCombinedFilters,
+  useAppStateSelector,
+} from '../../state_management/redux';
 import type {
   DataDocumentsMsg,
   DiscoverLatestFetchDetails,
@@ -52,7 +55,6 @@ import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
-const EMPTY_FILTERS: Filter[] = [];
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
   'externalVisContext',
   'breakdownField',
@@ -201,14 +203,7 @@ export const useDiscoverHistogram = (
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   const query = useAppStateSelector((state) => state.query);
-  const appFilters = useAppStateSelector((state) => state.filters);
-  const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
-
-  const filtersMemoized = useMemo(() => {
-    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
-    return allFilters.length ? allFilters : EMPTY_FILTERS;
-  }, [appFilters, globalFilters]);
-
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
@@ -228,7 +223,7 @@ export const useDiscoverHistogram = (
       requestAdapter: inspectorAdapters.requests,
       dataView,
       query,
-      filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
+      filters,
       timeRange,
       relativeTimeRange,
       breakdownField,
@@ -245,7 +240,7 @@ export const useDiscoverHistogram = (
     currentTabControlState,
     dataView,
     esqlVariables,
-    filtersMemoized,
+    filters,
     inspectorAdapters.requests,
     isEsqlMode,
     timeRange,

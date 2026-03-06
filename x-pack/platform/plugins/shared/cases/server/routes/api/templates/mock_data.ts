@@ -14,6 +14,8 @@ export const mockTemplates: Template[] = [
     templateId: 'template-1',
     name: 'Security Incident Template',
     owner: 'securitySolution',
+    tags: ['security', 'incident'],
+    author: 'alice',
     definition: yaml.dump({
       name: 'Security Incident Template',
       fields: [
@@ -39,6 +41,8 @@ export const mockTemplates: Template[] = [
     templateId: 'template-2',
     name: 'Observability Alert Template',
     owner: 'observability',
+    tags: ['observability', 'alert'],
+    author: 'bob',
     definition: yaml.dump({
       name: 'Observability Alert Template',
       fields: [
@@ -57,7 +61,9 @@ export const mockTemplates: Template[] = [
     templateId: 'template-3',
     name: 'Deleted Template',
     owner: 'securitySolution',
-    definition: yaml.dump({ name: 'Deleted Template', fields: [] }),
+    tags: ['security', 'deleted'],
+    author: 'charlie',
+    definition: yaml.dump({ fields: [] }),
     templateVersion: 1,
     deletedAt: '2024-01-15T10:00:00.000Z',
   },

@@ -35,7 +35,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
 import { getDateHistogramCompletionItem, PLACEHOLDER_CONFIG } from '../complete_items';
 
@@ -478,11 +478,15 @@ describe('STATS Autocomplete', () => {
           ),
         ]);
         await statsExpectSuggestions('from a | stats col0 = min(integerField) + ', [
-          ...getFunctionSignaturesByReturnType(Location.STATS, ['integer', 'double', 'long'], {
-            scalar: true,
-            agg: true,
-            grouping: true,
-          }),
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            ['integer', 'double', 'long', 'dense_vector'],
+            {
+              scalar: true,
+              agg: true,
+              grouping: true,
+            }
+          ),
         ]);
       });
 

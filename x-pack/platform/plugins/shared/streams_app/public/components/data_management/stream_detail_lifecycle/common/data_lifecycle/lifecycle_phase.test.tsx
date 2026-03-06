@@ -86,6 +86,28 @@ describe('LifecyclePhase', () => {
       // Click the button again to close (toggle)
       fireEvent.click(button);
     });
+
+    it('should navigate to phase when edit flyout is open (no popover)', () => {
+      const onEditPhase = jest.fn();
+      const onClick = jest.fn();
+
+      render(
+        <LifecyclePhase
+          label="warm"
+          color="#FFA500"
+          onEditPhase={onEditPhase}
+          onClick={onClick}
+          canManageLifecycle
+          isEditLifecycleFlyoutOpen
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(onEditPhase).toHaveBeenCalledWith('warm');
+      expect(onClick).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('lifecyclePhase-warm-popoverTitle')).not.toBeInTheDocument();
+    });
   });
 
   describe('Popover content', () => {
@@ -203,6 +225,20 @@ describe('LifecyclePhase', () => {
 
       expect(screen.queryByTestId('lifecyclePhase-hot-searchableSnapshot')).not.toBeInTheDocument();
     });
+
+    it('should hide size label when edit flyout is open', () => {
+      render(
+        <LifecyclePhase
+          label="hot"
+          color="#FF0000"
+          size="1.0 GB"
+          canManageLifecycle
+          isEditLifecycleFlyoutOpen
+        />
+      );
+
+      expect(screen.queryByTestId('lifecyclePhase-hot-size')).not.toBeInTheDocument();
+    });
   });
 
   describe('Remove actions', () => {
@@ -211,7 +247,7 @@ describe('LifecyclePhase', () => {
         <LifecyclePhase
           label="warm"
           color="#FFA500"
-          isIlm
+          showActions
           onRemovePhase={jest.fn()}
           description="Warm phase description"
           canManageLifecycle
@@ -228,7 +264,7 @@ describe('LifecyclePhase', () => {
         <LifecyclePhase
           label="warm"
           color="#FFA500"
-          isIlm
+          showActions
           onRemovePhase={jest.fn()}
           description="Warm phase description"
           canManageLifecycle={false}
@@ -246,7 +282,7 @@ describe('LifecyclePhase', () => {
         <LifecyclePhase
           label="warm"
           color="#FFA500"
-          isIlm
+          showActions
           onRemovePhase={onRemovePhase}
           description="Warm phase description"
           canManageLifecycle
@@ -264,7 +300,7 @@ describe('LifecyclePhase', () => {
         <LifecyclePhase
           label="hot"
           color="#FF0000"
-          isIlm
+          showActions
           onRemovePhase={jest.fn()}
           description="Hot phase description"
           canManageLifecycle
@@ -281,7 +317,7 @@ describe('LifecyclePhase', () => {
         <LifecyclePhase
           label="warm"
           color="#FFA500"
-          isIlm
+          showActions
           onRemovePhase={jest.fn()}
           description="Warm phase description"
           canManageLifecycle
@@ -303,7 +339,7 @@ describe('LifecyclePhase', () => {
         <LifecyclePhase
           label="warm"
           color="#FFA500"
-          isIlm
+          showActions
           onRemovePhase={onRemovePhase}
           description="Warm phase description"
           canManageLifecycle

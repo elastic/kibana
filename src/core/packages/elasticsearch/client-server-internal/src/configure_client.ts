@@ -38,7 +38,7 @@ export const configureClient = (
     getExecutionContext?: () => string | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
-    onRequest?: OnRequestHandler;
+    onRequest: OnRequestHandler;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);

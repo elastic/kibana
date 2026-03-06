@@ -10,7 +10,8 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { GENERATED_METRICS } from '../fixtures/constants';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/250046
+test.describe.skip(
   'Alert Details Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

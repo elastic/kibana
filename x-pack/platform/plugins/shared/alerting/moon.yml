@@ -81,6 +81,9 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
+  - '@kbn/core-feature-flags-server-mocks'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -93,6 +96,7 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:

@@ -24,7 +24,11 @@ import {
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
 import { annotationXY } from './annotations.mock';
-import { esqlChart, esqlChartWithBreakdownColorMapping } from './esqlXY.mock';
+import {
+  esqlChart,
+  esqlChartWithBreakdownColorMapping,
+  esqlXYWithCollapseByBreakdown,
+} from './esqlXY.mock';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -81,6 +85,10 @@ describe('XY', () => {
           xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
           xyStateSchema
         );
+      });
+
+      it('should convert an esql xy with collapse by breakdown', () => {
+        validateConverter(esqlXYWithCollapseByBreakdown, xyStateSchema);
       });
     });
 
@@ -178,6 +186,33 @@ describe('XY', () => {
         xyStateSchema
       );
     });
+
+    it.each(anyType)(
+      'should work for ES|QL mode for a %s chart with breakdown and collapse_by',
+      (type) => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: `${type} Chart with collapse`,
+            layers: [
+              {
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs',
+                },
+                type,
+                ignore_global_filters: false,
+                sampling: 1,
+                x: { operation: 'value', column: '@timestamp' },
+                y: [{ operation: 'value', column: 'bytes' }],
+                breakdown_by: { operation: 'value', column: 'agent', collapse_by: 'max' },
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      }
+    );
 
     it.each(anyType)(
       'should work for ES|QL mode for %s chart with breakdown and categorical color mapping',

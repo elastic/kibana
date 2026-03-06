@@ -8,7 +8,76 @@
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
+import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
+
+/**
+ * Returns a DSL filter that matches documents containing at least one
+ * identity field for the given entity type.
+ *
+ * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
+ * Use it to pre-filter searches/aggregations to only documents that could
+ * resolve to an entity of the requested type.
+ *
+ * @example
+ * ```ts
+ * const filter = getEuidDslDocumentsContainsIdFilter('user');
+ * // {
+ * //   bool: {
+ * //     should: [
+ * //       { exists: { field: 'user.entity.id' } },
+ * //       { exists: { field: 'user.id' } },
+ * //       { exists: { field: 'user.name' } },
+ * //       { exists: { field: 'user.email' } }
+ * //     ],
+ * //     minimum_should_match: 1
+ * //   }
+ * // }
+ * ```
+ */
+export function getEuidDslDocumentsContainsIdFilter(
+  entityType: EntityType
+): QueryDslQueryContainer {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  return {
+    bool: {
+      should: identityField.requiresOneOfFields.map((field) => ({
+        exists: { field },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+}
+
+/**
+ * Constructs an Elasticsearch DSL filter for the provided entity type and document.
+ *
+ * It supports both flattened and nested document shapes.
+ * If a document contains `_source` property, it will be unwrapped before processing.
+ *
+ * Example usage:
+ * ```ts
+ * import { getEuidDslFilterBasedOnDocument } from './dsl';
+ *
+ * const doc = { host: { name: 'server1', domain: 'example.com' } };
+ * const filter = getEuidDslFilterBasedOnDocument('host', doc);
+ * // filter may look like:
+ * // {
+ * //   bool: {
+ * //     filter: [
+ * //       { term: { 'host.name': 'server1' } },
+ * //       { term: { 'host.domain': 'example.com' } }
+ * //     ],
+ * //     must_not: [
+ * //       { exists: { field: 'host.entity.id' } }, ...
+ * //     ]
+ * //   }
+ * // }
+ * ```
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
+ * @returns An Elasticsearch DSL query container, or undefined if the document does not contain enough identifying information.
+ */
 
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
@@ -18,6 +87,7 @@ export function getEuidDslFilterBasedOnDocument(
     return undefined;
   }
 
+  doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {

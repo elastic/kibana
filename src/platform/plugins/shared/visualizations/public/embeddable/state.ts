@@ -10,7 +10,7 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { isEmpty } from 'lodash';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -54,7 +54,7 @@ export const deserializeSavedObjectState = async ({
   savedObjectId,
   drilldowns,
   uiState,
-  timeRange,
+  time_range,
   title: embeddableTitle,
   description: embeddableDescription,
 
@@ -106,7 +106,7 @@ export const deserializeSavedObjectState = async ({
     savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,
-    ...(timeRange ? { timeRange } : {}),
+    ...(time_range ? { time_range } : {}),
     ...(drilldowns ? { drilldowns } : {}),
   } as VisualizeRuntimeState;
 };
@@ -117,25 +117,24 @@ export const serializeState: (props: {
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
-  getDynamicActionsState?: (() => DynamicActionsSerializedState) | undefined;
-  timeRange?: VisualizeRuntimeState['timeRange'];
+  drilldowns?: SerializedDrilldowns;
+  time_range?: VisualizeRuntimeState['time_range'];
 }) => VisualizeEmbeddableState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
   id,
   savedObjectProperties,
   linkedToLibrary,
-  getDynamicActionsState,
-  timeRange,
+  drilldowns,
+  time_range,
 }) => {
-  const dynamicActionsState = getDynamicActionsState ? getDynamicActionsState() : {};
   // save by reference
   if (linkedToLibrary && id) {
     return {
       ...(titles ? titles : {}),
-      ...dynamicActionsState,
+      ...(drilldowns ? drilldowns : {}),
       ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
-      ...(timeRange ? { timeRange } : {}),
+      ...(time_range ? { time_range } : {}),
       savedObjectId: id,
     } as VisualizeByReferenceState;
   }
@@ -143,8 +142,8 @@ export const serializeState: (props: {
   return {
     ...(titles ? titles : {}),
     ...savedObjectProperties,
-    ...dynamicActionsState,
-    ...(timeRange ? { timeRange } : {}),
+    ...(drilldowns ? drilldowns : {}),
+    ...(time_range ? { time_range } : {}),
     savedVis: {
       ...serializedVis,
       id,

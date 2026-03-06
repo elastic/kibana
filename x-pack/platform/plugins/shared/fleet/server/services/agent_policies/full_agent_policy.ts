@@ -855,15 +855,60 @@ export function getBinarySourceSettings(
         }),
     };
   }
-  // if both ssl.es_key and secrets.ssl.key are present, prefer the secrets'
+
+  if (downloadSource?.auth) {
+    const authConfig: FullAgentPolicyDownload['auth'] = {};
+    if (downloadSource.auth.username) {
+      authConfig.username = downloadSource.auth.username;
+    }
+    if (
+      downloadSource.auth.password &&
+      typeof downloadSource?.secrets?.auth?.password !== 'object'
+    ) {
+      authConfig.password = downloadSource.auth.password;
+    }
+    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = downloadSource.auth.api_key;
+    }
+    // Filter out empty headers (both key and value are empty)
+    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
+      const filteredHeaders = downloadSource.auth.headers.filter(
+        (header) => header.key !== '' || header.value !== ''
+      );
+      if (filteredHeaders.length > 0) {
+        authConfig.headers = filteredHeaders;
+      }
+    }
+    if (Object.keys(authConfig).length > 0) {
+      config.auth = authConfig;
+    }
+  }
+
   if (downloadSource?.secrets) {
-    config.secrets = {
-      ssl: {
-        ...(downloadSource.secrets?.ssl?.key && {
-          key: downloadSource.secrets.ssl.key,
-        }),
-      },
-    };
+    const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
+
+    if (downloadSource.secrets?.ssl?.key) {
+      secretsConfig.ssl = {
+        key: downloadSource.secrets.ssl.key,
+      };
+    }
+
+    if (downloadSource.secrets?.auth) {
+      const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
+      if (typeof downloadSource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = downloadSource.secrets.auth.password;
+      }
+      if (typeof downloadSource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
+      }
+      if (Object.keys(authSecretsConfig).length > 0) {
+        secretsConfig.auth = authSecretsConfig;
+      }
+    }
+
+    if (Object.keys(secretsConfig).length > 0) {
+      config.secrets = secretsConfig;
+    }
   }
 
   if (downloadSourceProxy) {

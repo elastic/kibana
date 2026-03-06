@@ -17,8 +17,6 @@ import type {
   CaseUserActionsStats,
   CasesConfigurationUI,
 } from '../../containers/types';
-import type { AddCommentRefObject } from '../add_comment';
-import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { CasesNavigation } from '../links';
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
@@ -62,9 +60,6 @@ export interface UserActionBuilderArgs {
   userAction: UserActionUI;
   attachments: AttachmentUI[];
   index: number;
-  commentRefs: React.MutableRefObject<
-    Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
-  >;
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
@@ -72,10 +67,7 @@ export interface UserActionBuilderArgs {
   alertData: Record<string, unknown>;
   actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
-  handleManageMarkdownEditId: (id: string) => void;
-  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
-  handleManageQuote: (quote: string) => void;
   onShowAlertDetails?: (alertId: string, index: string) => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
