@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ErrorSampler } from '.';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -57,9 +57,16 @@ jest.mock('./error_sample_contextual_insight', () => ({
   ErrorSampleContextualInsight: () => null,
 }));
 
+jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: { id: 'apm_0', title: 'apm-*' },
+    apmIndices: undefined,
+  }),
+}));
+
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <EuiProvider>
+    <EuiThemeProvider>
       <MemoryRouter
         initialEntries={[
           '/services/test-service/errors/test-group-id?rangeFrom=now-24h&rangeTo=now&environment=ENVIRONMENT_ALL&kuery=&errorId=error-id-1',
@@ -67,7 +74,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
       >
         <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
       </MemoryRouter>
-    </EuiProvider>
+    </EuiThemeProvider>
   );
 }
 
