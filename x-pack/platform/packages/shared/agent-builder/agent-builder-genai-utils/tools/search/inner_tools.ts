@@ -27,7 +27,7 @@ const convertMatchResult = (result: MatchResult): Resource => {
     },
     partial: true,
     content: {
-      contentFragments: result.contentFragments,
+      snippets: result.snippets,
     },
   };
 };

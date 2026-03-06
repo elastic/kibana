@@ -14,7 +14,7 @@ import { isCcsTarget } from '../utils/ccs';
 export interface MatchResult {
   id: string;
   index: string;
-  contentFragments: string[];
+  snippets: string[];
 }
 
 export interface PerformMatchSearchResponse {
@@ -23,12 +23,22 @@ export interface PerformMatchSearchResponse {
 
 // --- Search & extraction configuration ---
 
+// When true, use ES|QL TOP_SNIPPETS command to generate snippets from the documents
+// returned via the RRF retriever. When false, rely on Elasticsearch's highlighter to generate snippets.
 const useSnippets = true;
+// The maximum number of snippets to return for each matching document. The number of returned snippets
+// may be lower than this depending on the content in the returned document.
+// Only applicable when useSnippets = true.
 const numSnippets = 2;
+// The number of words to use when chunking fields for snippet generation.
+// Only applicable when useSnippets = true.
 const numWords = 750;
 
+// The reranker inference ID to use. We assume this reranker is always available.
 const rerankInferenceID = '.jina-reranker-v3';
+// When true, perform RERANK on the documents that were returned via the RRF retriever.
 const rerankCandidateDocs = true;
+// When true, perform an additional rerank operation on the generated snippets for each document.
 const rerankSnippets = true;
 
 // Number of candidate documents to retrieve for doc reranking
@@ -38,6 +48,12 @@ const snippetRankWindowSize = 10;
 
 // --- End configuration ---
 
+/**
+ * Builds the search request body. For local indices, uses the RRF retriever
+ * for best relevance ranking. For CCS targets, falls back to a query-based
+ * approach because the simplified RRF retriever syntax does not support
+ * cross-cluster index patterns.
+ */
 const buildSearchRequest = ({
   index,
   term,
@@ -73,6 +89,7 @@ const buildSearchRequest = ({
     };
   }
 
+  // Here is where we're using the RRF retriever for hybrid retrieval :)
   return {
     index,
     size: requestSize,
@@ -211,6 +228,8 @@ const rerankSnippetEntries = async ({
 
   logger.info(`RERANK snippets: sending ${entries.length} snippets to inference API`);
 
+  // NOTE: ES|QL RERANK doesn't play nicely with the format of the content in our test dataset,
+  // so we're making a direct inference call to rerank snippets.
   const response = await esClient.inference.inference({
     inference_id: rerankInferenceID,
     task_type: 'rerank',
@@ -242,7 +261,7 @@ export const performMatchSearch = async ({
 }): Promise<PerformMatchSearchResponse> => {
   const searchRequest = buildSearchRequest({ index, term, fields, size });
 
-  logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
+  logger.info(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
 
   let response;
   try {
@@ -344,7 +363,7 @@ export const performMatchSearch = async ({
     const results: MatchResult[] = hitOrder.map((docId) => ({
       id: docId,
       index: hitsByDocId.get(docId)?._index ?? index,
-      contentFragments: snippetsByDocId.get(docId) ?? [],
+      snippets: snippetsByDocId.get(docId) ?? [],
     }));
 
     return { results };
@@ -355,7 +374,7 @@ export const performMatchSearch = async ({
     return {
       id: docId,
       index: hit?._index ?? index,
-      contentFragments: Object.values(hit?.highlight ?? {}).reduce<string[]>((acc, fragments) => {
+      snippets: Object.values(hit?.highlight ?? {}).reduce<string[]>((acc, fragments) => {
         acc.push(...fragments);
         return acc;
       }, []),
