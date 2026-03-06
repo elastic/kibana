@@ -61,9 +61,9 @@ export const DescriptionField: React.FC = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
+          fullWidth
           isInvalid={!!error}
           error={error?.message}
-          fullWidth
         >
           <EuiTextArea
             {...field}

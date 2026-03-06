@@ -10,6 +10,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
+import { initializeESQLViews } from '../esql_views/register_views';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 
@@ -25,6 +26,11 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     initializeResources({
       logger,
       resourceManager,
+      esClient,
+    });
+
+    initializeESQLViews({
+      logger,
       esClient,
     });
 

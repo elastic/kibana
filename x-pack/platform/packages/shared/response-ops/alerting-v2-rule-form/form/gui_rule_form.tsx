@@ -12,6 +12,7 @@ import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
 import { ConditionFieldGroup } from './field_groups/condition_field_group';
+import { StateTransitionFieldGroup } from './field_groups/state_transition_field_group';
 import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RULE_FORM_ID } from './constants';
@@ -29,6 +30,7 @@ export interface GuiRuleFormProps {
  * - Rule details (name, description, tags, etc.)
  * - Rule evaluation (ES|QL query + WHERE clause trigger condition)
  * - Rule execution settings (schedule, time field, grouping)
+ * - Alert delay / state transition (immediate, breaches, duration)
  * - Alert conditions (recovery policy)
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
@@ -47,6 +49,8 @@ export const GuiRuleForm: React.FC<GuiRuleFormProps> = ({
       <ConditionFieldGroup includeBase={includeQueryEditor} />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
+      <EuiSpacer size="m" />
+      <StateTransitionFieldGroup />
       <EuiSpacer size="m" />
       <AlertConditionsFieldGroup />
     </EuiForm>

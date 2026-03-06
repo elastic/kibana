@@ -342,6 +342,15 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects pending_count greater than 1000', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { pending_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a negative recovering_count', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -610,6 +619,14 @@ describe('updateRuleDataSchema', () => {
     it('rejects a non-integer pending_count', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending_count: 1.5 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects pending_count greater than 1000', () => {
+      const result = updateRuleDataSchema.safeParse({
+        state_transition: { pending_count: 1001 },
       });
 
       expect(result.success).toBe(false);

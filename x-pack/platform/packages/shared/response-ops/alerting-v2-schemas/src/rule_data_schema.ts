@@ -111,6 +111,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
+      .max(1000)
       .optional()
       .describe('Consecutive breaches before active.'),
     pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),

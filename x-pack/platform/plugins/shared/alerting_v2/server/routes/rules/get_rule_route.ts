@@ -13,19 +13,18 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
 
-import { RulesClient } from '../lib/rules_client';
-import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
+import { RulesClient } from '../../lib/rules_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
-const getRulesQuerySchema = schema.object({
-  page: schema.maybe(schema.number({ min: 1 })),
-  perPage: schema.maybe(schema.number({ min: 1, max: 1000 })),
+const getRuleParamsSchema = schema.object({
+  id: schema.string(),
 });
 
 @injectable()
-export class GetRulesRoute {
+export class GetRuleRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}`;
+  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
@@ -34,24 +33,21 @@ export class GetRulesRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      query: getRulesQuerySchema,
+      params: getRuleParamsSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, TypeOf<typeof getRulesQuerySchema>, unknown>,
+    private readonly request: KibanaRequest<TypeOf<typeof getRuleParamsSchema>, unknown, unknown>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}
 
   async handle() {
     try {
-      const result = await this.rulesClient.findRules({
-        page: this.request.query.page,
-        perPage: this.request.query.perPage,
-      });
-      return this.response.ok({ body: result });
+      const rule = await this.rulesClient.getRule({ id: this.request.params.id });
+      return this.response.ok({ body: rule });
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
       return this.response.customError({

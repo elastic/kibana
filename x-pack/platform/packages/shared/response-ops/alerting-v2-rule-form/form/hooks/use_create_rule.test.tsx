@@ -13,6 +13,29 @@ import { useCreateRule } from './use_create_rule';
 import type { FormValues } from '../types';
 
 describe('useCreateRule', () => {
+  const setupUseCreateRule = () => {
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
+    const onSuccess = jest.fn();
+    const hook = renderHook(
+      () =>
+        useCreateRule({
+          http,
+          notifications,
+          onSuccess,
+        }),
+      { wrapper: createQueryClientWrapper() }
+    );
+
+    return { http, notifications, onSuccess, ...hook };
+  };
+
+  const getLastPostedBody = (http: ReturnType<typeof httpServiceMock.createStartContract>) => {
+    const lastCallArgs = http.post.mock.calls[http.post.mock.calls.length - 1];
+    const requestOptions = lastCallArgs[lastCallArgs.length - 1] as { body: string };
+    return JSON.parse(requestOptions.body);
+  };
+
   const validFormData: FormValues = {
     kind: 'signal',
     metadata: {
@@ -162,6 +185,140 @@ describe('useCreateRule', () => {
         'Error creating rule: Network error'
       );
       expect(onSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  it('includes state_transition in payload when kind is alert with state transition config', async () => {
+    const { http, result } = setupUseCreateRule();
+
+    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
+
+    const formData: FormValues = {
+      kind: 'alert',
+      metadata: {
+        name: 'Alert Rule',
+        enabled: true,
+      },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM logs | LIMIT 10',
+        },
+      },
+      stateTransition: {
+        pendingCount: 3,
+        pendingTimeframe: '10m',
+      },
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const body = getLastPostedBody(http);
+      expect(body.state_transition).toEqual({
+        pending_count: 3,
+        pending_timeframe: '10m',
+      });
+    });
+  });
+
+  it('omits state_transition when kind is signal even if state transition is set', async () => {
+    const { http, result } = setupUseCreateRule();
+
+    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Signal Rule' } });
+
+    const formData: FormValues = {
+      kind: 'signal',
+      metadata: {
+        name: 'Signal Rule',
+        enabled: true,
+      },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM logs | LIMIT 10',
+        },
+      },
+      stateTransition: {
+        pendingCount: 3,
+      },
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const body = getLastPostedBody(http);
+      expect(body.state_transition).toBeUndefined();
+    });
+  });
+
+  it('omits state_transition when kind is alert but state transition is empty', async () => {
+    const { http, result } = setupUseCreateRule();
+
+    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
+
+    const formData: FormValues = {
+      kind: 'alert',
+      metadata: {
+        name: 'Alert Rule',
+        enabled: true,
+      },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM logs | LIMIT 10',
+        },
+      },
+      stateTransition: {},
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const body = getLastPostedBody(http);
+      expect(body.state_transition).toBeUndefined();
+    });
+  });
+
+  it('includes only pending_count when state transition timeframe is not set', async () => {
+    const { http, result } = setupUseCreateRule();
+
+    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
+
+    const formData: FormValues = {
+      kind: 'alert',
+      metadata: {
+        name: 'Alert Rule',
+        enabled: true,
+      },
+      timeField: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM logs | LIMIT 10',
+        },
+      },
+      stateTransition: {
+        pendingCount: 5,
+      },
+    };
+
+    await act(async () => {
+      result.current.createRule(formData);
+    });
+
+    await waitFor(() => {
+      const body = getLastPostedBody(http);
+      expect(body.state_transition).toEqual({ pending_count: 5 });
     });
   });
 

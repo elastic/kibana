@@ -43,6 +43,14 @@ export interface RecoveryPolicy {
 }
 
 /**
+ * State transition configuration for alert-type rules.
+ */
+export interface StateTransition {
+  pendingCount?: number;
+  pendingTimeframe?: string;
+}
+
+/**
  * Form values for creating a new alerting rule.
  * This interface defines the contract for the rule creation form,
  * independent of the API schema to allow for controlled evolution.
@@ -55,4 +63,5 @@ export interface FormValues {
   evaluation: RuleEvaluation;
   grouping?: RuleGrouping;
   recoveryPolicy?: RecoveryPolicy;
+  stateTransition?: StateTransition;
 }

@@ -56,7 +56,21 @@ const buildRecoveryQuery = (
  * and the API contract (CreateRuleData).
  */
 const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData => {
-  const { kind, metadata, timeField, schedule, evaluation, grouping, recoveryPolicy } = formValues;
+  const {
+    kind,
+    metadata,
+    timeField,
+    schedule,
+    evaluation,
+    grouping,
+    recoveryPolicy,
+    stateTransition,
+  } = formValues;
+
+  const hasStateTransition =
+    kind === 'alert' &&
+    stateTransition != null &&
+    (stateTransition.pendingCount != null || stateTransition.pendingTimeframe != null);
 
   return {
     kind,
@@ -83,6 +97,16 @@ const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData =
             type: recoveryPolicy.type,
             ...(recoveryPolicy.type === 'query'
               ? buildRecoveryQuery(recoveryPolicy, evaluation)
+              : {}),
+          },
+        }
+      : {}),
+    ...(hasStateTransition
+      ? {
+          state_transition: {
+            pending_count: stateTransition!.pendingCount,
+            ...(stateTransition!.pendingTimeframe != null
+              ? { pending_timeframe: stateTransition!.pendingTimeframe }
               : {}),
           },
         }

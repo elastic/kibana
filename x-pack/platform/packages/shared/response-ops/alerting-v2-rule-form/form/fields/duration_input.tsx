@@ -7,11 +7,13 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
-import { getDurationUnitValue, getDurationNumberInItsUnit } from '../../flyout/utils';
-import { getTimeOptions } from '../../flyout/utils';
-
-const INTEGER_REGEX = /^[1-9][0-9]*$/;
-const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
+import {
+  getDurationUnitValue,
+  getDurationNumberInItsUnit,
+  getTimeOptions,
+  POSITIVE_INTEGER_REGEX,
+  INVALID_NUMBER_KEYS,
+} from '../utils';
 
 export interface DurationInputProps {
   value: string;
@@ -58,7 +60,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
         // Always update the displayed value so the input is responsive.
         setLocalNumber(val);
         // Only propagate to the form when the value is a valid positive integer.
-        if (INTEGER_REGEX.test(val)) {
+        if (POSITIVE_INTEGER_REGEX.test(val)) {
           const parsedValue = parseInt(val, 10);
           onChange(`${parsedValue}${intervalUnit}`);
         }
@@ -68,7 +70,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
 
     // On blur, if the field is empty or invalid, restore the last valid form value.
     const onBlur = useCallback(() => {
-      if (!INTEGER_REGEX.test(localNumber)) {
+      if (!POSITIVE_INTEGER_REGEX.test(localNumber)) {
         setLocalNumber(String(intervalNumber ?? 1));
       }
     }, [localNumber, intervalNumber]);
@@ -81,7 +83,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
     );
 
     const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (INVALID_KEYS.includes(e.key)) {
+      if (INVALID_NUMBER_KEYS.includes(e.key)) {
         e.preventDefault();
       }
     }, []);
