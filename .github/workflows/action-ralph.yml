@@ -68,6 +68,7 @@ jobs:
       is_fork_pr: ${{ steps.context.outputs.is_fork_pr }}
       pr_number: ${{ steps.context.outputs.pr_number }}
       pr_branch: ${{ steps.context.outputs.pr_branch }}
+      pr_base_branch: ${{ steps.context.outputs.pr_base_branch }}
       pr_head_repo: ${{ steps.context.outputs.pr_head_repo }}
       default_branch: ${{ steps.context.outputs.default_branch }}
       checkout_ref: ${{ steps.context.outputs.checkout_ref }}
@@ -111,6 +112,7 @@ jobs:
           DEFAULT_BRANCH_INPUT: ${{ github.event.repository.default_branch }}
           PR_HEAD_REPO_FULL: ${{ github.event.pull_request.head.repo.full_name }}
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
           PR_NUMBER_INPUT: ${{ github.event.pull_request.number }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
@@ -128,6 +130,7 @@ jobs:
           IS_FORK_PR="false"
           PR_NUMBER=""
           PR_BRANCH=""
+          PR_BASE_BRANCH=""
           PR_HEAD_REPO=""
 
           if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
@@ -139,11 +142,13 @@ jobs:
             fi
             PR_NUMBER="$PR_NUMBER_INPUT"
             PR_BRANCH="$PR_HEAD_REF"
+            PR_BASE_BRANCH="$PR_BASE_REF"
             PR_HEAD_REPO="$PR_HEAD_REPO_FULL"
           elif [ "$EVENT_NAME" = "issue_comment" ]; then
             PR_JSON=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}" 2>/dev/null) || PR_JSON=""
             if [ -n "$PR_JSON" ]; then
               PR_BRANCH=$(printf '%s' "$PR_JSON" | jq -r '.head.ref // empty')
+              PR_BASE_BRANCH=$(printf '%s' "$PR_JSON" | jq -r '.base.ref // empty')
               PR_HEAD_REPO=$(printf '%s' "$PR_JSON" | jq -r '.head.repo.full_name // empty')
               if [ -n "$PR_BRANCH" ] && [ -n "$PR_HEAD_REPO" ]; then
                 IS_PR="true"
@@ -172,6 +177,7 @@ jobs:
             echo "is_fork_pr=${IS_FORK_PR}"
             echo "pr_number=${PR_NUMBER}"
             echo "pr_branch=${PR_BRANCH}"
+            echo "pr_base_branch=${PR_BASE_BRANCH}"
             echo "pr_head_repo=${PR_HEAD_REPO}"
             echo "checkout_ref=${CHECKOUT_REF}"
             echo "checkout_repo=${CHECKOUT_REPO}"
@@ -724,10 +730,10 @@ jobs:
           set -euo pipefail
           BASE="${LITELLM_BASE_URL%/}"
           NO_V1="${BASE%/v1}"
-          curl -fsS -X POST "${NO_V1}/key/delete" \
+          curl -fsS -X POST "${NO_V1}/key/block" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{key: $key}')" || echo "::warning::Failed to revoke short-lived key"
 
   # ---------------------------------------------------------------------------
   # Phase C: Apply changes and either push to the existing PR branch or
@@ -746,7 +752,7 @@ jobs:
       - name: Checkout target
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch || 'main' }}
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.pr_base_branch || needs.prepare.outputs.default_branch || 'main' }}
           fetch-depth: 1
           token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
@@ -766,8 +772,8 @@ jobs:
           if [ -f /tmp/agent-output/deleted-files.txt ] && [ -s /tmp/agent-output/deleted-files.txt ]; then
             while IFS= read -r del_path; do
               [ -z "$del_path" ] && continue
-              if [ -f "$GITHUB_WORKSPACE/$del_path" ]; then
-                rm -f "$GITHUB_WORKSPACE/$del_path"
+              if [ -e "$GITHUB_WORKSPACE/$del_path" ] || [ -L "$GITHUB_WORKSPACE/$del_path" ]; then
+                rm -f -- "$GITHUB_WORKSPACE/$del_path"
               fi
             done < /tmp/agent-output/deleted-files.txt
           fi
@@ -909,14 +915,13 @@ jobs:
             echo "cc @flash1293"
           } > /tmp/pr-body.md
 
-          gh pr create \
+          PR_URL=$(gh pr create \
             --repo "${{ github.repository }}" \
+            --base "${{ needs.prepare.outputs.pr_base_branch || needs.prepare.outputs.default_branch || 'main' }}" \
             --draft \
             --title "${PR_TITLE}" \
             --label "ai-generated" \
-            --body-file /tmp/pr-body.md
-
-          PR_URL=$(gh pr view --repo "${{ github.repository }}" --json url -q '.url')
+            --body-file /tmp/pr-body.md)
           echo "::notice::PR created: ${PR_URL}"
 
           if [ "${{ github.event_name }}" = "issue_comment" ] && [ "${{ needs.prepare.outputs.is_pr }}" != "true" ]; then
@@ -1177,10 +1182,10 @@ jobs:
           set -euo pipefail
           BASE="${LITELLM_BASE_URL%/}"
           NO_V1="${BASE%/v1}"
-          curl -fsS -X POST "${NO_V1}/key/delete" \
+          curl -fsS -X POST "${NO_V1}/key/block" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{key: $key}')" || echo "::warning::Failed to revoke short-lived key"
 
   review_publish:
     name: "Review Phase C: Publish Comment"
