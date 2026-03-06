@@ -406,14 +406,15 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
     for (const [key, aVal] of Object.entries(aObj)) {
       if (key in bObj) {
         const result = intersectValues(aVal, bObj[key]);
-        if (result !== undefined) {
-          if (result.kind === 'nested') {
-            const nextTarget: Record<string, unknown> = {};
-            target[key] = nextTarget;
-            stack.push([nextTarget, result.a, result.b]);
-          } else {
-            target[key] = result.value;
-          }
+        if (result === undefined) {
+          // eslint-disable-next-line no-continue
+          continue;
+        } else if (result.kind === 'nested') {
+          const nextTarget: Record<string, unknown> = {};
+          target[key] = nextTarget;
+          stack.push([nextTarget, result.a, result.b]);
+        } else {
+          target[key] = result.value;
         }
       }
     }
