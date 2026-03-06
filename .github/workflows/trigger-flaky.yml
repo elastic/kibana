@@ -1,3 +1,5 @@
+name: Trigger flaky test runner on comment
+
 on:
   issue_comment:
     types:
