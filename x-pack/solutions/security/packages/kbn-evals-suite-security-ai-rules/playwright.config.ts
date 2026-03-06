@@ -11,5 +11,5 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 export default createPlaywrightEvalsConfig({
   testDir: Path.join(__dirname, './evals'),
   repetitions: 1, // Reduced from 3 for faster iteration; increase for statistically significant benchmarking
-  timeout: 30 * 60_000, // 60 minutes — Gemini 2.5 Pro needs more time for the full 8-example × 3-rep dataset
+  timeout: 30 * 60_000, // 30 minutes — Gemini 2.5 Pro needs more time for the full dataset
 });

@@ -53,7 +53,9 @@ kbn-evals-suite-security-ai-rules/
 
 3. **AI Connectors**: Configure one or more AI connectors in `config/kibana.dev.yml` or via the Kibana UI. The suite runs against all connectors discovered at runtime (including EIS models when available).
 
-4. **Index patterns**: The dataset prompts reference specific index patterns (e.g., `logs-endpoint.events.*`, `logs-aws.cloudtrail*`). If these indices do not exist in your Elasticsearch instance, the affected examples will be skipped (all evaluators return N/A). Check the task logs for "Could not discover a suitable index" warnings.
+4. **GenAI Settings**: Navigate to **Stack Management > AI > GenAI Settings** (`app/management/ai/genAiSettings`) and select **AI agent (Beta)** in Chat Experience. This enables the Agent Builder API that the eval suite calls.
+
+5. **Index patterns**: The dataset prompts reference specific index patterns (e.g., `logs-endpoint.events.*`, `logs-aws.cloudtrail*`). If these indices do not exist in your Elasticsearch instance, the affected examples will be skipped (all evaluators return N/A). Check the task logs for "Could not discover a suitable index" warnings.
 
 ## Running Evaluations
 
@@ -145,7 +147,7 @@ createRuleDescriptionEvaluator(evaluators),
 
 ### Skip Wrappers
 
-All evaluators are wrapped with `skipNegativeCases` (returns N/A for negative test examples) and `skipMissingIndexFailures` (returns N/A when the rule creation tool failed due to missing index patterns). The ES|QL equivalence evaluator additionally uses `skipNonEsqlReferences` to avoid meaningless comparisons when no ES|QL ground truth exists.
+All evaluators except Rejection are wrapped with `skipNegativeCases` (returns N/A for negative test examples). All evaluators are wrapped with `skipMissingIndexFailures` (returns N/A when the rule creation tool failed due to missing index patterns). The ES|QL equivalence evaluator additionally uses `skipNonEsqlReferences` to avoid meaningless comparisons when no ES|QL ground truth exists.
 
 ## Viewing Results
 
@@ -321,7 +323,7 @@ This means the required index (e.g., `logs-azure.auditlogs*`) does not exist in 
 
 The evaluation suite runs three datasets:
 
-1. **rule-generation-basic** (31 examples): 8 sample rules + 18 standard pairs + 5 complex pairs from [elastic/detection-rules](https://github.com/elastic/detection-rules). Covers Windows, Linux, macOS, AWS, Azure, GCP, O365, Okta, Google Workspace, containers, and supply-chain scenarios.
+1. **rule-generation-basic** (31 examples): 8 sample rules + 18 standard pairs + 5 complex pairs from [elastic/detection-rules](https://github.com/elastic/detection-rules). Covers Windows, Linux, macOS, AWS, Azure, GCP, O365, Okta, Google Workspace, containers, and supply-chain scenarios. Note: 1 complex pair (`suspicious-genai-descendant-activity`) has incomplete ground truth (empty query, no esqlQuery) pending publication in the detection-rules repo; the ES|QL Functional Equivalence evaluator returns N/A for that entry.
 2. **edge-cases** (variable): Hard/edge-case prompts for robustness testing. Skipped when no usable cases exist.
 3. **negative-cases** (5 examples): Prompts that should NOT produce a valid rule given the stated available data. Tests the model's ability to refuse impossible detection requests.
 
@@ -387,7 +389,7 @@ When adding new evaluators or modifying existing ones:
 3. Add unit tests for any new helper functions in `src/helpers.test.ts`
 4. Test with multiple connectors (GPT-4o, Claude, Gemini)
 5. Update this README with new metrics and interpretations
-6. Consider statistical significance (run with `--repetitions 3` or more)
+6. Consider statistical significance (run with `EVALUATION_REPETITIONS=3` or more)
 
 ## References
 
