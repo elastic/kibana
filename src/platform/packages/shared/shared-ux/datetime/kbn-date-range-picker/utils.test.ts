@@ -96,7 +96,7 @@ describe('getOptionShorthand', () => {
   });
 
   it('combines both offsets when neither is now', () => {
-    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
+    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
   });
 
   it('returns null when a bound has rounding', () => {

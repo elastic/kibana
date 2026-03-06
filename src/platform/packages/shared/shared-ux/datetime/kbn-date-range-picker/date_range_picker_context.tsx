@@ -149,7 +149,10 @@ export function DateRangePickerProvider({
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
   const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
-  const timeRange: TimeRange = useMemo(() => textToTimeRange(text, { presets }), [text, presets]);
+  const timeRange: TimeRange = useMemo(
+    () => textToTimeRange(text, { presets, dateFormat }),
+    [text, presets, dateFormat]
+  );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
     [dateFormat, timeRange]

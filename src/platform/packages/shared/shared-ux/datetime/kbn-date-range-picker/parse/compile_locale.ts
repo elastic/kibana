@@ -9,7 +9,7 @@
 
 import type { ParserLocale } from '../types';
 
-interface CompiledTemplate {
+export interface CompiledTemplate {
   regex: RegExp;
   countGroup: number;
   unitGroup: number;
@@ -22,11 +22,13 @@ export interface CompiledLocale {
   instantPast: CompiledTemplate[];
   instantFuture: CompiledTemplate[];
   absoluteFormats: string[];
+  /** Precompiled delimiter patterns (locale delimiters + universal dash). */
+  delimiterPatterns: RegExp[];
 }
 
 const localeCache = new WeakMap<ParserLocale, CompiledLocale>();
 
-// TODO move to utils
+/** Escapes special regex characters in a string for safe use in `new RegExp(...)`. */
 export const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Returns a compiled locale, caching by object identity. */
@@ -45,6 +47,10 @@ function compileLocale(locale: ParserLocale): CompiledLocale {
     .map(escapeRegExp)
     .join('|');
 
+  const delimiterPatterns = [...locale.delimiters, '-']
+    .map(buildDelimiterPattern)
+    .filter((p): p is RegExp => p !== null);
+
   return {
     shorthandRegex: new RegExp(`^(now)?([+-]?)(\\d+)(${unitKeys})(\\/[smhdwMy])?$`),
     durationPast: locale.naturalDuration.past.map(compileTemplate),
@@ -52,7 +58,14 @@ function compileLocale(locale: ParserLocale): CompiledLocale {
     instantPast: locale.naturalInstant.past.map(compileTemplate),
     instantFuture: locale.naturalInstant.future.map(compileTemplate),
     absoluteFormats: locale.absoluteFormats,
+    delimiterPatterns,
   };
+}
+
+/** Builds a regex that splits text on a word delimiter surrounded by whitespace. */
+export function buildDelimiterPattern(delimiter: string): RegExp | null {
+  const trimmed = delimiter.trim();
+  return trimmed ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmed)}\\s+(.+)$`) : null;
 }
 
 /**

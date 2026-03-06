@@ -22,8 +22,8 @@ import type {
   ParserLocale,
 } from '../types';
 import { isValidTimeRange } from '../utils';
-import type { CompiledLocale } from './compile_locale';
-import { compileParserLocale, escapeRegExp } from './compile_locale';
+import type { CompiledLocale, CompiledTemplate } from './compile_locale';
+import { compileParserLocale, buildDelimiterPattern } from './compile_locale';
 import { en } from './locales/en';
 
 /** Matches text against preset labels (case-insensitive). */
@@ -48,53 +48,47 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
 
   const locale = options?.locale ?? en;
   const compiled = compileParserLocale(locale);
-  const { presets = [], delimiter } = options ?? {};
+  const { presets = [], delimiter, dateFormat } = options ?? {};
+  const formats = dateFormat ? [dateFormat, ...compiled.absoluteFormats] : compiled.absoluteFormats;
 
   // (1) Preset label match
   // TODO move this out of the parse function?
   const preset = matchPreset(trimmed, presets);
   if (preset) {
-    return buildRange(text, preset.start, preset.end, compiled.absoluteFormats, true);
+    return buildRange(text, preset.start, preset.end, formats, true);
   }
 
   // (2) Named range from locale ("today", "yesterday", "this week", ...)
   const named = locale.namedRanges[trimmed.toLowerCase()];
   if (named) {
-    return buildRange(text, named.start, named.end, compiled.absoluteFormats, true);
+    return buildRange(text, named.start, named.end, formats, true);
   }
 
   // (3) Natural duration ("last 7 minutes", "next 3 days")
   const duration = matchNaturalDuration(trimmed, locale, compiled);
   if (duration) {
-    return buildRange(text, duration.start, duration.end, compiled.absoluteFormats, true);
+    return buildRange(text, duration.start, duration.end, formats, true);
   }
 
   // (4) Try splitting on delimiters (locale + universal + extra)
-  const parts = trySplit(trimmed, locale, delimiter);
+  const parts = trySplit(trimmed, compiled, delimiter);
   if (parts) {
-    const startDateString = instantToDateString(parts[0], locale, compiled);
-    const endDateString = instantToDateString(parts[1], locale, compiled);
+    const startDateString = instantToDateString(parts[0], locale, compiled, formats);
+    const endDateString = instantToDateString(parts[1], locale, compiled, formats);
     if (startDateString && endDateString) {
-      return buildRange(text, startDateString, endDateString, compiled.absoluteFormats, false);
+      return buildRange(text, startDateString, endDateString, formats, false);
     }
     return buildInvalidRange(text);
   }
 
   // (5) Single instant (no delimiter found)
-  const dateString = instantToDateString(trimmed, locale, compiled);
+  const dateString = instantToDateString(trimmed, locale, compiled, formats);
   if (!dateString) return buildInvalidRange(text);
 
   if (dateString.startsWith('now+')) {
-    return buildRange(text, 'now', dateString, compiled.absoluteFormats, false);
+    return buildRange(text, 'now', dateString, formats, false);
   }
-  return buildRange(text, dateString, 'now', compiled.absoluteFormats, false);
-}
-
-function buildDelimiterPattern(delimiter: string): RegExp | null {
-  const trimmedDelimiter = delimiter.trim();
-  return trimmedDelimiter
-    ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmedDelimiter)}\\s+(.+)$`)
-    : null;
+  return buildRange(text, dateString, 'now', formats, false);
 }
 
 /** Resolves a user-typed unit string through locale aliases (exact first, then lowercase). */
@@ -135,7 +129,8 @@ function dateStringToOffset(dateString: DateString): DateOffset | null {
 function instantToDateString(
   text: string,
   locale: ParserLocale,
-  compiled: CompiledLocale
+  compiled: CompiledLocale,
+  formats: string[]
 ): DateString | null {
   const trimmed = text.trim();
 
@@ -159,17 +154,20 @@ function instantToDateString(
   if (unixDate) return unixDate.toISOString();
 
   // Absolute date / dateMath / ISO fallback
-  if (resolveDateString(trimmed, compiled.absoluteFormats) !== null) return trimmed;
+  if (dateStringToDate(trimmed, formats) !== null) return trimmed;
 
   return null;
 }
 
 /**
- * Resolves a {@link DateString} to a `Date`, returning `null` if unrecognised.
+ * Converts a {@link DateString} to a `Date`, returning `null` if unrecognised.
+ *
+ * Handles locale absolute formats (strict then forgiving), ISO 8601, and datemath.
+ * Unix timestamps are handled upstream by `instantToDateString` before this is called.
  *
  * Note: dateMath.parse supports milliseconds although it seems undocumented.
  */
-function resolveDateString(
+function dateStringToDate(
   dateString: DateString,
   formats: string[],
   options?: { roundUp?: boolean }
@@ -183,9 +181,6 @@ function resolveDateString(
     const forgiving = moment(dateString, formats);
     if (forgiving.isValid()) return forgiving.toDate();
   }
-
-  const unixDate = unixTimestampToDate(dateString);
-  if (unixDate) return unixDate;
 
   if (/^(now|[+-]|\d)/.test(dateString)) {
     return dateMath.parse(dateString, options)?.toDate() ?? null;
@@ -211,8 +206,8 @@ function buildRange(
     value: text,
     start,
     end,
-    startDate: resolveDateString(start, formats),
-    endDate: resolveDateString(end, formats, { roundUp: true }),
+    startDate: dateStringToDate(start, formats),
+    endDate: dateStringToDate(end, formats, { roundUp: true }),
     type: [startType, endType],
     isNaturalLanguage,
     startOffset: startType === DATE_TYPE_RELATIVE ? dateStringToOffset(start) : null,
@@ -240,21 +235,14 @@ function buildInvalidRange(text: string): TimeRange {
 
 /**
  * Attempts to split text into two parts using available delimiters.
- * Tries in order: extra delimiter, locale delimiters, universal `-`.
+ * Tries in order: extra delimiter, then precompiled locale + universal patterns.
  */
-function trySplit(text: string, locale: ParserLocale, extra?: string): [string, string] | null {
-  const patterns: RegExp[] = [];
-
-  if (extra) {
-    const delimiterPattern = buildDelimiterPattern(extra);
-    if (delimiterPattern) patterns.push(delimiterPattern);
-  }
-  for (const delimiter of locale.delimiters) {
-    const delimiterPattern = buildDelimiterPattern(delimiter);
-    if (delimiterPattern) patterns.push(delimiterPattern);
-  }
-  const dashPattern = buildDelimiterPattern('-');
-  if (dashPattern) patterns.push(dashPattern);
+function trySplit(text: string, compiled: CompiledLocale, extra?: string): [string, string] | null {
+  const patterns = extra
+    ? [buildDelimiterPattern(extra), ...compiled.delimiterPatterns].filter(
+        (p): p is RegExp => p !== null
+      )
+    : compiled.delimiterPatterns;
 
   for (const pattern of patterns) {
     const match = text.match(pattern);
@@ -265,25 +253,44 @@ function trySplit(text: string, locale: ParserLocale, extra?: string): [string, 
   return null;
 }
 
+/** Tries each compiled template against the text, returning the first successful build or `null`. */
+function matchTemplates(
+  text: string,
+  templates: CompiledTemplate[],
+  aliases: Record<string, TimeUnit>,
+  buildResult: (count: string, unit: TimeUnit) => string
+): string | null {
+  for (const t of templates) {
+    const match = text.match(t.regex);
+    if (match) {
+      const unit = resolveUnit(match[t.unitGroup], aliases);
+      if (unit) return buildResult(match[t.countGroup], unit);
+    }
+  }
+  return null;
+}
+
 function matchNaturalDuration(
   text: string,
   locale: ParserLocale,
   compiled: CompiledLocale
 ): { start: DateString; end: DateString } | null {
-  for (const template of compiled.durationPast) {
-    const match = text.match(template.regex);
-    if (match) {
-      const unit = resolveUnit(match[template.unitGroup], locale.unitAliases);
-      if (unit) return { start: `now-${match[template.countGroup]}${unit}`, end: 'now' };
-    }
-  }
-  for (const template of compiled.durationFuture) {
-    const match = text.match(template.regex);
-    if (match) {
-      const unit = resolveUnit(match[template.unitGroup], locale.unitAliases);
-      if (unit) return { start: 'now', end: `now+${match[template.countGroup]}${unit}` };
-    }
-  }
+  const past = matchTemplates(
+    text,
+    compiled.durationPast,
+    locale.unitAliases,
+    (count, unit) => `now-${count}${unit}`
+  );
+  if (past) return { start: past, end: 'now' };
+
+  const future = matchTemplates(
+    text,
+    compiled.durationFuture,
+    locale.unitAliases,
+    (count, unit) => `now+${count}${unit}`
+  );
+  if (future) return { start: 'now', end: future };
+
   return null;
 }
 
@@ -292,19 +299,18 @@ function matchNaturalInstant(
   locale: ParserLocale,
   compiled: CompiledLocale
 ): DateString | null {
-  for (const template of compiled.instantPast) {
-    const match = text.match(template.regex);
-    if (match) {
-      const unit = resolveUnit(match[template.unitGroup], locale.unitAliases);
-      if (unit) return `now-${match[template.countGroup]}${unit}`;
-    }
-  }
-  for (const template of compiled.instantFuture) {
-    const match = text.match(template.regex);
-    if (match) {
-      const unit = resolveUnit(match[template.unitGroup], locale.unitAliases);
-      if (unit) return `now+${match[template.countGroup]}${unit}`;
-    }
-  }
-  return null;
+  return (
+    matchTemplates(
+      text,
+      compiled.instantPast,
+      locale.unitAliases,
+      (count, unit) => `now-${count}${unit}`
+    ) ??
+    matchTemplates(
+      text,
+      compiled.instantFuture,
+      locale.unitAliases,
+      (count, unit) => `now+${count}${unit}`
+    )
+  );
 }

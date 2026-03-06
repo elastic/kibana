@@ -43,15 +43,6 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
   y: 'year',
 };
 
-/** Reverse of {@link UNIT_SHORT_TO_FULL_MAP}, also includes plural forms (e.g. "days" → "d") */
-export const UNIT_FULL_TO_SHORT_MAP: Record<string, string> = Object.entries(
-  UNIT_SHORT_TO_FULL_MAP
-).reduce((acc, [short, full]) => {
-  acc[full] = short;
-  acc[`${full}s`] = short;
-  return acc;
-}, {} as Record<string, string>);
-
 /** Selector for focusable elements */
 export const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';

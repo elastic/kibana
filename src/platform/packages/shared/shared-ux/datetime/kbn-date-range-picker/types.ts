@@ -87,6 +87,10 @@ export interface TimeRangeTransformOptions {
   locale?: ParserLocale;
   /** Additional accepted delimiter (on top of locale and universal `'-'`) */
   delimiter?: string;
+  /**
+   * Format string used for both displaying and parsing absolute dates.
+   * Prepended to locale formats so custom-formatted dates round-trip correctly.
+   */
   dateFormat?: string;
 }
 
