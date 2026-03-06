@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const supertest = getService('supertest');
 
-  describe.only('deprecated saved objects API compatibility', function () {
+  describe('deprecated saved objects API compatibility', function () {
     it('should support Discover sessions without tabs created through the deprecated saved objects API', async () => {
       await supertest
         .post(`/api/saved_objects/search`)
