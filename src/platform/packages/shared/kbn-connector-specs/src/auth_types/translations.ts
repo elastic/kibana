@@ -117,6 +117,45 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const OAUTH_CERT_LABEL = i18n.translate('connectorSpecs.oauthClientCertificate.label', {
+  defaultMessage: 'OAuth Client Certificate',
+});
+
+export const OAUTH_CERT_CERTIFICATE_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCertificate.certificate.label',
+  {
+    defaultMessage: 'Certificate (PEM)',
+  }
+);
+
+export const OAUTH_CERT_PRIVATE_KEY_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCertificate.privateKey.label',
+  {
+    defaultMessage: 'Private key (PEM)',
+  }
+);
+
+export const OAUTH_CERT_PRIVATE_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientCertificate.privateKey.requiredMessage',
+  {
+    defaultMessage: 'Private key is required',
+  }
+);
+
+export const OAUTH_CERT_CERTIFICATE_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientCertificate.certificate.requiredMessage',
+  {
+    defaultMessage: 'Certificate is required',
+  }
+);
+
+export const OAUTH_CERT_PASSPHRASE_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCertificate.passphrase.label',
+  {
+    defaultMessage: 'Private key passphrase',
+  }
+);
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });
