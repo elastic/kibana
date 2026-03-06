@@ -8,6 +8,7 @@
  */
 
 import type React from 'react';
+import type { ReactNode } from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 
 /** @public */
@@ -26,7 +27,13 @@ export interface ChromeHelpExtension {
    */
   links?: ChromeHelpExtensionMenuLink[];
   /**
+   * React-first alternative to `content`. Receives menu actions and returns a ReactNode.
+   * Preferred over `content` which is deprecated.
+   */
+  reactContent?: (menuActions: ChromeHelpMenuActions) => ReactNode;
+  /**
    * Custom content to occur below the list of links
+   * @deprecated Use `reactContent` instead.
    */
   content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
 }

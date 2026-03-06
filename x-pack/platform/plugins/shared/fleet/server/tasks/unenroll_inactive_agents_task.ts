@@ -28,19 +28,24 @@ import { agentPolicyService, appContextService, auditLoggingService } from '../s
 import type { AgentPolicy } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '10m';
+const DEFAULT_INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
 const POLICIES_BATCHSIZE = 500;
+
+interface UnenrollInactiveAgentsTaskConfig {
+  taskInterval?: string;
+}
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
   unenrollBatchSize?: number;
+  config: UnenrollInactiveAgentsTaskConfig;
 }
 
 interface UnenrollInactiveAgentsTaskStartContract {
@@ -51,12 +56,14 @@ export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private unenrollBatchSize: number;
+  private taskInterval: string;
 
   constructor(setupContract: UnenrollInactiveAgentsTaskSetupContract) {
-    const { core, taskManager, logFactory, unenrollBatchSize } = setupContract;
+    const { core, taskManager, logFactory, unenrollBatchSize, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
     this.unenrollBatchSize =
       unenrollBatchSize !== undefined ? unenrollBatchSize : UNENROLLMENT_BATCHSIZE;
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -81,7 +88,9 @@ export class UnenrollInactiveAgentsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[UnenrollInactiveAgentsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(
+      `[UnenrollInactiveAgentsTask] Started with interval of [${this.taskInterval}]`
+    );
 
     try {
       await taskManager.ensureScheduled({
@@ -89,7 +98,7 @@ export class UnenrollInactiveAgentsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -135,10 +144,11 @@ export class UnenrollInactiveAgentsTask {
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: policiesKuery,
       perPage: POLICIES_BATCHSIZE,
+      spaceId: '*',
     });
     for await (const agentPolicyPageResults of agentPolicyFetcher) {
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Found "${agentPolicyPageResults.length}" agent policies with unenroll_timeout > 0`
+        `[UnenrollInactiveAgentsTask] Found ${agentPolicyPageResults.length} agent policies with unenroll_timeout > 0`
       );
       if (!agentPolicyPageResults.length) {
         this.endRun('Found no policies to process');
@@ -166,7 +176,7 @@ export class UnenrollInactiveAgentsTask {
         return;
       }
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll. Attempting unenrollment`
+        `[UnenrollInactiveAgentsTask] Found ${res.agents.length} inactive agents to unenroll. Attempting unenrollment`
       );
       const unenrolledBatch = await unenrollBatch(soClient, esClient, res.agents, {
         revoke: true,

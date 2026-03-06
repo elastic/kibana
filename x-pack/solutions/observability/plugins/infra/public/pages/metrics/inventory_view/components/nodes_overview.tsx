@@ -83,7 +83,7 @@ export const NodesOverview = ({
   );
 
   const nodeName = useMemo(
-    () => nodes.find((node) => node.path[0].value === detailsItemId)?.name,
+    () => nodes?.find((node) => node.path[0].value === detailsItemId)?.name,
     [detailsItemId, nodes]
   );
 

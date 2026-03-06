@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { featureStatusSchema } from '@kbn/streams-schema/src/feature';
 import {
   STREAM_NAME,
@@ -13,6 +13,7 @@ import {
   FEATURE_DESCRIPTION,
   FEATURE_CONFIDENCE,
   FEATURE_EVIDENCE,
+  FEATURE_EVIDENCE_DOC_IDS,
   FEATURE_STATUS,
   FEATURE_LAST_SEEN,
   FEATURE_TITLE,
@@ -35,6 +36,7 @@ export const storedFeatureSchema = z.object({
   [FEATURE_PROPERTIES]: z.record(z.string(), z.any()),
   [FEATURE_CONFIDENCE]: z.number(),
   [FEATURE_EVIDENCE]: z.array(z.string()).optional(),
+  [FEATURE_EVIDENCE_DOC_IDS]: z.array(z.string()).optional(),
   [FEATURE_STATUS]: featureStatusSchema,
   [FEATURE_LAST_SEEN]: z.string(),
   [FEATURE_TAGS]: z.array(z.string()).optional(),
