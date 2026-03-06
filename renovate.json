@@ -1840,9 +1840,7 @@
         "typescript-fsa-reducers",
         "type-fest",
         "unidiff",
-        "ulid",
-        "flat",
-        "@types/flat"
+        "ulid"
       ],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
