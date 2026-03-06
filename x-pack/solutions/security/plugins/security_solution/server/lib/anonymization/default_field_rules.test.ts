@@ -17,35 +17,47 @@ describe('getDefaultAlertFieldRules', () => {
   it('returns allowed=true for standard ECS fields', () => {
     const timestampRule = rules.find((r) => r.field === '@timestamp');
 
-    expect(timestampRule).toBeDefined();
-    expect(timestampRule?.allowed).toBe(true);
-    expect(timestampRule?.anonymized).toBe(false);
+    expect(timestampRule).toEqual(
+      expect.objectContaining({
+        allowed: true,
+        anonymized: false,
+      })
+    );
   });
 
   it('returns anonymized=true with entity class for host.name', () => {
     const hostNameRule = rules.find((r) => r.field === 'host.name');
 
-    expect(hostNameRule).toBeDefined();
-    expect(hostNameRule?.allowed).toBe(true);
-    expect(hostNameRule?.anonymized).toBe(true);
-    expect(hostNameRule?.entityClass).toBe('HOST_NAME');
+    expect(hostNameRule).toEqual(
+      expect.objectContaining({
+        allowed: true,
+        anonymized: true,
+        entityClass: 'HOST_NAME',
+      })
+    );
   });
 
   it('returns anonymized=true with entity class for user.name', () => {
     const userNameRule = rules.find((r) => r.field === 'user.name');
 
-    expect(userNameRule).toBeDefined();
-    expect(userNameRule?.allowed).toBe(true);
-    expect(userNameRule?.anonymized).toBe(true);
-    expect(userNameRule?.entityClass).toBe('USER_NAME');
+    expect(userNameRule).toEqual(
+      expect.objectContaining({
+        allowed: true,
+        anonymized: true,
+        entityClass: 'USER_NAME',
+      })
+    );
   });
 
   it('returns anonymized=true for host.ip even though it is not in DEFAULT_ALLOW', () => {
     const hostIpRule = rules.find((r) => r.field === 'host.ip');
 
-    expect(hostIpRule).toBeDefined();
-    expect(hostIpRule?.anonymized).toBe(true);
-    expect(hostIpRule?.entityClass).toBe('IP');
+    expect(hostIpRule).toEqual(
+      expect.objectContaining({
+        anonymized: true,
+        entityClass: 'IP',
+      })
+    );
   });
 
   it('returns entity class for all anonymized fields', () => {

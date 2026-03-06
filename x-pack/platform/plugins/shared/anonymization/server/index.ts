@@ -26,7 +26,13 @@ export const plugin: PluginInitializer<
 };
 
 export type { AnonymizationPluginSetup, AnonymizationPluginStart } from './types';
-export type { AnonymizationPolicyService, AnonymizationTarget } from './types';
+export type {
+  AnonymizationPolicyService,
+  AnonymizationTarget,
+  AnonymizationProfileInitializer,
+  AnonymizationProfileInitializerContext,
+  CreateAnonymizationProfileParams,
+} from './types';
 export const config: PluginConfigDescriptor<AnonymizationConfig> = {
   schema: configSchema,
 };

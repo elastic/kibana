@@ -9,9 +9,6 @@ import { type FieldRule, suggestEntityClassForField } from '@kbn/anonymization-c
 
 /**
  * Fields that are allowed by default for the alerts data view profile.
- * Matches the Security Solution's DEFAULT_ALLOW list.
- * Kept here temporarily while anonymization profile bootstrapping is centralized
- * in this plugin; follow-up work will move Security-owned defaults to Security.
  */
 const DEFAULT_ALLOW: string[] = [
   '_id',
@@ -157,13 +154,13 @@ const DEFAULT_ALLOW: string[] = [
 ];
 
 /**
- * Fields that are anonymized by default (value replaced with deterministic token).
- * Matches the Security Solution's DEFAULT_ALLOW_REPLACEMENT list.
+ * Fields that are anonymized by default.
  */
 const DEFAULT_ANONYMIZE: string[] = [
   'cloud.account.name',
   'entity.name',
   'host.ip',
+  'host.hostname',
   'host.name',
   'user.name',
   'user.target.name',
@@ -172,12 +169,11 @@ const DEFAULT_ANONYMIZE: string[] = [
 ];
 
 /**
- * Builds the default field rules for the alerts data view profile.
+ * Builds the default field rules for the Security alerts data view profile.
  *
  * - All DEFAULT_ALLOW fields are `allowed: true`
  * - Fields in DEFAULT_ANONYMIZE are also `anonymized: true` with an entity class
- * - `host.ip` is added as anonymized even though it's not in DEFAULT_ALLOW
- *   (matches current Security Solution behavior)
+ * - `host.ip` is included and anonymized by default, even though it is not in DEFAULT_ALLOW
  */
 export const getDefaultAlertFieldRules = (): FieldRule[] => {
   const allFields = new Set([...DEFAULT_ALLOW, ...DEFAULT_ANONYMIZE]);
