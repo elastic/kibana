@@ -192,6 +192,121 @@ describe('simulateRequest — stability contract', () => {
   });
 });
 
+describe('simulateRequest — diamond graph (shared downstream visited via both paths)', () => {
+  // entry → left  → shared
+  //       ↘ right → shared
+  const DIAMOND: ServiceGraph = {
+    services: [
+      { name: 'entry', runtime: 'node', version: '1.0.0', infraDeps: [] },
+      { name: 'left', runtime: 'go', version: '1.0.0', infraDeps: [] },
+      { name: 'right', runtime: 'java', version: '1.0.0', infraDeps: [] },
+      { name: 'shared', runtime: 'python', version: '1.0.0', infraDeps: [] },
+    ],
+    edges: [
+      { source: 'entry', target: 'left', protocol: 'http' },
+      { source: 'entry', target: 'right', protocol: 'http' },
+      { source: 'left', target: 'shared', protocol: 'http' },
+      { source: 'right', target: 'shared', protocol: 'http' },
+    ],
+  };
+
+  it('generates docs for the shared service from both paths (not just one)', () => {
+    const docs = generateServiceDocs({
+      serviceGraph: DIAMOND,
+      entryService: 'entry',
+      seed: SEED,
+      index: 0,
+      timestamp: BASE_TS,
+    });
+
+    const sharedDocs = docs.filter((d) => d['service.name'] === 'shared');
+    // Each path (left→shared, right→shared) produces at least one self-log for 'shared'.
+    // A global visited set would produce only 1 doc; the path-based guard produces ≥ 2.
+    expect(sharedDocs.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('emits an outbound log from both left and right toward shared', () => {
+    const docs = generateServiceDocs({
+      serviceGraph: DIAMOND,
+      entryService: 'entry',
+      seed: SEED,
+      index: 0,
+      timestamp: BASE_TS,
+    });
+
+    const leftOutbound = docs.find(
+      (d) => d['service.name'] === 'left' && String(d.message ?? '').includes('shared')
+    );
+    const rightOutbound = docs.find(
+      (d) => d['service.name'] === 'right' && String(d.message ?? '').includes('shared')
+    );
+
+    expect(leftOutbound).toBeDefined();
+    expect(rightOutbound).toBeDefined();
+  });
+
+  it('propagates shared service failures via both left and right legs', () => {
+    const docs = generateServiceDocs({
+      serviceGraph: DIAMOND,
+      entryService: 'entry',
+      seed: SEED,
+      index: 0,
+      timestamp: BASE_TS,
+      failures: { services: { shared: { errorType: 'db_timeout', rate: 1 } } },
+    });
+
+    const sharedDocs = docs.filter((d) => d['service.name'] === 'shared');
+    expect(sharedDocs.length).toBeGreaterThanOrEqual(2);
+    expect(sharedDocs.every((d) => d['log.level'] === 'error')).toBe(true);
+
+    // Both intermediate services should record an outbound error toward shared.
+    const leftErr = docs.find((d) => d['service.name'] === 'left' && d['log.level'] === 'error');
+    const rightErr = docs.find((d) => d['service.name'] === 'right' && d['log.level'] === 'error');
+    expect(leftErr).toBeDefined();
+    expect(rightErr).toBeDefined();
+  });
+});
+
+describe('simulateRequest — cycle detection', () => {
+  // svc-a → svc-b → svc-a (cycle)
+  const CYCLIC: ServiceGraph = {
+    services: [
+      { name: 'svc-a', runtime: 'node', version: '1.0.0', infraDeps: [] },
+      { name: 'svc-b', runtime: 'go', version: '1.0.0', infraDeps: [] },
+    ],
+    edges: [
+      { source: 'svc-a', target: 'svc-b', protocol: 'http' },
+      { source: 'svc-b', target: 'svc-a', protocol: 'http' },
+    ],
+  };
+
+  it('does not infinitely recurse on a cyclic graph', () => {
+    expect(() =>
+      generateServiceDocs({
+        serviceGraph: CYCLIC,
+        entryService: 'svc-a',
+        seed: SEED,
+        index: 0,
+        timestamp: BASE_TS,
+      })
+    ).not.toThrow();
+  });
+
+  it('generates docs for both services despite the cycle', () => {
+    const docs = generateServiceDocs({
+      serviceGraph: CYCLIC,
+      entryService: 'svc-a',
+      seed: SEED,
+      index: 0,
+      timestamp: BASE_TS,
+    });
+
+    const names = new Set(docs.map((d) => d['service.name']));
+    expect(names).toContain('svc-a');
+    expect(names).toContain('svc-b');
+  });
+});
+
 describe('simulateRequest — warn emission', () => {
   it('emits warn-level doc on non-error tick when failure is configured', () => {
     // emitWarn fires on ~21% of non-error ticks with rate:0.7 — scan 200 indices to hit one.

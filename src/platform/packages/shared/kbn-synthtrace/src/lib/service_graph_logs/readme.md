@@ -34,7 +34,7 @@ Declare what is broken via the `failures` key on `LogsGeneratorConfig`. It accep
 
 ### Volume shaping
 
-Control how many docs each channel emits per tick via the `volume` key (`ChannelVolume`). Each service can have a `ChannelEntry` with `rate`, `every` (emit every N-th tick), and `spikes` (burst/silence windows with a `scale`, optional `start`/`end` timestamps, and optional service scope).
+Control how many docs each channel emits per tick via the `volume` key (`ChannelVolume`). Both **service names** and **infra dependency names** (e.g. `'postgres'`, `'redis'`) are valid keys — each maps to a `ChannelEntry` with `rate`, `every` (emit every N-th tick), and `spikes` (burst/silence windows with a `scale`, optional `start`/`end` timestamps, and optional service scope). Service-scoped keys control request-channel volume; infra-dep keys control how many infra dependency logs that dep emits per tick.
 
 Noise volume is configured separately via `noise.volume` (`NoiseVolumeConfig`) and supports the same spike pattern plus a `jitter` factor.
 
@@ -64,8 +64,8 @@ Templates live in `log_catalog/`. Each file owns one domain:
 
 | File | Domain |
 |---|---|
-| `log_catalog/request.ts` | Per-request success and error messages, outbound call pairs, stack traces |
-| `log_catalog/outbound.ts` | Outbound call log pairs |
+| `log_catalog/request.ts` | Per-request success and error messages, stack traces |
+| `log_catalog/outbound.ts` | Outbound call log pairs (HTTP, gRPC, Kafka) |
 | `log_catalog/database.ts`, `cache.ts`, `host.ts`, `kubernetes.ts`, `message_queue.ts` | Per-technology infra messages (one file per dependency type) |
 | `log_catalog/noise.ts` | Background noise messages keyed by health state and runtime |
 
@@ -73,7 +73,7 @@ Templates are plain string arrays with `{placeholder}` tokens. Add entries to an
 
 ### Adding a failure scenario
 
-Add an entry to the `scenarios` record in the relevant `MockAppDefinition` (e.g. `mock_apps/claims.ts`). A scenario is a `build({ at })` function that returns `failures`, `volume`, and `noise` keys. `at(offset)` converts a relative time offset (e.g. `'30s'`, `'5m'`, `'1h'`) from the incident start into an absolute timestamp.
+Add an entry to the `scenarios` record in the relevant `MockAppDefinition` (e.g. `mock_apps/claims.ts`). A scenario uses the `phase` / `phases` helpers from `makePhaseContext` to declare time-bounded windows. Inside each phase, `build({ at })` returns `failures`, `volume`, and `noise` keys. `at(offset)` converts a relative time offset (e.g. `'30s'`, `'5m'`, `'1h'`) from the incident start into an absolute timestamp. Simple single-phase scenarios can also expose a top-level `build({ at })` directly.
 
 ### Adding a new mock app
 

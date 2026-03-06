@@ -169,18 +169,24 @@ export function simulateRequest({
   tickSeed: number;
   metadataCache?: MetadataCache;
 }): Array<Partial<LogDocument>> {
-  const visited = new Set<string>();
-
-  function visit(current: string): {
+  function visit(
+    current: string,
+    path: ReadonlySet<string> = new Set()
+  ): {
     errored: boolean;
     httpStatus: number;
     docs: Array<Partial<LogDocument>>;
   } {
-    if (visited.has(current)) return { errored: false, httpStatus: 200, docs: [] };
-    visited.add(current);
+    if (path.has(current)) {
+      return { errored: false, httpStatus: 200, docs: [] };
+    }
+    const childPath = new Set(path);
+    childPath.add(current);
 
     const serviceNode = serviceGraph.services.find((s) => s.name === current);
-    if (!serviceNode) return { errored: false, httpStatus: 200, docs: [] };
+    if (!serviceNode) {
+      return { errored: false, httpStatus: 200, docs: [] };
+    }
 
     const svcSeed = deriveSeed(stableSeed, current);
     const svcTickSeed = deriveSeed(tickSeed, current);
@@ -199,7 +205,7 @@ export function simulateRequest({
         ? serviceGraph.edges
             .filter((e) => e.source === current)
             .map((edge) => {
-              const { errored, httpStatus: childHttpStatus, docs } = visit(edge.target);
+              const { errored, httpStatus: childHttpStatus, docs } = visit(edge.target, childPath);
               const targetNode = serviceGraph.services.find((s) => s.name === edge.target);
               return {
                 edge,

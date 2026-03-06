@@ -70,7 +70,7 @@ const RESOLVERS: Record<string, ResolverFn> = {
   table: (c) => c.cache.app_snake,
   topic: (c) => `${c.cache.app_snake}.events`,
   consumer_group: (c) => `${c.svc}-consumer-group`,
-  upstream_host: (c) => `${c.svc}-upstream.svc.cluster.local`,
+  upstream_host: (c) => `${c.cache.target_svc ?? c.svc}.svc.cluster.local`,
   upstream_status: () => '500',
   user_id: (c) => `user-${randHex(c.rng, 8)}`,
 };

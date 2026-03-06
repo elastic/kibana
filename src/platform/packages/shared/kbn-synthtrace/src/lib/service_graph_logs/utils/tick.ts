@@ -283,41 +283,40 @@ export function collectInfraDocs({
   });
   const { svc, dep } = selectInfraPair(allDeps, priorityPairs, index);
 
-  const depCfg = volume?.[dep];
-  if (!resolveChannelEvery(depCfg?.every, index)) {
-    return [];
-  }
-
-  const spikeMultiplier = resolveSpikes(depCfg?.spikes, timestamp, ctx, svc.name);
-  const baseRate = depCfg?.rate ?? 1;
-  const rng = mulberry32(deriveSeed(resolveEffectiveSeed(seed, index, timestamp), dep));
-  const infraCount = probabilisticCount(baseRate * spikeMultiplier, rng);
-  if (infraCount === 0) {
-    return [];
-  }
-
-  const infraFailureCfg = currentFailures?.infra?.[dep];
-  let depFailingErrorType: ErrorType | undefined;
-  if (failingDeps.has(dep) && infraFailureCfg != null) {
-    const { errorType, rate } = infraFailureCfg;
-    if (rate <= 0 || rng() < rate) {
-      depFailingErrorType = errorType;
-    }
-  }
-
   const result: Array<Partial<LogDocument>> = [];
-  for (let i = 0; i < infraCount; i++) {
-    result.push(
-      ...buildInfraDocs({
-        svc,
-        dep,
-        failingDeps,
-        depFailingErrorType,
-        timestamp,
-        metadataCache,
-        effectiveSeed: resolveEffectiveSeed(seed, index + i, timestamp),
-      })
-    );
+
+  // Infra dependency logs — gated by every/rate/volume.
+  const depCfg = volume?.[dep];
+  if (resolveChannelEvery(depCfg?.every, index)) {
+    const spikeMultiplier = resolveSpikes(depCfg?.spikes, timestamp, ctx, svc.name);
+    const baseRate = depCfg?.rate ?? 1;
+    const rng = mulberry32(deriveSeed(resolveEffectiveSeed(seed, index, timestamp), dep));
+    const infraCount = probabilisticCount(baseRate * spikeMultiplier, rng);
+
+    if (infraCount > 0) {
+      const infraFailureCfg = currentFailures?.infra?.[dep];
+      let depFailingErrorType: ErrorType | undefined;
+      if (failingDeps.has(dep) && infraFailureCfg != null) {
+        const { errorType, rate = 1 } = infraFailureCfg;
+        if (rng() < rate) {
+          depFailingErrorType = errorType;
+        }
+      }
+
+      for (let i = 0; i < infraCount; i++) {
+        result.push(
+          ...buildInfraDocs({
+            svc,
+            dep,
+            failingDeps,
+            depFailingErrorType,
+            timestamp,
+            metadataCache,
+            effectiveSeed: resolveEffectiveSeed(seed, index + i, timestamp),
+          })
+        );
+      }
+    }
   }
 
   // Host/k8s system log: at most once per tick, independent of infra rate/volume.
@@ -326,8 +325,9 @@ export function collectInfraDocs({
   let k8sErrorType: 'k8s_oom' | 'k8s_crash_loop_backoff' | undefined;
   if (serviceErrorType === 'k8s_oom' || serviceErrorType === 'k8s_crash_loop_backoff') {
     const svcFailureCfg = currentFailures?.services?.[svc.name];
+    const resolvedK8sRate = svcFailureCfg?.rate ?? 1;
     const k8sRng = mulberry32(deriveSeed(tickSeed, svc.name));
-    if (!svcFailureCfg || svcFailureCfg.rate <= 0 || k8sRng() < svcFailureCfg.rate) {
+    if (!svcFailureCfg || k8sRng() < resolvedK8sRate) {
       k8sErrorType = serviceErrorType;
     }
   }
