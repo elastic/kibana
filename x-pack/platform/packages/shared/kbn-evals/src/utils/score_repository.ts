@@ -49,6 +49,7 @@ export interface EvaluationScoreDocument {
   example: {
     id: string;
     index: number;
+    input?: Record<string, unknown> | null;
     dataset: {
       id: string;
       name: string;
@@ -58,6 +59,7 @@ export interface EvaluationScoreDocument {
   task: {
     trace_id: string | null;
     repetition_index: number;
+    output?: unknown | null;
     model: Model;
   };
 
@@ -225,6 +227,7 @@ export class EvaluationScoreRepository {
               properties: {
                 id: { type: 'keyword' },
                 index: { type: 'integer' },
+                input: { type: 'object', enabled: false },
                 dataset: {
                   type: 'object',
                   properties: {
@@ -239,6 +242,7 @@ export class EvaluationScoreRepository {
               properties: {
                 trace_id: { type: 'keyword' },
                 repetition_index: { type: 'integer' },
+                output: { type: 'object', enabled: false },
                 model: {
                   type: 'object',
                   properties: {
