@@ -119,6 +119,7 @@ export function QueriesTable() {
     query: searchQuery,
     page: pagination.index + 1,
     perPage: pagination.size,
+    status: ['active', 'draft'],
   });
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
   const {

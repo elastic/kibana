@@ -7,10 +7,10 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common';
 
 import { isMissingRequiredFields } from './is_missing_required_fields';
-import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import type { AttackDiscoveryApiAlert } from '../../schemas';
+import type { AttackDiscoveryAlertDocument } from '../../schedules/types';
 import { transformAttackDiscoveryAlertDocumentToApi } from './transform_attack_discovery_alert_document_to_api';
 
 interface HasNumericValue {
