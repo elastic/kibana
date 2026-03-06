@@ -125,6 +125,9 @@ function convertDynamicConnectorsToContractsInternal(
 ): ConnectorContractUnion[] {
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
+    if (connectorType.enabled === false) {
+      return;
+    }
     try {
       const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
 
@@ -316,10 +319,7 @@ export function addDynamicConnectorsToCache(
     ...registeredStepDefinitions,
   ];
 
-  const enabledDynamicTypes = Object.fromEntries(
-    Object.entries(dynamicConnectorTypes).filter(([, value]) => value.enabled !== false)
-  );
-  const dynamicConnectors = convertDynamicConnectorsToContractsInternal(enabledDynamicTypes);
+  const dynamicConnectors = convertDynamicConnectorsToContractsInternal(dynamicConnectorTypes);
   const connectorByType = new Map<string, ConnectorContractUnion>(
     baseConnectors.map((c) => [c.type, c])
   );
@@ -329,7 +329,7 @@ export function addDynamicConnectorsToCache(
 
   const updatedCache = Array.from(connectorByType.values());
   stepSchemas.setAllConnectorsCache(updatedCache);
-  stepSchemas.setAllConnectorsMapCache(new Map(updatedCache.map((c) => [c.type, c])));
+  stepSchemas.setAllConnectorsMapCache(connectorByType);
 }
 
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
