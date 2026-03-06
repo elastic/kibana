@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export {
-  SLO_ERROR_BUDGET_ID,
-  ADD_SLO_ERROR_BUDGET_ACTION_ID,
-} from '../../../../common/embeddables/error_budget/constants';
+/** Re-exported from server (derived from schemas there) */
+export type {
+  ErrorBudgetCustomState,
+  ErrorBudgetEmbeddableState,
+} from '../../../server/lib/embeddables/error_budget_schema';
