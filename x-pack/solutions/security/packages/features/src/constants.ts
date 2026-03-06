@@ -89,7 +89,7 @@ export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
 export const ALERTS_API_READ = 'alerts-read' as const;
 export const ALERTS_API_ALL = 'alerts-all' as const;
 
-// Rules UI privileges
+// Alerts UI privileges
 export const ALERTS_UI_READ = 'read_alerts' as const;
 export const ALERTS_UI_EDIT = 'edit_alerts' as const;
 export const ALERTS_UI_DETECTIONS = 'detections' as const;
