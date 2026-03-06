@@ -132,10 +132,12 @@ export function transformWorkpadOut(
         const transforms = embeddableService.getTransforms(embeddableType);
 
         try {
-          // For legacy embeddable expressions if the embeddable config already has a savedObjectId,
-          // transforms haven't been applied, so we need to transform in before we can transform out.
-          // This should only execute once per legacy embeddable element because stored embeddables should
-          // no longer have a savedObjectId.
+          // If an embeddable has a savedObjectId, it means it was created before the embeddable transforms were introduced,
+          // so transforms haven't been applied yet. By calling `transformIn`, we extract the correct stored state and references
+          // before passing both into `transformOut` to get the correct transformed runtime config. This should only execute
+          // once per legacy embeddable element because stored embeddables should no longer have a savedObjectId.
+          // This could cause problems in the future if there is an embeddable that stores `savedObjectId` in its stored state,
+          // but currently we don't have any embeddables that do this.
           if (embeddableConfig.savedObjectId) {
             if (transforms?.transformIn && transforms.transformOut) {
               const { state: storedState, references: storedReferences } =
