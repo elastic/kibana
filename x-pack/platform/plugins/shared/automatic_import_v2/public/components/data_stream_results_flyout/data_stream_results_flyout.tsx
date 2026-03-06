@@ -14,10 +14,16 @@ export const DataStreamResultsFlyout = ({
   integrationId,
   dataStream,
   onClose,
+  connectorId,
 }: DataStreamResultsFlyoutProps) => {
   return (
     <UIStateProvider>
-      <EditPipelineFlyout integrationId={integrationId} dataStream={dataStream} onClose={onClose} />
+      <EditPipelineFlyout
+        integrationId={integrationId}
+        dataStream={dataStream}
+        onClose={onClose}
+        connectorId={connectorId}
+      />
     </UIStateProvider>
   );
 };

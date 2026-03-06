@@ -39,6 +39,7 @@ interface EditPipelineFlyoutProps {
   integrationId: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
+  connectorId?: string;
 }
 
 interface TableRow {
@@ -51,6 +52,7 @@ export const EditPipelineFlyout = ({
   integrationId,
   dataStream,
   onClose,
+  connectorId,
 }: EditPipelineFlyoutProps) => {
   const [activeDocument, setActiveDocument] = useState(0);
   const [pipelineText, setPipelineText] = useState('');
