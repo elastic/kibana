@@ -11,13 +11,15 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
-import { parsePluginFromUrl } from './utils';
+import { parsePluginFromUrl, parsePluginFromFile } from './utils';
+
+type InstallPluginSource = { type: 'url'; url: string } | { type: 'file'; filePath: string };
 
 export interface PluginService {
   getScopedClient(options: { request: KibanaRequest }): Promise<PluginClient>;
   installPlugin(options: {
     request: KibanaRequest;
-    url: string;
+    source: InstallPluginSource;
   }): Promise<PersistedPluginDefinition>;
   deletePlugin(options: { request: KibanaRequest; pluginId: string }): Promise<void>;
 }
@@ -48,14 +50,22 @@ export class PluginServiceImpl implements PluginService {
 
   async installPlugin({
     request,
-    url,
+    source,
   }: {
     request: KibanaRequest;
-    url: string;
+    source: InstallPluginSource;
   }): Promise<PersistedPluginDefinition> {
-    const parsedArchive = await parsePluginFromUrl(url);
-    const { manifest } = parsedArchive;
+    let parsedArchive;
+    let sourceUrl: string | undefined;
 
+    if (source.type === 'url') {
+      parsedArchive = await parsePluginFromUrl(source.url);
+      sourceUrl = source.url;
+    } else {
+      parsedArchive = await parsePluginFromFile(source.filePath);
+    }
+
+    const { manifest } = parsedArchive;
     const client = await this.getScopedClient({ request });
 
     const existing = await client.findByName(manifest.name);
@@ -67,7 +77,7 @@ export class PluginServiceImpl implements PluginService {
 
     const createRequest = parsedArchiveToCreateRequest({
       parsedArchive,
-      sourceUrl: url,
+      sourceUrl,
     });
 
     return client.create(createRequest);

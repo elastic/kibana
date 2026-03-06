@@ -21,4 +21,5 @@ export {
   type ZipPluginUrl,
   type GithubPluginUrl,
 } from './resolve_plugin_url';
-export { parsePluginFromUrl } from './parse_plugin_from_url';
+export { parsePluginFromUrl, parsePluginFromFile } from './parse_plugin_from_url';
+export { saveUploadedFile } from './save_uploaded_file';

@@ -73,7 +73,7 @@ export const createRequestToEs = ({
 };
 
 /**
- * Converts a parsed plugin archive and its source URL into a
+ * Converts a parsed plugin archive into a
  * {@link PluginCreateRequest} suitable for the persistence client.
  */
 export const parsedArchiveToCreateRequest = ({
@@ -81,7 +81,7 @@ export const parsedArchiveToCreateRequest = ({
   sourceUrl,
 }: {
   parsedArchive: ParsedPluginArchive;
-  sourceUrl: string;
+  sourceUrl?: string;
 }): PluginCreateRequest => {
   const { manifest, unmanagedAssets } = parsedArchive;
   return {

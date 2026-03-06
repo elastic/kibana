@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
@@ -15,8 +16,9 @@ import type {
   InstallPluginResponse,
   DeletePluginResponse,
 } from '../../common/http_api/plugins';
-import { publicApiPath } from '../../common/constants';
+import { publicApiPath, internalApiPath } from '../../common/constants';
 import { toPluginDefinition } from '../services/plugins';
+import { saveUploadedFile } from '../services/plugins/utils';
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from './route_security';
 
 const pluginIdParamSchema = schema.object({
@@ -170,10 +172,50 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       wrapHandler(async (ctx, request, response) => {
         const { url } = request.body;
         const { plugins: pluginService } = getInternalServices();
-        const plugin = await pluginService.installPlugin({ request, url });
+        const plugin = await pluginService.installPlugin({
+          request,
+          source: { type: 'url', url },
+        });
         return response.ok<InstallPluginResponse>({
           body: toPluginDefinition(plugin),
         });
       }, featureFlagConfig)
     );
+
+  // upload plugin from zip file
+  router.post(
+    {
+      path: `${internalApiPath}/plugins/upload`,
+      validate: {
+        body: schema.object({
+          file: schema.stream(),
+        }),
+      },
+      options: {
+        access: 'internal',
+        body: {
+          accepts: ['multipart/form-data'],
+          output: 'stream',
+          maxBytes: 50 * 1024 * 1024,
+        },
+      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { file } = request.body as { file: Readable };
+      const { filePath, cleanup } = await saveUploadedFile(file);
+      try {
+        const { plugins: pluginService } = getInternalServices();
+        const plugin = await pluginService.installPlugin({
+          request,
+          source: { type: 'file', filePath },
+        });
+        return response.ok<InstallPluginResponse>({
+          body: toPluginDefinition(plugin),
+        });
+      } finally {
+        await cleanup();
+      }
+    }, featureFlagConfig)
+  );
 }

@@ -12,8 +12,10 @@ import { PluginServiceImpl } from './plugin_service';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 
 const mockParsePluginFromUrl = jest.fn();
+const mockParsePluginFromFile = jest.fn();
 jest.mock('./utils', () => ({
   parsePluginFromUrl: (...args: unknown[]) => mockParsePluginFromUrl(...args),
+  parsePluginFromFile: (...args: unknown[]) => mockParsePluginFromFile(...args),
 }));
 
 const mockCreateClient = jest.fn();
@@ -128,94 +130,151 @@ describe('PluginServiceImpl', () => {
   });
 
   describe('installPlugin', () => {
-    it('parses the URL, creates the plugin record, and returns it', async () => {
-      const parsedArchive = createMockParsedArchive();
-      const persistedPlugin = createMockPersistedPlugin();
+    describe('from URL', () => {
+      it('parses the URL, creates the plugin record, and returns it', async () => {
+        const parsedArchive = createMockParsedArchive();
+        const persistedPlugin = createMockPersistedPlugin();
 
-      mockParsePluginFromUrl.mockResolvedValue(parsedArchive);
-      mockClient.findByName.mockResolvedValue(undefined);
-      mockClient.create.mockResolvedValue(persistedPlugin);
+        mockParsePluginFromUrl.mockResolvedValue(parsedArchive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(persistedPlugin);
 
-      const result = await service.installPlugin({
-        request: mockRequest,
-        url: 'https://github.com/test/repo/tree/main/plugin',
+        const result = await service.installPlugin({
+          request: mockRequest,
+          source: { type: 'url', url: 'https://github.com/test/repo/tree/main/plugin' },
+        });
+
+        expect(mockParsePluginFromUrl).toHaveBeenCalledWith(
+          'https://github.com/test/repo/tree/main/plugin'
+        );
+
+        expect(mockClient.findByName).toHaveBeenCalledWith('my-plugin');
+
+        expect(mockClient.create).toHaveBeenCalledWith({
+          name: 'my-plugin',
+          version: '1.0.0',
+          description: 'A test plugin',
+          manifest: {
+            author: { name: 'Author' },
+            homepage: 'https://example.com',
+            repository: 'https://github.com/test/repo',
+            license: 'MIT',
+            keywords: ['test'],
+          },
+          source_url: 'https://github.com/test/repo/tree/main/plugin',
+          skill_ids: [],
+          unmanaged_assets: parsedArchive.unmanagedAssets,
+        });
+
+        expect(result).toBe(persistedPlugin);
       });
 
-      expect(mockParsePluginFromUrl).toHaveBeenCalledWith(
-        'https://github.com/test/repo/tree/main/plugin'
-      );
+      it('defaults version to 0.0.0 when manifest has no version', async () => {
+        const parsedArchive = createMockParsedArchive({
+          manifest: { name: 'no-version-plugin' },
+        });
 
-      expect(mockClient.findByName).toHaveBeenCalledWith('my-plugin');
+        mockParsePluginFromUrl.mockResolvedValue(parsedArchive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin());
 
-      expect(mockClient.create).toHaveBeenCalledWith({
-        name: 'my-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        manifest: {
-          author: { name: 'Author' },
-          homepage: 'https://example.com',
-          repository: 'https://github.com/test/repo',
-          license: 'MIT',
-          keywords: ['test'],
-        },
-        source_url: 'https://github.com/test/repo/tree/main/plugin',
-        skill_ids: [],
-        unmanaged_assets: parsedArchive.unmanagedAssets,
-      });
-
-      expect(result).toBe(persistedPlugin);
-    });
-
-    it('defaults version to 0.0.0 when manifest has no version', async () => {
-      const parsedArchive = createMockParsedArchive({
-        manifest: { name: 'no-version-plugin' },
-      });
-
-      mockParsePluginFromUrl.mockResolvedValue(parsedArchive);
-      mockClient.findByName.mockResolvedValue(undefined);
-      mockClient.create.mockResolvedValue(createMockPersistedPlugin());
-
-      await service.installPlugin({
-        request: mockRequest,
-        url: 'https://example.com/plugin.zip',
-      });
-
-      expect(mockClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          version: '0.0.0',
-          description: '',
-        })
-      );
-    });
-
-    it('throws BadRequestError when a plugin with the same name already exists', async () => {
-      mockParsePluginFromUrl.mockResolvedValue(createMockParsedArchive());
-      mockClient.findByName.mockResolvedValue(
-        createMockPersistedPlugin({ id: 'existing-id', version: '0.9.0' })
-      );
-
-      try {
         await service.installPlugin({
           request: mockRequest,
-          url: 'https://example.com/plugin.zip',
+          source: { type: 'url', url: 'https://example.com/plugin.zip' },
         });
-        fail('Expected error to be thrown');
-      } catch (e) {
-        expect((e as Error).message).toMatch(/already installed/);
-      }
 
-      expect(mockClient.create).not.toHaveBeenCalled();
+        expect(mockClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            version: '0.0.0',
+            description: '',
+          })
+        );
+      });
+
+      it('throws BadRequestError when a plugin with the same name already exists', async () => {
+        mockParsePluginFromUrl.mockResolvedValue(createMockParsedArchive());
+        mockClient.findByName.mockResolvedValue(
+          createMockPersistedPlugin({ id: 'existing-id', version: '0.9.0' })
+        );
+
+        try {
+          await service.installPlugin({
+            request: mockRequest,
+            source: { type: 'url', url: 'https://example.com/plugin.zip' },
+          });
+          fail('Expected error to be thrown');
+        } catch (e) {
+          expect((e as Error).message).toMatch(/already installed/);
+        }
+
+        expect(mockClient.create).not.toHaveBeenCalled();
+      });
+
+      it('propagates errors from parsePluginFromUrl', async () => {
+        mockParsePluginFromUrl.mockRejectedValue(new Error('Download failed'));
+
+        await expect(
+          service.installPlugin({
+            request: mockRequest,
+            source: { type: 'url', url: 'https://example.com/bad.zip' },
+          })
+        ).rejects.toThrow('Download failed');
+      });
     });
 
-    it('propagates errors from parsePluginFromUrl', async () => {
-      mockParsePluginFromUrl.mockRejectedValue(new Error('Download failed'));
+    describe('from file', () => {
+      it('parses the local file, creates the plugin record without source_url', async () => {
+        const parsedArchive = createMockParsedArchive();
+        const persistedPlugin = createMockPersistedPlugin({ source_url: undefined });
 
-      await expect(
-        service.installPlugin({
+        mockParsePluginFromFile.mockResolvedValue(parsedArchive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(persistedPlugin);
+
+        const result = await service.installPlugin({
           request: mockRequest,
-          url: 'https://example.com/bad.zip',
-        })
-      ).rejects.toThrow('Download failed');
+          source: { type: 'file', filePath: '/tmp/plugin.zip' },
+        });
+
+        expect(mockParsePluginFromFile).toHaveBeenCalledWith('/tmp/plugin.zip');
+        expect(mockParsePluginFromUrl).not.toHaveBeenCalled();
+
+        expect(mockClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'my-plugin',
+            source_url: undefined,
+          })
+        );
+
+        expect(result).toBe(persistedPlugin);
+      });
+
+      it('throws BadRequestError when a plugin with the same name already exists', async () => {
+        mockParsePluginFromFile.mockResolvedValue(createMockParsedArchive());
+        mockClient.findByName.mockResolvedValue(
+          createMockPersistedPlugin({ id: 'existing-id', version: '0.9.0' })
+        );
+
+        await expect(
+          service.installPlugin({
+            request: mockRequest,
+            source: { type: 'file', filePath: '/tmp/plugin.zip' },
+          })
+        ).rejects.toThrow(/already installed/);
+
+        expect(mockClient.create).not.toHaveBeenCalled();
+      });
+
+      it('propagates errors from parsePluginFromFile', async () => {
+        mockParsePluginFromFile.mockRejectedValue(new Error('Invalid zip'));
+
+        await expect(
+          service.installPlugin({
+            request: mockRequest,
+            source: { type: 'file', filePath: '/tmp/bad.zip' },
+          })
+        ).rejects.toThrow('Invalid zip');
+      });
     });
   });
 

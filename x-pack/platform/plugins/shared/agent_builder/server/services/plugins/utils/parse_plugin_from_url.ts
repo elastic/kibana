@@ -87,6 +87,18 @@ const downloadAndOpenArchive = async (
   return { archive, cleanup };
 };
 
+/**
+ * Parses a plugin from a local zip file already on disk.
+ */
+export const parsePluginFromFile = async (filePath: string): Promise<ParsedPluginArchive> => {
+  const archive = await openZipArchive(filePath);
+  try {
+    return await parsePluginZipFile(archive);
+  } finally {
+    archive.close();
+  }
+};
+
 const downloadToFile = async (url: string, fileName: string): Promise<string> => {
   const res = await fetch(url, { redirect: 'follow' });
 
