@@ -18,6 +18,7 @@ import { zoomDataSource } from './zoom';
 import { zendeskDataSource } from './zendesk';
 import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
+import { tavilyDataSource } from './tavily';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
@@ -33,4 +34,5 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(zendeskDataSource);
   dataCatalog.register(servicenowDataSource);
   dataCatalog.register(pagerdutyDataSource);
+  dataCatalog.register(tavilyDataSource);
 }
