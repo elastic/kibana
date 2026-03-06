@@ -86,3 +86,32 @@ export interface ParsedPluginArchive {
   skills: ParsedSkillFile[];
   unmanagedAssets: UnmanagedPluginAssets;
 }
+
+/**
+ * Manifest metadata stored alongside a persisted plugin.
+ * Contains the optional manifest fields that are not promoted to
+ * top-level plugin fields.
+ */
+export interface PluginManifestMetadata {
+  author?: PluginManifestAuthor;
+  homepage?: string;
+  repository?: string;
+  license?: string;
+  keywords?: string[];
+}
+
+/**
+ * Public API-facing representation of an installed plugin.
+ */
+export interface PluginDefinition {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  manifest: PluginManifestMetadata;
+  sourceUrl?: string;
+  skillIds: string[];
+  unmanagedAssets: UnmanagedPluginAssets;
+  createdAt: string;
+  updatedAt: string;
+}
