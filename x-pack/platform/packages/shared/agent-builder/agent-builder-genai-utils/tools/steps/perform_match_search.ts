@@ -224,20 +224,40 @@ interface SnippetEntry {
   snippet: string;
 }
 
-const rerankSnippetEntries = async ({
-  entries,
+/**
+ * Reranks all snippet entries across all documents in a single inference call,
+ * then returns the top snippets per document.
+ */
+const rerankAllSnippets = async ({
+  entriesByDocId,
   term,
   esClient,
   logger,
 }: {
-  entries: SnippetEntry[];
+  entriesByDocId: Map<string, SnippetEntry[]>;
   term: string;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<SnippetEntry[]> => {
-  if (entries.length === 0) return [];
+}): Promise<Map<string, string[]>> => {
+  const result = new Map<string, string[]>();
 
-  logger.info(`RERANK snippets: sending ${entries.length} snippets to inference API`);
+  // Flatten all entries into a single list, tracking the original index range per doc
+  const allEntries: SnippetEntry[] = [];
+  const docRanges: Array<{ docId: string; start: number; count: number }> = [];
+  for (const [docId, entries] of entriesByDocId) {
+    if (entries.length === 0) {
+      result.set(docId, []);
+      continue;
+    }
+    docRanges.push({ docId, start: allEntries.length, count: entries.length });
+    allEntries.push(...entries);
+  }
+
+  if (allEntries.length === 0) return result;
+
+  logger.info(
+    `RERANK snippets: sending ${allEntries.length} snippets across ${docRanges.length} docs to inference API`
+  );
 
   // NOTE: ES|QL RERANK doesn't play nicely with the format of the content in our test dataset,
   // so we're making a direct inference call to rerank snippets.
@@ -245,14 +265,50 @@ const rerankSnippetEntries = async ({
     inference_id: rerankInferenceID,
     task_type: 'rerank',
     query: term,
-    input: entries.map((e) => e.snippet),
+    input: allEntries.map((e) => e.snippet),
   });
 
   const reranked = (response as { rerank?: Array<{ index: number; relevance_score: number }> })
     .rerank;
-  if (!reranked) return entries.slice(0, numSnippets);
 
-  return reranked.slice(0, numSnippets).map((r) => entries[r.index]);
+  if (!reranked) {
+    // Fallback: take first numSnippets per doc without reranking
+    for (const { docId, start, count } of docRanges) {
+      result.set(
+        docId,
+        allEntries
+          .slice(start, start + count)
+          .slice(0, numSnippets)
+          .map((e) => e.snippet)
+      );
+    }
+    return result;
+  }
+
+  // Build a set of scores indexed by original position for fast lookup
+  const scoreByIndex = new Map<number, number>();
+  for (const r of reranked) {
+    scoreByIndex.set(r.index, r.relevance_score);
+  }
+
+  // For each doc, collect its scored snippets, sort by relevance, take top N
+  for (const { docId, start, count } of docRanges) {
+    const docScored: Array<{ snippet: string; score: number }> = [];
+    for (let i = start; i < start + count; i++) {
+      const score = scoreByIndex.get(i);
+      if (score !== undefined) {
+        docScored.push({ snippet: allEntries[i].snippet, score });
+      }
+    }
+    docScored.sort((a, b) => b.score - a.score);
+    const topSnippets = docScored.slice(0, numSnippets).map((s) => s.snippet);
+    logger.info(
+      `RERANK snippets for doc="${docId}": ${count} candidates -> ${topSnippets.length} returned`
+    );
+    result.set(docId, topSnippets);
+  }
+
+  return result;
 };
 
 export const performMatchSearch = async ({
@@ -338,38 +394,54 @@ export const performMatchSearch = async ({
       );
     }
 
-    const snippetsByDocId = new Map<string, string[]>();
-
+    // Dedup snippets per document
+    const dedupedByDocId = new Map<string, SnippetEntry[]>();
     for (const docId of hitOrder) {
       const rawSnippets = rawSnippetsByDocId.get(docId) ?? [];
-
       const seen = new Set<string>();
       const uniqueSnippets = rawSnippets.filter((s) => {
         if (seen.has(s)) return false;
         seen.add(s);
         return true;
       });
+      dedupedByDocId.set(
+        docId,
+        uniqueSnippets.map((s) => ({ docId, snippet: s }))
+      );
+    }
 
-      let finalSnippets = uniqueSnippets;
-      if (rerankSnippets && uniqueSnippets.length > 0) {
-        try {
-          const entries: SnippetEntry[] = uniqueSnippets.map((s) => ({ docId, snippet: s }));
-          const reranked = await rerankSnippetEntries({ entries, term, esClient, logger });
-          logger.info(
-            `RERANK snippets for doc="${docId}": ${uniqueSnippets.length} candidates -> ${reranked.length} returned`
+    // Rerank all snippets across all docs in a single inference call
+    let snippetsByDocId: Map<string, string[]>;
+    if (rerankSnippets) {
+      try {
+        snippetsByDocId = await rerankAllSnippets({
+          entriesByDocId: dedupedByDocId,
+          term,
+          esClient,
+          logger,
+        });
+      } catch (error) {
+        logger.info(
+          `RERANK snippets failed, keeping original order: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        snippetsByDocId = new Map<string, string[]>();
+        for (const [docId, entries] of dedupedByDocId) {
+          snippetsByDocId.set(
+            docId,
+            entries.slice(0, numSnippets).map((e) => e.snippet)
           );
-          finalSnippets = reranked.map((e) => e.snippet);
-        } catch (error) {
-          logger.info(
-            `RERANK snippets failed for doc="${docId}", keeping original order: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          finalSnippets = uniqueSnippets.slice(0, numSnippets);
         }
       }
-
-      snippetsByDocId.set(docId, finalSnippets);
+    } else {
+      snippetsByDocId = new Map<string, string[]>();
+      for (const [docId, entries] of dedupedByDocId) {
+        snippetsByDocId.set(
+          docId,
+          entries.map((e) => e.snippet)
+        );
+      }
     }
 
     const results: MatchResult[] = hitOrder.map((docId) => ({
