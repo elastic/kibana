@@ -6,11 +6,12 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloTemplateTags } from '../../../../hooks/use_fetch_slo_template_tags';
+import { useKibana } from '../../../../hooks/use_kibana';
 import type { TemplatesSearchState } from '../../hooks/use_templates_url_search_state';
 
 interface Props {
@@ -19,49 +20,54 @@ interface Props {
 }
 
 export function SloTemplatesSearchBar({ state, onStateChange }: Props) {
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana().services;
   const { data: allTemplateTags } = useFetchSloTemplateTags();
-  const { search, tags } = state;
-  const [inputValue, setInputValue] = useState(search);
+  const { tags } = state;
 
-  useDebounce(() => onStateChange({ search: inputValue }), 300, [inputValue]);
+  const [selectedTagOptions, setSelectedTagOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(tags.map((tag) => ({ label: tag, value: tag })));
 
   const tagOptions: Array<EuiComboBoxOptionOption<string>> = (allTemplateTags?.tags ?? []).map(
-    (tag) => ({
-      label: tag,
-      value: tag,
-    })
+    (tag) => ({ label: tag, value: tag })
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive>
-      <EuiFlexItem>
-        <EuiFieldSearch
-          fullWidth
-          compressed
-          placeholder={SEARCH_PLACEHOLDER}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          data-test-subj="sloTemplatesSearchInput"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ minWidth: 200, maxWidth: 300 }}>
+    <SearchBar
+      appName={observabilityAppId}
+      placeholder={SEARCH_PLACEHOLDER}
+      isAutoRefreshDisabled
+      disableQueryLanguageSwitcher
+      nonKqlMode="text"
+      showQueryMenu={false}
+      showDatePicker={false}
+      showSavedQueryControls={false}
+      showFilterBar={false}
+      query={{ query: state.search, language: 'text' }}
+      onQuerySubmit={({ query: value }) => {
+        onStateChange({ search: String(value?.query ?? '') });
+      }}
+      renderQueryInputAppend={() => (
         <EuiComboBox
           compressed
+          css={{ maxWidth: 300 }}
           aria-label={FILTER_TAGS_LABEL}
           placeholder={FILTER_TAGS_LABEL}
           options={tagOptions}
-          selectedOptions={tags.map((tag) => ({
-            label: tag,
-            value: tag,
-          }))}
+          selectedOptions={selectedTagOptions}
           onChange={(newOptions) => {
+            setSelectedTagOptions(newOptions);
             onStateChange({ tags: newOptions.map((option) => String(option.value)) });
           }}
           isClearable
           data-test-subj="sloTemplatesFilterByTag"
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    />
   );
 }
 
