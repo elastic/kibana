@@ -93,6 +93,9 @@ describe('getContextSchemaWithTemplateLocals', () => {
   const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
     typeof getScalarValueAtOffset
   >;
+  const realGetScalarValueAtOffset = jest.requireActual<
+    typeof import('../../../../common/lib/yaml/get_scalar_value_at_offset')
+  >('../../../../common/lib/yaml/get_scalar_value_at_offset').getScalarValueAtOffset;
 
   it('returns base schema when scalar at offset is null', () => {
     mockGetScalarValueAtOffset.mockReturnValue(null);
@@ -165,14 +168,8 @@ describe('getContextSchemaWithTemplateLocals', () => {
   it('extends schema for block literal scalars', () => {
     const templateString = '{% assign z = 3 %}{{ z }}';
     const yamlSource = `value: |-\n  ${templateString}\n`;
-    const scalarStart = yamlSource.indexOf('|-');
-    mockGetScalarValueAtOffset.mockReturnValue({
-      value: templateString,
-      type: 'BLOCK_LITERAL',
-      source: templateString,
-      range: [scalarStart, yamlSource.length, yamlSource.length],
-    } as any);
-    const doc = { toString: () => yamlSource } as unknown as Document;
+    mockGetScalarValueAtOffset.mockImplementation(realGetScalarValueAtOffset);
+    const doc = parseDocument(yamlSource);
     const varYamlOffset = yamlSource.indexOf('{{ z }}');
     const result = getContextSchemaWithTemplateLocals(doc, varYamlOffset, DynamicStepContextSchema);
     const shape = getShape(result);
@@ -182,14 +179,8 @@ describe('getContextSchemaWithTemplateLocals', () => {
   it('extends schema for block folded scalars', () => {
     const templateString = '{% assign w = 4 %}{{ w }}';
     const yamlSource = `value: >-\n  ${templateString}\n`;
-    const scalarStart = yamlSource.indexOf('>-');
-    mockGetScalarValueAtOffset.mockReturnValue({
-      value: templateString,
-      type: 'BLOCK_FOLDED',
-      source: templateString,
-      range: [scalarStart, yamlSource.length, yamlSource.length],
-    } as any);
-    const doc = { toString: () => yamlSource } as unknown as Document;
+    mockGetScalarValueAtOffset.mockImplementation(realGetScalarValueAtOffset);
+    const doc = parseDocument(yamlSource);
     const varYamlOffset = yamlSource.indexOf('{{ w }}');
     const result = getContextSchemaWithTemplateLocals(doc, varYamlOffset, DynamicStepContextSchema);
     const shape = getShape(result);
@@ -249,27 +240,13 @@ describe('getContextSchemaWithTemplateLocals', () => {
       return `${YAML_PREFIX}${header}\n${body}\n`;
     }
 
-    function mockBlockScalar(
-      yamlSource: string,
-      header: string,
-      templateValue: string,
-      scalarType: 'BLOCK_LITERAL' | 'BLOCK_FOLDED' = 'BLOCK_LITERAL'
-    ) {
-      const scalarStart = yamlSource.indexOf(header);
-      const srcEnd = yamlSource.length;
-      mockGetScalarValueAtOffset.mockReturnValue({
-        value: templateValue,
-        type: scalarType,
-        source: templateValue,
-        range: [scalarStart, srcEnd, srcEnd],
-      } as any);
-      return { doc: { toString: () => yamlSource } as unknown as Document, scalarStart };
-    }
+    beforeEach(() => {
+      mockGetScalarValueAtOffset.mockImplementation(realGetScalarValueAtOffset);
+    });
 
     it('excludes assign that appears AFTER variable on the same line', () => {
-      const templateString = '{{ x }}{% assign x = 1 %}';
-      const yamlSource = buildBlockScalarYaml('|-', '  ', [templateString]);
-      const { doc } = mockBlockScalar(yamlSource, '|-', templateString);
+      const yamlSource = buildBlockScalarYaml('|-', '  ', ['{{ x }}{% assign x = 1 %}']);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -282,7 +259,7 @@ describe('getContextSchemaWithTemplateLocals', () => {
     it('includes assign that appears BEFORE variable on the same line', () => {
       const templateString = '{% assign x = 1 %}{{ x }}';
       const yamlSource = buildBlockScalarYaml('|-', '  ', [templateString]);
-      const { doc } = mockBlockScalar(yamlSource, '|-', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -294,9 +271,8 @@ describe('getContextSchemaWithTemplateLocals', () => {
 
     it('excludes assign after variable even with many preceding lines', () => {
       const lines = Array.from({ length: 20 }, (_, i) => `line${i} content here`);
-      const templateString = [...lines, '{{ x }}{% assign x = 1 %}'].join('\n');
       const yamlSource = buildBlockScalarYaml('|-', '  ', [...lines, '{{ x }}{% assign x = 1 %}']);
-      const { doc } = mockBlockScalar(yamlSource, '|-', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -307,9 +283,9 @@ describe('getContextSchemaWithTemplateLocals', () => {
     });
 
     it('includes assign before variable in multi-line block', () => {
-      const templateString = '{% assign x = 1 %}\n{{ x }}';
-      const yamlSource = buildBlockScalarYaml('|-', '  ', ['{% assign x = 1 %}', '{{ x }}']);
-      const { doc } = mockBlockScalar(yamlSource, '|-', templateString);
+      const templateString = ['{% assign x = 1 %}', '{{ x }}'];
+      const yamlSource = buildBlockScalarYaml('|-', '  ', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -322,7 +298,7 @@ describe('getContextSchemaWithTemplateLocals', () => {
     it('handles block folded scalars correctly', () => {
       const templateString = '{{ x }}{% assign x = 1 %}';
       const yamlSource = buildBlockScalarYaml('>-', '  ', [templateString]);
-      const { doc } = mockBlockScalar(yamlSource, '>-', templateString, 'BLOCK_FOLDED');
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -336,7 +312,7 @@ describe('getContextSchemaWithTemplateLocals', () => {
       const indent = ' '.repeat(20);
       const templateString = '{{ x }}{% assign x = 1 %}';
       const yamlSource = buildBlockScalarYaml('|-', indent, [templateString]);
-      const { doc } = mockBlockScalar(yamlSource, '|-', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -347,12 +323,9 @@ describe('getContextSchemaWithTemplateLocals', () => {
     });
 
     it('excludes capture when variable is on a preceding line (multi-line)', () => {
-      const templateString = '{{ cap }}\n{% capture cap %}body{% endcapture %}\n';
-      const yamlSource = buildBlockScalarYaml('|', '  ', [
-        '{{ cap }}',
-        '{% capture cap %}body{% endcapture %}',
-      ]);
-      const { doc } = mockBlockScalar(yamlSource, '|', templateString);
+      const templateString = ['{{ cap }}', '{% capture cap %}body{% endcapture %}'];
+      const yamlSource = buildBlockScalarYaml('|', '  ', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ cap }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -363,12 +336,9 @@ describe('getContextSchemaWithTemplateLocals', () => {
     });
 
     it('includes capture when variable is after the capture block (multi-line)', () => {
-      const templateString = '{% capture cap %}body{% endcapture %}\n{{ cap }}\n';
-      const yamlSource = buildBlockScalarYaml('|', '  ', [
-        '{% capture cap %}body{% endcapture %}',
-        '{{ cap }}',
-      ]);
-      const { doc } = mockBlockScalar(yamlSource, '|', templateString);
+      const templateString = ['{% capture cap %}body{% endcapture %}', '{{ cap }}'];
+      const yamlSource = buildBlockScalarYaml('|', '  ', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ cap }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -381,7 +351,7 @@ describe('getContextSchemaWithTemplateLocals', () => {
     it('excludes capture on same line when variable precedes the block', () => {
       const templateString = '{{ cap }}{% capture cap %}body{% endcapture %}';
       const yamlSource = buildBlockScalarYaml('|-', '  ', [templateString]);
-      const { doc } = mockBlockScalar(yamlSource, '|-', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ cap }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -392,13 +362,12 @@ describe('getContextSchemaWithTemplateLocals', () => {
     });
 
     it('handles assign on first line + capture on second line correctly', () => {
-      const templateString =
-        '{% assign a = 1 %}{{ a }}{{ cap }}\n{% capture cap %}body{% endcapture %}\n';
-      const yamlSource = buildBlockScalarYaml('|', '  ', [
+      const templateString = [
         '{% assign a = 1 %}{{ a }}{{ cap }}',
         '{% capture cap %}body{% endcapture %}',
-      ]);
-      const { doc } = mockBlockScalar(yamlSource, '|', templateString);
+      ];
+      const yamlSource = buildBlockScalarYaml('|', '  ', templateString);
+      const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ cap }}');
       const result = getContextSchemaWithTemplateLocals(
         doc,
@@ -411,19 +380,13 @@ describe('getContextSchemaWithTemplateLocals', () => {
     });
 
     it('resolves block scalar offsets correctly when a preceding long quoted string would trigger line folding', () => {
-      const realGetScalarValueAtOffset = jest.requireActual<
-        typeof import('../../../../common/lib/yaml/get_scalar_value_at_offset')
-      >('../../../../common/lib/yaml/get_scalar_value_at_offset').getScalarValueAtOffset;
-      mockGetScalarValueAtOffset.mockImplementation(realGetScalarValueAtOffset);
-
       const longValue = 'A'.repeat(120);
-      const yamlSource = `
-longkey: "${longValue}"
-template: |-
-  {% assign x = 1 %}{{ x }}
-
-`;
-
+      const yamlSource = [
+        `longkey: "${longValue}"`,
+        'template: |-',
+        '  {% assign x = 1 %}{{ x }}',
+        '',
+      ].join('\n');
       const doc = parseDocument(yamlSource);
       const blockScalarOffset = yamlSource.indexOf('{{ x }}');
       const result = getContextSchemaWithTemplateLocals(
