@@ -71,6 +71,8 @@ interface GraphProps {
   end: string;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  /** When set, shows a "View full service map" button that links to the full map (focused map only) */
+  fullMapHref?: string;
 }
 
 function GraphInner({
@@ -84,6 +86,7 @@ function GraphInner({
   end,
   isFullscreen = false,
   onToggleFullscreen,
+  fullMapHref,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -254,6 +257,10 @@ function GraphInner({
         defaultMessage: 'Enter fullscreen',
       });
 
+  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
+    defaultMessage: 'View full service map',
+  });
+
   const containerStyle = useMemo(
     () => ({
       height,
@@ -289,10 +296,23 @@ function GraphInner({
       position: relative;
       margin: ${euiTheme.size.s};
 
-      button {
+      button,
+      a[data-test-subj='serviceMapViewFullMapButton'] {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         fill: ${euiTheme.colors.text};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: ${euiTheme.size.s};
+        cursor: pointer;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        width: 100%;
+        box-sizing: border-box;
+        color: inherit;
+        text-decoration: none;
 
         &:hover {
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
@@ -383,6 +403,16 @@ function GraphInner({
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles}>
+          {fullMapHref && (
+            <a
+              href={fullMapHref}
+              title={viewFullMapButtonLabel}
+              aria-label={viewFullMapButtonLabel}
+              data-test-subj="serviceMapViewFullMapButton"
+            >
+              <EuiIcon type="apps" aria-label={viewFullMapButtonLabel} />
+            </a>
+          )}
           {onToggleFullscreen && (
             <ControlButton
               onClick={onToggleFullscreen}

@@ -12760,15 +12760,15 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-server.IndexPatternsFetcher.getExistingIndices",
+            "id": "def-server.IndexPatternsFetcher.getIndexPatternsWithMatches",
             "type": "Function",
             "tags": [],
-            "label": "getExistingIndices",
+            "label": "getIndexPatternsWithMatches",
             "description": [
               "\nGet existing index pattern list by providing string array index pattern list."
             ],
             "signature": [
-              "(indices: string[]) => Promise<string[]>"
+              "(indexPatterns: string[]) => Promise<string[]>"
             ],
             "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
             "lineNumber": 161,
@@ -12778,10 +12778,10 @@
             "children": [
               {
                 "parentPluginId": "dataViews",
-                "id": "def-server.IndexPatternsFetcher.getExistingIndices.$1",
+                "id": "def-server.IndexPatternsFetcher.getIndexPatternsWithMatches.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "indices",
+                "label": "indexPatterns",
                 "description": [
                   "- index pattern list"
                 ],
@@ -12790,7 +12790,7 @@
                 ],
                 "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
                 "lineNumber": 166,
-                "columnNumber": 28,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -13749,7 +13749,7 @@
           "\nService keys as type"
         ],
         "signature": [
-          "\"index_pattern\" | \"data_view\""
+          "\"data_view\" | \"index_pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/server/constants.ts",
         "lineNumber": 81,
