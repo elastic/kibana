@@ -13,7 +13,6 @@ import {
 } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { get } from 'lodash';
 import { extractTabsBackfillFnV12 } from '../../common/service/extract_tabs';
 import { getAllMigrations } from './search_migrations';
 import { SavedSearchTypeDisplayName } from '../../common/constants';
@@ -47,7 +46,14 @@ export function getSavedSearchObjectType(
     },
   };
 
-  const latestModelVersion = Math.max(...Object.keys(modelVersions).map(Number));
+  // Sort model version schemas from latest to oldest,
+  // since the guesser tries to match the latest valid schema
+  const modelVersionsArray = Object.entries(modelVersions)
+    .toSorted(([a], [b]) => Number(b) - Number(a))
+    .map(([version, { schemas }]) => ({
+      version: Number(version),
+      schema: schemas?.create,
+    }));
 
   return {
     name: 'search',
@@ -82,8 +88,22 @@ export function getSavedSearchObjectType(
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
-    typeVersionGuesser: (doc) => {
-      return Array.isArray(get(doc.attributes, 'tabs')) ? latestModelVersion : 11;
+    typeVersionGuesser: (document) => {
+      // Try to match the document against each model version schema,
+      // starting from the latest one and working backwards
+      for (const { version, schema } of modelVersionsArray) {
+        if (schema) {
+          try {
+            schema.validate(document.attributes);
+            return version;
+          } catch {
+            // Schema validation failed, try the next one
+          }
+        }
+      }
+
+      // Return the latest version if none of the schemas matched
+      return modelVersionsArray[0].version;
     },
   };
 }
