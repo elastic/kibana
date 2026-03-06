@@ -44,6 +44,7 @@ export const esqlSearchStrategyProvider = (
             path: `/_query`,
             querystring: dropNullColumns ? 'drop_null_columns' : '',
             body: {
+              project_routing: '_alias:_origin',
               ...requestParams,
             },
           },

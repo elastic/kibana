@@ -85,7 +85,7 @@ export const performEsqlRequest = async ({
     const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({
       method: 'POST',
       path: '/_query/async',
-      body: requestBody,
+      body: { project_routing: '_alias:_origin', ...requestBody },
       querystring: requestQueryParams,
     });
     setLatestRequestDuration(asyncSearchStarted, loggedRequests);

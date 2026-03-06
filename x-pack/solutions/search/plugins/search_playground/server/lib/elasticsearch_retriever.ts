@@ -75,6 +75,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
         method: 'POST',
         path: `/${this.index}/_search`,
         body: {
+          project_routing: '_alias:_origin',
           ...queryBody,
           size: this.k,
         },

@@ -230,6 +230,7 @@ async function getTile({
           method: 'POST',
           path,
           body,
+          querystring: { project_routing: '_alias:_origin' },
         },
         {
           signal: abortController.signal,

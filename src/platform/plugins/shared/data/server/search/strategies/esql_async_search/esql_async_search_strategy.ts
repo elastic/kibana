@@ -119,7 +119,7 @@ export const esqlAsyncSearchStrategyProvider = (
       {
         method: 'POST',
         path: `/_query/async`,
-        body: params,
+        body: { project_routing: '_alias:_origin', ...params },
         querystring: dropNullColumns ? 'drop_null_columns' : '',
       },
       {

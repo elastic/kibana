@@ -55,7 +55,11 @@ export function registerElasticsearchFunction({
       const response = await esClient.asCurrentUser.transport.request({
         method,
         path,
-        body,
+        // POST _search: inject project_routing for CPS (stripped automatically when CPS is disabled)
+        body:
+          isSearchEndpoint && method === 'POST'
+            ? { project_routing: '_alias:_origin', ...body }
+            : body,
       });
 
       return { content: { response } };
