@@ -41,17 +41,17 @@ export const ESQLMenu: React.FC<{
 }> = (props) => {
   const deps = getKibanaServices();
 
-  const content = (
-    <Suspense fallback={helpPopoverFallback}>
-      <LazyESQLMenu {...props} />
-    </Suspense>
-  );
-
   if (!deps) {
-    return content;
+    return helpPopoverFallback;
   }
 
-  return <KibanaContextProvider services={{ ...deps }}>{content}</KibanaContextProvider>;
+  return (
+    <KibanaContextProvider services={{ ...deps }}>
+      <Suspense fallback={helpPopoverFallback}>
+        <LazyESQLMenu {...props} />
+      </Suspense>
+    </KibanaContextProvider>
+  );
 };
 
 export const EsqlEditorActionsProvider: React.FC<{ children: React.ReactNode }> = ({
