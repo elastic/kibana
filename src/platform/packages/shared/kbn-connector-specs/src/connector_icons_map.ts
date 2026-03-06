@@ -66,6 +66,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.salesforce',
+    lazy(() => import(/* webpackChunkName: "connectorIconSalesforce" */ './specs/salesforce/icon')),
+  ],
+  [
     '.abuseipdb',
     lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
   ],
@@ -107,6 +111,11 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+
+  [
+    '.firecrawl',
+    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
+  ],
   ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
     '.zendesk',
@@ -120,5 +129,20 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
         )
     ),
+  ],
+  [
+    '.tavily',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+  ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
+  [
+    '.aws_lambda',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
   ],
 ]);

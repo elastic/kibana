@@ -83,6 +83,7 @@ export function TraceContextLogEvents({
       title={logsTitle}
       description={logsDescription}
       id="traceContextLogEvents"
+      data-test-subj="unifiedDocViewerLogsSection"
       forceState="closed"
       actions={actions}
     >

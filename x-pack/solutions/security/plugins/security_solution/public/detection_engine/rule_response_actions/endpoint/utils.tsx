@@ -59,6 +59,12 @@ const useGetCommandText = (
         description: CONSOLE_COMMANDS.suspendProcess.about,
         tooltip: CONSOLE_COMMANDS.suspendProcess.privileges,
       };
+    case 'runscript':
+      return {
+        title: CONSOLE_COMMANDS.runscript.title,
+        description: CONSOLE_COMMANDS.runscript.about,
+        tooltip: CONSOLE_COMMANDS.runscript.privileges,
+      };
     default:
       return {
         title: '',
