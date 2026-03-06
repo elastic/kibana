@@ -21,9 +21,9 @@ export const getInferenceEndpointById = async ({
   inferenceId: string;
   esClient: ElasticsearchClient;
 }): Promise<InferenceEndpoint> => {
-  const response = await esClient.inference.get({ inference_id: inferenceId });
+  const response = await esClient.inference.get({ inference_id: inferenceId }, { ignore: [404] });
 
-  const endpoint = response.endpoints?.[0];
+  const endpoint = response?.endpoints?.[0];
   if (!endpoint) {
     throw createInferenceRequestError(`Inference endpoint '${inferenceId}' not found`, 404);
   }
