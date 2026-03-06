@@ -524,13 +524,16 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: false,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) => (
-            <DiscoverBadgeButton
-              hasDataStream={!!item.data_stream || Streams.QueryStream.Definition.is(item.stream)}
-              indexMode={item.data_stream?.index_mode}
-              stream={item.stream}
-            />
-          ),
+          render: (_: unknown, item: TableRow) =>
+            Streams.QueryStream.Definition.is(item.stream) ? (
+              <DiscoverBadgeButton hasDataStream stream={item.stream} />
+            ) : (
+              <DiscoverBadgeButton
+                hasDataStream={!!item.data_stream}
+                indexMode={item.data_stream?.index_mode}
+                stream={item.stream}
+              />
+            ),
         },
       ]}
       itemId="name"
