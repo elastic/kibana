@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import type { CoreSetup, HttpStart } from '@kbn/core/public';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { extractStepCommonDefinition } from '../../../common/steps/extract/extract_step';
+import { createInferenceIdSelectionHandler } from './inference_id_selection';
+
+export const createExtractStepDefinition = (core: CoreSetup) => {
+  let httpPromise: Promise<HttpStart> | null = null;
+
+  const getHttp = async (): Promise<HttpStart> => {
+    if (!httpPromise) {
+      httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
+    }
+    return httpPromise;
+  };
+
+  return createPublicStepDefinition({
+    ...extractStepCommonDefinition,
+    icon: React.lazy(() =>
+      import('@elastic/eui/es/components/icon/assets/document_edit').then(({ icon }) => ({
+        default: icon,
+      }))
+    ),
+    editorHandlers: {
+      config: {
+        inference_id: {
+          selection: createInferenceIdSelectionHandler(getHttp),
+        },
+      },
+    },
+  });
+};

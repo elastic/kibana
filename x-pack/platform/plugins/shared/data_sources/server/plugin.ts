@@ -23,6 +23,10 @@ import type {
 import { registerUISettings } from './register';
 import { setupSavedObjects } from './saved_objects';
 import { BulkDeleteTask } from './tasks/bulk_delete_task';
+import { registerExtractionConfigSavedObject } from './extraction_config/saved_object';
+import { createExtractStepDefinition } from './steps/extract/extract_step';
+import { getExtractionConfig, DEFAULT_EXTRACTION_CONFIG } from './extraction_config';
+import { registerExtractionConfigRoutes } from './routes/extraction_config_routes';
 
 export class DataSourcesServerPlugin
   implements
@@ -51,8 +55,40 @@ export class DataSourcesServerPlugin
 
     registerUISettings({ uiSettings });
 
-    // Register saved objects type
+    // Register saved objects types
     setupSavedObjects(savedObjects);
+    registerExtractionConfigSavedObject(savedObjects);
+
+    // Register the extraction.extract custom workflow step
+    if (plugins.workflowsExtensions) {
+      const getGlobalConfig = async () => {
+        try {
+          const [coreStart] = await core.getStartServices();
+          const soClient = coreStart.savedObjects.createInternalRepository();
+          return await getExtractionConfig({
+            get: soClient.get.bind(soClient),
+          } as Parameters<typeof getExtractionConfig>[0]);
+        } catch {
+          return DEFAULT_EXTRACTION_CONFIG;
+        }
+      };
+
+      const workflowRunner = {
+        getWorkflow: workflowsManagement.management.getWorkflow.bind(
+          workflowsManagement.management
+        ),
+        runWorkflow: workflowsManagement.management.runWorkflow.bind(
+          workflowsManagement.management
+        ),
+        getWorkflowExecution: workflowsManagement.management.getWorkflowExecution.bind(
+          workflowsManagement.management
+        ),
+      };
+
+      plugins.workflowsExtensions.registerStepDefinition(
+        createExtractStepDefinition(getGlobalConfig, workflowRunner)
+      );
+    }
 
     // Register bulk delete task if Task Manager is available
     if (plugins.taskManager) {
@@ -69,6 +105,12 @@ export class DataSourcesServerPlugin
     registerRoutes({
       router,
       logger: this.logger,
+      getStartServices: core.getStartServices,
+      workflowManagement: workflowsManagement,
+    });
+
+    registerExtractionConfigRoutes({
+      router,
       getStartServices: core.getStartServices,
       workflowManagement: workflowsManagement,
     });

@@ -8,12 +8,15 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 export interface DataSourcesPluginSetup {}
 
 export interface DataSourcesPluginStart {}
 
-export interface DataSourcesPluginSetupDependencies {}
+export interface DataSourcesPluginSetupDependencies {
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface DataSourcesPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

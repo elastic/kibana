@@ -24,6 +24,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -36,6 +37,7 @@ export interface DataSourcesServerSetupDependencies {
   dataCatalog: DataCatalogPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   taskManager?: TaskManagerSetupContract;
 }
 

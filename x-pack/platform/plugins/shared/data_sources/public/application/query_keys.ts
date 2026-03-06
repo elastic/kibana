@@ -21,3 +21,7 @@ export const queryKeys = {
     byId: (id: string) => ['stackConnectors', 'detail', id] as const,
   },
 };
+
+export const EXTRACTION_CONFIG_QUERY_KEY = 'extractionConfig';
+export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpoints';
+export const WORKFLOWS_QUERY_KEY = 'workflows';
