@@ -57021,6 +57021,80 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/osquery/history:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/history</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
+      operationId: OsqueryGetUnifiedHistory
+      parameters:
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            default: 20
+            description: The number of results to return per page. The default is 20.
+            maximum: 100
+            minimum: 1
+            type: integer
+        - in: query
+          name: nextPage
+          required: false
+          schema:
+            description: A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.
+            type: string
+        - in: query
+          name: kuery
+          required: false
+          schema:
+            description: A search string to filter history entries by pack name, query text, or query ID.
+            type: string
+        - in: query
+          name: userIds
+          required: false
+          schema:
+            description: Comma-separated list of user IDs to filter live query history.
+            example: elastic,admin
+            type: string
+        - in: query
+          name: sourceFilters
+          required: false
+          schema:
+            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+            example: live,scheduled
+            type: string
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            description: The start of the time range filter (ISO 8601).
+            example: '2024-01-01T00:00:00Z'
+            type: string
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            description: The end of the time range filter (ISO 8601).
+            example: '2024-12-31T23:59:59Z'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_GetUnifiedHistoryResponse'
+          description: OK
+      summary: Get unified query history
+      tags:
+        - Security Osquery API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/osquery/live_queries:
     get:
       description: |-
@@ -84066,6 +84140,54 @@ components:
           total: 2
       type: object
       properties: {}
+    Security_Osquery_API_GetUnifiedHistoryResponse:
+      example:
+        data:
+          - actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            agentCount: 5
+            errorCount: 0
+            id: 3c42c847-eb30-4452-80e0-728584042334
+            queryName: uptime_query
+            queryText: select * from uptime;
+            source: Live
+            sourceType: live
+            successCount: 5
+            timestamp: '2024-07-26T09:59:32.220Z'
+            totalRows: 42
+            userId: elastic
+          - agentCount: 10
+            errorCount: 1
+            executionCount: 3
+            id: pack_my_pack_uptime_3
+            packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            packName: My Pack
+            plannedTime: '2024-07-26T09:00:00.000Z'
+            queryName: uptime
+            queryText: select * from uptime;
+            scheduleId: pack_my_pack_uptime
+            source: Scheduled
+            sourceType: scheduled
+            successCount: 9
+            timestamp: '2024-07-26T09:00:00.000Z'
+            totalRows: 100
+        hasMore: true
+        nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
+      type: object
+      properties:
+        data:
+          description: The list of unified history rows for the current page.
+          items:
+            $ref: '#/components/schemas/Security_Osquery_API_UnifiedHistoryRow'
+          type: array
+        hasMore:
+          description: Whether there are more results beyond the current page.
+          type: boolean
+        nextPage:
+          description: A base64-encoded cursor to fetch the next page. Absent when there are no more results.
+          type: string
+      required:
+        - data
+        - hasMore
     Security_Osquery_API_Interval:
       description: An interval, in seconds, on which to run the query.
       example: '60'
@@ -84078,6 +84200,68 @@ components:
       example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
       nullable: true
       type: string
+    Security_Osquery_API_LiveHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/Security_Osquery_API_UnifiedHistoryRowBase'
+        - type: object
+          properties:
+            actionId:
+              description: The Fleet action ID for the live query.
+              type: string
+            agentAll:
+              description: Whether the query targeted all agents.
+              type: boolean
+            agentIds:
+              description: List of targeted agent IDs.
+              items:
+                type: string
+              type: array
+            agentPlatforms:
+              description: List of targeted agent platforms.
+              items:
+                type: string
+              type: array
+            agentPolicyIds:
+              description: List of targeted agent policy IDs.
+              items:
+                type: string
+              type: array
+            ecsMapping:
+              additionalProperties: true
+              description: ECS mapping configuration used for the query.
+              type: object
+            queriesTotal:
+              description: The total number of sub-queries in the live action.
+              type: integer
+            queriesWithResults:
+              description: The number of sub-queries that returned results.
+              type: integer
+            savedQueryId:
+              description: The saved query ID, if the live query was based on a saved query.
+              type: string
+            source:
+              description: Whether this was a manually run live query or triggered by a rule.
+              enum:
+                - Live
+                - Rule
+              type: string
+            sourceType:
+              description: Identifies this as a live query history row.
+              enum:
+                - live
+              type: string
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
+            userId:
+              description: The ID of the user who ran the query.
+              type: string
+            userProfileUid:
+              description: The user profile UID of the user who ran the query.
+              type: string
+          required:
+            - sourceType
+            - source
     Security_Osquery_API_ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItem'
@@ -84179,6 +84363,33 @@ components:
     Security_Osquery_API_SavedQueryIdOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
       nullable: true
+    Security_Osquery_API_ScheduledHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/Security_Osquery_API_UnifiedHistoryRowBase'
+        - type: object
+          properties:
+            executionCount:
+              description: The execution count for this scheduled query run.
+              type: integer
+            plannedTime:
+              description: The planned execution time for the scheduled query.
+              type: string
+            scheduleId:
+              description: The schedule ID for the scheduled query.
+              type: string
+            source:
+              description: Indicates this is a scheduled query execution.
+              enum:
+                - Scheduled
+              type: string
+            sourceType:
+              description: Identifies this as a scheduled query history row.
+              enum:
+                - scheduled
+              type: string
+          required:
+            - sourceType
+            - source
     Security_Osquery_API_Shards:
       additionalProperties:
         type: number
@@ -84206,6 +84417,54 @@ components:
       example: createdAt
       nullable: true
       type: string
+    Security_Osquery_API_UnifiedHistoryRow:
+      oneOf:
+        - $ref: '#/components/schemas/Security_Osquery_API_LiveHistoryRow'
+        - $ref: '#/components/schemas/Security_Osquery_API_ScheduledHistoryRow'
+    Security_Osquery_API_UnifiedHistoryRowBase:
+      type: object
+      properties:
+        agentCount:
+          description: The number of agents targeted by the query.
+          type: integer
+        errorCount:
+          description: The number of agent responses with errors.
+          nullable: true
+          type: integer
+        id:
+          description: Unique identifier for the history row.
+          type: string
+        packId:
+          description: The ID of the pack containing the query.
+          type: string
+        packName:
+          description: The name of the pack containing the query.
+          type: string
+        queryName:
+          description: The name of the query, if available.
+          type: string
+        queryText:
+          description: The SQL query that was executed.
+          type: string
+        spaceId:
+          description: The Kibana space ID where the query was executed.
+          type: string
+        successCount:
+          description: The number of successful agent responses.
+          nullable: true
+          type: integer
+        timestamp:
+          description: The timestamp of the query execution.
+          type: string
+        totalRows:
+          description: The total number of result rows returned across all agents.
+          nullable: true
+          type: integer
+      required:
+        - id
+        - timestamp
+        - queryText
+        - agentCount
     Security_Osquery_API_UpdatePacksRequestBody:
       example:
         name: updated_my_pack_name
