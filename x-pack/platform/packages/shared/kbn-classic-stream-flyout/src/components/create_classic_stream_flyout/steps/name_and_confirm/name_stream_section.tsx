@@ -66,6 +66,15 @@ const getValidationErrorMessage = (
     );
   }
 
+  if (validationError === 'notLowercase') {
+    return i18n.translate(
+      'xpack.createClassicStreamFlyout.nameAndConfirmStep.notLowercaseValidationError',
+      {
+        defaultMessage: 'Stream name must be lowercase.',
+      }
+    );
+  }
+
   if (validationError === 'duplicate') {
     return i18n.translate(
       'xpack.createClassicStreamFlyout.nameAndConfirmStep.duplicateValidationError',

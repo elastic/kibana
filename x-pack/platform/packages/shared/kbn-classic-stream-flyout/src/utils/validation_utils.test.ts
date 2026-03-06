@@ -10,6 +10,7 @@ import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-sh
 import {
   hasEmptyWildcards,
   hasInvalidFormat,
+  hasUppercaseCharacters,
   validateStreamName,
   type StreamNameValidator,
 } from './validation_utils';
@@ -172,6 +173,22 @@ describe('validation_utils', () => {
     });
   });
 
+  describe('hasUppercaseCharacters', () => {
+    it('returns true when stream name contains uppercase characters', () => {
+      expect(hasUppercaseCharacters('Logs-myapp-data')).toBe(true);
+      expect(hasUppercaseCharacters('logs-Myapp-data')).toBe(true);
+      expect(hasUppercaseCharacters('logs-myapp-DATA')).toBe(true);
+    });
+
+    it('returns false when stream name is lowercase', () => {
+      expect(hasUppercaseCharacters('logs-myapp-data')).toBe(false);
+    });
+
+    it('returns false for empty string', () => {
+      expect(hasUppercaseCharacters('')).toBe(false);
+    });
+  });
+
   describe('validateStreamName', () => {
     const mockTemplate: IndexTemplate = {
       name: 'test-template',
@@ -207,6 +224,13 @@ describe('validation_utils', () => {
         const result = await validateStreamName('.', mockTemplate);
         expect(result).toEqual({
           errorType: 'invalidFormat',
+        });
+      });
+
+      it('returns notLowercase error when stream name contains uppercase characters', async () => {
+        const result = await validateStreamName('Logs-myapp-data', mockTemplate);
+        expect(result).toEqual({
+          errorType: 'notLowercase',
         });
       });
 
@@ -307,6 +331,17 @@ describe('validation_utils', () => {
         expect(mockValidator).not.toHaveBeenCalled();
       });
 
+      it('does not call validator when stream name contains uppercase characters', async () => {
+        const mockValidator: StreamNameValidator = jest.fn();
+
+        const result = await validateStreamName('Logs-myapp', mockTemplate, mockValidator);
+
+        expect(result).toEqual({
+          errorType: 'notLowercase',
+        });
+        expect(mockValidator).not.toHaveBeenCalled();
+      });
+
       it('throws error when validator is aborted', async () => {
         const abortController = new AbortController();
         const mockValidator: StreamNameValidator = jest
@@ -333,7 +368,7 @@ describe('validation_utils', () => {
     });
 
     describe('validation order', () => {
-      it('validates in correct order: wildcards -> format -> external validator', async () => {
+      it('validates in correct order: wildcards -> format -> lowercase -> external validator', async () => {
         const validationOrder: string[] = [];
         const mockValidator: StreamNameValidator = jest.fn().mockImplementation(async () => {
           validationOrder.push('external');
@@ -354,6 +389,12 @@ describe('validation_utils', () => {
 
         // Stream name with invalid format - should not reach external validator
         await validateStreamName('-logs', mockTemplate, mockValidator);
+        expect(validationOrder).toEqual([]);
+
+        validationOrder.length = 0;
+
+        // Stream name with uppercase - should not reach external validator
+        await validateStreamName('Logs-myapp', mockTemplate, mockValidator);
         expect(validationOrder).toEqual([]);
       });
     });

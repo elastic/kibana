@@ -64,9 +64,22 @@ export const hasInvalidFormat = (streamName: string): boolean => {
 };
 
 /**
+ * Checks if a stream name contains any uppercase characters.
+ */
+export const hasUppercaseCharacters = (streamName: string): boolean => {
+  return streamName !== streamName.toLowerCase();
+};
+
+/**
  * Validation error types for stream name validation
  */
-export type ValidationErrorType = 'empty' | 'invalidFormat' | 'duplicate' | 'higherPriority' | null;
+export type ValidationErrorType =
+  | 'empty'
+  | 'invalidFormat'
+  | 'notLowercase'
+  | 'duplicate'
+  | 'higherPriority'
+  | null;
 
 /**
  * Result from stream name validation
@@ -109,6 +122,11 @@ export const validateStreamName = async (
   // Check for invalid format
   if (hasInvalidFormat(streamName)) {
     return { errorType: 'invalidFormat' };
+  }
+
+  // Stream names must be lowercase
+  if (hasUppercaseCharacters(streamName)) {
+    return { errorType: 'notLowercase' };
   }
 
   // Run the external validator if provided

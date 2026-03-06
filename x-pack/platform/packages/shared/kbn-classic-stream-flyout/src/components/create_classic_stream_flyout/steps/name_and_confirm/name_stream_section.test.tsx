@@ -157,6 +157,14 @@ describe('NameStreamSection', () => {
       expect(getByText(/It cannot start with/i)).toBeInTheDocument();
     });
 
+    it('displays notLowercase validation error message', () => {
+      const { getByText } = renderComponent({
+        validationError: 'notLowercase',
+      });
+
+      expect(getByText('Stream name must be lowercase.')).toBeInTheDocument();
+    });
+
     it('displays duplicate validation error message', () => {
       const { getByText } = renderComponent({
         validationError: 'duplicate',
@@ -184,6 +192,7 @@ describe('NameStreamSection', () => {
 
       expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       expect(queryByText(/Stream name cannot include/i)).not.toBeInTheDocument();
+      expect(queryByText(/must be lowercase/i)).not.toBeInTheDocument();
       expect(queryByText(/already exists/i)).not.toBeInTheDocument();
       expect(queryByText(/higher priority/i)).not.toBeInTheDocument();
     });
