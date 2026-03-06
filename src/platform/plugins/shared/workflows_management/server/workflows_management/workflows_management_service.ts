@@ -57,7 +57,6 @@ import type {
   GetStepExecutionParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import {
   InvalidYamlSchemaError,
@@ -1065,23 +1064,8 @@ export class WorkflowsService {
     params: GetStepExecutionParams,
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
-    const { executionId, id } = params;
-    const response = await this.esClient.search<EsWorkflowStepExecution>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      query: {
-        bool: {
-          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-      track_total_hits: false,
-    });
-
-    if (response.hits.hits.length === 0) {
-      return null;
-    }
-
-    return response.hits.hits[0]._source as EsWorkflowStepExecution;
+    const workflowExecutionEngine = await this.getWrorkflowExecutionEngine();
+    return workflowExecutionEngine.getStepExecution(params.id, spaceId);
   }
 
   private transformStorageDocumentToWorkflowDto(
