@@ -295,7 +295,7 @@ export function MonitorDetailFlyout(props: Props) {
     const monitorName = monitorObject[ConfigKey.NAME];
     const monitorType = monitorObject[ConfigKey.MONITOR_TYPE];
 
-    if (!configId || !monitorName) {
+    if (!configId) {
       return;
     }
 
@@ -305,15 +305,20 @@ export function MonitorDetailFlyout(props: Props) {
         {
           type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
           data: {
-            attachmentLabel: i18n.translate('xpack.synthetics.monitorAttachment.attachmentLabel', {
-              defaultMessage: '{monitorName} monitor',
-              values: { monitorName },
-            }),
+            ...(monitorName
+              ? {
+                  attachmentLabel: i18n.translate(
+                    'xpack.synthetics.monitorAttachment.attachmentLabel',
+                    {
+                      defaultMessage: '{monitorName} monitor',
+                      values: { monitorName },
+                    }
+                  ),
+                }
+              : {}),
             configId,
             monitorName,
             monitorType: monitorType ?? 'unknown',
-            start: 'now-12h',
-            end: 'now',
           },
         },
       ],

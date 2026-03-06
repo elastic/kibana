@@ -24,20 +24,13 @@ jest.mock('./use_selected_monitor', () => ({
   useSelectedMonitor: jest.fn(),
 }));
 
-jest.mock('../../../hooks', () => ({
-  useRefreshedRangeFromUrl: jest.fn(),
-}));
-
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedMonitor } from './use_selected_monitor';
-import { useRefreshedRangeFromUrl } from '../../../hooks';
 
 interface SetupMocksOptions {
   agentBuilder?: typeof mockAgentBuilder | undefined;
   monitor?: Record<string, unknown> | null;
   loading?: boolean;
-  from?: string;
-  to?: string;
 }
 
 const setupMockDefaults: Required<SetupMocksOptions> = {
@@ -48,8 +41,6 @@ const setupMockDefaults: Required<SetupMocksOptions> = {
     type: 'http',
   },
   loading: false,
-  from: '2024-01-01T00:00:00.000Z',
-  to: '2024-01-02T00:00:00.000Z',
 };
 
 const setupMocks = (overrides: SetupMocksOptions = {}) => {
@@ -62,11 +53,6 @@ const setupMocks = (overrides: SetupMocksOptions = {}) => {
   (useSelectedMonitor as jest.Mock).mockReturnValue({
     monitor: opts.monitor,
     loading: opts.loading,
-  });
-
-  (useRefreshedRangeFromUrl as jest.Mock).mockReturnValue({
-    from: opts.from,
-    to: opts.to,
   });
 };
 
@@ -107,14 +93,6 @@ describe('useMonitorAttachmentConfig', () => {
     expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
   });
 
-  it('does not configure attachment when date range is missing', () => {
-    setupMocks({ from: '', to: '' });
-
-    renderHook(() => useMonitorAttachmentConfig());
-
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
-  });
-
   it('configures agent builder with monitor attachment when all conditions are met', () => {
     setupMocks();
 
@@ -130,8 +108,6 @@ describe('useMonitorAttachmentConfig', () => {
             configId: 'test-config-id',
             monitorName: 'My HTTP Monitor',
             monitorType: 'http',
-            start: '2024-01-01T00:00:00.000Z',
-            end: '2024-01-02T00:00:00.000Z',
           },
         },
       ],

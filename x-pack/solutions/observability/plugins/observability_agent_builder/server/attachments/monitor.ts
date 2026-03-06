@@ -21,8 +21,6 @@ const monitorDataSchema = observabilityAttachmentDataSchema.extend({
   configId: z.string(),
   monitorName: z.string(),
   monitorType: z.string(),
-  start: z.string(),
-  end: z.string(),
 });
 
 export type MonitorAttachmentData = z.infer<typeof monitorDataSchema>;
@@ -112,7 +110,7 @@ export function createMonitorAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability synthetics monitor attachment. The monitor config ID, name, and type are provided - use the ${GET_MONITOR_DETAILS_TOOL_ID} tool to fetch the full monitor details.`
+        `An Observability synthetics monitor attachment. The monitor config ID is provided - Use the ${GET_MONITOR_DETAILS_TOOL_ID} tool to fetch the full monitor configuration details.`
       ),
   };
 }

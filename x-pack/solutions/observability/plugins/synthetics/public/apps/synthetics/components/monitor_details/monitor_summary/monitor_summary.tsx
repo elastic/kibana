@@ -33,11 +33,13 @@ import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 export const MonitorSummary = () => {
-  useMonitorAttachmentConfig();
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
   const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
+
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {

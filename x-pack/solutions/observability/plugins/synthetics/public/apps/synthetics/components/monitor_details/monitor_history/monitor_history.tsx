@@ -29,9 +29,11 @@ import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_conf
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
 
 export const MonitorHistory = () => {
-  useMonitorAttachmentConfig();
   const [, updateUrlParams] = useUrlParams();
   const { from, to } = useRefreshedRangeFromUrl();
+
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   const { elementRef: statsRef, width: statsWidth } = useDimensions<HTMLDivElement>();
   const statsColumns = statsWidth && statsWidth < STATS_WIDTH_SINGLE_COLUMN_THRESHOLD ? 1 : 2;

@@ -15,12 +15,10 @@ import {
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from './use_selected_monitor';
-import { useRefreshedRangeFromUrl } from '../../../hooks';
 
 export const useMonitorAttachmentConfig = () => {
   const { agentBuilder } = useKibana<ClientPluginsStart>().services;
   const { monitor, loading } = useSelectedMonitor({ refetchMonitorEnabled: false });
-  const { from, to } = useRefreshedRangeFromUrl();
 
   useEffect(() => {
     if (!agentBuilder || loading || !monitor) {
@@ -31,7 +29,7 @@ export const useMonitorAttachmentConfig = () => {
     const monitorName = monitor[ConfigKey.NAME];
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
 
-    if (!configId || !monitorName || !from || !to) {
+    if (!configId) {
       return;
     }
 
@@ -41,15 +39,20 @@ export const useMonitorAttachmentConfig = () => {
         {
           type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
           data: {
-            attachmentLabel: i18n.translate('xpack.synthetics.monitorAttachment.attachmentLabel', {
-              defaultMessage: '{monitorName} monitor',
-              values: { monitorName },
-            }),
+            ...(monitorName
+              ? {
+                  attachmentLabel: i18n.translate(
+                    'xpack.synthetics.monitorAttachment.attachmentLabel',
+                    {
+                      defaultMessage: '{monitorName} monitor',
+                      values: { monitorName },
+                    }
+                  ),
+                }
+              : {}),
             configId,
             monitorName,
             monitorType: monitorType ?? 'unknown',
-            start: from,
-            end: to,
           },
         },
       ],
@@ -58,5 +61,5 @@ export const useMonitorAttachmentConfig = () => {
     return () => {
       agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [agentBuilder, loading, monitor, from, to]);
+  }, [agentBuilder, loading, monitor]);
 };
