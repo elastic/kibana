@@ -8,7 +8,6 @@
 import {
   EuiButtonIcon,
   EuiFlexItem,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,
@@ -19,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { useCaseActions } from '@kbn/response-ops-alerts-table/hooks/use_case_actions';
+import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -62,6 +61,21 @@ export function AlertActions(
 
   const observabilityAlert = parseObservabilityAlert(alert);
 
+  const closeActionsPopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
+
+  const toggleActionsPopover = useCallback(() => {
+    setIsPopoverOpen((open) => !open);
+  }, []);
+
+  const caseAlertActionItems = useCaseAlertActionItems({
+    alert,
+    cases,
+    refresh,
+    onActionExecuted: closeActionsPopover,
+  });
+
   useEffect(() => {
     const alertLink = observabilityAlert.link;
     if (!observabilityAlert.hasBasePath && prepend) {
@@ -81,66 +95,13 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const onAddToCase = useCallback(
-    ({ isNewCase }: { isNewCase: boolean }) => {
-      telemetryClient.reportAlertAddedToCase(
-        isNewCase,
-        tableId || 'unknown',
-        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
-      );
-
-      refresh?.();
-    },
-    [telemetryClient, tableId, observabilityAlert.fields, refresh]
-  );
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const { handleAddToExistingCaseClick, handleAddToNewCaseClick } = useCaseActions({
-    alerts: [alert],
-    cases,
-    onAddToCase,
-  });
-
-  const closeActionsPopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, []);
-
-  const toggleActionsPopover = useCallback(() => {
-    setIsPopoverOpen((open) => !open);
-  }, []);
 
   const actionsMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="add-to-existing-case-action"
-            key="addToExistingCase"
-            onClick={() => {
-              handleAddToExistingCaseClick();
-              closeActionsPopover();
-            }}
-            size="s"
-          >
-            {i18n.translate('xpack.observability.alerts.actions.addToCase', {
-              defaultMessage: 'Add to existing case',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            data-test-subj="add-to-new-case-action"
-            key="addToNewCase"
-            onClick={() => {
-              handleAddToNewCaseClick();
-              closeActionsPopover();
-            }}
-            size="s"
-          >
-            {i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
-              defaultMessage: 'Add to new case',
-            })}
-          </EuiContextMenuItem>,
-        ]
+      ? caseAlertActionItems
       : []),
+
     useMemo(
       () => (
         <DefaultAlertActions<ObservabilityAlertsTableContext>
