@@ -10,26 +10,10 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { runMaintainer } from './run_maintainer';
 import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { CompositeAfterKey, ProcessedEntityRecord } from './types';
+import type { AccessesIntegrationConfig } from './integrations';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockBuildCompositeAggQuery = jest.fn((): any => ({ size: 0, aggs: {} }));
-const mockBuildBucketUserFilter = jest.fn(() => ({
-  bool: { should: [], minimum_should_match: 1 },
-}));
-const mockBuildEsqlQuery = jest.fn(() => 'FROM test | STATS count = COUNT(*)');
 const mockPostprocessEsqlResults = jest.fn((): ProcessedEntityRecord[] => []);
 const mockUpsertEntityRelationships = jest.fn(() => Promise.resolve(0));
-
-jest.mock('./build_composite_agg', () => ({
-  buildCompositeAggQuery: (...args: Parameters<typeof mockBuildCompositeAggQuery>) =>
-    mockBuildCompositeAggQuery(...args),
-  buildBucketUserFilter: (...args: Parameters<typeof mockBuildBucketUserFilter>) =>
-    mockBuildBucketUserFilter(...args),
-}));
-
-jest.mock('./build_esql_query', () => ({
-  buildEsqlQuery: (...args: Parameters<typeof mockBuildEsqlQuery>) => mockBuildEsqlQuery(...args),
-}));
 
 jest.mock('./postprocess_records', () => ({
   postprocessEsqlResults: (...args: Parameters<typeof mockPostprocessEsqlResults>) =>
@@ -40,6 +24,22 @@ jest.mock('./upsert_entities', () => ({
   upsertEntityRelationships: (...args: Parameters<typeof mockUpsertEntityRelationships>) =>
     mockUpsertEntityRelationships(...args),
 }));
+
+function createMockIntegration(
+  overrides?: Partial<AccessesIntegrationConfig>
+): AccessesIntegrationConfig {
+  return {
+    id: 'test_integration',
+    name: 'Test Integration',
+    getIndexPattern: jest.fn((ns: string) => `test-index-${ns}`),
+    buildCompositeAggQuery: jest.fn((): Record<string, unknown> => ({ size: 0, aggs: {} })),
+    buildBucketUserFilter: jest.fn(() => ({
+      bool: { should: [], minimum_should_match: 1 },
+    })),
+    buildEsqlQuery: jest.fn(() => 'FROM test | STATS count = COUNT(*)'),
+    ...overrides,
+  };
+}
 
 function createBucket(userId: string): { key: CompositeAfterKey; doc_count: number } {
   return {
@@ -78,11 +78,11 @@ function createEsqlResponse(columns: EsqlColumn[] = [], values: unknown[][] = []
 describe('runMaintainer', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
+  let mockIntegration: AccessesIntegrationConfig;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockBuildCompositeAggQuery.mockReturnValue({ size: 0, aggs: {} });
-    mockBuildEsqlQuery.mockReturnValue('FROM test | STATS count = COUNT(*)');
+    mockIntegration = createMockIntegration();
     mockPostprocessEsqlResults.mockReturnValue([]);
     mockUpsertEntityRelationships.mockResolvedValue(0);
   });
@@ -93,7 +93,12 @@ describe('runMaintainer', () => {
       esClient.search.mockResolvedValueOnce(createAggResponse(buckets, { 'user.id': 'user-2' }));
       esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
 
-      const result = await runMaintainer({ esClient, logger, namespace: 'default' });
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(result.totalBuckets).toBe(2);
@@ -116,18 +121,28 @@ describe('runMaintainer', () => {
         .mockResolvedValueOnce(createEsqlResponse() as never)
         .mockResolvedValueOnce(createEsqlResponse() as never);
 
-      const result = await runMaintainer({ esClient, logger, namespace: 'default' });
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(esClient.search).toHaveBeenCalledTimes(2);
-      expect(mockBuildCompositeAggQuery).toHaveBeenNthCalledWith(1, undefined);
-      expect(mockBuildCompositeAggQuery).toHaveBeenNthCalledWith(2, page1AfterKey);
+      expect(mockIntegration.buildCompositeAggQuery).toHaveBeenNthCalledWith(1, undefined);
+      expect(mockIntegration.buildCompositeAggQuery).toHaveBeenNthCalledWith(2, page1AfterKey);
       expect(result.totalBuckets).toBe(COMPOSITE_PAGE_SIZE + 1);
     });
 
     it('stops when composite returns empty buckets', async () => {
       esClient.search.mockResolvedValueOnce(createAggResponse([]));
 
-      const result = await runMaintainer({ esClient, logger, namespace: 'default' });
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(esClient.esql.query).not.toHaveBeenCalled();
@@ -145,11 +160,16 @@ describe('runMaintainer', () => {
       esClient.search.mockResolvedValue(createAggResponse(fullPageBuckets, afterKey));
       esClient.esql.query.mockResolvedValue(createEsqlResponse() as never);
 
-      const result = await runMaintainer({ esClient, logger, namespace: 'default' });
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(esClient.search).toHaveBeenCalledTimes(MAX_ITERATIONS);
       expect(logger.warn).toHaveBeenCalledWith(
-        `Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping pagination`
+        `[test_integration] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping pagination`
       );
       expect(result.totalBuckets).toBe(COMPOSITE_PAGE_SIZE * MAX_ITERATIONS);
     });
@@ -167,11 +187,16 @@ describe('runMaintainer', () => {
         .mockRejectedValueOnce(verificationError)
         .mockResolvedValueOnce(createEsqlResponse() as never);
 
-      await runMaintainer({ esClient, logger, namespace: 'default' });
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
-      expect(mockBuildEsqlQuery).toHaveBeenCalledWith('default', false);
-      expect(mockBuildEsqlQuery).toHaveBeenCalledWith('default', true);
+      expect(mockIntegration.buildEsqlQuery).toHaveBeenCalledWith('default', false);
+      expect(mockIntegration.buildEsqlQuery).toHaveBeenCalledWith('default', true);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('verification_exception'));
     });
 
@@ -194,9 +219,14 @@ describe('runMaintainer', () => {
         .mockResolvedValueOnce(createEsqlResponse() as never)
         .mockResolvedValueOnce(createEsqlResponse() as never);
 
-      await runMaintainer({ esClient, logger, namespace: 'default' });
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
-      const buildEsqlCalls = mockBuildEsqlQuery.mock.calls;
+      const buildEsqlCalls = (mockIntegration.buildEsqlQuery as jest.Mock).mock.calls;
       expect(buildEsqlCalls[0]).toEqual(['default', false]);
       expect(buildEsqlCalls[1]).toEqual(['default', true]);
       expect(buildEsqlCalls[2]).toEqual(['default', true]);
@@ -209,9 +239,14 @@ describe('runMaintainer', () => {
       const genericError = new Error('search_phase_execution_exception');
       esClient.esql.query.mockRejectedValueOnce(genericError);
 
-      await expect(runMaintainer({ esClient, logger, namespace: 'default' })).rejects.toThrow(
-        'search_phase_execution_exception'
-      );
+      await expect(
+        runMaintainer({
+          esClient,
+          logger,
+          namespace: 'default',
+          integrations: [mockIntegration],
+        })
+      ).rejects.toThrow('search_phase_execution_exception');
     });
 
     it('does not retry twice on repeated verification_exception', async () => {
@@ -223,9 +258,14 @@ describe('runMaintainer', () => {
         .mockRejectedValueOnce(verificationError)
         .mockRejectedValueOnce(verificationError);
 
-      await expect(runMaintainer({ esClient, logger, namespace: 'default' })).rejects.toThrow(
-        'verification_exception'
-      );
+      await expect(
+        runMaintainer({
+          esClient,
+          logger,
+          namespace: 'default',
+          integrations: [mockIntegration],
+        })
+      ).rejects.toThrow('verification_exception');
 
       expect(esClient.esql.query).toHaveBeenCalledTimes(2);
     });
@@ -271,7 +311,12 @@ describe('runMaintainer', () => {
 
       mockUpsertEntityRelationships.mockResolvedValue(2);
 
-      const result = await runMaintainer({ esClient, logger, namespace: 'default' });
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(mockUpsertEntityRelationships).toHaveBeenCalledTimes(1);
       expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(esClient, logger, 'default', [
@@ -285,9 +330,82 @@ describe('runMaintainer', () => {
     it('calls upsert with empty array when no records found', async () => {
       esClient.search.mockResolvedValueOnce(createAggResponse([]));
 
-      await runMaintainer({ esClient, logger, namespace: 'default' });
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(esClient, logger, 'default', []);
+    });
+  });
+
+  describe('multiple integrations', () => {
+    it('processes each integration independently and merges records', async () => {
+      const integration1 = createMockIntegration({ id: 'integration_1', name: 'Integration 1' });
+      const integration2 = createMockIntegration({ id: 'integration_2', name: 'Integration 2' });
+
+      const buckets1 = [createBucket('user-a')];
+      const buckets2 = [createBucket('user-b')];
+
+      esClient.search
+        .mockResolvedValueOnce(createAggResponse(buckets1))
+        .mockResolvedValueOnce(createAggResponse(buckets2));
+
+      esClient.esql.query
+        .mockResolvedValueOnce(createEsqlResponse() as never)
+        .mockResolvedValueOnce(createEsqlResponse() as never);
+
+      const records1: ProcessedEntityRecord[] = [
+        { entityId: 'user-a', accesses_frequently: ['host-1'], accesses_infrequently: [] },
+      ];
+      const records2: ProcessedEntityRecord[] = [
+        { entityId: 'user-b', accesses_frequently: [], accesses_infrequently: ['host-2'] },
+      ];
+
+      mockPostprocessEsqlResults.mockReturnValueOnce(records1).mockReturnValueOnce(records2);
+      mockUpsertEntityRelationships.mockResolvedValue(2);
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [integration1, integration2],
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(integration1.buildCompositeAggQuery).toHaveBeenCalledTimes(1);
+      expect(integration2.buildCompositeAggQuery).toHaveBeenCalledTimes(1);
+      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(esClient, logger, 'default', [
+        ...records1,
+        ...records2,
+      ]);
+      expect(result.totalBuckets).toBe(2);
+      expect(result.totalAccessRecords).toBe(2);
+    });
+
+    it('continues to next integration when one returns empty buckets', async () => {
+      const integration1 = createMockIntegration({ id: 'empty_int', name: 'Empty' });
+      const integration2 = createMockIntegration({ id: 'data_int', name: 'Has Data' });
+
+      esClient.search
+        .mockResolvedValueOnce(createAggResponse([]))
+        .mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));
+
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [integration1, integration2],
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(integration1.buildEsqlQuery).not.toHaveBeenCalled();
+      expect(integration2.buildEsqlQuery).toHaveBeenCalled();
+      expect(result.totalBuckets).toBe(1);
     });
   });
 
@@ -295,9 +413,14 @@ describe('runMaintainer', () => {
     it('throws when composite aggregation fails', async () => {
       esClient.search.mockRejectedValueOnce(new Error('index_not_found_exception'));
 
-      await expect(runMaintainer({ esClient, logger, namespace: 'default' })).rejects.toThrow(
-        'index_not_found_exception'
-      );
+      await expect(
+        runMaintainer({
+          esClient,
+          logger,
+          namespace: 'default',
+          integrations: [mockIntegration],
+        })
+      ).rejects.toThrow('index_not_found_exception');
     });
   });
 
@@ -313,7 +436,12 @@ describe('runMaintainer', () => {
       mockPostprocessEsqlResults.mockReturnValueOnce(records);
       mockUpsertEntityRelationships.mockResolvedValue(1);
 
-      const result = await runMaintainer({ esClient, logger, namespace: 'default' });
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -323,6 +451,36 @@ describe('runMaintainer', () => {
           lastRunTimestamp: expect.any(String),
         })
       );
+    });
+  });
+
+  describe('integration config usage', () => {
+    it('calls integration.getIndexPattern with the namespace', async () => {
+      esClient.search.mockResolvedValueOnce(createAggResponse([]));
+
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'custom-ns',
+        integrations: [mockIntegration],
+      });
+
+      expect(mockIntegration.getIndexPattern).toHaveBeenCalledWith('custom-ns');
+    });
+
+    it('passes buckets to integration.buildBucketUserFilter', async () => {
+      const buckets = [createBucket('user-1'), createBucket('user-2')];
+      esClient.search.mockResolvedValueOnce(createAggResponse(buckets));
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        integrations: [mockIntegration],
+      });
+
+      expect(mockIntegration.buildBucketUserFilter).toHaveBeenCalledWith(buckets);
     });
   });
 });
