@@ -9,8 +9,10 @@ import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
 import { times } from 'lodash';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
-import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
+import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
+import type { LlmProxy } from '../utils/create_llm_proxy';
+import { createLlmProxy } from '../utils/create_llm_proxy';
+import { decodeEvents } from '../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const SYSTEM_MESSAGE = `this is a system message`;
@@ -129,7 +131,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const chunks = times(NUM_RESPONSES).map((i) => `Part: ${i}\n`);
             void proxy.interceptWithResponse(chunks);
 
-            const receivedChunks: Array<Record<string, any>> = [];
+            const receivedChunks: string[] = [];
 
             const passThrough = new PassThrough();
             supertestEditorWithCookieCredentials
@@ -146,12 +148,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .pipe(passThrough);
 
             passThrough.on('data', (chunk) => {
-              receivedChunks.push(JSON.parse(chunk.toString()));
+              receivedChunks.push(chunk.toString());
             });
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
 
-            const chatCompletionChunks = receivedChunks.filter(
+            const parsedEvents = decodeEvents(receivedChunks.join(''));
+
+            const chatCompletionChunks = parsedEvents.filter(
               (chunk) => chunk.type === 'chatCompletionChunk'
             );
             expect(chatCompletionChunks).to.have.length(
