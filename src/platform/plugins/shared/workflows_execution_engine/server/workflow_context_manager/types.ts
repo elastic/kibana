@@ -13,9 +13,8 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowRepository } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowLogEvent } from '../repositories/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 
 export interface ContextDependencies {
@@ -25,8 +24,7 @@ export interface ContextDependencies {
   taskManager: TaskManagerStartContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   workflowRepository?: WorkflowRepository;
-  workflowExecutionRepository?: WorkflowExecutionRepository;
-  stepExecutionRepository?: StepExecutionRepository;
+  executionStateRepository?: ExecutionStateRepository;
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   spaceId?: string;
   request?: KibanaRequest;

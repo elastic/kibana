@@ -108,12 +108,15 @@ export async function runWorkflow({
   // will no-op for non-terminal states (e.g., WAITING for resume).
   if (meteringService) {
     try {
-      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowRunId,
+      const response = await executionStateRepository.getWorkflowExecutions(
+        new Set([workflowRunId]),
         spaceId
       );
-      if (finalExecution) {
-        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+      if (workflowRunId in response) {
+        void meteringService.reportWorkflowExecution(
+          response[workflowRunId],
+          dependencies.cloudSetup
+        );
       }
     } catch (err) {
       logger.warn(
