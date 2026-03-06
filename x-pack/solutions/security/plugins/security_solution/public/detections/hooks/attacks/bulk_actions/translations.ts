@@ -142,3 +142,46 @@ export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
     defaultMessage: 'Unassign alert',
   }
 );
+
+export const RUN_WORKFLOW_ON_ATTACK_ONLY = i18n.translate(
+  'xpack.securitySolution.detections.hooks.attacks.bulkActions.runWorkflowOnAttackOnlyButtonLabel',
+  {
+    defaultMessage: 'Run workflow on attack only',
+  }
+);
+
+export const RUN_WORKFLOW_ON_ALERTS_AND_DISCOVERIES = ({
+  alertsCount,
+}: {
+  alertsCount: number;
+}) => {
+  return i18n.translate(
+    'xpack.securitySolution.detections.hooks.attacks.bulkActions.runWorkflowOnAlertsAndDiscoveriesButtonLabel',
+    {
+      defaultMessage: 'Run workflow on attack & {alertsCount, plural, =1 {alert} other {alerts}}',
+      values: {
+        alertsCount,
+      },
+    }
+  );
+};
+
+export const INCLUDE_ALERTS_IN_WORKFLOW_TITLE = i18n.translate(
+  'xpack.securitySolution.detections.hooks.attacks.bulkActions.includeAlertsInWorkflowModalTitle',
+  {
+    defaultMessage: 'Include related alerts?',
+  }
+);
+
+export const INCLUDE_ALERTS_IN_WORKFLOW_BODY = ({ alertsCount }: { alertsCount: number }) => {
+  return i18n.translate(
+    'xpack.securitySolution.detections.hooks.attacks.bulkActions.includeAlertsInWorkflowModalBody',
+    {
+      defaultMessage:
+        'Run workflow on {alertsCount, plural, =1 {alert} other {alerts}} associated with this attack?',
+      values: {
+        alertsCount,
+      },
+    }
+  );
+};

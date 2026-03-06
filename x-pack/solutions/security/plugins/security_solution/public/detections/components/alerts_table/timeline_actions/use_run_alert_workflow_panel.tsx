@@ -36,10 +36,21 @@ export interface AlertWorkflowsPanelProps {
     _index: string;
   }[];
   onClose: () => void;
+  /**
+   * Optional callback to customize the final alert ids before execution.
+   * Return null to cancel execution.
+   */
+  onPrepareAlertIds?: (
+    alertIds: AlertWorkflowsPanelProps['alertIds']
+  ) => Promise<AlertWorkflowsPanelProps['alertIds'] | null>;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
+export const AlertWorkflowsPanel = ({
+  alertIds,
+  onClose,
+  onPrepareAlertIds,
+}: AlertWorkflowsPanelProps) => {
   const {
     services: { application, rendering },
   } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
@@ -49,14 +60,18 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  const handleExecuteClick = useCallback(() => {
+  const handleExecuteClick = useCallback(async () => {
     if (!selectedId) return;
+
+    const preparedAlertIds = onPrepareAlertIds ? await onPrepareAlertIds(alertIds) : alertIds;
+    if (preparedAlertIds == null || preparedAlertIds.length === 0) return;
+
     setIsLoading(true);
 
     const inputsPayload: AlertTriggerInput = {
       event: {
         triggerType: 'alert',
-        alertIds,
+        alertIds: preparedAlertIds,
       },
     };
 
@@ -109,6 +124,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
     rendering,
     onClose,
     alertIds,
+    onPrepareAlertIds,
   ]);
 
   const workflowSelector = useMemo(
