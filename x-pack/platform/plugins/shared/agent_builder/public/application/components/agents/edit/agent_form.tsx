@@ -30,7 +30,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { filterToolsBySelection, type AgentDefinition } from '@kbn/agent-builder-common';
-import { useQuery } from '@kbn/react-query';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -52,8 +51,9 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { canChangeAgentVisibility } from '../../../utils/agent_access';
 import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
@@ -81,7 +81,10 @@ export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
 export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const { manageAgents } = useUiPrivileges();
+  const { services } = useKibana();
+  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.settings.client);
+  const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
+  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -91,8 +94,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     },
     [navigateToAgentBuilderUrl]
   );
-  const { services } = useKibana();
-  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.settings.client);
   const {
     notifications,
     http,
@@ -145,10 +146,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     experimentalFeaturesEnabled,
     onSaveSuccess,
     onSaveError,
-  });
-  const { data: currentUser } = useQuery({
-    queryKey: ['agentBuilder', 'currentUser'],
-    queryFn: async () => services.userProfile.getCurrent(),
   });
 
   const formMethods = useForm<AgentFormData>({
@@ -209,7 +206,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const isSaveDisabled = isFormDisabled || hasErrors || (!isCreateMode && !isDirty);
   const canChangeVisibility =
     experimentalFeaturesEnabled &&
-    (isCreateMode || canChangeAgentVisibility({ owner, currentUser: currentUser ?? null }));
+    (isCreateMode ||
+      canChangeAgentVisibility({
+        owner,
+        currentUser,
+        hasAgentVisibilityAccessOverride,
+      }));
 
   const [isContextMenuOpen, setContextMenuOpen] = useState(false);
   const [isAdditionalActionsMenuOpen, setAdditionalActionsMenuOpen] = useState(false);

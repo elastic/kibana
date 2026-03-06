@@ -11,7 +11,7 @@ import {
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
 import {
-  hasVisibilityAccessOverrideFromRequest,
+  hasAgentVisibilityAccessOverrideFromRequest,
   getAgentApiAccessFromRequest,
   getUserFromRequest,
 } from './utils';
@@ -84,7 +84,7 @@ describe('getUserFromRequest', () => {
   });
 });
 
-describe('hasVisibilityAccessOverrideFromRequest', () => {
+describe('hasAgentVisibilityAccessOverrideFromRequest', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
@@ -100,7 +100,7 @@ describe('hasVisibilityAccessOverrideFromRequest', () => {
       username: 'testuser',
     });
 
-    const result = await hasVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await hasAgentVisibilityAccessOverrideFromRequest({ esClient });
 
     expect(result).toBe(true);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
@@ -115,7 +115,7 @@ describe('hasVisibilityAccessOverrideFromRequest', () => {
       username: 'testuser',
     });
 
-    const result = await hasVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await hasAgentVisibilityAccessOverrideFromRequest({ esClient });
 
     expect(result).toBe(false);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);

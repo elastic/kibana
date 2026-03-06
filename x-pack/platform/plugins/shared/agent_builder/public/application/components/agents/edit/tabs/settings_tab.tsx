@@ -40,7 +40,7 @@ import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import type { AgentFormData } from '../agent_form';
 
-interface AgentSettingsTabProps {
+export interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
   formState: FormState<AgentFormData>;
   isCreateMode: boolean;

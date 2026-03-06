@@ -9,8 +9,12 @@ import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../../../common/features';
 
-type AgentBuilderUiPrivileges = {
+/** UI-facing privileges for Agent Builder (feature-backed + phantom hasAgentVisibilityAccessOverride). */
+export type AgentBuilderUiPrivileges = {
   [K in keyof typeof uiPrivileges]: boolean;
+} & {
+  /** Phantom capability: true only for wildcard roles (e.g. superuser). Resolved server-side. */
+  hasAgentVisibilityAccessOverride: boolean;
 };
 
 export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
@@ -18,14 +22,19 @@ export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
     services: { application },
   } = useKibana();
 
-  const agentBuilderCapabilities = useMemo(() => {
+  const agentBuilderCapabilities = useMemo((): AgentBuilderUiPrivileges => {
     const capabilities = application?.capabilities?.[AGENTBUILDER_FEATURE_ID] ?? {};
 
-    return Object.keys(uiPrivileges).reduce((acc, key) => {
+    const fromFeature = Object.keys(uiPrivileges).reduce((acc, key) => {
       const privilegeKey = key as keyof typeof uiPrivileges;
       acc[privilegeKey] = !!capabilities[uiPrivileges[privilegeKey]];
       return acc;
-    }, {} as AgentBuilderUiPrivileges);
+    }, {} as { [K in keyof typeof uiPrivileges]: boolean });
+
+    return {
+      ...fromFeature,
+      hasAgentVisibilityAccessOverride: !!capabilities.hasAgentVisibilityAccessOverride,
+    };
   }, [application]);
 
   return agentBuilderCapabilities;

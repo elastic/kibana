@@ -19,7 +19,7 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { hasVisibilityAccessOverrideFromRequest, getUserFromRequest } from '../../../utils';
+import { hasAgentVisibilityAccessOverrideFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
   AgentDeleteRequest,
@@ -74,7 +74,7 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
-  const hasVisibilityAccessOverride = await hasVisibilityAccessOverrideFromRequest({
+  const hasAgentVisibilityAccessOverride = await hasAgentVisibilityAccessOverrideFromRequest({
     esClient: scopedClient.asCurrentUser,
   });
   const esClient = scopedClient.asInternalUser;
@@ -83,7 +83,7 @@ export const createClient = async ({
   return new AgentClientImpl({
     storage,
     user,
-    hasVisibilityAccessOverride,
+    hasAgentVisibilityAccessOverride,
     request,
     space,
     toolsService,
@@ -97,14 +97,14 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
-  private readonly hasVisibilityAccessOverride: boolean;
+  private readonly hasAgentVisibilityAccessOverride: boolean;
   private readonly logger: Logger;
 
   constructor({
     storage,
     toolsService,
     user,
-    hasVisibilityAccessOverride,
+    hasAgentVisibilityAccessOverride,
     request,
     space,
     logger,
@@ -112,7 +112,7 @@ class AgentClientImpl implements AgentClient {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
-    hasVisibilityAccessOverride: boolean;
+    hasAgentVisibilityAccessOverride: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -121,7 +121,7 @@ class AgentClientImpl implements AgentClient {
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
-    this.hasVisibilityAccessOverride = hasVisibilityAccessOverride;
+    this.hasAgentVisibilityAccessOverride = hasAgentVisibilityAccessOverride;
     this.space = space;
     this.logger = logger;
   }
@@ -165,7 +165,7 @@ class AgentClientImpl implements AgentClient {
 
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
     const filters = [createSpaceDslFilter(this.space)];
-    if (!this.hasVisibilityAccessOverride) {
+    if (!this.hasAgentVisibilityAccessOverride) {
       filters.push(buildVisibilityReadFilter({ user: this.user }));
     }
 
@@ -224,7 +224,7 @@ class AgentClientImpl implements AgentClient {
         source,
         update: profileUpdate,
         user: this.user,
-        hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+        hasAgentVisibilityAccessOverride: this.hasAgentVisibilityAccessOverride,
       })
     ) {
       throw createAgentNotFoundError({ agentId });
@@ -289,12 +289,12 @@ class AgentClientImpl implements AgentClient {
         ? hasReadAccess({
             source: document._source,
             user: this.user,
-            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+            hasAgentVisibilityAccessOverride: this.hasAgentVisibilityAccessOverride,
           })
         : hasWriteAccess({
             source: document._source,
             user: this.user,
-            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+            hasAgentVisibilityAccessOverride: this.hasAgentVisibilityAccessOverride,
           });
 
     if (!hasRequestedAccess) {

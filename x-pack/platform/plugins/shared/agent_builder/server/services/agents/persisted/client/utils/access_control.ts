@@ -5,43 +5,52 @@
  * 2.0.
  */
 
-import { AgentVisibility, type UserIdAndName } from '@kbn/agent-builder-common';
+import {
+  AgentVisibility,
+  type UserIdAndName,
+  hasAgentReadAccess,
+  hasAgentWriteAccess,
+  canChangeAgentVisibility,
+} from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
 import type { AgentProperties } from '../storage';
+
+const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
+  source.created_by_id !== undefined || source.created_by_name !== undefined
+    ? { id: source.created_by_id, username: source.created_by_name ?? 'unknown' }
+    : undefined;
 
 export const hasReadAccess = ({
   source,
   user,
-  hasVisibilityAccessOverride,
+  hasAgentVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  hasVisibilityAccessOverride: boolean;
-}) => {
-  const visibility = source.visibility ?? AgentVisibility.Public;
-  return (
-    hasVisibilityAccessOverride ||
-    isOwner({ source, user }) ||
-    visibility !== AgentVisibility.Private
-  );
-};
+  hasAgentVisibilityAccessOverride: boolean;
+}) =>
+  hasAgentReadAccess({
+    visibility: source.visibility,
+    owner: sourceToOwner(source),
+    currentUser: user,
+    hasAgentVisibilityAccessOverride,
+  });
 
 export const hasWriteAccess = ({
   source,
   user,
-  hasVisibilityAccessOverride,
+  hasAgentVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  hasVisibilityAccessOverride: boolean;
-}) => {
-  const visibility = source.visibility ?? AgentVisibility.Public;
-  return (
-    hasVisibilityAccessOverride ||
-    isOwner({ source, user }) ||
-    visibility === AgentVisibility.Public
-  );
-};
+  hasAgentVisibilityAccessOverride: boolean;
+}) =>
+  hasAgentWriteAccess({
+    visibility: source.visibility,
+    owner: sourceToOwner(source),
+    currentUser: user,
+    hasAgentVisibilityAccessOverride,
+  });
 
 export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => {
   const shouldClauses: Array<Record<string, unknown>> = [
@@ -71,30 +80,23 @@ export const validateVisibilityUpdateAccess = ({
   source,
   update,
   user,
-  hasVisibilityAccessOverride,
+  hasAgentVisibilityAccessOverride,
 }: {
   source: AgentProperties;
   update: AgentUpdateRequest;
   user: UserIdAndName;
-  hasVisibilityAccessOverride: boolean;
+  hasAgentVisibilityAccessOverride: boolean;
 }) => {
   const isVisibilityChange =
     update.visibility !== undefined &&
     update.visibility !== (source.visibility ?? AgentVisibility.Public);
 
-  return !isVisibilityChange || canChangeVisibility({ source, user, hasVisibilityAccessOverride });
+  return (
+    !isVisibilityChange ||
+    canChangeAgentVisibility({
+      owner: sourceToOwner(source),
+      currentUser: user,
+      hasAgentVisibilityAccessOverride,
+    })
+  );
 };
-
-const canChangeVisibility = ({
-  source,
-  user,
-  hasVisibilityAccessOverride,
-}: {
-  source: AgentProperties;
-  user: UserIdAndName;
-  hasVisibilityAccessOverride: boolean;
-}) => hasVisibilityAccessOverride || isOwner({ source, user });
-
-const isOwner = ({ source, user }: { source: AgentProperties; user: UserIdAndName }) =>
-  (user.id !== undefined && user.id === source.created_by_id) ||
-  user.username === source.created_by_name;

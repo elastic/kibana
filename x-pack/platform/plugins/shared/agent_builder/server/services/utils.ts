@@ -45,7 +45,7 @@ export const getUserFromRequest = async ({
   return { username: authResponse.username };
 };
 
-const VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE = 'agent_builder:visibility_access_override'; // intentionally unregistered privilege
+const VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE = 'agent_builder:agent_visibility_access_override'; // intentionally unregistered privilege
 
 /**
  * Returns `true` only for users with wildcard Elasticsearch privileges (for example `superuser`).
@@ -57,22 +57,23 @@ const VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE = 'agent_builder:visibility_access_ov
  * This is used as an internal visibility-access override, independent of feature/sub-feature
  * grants.
  */
-export const hasVisibilityAccessOverrideFromRequest = async ({
+export const hasAgentVisibilityAccessOverrideFromRequest = async ({
   esClient,
 }: {
   esClient: ElasticsearchClient;
 }): Promise<boolean> => {
-  const { has_all_requested: hasVisibilityAccessOverride } = await esClient.security.hasPrivileges({
-    application: [
-      {
-        application: KIBANA_APPLICATION,
-        resources: ['*'],
-        privileges: [VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE],
-      },
-    ],
-  });
+  const { has_all_requested: hasAgentVisibilityAccessOverride } =
+    await esClient.security.hasPrivileges({
+      application: [
+        {
+          application: KIBANA_APPLICATION,
+          resources: ['*'],
+          privileges: [VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE],
+        },
+      ],
+    });
 
-  return hasVisibilityAccessOverride;
+  return hasAgentVisibilityAccessOverride;
 };
 
 export const getAgentApiAccessFromRequest = async ({

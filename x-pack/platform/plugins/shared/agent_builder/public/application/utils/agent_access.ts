@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AgentVisibility, type UserIdAndName } from '@kbn/agent-builder-common';
+import {
+  type AgentVisibility,
+  type UserIdAndName,
+  canChangeAgentVisibility as canChangeAgentVisibilityCommon,
+  hasAgentWriteAccess,
+} from '@kbn/agent-builder-common';
 
 export interface AgentBuilderCurrentUser {
   uid?: string;
@@ -15,53 +20,50 @@ export interface AgentBuilderCurrentUser {
   };
 }
 
-const isSuperuser = (currentUser?: AgentBuilderCurrentUser | null) =>
-  currentUser?.user.roles?.includes('superuser') ?? false;
+/**
+ * Maps UI current user shape to UserIdAndName for shared access-control helpers.
+ */
+const toUserIdAndName = (currentUser?: AgentBuilderCurrentUser | null): UserIdAndName | null =>
+  currentUser ? { id: currentUser.uid, username: currentUser.user.username } : null;
 
-const isOwner = ({
-  owner,
-  currentUser,
-}: {
-  owner?: UserIdAndName;
-  currentUser?: AgentBuilderCurrentUser | null;
-}) => {
-  if (!owner || !currentUser) {
-    return false;
-  }
-
-  if (owner.id !== undefined && owner.id === currentUser.uid) {
-    return true;
-  }
-
-  return owner.username === currentUser.user.username;
-};
-
+/**
+ * Whether the current user can change the agent's visibility.
+ * Uses server-defined rules: visibility override (from API) or owner.
+ * Do not use role names (e.g. superuser); the override is determined server-side via ES privilege check.
+ */
 export const canChangeAgentVisibility = ({
   owner,
   currentUser,
+  hasAgentVisibilityAccessOverride,
 }: {
   owner?: UserIdAndName;
   currentUser?: AgentBuilderCurrentUser | null;
-}) => {
-  return isSuperuser(currentUser) || isOwner({ owner, currentUser });
-};
+  hasAgentVisibilityAccessOverride: boolean;
+}) =>
+  canChangeAgentVisibilityCommon({
+    owner,
+    currentUser: toUserIdAndName(currentUser),
+    hasAgentVisibilityAccessOverride,
+  });
 
+/**
+ * Whether the current user can edit the agent based on visibility (and owner/override).
+ * Public: anyone can edit. Private/Shared: only owner or user with visibility override.
+ */
 export const canEditAgentByVisibility = ({
   visibility,
   owner,
   currentUser,
+  hasAgentVisibilityAccessOverride,
 }: {
   visibility?: AgentVisibility;
   owner?: UserIdAndName;
   currentUser?: AgentBuilderCurrentUser | null;
-}) => {
-  if (isSuperuser(currentUser)) {
-    return true;
-  }
-
-  if ((visibility ?? AgentVisibility.Public) === AgentVisibility.Public) {
-    return true;
-  }
-
-  return isOwner({ owner, currentUser });
-};
+  hasAgentVisibilityAccessOverride: boolean;
+}) =>
+  hasAgentWriteAccess({
+    visibility,
+    owner,
+    currentUser: toUserIdAndName(currentUser),
+    hasAgentVisibilityAccessOverride,
+  });

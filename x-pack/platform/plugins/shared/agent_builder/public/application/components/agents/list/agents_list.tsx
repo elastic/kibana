@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AgentVisibility, VISIBILITY_ICON, type AgentDefinition } from '@kbn/agent-builder-common';
-import { useQuery } from '@kbn/react-query';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { VISIBILITY_BADGE_COLOR } from '@kbn/agent-builder-common/agents/visibility';
@@ -38,10 +37,11 @@ import {
   canEditAgentByVisibility,
   type AgentBuilderCurrentUser,
 } from '../../../utils/agent_access';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
 const columnNames = {
@@ -89,11 +89,12 @@ const getVisibilityBadgeTooltipContent = (
   switch (visibility) {
     case AgentVisibility.Private:
       return i18n.translate('xpack.agentBuilder.agents.visibility.privateTooltip', {
-        defaultMessage: 'Only the owner or a superuser can view and edit.',
+        defaultMessage: 'Only the owner or users with visibility override can view and edit.',
       });
     case AgentVisibility.Shared:
       return i18n.translate('xpack.agentBuilder.agents.visibility.sharedTooltip', {
-        defaultMessage: 'Anyone can view. Only the owner or a superuser can edit.',
+        defaultMessage:
+          'Anyone can view. Only the owner or users with visibility override can edit.',
       });
     case AgentVisibility.Public:
       return i18n.translate('xpack.agentBuilder.agents.visibility.publicTooltip', {
@@ -147,11 +148,13 @@ const canCurrentUserEditAgent = ({
   manageAgents,
   experimentalFeaturesEnabled,
   currentUser,
+  hasAgentVisibilityAccessOverride,
 }: {
   agent: AgentDefinition;
   manageAgents: boolean;
   experimentalFeaturesEnabled: boolean;
-  currentUser?: AgentBuilderCurrentUser;
+  currentUser?: AgentBuilderCurrentUser | null;
+  hasAgentVisibilityAccessOverride: boolean;
 }) => {
   if (agent.readonly || !manageAgents) {
     return false;
@@ -165,21 +168,18 @@ const canCurrentUserEditAgent = ({
     visibility: agent.visibility,
     owner: agent.created_by,
     currentUser,
+    hasAgentVisibilityAccessOverride,
   });
 };
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
-  const { manageAgents } = useUiPrivileges();
   const { services } = useKibana();
   const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.settings.client);
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
-  const { data: currentUser } = useQuery({
-    queryKey: ['agentBuilder', 'currentUser'],
-    queryFn: async () => services.userProfile.getCurrent(),
-    enabled: experimentalFeaturesEnabled,
-  });
+  const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
+  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
@@ -196,6 +196,7 @@ export const AgentsList: React.FC = () => {
         manageAgents,
         experimentalFeaturesEnabled,
         currentUser,
+        hasAgentVisibilityAccessOverride,
       });
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
@@ -308,7 +309,14 @@ export const AgentsList: React.FC = () => {
     return experimentalFeaturesEnabled
       ? [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions]
       : [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createAgentBuilderUrl, currentUser, deleteAgent, manageAgents, experimentalFeaturesEnabled]);
+  }, [
+    createAgentBuilderUrl,
+    currentUser,
+    deleteAgent,
+    hasAgentVisibilityAccessOverride,
+    manageAgents,
+    experimentalFeaturesEnabled,
+  ]);
 
   const errorMessage = useMemo(
     () =>
