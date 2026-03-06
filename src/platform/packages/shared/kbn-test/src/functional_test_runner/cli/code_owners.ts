@@ -14,14 +14,16 @@ import { getCodeOwnersEntries } from '@kbn/code-owners';
 import type { RepoPath } from '@kbn/repo-path';
 import ignore from 'ignore';
 
-const FTR_TEST_DIRECTORIES = [
-  'test',
+const FTR_TEST_PATTERNS = [
   'src/platform/test',
   'x-pack/platform/test',
-  'x-pack/solutions/search/test',
-  'x-pack/solutions/observability/test',
-  'x-pack/solutions/security/test',
-  'x-pack/solutions/chat/test',
+  ':(glob)x-pack/solutions/*/test/**',
+];
+
+const SCOUT_TEST_PATTERNS = [
+  ':(glob)src/platform/**/test/scout*/**',
+  ':(glob)x-pack/platform/**/test/scout*/**',
+  ':(glob)x-pack/solutions/**/test/scout*/**',
 ];
 
 const JEST_TEST_PATTERNS = [
@@ -31,18 +33,16 @@ const JEST_TEST_PATTERNS = [
   ':(glob)**/*.test.jsx',
 ];
 
-const SCOUT_TEST_PATTERNS = [':(glob)**/test/scout*/**/*.spec.ts'];
-
 interface TestFileGroup {
   label: string;
   files: RepoPath[];
 }
 
 async function getTestFileGroups(): Promise<TestFileGroup[]> {
-  const [ftrFiles, jestFiles, scoutFiles] = await Promise.all([
-    getRepoFiles(FTR_TEST_DIRECTORIES),
-    getRepoFiles(JEST_TEST_PATTERNS),
+  const [ftrFiles, scoutFiles, jestFiles] = await Promise.all([
+    getRepoFiles(FTR_TEST_PATTERNS),
     getRepoFiles(SCOUT_TEST_PATTERNS),
+    getRepoFiles(JEST_TEST_PATTERNS),
   ]);
 
   const seen = new Set(ftrFiles.map((f) => f.repoRel));
@@ -55,8 +55,8 @@ async function getTestFileGroups(): Promise<TestFileGroup[]> {
 
   return [
     { label: 'FTR', files: ftrFiles },
-    { label: 'Jest', files: dedup(jestFiles) },
     { label: 'Scout', files: dedup(scoutFiles) },
+    { label: 'Jest', files: dedup(jestFiles) },
   ];
 }
 
@@ -97,7 +97,7 @@ export async function checkTestCodeOwnersCLI() {
       throw createFailError(`Found ${allMissing.length} test files without code owner`);
     },
     {
-      description: 'Check that all test files (FTR, Jest, Scout) are covered by GitHub CODEOWNERS',
+      description: 'Check that all test files (FTR, Scout, Jest) are covered by GitHub CODEOWNERS',
     }
   );
 }
