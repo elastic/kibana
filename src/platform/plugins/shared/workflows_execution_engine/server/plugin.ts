@@ -36,6 +36,7 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
 import { getExecutionHistoryStatsFn } from './repositories/functions/get_execution_history_stats';
 import { getRecentExecutionsForWorkflowsFn } from './repositories/functions/get_recent_executions_for_workflows';
+import { getStepExecutionFn } from './repositories/functions/get_step_execution';
 import { getStepExecutionsFn } from './repositories/functions/get_step_executions';
 import { getWorkflowExecutionFn } from './repositories/functions/get_workflow_executions';
 import { searchWorkflowExecutionsFn } from './repositories/functions/search_workflow_executions';
@@ -863,6 +864,10 @@ export class WorkflowsExecutionEnginePlugin
       ),
       searchWorkflowExecutions: searchWorkflowExecutionsFn(
         coreStart.elasticsearch.client.asInternalUser
+      ),
+      getStepExecution: getStepExecutionFn(
+        executionStateRepository,
+        stepExecutionRepositoryPromise
       ),
       getStepExecutions: getStepExecutionsFn(
         executionStateRepository,

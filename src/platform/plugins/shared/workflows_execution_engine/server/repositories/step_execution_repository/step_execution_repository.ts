@@ -50,6 +50,50 @@ export class StepExecutionRepository {
     );
   }
 
+  /**
+   * Searches for a single step execution by its ID from cold storage (data stream).
+   *
+   * When `fields` is provided, only those properties are fetched via `_source_includes`
+   * and the return type is narrowed to `Pick<EsWorkflowStepExecution, K>`.
+   */
+  public async searchStepExecutionById(
+    stepExecutionId: string,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null>;
+  public async searchStepExecutionById<K extends keyof EsWorkflowStepExecution>(
+    stepExecutionId: string,
+    spaceId: string,
+    fields: K[]
+  ): Promise<Pick<EsWorkflowStepExecution, K> | null>;
+  public async searchStepExecutionById<K extends keyof EsWorkflowStepExecution>(
+    stepExecutionId: string,
+    spaceId: string,
+    fields?: K[]
+  ): Promise<EsWorkflowStepExecution | Pick<EsWorkflowStepExecution, K> | null> {
+    const response = await this.dataStreamClient.search({
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { id: stepExecutionId },
+            },
+            {
+              term: { spaceId },
+            },
+            {
+              term: { type: 'step' },
+            },
+          ],
+        },
+      },
+      size: 1,
+      _source_includes: fields,
+    });
+
+    const hit = response.hits.hits[0];
+    return hit ? (hit._source as unknown as Pick<EsWorkflowStepExecution, K>) : null;
+  }
+
   public async bulkCreate(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
     if (stepExecutions.length === 0) {
       return;

@@ -27,6 +27,7 @@ import type {
 import type {
   getExecutionHistoryStatsFn,
   getRecentExecutionsForWorkflowsFn,
+  getStepExecutionFn,
   getStepExecutionsFn,
   getWorkflowExecutionFn,
   searchWorkflowExecutionsFn,
@@ -67,6 +68,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   getWorkflowExecution: ReturnType<typeof getWorkflowExecutionFn>;
   searchWorkflowExecutions: ReturnType<typeof searchWorkflowExecutionsFn>;
+  getStepExecution: ReturnType<typeof getStepExecutionFn>;
   getStepExecutions: ReturnType<typeof getStepExecutionsFn>;
   getExecutionHistoryStats: ReturnType<typeof getExecutionHistoryStatsFn>;
   getRecentExecutionsForWorkflows: ReturnType<typeof getRecentExecutionsForWorkflowsFn>;
