@@ -48,4 +48,25 @@ describe('createStatusUserActionBuilder ', () => {
     expect(screen.getByText('marked case as')).toBeInTheDocument();
     expect(screen.getByText(label)).toBeInTheDocument();
   });
+
+  it('renders close reason details when provided by status user action', () => {
+    const userAction = getUserAction('status', UserActionActions.update, {
+      payload: { status: CaseStatuses.closed, closeReason: 'false_positive' },
+    });
+    const builder = createStatusUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('and synced alerts with close reason:')).toBeInTheDocument();
+    expect(screen.getByText('false_positive')).toBeInTheDocument();
+    expect(screen.getByTestId('status-update-user-action-close-reason-badge')).toBeInTheDocument();
+  });
 });

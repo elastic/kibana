@@ -675,6 +675,7 @@ const createPatchCasesPayload = ({
       return {
         caseId,
         originalCase,
+        closeReason: updateReq.closeReason,
         updatedAttributes: {
           ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),

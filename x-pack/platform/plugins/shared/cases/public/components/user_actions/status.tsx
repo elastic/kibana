@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
@@ -19,6 +19,8 @@ const isStatusValid = (status: string): status is CaseStatuses => Object.hasOwn(
 
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
+  const closeReason = userAction.payload.closeReason;
+
   if (isStatusValid(status)) {
     return (
       <EuiFlexGroup
@@ -31,6 +33,14 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
         <EuiFlexItem grow={false}>
           <Status status={status} />
         </EuiFlexItem>
+        {closeReason != null && (
+          <>
+            <EuiFlexItem grow={false}>{i18n.SYNCED_ALERTS_CLOSE_REASON}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge>{closeReason}</EuiBadge>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   }

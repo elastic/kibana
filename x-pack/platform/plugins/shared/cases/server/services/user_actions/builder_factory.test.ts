@@ -1107,6 +1107,26 @@ describe('UserActionBuilder', () => {
       );
     });
 
+    it('logs a status user action with close reason when alerts are synced', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.status)!;
+      const userAction = builder.build({
+        payload: {
+          status: CaseStatuses.closed,
+          closeReason: 'false_positive',
+          syncAlerts: true,
+        },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User closed case id: 123 and synced alerts with close reason: false_positive - user action id: 123"`
+      );
+      expect(userAction!.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        closeReason: 'false_positive',
+      });
+    });
+
     it('logs a severity user action correctly', () => {
       const builder = builderFactory.getBuilder(UserActionTypes.severity)!;
       const userAction = builder.build({

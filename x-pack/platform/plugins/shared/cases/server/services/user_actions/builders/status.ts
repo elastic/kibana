@@ -6,24 +6,42 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import { CaseStatuses, UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
-import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
+import type {
+  EventDetails,
+  UserActionParameters,
+  UserActionEvent,
+  SavedObjectParameters,
+} from '../types';
 
 export class StatusUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'status'>): UserActionEvent {
     const action = UserActionActions.update;
+    const shouldLogCloseReasonSyncMessage =
+      args.payload.status === CaseStatuses.closed &&
+      args.payload.syncAlerts === true &&
+      args.payload.closeReason != null;
 
-    const parameters = this.buildCommonUserAction({
-      ...args,
-      action,
-      valueKey: 'status',
-      value: args.payload.status,
-      type: UserActionTypes.status,
-    });
-
+    const parameters: SavedObjectParameters = {
+      attributes: {
+        ...this.getCommonUserActionAttributes({
+          user: args.user,
+          owner: args.owner,
+        }),
+        action,
+        payload: {
+          status: args.payload.status,
+          ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
+        },
+        type: UserActionTypes.status,
+      },
+      references: this.createCaseReferences(args.caseId),
+    };
     const getMessage = (id?: string) =>
-      `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
+      shouldLogCloseReasonSyncMessage
+        ? `User closed case id: ${args.caseId} and synced alerts with close reason: ${args.payload.closeReason} - user action id: ${id}`
+        : `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
 
     const eventDetails: EventDetails = {
       getMessage,

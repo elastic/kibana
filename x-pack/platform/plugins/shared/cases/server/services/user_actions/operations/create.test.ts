@@ -45,7 +45,7 @@ import {
   patchBothSettingsCasesRequest,
   getBothSettingsUserActions,
 } from '../mocks';
-import { AttachmentType } from '../../../../common/types/domain';
+import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -313,6 +313,46 @@ describe('UserActionPersister', () => {
           user: testUser,
         })
       ).toEqual(getBothSettingsUserActions({ isMock: false }));
+    });
+
+    it('adds close reason details to the status audit message when alerts are synced', () => {
+      const updatedCases = {
+        ...patchCasesRequest,
+        cases: patchCasesRequest.cases.map((theCase) => {
+          if (theCase.caseId !== '1') {
+            return theCase;
+          }
+
+          return {
+            ...theCase,
+            closeReason: 'false_positive',
+            updatedAttributes: {
+              ...theCase.updatedAttributes,
+              settings: {
+                syncAlerts: true,
+                extractObservables: false,
+              },
+            },
+          };
+        }),
+      };
+
+      const builtUserActions = persister.buildUserActions({
+        updatedCases,
+        user: testUser,
+      });
+
+      const statusAction = builtUserActions['1'].find(
+        ({ parameters }) => parameters.attributes.type === UserActionTypes.status
+      );
+
+      expect(statusAction?.eventDetails.getMessage('status-user-action-id')).toBe(
+        'User closed case id: 1 and synced alerts with close reason: false_positive - user action id: status-user-action-id'
+      );
+      expect(statusAction?.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        closeReason: 'false_positive',
+      });
     });
 
     describe('customFields', () => {

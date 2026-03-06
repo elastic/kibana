@@ -49,7 +49,9 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: { status: CaseStatuses; closeReason?: string; syncAlerts?: boolean };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };

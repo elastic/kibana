@@ -160,3 +160,10 @@ export const USER_ACTION_EDITED = (type: string) =>
     values: { type },
     defaultMessage: `Edited "{type}"`,
   });
+
+export const SYNCED_ALERTS_CLOSE_REASON = i18n.translate(
+  'xpack.cases.caseView.userActions.status.syncedAlertsCloseReason',
+  {
+    defaultMessage: 'and synced alerts with close reason',
+  }
+);

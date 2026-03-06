@@ -85,6 +85,29 @@ export class UserActionPersister {
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
         .forEach((field) => {
+          // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
+          // Persist the closeReason to the status userAction
+          if (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) {
+            const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.status);
+            const statusUserAction = userActionBuilder?.build({
+              caseId,
+              owner,
+              user,
+              payload: {
+                status: updatedCase.updatedAttributes.status,
+                closeReason: updatedCase.closeReason,
+                syncAlerts:
+                  updatedCase.updatedAttributes.settings?.syncAlerts ??
+                  originalCase.attributes.settings.syncAlerts,
+              },
+            });
+
+            if (statusUserAction != null) {
+              userActions.push(statusUserAction);
+            }
+            return;
+          }
+
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
           userActions.push(
