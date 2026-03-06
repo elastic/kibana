@@ -42,7 +42,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
-    - ./emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:

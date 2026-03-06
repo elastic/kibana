@@ -62,11 +62,32 @@ export function createErrorHandlingTests(executionMode: ExecutionMode) {
 
         const retryRequest = llmProxy.interceptedRequests.find(
           (request) => request.matchingInterceptorName === 'final-assistant-response'
-        )!.requestBody;
+        )?.requestBody;
 
-        const messages = retryRequest.messages;
+        expect(retryRequest).to.not.be(undefined);
 
-        const errorMessage = JSON.parse(messages[messages.length - 1].content as string).response;
+        const messages = (retryRequest as { messages: Array<{ role?: string; content?: unknown }> })
+          .messages;
+
+        // The retry request includes a mix of human/assistant/tool messages.
+        // We want the tool-result message that carries the "tool not available" error.
+        const lastToolMessage = [...messages]
+          .reverse()
+          .find((m) => m?.role === 'tool' && typeof m?.content === 'string');
+
+        expect(lastToolMessage).to.not.be(undefined);
+
+        const toolContent = lastToolMessage!.content as string;
+        let errorMessage = toolContent;
+        // Some layers may wrap tool result content in a JSON string.
+        try {
+          const parsed = JSON.parse(toolContent) as { response?: unknown };
+          if (parsed && typeof parsed === 'object' && typeof parsed.response === 'string') {
+            errorMessage = parsed.response;
+          }
+        } catch {
+          // Non-JSON tool content; use as-is.
+        }
 
         expect(errorMessage).to.contain('ERROR: called a tool which was not available');
       });

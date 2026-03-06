@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defer, from, ReplaySubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
@@ -26,11 +26,11 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
-import { createChromeComponents } from './ui/chrome_components';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
@@ -107,18 +107,11 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
-    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
       application,
       docLinks,
-      feedbackDeps: {
-        isEnabled$: defer(() =>
-          from(getNotifications().then((notifications) => notifications.feedback.isEnabled()))
-        ),
-        urlParams$: defer(() => projectNavigation.getFeedbackUrlParams$()),
-      },
     });
 
     // 2. Setup side effects (body classes, fullscreen changes, system color mode)
@@ -157,13 +150,19 @@ export class ChromeService {
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
     const projectNavigation = this.projectNavigation.start({
-      application,
-      navLinksService: navLinks,
-      http,
-      chromeBreadcrumbs$: state.breadcrumbs.classic.$,
+      history: application.history,
+      prependBasePath: http.basePath.prepend,
+      navLinks,
+      getUiSettingsHomeRoute: () => {
+        try {
+          return uiSettings.get('defaultRoute');
+        } catch (e) {
+          // In some cases, this might be fetched before the uiSettings client is fully ready (interactive setup mode)
+          return;
+        }
+      },
       logger: this.logger,
-      featureFlags,
-      uiSettings,
+      chromeBreadcrumbs$: state.breadcrumbs.classic.$,
     });
 
     const sidebar = this.sidebar.start();
@@ -178,17 +177,15 @@ export class ChromeService {
 
     // 6. Create cached observables for components
     const navLinks$ = navLinks.getNavLinks$();
-    const activeNodes$ = projectNavigation.getActiveNodes$();
-    const navigationTreeUi$ = projectNavigation.getNavigationTreeUi$();
+    const navigation$ = projectNavigation.getNavigation$();
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
-    const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
     const homeHref = http.basePath.prepend('/app/home');
     const kibanaVersion = this.params.kibanaVersion;
 
-    // 7. Create chrome components
-    const components = createChromeComponents({
+    // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
+    const componentDeps: ChromeComponentsDeps = {
       config: {
         isServerless: this.isServerless,
         kibanaVersion,
@@ -198,28 +195,41 @@ export class ChromeService {
       application,
       basePath: http.basePath,
       docLinks,
-      state,
       navControls: {
         left$: navControls.getLeft$(),
         center$: navControls.getCenter$(),
         right$: navControls.getRight$(),
         extension$: navControls.getExtension$(),
       },
-      projectNavigation: {
+      classic: {
+        breadcrumbs$: state.breadcrumbs.classic.$,
+        badge$: state.badge.$,
+        recentlyAccessed$,
+        customNavLink$: state.customNavLink.$,
+      },
+      project: {
         breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
         homeHref$: projectNavigation.getProjectHome$(),
-        navigationTree$: navigationTreeUi$,
-        activeNodes$,
-        activeDataTestSubj$,
+        navigation$,
       },
       loadingCount$,
-      helpMenuLinks$,
+      helpMenu: {
+        menuLinks$: helpMenuLinks$,
+        extension$: state.help.extension.$,
+        supportUrl$: state.help.supportUrl.$,
+        globalExtensionMenuLinks$: state.help.globalMenuLinks.$,
+      },
       navLinks$,
-      recentlyAccessed$,
       customBranding$: customBranding.customBranding$,
-      appMenuActions$: application.currentActionMenu$,
-      prependBasePath: http.basePath.prepend,
-    });
+      breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
+      appMenu$: state.appMenu.$,
+      headerBanner$: state.headerBanner.$,
+      sideNav: {
+        collapsed$: state.sideNav.collapsed.$,
+        initialCollapsed: state.sideNav.collapsed.get(),
+        onToggleCollapsed: state.sideNav.collapsed.set,
+      },
+    };
 
     // 8. Return chrome API
     return createChromeApi({
@@ -231,14 +241,16 @@ export class ChromeService {
         docTitle,
         projectNavigation,
       },
-      components,
+      componentDeps,
       sidebar,
     });
   }
 
   public stop() {
+    this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
+    this.sidebar.stop();
     this.stop$.next();
   }
 }

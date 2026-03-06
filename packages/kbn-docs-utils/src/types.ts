@@ -295,6 +295,7 @@ export interface ApiStats {
   noReferences: ApiDeclaration[];
   paramDocMismatches: ApiDeclaration[];
   missingComplexTypeInfo: ApiDeclaration[];
+  missingReturns: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
@@ -308,6 +309,30 @@ export interface ApiStats {
    * Number of adoption-tracked APIs that are still not referenced.
    */
   adoptionTrackedAPIsUnreferencedCount: number;
+  /**
+   * Unnamed exports found in this plugin (e.g., JSDoc comments above non-declarations).
+   */
+  unnamedExports: UnnamedExport[];
+}
+
+/**
+ * Represents an exported declaration that has no identifiable name.
+ * This typically occurs when a JSDoc-style comment appears above a line
+ * that isn't a proper declaration.
+ */
+export interface UnnamedExport {
+  pluginId: string;
+  scope: ApiScope;
+  path: string;
+  lineNumber: number;
+  textSnippet: string;
+}
+
+/**
+ * A mapping of plugin id to a list of unnamed exports found in that plugin.
+ */
+export interface UnnamedExportsByPlugin {
+  [pluginId: string]: UnnamedExport[];
 }
 
 /**
@@ -318,6 +343,7 @@ export interface IssuesByPlugin {
   missingApiItems: MissingApiItemMap;
   referencedDeprecations: ReferencedDeprecationsByPlugin;
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  unnamedExports?: UnnamedExportsByPlugin;
 }
 
 export type PluginMetaInfo = ApiStats & {

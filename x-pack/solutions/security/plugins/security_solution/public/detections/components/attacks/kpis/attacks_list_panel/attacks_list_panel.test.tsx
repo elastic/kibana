@@ -15,6 +15,9 @@ import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details
 
 jest.mock('./use_attacks_list_data');
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../entity_analytics/components/severity/severity_bar', () => ({
+  SeverityBar: () => <div data-test-subj="severity-bar" />,
+}));
 
 describe('AttacksListPanel', () => {
   const mockDataView = {
@@ -51,8 +54,18 @@ describe('AttacksListPanel', () => {
 
   it('renders table with data correctly', () => {
     const mockItems = [
-      { id: 'attack-1', name: 'Attack 1', alertsCount: 5 },
-      { id: 'attack-2', name: 'Attack 2', alertsCount: 3 },
+      {
+        id: 'attack-1',
+        name: 'Attack 1',
+        alertsCount: 5,
+        severityCount: { critical: 2, high: 3 },
+      },
+      {
+        id: 'attack-2',
+        name: 'Attack 2',
+        alertsCount: 3,
+        severityCount: { low: 3 },
+      },
     ];
 
     (useAttacksListData as jest.Mock).mockReturnValue({
@@ -72,10 +85,11 @@ describe('AttacksListPanel', () => {
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('Attack 2')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getAllByTestId('severity-bar')).toHaveLength(2);
   });
 
   it('calls openFlyout when clicking on an attack name', () => {
-    const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5 }];
+    const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
 
     (useAttacksListData as jest.Mock).mockReturnValue({
       items: mockItems,

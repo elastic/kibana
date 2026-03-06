@@ -8,6 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import type { UsageApiConfigType } from './config';
 import { UsageApiPlugin } from './plugin';
+import { UsageReportingService } from './usage_reporting';
 
 describe('Usage API Plugin', () => {
   const setupPlugin = (configParts: Partial<UsageApiConfigType> = {}) => {
@@ -27,41 +28,32 @@ describe('Usage API Plugin', () => {
     describe('interface', () => {
       it('it should return enabled false when no config is provided', () => {
         const { setup } = setupPlugin();
-        expect(setup).toMatchInlineSnapshot(`
-          Object {
-            "config": Object {
-              "enabled": false,
-              "tls": undefined,
-              "url": undefined,
-            },
-          }
-        `);
+        expect(setup.config).toEqual({
+          enabled: false,
+          tls: undefined,
+          url: undefined,
+        });
+        expect(setup.usageReporting).toBeUndefined();
       });
 
       it('it should return enabled false when config is provided but url is not set', () => {
         const { setup } = setupPlugin({ enabled: true });
-        expect(setup).toMatchInlineSnapshot(`
-          Object {
-            "config": Object {
-              "enabled": false,
-              "tls": undefined,
-              "url": undefined,
-            },
-          }
-        `);
+        expect(setup.config).toEqual({
+          enabled: false,
+          tls: undefined,
+          url: undefined,
+        });
+        expect(setup.usageReporting).toBeUndefined();
       });
 
       it('it should return enabled true when config is provided and url is set', () => {
         const { setup } = setupPlugin({ enabled: true, url: 'https://usage-api.example' });
-        expect(setup).toMatchInlineSnapshot(`
-          Object {
-            "config": Object {
-              "enabled": true,
-              "tls": undefined,
-              "url": "https://usage-api.example",
-            },
-          }
-        `);
+        expect(setup.config).toEqual({
+          enabled: true,
+          tls: undefined,
+          url: 'https://usage-api.example',
+        });
+        expect(setup.usageReporting).toBeInstanceOf(UsageReportingService);
       });
 
       it('it should return tls when tls is provided', () => {
@@ -70,28 +62,26 @@ describe('Usage API Plugin', () => {
           url: 'https://usage-api.example',
           tls: { certificate: 'certificate', key: 'key', ca: 'ca' },
         });
-        expect(setup).toMatchInlineSnapshot(`
-          Object {
-            "config": Object {
-              "enabled": true,
-              "tls": Object {
-                "ca": "ca",
-                "certificate": "certificate",
-                "key": "key",
-              },
-              "url": "https://usage-api.example",
-            },
-          }
-        `);
+        expect(setup.config).toEqual({
+          enabled: true,
+          tls: { ca: 'ca', certificate: 'certificate', key: 'key' },
+          url: 'https://usage-api.example',
+        });
+        expect(setup.usageReporting).toBeInstanceOf(UsageReportingService);
       });
     });
   });
 
   describe('#start', () => {
     describe('interface', () => {
-      it('snapshot', () => {
+      it('should not expose usageReporting when disabled', () => {
         const { start } = setupPlugin();
-        expect(start).toMatchInlineSnapshot(`undefined`);
+        expect(start.usageReporting).toBeUndefined();
+      });
+
+      it('should expose usageReporting when enabled', () => {
+        const { start } = setupPlugin({ enabled: true, url: 'https://usage-api.example' });
+        expect(start.usageReporting).toBeInstanceOf(UsageReportingService);
       });
     });
   });

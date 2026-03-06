@@ -56,6 +56,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointRunScript: false,
 
   /**
+   * Support for Automated Endpoint `runscript` (from rules)
+   * Release: 9.4
+   */
+  responseActionsEndpointAutomatedRunScript: false,
+
+  /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
@@ -95,11 +101,6 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
-
-  /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
-   */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Enables the storing of gaps in the event log
@@ -209,7 +210,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
-  splunkV2DashboardsEnabled: false,
+  splunkV2DashboardsEnabled: true,
 
   /**
    * Enables Detection Engine Health UI
@@ -220,6 +221,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Rule Health UI
    */
   ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -15,13 +15,19 @@ import {
 /**
  * Determine if condition filtering is enabled for a given condition block.
  * The filtering on a condition is enabled either if the condition is currently
- * selected or it has at least one new descendant processor in the current simulation.
+ * selected, the condition itself is newly created, or it has at least one new descendant processor
+ * in the current simulation.
  */
 export function useConditionFilteringEnabled(conditionId: string) {
   const stepRefs = useInteractiveModeSelector((state) => state.context.stepRefs);
   const isConditionSelected = useSimulatorSelector(
     (snapshot) => snapshot.context.selectedConditionId === conditionId
   );
+
+  const isConditionNew = useMemo(() => {
+    const stepRef = stepRefs.find((ref) => ref.id === conditionId);
+    return Boolean(stepRef?.getSnapshot()?.context.isNew);
+  }, [stepRefs, conditionId]);
 
   const newProcessorsForCondition = useMemo(() => {
     const newSteps = stepRefs
@@ -31,5 +37,5 @@ export function useConditionFilteringEnabled(conditionId: string) {
     return collectDescendantProcessorIdsForCondition(newSteps, conditionId);
   }, [stepRefs, conditionId]);
 
-  return isConditionSelected || newProcessorsForCondition.length !== 0;
+  return isConditionSelected || isConditionNew || newProcessorsForCondition.length !== 0;
 }

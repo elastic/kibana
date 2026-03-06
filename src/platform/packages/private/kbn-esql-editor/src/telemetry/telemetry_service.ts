@@ -15,11 +15,12 @@ import type {
   ControlTriggerSource,
   TelemetryLatencyProps,
 } from '@kbn/esql-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
@@ -28,12 +29,23 @@ import {
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
+  ESQL_RESOURCE_BROWSER_OPENED,
+  ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
+
+export enum ResourceBrowserType {
+  DATA_SOURCES = 'data_sources',
+  FIELDS = 'fields',
+}
+export enum ResourceBrowserOpenedFrom {
+  AUTOCOMPLETE = 'autocomplete',
+  BADGE = 'badge',
+}
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -64,6 +76,11 @@ export class ESQLEditorTelemetryService {
       value1: payload.queryLength,
       key2: 'query_lines' as const,
       value2: payload.queryLines,
+
+      ...(payload.callbacksDuration !== undefined
+        ? { key3: 'callbacks_duration' as const, value3: Math.round(payload.callbacksDuration) }
+        : {}),
+
       meta: {
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
@@ -206,6 +223,28 @@ export class ESQLEditorTelemetryService {
     this._reportEvent(ESQL_CONTROL_CANCELLED, {
       control_kind: controlType,
       reason,
+    });
+  }
+
+  public trackResourceBrowserOpened(payload: {
+    browserType: ResourceBrowserType;
+    openedFrom: ResourceBrowserOpenedFrom;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
+      browser_type: payload.browserType,
+      opened_from: payload.openedFrom,
+    });
+  }
+
+  public trackResourceBrowserItemToggled(payload: {
+    browserType: ResourceBrowserType;
+    openedFrom: ResourceBrowserOpenedFrom;
+    action: DataSourceSelectionChange;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
+      browser_type: payload.browserType,
+      opened_from: payload.openedFrom,
+      action: payload.action,
     });
   }
 

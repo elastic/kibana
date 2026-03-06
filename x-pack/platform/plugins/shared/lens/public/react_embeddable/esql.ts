@@ -50,7 +50,7 @@ export async function loadESQLAttributes({
     import('../async_services'),
   ]);
 
-  const esqlQuery = getInitialESQLQuery(dataView, true);
+  const esqlQuery = getInitialESQLQuery(dataView);
 
   const defaultEsqlQuery = {
     esql: esqlQuery,

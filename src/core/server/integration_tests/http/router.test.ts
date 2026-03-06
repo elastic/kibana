@@ -13,10 +13,11 @@ import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
@@ -36,6 +37,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 beforeEach(async () => {
@@ -847,7 +849,7 @@ describe('Handler', () => {
 
       expect(result.body).toEqual({
         error: 'Bad Request',
-        message: expect.stringMatching(/Expected number, received string/),
+        message: expect.stringMatching(/Invalid input: expected number, received string/),
         statusCode: 400,
       });
 
@@ -859,13 +861,12 @@ describe('Handler', () => {
               "error": Object {
                 "message": "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"number\\",
-            \\"received\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"page\\"
             ],
-            \\"message\\": \\"Expected number, received string\\"
+            \\"message\\": \\"Invalid input: expected number, received string\\"
           }
         ]",
               },

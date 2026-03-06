@@ -8,12 +8,12 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiHighlight,
   EuiIcon,
   EuiLink,
@@ -219,9 +219,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             isDisabled={integrations.status === 'loading'}
             prepend={
               selectedOptions.length > 0 ? (
-                <EuiButtonEmpty>
-                  <EuiIcon type={selectedOptions[0]?.icon ?? 'fleetApp'} />
-                </EuiButtonEmpty>
+                <EuiFormPrepend iconLeft={selectedOptions[0]?.icon ?? 'fleetApp'} />
               ) : undefined
             }
             renderOption={(option, searchValue, contentClassName) => (

@@ -19,8 +19,8 @@ import {
   createToolRegistryMock,
   createMockedTool,
 } from '@kbn/agent-builder-plugin/server/test_utils/tools';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
 
 const mockLoadWorkflows = jest.fn();
 jest.mock('@kbn/data-catalog-plugin/common/workflow_loader', () => ({
@@ -123,15 +123,8 @@ describe('createConnectorAndRelatedResources', () => {
   const mockActions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
   };
-  const mockAgentBuilder: AgentBuilderPluginStart = {
-    agents: {
-      runAgent: jest.fn(),
-    },
-    tools: {
-      execute: jest.fn(),
-      getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-    },
-  };
+  const mockAgentBuilder = agentBuilderMocks.createStart();
+  mockAgentBuilder.tools.getRegistry.mockResolvedValue(mockToolRegistry);
 
   const mockRequest = httpServerMock.createKibanaRequest();
 
@@ -224,13 +217,13 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: my-data-source.sources.notion.search');
+    expect(createdYaml).toContain('name: my-data-source.test_type.source.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-data-source.search',
+        id: 'my-data-source.test_type.source.search',
         type: 'workflow',
         description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
@@ -248,6 +241,62 @@ tags:
         toolIds: ['tool-1'],
         kscIds: ['ksc-1'],
       })
+    );
+  });
+
+  it('should preserve underscores in slugified workflow names and tool IDs', async () => {
+    const actionTypeId = '.notion';
+    const mockStackConnector = { id: 'ksc-1', actionTypeId };
+    const mockWorkflow = { id: 'workflow-1', name: 'Test Workflow' };
+    const mockTool = createMockedTool({ id: 'tool-1' });
+    const mockSavedObject = {
+      id: 'connector-1',
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'Notion_Source',
+        type: 'test_type',
+        workflowIds: ['workflow-1'],
+        toolIds: ['tool-1'],
+        kscIds: ['ksc-1'],
+      },
+    };
+    const mockDataSource = {
+      stackConnectors: [{ type: actionTypeId, config: {} }],
+      workflows: { directory: '/path/to/workflows' },
+    } as Partial<DataSource>;
+
+    mockLoadWorkflows.mockResolvedValue([
+      {
+        content: `name: sources.notion.search
+description: Search Notion content
+tags:
+  - agent-builder-tool`,
+        shouldGenerateABTool: true,
+      },
+    ]);
+
+    mockActionsClient.create.mockResolvedValue(mockStackConnector);
+    mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
+    mockToolRegistry.create.mockResolvedValue(mockTool);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
+
+    await createDataSourceAndRelatedResources({
+      name: 'Notion_Source',
+      type: 'test_type',
+      credentials: 'secret-token-123',
+      savedObjectsClient: mockSavedObjectsClient,
+      request: mockRequest,
+      logger: mockLogger,
+      workflowManagement: mockWorkflowManagement as any,
+      actions: mockActions as any,
+      dataSource: mockDataSource as any,
+      agentBuilder: mockAgentBuilder as any,
+    });
+
+    const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
+    expect(createdYaml).toContain('name: notion_source.test_type.source.search');
+    expect(mockToolRegistry.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'notion_source.test_type.source.search' })
     );
   });
 
@@ -402,7 +451,7 @@ tags:
             description: 'List repository issues List issues',
           },
         ],
-        namespace: 'My MCP Connector',
+        namespace: 'my-mcp-connector.test_type',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -484,7 +533,7 @@ tags:
       );
     });
 
-    it('should throw error when no MCP tools are found', async () => {
+    it('should propagate the error when getNamedMcpTools fails', async () => {
       const actionTypeId = '.mcp';
       const mockStackConnector = {
         id: 'mcp-connector-1',
@@ -513,7 +562,11 @@ tags:
         },
       ]);
 
-      mockGetNamedMcpTools.mockResolvedValue(undefined);
+      mockGetNamedMcpTools.mockRejectedValue(
+        new Error(
+          'an error occurred while running the action: Streamable HTTP error: missing required Authorization header'
+        )
+      );
       mockActionsClient.create.mockResolvedValue(mockStackConnector);
 
       await expect(
@@ -529,7 +582,9 @@ tags:
           dataSource: mockDataSource as any,
           agentBuilder: mockAgentBuilder as any,
         })
-      ).rejects.toThrow('No imported connector tools found for My MCP Connector');
+      ).rejects.toThrow(
+        'an error occurred while running the action: Streamable HTTP error: missing required Authorization header'
+      );
     });
 
     it('should throw error when bulk creating MCP tools fails', async () => {

@@ -22,7 +22,7 @@ import type {
   Incident,
   PartialIncident,
   ResponseError,
-  ServiceNowError,
+  ErrorMessageFormat,
 } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
@@ -44,23 +44,61 @@ export const prepareIncident = (
 
   return { ...additionalFields, ...baseFields };
 };
+/**
+ * Extracts error information from ServiceNow API errors.
+ *
+ * Handles 3 formats:
+ * 1. Table API: error.response.data = { error: { message?: string, detail?: string }, status?: string }
+ * 2. OAuth: error.message is JSON like {"error": "invalid_grant", "error_description"?: "User not found"}
+ * 3. Plain message like Incident id is empty
+ */
+const createErrorMessage = (error: ResponseError): ErrorMessageFormat => {
+  // 1. Standard ServiceNow Table API error (error.response.data exists)
+  const data = error.response?.data;
 
-const createErrorMessage = (errorResponse?: ServiceNowError): string => {
-  if (errorResponse == null) {
-    return 'unknown: errorResponse was null';
+  if (data) {
+    const snErrorMessage = data.error?.message;
+    const snErrorDetail = data.error?.detail;
+
+    const reason = snErrorMessage
+      ? snErrorDetail
+        ? `${snErrorMessage}: ${snErrorDetail}`
+        : snErrorMessage
+      : 'unknown: no error in error response';
+
+    return {
+      error: error.message,
+      reason,
+    };
   }
 
-  const { error } = errorResponse;
-  return error != null
-    ? `${error?.message}: ${error?.detail}`
-    : 'unknown: no error in error response';
+  // 2. OAuth error (error.message is JSON)
+  // Example: {"error":"invalid_grant","error_description":"User not found"}
+  if (error.message) {
+    try {
+      const parsed = JSON.parse(error.message);
+      if (typeof parsed?.error === 'string') {
+        const reason = parsed.error_description || '';
+        return { error: parsed.error, reason };
+      }
+    } catch {
+      // JSON parsing failed - not an OAuth error, use error.message as-is
+    }
+
+    // Plain error
+    return { error: error.message, reason: '' };
+  }
+
+  return { error: '', reason: '' };
 };
 
 export const addServiceMessageToError = (error: ResponseError, message: string): AxiosError => {
-  error.message = getErrorMessage(
-    i18n.SERVICENOW,
-    `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
-  );
+  const { error: errorPart, reason } = createErrorMessage(error);
+
+  const parts = [`${message}.`, 'Error:', errorPart];
+  if (reason) parts.push('Reason:', reason);
+
+  error.message = getErrorMessage(i18n.SERVICENOW, parts.join(' '));
   return error;
 };
 

@@ -106,15 +106,15 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     searchInputRef.current = node;
   };
 
-  // Focus the search input when popover opens
+  // Focus the search input as soon as the popover opens so that focus
+  // transfers away from the editor immediately (avoids visible flicker).
   useEffect(() => {
-    if (isOpen && !isLoading) {
-      // Use setTimeout to ensure the DOM is ready
-      setTimeout(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
         searchInputRef.current?.focus();
-      }, 0);
+      });
     }
-  }, [isOpen, isLoading]);
+  }, [isOpen]);
 
   const filterButton = (
     <EuiFilterButton
