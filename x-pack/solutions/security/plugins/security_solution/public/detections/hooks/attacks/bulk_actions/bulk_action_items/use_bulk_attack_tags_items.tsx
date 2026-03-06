@@ -11,6 +11,8 @@ import type {
   BulkActionsConfig,
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
+
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { BulkAlertTagsPanel } from '../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
@@ -21,6 +23,8 @@ import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 export interface UseBulkAttackTagsItemsProps {
   /** Optional callback when tags are updated */
   onTagsUpdate?: () => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -30,6 +34,7 @@ export interface UseBulkAttackTagsItemsProps {
  */
 export const useBulkAttackTagsItems = ({
   onTagsUpdate,
+  telemetrySource,
 }: UseBulkAttackTagsItemsProps = {}): BulkAttackActionItems => {
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
   const { applyTags } = useApplyAttackTags();
@@ -94,12 +99,13 @@ export const useBulkAttackTagsItems = ({
               relatedAlertIds,
               setIsLoading,
               onSuccess,
+              telemetrySource,
             });
           }}
         />
       );
     },
-    [applyTags, onTagsUpdate]
+    [applyTags, onTagsUpdate, telemetrySource]
   );
 
   const attackTagsPanels: AttackContentPanelConfig[] = useMemo(
