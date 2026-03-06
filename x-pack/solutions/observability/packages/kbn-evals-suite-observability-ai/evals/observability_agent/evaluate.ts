@@ -13,9 +13,9 @@ import {
   type EvaluationDataset,
   type Example,
 } from '@kbn/evals';
-import { AgentBuilderClient } from '../src/clients/chat/agent_builder_client';
-import type { ConverseAttachment } from '../src/clients/chat/types';
-import { createCriteriaEvaluator } from '../src/evaluate_dataset';
+import { AgentBuilderClient } from '../../src/clients/chat/agent_builder_client';
+import type { ConverseAttachment } from '../../src/clients/chat/types';
+import { createCriteriaEvaluator } from '../../src/criteria_evaluator';
 
 const OBSERVABILITY_AGENT_ID = 'observability.agent';
 

@@ -7,13 +7,13 @@
 
 import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
-import type { AlertInsightParams } from '../src/clients/ai_insight_client';
-import { apmErrorCountAIInsight } from '../src/alert_templates/alerts';
+import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
+import { apmErrorCountAIInsight } from '../../src/alert_templates/alerts';
 import {
   OTEL_DEMO_SNAPSHOT_NAME,
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
-} from '../src/data_generators/replay';
+} from '../../src/data_generators/replay';
 import { evaluate } from './evaluate_ai_insights';
 
 const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';

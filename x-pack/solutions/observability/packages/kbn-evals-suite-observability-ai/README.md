@@ -11,8 +11,8 @@ This package is separate from [`@kbn/evals-suite-obs-ai-assistant`](../kbn-evals
 
 | Directory | Client | Description |
 |---|---|---|
-| `ai_insights/` | `AiInsightClient` | Correctness of LLM-generated insight summaries for alerts and APM errors |
-| `observability_agent/` | `AgentBuilderClient` | Observability Agent chat behavior |
+| `evals/ai_insights/` | `AiInsightClient` | Correctness of LLM-generated insight summaries for alerts and APM errors |
+| `evals/observability_agent/` | `AgentBuilderClient` | Observability Agent chat behavior |
 
 ## Prerequisites
 
@@ -112,7 +112,7 @@ node scripts/evals run \
   --suite observability-ai \
   --judge <connector-id> \
   --project <connector-id> \
-  ai_insights/alert_insight.spec.ts
+  evals/ai_insights/alert_insight.spec.ts
 ```
 
 ### Alternative: separate terminals
