@@ -29,13 +29,13 @@ import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
-import { AlertStatus } from './alert_status';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
 import {
   ABOUT_SECTION_TEST_ID,
   ABOUT_SECTION_TITLE,
 } from '../../../../flyout_v2/document/components/about_section';
+import { AlertStatus } from '../../../../flyout_v2/document/components/alert_status';
 import {
   ALERT_REASON_BANNER,
   AlertReason,
@@ -116,7 +116,7 @@ export const AboutSection = memo(() => {
         />
         <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
         <MitreAttack />
-        <AlertStatus />
+        <AlertStatus hit={hit} />
       </>
     ) : (
       <>

@@ -96,6 +96,28 @@ describe('useAttackCaseContextMenuItems', () => {
     });
   });
 
+  it('should pass telemetrySource to useBulkAttackCaseItems', () => {
+    renderHook(() =>
+      useAttackCaseContextMenuItems({
+        attacksWithCase: [
+          {
+            attackId: 'attack-1',
+            relatedAlertIds: ['alert-1'],
+            markdownComment: 'markdown',
+          },
+        ],
+        title: 'Attack title',
+        telemetrySource: 'attacks_page_group_take_action',
+      })
+    );
+
+    expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
+      title: 'Attack title',
+      closePopover: undefined,
+      telemetrySource: 'attacks_page_group_take_action',
+    });
+  });
+
   it('should pass closePopover to useBulkAttackCaseItems', () => {
     renderHook(() =>
       useAttackCaseContextMenuItems({
