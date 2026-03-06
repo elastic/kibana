@@ -22,7 +22,7 @@ import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
  * See README.md for usage instructions.
  */
 // Failing: See https://github.com/elastic/kibana/issues/256140
-describe.skip('dashboard REST schema', { tag: tags.stateful.all }, () => {
+apiTest.describe.skip('dashboard REST schema', { tag: tags.stateful.all }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
