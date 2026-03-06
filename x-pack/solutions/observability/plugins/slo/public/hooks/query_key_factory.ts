@@ -49,7 +49,8 @@ export const sloKeys = {
   overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
   templates: () => [...sloKeys.all, 'templates'] as const,
   template: (templateId: string) => [...sloKeys.templates(), templateId] as const,
-  templatesList: (filters: SloTemplateListFilter) => [...sloKeys.templates(), 'list', filters] as const,
+  templatesList: (filters: SloTemplateListFilter) =>
+    [...sloKeys.templates(), 'list', filters] as const,
   templateTags: () => [...sloKeys.templates(), 'tags'] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId: string, instanceId: string | undefined, remoteName: string | undefined) =>
