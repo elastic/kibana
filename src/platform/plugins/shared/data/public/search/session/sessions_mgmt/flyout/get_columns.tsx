@@ -33,6 +33,7 @@ export const getColumns: GetColumnsFn = ({
     core,
     api,
     onActionComplete,
-    allowedActions: [ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
+    allowedActions: [ACTION.INSPECT, ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
+    isWithinFlyout: true,
   }),
 ];

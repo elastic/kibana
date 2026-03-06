@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/std'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
