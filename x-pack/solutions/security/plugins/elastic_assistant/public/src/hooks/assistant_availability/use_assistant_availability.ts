@@ -7,7 +7,7 @@
 
 import type { UseAssistantAvailability } from '@kbn/elastic-assistant';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
-import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
+import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '@kbn/agent-builder-plugin/public';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
@@ -30,9 +30,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
 
   const hasAgentBuilderPrivilege = capabilities[AGENTBUILDER_FEATURE_ID]?.show === true;
   const hasAgentBuilderManageCapability =
-    capabilities[AGENTBUILDER_FEATURE_ID]?.manageAgents === true ||
-    (capabilities[AGENTBUILDER_FEATURE_ID] as { showManagement?: boolean } | undefined)
-      ?.showManagement === true;
+    capabilities[AGENTBUILDER_FEATURE_ID]?.[uiPrivileges.manageAgents] === true;
   const hasAgentBuilderManagePrivilege =
     hasAgentBuilderManageCapability && capabilities.advancedSettings?.save === true;
 

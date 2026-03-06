@@ -12,7 +12,7 @@ import type { LicenseService } from '../licence/license_service';
 import { renderHook } from '@testing-library/react';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
-import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
+import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '@kbn/agent-builder-plugin/public';
 import { useIsNavControlVisible } from '../is_nav_control_visible/use_is_nav_control_visible';
 
 jest.mock('../licence/use_licence');
@@ -108,7 +108,7 @@ describe('useAssistantAvailability', () => {
             },
             [AGENTBUILDER_FEATURE_ID]: {
               show: true,
-              manageAgents: true,
+              [uiPrivileges.manageAgents]: true,
             },
             advancedSettings: {
               save: true,
