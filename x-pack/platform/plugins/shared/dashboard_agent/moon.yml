@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/dashboard-markdown'
   - '@kbn/lens-plugin'
   - '@kbn/unified-search-plugin'
-  - '@kbn/i18n-react'
   - '@kbn/deeplinks-analytics'
   - '@kbn/share-plugin'
 tags:
