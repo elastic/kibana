@@ -8,7 +8,11 @@
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import type { MaintenanceWindowClientContext } from '../../../../common';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type {
+  MaintenanceWindowAttributes,
+  MaintenanceWindowClientContext,
+} from '../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../data';
@@ -25,10 +29,10 @@ export interface MaintenanceWindowAggregationResult {
 
 export async function getActiveMaintenanceWindows(
   context: MaintenanceWindowClientContext,
-  cacheIntervalMs?: number
+  cacheIntervalMs?: number,
+  perPage: number = 100
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
-  const perPage = 1000;
 
   const startDate = new Date();
   const startDateISO = startDate.toISOString();
@@ -52,22 +56,22 @@ export async function getActiveMaintenanceWindows(
   ]);
 
   try {
-    const firstPageResponse = await findMaintenanceWindowSo({
-      savedObjectsClient,
-      savedObjectsFindOptions: { filter, page: 1, perPage },
-    });
+    const savedObjects = [];
+    let page = 1;
+    let response: SavedObjectsFindResponse<
+      MaintenanceWindowAttributes,
+      MaintenanceWindowAggregationResult
+    >;
 
-    const savedObjects = [...firstPageResponse.saved_objects];
-    const total = firstPageResponse.total;
-
-    for (let page = 2; savedObjects.length < total; page += 1) {
-      const response = await findMaintenanceWindowSo({
+    do {
+      response = await findMaintenanceWindowSo({
         savedObjectsClient,
         savedObjectsFindOptions: { filter, page, perPage },
       });
 
       savedObjects.push(...response.saved_objects);
-    }
+      page++;
+    } while (response.saved_objects.length === perPage);
 
     return savedObjects.map((savedObject) => {
       return transformMaintenanceWindowAttributesToMaintenanceWindow({
