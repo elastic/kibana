@@ -25,7 +25,6 @@ export const registeredDomainCommand = {
   methods: registeredDomainCommandMethods,
   metadata: {
     preview: true,
-    hidden: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.registeredDomainDoc', {
       defaultMessage:
         'Parses an FQDN string and extracts domain parts into new columns using the public suffix list',

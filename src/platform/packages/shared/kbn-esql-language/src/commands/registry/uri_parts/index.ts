@@ -25,7 +25,6 @@ export const uriPartsCommand = {
   methods: uriPartsCommandMethods,
   metadata: {
     preview: true,
-    hidden: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.uriPartsDoc', {
       defaultMessage: 'Parses a URI string and extracts its components into new columns',
     }),
