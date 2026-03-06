@@ -161,6 +161,11 @@ async function signRequest(
     Authorization: authorizationHeader,
   };
 
+  // if it's an S3 request, we need the "x-amz-content-sha256" header to be set
+  if (service === 's3') {
+    result['x-amz-content-sha256'] = payloadHash;
+  }
+
   if (hasBody) {
     result['Content-Type'] = 'application/json';
   }
