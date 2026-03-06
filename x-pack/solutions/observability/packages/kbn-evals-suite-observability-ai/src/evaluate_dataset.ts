@@ -11,12 +11,18 @@ import type { DefaultEvaluators } from '@kbn/evals';
  * Common criteria evaluator that can be used across all evaluation scenarios.
  * This provides a standardized evaluator with a consistent name "Criteria".
  */
-export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
+export function createCriteriaEvaluator({
+  evaluators,
+  getCriteria,
+}: {
+  evaluators: DefaultEvaluators;
+  getCriteria?: (expected: any) => string[];
+}) {
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
     evaluate: async ({ input, output, expected, metadata }: any) => {
-      const criteria = expected.criteria ?? [];
+      const criteria = getCriteria ? getCriteria(expected) : expected.criteria ?? [];
       const result = await evaluators
         .criteria(criteria)
         .evaluate({ input, expected, output, metadata });

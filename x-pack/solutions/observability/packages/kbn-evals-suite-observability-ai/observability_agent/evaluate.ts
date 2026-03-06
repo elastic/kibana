@@ -7,6 +7,7 @@
 
 import {
   evaluate as base,
+  createQuantitativeCorrectnessEvaluators,
   createSpanLatencyEvaluator,
   getCurrentTraceId,
   type EvaluationDataset,
@@ -24,7 +25,8 @@ interface ObservabilityAgentExample extends Example {
     attachments?: ConverseAttachment[];
   };
   output: {
-    criteria: string[];
+    criteria?: string[];
+    expected: string;
   };
 }
 
@@ -56,24 +58,36 @@ export const evaluate = base.extend<
         await executorClient.runExperiment(
           {
             dataset: { name, description, examples } satisfies EvaluationDataset,
-            task: async ({ input }) => {
+            task: async ({ input, output, metadata }) => {
               const response = await chatClient.converse({
                 messages: input.question,
                 attachments: input.attachments,
               });
 
+              const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
+                input,
+                expected: { expected: output.expected },
+                output: {
+                  messages: [response.messages[response.messages.length - 1]].map((message) => ({
+                    message: message.content,
+                  })),
+                },
+                metadata,
+              });
               const traceId = getCurrentTraceId();
 
               return {
                 errors: response.errors,
                 messages: response.messages,
                 steps: response.steps,
+                correctnessAnalysis: correctnessResult?.metadata,
                 traceId,
               };
             },
           },
           [
             createCriteriaEvaluator({ evaluators }),
+            ...createQuantitativeCorrectnessEvaluators(),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,

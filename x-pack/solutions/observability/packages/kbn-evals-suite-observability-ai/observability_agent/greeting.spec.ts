@@ -23,7 +23,9 @@ evaluate.describe(
                 question: 'hi',
               },
               output: {
-                criteria: ['Responds with a friendly greeting'],
+                criteria: ['Response is brief and friendly.', 'Does not call tools.'],
+                expected:
+                  'Hi! I am your Observability Agent. How can I help you investigate today?',
               },
               metadata: {},
             },
