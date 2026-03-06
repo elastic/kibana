@@ -11,6 +11,8 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
 
+import gmailIcon from './gmail.png';
+
 export default (props: ConnectorIconProps) => {
-  return <EuiIcon type="email" {...props} />;
+  return <EuiIcon type={gmailIcon} {...props} />;
 };
