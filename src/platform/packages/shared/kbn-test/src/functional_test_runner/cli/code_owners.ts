@@ -11,9 +11,10 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
+import type { RepoPath } from '@kbn/repo-path';
 import ignore from 'ignore';
 
-const TEST_DIRECTORIES = [
+const FTR_TEST_DIRECTORIES = [
   'test',
   'src/platform/test',
   'x-pack/platform/test',
@@ -23,7 +24,43 @@ const TEST_DIRECTORIES = [
   'x-pack/solutions/chat/test',
 ];
 
-export async function checkFTRCodeOwnersCLI() {
+const JEST_TEST_PATTERNS = [
+  ':(glob)**/*.test.ts',
+  ':(glob)**/*.test.tsx',
+  ':(glob)**/*.test.js',
+  ':(glob)**/*.test.jsx',
+];
+
+const SCOUT_TEST_PATTERNS = [':(glob)**/test/scout*/**/*.spec.ts'];
+
+interface TestFileGroup {
+  label: string;
+  files: RepoPath[];
+}
+
+async function getTestFileGroups(): Promise<TestFileGroup[]> {
+  const [ftrFiles, jestFiles, scoutFiles] = await Promise.all([
+    getRepoFiles(FTR_TEST_DIRECTORIES),
+    getRepoFiles(JEST_TEST_PATTERNS),
+    getRepoFiles(SCOUT_TEST_PATTERNS),
+  ]);
+
+  const seen = new Set(ftrFiles.map((f) => f.repoRel));
+  const dedup = (files: RepoPath[]): RepoPath[] =>
+    files.filter((f) => {
+      if (seen.has(f.repoRel)) return false;
+      seen.add(f.repoRel);
+      return true;
+    });
+
+  return [
+    { label: 'FTR', files: ftrFiles },
+    { label: 'Jest', files: dedup(jestFiles) },
+    { label: 'Scout', files: dedup(scoutFiles) },
+  ];
+}
+
+export async function checkTestCodeOwnersCLI() {
   await run(
     async ({ log }) => {
       const matcher = ignore().add(
@@ -33,24 +70,34 @@ export async function checkFTRCodeOwnersCLI() {
       );
       const hasOwner = (path: string): boolean => matcher.test(path).ignored;
 
-      const testFiles = await getRepoFiles(TEST_DIRECTORIES);
-      const filesWithoutOwner = testFiles
-        .filter((repoPath) => !hasOwner(repoPath.repoRel))
-        .map((repoPath) => repoPath.repoRel);
+      const groups = await getTestFileGroups();
+      const totalFiles = groups.reduce((sum, g) => sum + g.files.length, 0);
+      const allMissing: string[] = [];
 
-      log.info(`Checked ${testFiles.length} test files in ${process.uptime().toFixed(2)}s`);
+      for (const { label, files } of groups) {
+        const missing = files
+          .filter((repoPath) => !hasOwner(repoPath.repoRel))
+          .map((repoPath) => repoPath.repoRel);
 
-      if (filesWithoutOwner.length === 0) {
-        log.success(`All test files have a code owner 🥳`);
+        if (missing.length > 0) {
+          log.write(`${label} test files without a code owner:`);
+          log.write(missing.map((i) => ` - ${i}`).join('\n'));
+        }
+
+        allMissing.push(...missing);
+      }
+
+      log.info(`Checked ${totalFiles} test files in ${process.uptime().toFixed(2)}s`);
+
+      if (allMissing.length === 0) {
+        log.success('All test files have a code owner');
         return;
       }
 
-      log.write('Test files without a code owner:');
-      log.write(filesWithoutOwner.map((i) => ` - ${i}`).join('\n'));
-      throw createFailError(`Found ${filesWithoutOwner.length} test files without code owner`);
+      throw createFailError(`Found ${allMissing.length} test files without code owner`);
     },
     {
-      description: 'Check that all test files are covered by GitHub CODEOWNERS',
+      description: 'Check that all test files (FTR, Jest, Scout) are covered by GitHub CODEOWNERS',
     }
   );
 }
