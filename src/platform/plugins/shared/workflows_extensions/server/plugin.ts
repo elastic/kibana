@@ -129,7 +129,7 @@ export class WorkflowsExtensionsServerPlugin
       getAllTriggerDefinitions: () => {
         return this.triggerRegistry.list();
       },
-      emitEvent: this.emitEventFn,
+      emitEvent: this.emitEventFn.bind(this),
     };
   }
 
