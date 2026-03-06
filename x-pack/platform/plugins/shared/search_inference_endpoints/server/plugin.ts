@@ -16,7 +16,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
+import { deepFreeze } from '@kbn/std';
 import { defineRoutes } from './routes';
+import { InferenceFeatureRegistry } from './inference_feature_registry';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginSetupDependencies,
@@ -37,10 +39,12 @@ export class SearchInferenceEndpointsPlugin
   private readonly logger: Logger;
   private readonly config: SearchInferenceEndpointsConfig;
   private dynamicConnectorsPoller?: DynamicConnectorsPoller;
+  private readonly featureRegistry: InferenceFeatureRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
+    this.featureRegistry = new InferenceFeatureRegistry();
   }
 
   public setup(
@@ -91,7 +95,11 @@ export class SearchInferenceEndpointsPlugin
       },
     });
 
-    return {};
+    return deepFreeze({
+      features: {
+        register: this.featureRegistry.register.bind(this.featureRegistry),
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
@@ -108,6 +116,8 @@ export class SearchInferenceEndpointsPlugin
       this.dynamicConnectorsPoller.start();
     }
 
+    this.featureRegistry.lockRegistration();
+    this.featureRegistry.validateFeatures();
     return {};
   }
 
