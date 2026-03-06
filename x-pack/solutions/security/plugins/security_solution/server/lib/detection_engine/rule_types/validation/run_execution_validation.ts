@@ -15,7 +15,7 @@ import {
   isThreatParams,
   checkForFrozenIndices,
 } from '../utils/utils';
-import { withSecuritySpan } from '../../../utils/with_security_span';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 export interface RunExecutionValidationParams {
   params: RuleParams;
