@@ -284,7 +284,6 @@ export const getDashboardRendererCreationOptions = async ({
 }): Promise<DashboardCreationOptions> => {
   if (savedObjectId) {
     return {
-      useUnifiedSearchIntegration: true,
       getInitialInput: () => ({
         viewMode: 'view',
       }),
@@ -292,7 +291,6 @@ export const getDashboardRendererCreationOptions = async ({
   }
 
   return {
-    useUnifiedSearchIntegration: true,
     getInitialInput: () => {
       const { timeRange, ...restInitialDashboardInput } = initialDashboardInput;
       return {
