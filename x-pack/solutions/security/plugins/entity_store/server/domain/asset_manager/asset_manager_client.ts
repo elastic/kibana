@@ -11,10 +11,10 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { EntityType } from '../../common';
-import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
-import { scheduleHistorySnapshotTasks } from '../tasks/history_snapshot_task';
-import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
+import type { EntityType } from '../../../common';
+import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
+import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
+import { installElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -22,41 +22,38 @@ import {
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
   LogExtractionConfig,
-} from './definitions/saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../routes/constants';
+} from '../saved_objects';
+import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_STATUS,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
-} from './constants';
+} from '../constants';
 import type {
   EntityStoreStatus,
   EngineComponentStatus,
   EngineComponentResource,
   GetStatusResult,
-} from './types';
-import { getExtractEntityTaskId } from '../tasks/extract_entity_task';
-import { getLatestEntitiesIndexName } from './assets/latest_index';
-import { getLatestIndexTemplateId } from './assets/latest_index_template';
-import { getUpdatesIndexTemplateId } from './assets/updates_index_template';
-import {
-  getComponentTemplateName,
-  getUpdatesComponentTemplateName,
-} from './assets/component_templates';
-import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import type { LogsExtractionClient } from './logs_extraction';
-import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
+} from '../types';
+import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
+import { getLatestEntitiesIndexName } from './latest_index';
+import { getLatestIndexTemplateId } from './latest_index_template';
+import { getUpdatesIndexTemplateId } from './updates_index_template';
+import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
+import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
+import type { LogsExtractionClient } from '../logs_extraction';
+import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
 import {
   type TelemetryReporter,
   ENTITY_STORE_DELETION_EVENT,
   ENTITY_STORE_INITIALIZATION_EVENT,
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
-} from '../telemetry/events';
-import { getErrorMessage } from '../../common';
+} from '../../telemetry/events';
+import { getErrorMessage } from '../../../common';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -71,7 +68,7 @@ interface AssetManagerDependencies {
   analytics: TelemetryReporter;
 }
 
-export class AssetManager {
+export class AssetManagerClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly taskManager: TaskManagerStartContract;
