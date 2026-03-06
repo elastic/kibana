@@ -49,7 +49,10 @@ export function GeneratedEventPreview({
   const [touched, setTouched] = useState({ title: false, esql: false });
   const validation = validateQuery(query);
   const prefix = useMemo(() => getValidPrefixes(definition), [definition]);
-  const prefixValidation = validatePrefix(query.esql.query, prefix);
+  const prefixValidation = useMemo(
+    () => validatePrefix(query.esql.query, prefix),
+    [query.esql.query, prefix]
+  );
 
   return (
     <div

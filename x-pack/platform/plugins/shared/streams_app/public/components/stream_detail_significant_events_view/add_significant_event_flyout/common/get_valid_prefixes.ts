@@ -6,8 +6,8 @@
  */
 
 import { BasicPrettyPrinter, Builder } from '@elastic/esql';
-import { Streams } from '@kbn/streams-schema';
 import {
+  Streams,
   buildMetadataOption,
   getIndexPatternsForStream,
   normalizeEsqlQuery,
