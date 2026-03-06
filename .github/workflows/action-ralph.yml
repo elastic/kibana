@@ -27,6 +27,9 @@ on:
   pull_request_review_comment:
     types: [created]
 
+env:
+  BETA_TESTERS: '["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'
+
 # Prevent parallel runs from the same trigger to avoid wasted spend
 concurrency:
   group: action-ralph-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
@@ -47,12 +50,12 @@ jobs:
       || (
         github.event_name == 'issue_comment'
         && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
-        && github.event.comment.user.login == 'flash1293'
+        && contains(fromJSON(env.BETA_TESTERS), github.event.comment.user.login)
       )
       || (
         github.event_name == 'pull_request_review_comment'
         && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
-        && github.event.comment.user.login == 'flash1293'
+        && contains(fromJSON(env.BETA_TESTERS), github.event.comment.user.login)
       )
     permissions:
       contents: read
@@ -67,6 +70,34 @@ jobs:
       default_branch: ${{ steps.context.outputs.default_branch }}
 
     steps:
+      - name: Verify comment trigger (TOCTOU mitigation)
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+            COMMENT_JSON=$(gh api "repos/${{ github.repository }}/pulls/comments/${COMMENT_ID}")
+          else
+            COMMENT_JSON=$(gh api "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}")
+          fi
+
+          CURRENT_USER=$(printf '%s' "$COMMENT_JSON" | jq -r '.user.login // ""')
+          CURRENT_BODY=$(printf '%s' "$COMMENT_JSON" | jq -r '.body // ""')
+
+          BETA_USERS='${{ env.BETA_TESTERS }}'
+          if ! printf '%s' "$BETA_USERS" | jq -e --arg u "$CURRENT_USER" 'index($u) != null' >/dev/null 2>&1; then
+            echo "::error::Comment author '${CURRENT_USER}' is not in the beta testers list."
+            exit 1
+          fi
+
+          if ! printf '%s' "$CURRENT_BODY" | grep -qE '/(action|review)-ralph'; then
+            echo "::error::Re-fetched comment no longer contains a valid slash command."
+            exit 1
+          fi
+
       - name: Resolve trigger context
         id: context
         env:
@@ -139,7 +170,7 @@ jobs:
 
     steps:
       - name: Install OpenCode CLI
-        run: curl -fsSL https://opencode.ai/install | bash
+        run: npm install -g @opencode-ai/cli@1.2.15
 
       - name: Resolve prompt and model
         id: prompt
@@ -266,24 +297,16 @@ jobs:
           BASE="${LITELLM_BASE_URL%/}"
           NO_V1="${BASE%/v1}"
           API_KEY_ENDPOINT="${NO_V1}/key/generate"
-          FALLBACK_ENDPOINT="${BASE}/key/generate"
 
           payload="$(jq -n \
             --arg model "$LITELLM_MODEL" \
             --arg alias "action-ralph-run-${RUN_ID}" \
-            '{models: [$model], duration: "90m", key_alias: $alias}')"
+            '{models: [$model], duration: "90m", key_alias: $alias, max_budget: 10}')"
 
           response="$(curl -fsS -X POST "$API_KEY_ENDPOINT" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$payload" 2>/dev/null || true)"
-
-          if [ -z "$response" ]; then
-            response="$(curl -fsS -X POST "$FALLBACK_ENDPOINT" \
-              -H "Authorization: Bearer ${LITELLM_API_KEY}" \
-              -H "Content-Type: application/json" \
-              -d "$payload")"
-          fi
+            -d "$payload")"
 
           short_key="$(printf '%s' "$response" | jq -r '.key // .token // .data.key // empty')"
           if [ -z "$short_key" ] || [ "$short_key" = "null" ]; then
@@ -291,7 +314,6 @@ jobs:
             exit 1
           fi
 
-          # Ensure the ephemeral key is masked anywhere it might appear in logs.
           echo "::add-mask::${short_key}"
 
           {
@@ -299,14 +321,15 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
           fetch-depth: 1
+          persist-credentials: false
           repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
 
@@ -650,11 +673,26 @@ jobs:
             -T "$AGENT_OUTPUT_DIR/changed-files.txt"
 
       - name: Upload agent output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: agent-changes
           path: ${{ github.workspace }}/.action-ralph-runtime/agent-output/
           retention-days: 1
+
+      - name: Revoke short-lived LiteLLM key
+        if: always() && steps.short_lived_key.outputs.api_key
+        env:
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          SHORT_LIVED_KEY: ${{ steps.short_lived_key.outputs.api_key }}
+        run: |
+          set -euo pipefail
+          BASE="${LITELLM_BASE_URL%/}"
+          NO_V1="${BASE%/v1}"
+          curl -fsS -X POST "${NO_V1}/key/delete" \
+            -H "Authorization: Bearer ${LITELLM_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
 
   # ---------------------------------------------------------------------------
   # Phase C: Apply changes and either push to the existing PR branch or
@@ -667,12 +705,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout target
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
           fetch-depth: 1
@@ -680,7 +717,7 @@ jobs:
           repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
 
       - name: Download agent changes
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: agent-changes
           path: /tmp/agent-output
@@ -962,14 +999,15 @@ jobs:
 
     steps:
       - name: Checkout PR source (read-only)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.prepare.outputs.pr_branch }}
           fetch-depth: 1
+          persist-credentials: false
           repository: ${{ needs.prepare.outputs.pr_head_repo }}
 
       - name: Install OpenCode CLI
-        run: curl -fsSL https://opencode.ai/install | bash
+        run: npm install -g @opencode-ai/cli@1.2.15
 
       - name: Create short-lived LiteLLM key
         id: short_lived_key_review
@@ -987,12 +1025,8 @@ jobs:
           BASE="${LITELLM_BASE_URL%/}"
           NO_V1="${BASE%/v1}"
           API_KEY_ENDPOINT="${NO_V1}/key/generate"
-          FALLBACK_ENDPOINT="${BASE}/key/generate"
-          payload="$(jq -n --arg model "$LITELLM_MODEL" --arg alias "review-ralph-run-${RUN_ID}" '{models: [$model], duration: "90m", key_alias: $alias}')"
-          response="$(curl -fsS -X POST "$API_KEY_ENDPOINT" -H "Authorization: Bearer ${LITELLM_API_KEY}" -H "Content-Type: application/json" -d "$payload" 2>/dev/null || true)"
-          if [ -z "$response" ]; then
-            response="$(curl -fsS -X POST "$FALLBACK_ENDPOINT" -H "Authorization: Bearer ${LITELLM_API_KEY}" -H "Content-Type: application/json" -d "$payload")"
-          fi
+          payload="$(jq -n --arg model "$LITELLM_MODEL" --arg alias "review-ralph-run-${RUN_ID}" '{models: [$model], duration: "90m", key_alias: $alias, max_budget: 10}')"
+          response="$(curl -fsS -X POST "$API_KEY_ENDPOINT" -H "Authorization: Bearer ${LITELLM_API_KEY}" -H "Content-Type: application/json" -d "$payload")"
           short_key="$(printf '%s' "$response" | jq -r '.key // .token // .data.key // empty')"
           if [ -z "$short_key" ] || [ "$short_key" = "null" ]; then
             echo "::error::Failed to mint short-lived LiteLLM key."
@@ -1064,11 +1098,26 @@ jobs:
           fi
 
       - name: Upload review output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: review-output
           path: ${{ github.workspace }}/.action-ralph-runtime/review-output/
           retention-days: 1
+
+      - name: Revoke short-lived LiteLLM key
+        if: always() && steps.short_lived_key_review.outputs.api_key
+        env:
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          SHORT_LIVED_KEY: ${{ steps.short_lived_key_review.outputs.api_key }}
+        run: |
+          set -euo pipefail
+          BASE="${LITELLM_BASE_URL%/}"
+          NO_V1="${BASE%/v1}"
+          curl -fsS -X POST "${NO_V1}/key/delete" \
+            -H "Authorization: Bearer ${LITELLM_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
 
   review_publish:
     name: "Review Phase C: Publish Comment"
@@ -1081,7 +1130,7 @@ jobs:
 
     steps:
       - name: Download review output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: review-output
           path: /tmp/review-output
