@@ -1,0 +1,48 @@
+{
+  "10.1.0": [
+    {
+      "name": "test-pack",
+      "description": "A test osquery pack",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "created_by": "elastic",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "updated_by": "elastic",
+      "enabled": true,
+      "version": 1,
+      "shards": {},
+      "queries": [
+        {
+          "id": "query-1",
+          "query": "SELECT * FROM processes",
+          "interval": "3600",
+          "timeout": 60,
+          "platform": "linux",
+          "version": "4.7.0"
+        }
+      ]
+    }
+  ],
+  "10.2.0": [
+    {
+      "name": "test-pack",
+      "description": "A test osquery pack",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "created_by": "elastic",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "updated_by": "elastic",
+      "enabled": true,
+      "version": 1,
+      "shards": {},
+      "queries": [
+        {
+          "id": "query-1",
+          "query": "SELECT * FROM processes",
+          "interval": "3600",
+          "timeout": 60,
+          "platform": "linux",
+          "version": "4.7.0"
+        }
+      ]
+    }
+  ]
+}
