@@ -10,8 +10,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 
-function isKibanaServerError(error: any): error is KibanaServerError {
-  return error.statusCode && error.message;
+function isKibanaServerError(error: unknown): error is KibanaServerError {
+  return typeof error === 'object' && error !== null && 'statusCode' in error && 'message' in error;
 }
 
 export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) => (handler) => {
@@ -27,7 +27,7 @@ export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) 
         });
       }
       if (isKibanaServerError(e)) {
-        return response.customError({ statusCode: e.statusCode, body: e.message });
+        return response.customError({ statusCode: e.statusCode, body: { message: e.message } });
       }
       throw e;
     }

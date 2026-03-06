@@ -193,6 +193,63 @@ describe('Inference Settings API', () => {
       });
     });
 
+    describe('schema validation', () => {
+      it('should accept a valid body', () => {
+        mockRouter.shouldValidate({
+          body: {
+            features: [
+              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            ],
+          },
+        });
+      });
+
+      it('should reject an empty feature_id', () => {
+        mockRouter.shouldThrow({
+          body: {
+            features: [{ feature_id: '', endpoint_ids: ['.endpoint-a'] }],
+          },
+        });
+      });
+
+      it('should reject empty endpoint_ids array', () => {
+        mockRouter.shouldThrow({
+          body: {
+            features: [{ feature_id: 'agent_builder', endpoint_ids: [] }],
+          },
+        });
+      });
+
+      it('should reject an empty endpoint_ids string', () => {
+        mockRouter.shouldThrow({
+          body: {
+            features: [{ feature_id: 'agent_builder', endpoint_ids: [''] }],
+          },
+        });
+      });
+
+      it('should reject missing features field', () => {
+        mockRouter.shouldThrow({ body: {} });
+      });
+
+      it('should reject features exceeding maxSize', () => {
+        const features = Array.from({ length: 31 }, (_, i) => ({
+          feature_id: `feature_${i}`,
+          endpoint_ids: ['.endpoint-a'],
+        }));
+        mockRouter.shouldThrow({ body: { features } });
+      });
+
+      it('should reject endpoint_ids exceeding maxSize', () => {
+        const endpointIds = Array.from({ length: 31 }, (_, i) => `.endpoint-${i}`);
+        mockRouter.shouldThrow({
+          body: {
+            features: [{ feature_id: 'agent_builder', endpoint_ids: endpointIds }],
+          },
+        });
+      });
+    });
+
     it('should reject duplicate feature_id values', async () => {
       await mockRouter.callRoute({
         body: {
@@ -210,6 +267,26 @@ describe('Inference Settings API', () => {
           attributes: {
             errors: expect.arrayContaining([
               expect.stringContaining('Duplicate feature_id values'),
+            ]),
+          },
+        },
+      });
+    });
+
+    it('should reject duplicate endpoint_ids within a feature', async () => {
+      await mockRouter.callRoute({
+        body: {
+          features: [{ feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a', '.endpoint-a'] }],
+        },
+      });
+
+      expect(mockSOClient.create).not.toHaveBeenCalled();
+      expect(mockRouter.response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'Invalid inference settings',
+          attributes: {
+            errors: expect.arrayContaining([
+              expect.stringContaining('Duplicate endpoint_ids in feature "agent_builder"'),
             ]),
           },
         },

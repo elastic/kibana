@@ -65,7 +65,8 @@ export class MockRouter {
   public validateRoute = (request: MockRouterRequest) => {
     const route = this.findRouteRegistration();
     const [config] = route;
-    const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
+    const rawValidate = config.validate as any;
+    const validate = (rawValidate?.request ?? rawValidate) as RouteValidatorConfig<{}, {}, {}>;
     const payloads = Object.keys(request) as PayloadType[];
 
     payloads.forEach((payload: PayloadType) => {

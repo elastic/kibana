@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 
 export const parseInferenceSettingsSO = (
@@ -29,7 +30,12 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
   const featureIds = attrs.features.map((f) => f.feature_id);
   const duplicateFeatureIds = featureIds.filter((id, index) => featureIds.indexOf(id) !== index);
   if (duplicateFeatureIds.length > 0) {
-    errors.push(`Duplicate feature_id values: ${[...new Set(duplicateFeatureIds)].join(', ')}`);
+    errors.push(
+      i18n.translate('xpack.searchInferenceEndpoints.settings.duplicateFeatureIds', {
+        defaultMessage: 'Duplicate feature_id values: {ids}',
+        values: { ids: [...new Set(duplicateFeatureIds)].join(', ') },
+      })
+    );
   }
 
   for (const feature of attrs.features) {
@@ -38,9 +44,13 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
     );
     if (duplicateEndpointIds.length > 0) {
       errors.push(
-        `Duplicate endpoint_ids in feature "${feature.feature_id}": ${[
-          ...new Set(duplicateEndpointIds),
-        ].join(', ')}`
+        i18n.translate('xpack.searchInferenceEndpoints.settings.duplicateEndpointIds', {
+          defaultMessage: 'Duplicate endpoint_ids in feature "{featureId}": {ids}',
+          values: {
+            featureId: feature.feature_id,
+            ids: [...new Set(duplicateEndpointIds)].join(', '),
+          },
+        })
       );
     }
   }
