@@ -65,6 +65,6 @@ apiTest.describe.skip('dashboard REST schema', { tag: tags.stateful.all }, () =>
       ].schema;
     const panelsSchema = createBodySchema.properties.panels;
     expect(panelsSchema).toBeDefined();
-    expect(panelsSchema.items.anyOf[0].oneOf).toHaveLength(9);
+    expect(panelsSchema.items.anyOf[0].oneOf).toHaveLength(10);
   });
 });
