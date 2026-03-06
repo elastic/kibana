@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';

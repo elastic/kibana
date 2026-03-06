@@ -22,7 +22,7 @@ import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common'
 import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
 import { trace } from '@opentelemetry/api';
 import { omit, partition } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   createCompleteToolCall,
   createCompleteToolCallResponse,
@@ -88,7 +88,14 @@ export async function executeAsReasoningAgent(
       finalToolChoice?: ToolChoice;
     }
 ): Promise<ReasoningPromptResponse> {
-  const { inferenceClient, maxSteps = 10, power = 'medium', toolCallbacks } = options;
+  const {
+    inferenceClient,
+    maxDurationMs,
+    maxSteps = 10,
+    power = 'medium',
+    toolCallbacks,
+  } = options;
+  const startTime = Date.now();
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
@@ -144,7 +151,10 @@ export async function executeAsReasoningAgent(
         message.role === MessageRole.Tool && isPlanningToolName(message.name)
     )?.name;
 
-    const shouldComplete = stepsLeft <= 0 || lastSystemToolCallName === 'complete';
+    const isOverDurationBudget =
+      maxDurationMs !== undefined && Date.now() - startTime >= maxDurationMs;
+    const shouldComplete =
+      stepsLeft <= 0 || lastSystemToolCallName === 'complete' || isOverDurationBudget;
 
     // reason when:
     // - not completing

@@ -12,23 +12,14 @@ import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import type { ChromeHelpExtension } from '@kbn/core-chrome-browser';
 
 import { HeaderHelpMenu } from './header_help_menu';
 
 describe('HeaderHelpMenu', () => {
   const application = applicationServiceMock.createInternalStartContract();
 
-  const defaultComponentProps: Pick<
-    ComponentProps<typeof HeaderHelpMenu>,
-    | 'kibanaVersion'
-    | 'docLinks'
-    | 'navigateToUrl'
-    | 'defaultContentLinks$'
-    | 'helpExtension$'
-    | 'helpSupportUrl$'
-    | 'kibanaDocLink'
-    | 'isServerless'
-  > = {
+  const defaultComponentProps: ComponentProps<typeof HeaderHelpMenu> = {
     navigateToUrl: application.navigateToUrl,
     kibanaVersion: 'version',
     docLinks: docLinksServiceMock.createStartContract(),
@@ -37,15 +28,17 @@ describe('HeaderHelpMenu', () => {
     helpSupportUrl$: new BehaviorSubject(''),
     kibanaDocLink: '',
     isServerless: false,
+    globalHelpExtensionMenuLinks$: of([]),
+  };
+
+  const renderAndOpenMenu = (overrides: Partial<ComponentProps<typeof HeaderHelpMenu>> = {}) => {
+    const component = mountWithIntl(<HeaderHelpMenu {...defaultComponentProps} {...overrides} />);
+    component.find('EuiButtonEmpty').simulate('click');
+    return component;
   };
 
   test('it only renders the default content', () => {
-    const component = mountWithIntl(
-      <HeaderHelpMenu {...defaultComponentProps} globalHelpExtensionMenuLinks$={of([])} />
-    );
-
-    expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
-    component.find('EuiButtonEmpty').simulate('click');
+    const component = renderAndOpenMenu();
 
     const buttons = component.find('EuiButtonEmpty');
     const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
@@ -55,42 +48,47 @@ describe('HeaderHelpMenu', () => {
 
   test("it doesn't render the version details when the prop isServerless is true", () => {
     const component = mountWithIntl(
-      <HeaderHelpMenu
-        {...defaultComponentProps}
-        isServerless={true}
-        globalHelpExtensionMenuLinks$={of([])}
-      />
+      <HeaderHelpMenu {...defaultComponentProps} isServerless={true} />
     );
 
     expect(component.find('[data-test-subj="kbnVersionString"]').exists()).toBeFalsy();
   });
 
-  test('it renders the global custom content + the default content', () => {
-    const component = mountWithIntl(
-      <HeaderHelpMenu
-        {...defaultComponentProps}
-        globalHelpExtensionMenuLinks$={of([
-          {
-            linkType: 'custom',
-            href: 'my-link-2',
-            content: 'Some other text for the link',
-            priority: 10,
-          },
-          {
-            linkType: 'custom',
-            href: 'my-link',
-            content: 'Some text for the link',
-            'data-test-subj': 'my-test-custom-link',
-            priority: 100,
-          },
-        ])}
-      />
+  test('it renders content and passes hideHelpMenu action', () => {
+    const content = jest.fn(() => <span data-test-subj="react-content-node">React Content</span>);
+    const component = renderAndOpenMenu({
+      helpExtension$: new BehaviorSubject<ChromeHelpExtension | undefined>({
+        appName: 'Test App',
+        content,
+      }),
+    });
+
+    expect(component.find('[data-test-subj="react-content-node"]').exists()).toBeTruthy();
+    expect(content).toHaveBeenCalledWith(
+      expect.objectContaining({ hideHelpMenu: expect.any(Function) })
     );
+  });
 
-    expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
-    component.find('EuiButtonEmpty').simulate('click');
+  test('it renders the global custom content + the default content', () => {
+    const component = renderAndOpenMenu({
+      globalHelpExtensionMenuLinks$: of([
+        {
+          linkType: 'custom',
+          href: 'my-link-2',
+          content: 'Some other text for the link',
+          priority: 10,
+        },
+        {
+          linkType: 'custom',
+          href: 'my-link',
+          content: 'Some text for the link',
+          'data-test-subj': 'my-test-custom-link',
+          priority: 100,
+        },
+      ]),
+    });
 
-    // 2 custom global link + 4 default links + the toggle button
+    // 2 custom global link + 3 default links + the toggle button
     expect(component.find('EuiButtonEmpty').length).toBe(6);
 
     expect(component.find('[data-test-subj="my-test-custom-link"]').exists()).toBeTruthy();
