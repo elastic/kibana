@@ -56,6 +56,12 @@ jest.mock('./context/bulk_operation', () => ({
 jest.mock('../../context/action_modal', () => ({
   ActionModalProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('./hooks/use_templates_url_search_state', () => ({
+  useTemplatesUrlSearchState: () => ({
+    state: { search: '', tags: [], page: 0, perPage: 20 },
+    onStateChange: jest.fn(),
+  }),
+}));
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;

@@ -19,17 +19,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SLOTemplateResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React, { useCallback, useState } from 'react';
-import { useFetchSloTemplates } from '../../../hooks/use_fetch_slo_templates';
-import { useKibana } from '../../../hooks/use_kibana';
-import { usePermissions } from '../../../hooks/use_permissions';
+import React from 'react';
+import { useFetchSloTemplates } from '../../../../hooks/use_fetch_slo_templates';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePermissions } from '../../../../hooks/use_permissions';
+import type { TemplatesSearchState } from '../../hooks/use_templates_url_search_state';
 import { SloTemplatesSearchBar } from './slo_templates_search_bar';
 
 interface Props {
+  state: TemplatesSearchState;
+  onStateChange: (newState: Partial<TemplatesSearchState>) => void;
   onTemplateSelect?: (templateId: string) => void;
 }
 
-export function SloTemplatesTable({ onTemplateSelect }: Props) {
+export function SloTemplatesTable({ state, onStateChange, onTemplateSelect }: Props) {
   const {
     services: {
       http,
@@ -37,36 +40,27 @@ export function SloTemplatesTable({ onTemplateSelect }: Props) {
     },
   } = useKibana();
   const { data: permissions } = usePermissions();
-
-  const [search, setSearch] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [page, setPage] = useState(0);
-  const [perPage, setPerPage] = useState(20);
+  const { search, tags, page, perPage } = state;
 
   const { isLoading, isError, data } = useFetchSloTemplates({
-    search: search || undefined,
-    tags: tags.length ? tags : undefined,
+    search,
+    tags,
     page: page + 1,
     perPage,
   });
 
-  const handleCreateFromTemplate = useCallback(
-    (templateId: string) => {
-      if (onTemplateSelect) {
-        onTemplateSelect(templateId);
-      } else {
-        navigateToUrl(http.basePath.prepend(paths.sloCreateFromTemplate(templateId)));
-      }
-    },
-    [http.basePath, navigateToUrl, onTemplateSelect]
-  );
+  const handleCreateFromTemplate = (templateId: string) => {
+    if (onTemplateSelect) {
+      onTemplateSelect(templateId);
+    } else {
+      navigateToUrl(http.basePath.prepend(paths.sloCreateFromTemplate(templateId)));
+    }
+  };
 
   const actions: Array<DefaultItemAction<SLOTemplateResponse>> = [
     {
-      type: 'icon',
-      icon: 'plusInCircle',
       name: i18n.translate('xpack.slo.sloTemplatesTable.actions.createSlo', {
-        defaultMessage: 'Create SLO',
+        defaultMessage: 'Create',
       }),
       description: i18n.translate('xpack.slo.sloTemplatesTable.actions.createSloDescription', {
         defaultMessage: 'Create SLO from this template',
@@ -105,7 +99,7 @@ export function SloTemplatesTable({ onTemplateSelect }: Props) {
           <EuiFlexGroup gutterSize="xs" wrap responsive>
             {value.map((tag) => (
               <EuiFlexItem key={tag} grow={false}>
-                <EuiBadge>{tag}</EuiBadge>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -123,8 +117,7 @@ export function SloTemplatesTable({ onTemplateSelect }: Props) {
 
   const onTableChange = ({ page: newPage }: Criteria<SLOTemplateResponse>) => {
     if (newPage) {
-      setPage(newPage.index);
-      setPerPage(newPage.size);
+      onStateChange({ page: newPage.index, perPage: newPage.size });
     }
   };
 
@@ -164,12 +157,7 @@ export function SloTemplatesTable({ onTemplateSelect }: Props) {
 
   return (
     <EuiPanel hasBorder>
-      <SloTemplatesSearchBar
-        search={search}
-        tags={tags}
-        onSearchChange={setSearch}
-        onTagsChange={setTags}
-      />
+      <SloTemplatesSearchBar state={state} onStateChange={onStateChange} />
       <EuiSpacer size="m" />
       <EuiText size="xs">
         {i18n.translate('xpack.slo.sloTemplatesTable.itemCount', {

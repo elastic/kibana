@@ -30,6 +30,7 @@ export function useFetchSloTemplates({
   perPage = 20,
 }: UseFetchSloTemplatesParams = {}): UseFetchSloTemplatesResponse {
   const { sloClient } = usePluginContext();
+  const searchWithWildcard = search && !search.endsWith('*') ? `${search}*` : search;
 
   const { isLoading, isError, data } = useQuery({
     queryKey: sloKeys.templatesList({ search, tags, page, perPage }),
@@ -37,8 +38,8 @@ export function useFetchSloTemplates({
       return await sloClient.fetch('GET /api/observability/slo_templates', {
         params: {
           query: {
-            ...(search && { search }),
-            ...(tags?.length && { tags }),
+            ...(searchWithWildcard && { search: searchWithWildcard }),
+            ...(tags?.length && { tags: tags.join(',') }),
             page,
             perPage,
           },

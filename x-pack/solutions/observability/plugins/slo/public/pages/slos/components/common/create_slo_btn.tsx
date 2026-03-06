@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
-import { SloTemplatesFlyout } from './slo_templates_flyout';
+import { SloTemplatesFlyout } from '../../../../components/slo/slo_templates/slo_templates_flyout';
 
 export function CreateSloBtn() {
   const {

@@ -13,7 +13,7 @@ import {
   SLOS_MANAGEMENT_TEMPLATES_PATH,
   paths,
 } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { ActionModalProvider } from '../../context/action_modal';
@@ -26,8 +26,9 @@ import { LoadingPage } from '../loading_page';
 import { HeaderControl } from './components/header_control/header_control';
 import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
 import { SloManagementTable } from './components/slo_management_table';
-import { SloTemplatesTable } from './components/slo_templates_table';
+import { SloTemplatesTable } from './components/slo_templates/slo_templates_table';
 import { BulkOperationProvider } from './context/bulk_operation';
+import { useTemplatesUrlSearchState } from './hooks/use_templates_url_search_state';
 
 type ManagementTab = 'slos' | 'templates';
 
@@ -47,9 +48,10 @@ export function SloManagementPage() {
     data: { total } = { total: 0 },
   } = useFetchSloDefinitions({ perPage: 0 });
 
-  const activeTab: ManagementTab = useMemo(() => {
-    return history.location.pathname === SLOS_MANAGEMENT_TEMPLATES_PATH ? 'templates' : 'slos';
-  }, [history.location.pathname]);
+  const templatesSearchState = useTemplatesUrlSearchState();
+
+  const activeTab: ManagementTab =
+    history.location.pathname === SLOS_MANAGEMENT_TEMPLATES_PATH ? 'templates' : 'slos';
 
   const onTabChange = (tab: ManagementTab) => {
     if (tab === 'templates') {
@@ -141,7 +143,12 @@ export function SloManagementPage() {
           </ActionModalProvider>
         </BulkOperationProvider>
       )}
-      {activeTab === 'templates' && <SloTemplatesTable />}
+      {activeTab === 'templates' && (
+        <SloTemplatesTable
+          state={templatesSearchState.state}
+          onStateChange={templatesSearchState.onStateChange}
+        />
+      )}
     </ObservabilityPageTemplate>
   );
 }

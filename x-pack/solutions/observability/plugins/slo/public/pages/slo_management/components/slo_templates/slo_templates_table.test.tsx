@@ -7,17 +7,18 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
-import { useFetchSloTemplates } from '../../../hooks/use_fetch_slo_templates';
-import { useFetchSloTemplateTags } from '../../../hooks/use_fetch_slo_template_tags';
-import { useKibana } from '../../../hooks/use_kibana';
-import { usePermissions } from '../../../hooks/use_permissions';
-import { render } from '../../../utils/test_helper';
+import { useFetchSloTemplates } from '../../../../hooks/use_fetch_slo_templates';
+import { useFetchSloTemplateTags } from '../../../../hooks/use_fetch_slo_template_tags';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePermissions } from '../../../../hooks/use_permissions';
+import { render } from '../../../../utils/test_helper';
+import { DEFAULT_STATE } from '../../hooks/use_templates_url_search_state';
 import { SloTemplatesTable } from './slo_templates_table';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_permissions');
-jest.mock('../../../hooks/use_fetch_slo_templates');
-jest.mock('../../../hooks/use_fetch_slo_template_tags');
+jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../hooks/use_permissions');
+jest.mock('../../../../hooks/use_fetch_slo_templates');
+jest.mock('../../../../hooks/use_fetch_slo_template_tags');
 
 const useKibanaMock = useKibana as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
@@ -25,6 +26,12 @@ const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
 const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 
 const mockNavigateToUrl = jest.fn();
+const mockOnStateChange = jest.fn();
+
+const defaultProps = {
+  state: DEFAULT_STATE,
+  onStateChange: mockOnStateChange,
+};
 
 describe('SloTemplatesTable', () => {
   beforeEach(() => {
@@ -52,7 +59,7 @@ describe('SloTemplatesTable', () => {
       isError: false,
     });
 
-    render(<SloTemplatesTable />);
+    render(<SloTemplatesTable {...defaultProps} />);
 
     expect(screen.getByTestId('sloTemplatesEmptyPrompt')).toBeTruthy();
     expect(screen.getByText(/No SLO templates found/)).toBeTruthy();
@@ -83,7 +90,7 @@ describe('SloTemplatesTable', () => {
       isError: false,
     });
 
-    render(<SloTemplatesTable />);
+    render(<SloTemplatesTable {...defaultProps} />);
 
     expect(screen.getByText('Latency SLO Template')).toBeTruthy();
     expect(screen.getByText('Availability SLO Template')).toBeTruthy();
@@ -97,7 +104,7 @@ describe('SloTemplatesTable', () => {
       isError: false,
     });
 
-    render(<SloTemplatesTable />);
+    render(<SloTemplatesTable {...defaultProps} />);
 
     expect(screen.getByText('Showing 0 of 0 SLO templates')).toBeTruthy();
   });
@@ -109,7 +116,7 @@ describe('SloTemplatesTable', () => {
       isError: true,
     });
 
-    render(<SloTemplatesTable />);
+    render(<SloTemplatesTable {...defaultProps} />);
 
     expect(screen.getByText(/An error occurred while retrieving SLO templates/)).toBeTruthy();
   });
@@ -121,7 +128,7 @@ describe('SloTemplatesTable', () => {
       isError: false,
     });
 
-    render(<SloTemplatesTable />);
+    render(<SloTemplatesTable {...defaultProps} />);
 
     expect(screen.getByTestId('sloTemplatesSearchInput')).toBeTruthy();
     expect(screen.getByTestId('sloTemplatesFilterByTag')).toBeTruthy();

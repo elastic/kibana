@@ -8,27 +8,28 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import { useFetchSloTemplateTags } from '../../../hooks/use_fetch_slo_template_tags';
+import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useFetchSloTemplateTags } from '../../../../hooks/use_fetch_slo_template_tags';
+import type { TemplatesSearchState } from '../../hooks/use_templates_url_search_state';
 
 interface Props {
-  search: string;
-  tags: string[];
-  onSearchChange: (search: string) => void;
-  onTagsChange: (tags: string[]) => void;
+  state: TemplatesSearchState;
+  onStateChange: (newState: Partial<TemplatesSearchState>) => void;
 }
 
-export function SloTemplatesSearchBar({ search, tags, onSearchChange, onTagsChange }: Props) {
-  const { data: tagsData } = useFetchSloTemplateTags();
+export function SloTemplatesSearchBar({ state, onStateChange }: Props) {
+  const { data: allTemplateTags } = useFetchSloTemplateTags();
+  const { search, tags } = state;
+  const [inputValue, setInputValue] = useState(search);
 
-  const tagOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () => (tagsData?.tags ?? []).map((tag) => ({ label: tag, value: tag })),
-    [tagsData]
-  );
+  useDebounce(() => onStateChange({ search: inputValue }), 300, [inputValue]);
 
-  const selectedTagOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () => tags.map((tag) => ({ label: tag, value: tag })),
-    [tags]
+  const tagOptions: Array<EuiComboBoxOptionOption<string>> = (allTemplateTags?.tags ?? []).map(
+    (tag) => ({
+      label: tag,
+      value: tag,
+    })
   );
 
   return (
@@ -36,21 +37,25 @@ export function SloTemplatesSearchBar({ search, tags, onSearchChange, onTagsChan
       <EuiFlexItem>
         <EuiFieldSearch
           fullWidth
+          compressed
           placeholder={SEARCH_PLACEHOLDER}
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           data-test-subj="sloTemplatesSearchInput"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 200, maxWidth: 300 }}>
         <EuiComboBox
           compressed
           aria-label={FILTER_TAGS_LABEL}
           placeholder={FILTER_TAGS_LABEL}
           options={tagOptions}
-          selectedOptions={selectedTagOptions}
+          selectedOptions={tags.map((tag) => ({
+            label: tag,
+            value: tag,
+          }))}
           onChange={(newOptions) => {
-            onTagsChange(newOptions.map((option) => String(option.value)));
+            onStateChange({ tags: newOptions.map((option) => String(option.value)) });
           }}
           isClearable
           data-test-subj="sloTemplatesFilterByTag"

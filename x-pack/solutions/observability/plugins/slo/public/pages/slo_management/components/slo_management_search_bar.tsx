@@ -50,22 +50,21 @@ export function SloManagementSearchBar({ onRefresh }: Props) {
         onRefresh();
       }}
       renderQueryInputAppend={() => (
-        <>
-          <EuiComboBox
-            compressed
-            aria-label={filterTagsLabel}
-            placeholder={filterTagsLabel}
-            delimiter=","
-            options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
-            selectedOptions={selectedOptions}
-            onChange={(newOptions) => {
-              setSelectedOptions(newOptions);
-              onStateChange({ tags: newOptions.map((option) => String(option.value)) });
-            }}
-            isClearable={true}
-            data-test-subj="filter-slos-by-tag"
-          />
-        </>
+        <EuiComboBox
+          compressed
+          css={{ maxWidth: 300 }}
+          aria-label={filterTagsLabel}
+          placeholder={filterTagsLabel}
+          delimiter=","
+          options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
+          selectedOptions={selectedOptions}
+          onChange={(newOptions) => {
+            setSelectedOptions(newOptions);
+            onStateChange({ tags: newOptions.map((option) => String(option.value)) });
+          }}
+          isClearable={true}
+          data-test-subj="filter-slos-by-tag"
+        />
       )}
     />
   );
