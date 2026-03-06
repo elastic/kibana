@@ -10,6 +10,10 @@ inputs:
     type: string
     required: true
     description: "The name of the S3 bucket to list objects from."
+  - name: region
+    type: string
+    required: false
+    description: "The region of the S3 bucket. If not specified, will attempt to auto-detect."
   - name: prefix
     type: string
     required: false
@@ -28,6 +32,7 @@ steps:
     connector-id: <%= amazon_s3-stack-connector-id %>
     with:
       bucket: "${{ inputs.bucket }}"
+      region: "${{ inputs.region }}"
       prefix: "${{ inputs.prefix }}"
       continuationToken: "${{ inputs.continuationToken }}"
       maxKeys: "${{ inputs.maxKeys }}"

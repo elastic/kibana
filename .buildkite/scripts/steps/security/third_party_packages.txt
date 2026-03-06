@@ -34,5 +34,3 @@ simple-statistics
 monaco-promql
 oxlint
 react-element-to-jsx-string
-@aws-sdk/client-s3
-@aws-sdk/s3-request-presigner

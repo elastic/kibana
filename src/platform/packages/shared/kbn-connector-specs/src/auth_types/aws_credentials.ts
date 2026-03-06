@@ -64,7 +64,7 @@ async function calculateSignature(
  * Parse an AWS hostname into service and region.
  * Supports: {service}.{region}.amazonaws.com
  */
-function parseAwsHost(hostname: string): { service: string; region: string } | null {
+function parseAwsHost(hostname: string): { service: string; region: string, itemName?: string } | null {
   if (!hostname.endsWith('.amazonaws.com')) {
     return null;
   }
@@ -72,7 +72,13 @@ function parseAwsHost(hostname: string): { service: string; region: string } | n
   if (parts.length < 2) {
     return null;
   }
-  return { service: parts[0], region: parts[1] };
+
+  if (parts.length == 2) {
+    return { service: parts[0], region: parts[1] };
+  }
+
+  // Handle item-specific hostnames like {bucket}.s3.{region}.amazonaws.com
+  return { itemName: parts[0], service: parts[1], region: parts[2] };
 }
 
 /**
