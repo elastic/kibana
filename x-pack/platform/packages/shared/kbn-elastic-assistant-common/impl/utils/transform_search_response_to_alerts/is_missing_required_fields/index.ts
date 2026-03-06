@@ -16,8 +16,8 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_TITLE,
-} from '../../../../schedules/fields/field_names';
-import type { AttackDiscoveryAlertDocument } from '../../../../schedules/types';
+} from '../../../schedules/field_names';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 
 /** Returns `true` if the document is missing fields required to create an `AttackDiscoveryAlert` */
 export const isMissingRequiredFields = (
