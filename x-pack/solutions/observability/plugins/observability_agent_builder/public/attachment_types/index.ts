@@ -93,7 +93,7 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.monitor.label', {
       defaultMessage: 'Monitor',
     }),
-    icon: 'videoPlayer',
+    icon: 'online',
   },
 ];
 

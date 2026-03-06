@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   OBSERVABILITY_AGENT_ID,
@@ -40,7 +41,10 @@ export const useMonitorAttachmentConfig = () => {
         {
           type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
           data: {
-            attachmentLabel: `${monitorName} monitor`,
+            attachmentLabel: i18n.translate('xpack.synthetics.monitorAttachment.attachmentLabel', {
+              defaultMessage: '{monitorName} monitor',
+              values: { monitorName },
+            }),
             configId,
             monitorName,
             monitorType: monitorType ?? 'unknown',
