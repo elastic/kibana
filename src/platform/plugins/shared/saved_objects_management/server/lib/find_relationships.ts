@@ -10,8 +10,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
 import type { ISavedObjectsManagement } from '../services';
-import type { v1 } from '../../common';
-import type { SavedObjectInvalidRelation, SavedObjectWithMetadata } from '../types';
+import type { v1, SavedObjectInvalidRelation, SavedObjectWithMetadata } from '../../common';
 
 export async function findRelationships({
   type,
