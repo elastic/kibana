@@ -163,6 +163,24 @@ describe('getEuidFromObject', () => {
       });
       expect(getEuidFromObject('user', obj)).toBe('user:dev@example.com@okta');
     });
+
+    it('uses user.name@user.domain@entity.namespace when entity.namespace is active_directory (conditional instruction)', () => {
+      expect(
+        getEuidFromObject('user', {
+          user: { name: 'jane', domain: 'corp.com' },
+          event: { module: 'entityanalytics_ad' },
+        })
+      ).toBe('user:jane@corp.com@active_directory');
+    });
+
+    it('uses user.name@entity.namespace when name and domain present but namespace is not active_directory', () => {
+      expect(
+        getEuidFromObject('user', {
+          user: { name: 'jane', domain: 'corp.com' },
+          event: { module: 'okta' },
+        })
+      ).toBe('user:jane@okta');
+    });
   });
 
   describe('service', () => {

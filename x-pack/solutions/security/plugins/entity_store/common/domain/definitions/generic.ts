@@ -8,13 +8,14 @@
 import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import { compose, field } from './euid_instructions';
 
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
   identityField: {
     requiresOneOfFields: ['entity.id'],
-    euidFields: [[{ field: 'entity.id' }]],
+    euidFields: [compose(field('entity.id'))],
   },
   indexPatterns: [],
   fields: [

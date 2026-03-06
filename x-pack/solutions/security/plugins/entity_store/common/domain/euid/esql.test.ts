@@ -112,7 +112,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.name == "alice") AND (entity.namespace == "entra_id") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == ""))'
+        '((user.name == "alice") AND (entity.namespace == "entra_id") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND (user.domain IS NULL OR user.domain == ""))'
       );
     });
 
@@ -138,6 +138,17 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
+    });
+
+    it('returns filter for Active Directory conditional: user.name, user.domain, entity.namespace when namespace is active_directory', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { name: 'jane', domain: 'corp.com' },
+        event: { module: 'entityanalytics_ad' },
+      });
+
+      expect(result).toBe(
+        '((user.name == "jane") AND (user.domain == "corp.com") AND (entity.namespace == "active_directory") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == ""))'
+      );
     });
   });
 

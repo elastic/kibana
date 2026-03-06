@@ -35,8 +35,8 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
     requiresOneOf: requiresOneOfFields,
     identitySourceFields: Array.from(
       new Set(
-        euidFields.flatMap((composedField) =>
-          composedField.filter(isEuidField).map((attr) => attr.field)
+        euidFields.flatMap((instr) =>
+          instr.composition.filter(isEuidField).map((attr) => attr.field)
         )
       )
     ),

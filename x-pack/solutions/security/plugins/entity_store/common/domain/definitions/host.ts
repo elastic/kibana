@@ -8,6 +8,7 @@
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import { compose, field, sep } from './euid_instructions';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
@@ -17,12 +18,12 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   identityField: {
     requiresOneOfFields: ['host.entity.id', 'host.id', 'host.name', 'host.hostname'],
     euidFields: [
-      [{ field: 'host.entity.id' }],
-      [{ field: 'host.id' }],
-      [{ field: 'host.name' }, { separator: '.' }, { field: 'host.domain' }],
-      [{ field: 'host.hostname' }, { separator: '.' }, { field: 'host.domain' }],
-      [{ field: 'host.name' }],
-      [{ field: 'host.hostname' }],
+      compose(field('host.entity.id')),
+      compose(field('host.id')),
+      compose(field('host.name'), sep('.'), field('host.domain')),
+      compose(field('host.hostname'), sep('.'), field('host.domain')),
+      compose(field('host.name')),
+      compose(field('host.hostname')),
     ],
   },
   entityTypeFallback: 'Host',

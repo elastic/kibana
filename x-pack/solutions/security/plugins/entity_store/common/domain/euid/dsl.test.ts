@@ -159,7 +159,11 @@ describe('getEuidDslFilterBasedOnDocument', () => {
             { term: { 'user.name': 'alice' } },
             { term: { 'entity.namespace': 'entra_id' } },
           ],
-          must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
+          must_not: [
+            { exists: { field: 'user.email' } },
+            { exists: { field: 'user.id' } },
+            { exists: { field: 'user.domain' } },
+          ],
         },
       });
     });
@@ -197,6 +201,24 @@ describe('getEuidDslFilterBasedOnDocument', () => {
             { term: { 'user.email': 'alice@example.com' } },
             { term: { 'entity.namespace': 'okta' } },
           ],
+        },
+      });
+    });
+
+    it('returns filter for Active Directory conditional: user.name, user.domain, entity.namespace when namespace is active_directory', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { name: 'jane', domain: 'corp.com' },
+        event: { module: 'entityanalytics_ad' },
+      });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [
+            { term: { 'user.name': 'jane' } },
+            { term: { 'user.domain': 'corp.com' } },
+            { term: { 'entity.namespace': 'active_directory' } },
+          ],
+          must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
         },
       });
     });

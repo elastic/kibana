@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EntityType, EuidAttribute, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EntityType,
+  EuidAttribute,
+  EuidConditional,
+  FieldEvaluation,
+} from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, isEuidSeparator } from './commons';
 
@@ -50,6 +55,15 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  */
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
+}
+
+/** Painless boolean expression for the minimal conditional (field == eq). */
+function conditionalToPainlessExpression(
+  conditional: EuidConditional,
+  fieldValueExpr: (field: string) => string
+): string {
+  const val = fieldValueExpr(conditional.field);
+  return `${val} == "${escapePainlessString(conditional.eq)}"`;
 }
 
 function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
@@ -115,22 +129,32 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   };
 
   if (identityField.euidFields.length === 1) {
-    const first = identityField.euidFields[0][0];
+    const instruction = identityField.euidFields[0];
+    const comp = instruction.composition;
+    const first = comp[0];
     if (isEuidSeparator(first)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     const field = first.field;
-    const condition = fieldCondition(field);
+    const condPart = instruction.conditional
+      ? conditionalToPainlessExpression(instruction.conditional, fieldValueExpr) + ' && '
+      : '';
+    const condition = condPart + fieldCondition(field);
     const valueExpr = fieldValueExpr(field);
     return `${preamble}if (${condition}) { return "${entityType}:" + ${valueExpr}; } return null;`;
   }
 
   const prefix = `"${entityType}:"`;
-  const clauses = identityField.euidFields.map((composedField) => {
-    const condition = composedField
+  const clauses = identityField.euidFields.map((instruction) => {
+    const composedField = instruction.composition;
+    const compositionCond = composedField
       .filter(isEuidField)
       .map((a) => fieldCondition(a.field))
       .join(' && ');
+    const condPart = instruction.conditional
+      ? conditionalToPainlessExpression(instruction.conditional, fieldValueExpr) + ' && '
+      : '';
+    const condition = condPart + compositionCond;
     const valueExpr = buildPainlessValueExprWithEvaluated(composedField, fieldValueExpr);
     return `if (${condition}) { return ${prefix} + ${valueExpr}; }`;
   });

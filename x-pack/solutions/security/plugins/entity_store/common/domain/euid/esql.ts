@@ -101,7 +101,7 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
   }
 
   const onExpressions = Object.entries(fieldsToBeFilteredOn.values).map(
-    ([field, value]) => `(${field} == "${value}")`
+    ([field, value]) => `(${field} == "${escapeEsqlString(value)}")`
   );
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
@@ -184,38 +184,56 @@ export function getEuidEsqlEvaluation(
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
-  // If only one field is defined, it must exist, no CASE logic is needed
+  // If only one instruction with single field, no CASE logic is needed (unless conditional)
   if (identityField.euidFields.length === 1) {
-    const firstField = identityField.euidFields[0][0];
-    if (isEuidSeparator(firstField)) {
+    const instruction = identityField.euidFields[0];
+    const comp = instruction.composition;
+    const firstAttr = comp[0];
+    if (isEuidSeparator(firstAttr)) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+    if (comp.length === 1 && isEuidField(firstAttr)) {
+      if (instruction.conditional) {
+        const condEsql = `(${instruction.conditional.field} == "${escapeEsqlString(
+          instruction.conditional.eq
+        )}")`;
+        const caseExpr = `CASE((${condEsql}) AND (${esqlIsNotNullOrEmpty(firstAttr.field)}), ${
+          firstAttr.field
+        }, NULL)`;
+        return appendTypeIdIfNeeded(entityType, caseExpr, withTypeId);
+      }
+      return appendTypeIdIfNeeded(entityType, firstAttr.field, withTypeId);
+    }
+    // single instruction but composed: fall through to multi-branch CASE
+  }
+
+  const euidLogic = identityField.euidFields.map((instruction) => {
+    const composedField = instruction.composition;
+    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
 
-    return appendTypeIdIfNeeded(entityType, firstField.field, withTypeId);
-  }
-
-  const euidLogic = identityField.euidFields.map((composedField) => {
-    if (composedField.length === 1) {
-      if (isEuidSeparator(composedField[0])) {
-        throw new Error('Separator found in single field, invalid euid logic definition');
-      }
-    }
-
-    const caseBooleanOp = composedField
+    const compositionConditions = composedField
       .filter(isEuidField)
-      .map((field) => `${esqlIsNotNullOrEmpty(field.field)}`)
+      .map((f) => `${esqlIsNotNullOrEmpty(f.field)}`)
       .join(' AND ');
 
     if (isEuidSeparator(composedField[0])) {
       throw new Error('The first field of a composed field cannot be a separator');
     }
 
+    const caseBooleanOp = instruction.conditional
+      ? `(${instruction.conditional.field} == "${escapeEsqlString(
+          instruction.conditional.eq
+        )}") AND (${compositionConditions})`
+      : compositionConditions;
+
     if (composedField.length === 1) {
-      return `(${caseBooleanOp}), ${composedField[0].field}`;
+      return `(${caseBooleanOp}), ${(composedField[0] as { field: string }).field}`;
     }
 
     const evaluations = composedField
-      .map((field) => (isEuidField(field) ? field.field : `"${field.separator}"`))
+      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.separator)}"`))
       .join(', ');
 
     const concatLogic = `CONCAT(${evaluations})`;

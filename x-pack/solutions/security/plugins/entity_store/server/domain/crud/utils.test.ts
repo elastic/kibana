@@ -40,7 +40,7 @@ const createDefinition = (
   fields,
   identityField: {
     requiresOneOfFields,
-    euidFields: [[{ field: 'entity.id' }]],
+    euidFields: [{ composition: [{ field: 'entity.id' }] }],
   },
   indexPatterns: ['logs-*'],
 });

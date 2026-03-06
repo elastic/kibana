@@ -93,9 +93,10 @@ function buildExtractionSourceClause(params: {
     METADATA ${METADATA_FIELDS.join(', ')}` +
     // Where clause: documents contain id (and field-evaluation sources when present), timestamp window
     `
-  | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
-      AND ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
-      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")`
+  | WHERE 
+      ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
+      AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`
   );
 }
 
@@ -108,7 +109,6 @@ export function buildRemainingLogsCountQuery(params: {
 }): string {
   return (
     buildExtractionSourceClause(params) +
-    buildFieldEvaluations(params.type) +
     `
   | STATS document_count = COUNT()`
   );

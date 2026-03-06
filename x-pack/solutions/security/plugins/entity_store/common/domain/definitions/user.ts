@@ -11,6 +11,7 @@ import {
   isNotEmptyCondition,
 } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
+import { compose, composeIf, field, sep } from './euid_instructions';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
@@ -25,14 +26,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       'client.user.email',
       'source.user.email',
     ],
-    euidFields: [
-      [{ field: 'user.email' }, { separator: '@' }, { field: 'entity.namespace' }],
-      [{ field: 'user.id' }, { separator: '@' }, { field: 'entity.namespace' }],
-      // TODO  ADD user.domain IS NOT NULL AND namespace == "entityanalytics_ad": entity_key = "{user.name}@{user.domain}@active_directory"
-      [{ field: 'user.name' }, { separator: '@' }, { field: 'entity.namespace' }],
-      [{ field: 'client.user.email' }, { separator: '@' }, { field: 'entity.namespace' }],
-      [{ field: 'source.user.email' }, { separator: '@' }, { field: 'entity.namespace' }],
-    ],
     fieldEvaluations: [
       {
         destination: 'entity.namespace',
@@ -45,6 +38,21 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           { when: 'else', copyValueFrom: 'source' },
         ],
       },
+    ],
+    euidFields: [
+      compose(field('user.email'), sep('@'), field('entity.namespace')),
+      compose(field('user.id'), sep('@'), field('entity.namespace')),
+      composeIf(
+        { field: 'entity.namespace', eq: 'active_directory' },
+        field('user.name'),
+        sep('@'),
+        field('user.domain'),
+        sep('@'),
+        field('entity.namespace')
+      ),
+      compose(field('user.name'), sep('@'), field('entity.namespace')),
+      compose(field('client.user.email'), sep('@'), field('entity.namespace')),
+      compose(field('source.user.email'), sep('@'), field('entity.namespace')),
     ],
     /**
      * UEBA user documents filter: only documents that are either

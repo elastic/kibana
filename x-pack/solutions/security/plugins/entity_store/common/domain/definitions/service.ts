@@ -7,6 +7,7 @@
 
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
+import { compose, field } from './euid_instructions';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
@@ -14,7 +15,7 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   name: `Security 'service' Entity Store Definition`,
   identityField: {
     requiresOneOfFields: ['service.entity.id', 'service.name'],
-    euidFields: [[{ field: 'service.entity.id' }], [{ field: 'service.name' }]],
+    euidFields: [compose(field('service.entity.id')), compose(field('service.name'))],
   },
   indexPatterns: [],
   entityTypeFallback: 'Service',
