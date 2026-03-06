@@ -118,6 +118,7 @@ export function UnifiedSearchBar({
   isClearable = true,
   boolFilter,
   onDirtyStateChange,
+  submitActionRef,
 }: {
   placeholder?: string;
   value?: string;
@@ -126,7 +127,8 @@ export function UnifiedSearchBar({
   showSubmitButton?: boolean;
   isClearable?: boolean;
   boolFilter?: QueryDslQueryContainer[];
-  onDirtyStateChange?: (isDirty: boolean) => void;
+  onDirtyStateChange?: (isDirty: boolean, draftKuery?: string) => void;
+  submitActionRef?: React.MutableRefObject<(() => void) | undefined>;
 }) {
   const {
     unifiedSearch: {
@@ -228,52 +230,49 @@ export function UnifiedSearchBar({
     (payload: { dateRange: TimeRange; query?: Query }) => {
       const currentUrlKuery = kuery?.query ?? '';
       const draftKuery = (payload.query?.query as string) ?? '';
-      onDirtyStateChange?.(currentUrlKuery !== draftKuery);
+      const isDirty = currentUrlKuery !== draftKuery;
+      onDirtyStateChange?.(isDirty, isDirty ? draftKuery : undefined);
     },
     [kuery, onDirtyStateChange]
   );
 
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
-    let action = SearchQueryActions.Submit;
     if (dataView == null) {
       return;
     }
 
     const { dateRange, query } = payload;
-    const { from: rangeFrom, to: rangeTo } = dateRange;
 
     try {
       const res = convertKueryToEsQuery(query?.query as string, dataView as DataView);
       if (!res) {
         return;
       }
-      const kueryFields = getKqlFieldNamesFromExpression(query?.query as string);
 
-      const existingQueryParams = toQuery(location.search);
-      const updatedQueryWithTime = {
-        ...existingQueryParams,
-        rangeFrom,
-        rangeTo,
-      };
-      const newSearchParams = {
-        ...updatedQueryWithTime,
-        kuery: query?.query,
-      };
-
-      if (isUpdate) {
-        history.push({
-          ...location,
-          search: fromQuery(newSearchParams),
-        });
+      if (submitActionRef?.current) {
+        submitActionRef.current();
       } else {
-        action = SearchQueryActions.Refresh;
-        onRefresh();
+        const existingQueryParams = toQuery(location.search);
+        const newSearchParams = {
+          ...existingQueryParams,
+          kuery: query?.query,
+        };
+        if (isUpdate) {
+          history.push({
+            ...location,
+            search: fromQuery(newSearchParams),
+          });
+        } else {
+          onRefresh();
+        }
       }
       onDirtyStateChange?.(false);
+
+      const kueryFields = getKqlFieldNamesFromExpression(query?.query as string);
       telemetry.reportSearchQuerySubmitted({
         kueryFields,
-        action,
-        timerange: `${rangeFrom} - ${rangeTo}`,
+        action: isUpdate ? SearchQueryActions.Submit : SearchQueryActions.Refresh,
+        timerange: `${dateRange.from} - ${dateRange.to}`,
       });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console

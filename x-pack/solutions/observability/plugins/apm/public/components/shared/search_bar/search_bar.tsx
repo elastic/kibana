@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ApmDatePicker } from '../date_picker/apm_date_picker';
@@ -37,8 +37,11 @@ export function SearchBar({
 }: Props) {
   const { isMedium } = useBreakpoints();
   const [isQueryDirty, setIsQueryDirty] = useState(false);
-  const handleDirtyStateChange = useCallback((isDirty: boolean) => {
+  const [pendingKuery, setPendingKuery] = useState<string | undefined>();
+  const submitActionRef = useRef<() => void>();
+  const handleDirtyStateChange = useCallback((isDirty: boolean, draftKuery?: string) => {
     setIsQueryDirty(isDirty);
+    setPendingKuery(draftKuery);
   }, []);
 
   if (hidden) {
@@ -73,6 +76,7 @@ export function SearchBar({
               showDatePicker={false}
               showSubmitButton={false}
               onDirtyStateChange={handleDirtyStateChange}
+              submitActionRef={submitActionRef}
             />
           </EuiFlexItem>
         )}
@@ -111,6 +115,8 @@ export function SearchBar({
             <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
               <ApmDatePicker
                 compressed
+                pendingKuery={pendingKuery}
+                submitActionRef={submitActionRef}
                 updateButtonProps={{
                   'data-test-subj': 'querySubmitButton',
                   ...(isQueryDirty && { needsUpdate: true, showTooltip: false }),
