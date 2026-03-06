@@ -106,6 +106,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
   const {
     items,
     totalItems,
+    counts,
     isLoading,
     isFetching,
     error,
@@ -122,6 +123,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
         ...clientState,
         items,
         totalItems,
+        counts,
         isLoading,
         isFetching,
         error,
@@ -129,7 +131,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
       dispatch,
       refetch,
     }),
-    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch]
+    [clientState, items, totalItems, counts, isLoading, isFetching, error, dispatch, refetch]
   );
 
   return (
