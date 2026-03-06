@@ -71,7 +71,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./add_to_dashboard')); // 12m 50s
-    loadTestFile(require.resolve('../group16/runtime_fields')); // 1m
+    loadTestFile(require.resolve('./add_to_dashboard'));
   });
 };

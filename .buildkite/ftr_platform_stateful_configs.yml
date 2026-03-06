@@ -116,6 +116,7 @@ enabled:
   - src/platform/test/functional/apps/discover/group18/config.ts
   - src/platform/test/functional/apps/discover/group19/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config_1.ts
+  - src/platform/test/functional/apps/discover/context_awareness/config_2.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/discover/query_mode/config.ts
   - src/platform/test/functional/apps/discover/query_mode_esql_default/config.ts
