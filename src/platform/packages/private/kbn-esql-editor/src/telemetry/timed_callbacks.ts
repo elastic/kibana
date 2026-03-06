@@ -56,14 +56,15 @@ export const createTimedCallbacks = (
     }
 
     timedCallbacks[key] = (...args: unknown[]) => {
+      onStart();
       const result = (value as Function)(...args);
 
       // If the result is a promise, wrap it in the onStart and onEnd logic
       if (result instanceof Promise) {
-        onStart();
-        result.finally(onEnd);
+        return result.finally(onEnd);
       }
 
+      onEnd();
       return result;
     };
   }
