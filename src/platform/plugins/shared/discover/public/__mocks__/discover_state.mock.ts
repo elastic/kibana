@@ -619,6 +619,7 @@ export function initializeDataStateInDiscoverStateMock(
   const tabId = internalState.getState().tabs.unsafeCurrentId;
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const dataStateContainer = createDataStateContainer(stateContainer, services);
+  tabRuntimeState.dataStateContainer$.getValue()?.cancel();
   tabRuntimeState.dataStateContainer$.next(dataStateContainer);
   return dataStateContainer;
 }

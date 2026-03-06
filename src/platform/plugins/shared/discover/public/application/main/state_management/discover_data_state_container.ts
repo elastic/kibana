@@ -523,7 +523,7 @@ export function getDataStateContainer({
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
-      if (nextDataView && nextDataView !== currentDataView) {
+      if (nextDataView !== currentDataView) {
         internalState.dispatch(
           injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
         );
