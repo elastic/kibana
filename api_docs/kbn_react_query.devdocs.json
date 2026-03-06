@@ -14039,6 +14039,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/components/endpoint_runscript_script_selector/endpoint_runscript_script_selector.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.test.ts"
               }
             ],
@@ -14309,11 +14313,11 @@
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
               },
               {
                 "plugin": "maintenanceWindows",
@@ -14512,12 +14516,12 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule_management_filters.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14525,15 +14529,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
               },
               {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
               },
               {
                 "plugin": "@kbn/cloud-security-posture",
@@ -14586,6 +14586,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
               },
               {
                 "plugin": "securitySolution",

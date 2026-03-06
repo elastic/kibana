@@ -42,7 +42,6 @@ import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
-import type { SystemClient } from './system/system_client';
 import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -79,7 +78,6 @@ export class StreamsClient {
       scopedClusterClient: IScopedClusterClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
-      systemClient: SystemClient;
       featureClient: FeatureClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
