@@ -1673,6 +1673,7 @@
     "@kbn/evals-suite-entity-analytics": "link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics",
     "@kbn/evals-suite-llm-tasks": "link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks",
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
+    "@kbn/evals-suite-observability-ai": "link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
