@@ -46,7 +46,7 @@ import type {
 import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
 import { BulkOperationError } from '../errors';
-import { VERSION_FIELD, getSchemapaths, type StorageSchemaVersioning } from '../schema_versioning';
+import { VERSION_FIELD, getSchemaPaths, type StorageSchemaVersioning } from '../schema_versioning';
 
 function getAliasName(name: string) {
   return name;
@@ -172,7 +172,7 @@ export class StorageIndexAdapter<
       );
     }
 
-    const schemaPaths = getSchemapaths(versioning.latestSchema);
+    const schemaPaths = getSchemaPaths(versioning.latestSchema);
     if (!schemaPaths) {
       return;
     }
@@ -747,12 +747,19 @@ export class StorageIndexAdapter<
         { ...(doc as Record<string, unknown>), [VERSION_FIELD]: versioning.latestVersion } as {},
       ]);
 
-      await wrapEsCall(
+      const bulkResponse = await wrapEsCall(
         this.esClient.bulk({
           operations,
           refresh: false,
         })
       );
+
+      if (bulkResponse.errors) {
+        const failedItems = bulkResponse.items.filter((item) => Object.values(item)[0]?.error);
+        this.logger.warn(
+          `Bulk migration encountered ${failedItems.length} errors in batch of ${hits.length}`
+        );
+      }
       migrated += hits.length;
 
       this.logger.debug(`Migrated ${migrated} documents so far`);
