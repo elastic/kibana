@@ -64,8 +64,6 @@ import type {
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes, WORKFLOWS_EXECUTION_STATE_INDEX } from '../common';
-import { createIndex } from '@kbn/core/packages/saved-objects/migration-server-internal';
-import { createIndexWithMappings } from '../common/create_index';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
