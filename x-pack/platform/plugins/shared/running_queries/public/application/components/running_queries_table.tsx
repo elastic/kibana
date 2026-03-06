@@ -25,6 +25,7 @@ import { useRunningQueriesAppContext } from '../app_context';
 import { QueryDetailFlyout } from './query_detail_flyout';
 import { RunTimeFilter } from './run_time_filter';
 import { StopQueryConfirmationModal } from './stop_query_confirmation_modal';
+import { formatRuntime } from '../../lib/format_runtime';
 import {
   getStopRequestedTaskIds,
   markStopRequestedTask,
@@ -177,14 +178,14 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         render: (startTime: number) => moment(startTime).format('MMM D YYYY, HH:mm:ss'),
       },
       {
-        field: 'startTime',
+        field: 'runningTimeMs',
         name: i18n.translate('xpack.runningQueries.table.runTimeColumn', {
           defaultMessage: 'Run time',
         }),
         width: '140px',
         sortable: true,
         truncateText: true,
-        render: (startTime: number) => moment(startTime).fromNow(true),
+        render: (runningTimeMs: number) => formatRuntime(runningTimeMs),
       },
       {
         name: i18n.translate('xpack.runningQueries.table.actionsColumn', {
@@ -317,7 +318,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
           filters: searchFilters,
         }}
         noItemsMessage={i18n.translate('xpack.runningQueries.table.noItemsMessage', {
-          defaultMessage: 'No long running queries detected',
+          defaultMessage: 'No running queries detected',
         })}
         pagination={true}
         sorting={{

@@ -6,7 +6,11 @@
  */
 
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
-import { API_BASE_PATH, RUNNING_QUERIES_READ_PRIVILEGE } from '../../common/constants';
+import {
+  API_BASE_PATH,
+  RUNNING_QUERIES_READ_PRIVILEGE,
+  RUNNING_QUERIES_MIN_RUNNING_TIME_SETTING,
+} from '../../common/constants';
 import type { RouteOptions } from '.';
 import { transformTasks } from '../lib/transform_tasks';
 
@@ -28,6 +32,10 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
       try {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const minRunningTimeMs = await coreContext.uiSettings.client.get<number>(
+          RUNNING_QUERIES_MIN_RUNNING_TIME_SETTING
+        );
+        const thresholdNanos = minRunningTimeMs * 1_000_000;
 
         const result = await esClient.tasks.list({
           detailed: true,
@@ -43,7 +51,7 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
         });
 
         const tasks = (result.tasks ?? []) as TasksTaskInfo[];
-        const queries = transformTasks(tasks);
+        const queries = transformTasks(tasks, thresholdNanos);
 
         return response.ok({ body: { queries } });
       } catch (error) {

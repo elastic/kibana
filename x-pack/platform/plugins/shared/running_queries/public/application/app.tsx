@@ -159,7 +159,7 @@ const RunningQueriesAppWithData: React.FC = () => {
                       defaultMessage: 'Updated <1m ago',
                     })
                   : i18n.translate('xpack.runningQueries.lastUpdatedMinutes', {
-                      defaultMessage: 'Updated {minutes}min ago',
+                      defaultMessage: 'Updated {minutes} min ago',
                       values: { minutes: Math.floor(secondsAgo / 60) },
                     })}
               </EuiText>

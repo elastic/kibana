@@ -16,7 +16,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,7 +24,6 @@ import {
 import { css } from '@emotion/react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { getRouterLinkProps } from '@kbn/router-utils';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { formatRuntime } from '../../lib/format_runtime';
@@ -74,20 +72,18 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
     if (!query.traceId) {
       return undefined;
     }
-
     const discoverParams: DiscoverAppLocatorParams = {
       timeRange: { from: rangeFrom, to: rangeTo },
       query: { language: 'kuery', query: `trace.id:"${query.traceId}"` },
       filters: [],
     };
-
     const discoverHref = discoverLocator?.getRedirectUrl(discoverParams);
-
     return discoverLocator && discoverHref
-      ? getRouterLinkProps({
+      ? {
           href: discoverHref,
-          onClick: () => discoverLocator.navigate(discoverParams),
-        })
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        }
       : undefined;
   }, [discoverLocator, query.traceId, rangeFrom, rangeTo]);
 
@@ -154,13 +150,35 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             })}
           </strong>{' '}
           {source ? (
-            <EuiLink>{source}</EuiLink>
+            <>{source}</>
           ) : (
             <EuiText color="subdued">
               <em>{notAvailableLabel}</em>
             </EuiText>
           )}
         </EuiText>
+
+        {query.xOpaqueId && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('xpack.runningQueries.flyout.xOpaqueIdLabel', {
+                      defaultMessage: 'Opaque ID',
+                    })}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiText size="s" css={{ wordBreak: 'break-all' }}>
+                  {query.xOpaqueId}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
 
         <EuiSpacer size="l" />
 
@@ -188,7 +206,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               <EuiSpacer size="xs" />
               <EuiText>
                 <h4>
-                  <strong>{formatRuntime(query.startTime)}</strong>
+                  <strong>{formatRuntime(query.runningTimeMs)}</strong>
                 </h4>
               </EuiText>
             </EuiFlexItem>

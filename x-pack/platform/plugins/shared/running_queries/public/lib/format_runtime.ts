@@ -13,12 +13,14 @@ import { i18n } from '@kbn/i18n';
 // A bare format string (e.g. moment.utc(ms).format('H[h] m[m]')) would hardcode
 // English unit labels and skip pluralization. The explicit i18n calls below give
 // exact values ("2 hours 15 mins") with proper pluralization across locales.
-export function formatRuntime(startTime: number): string {
-  const duration = moment.duration(Date.now() - startTime);
+export function formatRuntime(durationMs: number): string {
+  durationMs = Math.max(0, durationMs);
+  const duration = moment.duration(durationMs);
   const hours = Math.floor(duration.asHours());
-  const minutes = duration.minutes();
+  const totalMinutes = Math.floor(duration.asMinutes());
 
   if (hours > 0) {
+    const minutes = totalMinutes - hours * 60;
     return minutes > 0
       ? i18n.translate('xpack.runningQueries.flyout.runtimeHoursMinutes', {
           defaultMessage:
@@ -31,8 +33,20 @@ export function formatRuntime(startTime: number): string {
         });
   }
 
-  return i18n.translate('xpack.runningQueries.flyout.runtimeMinutes', {
-    defaultMessage: '{minutes} {minutes, plural, one {min} other {mins}}',
-    values: { minutes },
+  if (totalMinutes > 0) {
+    return i18n.translate('xpack.runningQueries.flyout.runtimeMinutes', {
+      defaultMessage: '{minutes} {minutes, plural, one {min} other {mins}}',
+      values: { minutes: totalMinutes },
+    });
+  }
+
+  const seconds =
+    durationMs > 0
+      ? Math.max(1, Math.floor(duration.asSeconds()))
+      : Math.floor(duration.asSeconds());
+
+  return i18n.translate('xpack.runningQueries.flyout.runtimeSeconds', {
+    defaultMessage: '{seconds} {seconds, plural, one {sec} other {secs}}',
+    values: { seconds },
   });
 }

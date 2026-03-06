@@ -16,3 +16,6 @@ export const RUNNING_QUERIES_READ_PRIVILEGE = 'running_queries-read';
 export const RUNNING_QUERIES_WRITE_PRIVILEGE = 'running_queries-write';
 
 export const CANCELLATION_POLL_INTERVAL_MS = 5_000;
+
+export const RUNNING_QUERIES_MIN_RUNNING_TIME_SETTING = 'running_queries:minRunningTime';
+export const RUNNING_QUERIES_MIN_RUNNING_TIME_DEFAULT_MS = 100;

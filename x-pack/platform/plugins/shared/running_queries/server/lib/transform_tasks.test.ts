@@ -6,8 +6,8 @@
  */
 
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
+import { RUNNING_QUERIES_MIN_RUNNING_TIME_DEFAULT_MS } from '../../common/constants';
 import {
-  RUNNING_TIME_THRESHOLD_NANOS,
   extractSource,
   getQueryType,
   capitalise,
@@ -17,13 +17,15 @@ import {
   transformTasks,
 } from './transform_tasks';
 
+const DEFAULT_THRESHOLD_NANOS = RUNNING_QUERIES_MIN_RUNNING_TIME_DEFAULT_MS * 1_000_000;
+
 const baseTask: TasksTaskInfo = {
   node: 'node1',
   id: 100,
   type: 'transport',
   action: 'indices:data/read/search',
   start_time_in_millis: 1000000,
-  running_time_in_nanos: RUNNING_TIME_THRESHOLD_NANOS + 1,
+  running_time_in_nanos: DEFAULT_THRESHOLD_NANOS + 1,
   cancellable: true,
   cancelled: false,
   headers: {},
@@ -149,43 +151,64 @@ describe('parseEsqlDescription', () => {
 
 describe('isIncludedTask', () => {
   it('includes a qualifying top-level search task', () => {
-    expect(isIncludedTask(baseTask)).toBe(true);
+    expect(isIncludedTask(baseTask, DEFAULT_THRESHOLD_NANOS)).toBe(true);
   });
 
   it('includes esql tasks', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/esql[a]' })).toBe(true);
+    expect(
+      isIncludedTask({ ...baseTask, action: 'indices:data/read/esql[a]' }, DEFAULT_THRESHOLD_NANOS)
+    ).toBe(true);
   });
 
   it('includes eql tasks', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/eql/search' })).toBe(true);
+    expect(
+      isIncludedTask(
+        { ...baseTask, action: 'indices:data/read/eql/search' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(true);
   });
 
   it('includes sql tasks', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/sql' })).toBe(true);
+    expect(
+      isIncludedTask({ ...baseTask, action: 'indices:data/read/sql' }, DEFAULT_THRESHOLD_NANOS)
+    ).toBe(true);
   });
 
   it('includes msearch tasks', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/msearch' })).toBe(true);
+    expect(
+      isIncludedTask({ ...baseTask, action: 'indices:data/read/msearch' }, DEFAULT_THRESHOLD_NANOS)
+    ).toBe(true);
   });
 
   it('includes async_search tasks', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/async_search/submit' })).toBe(
-      true
-    );
+    expect(
+      isIncludedTask(
+        { ...baseTask, action: 'indices:data/read/async_search/submit' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(true);
   });
 
   it('excludes child tasks with parent_task_id', () => {
-    expect(isIncludedTask({ ...baseTask, parent_task_id: 'node1:99' })).toBe(false);
+    expect(
+      isIncludedTask({ ...baseTask, parent_task_id: 'node1:99' }, DEFAULT_THRESHOLD_NANOS)
+    ).toBe(false);
   });
 
   it('excludes tasks below the runtime threshold', () => {
     expect(
-      isIncludedTask({ ...baseTask, running_time_in_nanos: RUNNING_TIME_THRESHOLD_NANOS - 1 })
+      isIncludedTask(
+        { ...baseTask, running_time_in_nanos: DEFAULT_THRESHOLD_NANOS - 1 },
+        DEFAULT_THRESHOLD_NANOS
+      )
     ).toBe(false);
   });
 
   it('excludes non-search actions', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/write/bulk' })).toBe(false);
+    expect(
+      isIncludedTask({ ...baseTask, action: 'indices:data/write/bulk' }, DEFAULT_THRESHOLD_NANOS)
+    ).toBe(false);
   });
 });
 
@@ -199,7 +222,7 @@ describe('transformTasks', () => {
         'X-Opaque-Id': 'req1;kibana:application:discover:new',
       },
     };
-    const results = transformTasks([task]);
+    const results = transformTasks([task], DEFAULT_THRESHOLD_NANOS);
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
       taskId: 'node1:100',
@@ -214,11 +237,11 @@ describe('transformTasks', () => {
 
   it('filters out child tasks', () => {
     const child: TasksTaskInfo = { ...baseTask, parent_task_id: 'node1:50' };
-    expect(transformTasks([child])).toHaveLength(0);
+    expect(transformTasks([child], DEFAULT_THRESHOLD_NANOS)).toHaveLength(0);
   });
 
   it('handles an empty tasks array', () => {
-    expect(transformTasks([])).toEqual([]);
+    expect(transformTasks([], DEFAULT_THRESHOLD_NANOS)).toEqual([]);
   });
 
   it('transforms DSL search tasks', () => {
@@ -230,7 +253,7 @@ describe('transformTasks', () => {
         'X-Opaque-Id': 'req2;kibana:application:dashboard:abc',
       },
     };
-    const results = transformTasks([task]);
+    const results = transformTasks([task], DEFAULT_THRESHOLD_NANOS);
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
       queryType: 'DSL',
@@ -250,7 +273,7 @@ describe('transformTasks', () => {
       },
     };
 
-    const results = transformTasks([task]);
+    const results = transformTasks([task], DEFAULT_THRESHOLD_NANOS);
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
       queryType: 'SQL',
@@ -268,7 +291,7 @@ describe('transformTasks', () => {
       },
     };
 
-    const results = transformTasks([task]);
+    const results = transformTasks([task], DEFAULT_THRESHOLD_NANOS);
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
       queryType: 'EQL',
@@ -286,7 +309,7 @@ describe('transformTasks', () => {
       },
     };
 
-    const results = transformTasks([task]);
+    const results = transformTasks([task], DEFAULT_THRESHOLD_NANOS);
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
       queryType: 'MSearch',

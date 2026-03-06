@@ -8,8 +8,11 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { API_BASE_PATH } from '../../common/constants';
-import { RUNNING_TIME_THRESHOLD_NANOS } from '../lib/transform_tasks';
+import {
+  API_BASE_PATH,
+  RUNNING_QUERIES_MIN_RUNNING_TIME_DEFAULT_MS,
+  RUNNING_QUERIES_MIN_RUNNING_TIME_SETTING,
+} from '../../common/constants';
 import { registerSearchRoute } from './search';
 
 describe(`GET ${API_BASE_PATH}/search`, () => {
@@ -22,6 +25,11 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
     const [[_config, handler]] = router.get.mock.calls;
 
     const coreContext = coreMock.createRequestHandlerContext();
+    coreContext.uiSettings.client.get.mockImplementation(async (key: string) => {
+      if (key === RUNNING_QUERIES_MIN_RUNNING_TIME_SETTING) {
+        return RUNNING_QUERIES_MIN_RUNNING_TIME_DEFAULT_MS;
+      }
+    });
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -39,7 +47,7 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
           type: 'transport',
           action: 'indices:data/read/search',
           start_time_in_millis: 1_000_000,
-          running_time_in_nanos: RUNNING_TIME_THRESHOLD_NANOS + 1,
+          running_time_in_nanos: RUNNING_QUERIES_MIN_RUNNING_TIME_DEFAULT_MS * 1_000_000 + 1,
           cancellable: true,
           cancelled: false,
           headers: { 'X-Opaque-Id': 'req1;kibana:application:discover:new' },

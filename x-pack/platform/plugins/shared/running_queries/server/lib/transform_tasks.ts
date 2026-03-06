@@ -8,9 +8,6 @@
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { RunningQuery, QueryType } from '../../common/types';
 
-/** Tasks running shorter than this are excluded. 0.1s = 100_000_000 nanos. */
-export const RUNNING_TIME_THRESHOLD_NANOS = 100_000_000;
-
 const SEARCH_ACTION_PREFIX = 'indices:data/read/search';
 const ESQL_ACTION_PREFIX = 'indices:data/read/esql';
 const EQL_ACTION_PREFIX = 'indices:data/read/eql';
@@ -117,7 +114,7 @@ export function parseEsqlDescription(description: string): { indices: number; qu
 /**
  * Returns true for top-level search/esql tasks that exceed the runtime threshold.
  */
-export function isIncludedTask(task: TasksTaskInfo): boolean {
+export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boolean {
   if (task.parent_task_id !== undefined && task.parent_task_id !== null) {
     return false;
   }
@@ -134,7 +131,7 @@ export function isIncludedTask(task: TasksTaskInfo): boolean {
     return false;
   }
 
-  if ((task.running_time_in_nanos ?? 0) < RUNNING_TIME_THRESHOLD_NANOS) {
+  if ((task.running_time_in_nanos ?? 0) < thresholdNanos) {
     return false;
   }
 
@@ -145,11 +142,11 @@ export function isIncludedTask(task: TasksTaskInfo): boolean {
  * Transforms a flat list of ES TasksTaskInfo into RunningQuery objects,
  * applying filtering and field extraction.
  */
-export function transformTasks(tasks: TasksTaskInfo[]): RunningQuery[] {
+export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): RunningQuery[] {
   const results: RunningQuery[] = [];
 
   for (const task of tasks) {
-    if (!isIncludedTask(task)) {
+    if (!isIncludedTask(task, thresholdNanos)) {
       continue;
     }
 
@@ -181,9 +178,11 @@ export function transformTasks(tasks: TasksTaskInfo[]): RunningQuery[] {
       queryType,
       source,
       startTime: task.start_time_in_millis as number,
+      runningTimeMs: Math.round((task.running_time_in_nanos ?? 0) / 1_000_000),
       indices,
       query,
       traceId,
+      xOpaqueId,
       cancellable: task.cancellable ?? false,
       cancelled: task.cancelled ?? false,
     });

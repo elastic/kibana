@@ -19,6 +19,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes';
 import { runningQueriesFeature } from './running_queries_feature';
+import { uiSettings } from './ui_settings';
 
 export class RunningQueriesPlugin
   implements
@@ -49,6 +50,8 @@ export class RunningQueriesPlugin
     }));
 
     plugins.features.registerKibanaFeature(runningQueriesFeature);
+
+    core.uiSettings.register(uiSettings);
 
     const router = core.http.createRouter();
     registerRoutes({ router, logger: this.logger });
