@@ -59,6 +59,15 @@ Schema features describe the **log schema family** evident from field names and 
 
 - **Identify high-level components**: Focus on services, databases, queues, caches, and other architectural building blocks — not individual instances, pods, or hosts.
 - **Attach context to entities**: When technology or infrastructure details can be attributed to a specific entity, include them in the entity's `properties` or `meta`. This duplication with standalone infrastructure/technology features is expected and desirable — entities carry their own context while standalone features provide system-wide visibility.
+- **Add filter by default for entities**: when emitting an `entity` feature, include a `filter` whenever at least one stable, selective field-value pair is supported by evidence (for example `service.name`, `event.dataset`, `kubernetes.namespace`). Omit `filter` only if no reliable, selective condition can be formed from the provided logs.
+- **Filter shape**: `filter` should use these condition forms:
+  - Single equality: `{ "field": "...", "eq": "..." }` (value can be string, number, or boolean)
+  - AND group: `{ "and": [ { "field": "...", "eq": "..." }, ... ] }`
+  - OR group: `{ "or": [ { "field": "...", "eq": "..." }, ... ] }`
+  - Use only `eq`, `and`, and `or` operators for the filter condition.
+- **Prefer the simplest valid filter**: start with a single equality when it is selective enough; use `and` only when needed to disambiguate; use `or` only for true alternatives of the same component.
+- **Filter quality constraints**: Prefer stable, selective fields (for example, service/component names). Avoid broad filters that match most documents (for example, `agent.name=filebeat`) and avoid high-cardinality or instance-like values (pod names, hostnames, container IDs, request/trace IDs, IPs).
+- **Filter-evidence consistency**: every field/value used in `filter` must appear in, or be directly justified by, the feature's `evidence`.
 - **Require sufficient evidence**: Do not speculatively create entities. Only emit an entity when the log evidence clearly identifies a distinct, named system component.
 - **Keep rules generic**: Entity identification is not tied to specific technologies or log patterns. Any log evidence that reveals a distinct, named system component qualifies.
 
@@ -216,6 +225,32 @@ For every feature you decide **not** to generate because it matches a deleted fe
 }
 ```
 
+**Example 2b — Entity filter (compact example)**
+```
+{
+  "type": "entity",
+  "subtype": "service",
+  "id": "checkout-api",
+  "title": "Checkout API",
+  "description": "Checkout API service handling payment and order requests",
+  "properties": {
+    "name": "checkout-api"
+  },
+  "confidence": 90,
+  "evidence": [
+    "service.name=checkout-api",
+    "event.dataset=checkout-api.logs"
+  ],
+  "tags": ["entity", "service"],
+  "filter": {
+    "and": [
+      { "field": "service.name", "eq": "checkout-api" },
+      { "field": "event.dataset", "eq": "checkout-api.logs" }
+    ]
+  }
+}
+```
+
 **Example 3 — Infrastructure: cloud deployment showing properties vs meta**
 ```
 {
@@ -353,6 +388,7 @@ For every feature you decide **not** to generate because it matches a deleted fe
 - Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `subtype`).
 - Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
 - Entity threshold: only create entity features when there is clear evidence of a distinct, named system component. When in doubt, omit the entity.
+- Entity filters: for each emitted entity, include a valid `filter` unless there is no stable/selective condition available from evidence.
 - Schema: when multiple schema families are evident (e.g. ECS and OTel), emit one schema feature per family; keep each schema feature's `properties` short (`schema_family`, optional `ecs_version` only).
 
 Extract all features that meet the confidence threshold and have supporting evidence.
