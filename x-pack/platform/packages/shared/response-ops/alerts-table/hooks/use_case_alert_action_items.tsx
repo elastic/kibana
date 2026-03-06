@@ -7,24 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
-import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { CasesService } from '../types';
 import { useCaseActions } from './use_case_actions';
-
-const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.triggersActionsUI.ruleDetails.alertsTable.actions.addToExistingCase',
-  { defaultMessage: 'Add to existing case' }
-);
-
-const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.triggersActionsUI.ruleDetails.alertsTable.actions.addToNewCase',
-  { defaultMessage: 'Add to new case' }
-);
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
 /**
  * Returns "Add to existing case" and "Add to new case" context menu items
- * for the rule details alerts table actions popover.
+ * for the alerts table actions popover.
  *
  * Returns an empty array if the cases service is unavailable or the user lacks permissions.
  */

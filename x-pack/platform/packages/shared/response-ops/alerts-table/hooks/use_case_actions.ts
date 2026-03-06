@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import type { Alert } from '@kbn/alerting-types';
-import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { CasesService } from '../types';
 
 export const useCaseActions = ({
   alerts,
@@ -16,14 +16,14 @@ export const useCaseActions = ({
 }: {
   alerts: Alert[];
   cases?: CasesService;
-  onAddToCase?: () => void;
+  onAddToCase?: (opts: { isNewCase: boolean }) => void;
 }) => {
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
-    onSuccess: () => onAddToCase?.(),
+    onSuccess: () => onAddToCase?.({ isNewCase: false }),
   });
 
   const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({
-    onSuccess: () => onAddToCase?.(),
+    onSuccess: () => onAddToCase?.({ isNewCase: true }),
   });
 
   const getCaseAttachments = useCallback(() => {
