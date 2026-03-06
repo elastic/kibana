@@ -12,8 +12,8 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { WORKFLOW_EXAMPLES } from '@kbn/workflows';
 import { registerGetExamplesTool } from './get_examples_tool';
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(() => 'name: Test Workflow\nenabled: true'),
+jest.mock('fs/promises', () => ({
+  readFile: jest.fn(() => Promise.resolve('name: Test Workflow\nenabled: true')),
 }));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>

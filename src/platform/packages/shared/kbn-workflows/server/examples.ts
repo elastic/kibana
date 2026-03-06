@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable import/no-nodejs-modules -- we need this on server to read yaml files */
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import path from 'path';
 
 import { getWorkflowExamplesDir, WORKFLOW_EXAMPLE_IDS } from '../spec/examples';
@@ -17,15 +17,15 @@ import { getWorkflowExamplesDir, WORKFLOW_EXAMPLE_IDS } from '../spec/examples';
  * Load the YAML content of a bundled workflow example by its catalog ID.
  * Returns `undefined` if the ID is not in the allowlist or the file cannot be read.
  */
-export function loadWorkflowExampleContent(entry: {
+export async function loadWorkflowExampleContent(entry: {
   id: string;
   filename: string;
-}): string | undefined {
+}): Promise<string | undefined> {
   if (!WORKFLOW_EXAMPLE_IDS.has(entry.id)) {
     return undefined;
   }
   try {
-    return readFileSync(path.join(getWorkflowExamplesDir(), entry.filename), 'utf-8');
+    return await readFile(path.join(getWorkflowExamplesDir(), entry.filename), 'utf-8');
   } catch {
     return undefined;
   }

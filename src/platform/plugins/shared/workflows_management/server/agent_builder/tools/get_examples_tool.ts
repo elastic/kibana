@@ -57,18 +57,20 @@ Supports keyword search across names, descriptions, and tags.`,
       const effectiveLimit = Math.min(limit ?? 3, 5);
       const entries = getWorkflowExamples({ category, search });
 
-      const examples = entries.slice(0, effectiveLimit).map((entry) => {
-        if (!WORKFLOW_EXAMPLE_IDS.has(entry.id)) {
-          return { id: entry.id, name: entry.name, category: entry.category };
-        }
-        const yaml = loadWorkflowExampleContent(entry);
-        return {
-          id: entry.id,
-          name: entry.name,
-          category: entry.category,
-          ...(yaml ? { yaml } : {}),
-        };
-      });
+      const examples = await Promise.all(
+        entries.slice(0, effectiveLimit).map(async (entry) => {
+          if (!WORKFLOW_EXAMPLE_IDS.has(entry.id)) {
+            return { id: entry.id, name: entry.name, category: entry.category };
+          }
+          const yaml = await loadWorkflowExampleContent(entry);
+          return {
+            id: entry.id,
+            name: entry.name,
+            category: entry.category,
+            ...(yaml ? { yaml } : {}),
+          };
+        })
+      );
 
       return {
         results: [
