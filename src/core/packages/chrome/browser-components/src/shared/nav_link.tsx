@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 /** Converts a relative URL to an absolute URL using DOM resolution. */
 const relativeToAbsolute = (url: string) => {
@@ -149,7 +148,7 @@ export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath'],
-  navigateToUrl: InternalApplicationStart['navigateToUrl']
+  navigateToUrl: ApplicationStart['navigateToUrl']
 ): RecentNavLink {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));

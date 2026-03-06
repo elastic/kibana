@@ -44,7 +44,7 @@ export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 
 export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
 export const HistorySnapshotState = z.object({
-  status: HistorySnapshotStatus.default('stopped'),
+  status: HistorySnapshotStatus.default('started'),
   frequency: z
     .string()
     .regex(/[smdh]$/)
