@@ -131,9 +131,7 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   : packAssetSavedObject.attributes.name;
 
               const now = moment().toISOString();
-              const enrichedQueries = (
-                packAssetSavedObject.attributes.queries ?? []
-              ).map((q) => ({
+              const enrichedQueries = (packAssetSavedObject.attributes.queries ?? []).map((q) => ({
                 ...q,
                 schedule_id: q.schedule_id ?? uuidv4(),
                 start_date: q.start_date ?? now,
