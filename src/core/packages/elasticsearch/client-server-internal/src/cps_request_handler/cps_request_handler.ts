@@ -24,16 +24,14 @@ export function getCpsRequestHandler(
     const { acceptedParams } = params.meta ?? {};
 
     if (cpsEnabled) {
-      if (isProjectRoutingAccepted(acceptedParams)) {
-        if (isProjectRoutingInQuery(acceptedParams)) {
-          injectProjectRoutingQueryString(projectRouting, params);
+      if (isProjectRoutingInQuery(acceptedParams)) {
+        injectProjectRoutingQueryString(projectRouting, params);
+      } else if (isProjectRoutingInBody(acceptedParams)) {
+        if (body?.pit) {
+          // The project_routing is set by the openPit API, and thus part of the PIT context.
+          stripProjectRoutingBody(body);
         } else {
-          if (body?.pit) {
-            // The project_routing is set by the openPit API, and thus part of the PIT context.
-            stripProjectRoutingBody(body);
-          } else {
-            injectProjectRoutingBody(projectRouting, params, body);
-          }
+          injectProjectRoutingBody(projectRouting, params, body);
         }
       }
     } else {
@@ -47,23 +45,6 @@ export function getCpsRequestHandler(
 }
 
 /**
- * Returns true if `project_routing` is an accepted parameter for this API, regardless of whether
- * it goes in the query string or the body.
- *
- * Handles both the legacy flat-array form (produced by older client versions or raw
- * `transport.request()` callers) and the current structured form introduced in elasticsearch-js
- * v9.3.3, which differentiates between path, body, and query parameters.
- */
-function isProjectRoutingAccepted(acceptedParams: AcceptedParams | undefined): boolean {
-  if (!acceptedParams) return false;
-  if (Array.isArray(acceptedParams)) return acceptedParams.includes('project_routing');
-  return (
-    acceptedParams.body.includes('project_routing') ||
-    acceptedParams.query.includes('project_routing')
-  );
-}
-
-/**
  * Returns true when `project_routing` must be sent as a query parameter rather than in the
  * request body. This applies to NDJSON-body APIs (e.g. `msearch`, `msearch_template`) where
  * injecting into the body would corrupt the newline-delimited format.
@@ -74,6 +55,19 @@ function isProjectRoutingAccepted(acceptedParams: AcceptedParams | undefined): b
 function isProjectRoutingInQuery(acceptedParams: AcceptedParams | undefined): boolean {
   if (!acceptedParams || Array.isArray(acceptedParams)) return false;
   return acceptedParams.query.includes('project_routing');
+}
+
+/**
+ * Returns true if `project_routing` is an accepted body parameter for this API.
+ *
+ * Handles both the legacy flat-array form (produced by older client versions or raw
+ * `transport.request()` callers) and the current structured form introduced in elasticsearch-js
+ * v9.3.3, which differentiates between path, body, and query parameters.
+ */
+function isProjectRoutingInBody(acceptedParams: AcceptedParams | undefined): boolean {
+  if (!acceptedParams) return false;
+  if (Array.isArray(acceptedParams)) return acceptedParams.includes('project_routing');
+  return acceptedParams.body.includes('project_routing');
 }
 
 function stripProjectRoutingBody(body: Record<string, unknown> | undefined): void {
