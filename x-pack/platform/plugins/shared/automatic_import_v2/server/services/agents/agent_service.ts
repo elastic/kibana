@@ -8,7 +8,8 @@
 import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { createAutomaticImportAgent } from '../../agents';
+import type { BaseMessage } from '@langchain/core/messages';
+import { createAutomaticImportAgent, createPipelineEditorAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
   createLogsAnalyzerAgent,
@@ -128,5 +129,90 @@ export class AgentService {
     );
 
     return result;
+  }
+
+  /**
+   * Invokes the pipeline editor agent for interactive, chat-based pipeline editing.
+   * Runs synchronously (not via Task Manager) since this is an interactive request.
+   *
+   * @param integrationId - The integration ID
+   * @param dataStreamId - The data stream ID
+   * @param esClient - The Elasticsearch client
+   * @param model - The chat model to use
+   * @param currentPipeline - The current ingest pipeline JSON
+   * @param userMessage - The user's edit request
+   * @param conversationHistory - Prior conversation messages for context
+   */
+  public async invokePipelineEditorAgent(
+    integrationId: string,
+    dataStreamId: string,
+    esClient: ElasticsearchClient,
+    model: InferenceChatModel,
+    currentPipeline: Record<string, unknown>,
+    userMessage: string,
+    conversationHistory: Array<{ role: string; content: string }>
+  ) {
+    this.logger.debug(
+      `invokePipelineEditorAgent: Invoking pipeline editor for integration ${integrationId}, data stream ${dataStreamId}`
+    );
+
+    const samples = await this.samplesIndexService.getSamplesForDataStream(
+      integrationId,
+      dataStreamId,
+      esClient
+    );
+
+    const fetchSamplesToolInstance = fetchSamplesTool(samples);
+    const validatorTool = ingestPipelineValidatorTool(esClient, samples);
+
+    const agent = createPipelineEditorAgent({
+      model,
+      tools: [validatorTool, fetchSamplesToolInstance],
+    });
+
+    const messages: BaseMessage[] | Array<{ role: string; content: string }> = [
+      ...conversationHistory,
+      {
+        role: 'user',
+        content: `Here is the current ingest pipeline:\n\n\`\`\`json\n${JSON.stringify(
+          currentPipeline,
+          null,
+          2
+        )}\n\`\`\`\n\nUser request: ${userMessage}`,
+      },
+    ];
+
+    const result = await agent.invoke(
+      { messages },
+      {
+        runName: 'pipeline_editor_agent',
+        tags: ['pipeline_editor_agent'],
+      }
+    );
+
+    const lastMessage = result.messages[result.messages.length - 1];
+    const responseText =
+      typeof lastMessage.content === 'string'
+        ? lastMessage.content
+        : JSON.stringify(lastMessage.content);
+
+    const pipelineMatch = responseText.match(/```json\s*([\s\S]*?)```/);
+    const updatedPipeline = pipelineMatch ? JSON.parse(pipelineMatch[1].trim()) : currentPipeline;
+
+    const explanation = pipelineMatch
+      ? responseText.replace(/```json\s*[\s\S]*?```/, '').trim()
+      : responseText;
+
+    return {
+      updatedPipeline,
+      explanation,
+      validationResults: result.pipeline_validation_results ?? {
+        success_rate: 0,
+        successful_samples: 0,
+        failed_samples: 0,
+        total_samples: 0,
+        failure_details: [],
+      },
+    };
   }
 }
