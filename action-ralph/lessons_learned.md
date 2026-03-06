@@ -55,7 +55,7 @@ Guidance distilled from repeated agent runs. Read before implementing changes.
 ### XState v5 typing gotchas
 - Prefer stubbing via `someMachine.provide({ actors: { ... } })` so the resulting machine stays assignable.
 - When testing machines with `after: { <ms>: ... }` transitions and fake timers, use `await jest.advanceTimersByTimeAsync(0)` for a flush tick.
-- For TS4023/TS7056 type serialization errors with `setup()`, wrap in an IIFE.
+- For TS4023/TS7056 type-serialization errors with `setup()`, wrap in an IIFE.
 
 ### React hooks deps
 - If a hook should react only to mapping-affecting changes (not metadata-only edits like `description`), derive a stable key from the mapping-affecting subset and depend on that.

@@ -218,12 +218,10 @@ jobs:
           set -euo pipefail
           DEFAULT_MODEL="litellm/${LITELLM_MODEL}"
 
+          TASK_FILE="${RUNNER_TEMP}/ralph-task.txt"
+
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            {
-              echo 'task<<RALPH_EOF'
-              printf '%s\n' "$INPUT_PROMPT"
-              echo 'RALPH_EOF'
-            } >> "$GITHUB_OUTPUT"
+            printf '%s\n' "$INPUT_PROMPT" > "$TASK_FILE"
             if [ -n "$INPUT_MODEL" ]; then
               echo "model=${INPUT_MODEL}" >> "$GITHUB_OUTPUT"
             else
@@ -243,7 +241,6 @@ jobs:
             ' 2>/dev/null || echo "(unavailable)")
 
             if [ "$IS_PR" = "true" ]; then
-              # Collect recent PR conversation context.
               REVIEW_COMMENTS_JSON=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
 
               REVIEW_COMMENTS_SUMMARY=$(printf '%s' "$REVIEW_COMMENTS_JSON" | jq -r '
@@ -257,7 +254,6 @@ jobs:
               ' 2>/dev/null || echo "(unavailable)")
 
               {
-                echo 'task<<RALPH_EOF'
                 echo "You are modifying an existing PR #${PR_NUMBER}."
                 echo ""
                 echo "PR context (from issue/PR body):"
@@ -282,11 +278,9 @@ jobs:
                 fi
                 echo "Task from comment:"
                 printf '%s\n' "$PROMPT_TEXT"
-                echo 'RALPH_EOF'
-              } >> "$GITHUB_OUTPUT"
+              } > "$TASK_FILE"
             else
               {
-                echo 'task<<RALPH_EOF'
                 echo "Original issue description:"
                 printf '%s\n' "$ISSUE_BODY"
                 echo ""
@@ -296,8 +290,7 @@ jobs:
                 echo ""
                 echo "Task:"
                 printf '%s\n' "$PROMPT_TEXT"
-                echo 'RALPH_EOF'
-              } >> "$GITHUB_OUTPUT"
+              } > "$TASK_FILE"
             fi
             echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
           fi
@@ -399,7 +392,6 @@ jobs:
           # Security guardrail: pass only a short-lived, model-scoped key in the sandbox.
           # Do not inject long-lived secrets in this phase without security review.
           LITELLM_API_KEY: ${{ steps.short_lived_key.outputs.api_key }}
-          PROMPT: ${{ steps.prompt.outputs.task }}
           MODEL: ${{ steps.prompt.outputs.model }}
           MAX_ITERATIONS: ${{ inputs.max_iterations || '5' }}
           IS_PR: ${{ needs.prepare.outputs.is_pr }}
@@ -407,6 +399,7 @@ jobs:
           DEFAULT_BRANCH: ${{ needs.prepare.outputs.default_branch }}
         run: |
           set -euo pipefail
+          PROMPT="$(cat "${RUNNER_TEMP}/ralph-task.txt")"
 
           RALPH_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime"
           AGENT_OUTPUT_DIR="$RALPH_DIR/agent-output"
@@ -568,10 +561,9 @@ jobs:
           PY
 
       - name: Detect and package changes
-        env:
-          TASK_PROMPT: ${{ steps.prompt.outputs.task }}
         run: |
           set -euo pipefail
+          TASK_PROMPT="$(cat "${RUNNER_TEMP}/ralph-task.txt")"
 
           AGENT_OUTPUT_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime/agent-output"
           mkdir -p "$AGENT_OUTPUT_DIR"
@@ -579,11 +571,14 @@ jobs:
           # Collect changed files from git state (more reliable than mtime-based detection).
           TRACKED_CHANGED=$(git diff --name-only 2>/dev/null || true)
           UNTRACKED_CHANGED=$(git ls-files --others --exclude-standard 2>/dev/null || true)
+          DELETED_FILES=$(git diff --name-only --diff-filter=D 2>/dev/null || true)
 
           printf '%s\n%s\n' "$TRACKED_CHANGED" "$UNTRACKED_CHANGED" > "$AGENT_OUTPUT_DIR/candidate-files.txt"
+          printf '%s\n' "$DELETED_FILES" | sed '/^$/d' > "$AGENT_OUTPUT_DIR/deleted-files.txt"
 
           CANDIDATE_FILE="$AGENT_OUTPUT_DIR/candidate-files.txt" \
           CHANGED_FILE="$AGENT_OUTPUT_DIR/changed-files.txt" \
+          DELETED_FILE="$AGENT_OUTPUT_DIR/deleted-files.txt" \
           SPEC_FILE="$AGENT_OUTPUT_DIR/ralph-spec.md" \
           PR_TITLE_FILE="$AGENT_OUTPUT_DIR/pr-title.txt" \
           PR_SUMMARY_FILE="$AGENT_OUTPUT_DIR/pr-summary.md" \
@@ -615,6 +610,14 @@ jobs:
           ]
           exclude_re = [re.compile(p) for p in exclude_patterns]
 
+          deleted_file = Path(os.environ.get('DELETED_FILE', ''))
+          deleted_set = set()
+          if deleted_file.is_file():
+              for raw in deleted_file.read_text(encoding='utf-8', errors='ignore').splitlines():
+                  d = raw.strip()
+                  if d:
+                      deleted_set.add(d)
+
           seen = set()
           kept = []
           for raw in candidate_file.read_text(encoding='utf-8', errors='ignore').splitlines():
@@ -628,7 +631,7 @@ jobs:
               seen.add(p)
               if any(rx.search(p) for rx in exclude_re):
                   continue
-              if Path(p).is_file():
+              if Path(p).is_file() or p in deleted_set:
                   kept.append(p)
 
           changed_file.write_text(''.join(f'{p}\n' for p in kept), encoding='utf-8')
@@ -694,8 +697,15 @@ jobs:
 
           cat "$AGENT_OUTPUT_DIR/changed-files.txt"
 
-          tar czf "$AGENT_OUTPUT_DIR/agent-changes.tar.gz" \
-            -T "$AGENT_OUTPUT_DIR/changed-files.txt"
+          # Only tar files that exist on disk (exclude deletions from the archive).
+          grep -v -F -x -f "$AGENT_OUTPUT_DIR/deleted-files.txt" "$AGENT_OUTPUT_DIR/changed-files.txt" \
+            > "$AGENT_OUTPUT_DIR/tar-files.txt" 2>/dev/null || true
+          if [ -s "$AGENT_OUTPUT_DIR/tar-files.txt" ]; then
+            tar czf "$AGENT_OUTPUT_DIR/agent-changes.tar.gz" \
+              -T "$AGENT_OUTPUT_DIR/tar-files.txt"
+          else
+            tar czf "$AGENT_OUTPUT_DIR/agent-changes.tar.gz" --files-from /dev/null
+          fi
 
       - name: Upload agent output
         uses: actions/upload-artifact@v7
@@ -739,7 +749,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch || 'main' }}
           fetch-depth: 1
           token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || needs.prepare.outputs.checkout_repo }}
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
 
       - name: Download agent changes
         uses: actions/download-artifact@v8
@@ -751,6 +761,16 @@ jobs:
         run: |
           set -euo pipefail
           tar xzf /tmp/agent-output/agent-changes.tar.gz -C "$GITHUB_WORKSPACE"
+
+          # Apply deletions tracked by the agent.
+          if [ -f /tmp/agent-output/deleted-files.txt ] && [ -s /tmp/agent-output/deleted-files.txt ]; then
+            while IFS= read -r del_path; do
+              [ -z "$del_path" ] && continue
+              if [ -f "$GITHUB_WORKSPACE/$del_path" ]; then
+                rm -f "$GITHUB_WORKSPACE/$del_path"
+              fi
+            done < /tmp/agent-output/deleted-files.txt
+          fi
 
           # Runtime config file generated in sandbox must never be committed.
           rm -f "$GITHUB_WORKSPACE/opencode.json"
@@ -890,12 +910,13 @@ jobs:
           } > /tmp/pr-body.md
 
           gh pr create \
+            --repo "${{ github.repository }}" \
             --draft \
             --title "${PR_TITLE}" \
             --label "ai-generated" \
             --body-file /tmp/pr-body.md
 
-          PR_URL=$(gh pr view --json url -q '.url')
+          PR_URL=$(gh pr view --repo "${{ github.repository }}" --json url -q '.url')
           echo "::notice::PR created: ${PR_URL}"
 
           if [ "${{ github.event_name }}" = "issue_comment" ] && [ "${{ needs.prepare.outputs.is_pr }}" != "true" ]; then
@@ -926,8 +947,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    outputs:
-      task: ${{ steps.review_prompt.outputs.task }}
 
     steps:
       - name: Resolve review prompt and model
@@ -975,8 +994,8 @@ jobs:
             end
           ' 2>/dev/null || echo "(unavailable)")
 
+          TASK_FILE="${RUNNER_TEMP}/ralph-review-task.txt"
           {
-            echo 'task<<RALPH_EOF'
             echo "You are in review mode for PR #${PR_NUMBER}."
             echo "Read the PR code and context, then answer the review request."
             echo "Do NOT edit, create, or delete files."
@@ -1010,9 +1029,15 @@ jobs:
             echo "REVIEW_SUMMARY_BEGIN"
             echo "<your markdown review response>"
             echo "REVIEW_SUMMARY_END"
-            echo 'RALPH_EOF'
-          } >> "$GITHUB_OUTPUT"
+          } > "$TASK_FILE"
           echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload review task prompt
+        uses: actions/upload-artifact@v7
+        with:
+          name: review-task-prompt
+          path: ${{ runner.temp }}/ralph-review-task.txt
+          retention-days: 1
 
   review_sandbox:
     name: "Review Phase B: Sandbox Analysis"
@@ -1030,6 +1055,12 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
           repository: ${{ needs.prepare.outputs.checkout_repo }}
+
+      - name: Download review task prompt
+        uses: actions/download-artifact@v8
+        with:
+          name: review-task-prompt
+          path: ${{ runner.temp }}/review-task
 
       - name: Install OpenCode CLI
         run: npm install -g opencode-ai@1.2.15
@@ -1096,24 +1127,31 @@ jobs:
         env:
           LITELLM_API_KEY: ${{ steps.short_lived_key_review.outputs.api_key }}
           MODEL: ${{ format('litellm/{0}', secrets.LITELLM_MODEL) }}
-          TASK: ${{ needs.review_prepare.outputs.task }}
         run: |
           set -euo pipefail
           if [ -z "${MODEL:-}" ] || [ "${MODEL#litellm/}" = "" ]; then
             echo "::error::Review model is empty/invalid: '${MODEL:-<empty>}'"
             exit 1
           fi
+          TASK="$(cat "${RUNNER_TEMP}/review-task/ralph-review-task.txt")"
           RALPH_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime"
           OUTPUT_DIR="$RALPH_DIR/review-output"
           mkdir -p "$OUTPUT_DIR"
           export HOME="$RALPH_DIR/home"
           mkdir -p "$HOME"
 
+          set +e
           opencode run "$TASK" --model "$MODEL" 2>&1 | tee "$OUTPUT_DIR/review-run.md"
+          opencode_rc=${PIPESTATUS[0]}
+          set -e
 
           awk '/REVIEW_SUMMARY_BEGIN/{flag=1;next}/REVIEW_SUMMARY_END/{flag=0}flag' "$OUTPUT_DIR/review-run.md" > "$OUTPUT_DIR/review-summary.md" || true
           if [ ! -s "$OUTPUT_DIR/review-summary.md" ]; then
-            echo "- Review Ralph could not extract a structured summary; see workflow logs for full output." > "$OUTPUT_DIR/review-summary.md"
+            if [ "$opencode_rc" -ne 0 ]; then
+              echo "- Review Ralph failed to complete analysis (exit ${opencode_rc}); see workflow logs." > "$OUTPUT_DIR/review-summary.md"
+            else
+              echo "- Review Ralph could not extract a structured summary; see workflow logs for full output." > "$OUTPUT_DIR/review-summary.md"
+            fi
           fi
 
           if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then

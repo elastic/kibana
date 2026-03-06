@@ -26,9 +26,14 @@ yarn test:jest <path-to-test-file>
 
 ## Lint and type-check
 
+Always run `node scripts/check_changes.ts` to validate your changes against the repo's baseline gate.
+
 Run checks only for touched projects/packages:
 
 ```bash
+# Baseline validation gate
+node scripts/check_changes.ts
+
 # Lint
 node scripts/eslint.js <touched-path> --fix
 
