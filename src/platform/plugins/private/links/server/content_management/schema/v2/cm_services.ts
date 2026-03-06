@@ -15,6 +15,7 @@ import {
 } from '../v1';
 
 const baseLinkSchemaExtension = {
+  id: schema.maybe(dashboardLinkSchemaV1.getPropSchemas().id),
   order: undefined,
 };
 
