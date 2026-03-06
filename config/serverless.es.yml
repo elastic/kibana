@@ -97,6 +97,7 @@ xpack.actions.enabledActionTypes:
     '.sharepoint-online',
     '.http',
     '.http-system',
+    '.workflows'
   ]
 
 # Customize empty page state for analytics apps
