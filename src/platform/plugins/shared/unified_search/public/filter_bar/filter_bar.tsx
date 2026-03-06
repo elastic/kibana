@@ -179,7 +179,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       wrap={!isCollapsed}
       responsive={false}
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={styles.filterBarCollapseExpandButton}>
         <EuiToolTip
           ref={expandTooltipRef}
           content={!isCollapsed ? collapseLabel : expandLabel}
@@ -197,7 +197,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       </EuiFlexItem>
       {/* For a11y compliance, show and hide filtersAppliedLabel and filterPills using CSS instead of re-renders */}
       <EuiFlexItem
-        css={!isCollapsed ? css({ display: 'none' }) : null}
+        css={[!isCollapsed ? css({ display: 'none' }) : styles.filterBarContent]}
         aria-hidden={!isCollapsed}
         grow={false}
       >
@@ -218,9 +218,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         aria-hidden={isCollapsed}
         grow={true}
         css={[
-          css({ minWidth: 0 }),
           styles.pillsScrollContainer,
-          isCollapsed ? css({ blockSize: 0 }) : null,
+          isCollapsed ? css({ blockSize: 0 }) : styles.filterBarContent,
         ]}
       >
         {filterPills}

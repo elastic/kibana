@@ -35,5 +35,17 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
       max-height: 150px;
       overflow-y: auto;
     `,
+    /** These two classes reduce horizontal whitespace between the collapse/expand button and the filter bar
+     * content while preserving the minimum a11y-mandated click target size of 24x24px
+     */
+    filterBarCollapseExpandButton: css`
+      position: relative;
+      left: -${euiTheme.size.xs};
+    `,
+    filterBarContent: css`
+      position: relative;
+      min-width: 0;
+      left: -${euiTheme.size.s};
+    `,
   };
 };
