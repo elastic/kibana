@@ -14,6 +14,7 @@ import type {
 } from '@kbn/rule-data-utils';
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 import { intersection as lodashIntersection, isArray } from 'lodash';
+import { setWith } from '@kbn/safer-lodash-set';
 
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -291,7 +292,7 @@ const flattenToPathValues = (obj: object): [string[], unknown][] =>
 const unflatten = (pathValues: [string[], unknown][]): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [path, value] of pathValues) {
-    setAtPath(result, path, value);
+    setWith(result, path, value);
   }
   return result;
 };
@@ -349,20 +350,6 @@ const pruneEmptyNestedObjects = (obj: Record<string, unknown>): void => {
 const hasDefinedValues = (obj: Record<string, unknown>): boolean =>
   Object.values(obj).some((v) => v !== undefined);
 
-/** Sets a value at a nested path, creating intermediate objects as needed. */
-const setAtPath = (obj: Record<string, unknown>, path: string[], value: unknown): void => {
-  let current = obj;
-  for (let i = 0; i < path.length - 1; i++) {
-    const p = path[i];
-    const next = current[p];
-    if (!isPlainObject(next)) {
-      current[p] = {};
-    }
-    current = current[p] as Record<string, unknown>;
-  }
-  current[path[path.length - 1]] = value;
-};
-
 /**
  * Converts a normalized (nested) intersection result to output form:
  * paths that were dot notation in both inputs stay as dot keys; others stay nested.
@@ -379,7 +366,7 @@ const applyNotationPreference = (
     if (aDotPaths.has(pathStr) && bDotPaths.has(pathStr)) {
       result[pathStr] = value;
     } else {
-      setAtPath(result, path, value);
+      setWith(result, path, value);
     }
   }
   return result;
