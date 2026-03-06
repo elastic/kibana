@@ -389,7 +389,7 @@ steps:
 steps:
   - name: nativeForeach
     type: foreach
-      foreach: ["x", "y"]
+    foreach: ["x", "y"]
     steps:
       - name: childStep
         type: slack
