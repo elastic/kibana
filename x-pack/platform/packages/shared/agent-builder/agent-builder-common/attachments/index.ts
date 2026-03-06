@@ -23,6 +23,8 @@ export {
   visualizationOriginDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
+  type ScreenContextTimeRange,
+  screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
   type VisualizationOriginData,
@@ -36,6 +38,7 @@ export type {
   AttachmentRefActor,
   AttachmentDiff,
   VersionedAttachmentInput,
+  UpdateOriginResponse,
 } from './versioned_attachment';
 export {
   ATTACHMENT_REF_OPERATION,

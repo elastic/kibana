@@ -119,6 +119,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
     abortSignal,
     nextInput: processedConversation.nextInput,
+    agentId,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
@@ -167,6 +168,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
     toolRegistry,
+    toolManager,
     filestore,
     filestoreEnabled: experimentalFeatures.filestore,
   });

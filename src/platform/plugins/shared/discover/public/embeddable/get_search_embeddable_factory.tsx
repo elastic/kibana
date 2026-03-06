@@ -30,7 +30,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -40,7 +40,6 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
@@ -61,7 +60,13 @@ export const getSearchEmbeddableFactory = ({
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const runtimeState = await deserializeState({
         serializedState: initialState,
         discoverServices,
@@ -71,10 +76,9 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId =
         runtimeState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
         (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
-      const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
+      await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
-      const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
       const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
         scopedEbtManager,
@@ -96,13 +100,7 @@ export const getSearchEmbeddableFactory = ({
       /** Build API */
       const titleManager = initializeTitleManager(initialState);
       const timeRangeManager = initializeTimeRangeManager(initialState);
-      const dynamicActionsManager =
-        await discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-          uuid,
-          () => titleManager.api.title$.getValue(),
-          initialState
-        );
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
       });
@@ -114,7 +112,7 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
-          serializeDynamicActions: dynamicActionsManager?.getLatestState,
+          serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
         });
 
@@ -123,14 +121,14 @@ export const getSearchEmbeddableFactory = ({
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),
         anyStateChange$: merge(
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+          drilldownsManager.anyStateChange$,
           searchEmbeddable.anyStateChange$,
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$
         ),
         getComparators: () => {
           return {
-            ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
+            ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
@@ -151,7 +149,7 @@ export const getSearchEmbeddableFactory = ({
           };
         },
         onReset: async (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          drilldownsManager.reinitializeState(lastSaved ?? {});
           timeRangeManager.reinitializeState(lastSaved);
           titleManager.reinitializeState(lastSaved);
           if (lastSaved) {
@@ -169,7 +167,7 @@ export const getSearchEmbeddableFactory = ({
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
-        ...dynamicActionsManager?.api,
+        ...drilldownsManager.api,
         ...initializeEditApi({
           uuid,
           parentApi,
@@ -254,9 +252,9 @@ export const getSearchEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
               unsubscribeFromFetch();
-              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
 
@@ -297,7 +295,7 @@ export const getSearchEmbeddableFactory = ({
                 $state: { store: FilterStateStore.APP_STATE },
               }));
 
-              await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+              await startServices.executeTriggerActions(ON_APPLY_FILTER, {
                 embeddable: api,
                 filters: newFilters,
               });
@@ -317,42 +315,40 @@ export const getSearchEmbeddableFactory = ({
                   scopedProfilesManager={scopedProfilesManager}
                   scopedEBTManager={scopedEbtManager}
                 >
-                  <AppWrapper>
-                    {renderAsFieldStatsTable ? (
-                      <SearchEmbeddablFieldStatsTableComponent
-                        api={{
-                          ...api,
-                          fetchContext$,
-                        }}
+                  {renderAsFieldStatsTable ? (
+                    <SearchEmbeddablFieldStatsTableComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
+                      dataView={dataView!}
+                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                      stateManager={searchEmbeddable.stateManager}
+                    />
+                  ) : (
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={
+                        discoverServices.uiActions.getTriggerCompatibleActions
+                      }
+                    >
+                      <SearchEmbeddableGridComponent
+                        api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        onAddFilter={
+                          runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                            ? undefined
+                            : onAddFilter
+                        }
+                        enableDocumentViewer={
+                          runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                            : true
+                        }
                         stateManager={searchEmbeddable.stateManager}
                       />
-                    ) : (
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={
-                          discoverServices.uiActions.getTriggerCompatibleActions
-                        }
-                      >
-                        <SearchEmbeddableGridComponent
-                          api={{ ...api, fetchWarnings$, fetchContext$ }}
-                          dataView={dataView!}
-                          onAddFilter={
-                            runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                              ? undefined
-                              : onAddFilter
-                          }
-                          enableDocumentViewer={
-                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                            undefined
-                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                              : true
-                          }
-                          stateManager={searchEmbeddable.stateManager}
-                        />
-                      </CellActionsProvider>
-                    )}
-                  </AppWrapper>
+                    </CellActionsProvider>
+                  )}
                 </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>

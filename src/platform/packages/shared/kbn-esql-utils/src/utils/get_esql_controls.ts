@@ -42,7 +42,7 @@ export function getEsqlControls(
       }
 
       const controlState = api.serializeState() as OptionsListESQLControlState;
-      const variableName = controlState.variableName;
+      const variableName = controlState.variable_name;
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);
       if (!isUsed) return acc;

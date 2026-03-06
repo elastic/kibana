@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamType } from '@kbn/streams-schema';
 
 interface StreamEndpointLatencyProps {
@@ -22,14 +23,6 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-interface StreamsSystemIdentificationIdentifiedProps {
-  count: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsDescriptionGeneratedProps {
   input_tokens_used: number;
   output_tokens_used: number;
@@ -38,11 +31,11 @@ interface StreamsDescriptionGeneratedProps {
 }
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
-  systems_count: number;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
   stream_type: StreamType;
+  tool_usage: SignificantEventsToolUsage;
 }
 
 interface StreamsInsightsGeneratedProps {
@@ -59,12 +52,25 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_type: StreamType;
 }
 
+interface StreamsFeaturesIdentifiedProps {
+  total_duration_ms: number;
+  identification_duration_ms: number;
+  inferred_total_count: number;
+  inferred_dedup_count: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  total_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+  state: 'success' | 'failure' | 'canceled';
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
-  type StreamsSystemIdentificationIdentifiedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
   type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
+  type StreamsFeaturesIdentifiedProps,
 };

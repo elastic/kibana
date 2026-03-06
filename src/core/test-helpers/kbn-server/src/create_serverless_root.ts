@@ -106,7 +106,10 @@ export function createTestServerlessInstances({
 
   if (enableCPS) {
     if (!kibana.settings) kibana.settings = {};
-    set(kibana.settings, 'cps.cpsEnabled', true);
+    const hasCpsKey = kibana.settings && 'cps' in kibana.settings;
+    if (!hasCpsKey) {
+      set(kibana.settings, 'cps.cpsEnabled', enableCPS);
+    }
     // Match the default `yarn es serverless --uiam` setup, but allow tests to override
     // auth by pre-setting `elasticsearch.username/password` (e.g. use `system_indices_superuser`).
     const existingEsSettings = (kibana.settings as any).elasticsearch ?? {};

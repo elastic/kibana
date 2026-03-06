@@ -15,6 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import { z } from '@kbn/zod/v4';
 import { WorkflowsService } from './workflows_management_service';
 
 describe('WorkflowsService', () => {
@@ -2298,6 +2299,25 @@ steps:
         featureId: expect.any(String),
         includeSystemActionTypes: false,
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    const mockRequest = {} as any;
+
+    it('should resolve the schema and delegate to validateWorkflowYaml', async () => {
+      const mockSchema = z.object({ name: z.string() });
+      jest.spyOn(service, 'getWorkflowZodSchema').mockResolvedValue(mockSchema);
+
+      const result = await service.validateWorkflow('name: Test', 'my-space', mockRequest);
+
+      expect(service.getWorkflowZodSchema).toHaveBeenCalledWith(
+        { loose: false },
+        'my-space',
+        mockRequest
+      );
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
     });
   });
 });

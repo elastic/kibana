@@ -27,6 +27,14 @@ const apmBodyParamsSchema = t.intersection([
      * Environment to filter by.
      */
     environment: t.string,
+    /**
+     * KQL query to filter SLOs.
+     */
+    kqlQuery: t.string,
+    /**
+     * List of statuses to filter by (e.g. ['VIOLATED', 'DEGRADING']).
+     */
+    statusFilters: t.array(t.string),
   }),
 ]);
 

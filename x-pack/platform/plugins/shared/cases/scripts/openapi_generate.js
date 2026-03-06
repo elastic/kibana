@@ -7,7 +7,8 @@
 
 require('@kbn/setup-node-env');
 const { generate: openapiGenerate } = require('@kbn/openapi-generator');
-const { resolve } = require('path');
+const { resolve, join } = require('path');
+const { rename } = require('fs/promises');
 
 const CASES_ROOT = resolve(__dirname, '..');
 
@@ -23,4 +24,10 @@ const CASES_ROOT = resolve(__dirname, '..');
     skipLinting: true,
     schemaNameTransform: 'pascalCase',
   });
+
+  // Move generated types to `common` because `docs` will be excluded from bundle
+  await rename(
+    join(CASES_ROOT, 'docs', 'openapi', 'bundled-types.gen.ts'),
+    join(CASES_ROOT, 'common', 'bundled-types.gen.ts')
+  );
 })();

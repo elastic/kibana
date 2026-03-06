@@ -12,7 +12,6 @@
     "@kbn/expression-xy-plugin",
     "@kbn/expression-gauge-plugin",
     "@kbn/expression-partition-vis-plugin",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/expression-legacy-metric-vis-plugin",
     "@kbn/expressions-plugin",
     "@kbn/tinymath",

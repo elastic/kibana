@@ -28,7 +28,10 @@ interface DownsamplingPhaseProps {
   phaseName?: string;
   color?: string;
   onRemoveStep?: (stepNumber: number) => void;
+  onEditStep?: (stepNumber: number, phaseName?: string) => void;
+  isBeingEdited?: boolean;
   canManageLifecycle: boolean;
+  isEditLifecycleFlyoutOpen?: boolean;
 }
 
 export const DownsamplingPhase = ({
@@ -37,15 +40,32 @@ export const DownsamplingPhase = ({
   phaseName,
   color,
   onRemoveStep,
+  onEditStep,
+  isBeingEdited = false,
   canManageLifecycle,
+  isEditLifecycleFlyoutOpen = false,
 }: DownsamplingPhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const intervalLabel = downsample.fixed_interval;
 
+  const handleEditStep = () => {
+    onEditStep?.(stepNumber, phaseName);
+    setIsPopoverOpen(false);
+  };
+
   const handleRemoveStep = () => {
     onRemoveStep?.(stepNumber);
     setIsPopoverOpen(false);
+  };
+
+  const handleClick = () => {
+    if (isEditLifecycleFlyoutOpen) {
+      // When the flyout is open, navigate to the phase tab instead of showing the popover
+      onEditStep?.(stepNumber, phaseName);
+      return;
+    }
+    setIsPopoverOpen(!isPopoverOpen);
   };
 
   const button = (
@@ -60,11 +80,11 @@ export const DownsamplingPhase = ({
         values: { interval: intervalLabel },
       })}
       data-test-subj={`downsamplingPhase-${intervalLabel}-label`}
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      onClick={handleClick}
       css={getInteractivePanelStyles({
         euiTheme,
         backgroundColor: color ?? euiTheme.colors.backgroundBasePlain,
-        isPopoverOpen,
+        isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '30px',
         fullSize: true,
         extraStyles: {
@@ -89,14 +109,13 @@ export const DownsamplingPhase = ({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: '100%',
+            fontWeight: euiTheme.font.weight.semiBold,
           }}
         >
-          <b>
-            {downsample.fixed_interval}{' '}
-            {i18n.translate('xpack.streams.downsamplingPhaseBar.b.intervalLabel', {
-              defaultMessage: 'interval',
-            })}
-          </b>
+          {downsample.fixed_interval}{' '}
+          {i18n.translate('xpack.streams.downsamplingPhaseBar.b.intervalLabel', {
+            defaultMessage: 'interval',
+          })}
         </EuiText>
       </EuiFlexGroup>
     </EuiPanel>
@@ -105,7 +124,7 @@ export const DownsamplingPhase = ({
   return (
     <EuiPopover
       button={button}
-      isOpen={isPopoverOpen}
+      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
     >
@@ -117,23 +136,48 @@ export const DownsamplingPhase = ({
               values: { stepNumber },
             })}
           </EuiFlexItem>
-          {onRemoveStep && canManageLifecycle && (
+          {canManageLifecycle && (onEditStep || onRemoveStep) && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="trash"
-                size="s"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
-                  {
-                    defaultMessage: 'Remove downsample step {stepNumber}',
-                    values: { stepNumber },
-                  }
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                {onEditStep && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      display="base"
+                      iconType="pencil"
+                      size="s"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.editDownsampleStep.ariaLabel',
+                        {
+                          defaultMessage: 'Edit downsample step {stepNumber}',
+                          values: { stepNumber },
+                        }
+                      )}
+                      data-test-subj={`downsamplingPopover-step${stepNumber}-editButton`}
+                      onClick={handleEditStep}
+                    />
+                  </EuiFlexItem>
                 )}
-                data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
-                onClick={handleRemoveStep}
-              />
+
+                {onRemoveStep && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      display="base"
+                      iconType="trash"
+                      size="s"
+                      color="danger"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
+                        {
+                          defaultMessage: 'Remove downsample step {stepNumber}',
+                          values: { stepNumber },
+                        }
+                      )}
+                      data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
+                      onClick={handleRemoveStep}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

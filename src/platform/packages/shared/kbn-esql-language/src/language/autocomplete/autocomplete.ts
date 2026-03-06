@@ -8,17 +8,15 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { EsqlQuery, parse, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '../../types';
-import { EsqlQuery } from '../../composer';
+} from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
-import { isHeaderCommand, Walker } from '../../ast';
-import { parse } from '../../parser';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { SuggestionOrderingEngine } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
@@ -257,14 +255,14 @@ async function getSuggestionsWithinCommandExpression(
   );
 
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
-  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
+  const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
 
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
-    isFieldsBrowserEnabled: isResourceBrowserEnabled && !isInsideSubquery,
+    isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
   };
 
@@ -291,7 +289,7 @@ async function getSuggestionsWithinCommandExpression(
       hasMinimumLicenseRequired,
       getKqlSuggestions: callbacks?.getKqlSuggestions,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
-      isResourceBrowserEnabled: callbacks?.isResourceBrowserEnabled,
+      canSuggestResourceBrowser: callbacks?.canSuggestResourceBrowser,
       isServerless: callbacks?.isServerless,
     },
     context,

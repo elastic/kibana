@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -42,8 +42,9 @@ export const StepTabsRow = ({
   tabHasErrors,
   dataTestSubj,
 }: StepTabsRowProps) => {
-  const tabsScrollCss = useEuiOverflowScroll('x', true);
-  const { tabsContainerStyles } = useStyles();
+  const tabsScrollCss = useEuiOverflowScroll('x');
+  const { tabsContainerStyles, tabsErrorSelectedUnderlineStyles } = useStyles();
+  const tabRefs = useRef<Array<HTMLSpanElement | null>>([]);
 
   const tabs = useMemo(() => {
     return items.map((item, index) => {
@@ -54,15 +55,44 @@ export const StepTabsRow = ({
       });
 
       return (
-        <EuiTab
+        <span
           key={item.id}
-          onClick={() => setSelectedStepIndex(index)}
-          isSelected={index === selectedStepIndex}
-          data-test-subj={`${dataTestSubj}Tab-step-${index + 1}`}
-          prepend={hasErrors ? <EuiIcon type="warning" color="danger" size="m" /> : undefined}
+          ref={(node) => {
+            tabRefs.current[index] = node;
+            if (node && selectedStepIndex === index) {
+              node.scrollIntoView?.({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+              });
+            }
+          }}
         >
-          {hasErrors ? <EuiTextColor color="danger">{label}</EuiTextColor> : label}
-        </EuiTab>
+          <EuiTab
+            onClick={() => setSelectedStepIndex(index)}
+            isSelected={index === selectedStepIndex}
+            className={hasErrors ? 'streamsDslStepsTab--hasErrors' : undefined}
+            data-test-subj={`${dataTestSubj}Tab-step-${index + 1}`}
+            prepend={
+              hasErrors ? (
+                <EuiIcon
+                  type="warning"
+                  color="danger"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.streams.editDslStepsFlyout.stepTabHasErrorsIconAriaLabel',
+                    {
+                      defaultMessage: 'Step {stepNumber} has errors',
+                      values: { stepNumber: index + 1 },
+                    }
+                  )}
+                />
+              ) : undefined
+            }
+          >
+            {hasErrors ? <EuiTextColor color="danger">{label}</EuiTextColor> : label}
+          </EuiTab>
+        </span>
       );
     });
   }, [dataTestSubj, items, selectedStepIndex, setSelectedStepIndex, tabHasErrors]);
@@ -75,7 +105,7 @@ export const StepTabsRow = ({
         defaultMessage: 'Add downsampling step',
       })}
       size="xs"
-      color="primary"
+      color="text"
       data-test-subj={`${dataTestSubj}AddTabButton`}
       onClick={onAddStep}
       disabled={isAddDisabled}
@@ -99,7 +129,10 @@ export const StepTabsRow = ({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false} css={[tabsContainerStyles, tabsScrollCss]}>
+      <EuiFlexItem
+        grow={false}
+        css={[tabsContainerStyles, tabsScrollCss, tabsErrorSelectedUnderlineStyles]}
+      >
         <EuiTabs bottomBorder={false}>{tabs}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{renderAddButton()}</EuiFlexItem>

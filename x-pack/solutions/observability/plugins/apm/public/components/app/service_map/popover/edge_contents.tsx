@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
-import type { EdgeDataDefinition } from 'cytoscape';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import type { ContentsProps } from '.';
+import { isEdge } from './utils';
+import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -23,23 +26,59 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
-export function EdgeContents({ elementData, environment, start, end }: ContentsProps) {
-  const edgeData = elementData as EdgeDataDefinition;
+const DOCUMENTATION_LINK = 'https://ela.st/docs-service-map-no-metrics-available';
 
+function MessagingEdgeNoMetricsMessage() {
+  return (
+    <EuiText color="subdued" size="s" data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage">
+      <FormattedMessage
+        id="xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsMessage"
+        defaultMessage="No metrics available. See {documentation}."
+        values={{
+          documentation: (
+            <EuiLink
+              data-test-subj="apmServiceMapMessagingEdgeDocumentationLink"
+              href={DOCUMENTATION_LINK}
+              target="_blank"
+            >
+              {i18n.translate(
+                'xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsDocumentation',
+                { defaultMessage: 'documentation' }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
+  );
+}
+
+export function EdgeContents({
+  selection,
+  environment,
+  start,
+  end,
+}: Pick<ContentsProps, 'selection' | 'environment' | 'start' | 'end'>) {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-
   const { offset, comparisonEnabled } = query;
 
-  const sourceServiceName = edgeData.sourceData[SERVICE_NAME] as string | undefined;
-  const dependencies = edgeData.resources;
+  const isEdgeSelection = isEdge(selection);
+  const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
+  const sourceData = edgeSelectionData?.sourceData;
+  const dependencies = edgeSelectionData?.resources;
+
+  const sourceServiceName =
+    sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
+  // Message queue consumer edges (messaging dependency to service) are derived while transforming data into Service Map format, no metrics are available for these edges
+  const isMsgQueueConsumerEdge = isMessagingExitSpan(sourceData);
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (sourceServiceName && dependencies.length > 0) {
+      if (sourceServiceName && dependencies && dependencies.length > 0) {
         return callApmApi('GET /internal/apm/service-map/dependency', {
           params: {
             query: {
@@ -58,6 +97,18 @@ export function EdgeContents({ elementData, environment, start, end }: ContentsP
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  if (!isEdgeSelection) {
+    return null;
+  }
+
+  if (isMsgQueueConsumerEdge || edgeSelectionData?.isGrouped) {
+    return (
+      <EuiFlexItem>
+        <MessagingEdgeNoMetricsMessage />
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <EuiFlexItem>

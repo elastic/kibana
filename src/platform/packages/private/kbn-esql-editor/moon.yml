@@ -49,7 +49,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/aiops-utils'
   - '@kbn/esql-resource-browser'
-  - '@kbn/projects-solutions-groups'
+  - '@kbn/data-views-plugin'
 tags:
   - shared-browser
   - package

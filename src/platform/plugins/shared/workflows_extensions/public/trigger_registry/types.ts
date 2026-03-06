@@ -11,9 +11,49 @@ import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '../../common';
 
 /**
+ * Documentation for a trigger (aligned with steps: details + generic examples).
+ */
+export interface TriggerDocumentation {
+  /**
+   * Detailed description with usage examples (markdown supported)
+   */
+  details?: string;
+  /**
+   * Usage examples as markdown strings (e.g. "## Title\n```yaml\n...").
+   * Shown in the YAML editor hover.
+   */
+  examples?: string[];
+}
+
+/**
+ * Pre-filled snippet values when the user adds this trigger from the UI.
+ */
+export interface TriggerSnippets {
+  /**
+   * KQL condition pre-filled in the trigger's `with.condition` when the user adds this
+   * trigger from the UI (actions menu or YAML autocomplete).
+   * Must be valid KQL and only reference properties from the event schema (validated at registration).
+   */
+  condition?: string;
+}
+
+/**
  * User-facing definition for a workflow trigger.
- * Used by the UI to display trigger information (title, description, icon, event schema, examples).
+ * Used by the UI to display trigger information (title, description, icon, event schema, documentation).
  * Extends the server contract (id + eventSchema) with UI-only fields.
+ *
+ * @example Definition with documentation and snippets (aligned with steps pattern)
+ * {
+ *   id: 'example.my_trigger',
+ *   title: 'My Trigger',
+ *   description: 'Fired when something happens.',
+ *   eventSchema: z.object({ severity: z.string(), message: z.string() }),
+ *   documentation: {
+ *     details: 'Filter when this workflow runs using KQL on event properties.',
+ *     examples: ['## Match high severity\n```yaml\ntriggers:\n  - type: example.my_trigger\n    with:\n      condition: \'event.severity: "high"\'\n```'],
+ *   },
+ *   snippets: { condition: 'event.severity: "high"' },
+ * }
  */
 export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>
   extends CommonTriggerDefinition<EventSchema> {
@@ -33,4 +73,14 @@ export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    * Used to visually represent this trigger in the UI.
    */
   icon?: React.ComponentType;
+
+  /**
+   * Documentation (details + examples), aligned with step definitions.
+   */
+  documentation?: TriggerDocumentation;
+
+  /**
+   * Pre-filled values for snippet insertion (e.g. with.condition).
+   */
+  snippets?: TriggerSnippets;
 }

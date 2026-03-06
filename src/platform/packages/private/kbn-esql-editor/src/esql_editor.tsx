@@ -39,7 +39,9 @@ import type {
   ESQLControlVariable,
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
+  ESQLRegistrySolutionId,
 } from '@kbn/esql-types';
+import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -54,9 +56,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { firstValueFrom, of } from 'rxjs';
 import { QuerySource } from '@kbn/esql-types';
-import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
+import { useLookupIndexCommand } from './lookup_join';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -71,12 +72,14 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { createTimedCallbacks } from './telemetry/timed_callbacks';
 import { useEsqlEditorActionsRegistration } from './editor_actions_context';
 import {
   filterDataErrors,
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
+  getToggleCommentLines,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
   parseErrors,
@@ -159,6 +162,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
+  const suppressSuggestionsRef = useRef(false);
 
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
@@ -193,7 +197,9 @@ const ESQLEditorInternal = function ESQLEditor({
     [core.http, core.userProfile, usageCollection]
   );
 
-  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+  const activeSolutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
+  const activeSolutionId: ESQLRegistrySolutionId =
+    (activeSolutionNavId as ESQLRegistrySolutionId) ?? ESQL_CLASSIC_SOLUTION_ID;
 
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
@@ -412,23 +418,26 @@ const ESQLEditorInternal = function ESQLEditor({
     const currentSelection = editorRef?.current?.getSelection();
     const startLineNumber = currentSelection?.startLineNumber;
     const endLineNumber = currentSelection?.endLineNumber;
-    const edits = [];
     if (startLineNumber && endLineNumber) {
+      const lines: string[] = [];
       for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; lineNumber++) {
-        const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
-        const hasComment = lineContent?.startsWith('//');
-        const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
+        lines.push(editorModel.current?.getLineContent(lineNumber) ?? '');
+      }
 
-        edits.push({
+      const toggledLines = getToggleCommentLines(lines);
+
+      const edits = toggledLines.map((text, i) => {
+        const lineNumber = startLineNumber + i;
+        return {
           range: {
             startLineNumber: lineNumber,
             startColumn: 0,
             endLineNumber: lineNumber,
-            endColumn: (lineContent?.length ?? 0) + 1,
+            endColumn: (lines[i]?.length ?? 0) + 1,
           },
-          text: commentedLine,
-        });
-      }
+          text,
+        };
+      });
       // executeEdits allows to keep edit in history
       editorRef.current?.executeEdits('comment', edits);
     }
@@ -479,7 +488,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      if (suppressSuggestionsRef.current) {
+        suppressSuggestionsRef.current = false;
+        return;
+      }
+      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -664,8 +677,6 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedHistoryStarredItems: fn };
   }, []);
 
-  const canCreateLookupIndex = useCanCreateLookupIndex();
-
   // Extract source command and build minimal query with cluster prefixes
   const minimalQuery = useMemo(() => {
     const prefix = code.match(/\b(FROM|TS)\b/i)?.[1]?.toUpperCase();
@@ -714,11 +725,6 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   useEsqlEditorActionsRegistration(editorActions);
 
-  const isResourceBrowserEnabled = useCallback(async () => {
-    const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
-    return Boolean(enableResourceBrowser && currentApp === 'discover');
-  }, [application?.currentAppId$, enableResourceBrowser]);
-
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -726,10 +732,8 @@ const ESQLEditorInternal = function ESQLEditor({
     fieldsMetadata,
     esqlService,
     histogramBarTarget,
-    activeSolutionId: activeSolutionId ?? undefined,
-    canCreateLookupIndex,
+    activeSolutionId,
     minimalQueryRef,
-    abortControllerRef,
     dataSourcesCache,
     memoizedSources,
     esqlFieldsCache,
@@ -738,7 +742,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     favoritesClient,
     getJoinIndicesCallback,
-    isResourceBrowserEnabled,
+    enableResourceBrowser,
   });
 
   const {
@@ -761,6 +765,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     openIndicesBrowser,
+    suppressSuggestionsRef,
   });
 
   const {
@@ -779,7 +784,7 @@ const ESQLEditorInternal = function ESQLEditor({
     search: data.search.search,
     getTimeRange: () => data.query.timefilter.timefilter.getTime(),
     signal: abortControllerRef.current.signal,
-    activeSolutionId: activeSolutionId ?? undefined,
+    activeSolutionId,
     telemetryService,
   });
 
@@ -792,30 +797,26 @@ const ESQLEditorInternal = function ESQLEditor({
         color: 'text',
       };
     }
-    if (code !== codeWhenSubmitted) {
-      return {
-        label: i18n.translate('esqlEditor.query.runQuery', {
-          defaultMessage: 'Run query',
-        }),
-        color: 'success',
-      };
-    }
     return {
       label: i18n.translate('esqlEditor.query.searchLabel', {
         defaultMessage: 'Search',
       }),
       color: 'primary',
     };
-  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
+  }, [allowQueryCancellation, isLoading]);
 
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
       if (editorModel.current) {
-        return await ESQLLang.validate(editorModel.current, code, esqlCallbacks, options);
+        const { callbacks: timedCallbacks, getCallbacksDuration } =
+          createTimedCallbacks(esqlCallbacks);
+        const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
+        return { ...result, callbacksDuration: getCallbacksDuration() };
       }
       return {
         errors: [],
         warnings: [],
+        callbacksDuration: 0,
       };
     },
     [esqlCallbacks, code]
@@ -825,10 +826,10 @@ const ESQLEditorInternal = function ESQLEditor({
     const setQueryToTheCache = async () => {
       if (editorRef?.current) {
         try {
-          const parserMessages = await parseMessages();
-          const clientParserStatus = parserMessages.errors?.length
+          const { errors, warnings } = await parseMessages();
+          const clientParserStatus = errors?.length
             ? 'error'
-            : parserMessages.warnings.length
+            : warnings.length
             ? 'warning'
             : 'success';
 
@@ -860,7 +861,11 @@ const ESQLEditorInternal = function ESQLEditor({
     }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
+      const {
+        warnings: parserWarnings,
+        errors: parserErrors,
+        callbacksDuration,
+      } = await parseMessages({
         invalidateColumnsCache,
       });
 
@@ -891,7 +896,8 @@ const ESQLEditorInternal = function ESQLEditor({
         markers.push(...underlinedMessages);
       }
 
-      trackValidationLatencyEnd(active);
+      trackValidationLatencyEnd(active, callbacksDuration);
+      performance.mark('esql-validation-complete');
 
       if (active) {
         const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
@@ -1152,8 +1158,8 @@ const ESQLEditorInternal = function ESQLEditor({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate('esqlEditor.query.runQuery', {
-                defaultMessage: 'Run query',
+              content={i18n.translate('esqlEditor.query.searchLabel', {
+                defaultMessage: 'Search',
               })}
             >
               <EuiButton
@@ -1462,7 +1468,11 @@ const ESQLEditorInternal = function ESQLEditor({
             selectedSources={selectedSources}
             position={dataSourceBrowserPosition}
             onSelect={handleDataSourceBrowserSelect}
-            onClose={() => setIsDataSourceBrowserOpen(false)}
+            onClose={() => {
+              setIsDataSourceBrowserOpen(false);
+              suppressSuggestionsRef.current = true;
+              editorRef.current?.focus();
+            }}
           />,
           document.body
         )}

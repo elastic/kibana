@@ -21,8 +21,8 @@ export async function getIndicesBrowserSuggestion({
   context?: ICommandContext;
   innerText?: string;
 }): Promise<ISuggestionItem | undefined> {
-  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
-  if (!isResourceBrowserEnabled || context?.isCursorInSubquery) {
+  const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+  if (!canSuggestResourceBrowser || context?.isCursorInSubquery) {
     return undefined;
   }
 

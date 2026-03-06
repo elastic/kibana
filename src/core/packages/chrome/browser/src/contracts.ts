@@ -25,19 +25,14 @@ import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
 import type { SidebarStart, SidebarSetup } from './sidebar';
 
-export interface ChromeSetup {
-  /**
-   * {@link SidebarSetup}
-   */
-  sidebar: SidebarSetup;
-}
-
 /**
  * ChromeSetup exposes APIs available during the setup phase.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChromeSetup {}
+export interface ChromeSetup {
+  /** {@link SidebarSetup} */
+  sidebar: SidebarSetup;
+}
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -55,11 +50,11 @@ export interface ChromeSetup {}
  * ```
  *
  * @example
- * How to set the help dropdown extension:
+ * How to set the help dropdown extension (React-first, preferred):
  * ```tsx
- * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * core.chrome.setHelpExtension({
+ *   appName: 'My App',
+ *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -108,6 +103,11 @@ export interface ChromeStart {
   getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
 
   /**
+   * Get the current list of breadcrumbs synchronously
+   */
+  getBreadcrumbs(): ChromeBreadcrumb[];
+
+  /**
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
@@ -149,7 +149,19 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Mount an element next to the last breadcrumb
+   * Render an element next to the last breadcrumb.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBadge = dynamic(() => import('./my_badge'));
+   *
+   * const unregister = chrome.setBreadcrumbsAppendExtension({
+   *   content: <LazyBadge />,
+   *   order: 10,
+   * });
+   * ```
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
@@ -214,7 +226,8 @@ export interface ChromeStart {
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
   /**
-   * Override the current set of custom help content
+   * Override the current set of custom help content.
+   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 

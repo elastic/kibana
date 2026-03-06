@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ECS_POD_CPU_USAGE_LIMIT_PCT,
+  MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+} from '../shared/constants';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';
@@ -27,6 +32,7 @@ describe('usePodMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -43,6 +49,72 @@ describe('usePodMetricsTable hook', () => {
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
           kuery: kueryWithEventModuleFilter,
+        }),
+      })
+    );
+  });
+
+  it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when isOtel is true', () => {
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      usePodMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        isOtel: true,
+      })
+    );
+
+    expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          kuery: `event.dataset: "kubeletstatsreceiver.otel" AND (${kuery})`,
+          metrics: expect.arrayContaining([
+            expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION }),
+            expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      usePodMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery: `(${kuery})`,
+        metricsClient: createMetricsClientMock({}),
+        isOtel: false,
+      })
+    );
+
+    const kueryWithEventDatasetFilter = `event.dataset: "kubernetes.pod" AND (${kuery})`;
+
+    expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          kuery: kueryWithEventDatasetFilter,
+          metrics: expect.arrayContaining([
+            expect.objectContaining({ field: ECS_POD_CPU_USAGE_LIMIT_PCT }),
+            expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
+          ]),
         }),
       })
     );

@@ -46,6 +46,7 @@ describe('EditLifecycleModal', () => {
       },
       effective_lifecycle: effectiveLifecycle,
       effective_settings: {},
+      data_stream_exists: true,
       inherited_fields: {},
       dashboards: [],
       rules: [],
@@ -59,6 +60,7 @@ describe('EditLifecycleModal', () => {
         read_failure_store: true,
         manage_failure_store: true,
         view_index_metadata: true,
+        create_snapshot_repository: true,
       },
       effective_failure_store: {
         lifecycle: { enabled: { is_default_retention: true } },

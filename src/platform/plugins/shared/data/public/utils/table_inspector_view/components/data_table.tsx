@@ -8,7 +8,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -29,6 +28,7 @@ import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataViewRow, DataViewColumn } from '../types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -59,14 +59,6 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes: Record<string, PropTypes.Validator<unknown>> = {
-    data: PropTypes.object.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    fieldFormats: PropTypes.object.isRequired,
-    uiActions: PropTypes.object.isRequired,
-    isFilterable: PropTypes.func.isRequired,
-  };
-
   csvSeparator = this.props.uiSettings.get('csv:separator', ',');
   quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
@@ -106,7 +98,7 @@ class DataTableFormatClass extends Component<
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
-                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                    uiActions.executeTriggerActions(ON_CLICK_VALUE, {
                       data: { data: [eventData] },
                     });
                   }}
@@ -139,7 +131,7 @@ class DataTableFormatClass extends Component<
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
-                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                      uiActions.executeTriggerActions(ON_CLICK_VALUE, {
                         data: { data: [eventData], negate: true },
                       });
                     }}

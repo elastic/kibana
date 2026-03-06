@@ -118,21 +118,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins/,
-        /^package.json/,
-        /^yarn.lock/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites') ||
-      ALL_UI_TEST_SUITES
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
-    }
-
     const aiInfraPaths = [
       /^x-pack\/platform\/packages\/shared\/ai-infra/,
       /^x-pack\/platform\/plugins\/shared\/ai_infra/,
@@ -144,10 +129,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
     ];
-    // const agentBuilderPaths = [
-    //   /^x-pack\/platform\/plugins\/shared\/agent_builder/,
-    //   /^x-pack\/platform\/packages\/shared\/agent_builder/,
-    // ];
+    const agentBuilderPaths = [
+      /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+      /^x-pack\/platform\/packages\/shared\/agent_builder/,
+    ];
 
     if (
       (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths])) ||
@@ -157,9 +142,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
     }
 
-    // Temporarily disable auto-trigger on file changes - smoke tests still run daily
     if (
-      // (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
+      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
       GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
       ALL_UI_TEST_SUITES
@@ -546,36 +530,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^packages\/kbn-babel-preset/,
-        /^packages\/kbn-repo-file-maps/,
-        /^src\/platform\/packages\/private\/kbn-babel-transform/,
-        /^src\/platform\/packages\/private\/kbn-import-resolver/,
-        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
-        /^src\/platform\/packages\/private\/kbn-repo-packages/,
-        /^src\/platform\/packages\/shared\/kbn-babel-register/,
-        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-repo-info/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-jest')
-    ) {
+    if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-es/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-services/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-ui-services/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-ftr')
-    ) {
+    if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
 
