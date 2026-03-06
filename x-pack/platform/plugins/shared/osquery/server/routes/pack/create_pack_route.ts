@@ -185,7 +185,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     const packKey = makePackKey(packSO.attributes.name, spaceId);
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
-                      queries: convertSOQueriesToPackConfig(queries, spaceId, packSO.id),
+                      pack_id: packSO.id,
+                      queries: convertSOQueriesToPackConfig(queries, spaceId),
                     });
 
                     return draft;

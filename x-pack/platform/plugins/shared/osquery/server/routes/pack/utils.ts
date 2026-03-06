@@ -102,8 +102,7 @@ export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, P
 
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
-  spaceId?: string,
-  packId?: string
+  spaceId?: string
 ) =>
   reduce(
     queries as SOPackQuery[],
@@ -125,7 +124,6 @@ export const convertSOQueriesToPackConfig = (
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...resultType,
         ...(spaceId ? { space_id: spaceId } : {}),
-        ...(packId ? { pack_id: packId } : {}),
       };
 
       return acc;

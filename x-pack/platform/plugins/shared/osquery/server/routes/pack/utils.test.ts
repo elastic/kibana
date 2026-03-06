@@ -118,24 +118,10 @@ describe('Pack utils', () => {
       expect(convertedQueries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
     });
 
-    test('injects pack_id when provided', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
-        getTestQueries(),
-        undefined,
-        'pack-so-id-123'
-      );
-      expect(convertedQueries).toStrictEqual(getOneLiner({ pack_id: 'pack-so-id-123' }));
-    });
-
-    test('injects both space_id and pack_id when provided', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
-        getTestQueries(),
-        'my-space',
-        'pack-so-id-456'
-      );
-      expect(convertedQueries).toStrictEqual(
-        getOneLiner({ space_id: 'my-space', pack_id: 'pack-so-id-456' })
-      );
+    test('does not inject pack_id into queries (pack_id belongs at pack level)', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
+      expect(convertedQueries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
+      expect(convertedQueries.default).not.toHaveProperty('pack_id');
     });
   });
 

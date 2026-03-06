@@ -95,19 +95,21 @@ export const backfillScheduleIds = async ({
 
           for (const pp of packagePolicies) {
             if (policyHasPack(pp, packSO.attributes.name, spaceId)) {
+              const packPath = `inputs[0].config.osquery.value.packs.${makePackKey(
+                packSO.attributes.name,
+                spaceId
+              )}`;
               await packagePolicyService.update(
                 spaceClient,
                 esClient,
                 pp.id,
                 produce<PackagePolicy>(pp, (draft) => {
                   unset(draft, 'id');
+                  set(draft, `${packPath}.pack_id`, packSO.id);
                   set(
                     draft,
-                    `inputs[0].config.osquery.value.packs.${makePackKey(
-                      packSO.attributes.name,
-                      spaceId
-                    )}.queries`,
-                    convertSOQueriesToPackConfig(updatedQueries, spaceId, packSO.id)
+                    `${packPath}.queries`,
+                    convertSOQueriesToPackConfig(updatedQueries, spaceId)
                   );
 
                   return draft;
