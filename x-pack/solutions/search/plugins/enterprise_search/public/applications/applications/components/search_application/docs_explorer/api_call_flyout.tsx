@@ -33,7 +33,7 @@ export interface APICallData {
 }
 
 export interface APICallFlyoutProps {
-  focusButtonRef?: React.Ref<HTMLButtonElement>;
+  focusButtonRef: React.Ref<HTMLButtonElement>;
   lastAPICall: APICallData;
   onClose: () => void;
   searchApplicationName: string;
