@@ -1955,8 +1955,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.eslintignore @elastic/kibana-operations
 /src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 
-# QA - Appex QA
+# QA - AppEx QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
+/docs/extend/scout.md @elastic/appex-qa
+/docs/extend/scout/** @elastic/appex-qa
 /x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
