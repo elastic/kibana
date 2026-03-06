@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: Unified History Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/history:
+    get:
+      summary: Get unified query history
+      description: >
+        Get a unified, time-sorted history of live, rule-triggered, and scheduled
+        osquery executions. The response uses cursor-based pagination.
+      operationId: OsqueryGetUnifiedHistory
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            description: 'The number of results to return per page. The default is 20.'
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: nextPage
+          in: query
+          required: false
+          schema:
+            description: 'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
+            type: string
+        - name: kuery
+          in: query
+          required: false
+          schema:
+            description: 'A search string to filter history entries by pack name, query text, or query ID.'
+            type: string
+        - name: userIds
+          in: query
+          required: false
+          schema:
+            description: 'Comma-separated list of user IDs to filter live query history.'
+            example: 'elastic,admin'
+            type: string
+        - name: sourceFilters
+          in: query
+          required: false
+          schema:
+            description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+            example: 'live,scheduled'
+            type: string
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            description: 'The start of the time range filter (ISO 8601).'
+            example: '2024-01-01T00:00:00Z'
+            type: string
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            description: 'The end of the time range filter (ISO 8601).'
+            example: '2024-12-31T23:59:59Z'
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_unified_history.schema.yaml#/components/schemas/GetUnifiedHistoryResponse'
