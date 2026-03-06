@@ -11,7 +11,7 @@ import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser'
 import { createBreadcrumbsState } from './breadcrumbs_state';
 
 const createExtension = (): ChromeBreadcrumbsAppendExtension => ({
-  mount: () => () => undefined,
+  content: null,
 });
 
 const getBadgesContent = (extensions: ChromeBreadcrumbsAppendExtension[]) => {
