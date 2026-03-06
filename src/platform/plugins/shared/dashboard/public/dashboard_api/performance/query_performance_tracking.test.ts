@@ -56,6 +56,7 @@ describe('startQueryPerformanceTracking', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     window.performance.clearMarks = jest.fn();
+    window.performance.getEntriesByName = jest.fn().mockReturnValue([]);
   });
 
   const setChildrenStatus = (children: {}, status: PhaseEventType) => {
@@ -187,8 +188,10 @@ describe('startQueryPerformanceTracking', () => {
       );
     });
 
-    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
-    expect(window.performance.clearMarks).toHaveBeenLastCalledWith(DASHBOARD_DURATION_START_MARK);
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(3);
+    expect(window.performance.clearMarks).toHaveBeenCalledWith(DASHBOARD_DURATION_START_MARK);
+    expect(window.performance.clearMarks).toHaveBeenCalledWith('dashboard_hidden_start');
+    expect(window.performance.clearMarks).toHaveBeenCalledWith('dashboard_hidden_end');
 
     setChildrenStatus(children, 'loading');
     await new Promise((r) => setTimeout(r, 1));
@@ -200,8 +203,8 @@ describe('startQueryPerformanceTracking', () => {
       })
     );
 
-    expect(window.performance.clearMarks).toHaveBeenCalledTimes(2);
-    expect(window.performance.clearMarks).toHaveBeenLastCalledWith(DASHBOARD_DURATION_START_MARK);
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(6);
+    expect(window.performance.clearMarks).toHaveBeenCalledWith(DASHBOARD_DURATION_START_MARK);
   });
 
   it('subscribes to newly added panels', async () => {

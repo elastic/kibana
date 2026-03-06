@@ -23,6 +23,9 @@ import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
 
+const HIDDEN_START_MARK = 'dashboard_hidden_start';
+const HIDDEN_END_MARK = 'dashboard_hidden_end';
+
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
 export interface PerformanceState {
@@ -33,6 +36,7 @@ export interface PerformanceState {
 }
 
 let isFirstDashboardLoadOfSession = true;
+let visibilityCleanup: (() => void) | null = null;
 
 const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   sessionFirstLoad: 0, // on first time the SO is loaded
@@ -40,11 +44,53 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   dashboardSubsequentLoad: 2, // on filter-refresh
 };
 
+export const startDashboardVisibilityTracking = (): void => {
+  // Clean up any existing listener before starting new one
+  stopDashboardVisibilityTracking();
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      performance.mark(HIDDEN_START_MARK);
+    } else {
+      performance.mark(HIDDEN_END_MARK);
+    }
+  };
+
+  // If tab is already hidden when tracking starts, mark it now
+  if (document.visibilityState === 'hidden') {
+    performance.mark(HIDDEN_START_MARK);
+  }
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  visibilityCleanup = () =>
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+};
+
+export const stopDashboardVisibilityTracking = (): void => {
+  visibilityCleanup?.();
+  visibilityCleanup = null;
+};
+
+const calculateHiddenTime = (dashboardStartTime: number): number => {
+  const hiddenStarts = performance.getEntriesByName(HIDDEN_START_MARK, 'mark');
+  const hiddenEnds = performance.getEntriesByName(HIDDEN_END_MARK, 'mark');
+
+  let totalHiddenTime = 0;
+  for (let i = 0; i < hiddenStarts.length; i++) {
+    const start = Math.max(hiddenStarts[i].startTime, dashboardStartTime);
+    const end = hiddenEnds[i]?.startTime ?? performance.now();
+    if (end > start) {
+      totalHiddenTime += end - start;
+    }
+  }
+  return totalHiddenTime;
+};
+
 export function startQueryPerformanceTracking(
   dashboard: PresentationContainer,
   performanceState: PerformanceState
 ) {
-  return dashboard.children$
+  const subscription = dashboard.children$
     .pipe(
       skipWhile((children) => {
         // Don't track render-status when the dashboard is still adding embeddables.
@@ -112,9 +158,15 @@ export function startQueryPerformanceTracking(
           panelCount,
           totalLoadTime: completeLoadDuration,
           loadType,
+          creationStartTime: performanceState.creationStartTime ?? 0,
         });
       }
     });
+
+  return () => {
+    subscription.unsubscribe();
+    stopDashboardVisibilityTracking();
+  };
 }
 
 function reportPerformanceMetrics({
@@ -122,14 +174,18 @@ function reportPerformanceMetrics({
   panelCount,
   totalLoadTime,
   loadType,
+  creationStartTime,
 }: {
   timeToData: number;
   panelCount: number;
   totalLoadTime: number;
   loadType: DashboardLoadType;
+  creationStartTime: number;
 }) {
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
+
+  const hiddenTime = calculateHiddenTime(creationStartTime);
 
   const meanPanelPrerender = getMeanFromPerformanceMeasures({
     type: PERFORMANCE_TRACKER_TYPES.PANEL,
@@ -152,13 +208,19 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
+    key5: 'hidden_time',
+    value5: hiddenTime,
     key8: 'mean_panel_prerender',
     value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',
     value9: meanPanelRenderComplete,
   };
 
+  console.log('Dashboard performance metrics:', performanceMetricEvent);
+
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);
   clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.PANEL);
   performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+  performance.clearMarks(HIDDEN_START_MARK);
+  performance.clearMarks(HIDDEN_END_MARK);
 }
