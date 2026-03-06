@@ -37,6 +37,14 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 4. Panels' \`x + w\` must never exceed 48.
 5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
 
+### Section grid rules
+
+When using \`add_section\`, each section has its own coordinate space:
+
+- Panel coordinates inside a section are **relative to the section** — every section resets \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
+- **A section occupies exactly 1 row (\`h: 1\`) in the outer grid.** When computing \`y\` for top-level panels or sections that come after a section, the next \`y\` = section's outer \`y + 1\`, **not** the sum of the section's internal panel heights. The section's internal panel heights do not affect the outer grid.
+- When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels use their \`y + h\`, sections use their \`y + 1\`.
+
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 
 \`\`\`

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ToolUiEvent } from '@kbn/agent-builder-common/chat';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
@@ -32,7 +32,7 @@ export const lensAttachmentPanelSchema = z.object({
   type: z.literal('lens'),
   panelId: z.string(),
   /** The visualization configuration in Lens API format (LensApiSchemaType) */
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   /** Panel title */
   title: z.string().optional(),
   /** Natural language query that created this (if agent-generated) */
@@ -59,7 +59,7 @@ export const genericAttachmentPanelSchema = z.object({
   type: z.string(),
   panelId: z.string(),
   /** The raw panel configuration for recreating the panel */
-  rawConfig: z.record(z.unknown()),
+  rawConfig: z.record(z.string(), z.unknown()),
   /** Panel title if available */
   title: z.string().optional(),
   /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
@@ -103,11 +103,25 @@ export function isGenericAttachmentPanel(panel: AttachmentPanel): panel is Gener
 }
 
 /**
+ * Grid position for a section in the outer dashboard grid.
+ * Sections span the full width; only vertical position is configurable.
+ */
+export const sectionGridSchema = z.object({
+  y: z.number().int().min(0),
+});
+
+/**
  * Zod schema for a dashboard section containing panels.
  */
 export const dashboardSectionSchema = z.object({
+  /** Server-generated UUID for this section */
+  sectionId: z.string(),
   /** Section title */
   title: z.string(),
+  /** Whether the section is collapsed in the UI */
+  collapsed: z.boolean().optional(),
+  /** Vertical position in the outer dashboard grid. Auto-computed when omitted. */
+  grid: sectionGridSchema.optional(),
   /** Panels within this section */
   panels: z.array(attachmentPanelSchema),
 });

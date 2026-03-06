@@ -17,7 +17,7 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { normalizePanels } from './panel_grid_layout';
+import { normalizeDashboardState } from './panel_grid_layout';
 
 interface DashboardCanvasInitialInput {
   timeRange: {
@@ -35,7 +35,7 @@ const createDashboardRendererInitialInput = (
 ): DashboardCanvasInitialInput => ({
   timeRange: { from: 'now-24h', to: 'now' },
   viewMode: 'view',
-  panels: normalizePanels(data.panels ?? []) as DashboardState['panels'],
+  panels: normalizeDashboardState(data),
   title: data.title,
   description: data.description,
 });

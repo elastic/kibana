@@ -13,6 +13,7 @@ export {
 
 export {
   panelGridSchema,
+  sectionGridSchema,
   lensAttachmentPanelSchema,
   genericAttachmentPanelSchema,
   attachmentPanelSchema,

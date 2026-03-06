@@ -151,6 +151,7 @@ describe('executeDashboardOperations', () => {
         savedObjectId: 'saved-dashboard-id',
         sections: [
           {
+            sectionId: 'section-1',
             title: 'Section 1',
             panels: [],
           },
@@ -181,6 +182,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.savedObjectId).toBe('saved-dashboard-id');
     expect(result.dashboardData.sections).toEqual([
       {
+        sectionId: 'section-1',
         title: 'Section 1',
         panels: [],
       },

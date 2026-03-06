@@ -8,7 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+  DashboardSection,
+} from '@kbn/dashboard-agent-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isGenericAttachmentPanel,
@@ -197,8 +201,13 @@ export const upsertMarkdownPanel = (
 
 export const getRemovedPanels = (
   panels: AttachmentPanel[],
-  removePanelIds?: string[]
-): { panelsToRemove: AttachmentPanel[]; panelsToKeep: AttachmentPanel[] } => {
+  removePanelIds?: string[],
+  sections?: DashboardSection[]
+): {
+  panelsToRemove: AttachmentPanel[];
+  panelsToKeep: AttachmentPanel[];
+  updatedSections?: DashboardSection[];
+} => {
   if (!removePanelIds || removePanelIds.length === 0) {
     return {
       panelsToRemove: [],
@@ -218,10 +227,79 @@ export const getRemovedPanels = (
     }
   }
 
+  let updatedSections: DashboardSection[] | undefined;
+  if (sections) {
+    updatedSections = sections.map((section) => {
+      const keptSectionPanels: AttachmentPanel[] = [];
+      for (const panel of section.panels) {
+        if (removeSet.has(panel.panelId)) {
+          panelsToRemove.push(panel);
+        } else {
+          keptSectionPanels.push(panel);
+        }
+      }
+      return { ...section, panels: keptSectionPanels };
+    });
+  }
+
   return {
     panelsToRemove,
     panelsToKeep,
+    updatedSections,
   };
+};
+
+/**
+ * Finds a section by its sectionId. Throws if not found.
+ */
+export const findSectionById = (
+  data: DashboardAttachmentData,
+  sectionId: string
+): DashboardSection => {
+  const section = (data.sections ?? []).find((s) => s.sectionId === sectionId);
+  if (!section) {
+    throw new Error(`Section "${sectionId}" not found.`);
+  }
+  return section;
+};
+
+/**
+ * Extracts panels by ID from both top-level panels and all section panel arrays.
+ * Mutates the provided data in place, removing matched panels.
+ * Returns the extracted panels.
+ */
+export const extractPanelsById = (
+  data: DashboardAttachmentData,
+  panelIds: string[]
+): AttachmentPanel[] => {
+  const idSet = new Set(panelIds);
+  const extracted: AttachmentPanel[] = [];
+
+  const nextTopLevel: AttachmentPanel[] = [];
+  for (const panel of data.panels) {
+    if (idSet.has(panel.panelId)) {
+      extracted.push(panel);
+    } else {
+      nextTopLevel.push(panel);
+    }
+  }
+  data.panels = nextTopLevel;
+
+  if (data.sections) {
+    for (const section of data.sections) {
+      const nextSectionPanels: AttachmentPanel[] = [];
+      for (const panel of section.panels) {
+        if (idSet.has(panel.panelId)) {
+          extracted.push(panel);
+        } else {
+          nextSectionPanels.push(panel);
+        }
+      }
+      section.panels = nextSectionPanels;
+    }
+  }
+
+  return extracted;
 };
 
 /**

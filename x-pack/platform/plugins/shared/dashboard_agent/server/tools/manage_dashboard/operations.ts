@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { panelGridSchema } from '@kbn/dashboard-agent-common';
+import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
-import { getRemovedPanels, upsertMarkdownPanel, type VisualizationFailure } from './utils';
+import {
+  extractPanelsById,
+  findSectionById,
+  getRemovedPanels,
+  upsertMarkdownPanel,
+  type VisualizationFailure,
+} from './utils';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
@@ -27,6 +34,10 @@ const attachmentWithGridSchema = z.object({
   grid: panelGridSchema.describe(
     'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
   ),
+  sectionId: z
+    .string()
+    .optional()
+    .describe('Target section ID. If provided, the panel is added to that section.'),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({
@@ -42,11 +53,53 @@ export const removePanelsOperationSchema = z.object({
   panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
 });
 
+export const addSectionOperationSchema = z.object({
+  operation: z.literal('add_section'),
+  title: z.string().describe('Section title.'),
+  grid: sectionGridSchema
+    .optional()
+    .describe(
+      'Vertical position (y) in the outer dashboard grid. A section occupies 1 row. Auto-computed when omitted.'
+    ),
+  panels: z
+    .array(
+      z.object({
+        attachmentId: z
+          .string()
+          .describe('Visualization attachment ID to add as a panel in this section.'),
+        grid: panelGridSchema.describe(
+          'Panel layout relative to the section. Coordinates reset to y:0 per section.'
+        ),
+      })
+    )
+    .describe('Panels to place inside the new section. May be empty.'),
+});
+
+export const movePanelsToSectionOperationSchema = z.object({
+  operation: z.literal('move_panels_to_section'),
+  panelIds: z.array(z.string()).min(1).describe('Panel IDs to move.'),
+  sectionId: z
+    .string()
+    .nullable()
+    .describe('Target section ID, or null to promote panels to top-level.'),
+});
+
+export const removeSectionOperationSchema = z.object({
+  operation: z.literal('remove_section'),
+  sectionId: z.string().describe('ID of the section to remove.'),
+  panelAction: z
+    .enum(['promote', 'delete'])
+    .describe("'promote' moves panels to top-level; 'delete' removes them."),
+});
+
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
   upsertMarkdownOperationSchema,
   addPanelsFromAttachmentsOperationSchema,
   removePanelsOperationSchema,
+  addSectionOperationSchema,
+  movePanelsToSectionOperationSchema,
+  removeSectionOperationSchema,
 ]);
 
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
@@ -119,10 +172,15 @@ export const executeDashboardOperations = async ({
             grid: item.grid,
           }));
           if (panelsWithGrid.length > 0) {
-            nextDashboardData = {
-              ...nextDashboardData,
-              panels: [...nextDashboardData.panels, ...panelsWithGrid],
-            };
+            if (item.sectionId) {
+              const section = findSectionById(nextDashboardData, item.sectionId);
+              section.panels = [...section.panels, ...panelsWithGrid];
+            } else {
+              nextDashboardData = {
+                ...nextDashboardData,
+                panels: [...nextDashboardData.panels, ...panelsWithGrid],
+              };
+            }
             onPanelsAdded(panelsWithGrid);
           }
           failures.push(...result.failures);
@@ -131,18 +189,101 @@ export const executeDashboardOperations = async ({
       }
 
       case 'remove_panels': {
-        const { panelsToKeep, panelsToRemove } = getRemovedPanels(
+        const { panelsToKeep, panelsToRemove, updatedSections } = getRemovedPanels(
           nextDashboardData.panels,
-          operation.panelIds
+          operation.panelIds,
+          nextDashboardData.sections
         );
         if (panelsToRemove.length > 0) {
           nextDashboardData = {
             ...nextDashboardData,
             panels: panelsToKeep,
+            ...(updatedSections ? { sections: updatedSections } : {}),
           };
           onPanelsRemoved(panelsToRemove);
           logger.debug(`Removed ${panelsToRemove.length} panels from dashboard`);
         }
+        break;
+      }
+
+      case 'add_section': {
+        const sectionId = uuidv4();
+        const sectionPanels: AttachmentPanel[] = [];
+
+        for (const item of operation.panels) {
+          const result = await resolvePanelsFromAttachments([item.attachmentId]);
+          const panelsWithGrid: AttachmentPanel[] = result.panels.map((panel) => ({
+            ...panel,
+            grid: item.grid,
+          }));
+          sectionPanels.push(...panelsWithGrid);
+          failures.push(...result.failures);
+        }
+
+        const sections = nextDashboardData.sections ?? [];
+        nextDashboardData = {
+          ...nextDashboardData,
+          sections: [
+            ...sections,
+            {
+              sectionId,
+              title: operation.title,
+              collapsed: false,
+              ...(operation.grid ? { grid: operation.grid } : {}),
+              panels: sectionPanels,
+            },
+          ],
+        };
+
+        if (sectionPanels.length > 0) {
+          onPanelsAdded(sectionPanels);
+        }
+        logger.debug(
+          `Added section "${operation.title}" (${sectionId}) with ${sectionPanels.length} panels`
+        );
+        break;
+      }
+
+      case 'move_panels_to_section': {
+        const extracted = extractPanelsById(nextDashboardData, operation.panelIds);
+
+        if (operation.sectionId === null) {
+          nextDashboardData = {
+            ...nextDashboardData,
+            panels: [...nextDashboardData.panels, ...extracted],
+          };
+        } else {
+          const section = findSectionById(nextDashboardData, operation.sectionId);
+          section.panels = [...section.panels, ...extracted];
+        }
+        logger.debug(`Moved ${extracted.length} panels to ${operation.sectionId ?? 'top-level'}`);
+        break;
+      }
+
+      case 'remove_section': {
+        const section = findSectionById(nextDashboardData, operation.sectionId);
+        const sectionIndex = (nextDashboardData.sections ?? []).indexOf(section);
+
+        if (operation.panelAction === 'promote') {
+          nextDashboardData = {
+            ...nextDashboardData,
+            panels: [...nextDashboardData.panels, ...section.panels],
+          };
+        } else {
+          if (section.panels.length > 0) {
+            onPanelsRemoved(section.panels);
+          }
+        }
+
+        const updatedSections = [...(nextDashboardData.sections ?? [])];
+        updatedSections.splice(sectionIndex, 1);
+        nextDashboardData = {
+          ...nextDashboardData,
+          sections: updatedSections,
+        };
+        logger.debug(
+          `Removed section "${section.title}" (${operation.sectionId}), panelAction=${operation.panelAction}`
+        );
         break;
       }
     }
