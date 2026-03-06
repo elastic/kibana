@@ -172,7 +172,7 @@ jobs:
 
     steps:
       - name: Install OpenCode CLI
-        run: npm install -g @opencode-ai/cli@1.2.15
+        run: npm install -g opencode-ai@1.2.15
 
       - name: Resolve prompt and model
         id: prompt
@@ -1009,7 +1009,7 @@ jobs:
           repository: ${{ needs.prepare.outputs.pr_head_repo }}
 
       - name: Install OpenCode CLI
-        run: npm install -g @opencode-ai/cli@1.2.15
+        run: npm install -g opencode-ai@1.2.15
 
       - name: Create short-lived LiteLLM key
         id: short_lived_key_review
