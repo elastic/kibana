@@ -291,7 +291,6 @@ export function getDiscoverInternalStateMock({
           internalStateActions.initializeSingleTab({
             tabId,
             initializeSingleTabParams: {
-              internalState,
               customizationService,
               dataStateContainer,
               dataViewSpec: undefined,

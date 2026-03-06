@@ -13,11 +13,7 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import {
-  internalStateSlice,
-  type InternalStateStore,
-  type TabActionPayload,
-} from '../internal_state';
+import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
@@ -42,7 +38,6 @@ import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 
 export interface InitializeSingleTabsParams {
-  internalState: InternalStateStore;
   customizationService: ConnectedCustomizationService;
   dataStateContainer: DiscoverDataStateContainer;
   dataViewSpec: DataViewSpec | undefined;
@@ -56,7 +51,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     {
       tabId,
       initializeSingleTabParams: {
-        internalState,
         customizationService,
         dataStateContainer,
         dataViewSpec,

@@ -11,11 +11,11 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getTabStateMock, getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectTabSavedSearch } from './saved_search';
-import { internalStateActions } from '..';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import { setDataView } from '../actions';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -220,7 +220,7 @@ describe('selectTabSavedSearch', () => {
     // The tab is already initialized with dataViewWithTimefieldMock
     // Set a different data view in runtime state using the Redux action
     internalState.dispatch(
-      internalStateActions.setDataView({
+      setDataView({
         tabId: currentTab.id,
         dataView: dataViewWithNoTimefieldMock,
       })

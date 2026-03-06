@@ -286,7 +286,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         dispatch(initializeAndSync({ tabId: nextTab.id }));
 
         if (nextTab.forceFetchOnSelect) {
-          nextTabRuntimeState.dataStateContainer$.getValue()?.reset();
+          nextTabDataStateContainer.reset();
           dispatch(fetchData({ tabId: nextTab.id }));
         }
       } else {

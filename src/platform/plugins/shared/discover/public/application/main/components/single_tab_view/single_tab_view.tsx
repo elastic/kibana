@@ -113,7 +113,6 @@ export const SingleTabView = ({
       dispatch(
         initializeSingleTab({
           initializeSingleTabParams: {
-            internalState,
             customizationService,
             dataStateContainer,
             dataViewSpec,
