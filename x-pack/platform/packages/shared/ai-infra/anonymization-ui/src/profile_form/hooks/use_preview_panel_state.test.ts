@@ -157,4 +157,27 @@ describe('usePreviewPanelState', () => {
     );
     expect(submittingResult.current.isControlsDisabled).toBe(true);
   });
+
+  it('ignores unsafe prototype paths when transforming preview json', () => {
+    setupLoaderMock();
+
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+
+    const { result } = renderHook(() =>
+      usePreviewPanelState({
+        fieldRules: [{ field: '__proto__.polluted', allowed: true, anonymized: true }],
+        regexRules: [],
+        isSubmitting: false,
+        targetType: TARGET_TYPE_INDEX,
+        targetId: 'logs-1',
+      })
+    );
+
+    act(() => {
+      result.current.setPreviewInput('{}');
+    });
+
+    expect(result.current.transformedPreviewDocument).toEqual({});
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
 });

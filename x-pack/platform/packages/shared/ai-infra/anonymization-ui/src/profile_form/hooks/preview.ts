@@ -14,6 +14,14 @@ import {
 } from './field_rule_actions';
 import { isObjectRecord } from '../../common/utils/is_object_record';
 
+const UNSAFE_PATH_PARTS = new Set(['__proto__', 'prototype', 'constructor']);
+
+const hasUnsafePathPart = (path: string): boolean =>
+  path.split('.').some((part) => UNSAFE_PATH_PARTS.has(part));
+
+const hasOwnPath = (value: Record<string, unknown>, key: string): boolean =>
+  Object.hasOwn(value, key);
+
 export interface PreviewRow {
   field: string;
   action: FieldRuleAction;
@@ -22,8 +30,12 @@ export interface PreviewRow {
 }
 
 const getByPath = (document: Record<string, unknown>, path: string): unknown => {
+  if (hasUnsafePathPart(path)) {
+    return undefined;
+  }
+
   // Prefer exact key match first to support flattened documents that use literal dots in keys.
-  if (path in document) {
+  if (hasOwnPath(document, path)) {
     return document[path];
   }
 
@@ -31,7 +43,7 @@ const getByPath = (document: Record<string, unknown>, path: string): unknown => 
   let current: unknown = document;
 
   for (const part of parts) {
-    if (!isObjectRecord(current) || !(part in current)) {
+    if (UNSAFE_PATH_PARTS.has(part) || !isObjectRecord(current) || !hasOwnPath(current, part)) {
       return undefined;
     }
     current = current[part];
@@ -41,8 +53,12 @@ const getByPath = (document: Record<string, unknown>, path: string): unknown => 
 };
 
 const setByPath = (document: Record<string, unknown>, path: string, value: unknown): boolean => {
+  if (hasUnsafePathPart(path)) {
+    return false;
+  }
+
   // Prefer exact key match first to keep updates aligned with flattened key storage.
-  if (path in document) {
+  if (hasOwnPath(document, path)) {
     document[path] = value;
     return true;
   }
@@ -52,7 +68,7 @@ const setByPath = (document: Record<string, unknown>, path: string, value: unkno
 
   for (let index = 0; index < parts.length; index += 1) {
     const part = parts[index];
-    if (!isObjectRecord(current) || !(part in current)) {
+    if (UNSAFE_PATH_PARTS.has(part) || !isObjectRecord(current) || !hasOwnPath(current, part)) {
       return false;
     }
 
@@ -68,8 +84,12 @@ const setByPath = (document: Record<string, unknown>, path: string, value: unkno
 };
 
 const unsetByPath = (document: Record<string, unknown>, path: string): boolean => {
+  if (hasUnsafePathPart(path)) {
+    return false;
+  }
+
   // Prefer exact key match first to keep updates aligned with flattened key storage.
-  if (path in document) {
+  if (hasOwnPath(document, path)) {
     delete document[path];
     return true;
   }
@@ -79,7 +99,7 @@ const unsetByPath = (document: Record<string, unknown>, path: string): boolean =
 
   for (let index = 0; index < parts.length; index += 1) {
     const part = parts[index];
-    if (!isObjectRecord(current) || !(part in current)) {
+    if (UNSAFE_PATH_PARTS.has(part) || !isObjectRecord(current) || !hasOwnPath(current, part)) {
       return false;
     }
 
