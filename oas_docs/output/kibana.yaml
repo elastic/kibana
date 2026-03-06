@@ -9437,6 +9437,826 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/_find</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/backfill/_find:
+    post:
+      operationId: post-alerting-rules-backfill-find
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The end date for filtering backfills.
+          in: query
+          name: end
+          required: false
+          schema:
+            type: string
+        - description: The page number to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of backfills to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 10
+            minimum: 0
+            type: number
+        - description: A comma-separated list of rule identifiers.
+          in: query
+          name: rule_ids
+          required: false
+          schema:
+            type: string
+        - description: The initiator of the backfill, either `user` for manual backfills or `system` for automatic gap fills.
+          in: query
+          name: initiator
+          required: false
+          schema:
+            enum:
+              - user
+              - system
+            type: string
+        - description: The start date for filtering backfills.
+          in: query
+          name: start
+          required: false
+          schema:
+            type: string
+        - description: The field to sort backfills by.
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            enum:
+              - createdAt
+              - start
+            type: string
+        - description: The sort order.
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                findBackfillResponse:
+                  summary: Find backfills response
+                  value:
+                    data:
+                      - created_at: '2024-01-30T00:00:00.000Z'
+                        duration: 12h
+                        enabled: true
+                        id: 85bdf571-f4fb-4666-a8d2-e05e1220ebc6
+                        initiator: user
+                        rule:
+                          api_key_owner: elastic
+                          consumer: alerts
+                          created_at: '2022-12-05T23:40:33.132Z'
+                          created_by: elastic
+                          enabled: true
+                          id: 3583a470-74f6-11ed-9801-35303b735aef
+                          name: my alert
+                          params:
+                            aggField: sheet.version
+                            aggType: avg
+                            groupBy: top
+                            index:
+                              - test-index
+                            termField: name.keyword
+                            termSize: 6
+                            threshold:
+                              - 1000
+                            thresholdComparator: '>'
+                            timeField: '@timestamp'
+                            timeWindowSize: 5
+                            timeWindowUnit: m
+                          revision: 0
+                          rule_type_id: .index-threshold
+                          schedule:
+                            interval: 1m
+                          tags:
+                            - cpu
+                          updated_at: '2022-12-05T23:40:33.132Z'
+                          updated_by: elastic
+                        schedule:
+                          - interval: 12h
+                            run_at: '2024-01-01T12:00:00.000Z'
+                            status: pending
+                          - interval: 12h
+                            run_at: '2024-01-02T00:00:00.000Z'
+                            status: pending
+                        space_id: default
+                        start: '2024-01-01T00:00:00.000Z'
+                        status: pending
+                    page: 1
+                    per_page: 10
+                    total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        created_at:
+                          type: string
+                        duration:
+                          type: string
+                        enabled:
+                          type: boolean
+                        end:
+                          type: string
+                        id:
+                          type: string
+                        initiator:
+                          enum:
+                            - user
+                            - system
+                          type: string
+                        initiator_id:
+                          type: string
+                        rule:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            api_key_created_by_user:
+                              nullable: true
+                              type: boolean
+                            api_key_owner:
+                              nullable: true
+                              type: string
+                            consumer:
+                              type: string
+                            created_at:
+                              type: string
+                            created_by:
+                              nullable: true
+                              type: string
+                            enabled:
+                              type: boolean
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            params:
+                              additionalProperties: {}
+                              description: The parameters for the rule.
+                              type: object
+                            revision:
+                              type: number
+                            rule_type_id:
+                              type: string
+                            schedule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                interval:
+                                  type: string
+                              required:
+                                - interval
+                            tags:
+                              items:
+                                type: string
+                              type: array
+                            updated_at:
+                              type: string
+                            updated_by:
+                              nullable: true
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - tags
+                            - rule_type_id
+                            - params
+                            - api_key_owner
+                            - consumer
+                            - enabled
+                            - schedule
+                            - created_by
+                            - updated_by
+                            - created_at
+                            - updated_at
+                            - revision
+                        schedule:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              interval:
+                                type: string
+                              run_at:
+                                type: string
+                              status:
+                                enum:
+                                  - complete
+                                  - pending
+                                  - running
+                                  - error
+                                  - timeout
+                                type: string
+                            required:
+                              - run_at
+                              - status
+                              - interval
+                          type: array
+                        space_id:
+                          type: string
+                        start:
+                          type: string
+                        status:
+                          enum:
+                            - complete
+                            - pending
+                            - running
+                            - error
+                            - timeout
+                          type: string
+                      required:
+                        - id
+                        - created_at
+                        - duration
+                        - enabled
+                        - rule
+                        - space_id
+                        - initiator
+                        - start
+                        - status
+                        - schedule
+                    type: array
+                  page:
+                    type: number
+                  per_page:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - page
+                  - per_page
+                  - total
+                  - data
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+      summary: Find backfills for rules
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/_find</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/backfill/_schedule:
+    post:
+      operationId: post-alerting-rules-backfill-schedule
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              scheduleBackfillRequest:
+                summary: Schedule a backfill for an index threshold rule
+                value:
+                  - ranges:
+                      - end: '2024-01-02T00:00:00.000Z'
+                        start: '2024-01-01T00:00:00.000Z'
+                    rule_id: 3583a470-74f6-11ed-9801-35303b735aef
+            schema:
+              items:
+                additionalProperties: false
+                type: object
+                properties:
+                  ranges:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        end:
+                          type: string
+                        start:
+                          type: string
+                      required:
+                        - start
+                        - end
+                    type: array
+                  rule_id:
+                    type: string
+                  run_actions:
+                    type: boolean
+                required:
+                  - rule_id
+                  - ranges
+              maxItems: 100
+              minItems: 1
+              type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                scheduleBackfillResponse:
+                  summary: Schedule backfill response
+                  value:
+                    - created_at: '2024-01-30T00:00:00.000Z'
+                      duration: 12h
+                      enabled: true
+                      id: 85bdf571-f4fb-4666-a8d2-e05e1220ebc6
+                      initiator: user
+                      rule:
+                        api_key_owner: elastic
+                        consumer: alerts
+                        created_at: '2022-12-05T23:40:33.132Z'
+                        created_by: elastic
+                        enabled: true
+                        id: 3583a470-74f6-11ed-9801-35303b735aef
+                        name: my alert
+                        params:
+                          aggField: sheet.version
+                          aggType: avg
+                          groupBy: top
+                          index:
+                            - test-index
+                          termField: name.keyword
+                          termSize: 6
+                          threshold:
+                            - 1000
+                          thresholdComparator: '>'
+                          timeField: '@timestamp'
+                          timeWindowSize: 5
+                          timeWindowUnit: m
+                        revision: 0
+                        rule_type_id: .index-threshold
+                        schedule:
+                          interval: 1m
+                        tags:
+                          - cpu
+                        updated_at: '2022-12-05T23:40:33.132Z'
+                        updated_by: elastic
+                      schedule:
+                        - interval: 12h
+                          run_at: '2024-01-01T12:00:00.000Z'
+                          status: pending
+                        - interval: 12h
+                          run_at: '2024-01-02T00:00:00.000Z'
+                          status: pending
+                      space_id: default
+                      start: '2024-01-01T00:00:00.000Z'
+                      status: pending
+              schema:
+                items:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        created_at:
+                          type: string
+                        duration:
+                          type: string
+                        enabled:
+                          type: boolean
+                        end:
+                          type: string
+                        id:
+                          type: string
+                        initiator:
+                          enum:
+                            - user
+                            - system
+                          type: string
+                        initiator_id:
+                          type: string
+                        rule:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            api_key_created_by_user:
+                              nullable: true
+                              type: boolean
+                            api_key_owner:
+                              nullable: true
+                              type: string
+                            consumer:
+                              type: string
+                            created_at:
+                              type: string
+                            created_by:
+                              nullable: true
+                              type: string
+                            enabled:
+                              type: boolean
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            params:
+                              additionalProperties: {}
+                              description: The parameters for the rule.
+                              type: object
+                            revision:
+                              type: number
+                            rule_type_id:
+                              type: string
+                            schedule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                interval:
+                                  type: string
+                              required:
+                                - interval
+                            tags:
+                              items:
+                                type: string
+                              type: array
+                            updated_at:
+                              type: string
+                            updated_by:
+                              nullable: true
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - tags
+                            - rule_type_id
+                            - params
+                            - api_key_owner
+                            - consumer
+                            - enabled
+                            - schedule
+                            - created_by
+                            - updated_by
+                            - created_at
+                            - updated_at
+                            - revision
+                        schedule:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              interval:
+                                type: string
+                              run_at:
+                                type: string
+                              status:
+                                enum:
+                                  - complete
+                                  - pending
+                                  - running
+                                  - error
+                                  - timeout
+                                type: string
+                            required:
+                              - run_at
+                              - status
+                              - interval
+                          type: array
+                        space_id:
+                          type: string
+                        start:
+                          type: string
+                        status:
+                          enum:
+                            - complete
+                            - pending
+                            - running
+                            - error
+                            - timeout
+                          type: string
+                      required:
+                        - id
+                        - created_at
+                        - duration
+                        - enabled
+                        - rule
+                        - space_id
+                        - initiator
+                        - start
+                        - status
+                        - schedule
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            rule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                            status:
+                              type: number
+                          required:
+                            - message
+                            - rule
+                      required:
+                        - error
+                type: array
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
+      summary: Schedule a backfill for rules
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/_schedule</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/backfill/{id}:
+    delete:
+      operationId: delete-alerting-rules-backfill-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the backfill.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a backfill with the given ID does not exist.
+      summary: Delete a backfill by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+    get:
+      operationId: get-alerting-rules-backfill-id
+      parameters:
+        - description: The identifier for the backfill.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getBackfillResponse:
+                  summary: Get a backfill for an index threshold rule
+                  value:
+                    created_at: '2024-01-30T00:00:00.000Z'
+                    duration: 12h
+                    enabled: true
+                    id: 85bdf571-f4fb-4666-a8d2-e05e1220ebc6
+                    initiator: user
+                    rule:
+                      api_key_owner: elastic
+                      consumer: alerts
+                      created_at: '2022-12-05T23:40:33.132Z'
+                      created_by: elastic
+                      enabled: true
+                      id: 3583a470-74f6-11ed-9801-35303b735aef
+                      name: my alert
+                      params:
+                        aggField: sheet.version
+                        aggType: avg
+                        groupBy: top
+                        index:
+                          - test-index
+                        termField: name.keyword
+                        termSize: 6
+                        threshold:
+                          - 1000
+                        thresholdComparator: '>'
+                        timeField: '@timestamp'
+                        timeWindowSize: 5
+                        timeWindowUnit: m
+                      revision: 0
+                      rule_type_id: .index-threshold
+                      schedule:
+                        interval: 1m
+                      tags:
+                        - cpu
+                      updated_at: '2022-12-05T23:40:33.132Z'
+                      updated_by: elastic
+                    schedule:
+                      - interval: 12h
+                        run_at: '2024-01-01T12:00:00.000Z'
+                        status: pending
+                      - interval: 12h
+                        run_at: '2024-01-02T00:00:00.000Z'
+                        status: pending
+                    space_id: default
+                    start: '2024-01-01T00:00:00.000Z'
+                    status: pending
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    type: string
+                  duration:
+                    type: string
+                  enabled:
+                    type: boolean
+                  end:
+                    type: string
+                  id:
+                    type: string
+                  initiator:
+                    enum:
+                      - user
+                      - system
+                    type: string
+                  initiator_id:
+                    type: string
+                  rule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      api_key_created_by_user:
+                        nullable: true
+                        type: boolean
+                      api_key_owner:
+                        nullable: true
+                        type: string
+                      consumer:
+                        type: string
+                      created_at:
+                        type: string
+                      created_by:
+                        nullable: true
+                        type: string
+                      enabled:
+                        type: boolean
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      params:
+                        additionalProperties: {}
+                        description: The parameters for the rule.
+                        type: object
+                      revision:
+                        type: number
+                      rule_type_id:
+                        type: string
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          interval:
+                            type: string
+                        required:
+                          - interval
+                      tags:
+                        items:
+                          type: string
+                        type: array
+                      updated_at:
+                        type: string
+                      updated_by:
+                        nullable: true
+                        type: string
+                    required:
+                      - id
+                      - name
+                      - tags
+                      - rule_type_id
+                      - params
+                      - api_key_owner
+                      - consumer
+                      - enabled
+                      - schedule
+                      - created_by
+                      - updated_by
+                      - created_at
+                      - updated_at
+                      - revision
+                  schedule:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        interval:
+                          type: string
+                        run_at:
+                          type: string
+                        status:
+                          enum:
+                            - complete
+                            - pending
+                            - running
+                            - error
+                            - timeout
+                          type: string
+                      required:
+                        - run_at
+                        - status
+                        - interval
+                    type: array
+                  space_id:
+                    type: string
+                  start:
+                    type: string
+                  status:
+                    enum:
+                      - complete
+                      - pending
+                      - running
+                      - error
+                      - timeout
+                    type: string
+                required:
+                  - id
+                  - created_at
+                  - duration
+                  - enabled
+                  - rule
+                  - space_id
+                  - initiator
+                  - start
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a backfill with the given ID does not exist.
+      summary: Get a backfill by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/apm/agent_keys:
     post:
       description: |
