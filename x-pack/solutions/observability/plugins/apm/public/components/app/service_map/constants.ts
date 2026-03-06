@@ -87,6 +87,11 @@ export const MOCK_EUI_THEME = {
     success: '#00BFB3',
     warning: '#FEC514',
     danger: '#BD271E',
+    severity: {
+      success: '#00BFB3',
+      warning: '#FEC514',
+      danger: '#BD271E',
+    },
   },
 } as const;
 
