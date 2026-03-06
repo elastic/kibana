@@ -127,7 +127,6 @@ const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
   data_stream_exists: true,
   privileges: { ...privileges },
   effective_failure_store: { disabled: {}, from: 'parent' },
-  view_name: '$.logs',
 });
 
 const buildClassicDefinition = (): Streams.ClassicStream.GetResponse => ({

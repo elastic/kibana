@@ -111,7 +111,6 @@ describe('RetentionCard', () => {
           lifecycle: { enabled: { is_default_retention: true } },
           from: 'logs-test',
         },
-        view_name: '$.logs-test.child',
       };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
@@ -157,7 +156,6 @@ describe('RetentionCard', () => {
           lifecycle: { enabled: { is_default_retention: true } },
           from: 'logs-test',
         },
-        view_name: '$.logs-test.child',
       };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);

@@ -66,7 +66,6 @@ describe('EditLifecycleModal', () => {
         lifecycle: { enabled: { is_default_retention: true } },
         from: streamName,
       },
-      view_name: `$.${streamName}`,
     };
 
     if (isWired) {

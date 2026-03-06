@@ -127,12 +127,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         }
 
-        it('exposes view_name in the wired stream GET response', async () => {
-          const stream = await getStream(apiClient, 'logs.otel');
-          const parsed = Streams.WiredStream.GetResponse.parse(stream);
-          expect(parsed.view_name).to.eql('$.logs.otel');
-        });
-
         // Elasticsearch doesn't support streams in serverless mode yet
         if (!isServerless) {
           it('reports conflict if disabled on Elasticsearch level', async () => {
