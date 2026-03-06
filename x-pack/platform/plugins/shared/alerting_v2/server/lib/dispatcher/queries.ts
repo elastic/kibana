@@ -27,7 +27,7 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status
       | DROP episode.id, rule.id, episode.status
-      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ${ALERT_ACTIONS_BACKING_INDEX} AND (action_type == "fire" OR action_type == "suppress") BY rule_id, group_hash
+      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ${ALERT_ACTIONS_BACKING_INDEX} AND (action_type == "fire" OR action_type == "suppress" OR action_type == "no_action") BY rule_id, group_hash
       | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX})
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX}

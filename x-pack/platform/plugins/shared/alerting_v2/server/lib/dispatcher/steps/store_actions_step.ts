@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import type {
   AlertEpisode,
+  NotificationGroup,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
@@ -25,8 +26,16 @@ export class StoreActionsStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { suppressed = [], throttled = [], dispatch = [] } = state;
-    if (suppressed.length === 0 && throttled.length === 0 && dispatch.length === 0) {
+    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [] } = state;
+
+    const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
+
+    if (
+      suppressed.length === 0 &&
+      throttled.length === 0 &&
+      dispatch.length === 0 &&
+      unmatched.length === 0
+    ) {
       return { type: 'halt', reason: 'no_actions' };
     }
 
@@ -69,11 +78,36 @@ export class StoreActionsStep implements DispatcherStep {
           source: 'internal',
           reason: `notified by policy ${group.policyId} with throttle interval`,
         })),
+        ...unmatched.map((episode) =>
+          toAction({
+            episode,
+            actionType: 'no_action',
+            now,
+            reason: 'no matching notification policy',
+          })
+        ),
       ],
     });
 
     return { type: 'continue' };
   }
+}
+
+function getUnmatchedEpisodes(
+  dispatchable: readonly AlertEpisode[],
+  dispatch: readonly NotificationGroup[],
+  throttled: readonly NotificationGroup[]
+): AlertEpisode[] {
+  const handledEpisodeKeys = new Set<string>();
+  for (const group of [...dispatch, ...throttled]) {
+    for (const episode of group.episodes) {
+      handledEpisodeKeys.add(`${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`);
+    }
+  }
+
+  return dispatchable.filter(
+    (ep) => !handledEpisodeKeys.has(`${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`)
+  );
 }
 
 function toAction({
@@ -83,7 +117,7 @@ function toAction({
   reason,
 }: {
   episode: AlertEpisode;
-  actionType: 'suppress' | 'fire' | 'notified';
+  actionType: 'suppress' | 'fire' | 'notified' | 'no_action';
   now: Date;
   reason?: string;
 }): AlertAction {

@@ -7,7 +7,7 @@
 
 import { StoreActionsStep } from './store_actions_step';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../../resources/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import {
   createDispatcherPipelineState,
   createAlertEpisode,
@@ -290,6 +290,154 @@ describe('StoreActionsStep', () => {
       notification_group_id: 'dispatch-group',
       source: 'internal',
       reason: 'notified by policy dispatch-policy with throttle interval',
+    });
+  });
+
+  it('records unmatched episodes with action_type no_action', async () => {
+    const mockService = createMockStorageService();
+    const step = new StoreActionsStep(mockService);
+
+    const unmatchedEpisode = createAlertEpisode({
+      rule_id: 'rule-unmatched',
+      group_hash: 'hash-unmatched',
+      episode_id: 'ep-unmatched',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatchable: [unmatchedEpisode],
+      suppressed: [],
+      throttled: [],
+      dispatch: [],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs: [
+        {
+          '@timestamp': mockDate.toISOString(),
+          group_hash: 'hash-unmatched',
+          last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
+          actor: 'system',
+          action_type: 'no_action',
+          rule_id: 'rule-unmatched',
+          source: 'internal',
+          reason: 'no matching notification policy',
+        },
+      ],
+    });
+  });
+
+  it('does not halt when only unmatched episodes exist', async () => {
+    const mockService = createMockStorageService();
+    const step = new StoreActionsStep(mockService);
+
+    const episode1 = createAlertEpisode({
+      rule_id: 'rule-1',
+      group_hash: 'hash-1',
+      episode_id: 'ep-1',
+    });
+
+    const episode2 = createAlertEpisode({
+      rule_id: 'rule-2',
+      group_hash: 'hash-2',
+      episode_id: 'ep-2',
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatchable: [episode1, episode2],
+      suppressed: [],
+      throttled: [],
+      dispatch: [],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    expect(callArgs.docs).toHaveLength(2);
+    expect(callArgs.docs[0].action_type).toBe('no_action');
+    expect(callArgs.docs[1].action_type).toBe('no_action');
+  });
+
+  it('records unmatched episodes alongside dispatched and throttled groups', async () => {
+    const mockService = createMockStorageService();
+    const step = new StoreActionsStep(mockService);
+
+    const dispatchedEpisode = createAlertEpisode({
+      rule_id: 'rule-dispatch',
+      group_hash: 'hash-dispatch',
+      episode_id: 'ep-dispatch',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    const throttledEpisode = createAlertEpisode({
+      rule_id: 'rule-throttled',
+      group_hash: 'hash-throttled',
+      episode_id: 'ep-throttled',
+      last_event_timestamp: '2026-01-22T07:05:00.000Z',
+    });
+
+    const unmatchedEpisode = createAlertEpisode({
+      rule_id: 'rule-unmatched',
+      group_hash: 'hash-unmatched',
+      episode_id: 'ep-unmatched',
+      last_event_timestamp: '2026-01-22T07:10:00.000Z',
+    });
+
+    const dispatchGroup = createNotificationGroup({
+      id: 'dispatch-group',
+      ruleId: 'rule-dispatch',
+      policyId: 'dispatch-policy',
+      episodes: [dispatchedEpisode],
+    });
+
+    const throttledGroup = createNotificationGroup({
+      id: 'throttled-group',
+      policyId: 'throttle-policy',
+      episodes: [throttledEpisode],
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
+      suppressed: [],
+      throttled: [throttledGroup],
+      dispatch: [dispatchGroup],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    const actionTypes = callArgs.docs.map(
+      (d: Record<string, unknown>) => d.action_type as AlertAction['action_type']
+    );
+    expect(actionTypes).toContain('suppress');
+    expect(actionTypes).toContain('fire');
+    expect(actionTypes).toContain('notified');
+    expect(actionTypes).toContain('no_action');
+
+    const noActionDocs = callArgs.docs.filter(
+      (d: Record<string, unknown>) => d.action_type === 'no_action'
+    );
+    expect(noActionDocs).toHaveLength(1);
+    expect(noActionDocs[0]).toEqual({
+      '@timestamp': mockDate.toISOString(),
+      group_hash: 'hash-unmatched',
+      last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
+      actor: 'system',
+      action_type: 'no_action',
+      rule_id: 'rule-unmatched',
+      source: 'internal',
+      reason: 'no matching notification policy',
     });
   });
 
