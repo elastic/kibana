@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
@@ -35,7 +35,6 @@ import {
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
@@ -476,6 +475,8 @@ export const DashboardCanvasContent = ({
           data-test-subj="dashboardCanvasSearchBar"
         />
       </div>
+      {/* TODO: Hide the callout for now until we agree on the design */}
+      {/*
       {linkedSavedObjectId && linkedSavedDashboardExists && (
         <EuiCallOut
           css={styles.callout}
@@ -506,7 +507,7 @@ export const DashboardCanvasContent = ({
             />
           }
         />
-      )}
+      )} */}
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
