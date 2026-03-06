@@ -15,9 +15,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
-import { getLatestEntitiesIndexName } from '../assets/latest_index';
+import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
-import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
+import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { hashEuid, validateAndTransformDocForUpsert } from './utils';
 
 const RETRY_ON_CONFLICT = 3;
