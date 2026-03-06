@@ -90,7 +90,7 @@ node scripts/evals run \
 ```bash
 node scripts/evals run \
   --suite observability-ai \
-  --evaluation-connector-id <connector-id> \
+  --judge <connector-id> \
   --project <connector-id> \
   ai_insights/alert_insight.spec.ts
 ```
