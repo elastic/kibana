@@ -68,7 +68,11 @@ export const plugin: PluginInitializer<
     // Register role switcher dropdown menu in the top right navigation of the Kibana UI
     coreStart.chrome.navControls.registerRight({
       order: 4000 + 1, // Make sure it comes after the user menu
-      content: <RoleSwitcher />,
+      content: (
+        <KibanaContextProvider services={coreStart}>
+          <RoleSwitcher />
+        </KibanaContextProvider>
+      ),
     });
   },
   stop() {},
