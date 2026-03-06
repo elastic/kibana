@@ -8,11 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  defineVersioning,
-  getSchemapaths,
-  StorageSchemaVersioning,
-} from './schema_versioning';
+import { defineVersioning, getSchemaPaths, StorageSchemaVersioning } from './schema_versioning';
 
 describe('defineVersioning', () => {
   const v1Schema = z.object({ foo: z.string() });
@@ -195,11 +191,11 @@ describe('StorageSchemaVersioning', () => {
   });
 });
 
-describe('getSchemapaths', () => {
+describe('getSchemaPaths', () => {
   const flat = z.object({ foo: z.string(), bar: z.number() });
 
   it('extracts flat paths from a plain ZodObject', () => {
-    expect(getSchemapaths(flat)).toEqual(['foo', 'bar']);
+    expect(getSchemaPaths(flat)).toEqual(['foo', 'bar']);
   });
 
   it('extracts nested paths as dotted strings', () => {
@@ -207,7 +203,7 @@ describe('getSchemapaths', () => {
       name: z.string(),
       metadata: z.object({ createdAt: z.string(), tags: z.array(z.string()) }),
     });
-    expect(getSchemapaths(nested)).toEqual([
+    expect(getSchemaPaths(nested)).toEqual([
       'name',
       'metadata',
       'metadata.createdAt',
@@ -219,39 +215,39 @@ describe('getSchemapaths', () => {
     const deep = z.object({
       level1: z.object({ level2: z.object({ leaf: z.boolean() }) }),
     });
-    expect(getSchemapaths(deep)).toEqual([
-      'level1',
-      'level1.level2',
-      'level1.level2.leaf',
-    ]);
+    expect(getSchemaPaths(deep)).toEqual(['level1', 'level1.level2', 'level1.level2.leaf']);
   });
 
   it('unwraps common Zod wrappers', () => {
     const expected = ['foo', 'bar'];
-    expect(getSchemapaths(flat.refine(() => true))).toEqual(expected);
-    expect(getSchemapaths(flat.superRefine(() => {}))).toEqual(expected);
-    expect(getSchemapaths(flat.optional())).toEqual(expected);
-    expect(getSchemapaths(flat.nullable())).toEqual(expected);
-    expect(getSchemapaths(flat.default({ foo: '', bar: 0 }))).toEqual(expected);
-    expect(getSchemapaths(flat.catch({ foo: '', bar: 0 }))).toEqual(expected);
-    expect(getSchemapaths(flat.readonly())).toEqual(expected);
-    expect(getSchemapaths(flat.brand('MyBrand'))).toEqual(expected);
-    expect(getSchemapaths(z.lazy(() => flat))).toEqual(expected);
-    expect(getSchemapaths(flat.optional().nullable().default({ foo: '', bar: 0 }).readonly())).toEqual(expected);
+    expect(getSchemaPaths(flat.refine(() => true))).toEqual(expected);
+    expect(getSchemaPaths(flat.superRefine(() => {}))).toEqual(expected);
+    expect(getSchemaPaths(flat.optional())).toEqual(expected);
+    expect(getSchemaPaths(flat.nullable())).toEqual(expected);
+    expect(getSchemaPaths(flat.default({ foo: '', bar: 0 }))).toEqual(expected);
+    expect(getSchemaPaths(flat.catch({ foo: '', bar: 0 }))).toEqual(expected);
+    expect(getSchemaPaths(flat.readonly())).toEqual(expected);
+    expect(getSchemaPaths(flat.brand('MyBrand'))).toEqual(expected);
+    expect(getSchemaPaths(z.lazy(() => flat))).toEqual(expected);
+    expect(
+      getSchemaPaths(flat.optional().nullable().default({ foo: '', bar: 0 }).readonly())
+    ).toEqual(expected);
   });
 
   it('unwraps ZodIntersection (.and)', () => {
-    expect(getSchemapaths(z.object({ foo: z.string() }).and(z.object({ bar: z.number() })))).toEqual(['foo', 'bar']);
+    expect(
+      getSchemaPaths(z.object({ foo: z.string() }).and(z.object({ bar: z.number() })))
+    ).toEqual(['foo', 'bar']);
   });
 
   it('unwraps ZodPipeline (.pipe)', () => {
-    expect(getSchemapaths(z.record(z.string(), z.unknown()).pipe(flat))).toEqual(['foo', 'bar']);
+    expect(getSchemaPaths(z.record(z.string(), z.unknown()).pipe(flat))).toEqual(['foo', 'bar']);
   });
 
   it('returns null for transforms and non-object schemas', () => {
-    expect(getSchemapaths(flat.transform((v) => v))).toBeNull();
-    expect(getSchemapaths(z.string())).toBeNull();
-    expect(getSchemapaths(z.number())).toBeNull();
-    expect(getSchemapaths(z.array(z.string()))).toBeNull();
+    expect(getSchemaPaths(flat.transform((v) => v))).toBeNull();
+    expect(getSchemaPaths(z.string())).toBeNull();
+    expect(getSchemaPaths(z.number())).toBeNull();
+    expect(getSchemaPaths(z.array(z.string()))).toBeNull();
   });
 });

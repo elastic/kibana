@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isFunction } from 'lodash';
 
 /**
  * Reserved document field used to track the schema version of each persisted document.
@@ -63,10 +62,10 @@ function collectPaths(node: JsonSchemaNode, prefix: string = ''): string[] {
  *
  * Returns `null` when the schema has no object properties (e.g. `z.string()`).
  */
-export function getSchemapaths(schema: z.ZodType): string[] | null {
+export function getSchemaPaths(schema: z.ZodType): string[] | null {
   try {
     const jsonSchema = z.toJSONSchema(schema) as JsonSchemaNode;
-    const paths = collectPaths(jsonSchema);
+    const paths = [...new Set(collectPaths(jsonSchema))];
     return paths.length > 0 ? paths : null;
   } catch {
     return null;
@@ -97,7 +96,7 @@ export class StorageSchemaVersioning<TLatest> {
           `Version definitions must be sequential: expected version ${expectedVersion}, got ${def.version}`
         );
       }
-      if (index > 0 && !isFunction(def.migrate)) {
+      if (index > 0 && typeof def.migrate !== 'function') {
         throw new Error(`Version ${def.version} must provide a migrate function`);
       }
     });
