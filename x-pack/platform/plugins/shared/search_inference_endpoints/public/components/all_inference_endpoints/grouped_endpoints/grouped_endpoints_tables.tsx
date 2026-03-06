@@ -31,6 +31,7 @@ import { GroupPanelStyle } from './styles';
 import { GroupByHeaderButton } from './group_header_button';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../types';
 import { ServiceDescription } from './service_description';
+import { EndpointStats } from '../endpoint_stats';
 
 export interface GroupedEndpointsTablesProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -55,7 +56,12 @@ export const GroupedEndpointsTables = ({
   searchKey,
   columns,
 }: GroupedEndpointsTablesProps) => {
-  const groupedEndpoints = useGroupedData(inferenceEndpoints, groupBy, filterOptions, searchKey);
+  const { groupedEndpoints, filteredEndpoints } = useGroupedData(
+    inferenceEndpoints,
+    groupBy,
+    filterOptions,
+    searchKey
+  );
 
   const { groupToggleState, expandAll, collapseAll, toggleGroup } = useGroupsAccordionToggleState(
     inferenceEndpoints,
@@ -88,7 +94,8 @@ export const GroupedEndpointsTables = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="group-by-tables-container">
-      <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="expand-collapse-all-links">
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EndpointStats endpoints={filteredEndpoints} />
         <EuiButtonEmpty onClick={expandAll} data-test-subj="expandAllGroups">
           {i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.expandAll', {
             defaultMessage: 'Expand all',
