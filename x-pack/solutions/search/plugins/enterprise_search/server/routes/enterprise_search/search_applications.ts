@@ -122,7 +122,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
           name: schema.maybe(schema.string()),
           template: schema.maybe(
             schema.object({

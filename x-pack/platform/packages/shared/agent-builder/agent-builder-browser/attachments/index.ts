@@ -9,6 +9,7 @@ export type {
   AttachmentUIDefinition,
   AttachmentServiceStartContract,
   AttachmentRenderProps,
+  CanvasRenderCallbacks,
   GetActionButtonsParams,
   ActionButton,
 } from './contract';
