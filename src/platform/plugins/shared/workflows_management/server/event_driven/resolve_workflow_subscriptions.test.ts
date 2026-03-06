@@ -12,7 +12,7 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 import { resolveMatchingWorkflowSubscriptions } from './resolve_workflow_subscriptions';
 
 interface TestDefinitionOverrides {
-  triggers?: Array<{ type: string; with?: { condition?: string } }>;
+  triggers?: Array<{ type: string; on?: { condition?: string } }>;
   steps?: unknown[];
 }
 
@@ -44,13 +44,13 @@ describe('resolveMatchingWorkflowSubscriptions', () => {
   it('should return only workflows whose trigger condition matches the event context', async () => {
     const matchingWorkflow = createMockWorkflow('wf-1', {
       definition: {
-        triggers: [{ type: 'cases.updated', with: { condition: 'event.severity: "high"' } }],
+        triggers: [{ type: 'cases.updated', on: { condition: 'event.severity: "high"' } }],
         steps: [],
       },
     });
     const nonMatchingWorkflow = createMockWorkflow('wf-2', {
       definition: {
-        triggers: [{ type: 'cases.updated', with: { condition: 'event.severity: "low"' } }],
+        triggers: [{ type: 'cases.updated', on: { condition: 'event.severity: "low"' } }],
         steps: [],
       },
     });

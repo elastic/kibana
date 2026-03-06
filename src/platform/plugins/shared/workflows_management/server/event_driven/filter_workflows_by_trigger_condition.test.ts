@@ -13,7 +13,7 @@ import { workflowMatchesTriggerCondition } from './filter_workflows_by_trigger_c
 
 /** Definition overrides for tests; allows custom trigger types (e.g. cases.updated). */
 interface TestDefinitionOverrides {
-  triggers?: Array<{ type: string; with?: { condition?: string } }>;
+  triggers?: Array<{ type: string; on?: { condition?: string } }>;
   steps?: unknown[];
 }
 
@@ -73,7 +73,7 @@ describe('workflowMatchesTriggerCondition', () => {
         triggers: [
           {
             type: 'cases.updated',
-            with: { condition: 'event.severity: "high"' },
+            on: { condition: 'event.severity: "high"' },
           },
         ],
         steps: [],
@@ -90,7 +90,7 @@ describe('workflowMatchesTriggerCondition', () => {
         triggers: [
           {
             type: 'cases.updated',
-            with: { condition: 'event.severity: "high"' },
+            on: { condition: 'event.severity: "high"' },
           },
         ],
         steps: [],
@@ -107,7 +107,7 @@ describe('workflowMatchesTriggerCondition', () => {
         triggers: [
           {
             type: 'cases.updated',
-            with: { condition: 'invalid ( unclosed' },
+            on: { condition: 'invalid ( unclosed' },
           },
         ],
         steps: [],
@@ -123,7 +123,7 @@ describe('workflowMatchesTriggerCondition', () => {
         triggers: [
           {
             type: 'cases.updated',
-            with: {
+            on: {
               condition:
                 'event.severity: "high" and (event.category: "alerts" or event.category: "notifications") and not event.source: "legacy"',
             },

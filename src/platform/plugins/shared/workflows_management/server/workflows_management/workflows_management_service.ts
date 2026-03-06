@@ -184,7 +184,7 @@ export class WorkflowsService {
   /**
    * Parses and validates a workflow YAML, returning the prepared document and metadata.
    * Shared by createWorkflow and bulkCreateWorkflows.
-   * When triggerDefinitions is provided, custom trigger with.condition values are validated
+   * When triggerDefinitions is provided, custom trigger on.condition values are validated
    * (valid KQL and only event schema properties).
    */
   private prepareWorkflowDocument(

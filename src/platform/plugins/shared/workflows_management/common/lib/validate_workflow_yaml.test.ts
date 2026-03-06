@@ -213,7 +213,7 @@ version: '1'
 name: Valid Trigger Condition
 triggers:
   - type: ${customTriggerId}
-    with:
+    on:
       condition: "event.severity: critical"
 steps:
   - name: step1
@@ -233,7 +233,7 @@ version: '1'
 name: Invalid Trigger Condition
 triggers:
   - type: ${customTriggerId}
-    with:
+    on:
       condition: "event.unknown_field: value"
 steps:
   - name: step1
@@ -254,7 +254,7 @@ version: '1'
 name: No Trigger Defs
 triggers:
   - type: ${customTriggerId}
-    with:
+    on:
       condition: "event.unknown_field: value"
 steps:
   - name: step1

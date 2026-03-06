@@ -23,7 +23,7 @@ export interface TriggerConditionValidationError {
 }
 
 /**
- * Validates that each custom trigger's `with.condition` is valid KQL and only
+ * Validates that each custom trigger's `on.condition` is valid KQL and only
  * references properties from that trigger's eventSchema.
  */
 export function validateTriggerConditionsForWorkflow(

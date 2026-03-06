@@ -30,7 +30,7 @@ export interface TriggerDocumentation {
  */
 export interface TriggerSnippets {
   /**
-   * KQL condition pre-filled in the trigger's `with.condition` when the user adds this
+   * KQL condition pre-filled in the trigger's `on.condition` when the user adds this
    * trigger from the UI (actions menu or YAML autocomplete).
    * Must be valid KQL and only reference properties from the event schema (validated at registration).
    */
@@ -50,7 +50,7 @@ export interface TriggerSnippets {
  *   eventSchema: z.object({ severity: z.string(), message: z.string() }),
  *   documentation: {
  *     details: 'Filter when this workflow runs using KQL on event properties.',
- *     examples: ['## Match high severity\n```yaml\ntriggers:\n  - type: example.my_trigger\n    with:\n      condition: \'event.severity: "high"\'\n```'],
+ *     examples: ['## Match high severity\n```yaml\ntriggers:\n  - type: example.my_trigger\n    on:\n      condition: \'event.severity: "high"\'\n```'],
  *   },
  *   snippets: { condition: 'event.severity: "high"' },
  * }
@@ -80,7 +80,7 @@ export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   documentation?: TriggerDocumentation;
 
   /**
-   * Pre-filled values for snippet insertion (e.g. with.condition).
+   * Pre-filled values for snippet insertion (e.g. on.condition).
    */
   snippets?: TriggerSnippets;
 }

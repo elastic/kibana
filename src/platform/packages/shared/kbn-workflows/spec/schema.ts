@@ -134,8 +134,8 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
-/** Schema for the `with` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerWithSchema = z
+/** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
+const CustomTriggerOnSchema = z
   .object({
     condition: z.string().optional(),
   })
@@ -144,7 +144,7 @@ const CustomTriggerWithSchema = z
 /**
  * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
  * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
- * Custom triggers allow a `with.condition` clause for KQL filtering.
+ * Custom triggers allow an `on.condition` clause for KQL filtering.
  */
 export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
   if (customTriggerIds.length === 0) {
@@ -153,7 +153,7 @@ export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
   const customSchemas = customTriggerIds.map((id) =>
     z.object({
       type: z.literal(id),
-      with: CustomTriggerWithSchema,
+      on: CustomTriggerOnSchema,
     })
   );
   return z.discriminatedUnion('type', [

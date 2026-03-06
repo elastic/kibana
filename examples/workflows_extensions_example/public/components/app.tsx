@@ -109,7 +109,7 @@ export const WorkflowsExtensionsExampleApp = ({ http }: AppDeps) => {
 enabled: true
 triggers:
   - type: example.custom_trigger
-    with:
+    on:
       condition: 'event.category: "alerts"'
 steps:
   - name: log_event

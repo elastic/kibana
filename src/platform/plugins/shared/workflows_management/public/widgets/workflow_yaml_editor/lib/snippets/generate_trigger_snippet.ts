@@ -80,9 +80,9 @@ export function generateTriggerSnippet(
       break;
 
     default:
-      // Custom triggers: include with/condition so users can add a KQL filter (use defaultCondition when provided)
+      // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {
-        with: { condition: defaultCondition ?? '' },
+        on: { condition: defaultCondition ?? '' },
       };
       break;
   }
@@ -109,7 +109,7 @@ export function generateTriggerSnippet(
   // Add a comment above condition for custom triggers so users know they can use KQL and event.*
   if (!isTriggerType(triggerType) && result.includes('condition:')) {
     result = result.replace(
-      /(with:\n)(\s+)(condition:)/,
+      /(on:\n)(\s+)(condition:)/,
       `$1$2# ${CUSTOM_TRIGGER_CONDITION_COMMENT}\n$2$3`
     );
   }
