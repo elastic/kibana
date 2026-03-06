@@ -18,7 +18,7 @@ import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { FullScreenWaterfall } from '../full_screen_waterfall';
+import { FullScreenWaterfall, type FullScreenWaterfallProps } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
@@ -130,12 +130,44 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
 
   const actionId = 'traceWaterfallFullScreenAction';
 
-  const clearActiveFlyout = () => {
+  const clearActiveFlyout = useCallback(() => {
     setActiveFlyoutType(null);
     setActiveSection(undefined);
     setActiveDocId(null);
     setActiveDocIndex(undefined);
-  };
+  }, [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]);
+
+  const onNodeClick = useCallback(
+    (nodeSpanId: string) => {
+      setActiveSection(undefined);
+      setActiveDocId(nodeSpanId);
+      setActiveDocIndex(undefined);
+      setActiveFlyoutType(spanFlyoutId);
+    },
+    [setActiveSection, setActiveDocId, setActiveDocIndex, setActiveFlyoutType]
+  );
+
+  const onErrorClick = useCallback<FullScreenWaterfallProps['onErrorClick']>(
+    (params) => {
+      if (params.errorCount > 1) {
+        setActiveFlyoutType(spanFlyoutId);
+        setActiveSection('errors-table');
+        setActiveDocId(params.docId);
+        setActiveDocIndex(undefined);
+      } else if (params.errorDocId) {
+        setActiveFlyoutType(logsFlyoutId);
+        setActiveSection(undefined);
+        setActiveDocId(params.errorDocId);
+        setActiveDocIndex(params.docIndex);
+      }
+    },
+    [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]
+  );
+
+  const onExitFullScreen = useCallback(() => {
+    setShowFullScreenWaterfall(false);
+    clearActiveFlyout();
+  }, [setShowFullScreenWaterfall, clearActiveFlyout]);
 
   const actions = useMemo(
     () => [
@@ -168,30 +200,10 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           activeFlyoutType={activeFlyoutType}
           activeSection={activeSection}
           skipOpenAnimation={isRestoringRef.current}
-          onNodeClick={(nodeSpanId) => {
-            setActiveSection(undefined);
-            setActiveDocId(nodeSpanId);
-            setActiveDocIndex(undefined);
-            setActiveFlyoutType(spanFlyoutId);
-          }}
-          onErrorClick={(params) => {
-            if (params.errorCount > 1) {
-              setActiveFlyoutType(spanFlyoutId);
-              setActiveSection('errors-table');
-              setActiveDocId(params.docId);
-              setActiveDocIndex(undefined);
-            } else if (params.errorDocId) {
-              setActiveFlyoutType(logsFlyoutId);
-              setActiveSection(undefined);
-              setActiveDocId(params.errorDocId);
-              setActiveDocIndex(params.docIndex);
-            }
-          }}
+          onNodeClick={onNodeClick}
+          onErrorClick={onErrorClick}
           onCloseFlyout={clearActiveFlyout}
-          onExitFullScreen={() => {
-            setShowFullScreenWaterfall(false);
-            clearActiveFlyout();
-          }}
+          onExitFullScreen={onExitFullScreen}
         />
       ) : null}
       <ContentFrameworkSection
