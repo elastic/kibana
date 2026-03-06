@@ -26,6 +26,9 @@ export const useCalendarViewStyles = () => {
       root: {
         width: '100%',
       },
+      months: {
+        width: '100%',
+      },
       month: {
         padding: `0 ${euiTheme.size.base}`,
       },

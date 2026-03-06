@@ -19,9 +19,11 @@ import { calendarTexts } from '../translations';
 const MONTHS_TO_LOAD = 12;
 const INITIAL_PAST_MONTHS = 50;
 const INITIAL_FUTURE_MONTHS = 50;
+const SCROLL_TO_TODAY_TIMEOUT_MS = 1500;
 /**
  * Base index representing "today" (current month).
  * Using a high value allows prepending past months without going negative.
+ * Negative indices will trigger a Virtuoso console warning.
  */
 export const TODAY_INDEX = 100000;
 
@@ -39,35 +41,43 @@ interface CalendarProps {
 export function Calendar({ range, onRangeChange }: CalendarProps) {
   const euiThemeContext = useEuiTheme();
   const styles = calendarStyles(euiThemeContext);
+
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isScrollingToTodayRef = useRef(false);
   const startDateRef = useRef<Date | null>(null);
-  const initialRangeFromRef = useRef(range?.from);
+  const initialTopIndexRef = useRef<number | null>(null);
 
   if (!startDateRef.current) {
     startDateRef.current = getCurrentMonthStart();
   }
 
+  if (initialTopIndexRef.current === null) {
+    const from = range?.from;
+    const monthOffset =
+      from && startDateRef.current
+        ? (from.getFullYear() - startDateRef.current.getFullYear()) * 12 +
+          from.getMonth() -
+          startDateRef.current.getMonth()
+        : 0;
+    initialTopIndexRef.current = INITIAL_PAST_MONTHS + monthOffset;
+  }
+
+  const initialTopIndex = initialTopIndexRef.current;
+
   const [firstItemIndex, setFirstItemIndex] = useState(TODAY_INDEX - INITIAL_PAST_MONTHS);
   const [totalCount, setTotalCount] = useState(INITIAL_PAST_MONTHS + INITIAL_FUTURE_MONTHS);
   const [isTodayVisible, setIsTodayVisible] = useState(true);
 
+  // Center the initial month after first render (initialTopMostItemIndex only puts it at top)
   useEffect(() => {
-    const from = initialRangeFromRef.current;
-    if (!from) return;
-
-    const startDate = startDateRef.current!;
-    const monthOffset =
-      (from.getFullYear() - startDate.getFullYear()) * 12 + from.getMonth() - startDate.getMonth();
-
-    requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       virtuosoRef.current?.scrollToIndex({
-        index: INITIAL_PAST_MONTHS + monthOffset,
-        behavior: 'smooth',
-        align: 'start',
+        index: initialTopIndex,
+        align: 'center',
       });
-    });
-  }, []);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [initialTopIndex]);
 
   const handleStartReached = useCallback(() => {
     if (isScrollingToTodayRef.current) return;
@@ -83,12 +93,13 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
   }, []);
 
   const handleRangeChanged = useCallback((visibleRange: ListRange) => {
-    const isTodayInVisibleRange =
-      visibleRange.startIndex <= TODAY_INDEX && visibleRange.endIndex >= TODAY_INDEX;
+    const visibleCount = visibleRange.endIndex - visibleRange.startIndex;
+    const centerIndex = visibleRange.startIndex + Math.floor(visibleCount / 2);
+    const isTodayCentered = Math.abs(centerIndex - TODAY_INDEX) <= 1;
 
-    setIsTodayVisible(isTodayInVisibleRange);
+    setIsTodayVisible(isTodayCentered);
 
-    if (isTodayInVisibleRange && isScrollingToTodayRef.current) {
+    if (isTodayCentered && isScrollingToTodayRef.current) {
       isScrollingToTodayRef.current = false;
     }
   }, []);
@@ -98,12 +109,12 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
 
     setTimeout(() => {
       isScrollingToTodayRef.current = false;
-    }, 1500);
+    }, SCROLL_TO_TODAY_TIMEOUT_MS);
 
     virtuosoRef.current?.scrollToIndex({
       index: TODAY_INDEX - firstItemIndex,
       behavior: 'smooth',
-      align: 'start',
+      align: 'center',
     });
   }, [firstItemIndex]);
 
@@ -123,7 +134,7 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
       <Virtuoso
         ref={virtuosoRef}
         firstItemIndex={firstItemIndex}
-        initialTopMostItemIndex={INITIAL_PAST_MONTHS}
+        initialTopMostItemIndex={initialTopIndex}
         totalCount={totalCount}
         itemContent={renderMonth}
         startReached={handleStartReached}

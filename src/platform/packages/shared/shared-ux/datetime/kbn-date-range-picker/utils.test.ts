@@ -10,10 +10,7 @@
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from './constants';
 import type { TimeRange } from './types';
 import {
-  isHalfHourExact,
   toLocalPreciseString,
-  roundToHalfHour,
-  toUTCISOString,
   isValidTimeRange,
   getOptionDisplayLabel,
   getOptionShorthand,
@@ -34,85 +31,6 @@ describe('toLocalPreciseString', () => {
   it('does not produce a Z suffix (output is local, not UTC)', () => {
     const d = new Date(2026, 1, 10, 14, 0, 0, 0);
     expect(toLocalPreciseString(d)).not.toMatch(/Z$/);
-  });
-});
-
-describe('isHalfHourExact', () => {
-  it('returns true for exact :00 times', () => {
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 0, 0, 0))).toBe(true);
-    expect(isHalfHourExact(new Date(2026, 1, 10, 0, 0, 0, 0))).toBe(true);
-  });
-
-  it('returns true for exact :30 times', () => {
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 30, 0, 0))).toBe(true);
-  });
-
-  it('returns false when seconds are non-zero', () => {
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 0, 5, 0))).toBe(false);
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 30, 1, 0))).toBe(false);
-  });
-
-  it('returns false when minutes are not 0 or 30', () => {
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 18, 0, 0))).toBe(false);
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 38, 0, 0))).toBe(false);
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 29, 0, 0))).toBe(false);
-  });
-
-  it('returns false when milliseconds are non-zero', () => {
-    expect(isHalfHourExact(new Date(2026, 1, 10, 13, 0, 0, 500))).toBe(false);
-  });
-});
-
-describe('roundToHalfHour', () => {
-  // Dates constructed with local hours so the function reads local time correctly
-  const local = (h: number, m: number) => new Date(2026, 1, 10, h, m);
-
-  it('rounds down to :00 when minutes < 15', () => {
-    expect(roundToHalfHour(local(3, 0))).toBe('03:00');
-    expect(roundToHalfHour(local(3, 14))).toBe('03:00');
-  });
-
-  it('rounds to :30 when minutes are between 15 and 44', () => {
-    expect(roundToHalfHour(local(3, 15))).toBe('03:30');
-    expect(roundToHalfHour(local(3, 44))).toBe('03:30');
-  });
-
-  it('rounds up to the next hour :00 when minutes >= 45', () => {
-    expect(roundToHalfHour(local(3, 45))).toBe('04:00');
-    expect(roundToHalfHour(local(3, 59))).toBe('04:00');
-  });
-
-  it('wraps from 23:xx to 00:00 when rounding up past midnight', () => {
-    expect(roundToHalfHour(local(23, 46))).toBe('00:00');
-  });
-
-  it('zero-pads single-digit hours', () => {
-    expect(roundToHalfHour(local(0, 0))).toBe('00:00');
-    expect(roundToHalfHour(local(9, 30))).toBe('09:30');
-  });
-});
-
-describe('toUTCISOString', () => {
-  it('builds an ISO string from local date components and a local HH:mm string', () => {
-    const localDate = new Date(2026, 1, 10); // Feb 10 2026 local midnight
-    expect(toUTCISOString(localDate, '06:30')).toBe(new Date(2026, 1, 10, 6, 30).toISOString());
-  });
-
-  it('produces midnight ISO when hourStr is 00:00', () => {
-    const localDate = new Date(2026, 1, 10);
-    expect(toUTCISOString(localDate, '00:00')).toBe(new Date(2026, 1, 10, 0, 0).toISOString());
-  });
-
-  it('produces 23:30 local ISO when hourStr is 23:30', () => {
-    const localDate = new Date(2026, 1, 10);
-    expect(toUTCISOString(localDate, '23:30')).toBe(new Date(2026, 1, 10, 23, 30).toISOString());
-  });
-
-  it('uses the local calendar date (year/month/day)', () => {
-    const localDate = new Date(2026, 1, 10);
-    const result = toUTCISOString(localDate, '12:00');
-    // The local date components must be preserved: year=2026, month=Feb, day=10, hour=12
-    expect(result).toBe(new Date(2026, 1, 10, 12, 0).toISOString());
   });
 });
 

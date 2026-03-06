@@ -10,12 +10,16 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
+/**
+ * Fixed container height is required for virtuoso to work correctly.
+ */
+const CALENDAR_HEIGHT = 394;
+
 export const calendarStyles = ({ euiTheme }: UseEuiTheme) => {
   const container = css`
     position: relative;
-    height: 394px;
+    height: ${CALENDAR_HEIGHT}px;
     flex-grow: 1;
-    border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
   `;
 
   const todayButton = css`

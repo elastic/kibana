@@ -8,5 +8,3 @@
  */
 
 export { Calendar } from './calendar';
-export { HourPicker } from './hour_picker';
-export type { HourPickerHandle } from './hour_picker';

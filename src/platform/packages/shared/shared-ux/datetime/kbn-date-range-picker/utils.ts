@@ -31,51 +31,6 @@ export function toLocalPreciseString(d: Date): string {
 }
 
 /**
- * Returns true when a date falls exactly on a half-hour boundary (HH:00 or HH:30, zero seconds/ms).
- * Used to distinguish precisely-timed dates from rounded approximations.
- */
-export function isHalfHourExact(date: Date): boolean {
-  const m = date.getMinutes();
-  return (m === 0 || m === 30) && date.getSeconds() === 0 && date.getMilliseconds() === 0;
-}
-
-/**
- * Rounds a local date to the nearest 30-min slot, returns "HH:mm".
- * e.g. 3:14 → "03:00", 3:16 → "03:30", 3:46 → "04:00"
- */
-export function roundToHalfHour(date: Date): string {
-  let hour = date.getHours();
-  const minutes = date.getMinutes();
-  let roundedMinutes: string;
-  if (minutes < 15) {
-    roundedMinutes = '00';
-  } else if (minutes < 45) {
-    roundedMinutes = '30';
-  } else {
-    roundedMinutes = '00';
-    hour = (hour + 1) % 24;
-  }
-  return `${hour.toString().padStart(2, '0')}:${roundedMinutes}`;
-}
-
-/**
- * Builds an ISO string from a local calendar date (using its year/month/day)
- * and a "HH:mm" local time string.
- *
- * TODO: we want to pretty format the datetime string holistically but it's ISO for now.
- */
-export function toUTCISOString(localDate: Date, hourStr: string): string {
-  const [h, m] = hourStr.split(':').map(Number);
-  return new Date(
-    localDate.getFullYear(),
-    localDate.getMonth(),
-    localDate.getDate(),
-    h,
-    m
-  ).toISOString();
-}
-
-/**
  * Check a time range is valid
  */
 export function isValidTimeRange(range: TimeRange): boolean {

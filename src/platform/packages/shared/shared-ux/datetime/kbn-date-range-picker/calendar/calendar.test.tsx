@@ -109,7 +109,7 @@ describe('Calendar', () => {
     expect(mockScrollToIndex).toHaveBeenCalledWith(
       expect.objectContaining({
         behavior: 'smooth',
-        align: 'start',
+        align: 'center',
       })
     );
   });

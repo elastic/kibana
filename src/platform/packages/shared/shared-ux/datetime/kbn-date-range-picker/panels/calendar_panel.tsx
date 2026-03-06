@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type { DateRange } from 'react-day-picker';
+import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 
-import {
-  EuiButton,
-  EuiCheckbox,
-  EuiFlexGroup,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-
+import type { TimeRangeBounds } from '../types';
+import { Calendar } from '../calendar';
+import { DATE_RANGE_INPUT_DELIMITER, DATE_TYPE_ABSOLUTE } from '../constants';
 import {
   PanelBody,
   PanelContainer,
@@ -25,76 +21,37 @@ import {
   PanelHeader,
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
-import { Calendar, HourPicker } from '../calendar';
-import { useDateRangePickerContext } from '../date_range_picker_context';
-import type { TimeRangeBounds } from '../types';
-
-import { DATE_RANGE_INPUT_DELIMITER } from '../constants';
-import { timeRangeToDisplayText } from '../format';
-import { textToTimeRange } from '../parse';
-import {
-  isValidTimeRange,
-  isHalfHourExact,
-  roundToHalfHour,
-  toLocalPreciseString,
-} from '../utils';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
-import { calendarPanelStyles } from './calendar_panel.styles';
+import { timeRangeToDisplayText } from '../format';
+import { toLocalPreciseString } from '../utils';
+import { useDateRangePickerContext } from '../date_range_picker_context';
 
-/** Exact time-of-day components (hour, minute, second, millisecond). */
-interface TimeExact {
-  h: number;
-  m: number;
-  s: number;
-  ms: number;
-}
-
-const toTimeExact = (date: Date): TimeExact => ({
-  h: date.getHours(),
-  m: date.getMinutes(),
-  s: date.getSeconds(),
-  ms: date.getMilliseconds(),
-});
-
-const DEFAULT_START_EXACT: TimeExact = { h: 0, m: 0, s: 0, ms: 0 };
-const DEFAULT_END_EXACT: TimeExact = { h: 23, m: 30, s: 0, ms: 0 };
+const DEFAULT_END_HOUR = 23;
+const DEFAULT_END_MINUTE = 30;
 
 /**
- * Builds a Date from a calendar date (year/month/day) and exact time components.
- * All arithmetic stays in local time.
+ * Combines date (year/month/day) from `date` with time from `timeSource`.
+ * Falls back to defaults when timeSource is null.
  */
-const applyTimeExact = (date: Date, t: TimeExact): Date =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate(), t.h, t.m, t.s, t.ms);
-
-/**
- * Builds validated input text (local-precise format) and UTC ISO bounds from a
- * date range and exact time components.  Returns null when the range is invalid.
- */
-const buildRangeInputText = (
-  range: DateRange,
-  startExact: TimeExact,
-  endExact: TimeExact
-): { start: string; end: string; inputText: string } | null => {
-  if (!range.from) return null;
-
-  const startDate = applyTimeExact(range.from, startExact);
-  const endDate = applyTimeExact(range.to ?? range.from, endExact);
-
-  const start = startDate.toISOString();
-  const end = endDate.toISOString();
-
-  const parsed = textToTimeRange(`${start} ${DATE_RANGE_INPUT_DELIMITER} ${end}`);
-  if (parsed.isInvalid || !isValidTimeRange(parsed)) return null;
-
-  const inputText = `${toLocalPreciseString(startDate)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(endDate)}`;
-  return { start, end, inputText };
-};
+const combineDateAndTime = (
+  date: Date,
+  timeSource: Date | null,
+  defaultHour = 0,
+  defaultMinute = 0
+): Date =>
+  new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    timeSource?.getHours() ?? defaultHour,
+    timeSource?.getMinutes() ?? defaultMinute,
+    timeSource?.getSeconds() ?? 0,
+    timeSource?.getMilliseconds() ?? 0
+  );
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
   const { applyRange, onPresetSave, setText, text, timeRange } = useDateRangePickerContext();
-  const euiThemeContext = useEuiTheme();
-  const styles = calendarPanelStyles(euiThemeContext);
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
   const [range, setRange] = useState<DateRange | undefined>(() =>
@@ -103,207 +60,147 @@ export function CalendarPanel() {
       : undefined
   );
 
-  /**
-   * Exact time-of-day for each bound.  Initialised from the resolved dates so that
-   * sub-minute precision (e.g. "Last 20 minutes" → 14:12:59) is preserved in the
-   * input even when the hour picker displays the rounded approximation.
-   *
-   * Picking a specific slot in the hour picker replaces these with the chosen
-   * HH:mm (seconds/ms = 0), making them exact.
-   */
-  const [startExact, setStartExact] = useState<TimeExact>(() =>
-    timeRange.startDate ? toTimeExact(timeRange.startDate) : DEFAULT_START_EXACT
-  );
-  const [endExact, setEndExact] = useState<TimeExact>(() =>
-    timeRange.endDate ? toTimeExact(timeRange.endDate) : DEFAULT_END_EXACT
-  );
-
-  // Rounded half-hour string shown in the picker — derived from exact components
-  const startHour = useMemo(
-    () => roundToHalfHour(new Date(2000, 0, 1, startExact.h, startExact.m)),
-    [startExact]
-  );
-  const endHour = useMemo(
-    () => roundToHalfHour(new Date(2000, 0, 1, endExact.h, endExact.m)),
-    [endExact]
-  );
-
-  /**
-   * True when the displayed half-hour slot is a rounded approximation of a more
-   * precise time.  Becomes false as soon as the user picks an explicit slot
-   * (setting s=0, ms=0 and minutes exactly on :00 or :30).
-   */
-  const isStartApproximate = useMemo(
-    () =>
-      !isHalfHourExact(
-        new Date(2000, 0, 1, startExact.h, startExact.m, startExact.s, startExact.ms)
-      ),
-    [startExact]
-  );
-  const isEndApproximate = useMemo(
-    () =>
-      !isHalfHourExact(
-        new Date(2000, 0, 1, endExact.h, endExact.m, endExact.s, endExact.ms)
-      ),
-    [endExact]
-  );
-
+  const [hasChanges, setHasChanges] = useState(false);
   const [saveAsPreset, setSaveAsPreset] = useState(false);
 
-  // Captured once so the mount effect can read exact initial dates without being re-triggered
-  const initialDatesRef = useRef({ from: range?.from, to: range?.to });
+  const initialStartRef = useRef(timeRange.startDate);
+  const initialEndRef = useRef(timeRange.endDate);
+  const originalTextRef = useRef(text);
+  const mountTextRef = useRef<string | null>(null);
 
-  /**
-   * Pre-computed mount text — the value the mount effect will write to the input.
-   * Initialising lastSetTextRef to this value prevents the external-change effect from
-   * firing spuriously on the first render when the context's `text` is still the raw
-   * default (e.g. "last 15 minutes") and hasn't yet been replaced by the mount effect.
-   */
-  const initialMountText =
-    timeRange.startDate && timeRange.endDate
-      ? `${toLocalPreciseString(timeRange.startDate)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(timeRange.endDate)}`
-      : '';
+  if (mountTextRef.current === null && timeRange.startDate && timeRange.endDate) {
+    mountTextRef.current = `${toLocalPreciseString(
+      timeRange.startDate
+    )} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(timeRange.endDate)}`;
+  }
 
-  // Tracks the last text value we set programmatically, to distinguish our writes from user input
-  const lastSetTextRef = useRef<string>(initialMountText);
-  // Set to true when state was just updated from a text-input change; prevents the
-  // interaction effect from immediately echoing the text back (which would reformat / move cursor)
-  const updatingFromTextRef = useRef(false);
-  // Only trigger the interaction effect after the user has interacted with calendar/pickers
-  const hasInteracted = useRef(false);
-
-  /** On mount: immediately show the resolved exact absolute range in local time. */
+  // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
-    const { from, to } = initialDatesRef.current;
-    if (!from || !to) return;
-    const val = `${toLocalPreciseString(from)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(to)}`;
-    lastSetTextRef.current = val;
-    setText(val);
+    if (mountTextRef.current) {
+      setText(mountTextRef.current);
+    }
   }, [setText]);
 
-  /**
-   * External input change: when the user edits the text input directly,
-   * parse the new value and update the calendar and hour pickers accordingly.
-   * If the text is invalid, the calendar/pickers stay at the last valid state.
-   */
-  useEffect(() => {
-    // Skip if we were the ones who changed the text
-    if (text === lastSetTextRef.current) return;
-    // Skip if the new text doesn't parse to a valid range
-    if (timeRange.isInvalid || !timeRange.startDate || !timeRange.endDate) return;
+  const restoreOriginalText = useCallback(() => {
+    setText(originalTextRef.current);
+  }, [setText]);
 
-    const { startDate, endDate } = timeRange;
-    updatingFromTextRef.current = true;
-    hasInteracted.current = true;
-    setRange({ from: startDate, to: endDate });
-    setStartExact(toTimeExact(startDate));
-    setEndExact(toTimeExact(endDate));
-  }, [text, timeRange]);
+  const absoluteRange = useMemo(() => {
+    if (!range?.from || !range?.to) return null;
+
+    const startDate = combineDateAndTime(range.from, initialStartRef.current);
+    const endDate = combineDateAndTime(
+      range.to,
+      initialEndRef.current,
+      DEFAULT_END_HOUR,
+      DEFAULT_END_MINUTE
+    );
+
+    if (startDate > endDate) return null;
+
+    const inputText = `${toLocalPreciseString(
+      startDate
+    )} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(endDate)}`;
+
+    return {
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
+      inputText,
+    };
+  }, [range]);
 
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
-      hasInteracted.current = true;
+      setHasChanges(true);
 
+      // When both dates selected, reset to single date on next click
       if (range?.from && range?.to) {
         const fromChanged = newRange?.from?.getTime() !== range.from.getTime();
         const clickedDate = fromChanged ? newRange?.from : newRange?.to;
+
         setRange({ from: clickedDate, to: undefined });
+
+        if (clickedDate) {
+          const startDate = combineDateAndTime(clickedDate, initialStartRef.current);
+          setText(toLocalPreciseString(startDate));
+        }
+
         return;
       }
 
       setRange(newRange);
+
+      if (newRange?.from && newRange?.to) {
+        // Complete range: show both dates
+        const startDate = combineDateAndTime(newRange.from, initialStartRef.current);
+        const endDate = combineDateAndTime(
+          newRange.to,
+          initialEndRef.current,
+          DEFAULT_END_HOUR,
+          DEFAULT_END_MINUTE
+        );
+
+        if (startDate <= endDate) {
+          setText(
+            `${toLocalPreciseString(
+              startDate
+            )} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(endDate)}`
+          );
+        }
+      } else if (newRange?.from) {
+        // Start date only: show just that date
+        const startDate = combineDateAndTime(newRange.from, initialStartRef.current);
+        setText(toLocalPreciseString(startDate));
+      }
     },
-    [range]
+    [range, setText]
   );
 
-  const handleStartHourChange = useCallback((hour: string) => {
-    hasInteracted.current = true;
-    const [h, m] = hour.split(':').map(Number);
-    setStartExact({ h, m, s: 0, ms: 0 });
-  }, []);
-
-  const handleEndHourChange = useCallback((hour: string) => {
-    hasInteracted.current = true;
-    const [h, m] = hour.split(':').map(Number);
-    setEndExact({ h, m, s: 0, ms: 0 });
-  }, []);
-
-  const isApplyDisabled = useMemo(
-    () => !range?.from || !range?.to || !buildRangeInputText(range, startExact, endExact),
-    [range, startExact, endExact]
-  );
-
-  /**
-   * Sync input after user interaction with the calendar or hour pickers.
-   * Skipped when the state was just driven by an external text-input change.
-   */
-  useEffect(() => {
-    if (updatingFromTextRef.current) {
-      updatingFromTextRef.current = false;
-      return;
-    }
-    if (!hasInteracted.current || !range?.from) return;
-    const result = buildRangeInputText(range, startExact, endExact);
-    if (result) {
-      lastSetTextRef.current = result.inputText;
-      setText(result.inputText);
-    }
-  }, [range, startExact, endExact, setText]);
+  const isRangeComplete = Boolean(range?.from && range?.to);
+  const isApplyDisabled = !hasChanges || !isRangeComplete || !absoluteRange;
 
   const onApply = useCallback(() => {
-    if (!range?.from) return;
+    if (!absoluteRange) return;
 
-    const result = buildRangeInputText(range, startExact, endExact);
-    if (!result) return;
+    const rangeBounds: TimeRangeBounds = {
+      start: absoluteRange.start,
+      end: absoluteRange.end,
+    };
 
-    const { start, end, inputText } = result;
-    const rangeBounds: TimeRangeBounds = { start, end };
-
-    applyRange(rangeBounds);
+    applyRange(rangeBounds, absoluteRange.inputText);
 
     if (onPresetSave && saveAsPreset) {
-      const parsed = textToTimeRange(inputText);
-
       onPresetSave({
         ...rangeBounds,
         label: timeRangeToDisplayText({
-          ...parsed,
-          startDate: new Date(start),
-          endDate: new Date(end),
+          value: absoluteRange.inputText,
+          start: absoluteRange.start,
+          end: absoluteRange.end,
+          startDate: new Date(absoluteRange.start),
+          endDate: new Date(absoluteRange.end),
+          type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
+          isNaturalLanguage: false,
+          isInvalid: false,
         }),
       });
     }
-  }, [range, startExact, endExact, applyRange, onPresetSave, saveAsPreset]);
+  }, [absoluteRange, applyRange, onPresetSave, saveAsPreset]);
+
+  const applyButton = (
+    <EuiButton size="s" fill onClick={onApply} disabled={isApplyDisabled}>
+      {calendarPanelTexts.applyButton}
+    </EuiButton>
+  );
 
   return (
     <PanelContainer>
       <PanelHeader>
-        <SubPanelHeading>{mainPanelTexts.calendarPanelTitle}</SubPanelHeading>
+        <SubPanelHeading onGoBack={restoreOriginalText}>
+          {mainPanelTexts.calendarPanelTitle}
+        </SubPanelHeading>
       </PanelHeader>
       <PanelBody padding={false}>
-        <EuiFlexGroup gutterSize="none">
-          <Calendar range={range} onRangeChange={handleRangeChange} />
-          <div css={styles.timeColumn}>
-            <div css={styles.timeSection}>
-              <p css={styles.timeSectionHeader}>{calendarPanelTexts.startTimeLabel}</p>
-              <HourPicker
-                selectedHour={startHour}
-                onHourChange={handleStartHourChange}
-                isApproximate={isStartApproximate}
-                aria-label={calendarPanelTexts.startTimeLabel}
-              />
-            </div>
-            <div css={styles.timeSection}>
-              <p css={styles.timeSectionHeader}>{calendarPanelTexts.endTimeLabel}</p>
-              <HourPicker
-                selectedHour={endHour}
-                onHourChange={handleEndHourChange}
-                isApproximate={isEndApproximate}
-                aria-label={calendarPanelTexts.endTimeLabel}
-              />
-            </div>
-          </div>
-        </EuiFlexGroup>
+        <Calendar range={range} onRangeChange={handleRangeChange} />
       </PanelBody>
       <PanelFooter>
         <EuiFlexGroup
@@ -318,9 +215,11 @@ export function CalendarPanel() {
               onChange={() => setSaveAsPreset((prev) => !prev)}
             />
           )}
-          <EuiButton size="s" fill onClick={onApply} disabled={isApplyDisabled}>
-            {calendarPanelTexts.applyButton}
-          </EuiButton>
+          {isApplyDisabled && !isRangeComplete ? (
+            <EuiToolTip content={calendarPanelTexts.selectEndDateTooltip}>{applyButton}</EuiToolTip>
+          ) : (
+            applyButton
+          )}
         </EuiFlexGroup>
       </PanelFooter>
     </PanelContainer>

@@ -189,8 +189,8 @@ export function DateRangePickerProvider({
       }
 
       onChange({
-        start: rangeToApply.start,
-        end: rangeToApply.end,
+        start: range?.start ?? rangeToApply.start,
+        end: range?.end ?? rangeToApply.end,
         startDate: rangeToApply.startDate,
         endDate: rangeToApply.endDate,
         value: rangeToApply.value,

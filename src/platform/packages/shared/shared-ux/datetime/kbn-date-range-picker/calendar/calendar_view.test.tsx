@@ -12,27 +12,36 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarView } from './calendar_view';
 
-const dayPickerMock = jest.fn();
+const mockDayPicker = jest.fn();
 
 jest.mock('react-day-picker', () => ({
   DayPicker: (props: object) => {
-    dayPickerMock(props);
+    mockDayPicker(props);
     return <div data-test-subj="dayPickerMock" />;
   },
 }));
 
 describe('CalendarView', () => {
   beforeEach(() => {
-    dayPickerMock.mockClear();
+    mockDayPicker.mockClear();
   });
 
   it('passes DayPicker mode="range" and selected range props', () => {
-    const range = { from: new Date('2026-02-01T00:00:00.000Z'), to: new Date('2026-02-10T00:00:00.000Z') };
+    const range = {
+      from: new Date('2026-02-01T00:00:00.000Z'),
+      to: new Date('2026-02-10T00:00:00.000Z'),
+    };
     const setRange = jest.fn();
 
-    renderWithEuiTheme(<CalendarView month={new Date('2026-02-01T00:00:00.000Z')} range={range} setRange={setRange} />);
+    renderWithEuiTheme(
+      <CalendarView
+        month={new Date('2026-02-01T00:00:00.000Z')}
+        range={range}
+        setRange={setRange}
+      />
+    );
 
-    expect(dayPickerMock).toHaveBeenCalledWith(
+    expect(mockDayPicker).toHaveBeenCalledWith(
       expect.objectContaining({
         mode: 'range',
         selected: range,
@@ -43,27 +52,28 @@ describe('CalendarView', () => {
 
   it('applies supported DayPicker styles API', () => {
     renderWithEuiTheme(
-      <CalendarView month={new Date('2026-02-01T00:00:00.000Z')} range={undefined} setRange={() => {}} />
+      <CalendarView
+        month={new Date('2026-02-01T00:00:00.000Z')}
+        range={undefined}
+        setRange={() => {}}
+      />
     );
 
-    const dayPickerProps = dayPickerMock.mock.calls[0][0];
-
-    expect(dayPickerMock).toHaveBeenCalledWith(
+    expect(mockDayPicker).toHaveBeenCalledWith(
       expect.objectContaining({
         styles: expect.objectContaining({
           root: expect.objectContaining({
             width: '100%',
-            padding: '0 24px',
           }),
-          day_button: expect.any(Object),
+          month: expect.objectContaining({
+            padding: expect.any(String),
+          }),
+          month_caption: expect.objectContaining({
+            display: 'flex',
+            justifyContent: 'center',
+          }),
         }),
       })
     );
-
-    expect(dayPickerProps.styles.today).toBeDefined();
-    expect(dayPickerProps.styles.range_start).toBeDefined();
-    expect(dayPickerProps.styles.range_middle).toBeDefined();
-    expect(dayPickerProps.styles.range_end).toBeDefined();
   });
 });
-
