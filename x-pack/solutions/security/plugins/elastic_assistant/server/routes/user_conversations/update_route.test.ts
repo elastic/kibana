@@ -144,6 +144,7 @@ describe('Update conversation route', () => {
       const request = requestMock.create({
         method: 'put',
         path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        params: { id: 'conversation-1' },
         body: {
           ...getUpdateConversationSchemaMock(),
           messages: [
@@ -157,7 +158,7 @@ describe('Update conversation route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'invalid'`
+        'messages.0.role: Invalid option: expected one of "system"|"user"|"assistant"'
       );
     });
 
