@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Fast local confidence gate: run quick checks on current pending local changes
-// to address failures before PR CI.
-const argv = process.argv.slice(2);
-const hasFlag = (flag: string) => argv.some((arg) => arg === flag || arg.startsWith(`${flag}=`));
+import React from 'react';
 
-if (!hasFlag('--ref')) {
-  process.argv.push('--ref', 'HEAD');
-}
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
 
-if (!hasFlag('--include-untracked') && !hasFlag('--no-include-untracked')) {
-  process.argv.push('--include-untracked');
-}
+import googleCalendarIcon from './google_calendar.svg';
 
-require('./precommit_hook');
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={googleCalendarIcon} {...props} />;
+};
