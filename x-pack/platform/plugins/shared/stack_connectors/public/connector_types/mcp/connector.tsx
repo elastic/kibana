@@ -53,7 +53,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
     data: secretHeaderKeys = [],
     isLoading,
     isFetching,
-  } = useSecretHeaders(connectorId, {
+  } = useSecretHeaders(isEdit ? connectorId : undefined, {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

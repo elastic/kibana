@@ -19,6 +19,7 @@ describe('ConnectorForm', () => {
   const onFormModifiedChange = jest.fn();
 
   const connector = {
+    id: 'test-connector',
     actionTypeId: 'test',
     isDeprecated: false,
     config: {},

@@ -42,6 +42,7 @@ import * as i18n from './translations';
 
 interface Props {
   readOnly: boolean;
+  isEdit?: boolean;
   isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
 }
@@ -58,6 +59,7 @@ const VERIFICATION_MODE_DEFAULT = 'full';
 
 export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
+  isEdit = false,
   isPfxEnabled = true,
   isOAuth2Enabled = false,
 }) => {
@@ -78,7 +80,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
     data: secretHeaderKeys = [],
     isLoading: isLoadingHeaders,
     isFetching: isFetchingHeaders,
-  } = useSecretHeaders(connectorId);
+  } = useSecretHeaders(isEdit ? connectorId : undefined);
 
   const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
   const authType = config == null ? AuthType.Basic : config.authType;
