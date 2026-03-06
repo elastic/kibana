@@ -12,7 +12,7 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-const CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+export const CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
 
 const authSchema = z
   .object({
@@ -80,6 +80,7 @@ export const OAuthClientCertificate: AuthTypeSpec<AuthSchemaType> = {
       throw new Error(`Unable to retrieve new access token`);
     }
 
+    // set global defaults
     axiosInstance.defaults.headers.common.Authorization = token;
 
     return axiosInstance;

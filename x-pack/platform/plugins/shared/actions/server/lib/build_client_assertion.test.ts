@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createVerify } from 'crypto';
+import { constants, createVerify } from 'crypto';
 import {
   buildClientAssertion,
   computeCertificateThumbprint,
@@ -135,7 +135,7 @@ describe('buildClientAssertion', () => {
       const padded = headerB64.replace(/-/g, '+').replace(/_/g, '/');
       const header = JSON.parse(Buffer.from(padded, 'base64').toString());
 
-      expect(header.alg).toBe('RS256');
+      expect(header.alg).toBe('PS256');
       expect(header.typ).toBe('JWT');
       expect(header['x5t#S256']).toBeTruthy();
       expect(header['x5t#S256']).toBe(computeCertificateThumbprint(TEST_CERT));
@@ -157,12 +157,14 @@ describe('buildClientAssertion', () => {
       expect(payload.iss).toBe(CLIENT_ID);
       expect(payload.sub).toBe(CLIENT_ID);
       expect(payload.jti).toBeTruthy();
+      expect(typeof payload.iat).toBe('number');
       expect(typeof payload.nbf).toBe('number');
       expect(typeof payload.exp).toBe('number');
+      expect(payload.iat).toBe(payload.nbf);
       expect(payload.exp - payload.nbf).toBe(600);
     });
 
-    it('should produce a valid RSA-SHA256 signature', () => {
+    it('should produce a valid PS256 (RSA-PSS + SHA-256) signature', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
@@ -175,8 +177,56 @@ describe('buildClientAssertion', () => {
       const signaturePadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
       const signature = Buffer.from(signaturePadded, 'base64');
 
-      const isValid = createVerify('RSA-SHA256').update(signingInput).verify(TEST_CERT, signature);
+      const isValid = createVerify('sha256')
+        .update(signingInput)
+        .verify(
+          {
+            key: TEST_CERT,
+            padding: constants.RSA_PKCS1_PSS_PADDING,
+            saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+          },
+          signature
+        );
       expect(isValid).toBe(true);
+    });
+
+    it('should handle a private key with newlines stripped (storage round-trip)', () => {
+      const singleLineKey = TEST_KEY.replace(/\n/g, '');
+      const jwt = buildClientAssertion({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        certificate: TEST_CERT,
+        privateKey: singleLineKey,
+      });
+
+      const [headerB64, payloadB64, signatureB64] = jwt.split('.');
+      const signingInput = `${headerB64}.${payloadB64}`;
+      const signaturePadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
+      const signature = Buffer.from(signaturePadded, 'base64');
+
+      const isValid = createVerify('sha256')
+        .update(signingInput)
+        .verify(
+          {
+            key: TEST_CERT,
+            padding: constants.RSA_PKCS1_PSS_PADDING,
+            saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+          },
+          signature
+        );
+      expect(isValid).toBe(true);
+    });
+
+    it('should handle a private key with mixed whitespace', () => {
+      const messyKey = TEST_KEY.replace(/\n/g, ' ');
+      const jwt = buildClientAssertion({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        certificate: TEST_CERT,
+        privateKey: messyKey,
+      });
+
+      expect(jwt.split('.')).toHaveLength(3);
     });
 
     it('should throw on an invalid private key', () => {
@@ -187,7 +237,7 @@ describe('buildClientAssertion', () => {
           certificate: TEST_CERT,
           privateKey: 'not-a-key',
         })
-      ).toThrow();
+      ).toThrow('Invalid PEM');
     });
 
     it('should generate unique jti for each assertion', () => {
