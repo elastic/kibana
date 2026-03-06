@@ -33,8 +33,13 @@ export function assertLicensesValid({
 }: Options) {
   const invalidMsgs = packages.reduce((acc, pkg) => {
     const isValidLicense = (license: string) => validLicenses.includes(license);
-    const isValidLicenseForPackage = (license: string) =>
-      (perPackageOverrides[`${pkg.name}@${pkg.version}`] || []).includes(license);
+    const isValidLicenseForPackage = (license: string) => {
+      const perPackageOverride =
+        perPackageOverrides[`${pkg.name}@${pkg.version}`] || // Pinned version
+        perPackageOverrides[`${pkg.name}`] || // Any version of the package
+        [];
+      return perPackageOverride.includes(license);
+    };
 
     const invalidLicenses = pkg.licenses.filter(
       (license) => !isValidLicense(license) && !isValidLicenseForPackage(license)
