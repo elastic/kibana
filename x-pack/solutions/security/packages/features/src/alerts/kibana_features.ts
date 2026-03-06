@@ -7,17 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-
-import {
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   ALERTS_API_ALL,
@@ -33,22 +23,12 @@ import {
 } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 
-const SECURITY_RULE_TYPES = [
-  LEGACY_NOTIFICATIONS_ID,
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-];
-
-const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [SERVER_APP_ID],
-}));
+const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [SERVER_APP_ID],
+  })
+);
 
 export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ALERTS_FEATURE_ID,
