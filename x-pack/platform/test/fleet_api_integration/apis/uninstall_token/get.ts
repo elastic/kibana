@@ -317,8 +317,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('when `search` query param is used', () => {
         let generatedManagedPolicyArray: AgentPolicy[];
         let generatedPolicyArray: AgentPolicy[];
-        const specialCharactersForNameAndId = `!@#$%^&*-=_+()[]{}:;'\`|/<>,.?~`.split('');
-        const specialCharactersForNameOnly = `"\\`.split('');
+        // '/' is excluded from ID-capable characters because saved object IDs cannot contain
+        // forward slashes (they would be interpreted as URL path separators, enabling path traversal).
+        const specialCharactersForNameAndId = `!@#$%^&*-=_+()[]{}:;'\`|<>,.?~`.split('');
+        const specialCharactersForNameOnly = `"/\\`.split('');
 
         before(async () => {
           generatedPolicyArray = [];
