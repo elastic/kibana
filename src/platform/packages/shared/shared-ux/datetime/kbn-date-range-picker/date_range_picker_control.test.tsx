@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
-import { EuiThemeProvider } from '@elastic/eui';
+import { fireEvent, screen, waitFor, act } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { FOCUSABLE_SELECTOR } from './constants';
@@ -227,7 +226,7 @@ describe('DateRangePickerControl', () => {
 
   describe('controlled mode (value prop)', () => {
     const renderPicker = (props: DateRangePickerProps) =>
-      render(<DateRangePicker {...props} />, { wrapper: EuiThemeProvider });
+      renderWithEuiTheme(<DateRangePicker {...props} />);
 
     it('renders with initial value', () => {
       renderPicker({ value: 'last 20 minutes', onChange: () => {} });

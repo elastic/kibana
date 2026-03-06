@@ -155,7 +155,7 @@ export function DateRangePickerControl() {
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={width === 'restricted' && wrapperRestrictedStyles}
+      css={width === 'restricted' ? wrapperRestrictedStyles : undefined}
     >
       <EuiFormControlLayout
         compressed={compressed}
