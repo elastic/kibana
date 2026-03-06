@@ -246,17 +246,14 @@ export async function compressTar({
   let fileCount = 0;
   const packStream = tarFsPack(source, {
     map(header) {
+      if (header.type === 'file') {
+        fileCount += 1;
+      }
       if (createRootDirectory) {
         header.name = folder + '/' + header.name;
       }
       return header;
     },
-  });
-
-  packStream.on('entry', (header: { type: string }) => {
-    if (header.type === 'file') {
-      fileCount += 1;
-    }
   });
 
   const gzip = createGzip({ level: gzipLevel });
