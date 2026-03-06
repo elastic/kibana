@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React, { useEffect } from 'react';
+import {
+  SLOS_MANAGEMENT_PATH,
+  SLOS_MANAGEMENT_TEMPLATES_PATH,
+  paths,
+} from '@kbn/slo-shared-plugin/common/locators/paths';
+import React, { useEffect, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { ActionModalProvider } from '../../context/action_modal';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
@@ -21,7 +26,10 @@ import { LoadingPage } from '../loading_page';
 import { HeaderControl } from './components/header_control/header_control';
 import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
 import { SloManagementTable } from './components/slo_management_table';
+import { SloTemplatesTable } from './components/slo_templates_table';
 import { BulkOperationProvider } from './context/bulk_operation';
+
+type ManagementTab = 'slos' | 'templates';
 
 export function SloManagementPage() {
   const {
@@ -29,6 +37,7 @@ export function SloManagementPage() {
     serverless,
     application: { navigateToUrl },
   } = useKibana().services;
+  const history = useHistory();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
@@ -37,6 +46,18 @@ export function SloManagementPage() {
     isError,
     data: { total } = { total: 0 },
   } = useFetchSloDefinitions({ perPage: 0 });
+
+  const activeTab: ManagementTab = useMemo(() => {
+    return history.location.pathname === SLOS_MANAGEMENT_TEMPLATES_PATH ? 'templates' : 'slos';
+  }, [history.location.pathname]);
+
+  const onTabChange = (tab: ManagementTab) => {
+    if (tab === 'templates') {
+      history.push(SLOS_MANAGEMENT_TEMPLATES_PATH);
+    } else {
+      history.push(SLOS_MANAGEMENT_PATH);
+    }
+  };
 
   useEffect(() => {
     if (
@@ -78,24 +99,49 @@ export function SloManagementPage() {
         pageTitle: i18n.translate('xpack.slo.managementPage.pageTitle', {
           defaultMessage: 'SLO Management',
         }),
-        rightSideItems: !isLoading
-          ? [
-              <ActionModalProvider>
-                <HeaderControl />
-              </ActionModalProvider>,
-            ]
-          : undefined,
+        rightSideItems:
+          !isLoading && activeTab === 'slos'
+            ? [
+                <ActionModalProvider>
+                  <HeaderControl />
+                </ActionModalProvider>,
+              ]
+            : undefined,
       }}
     >
       <HeaderMenu />
-      <BulkOperationProvider>
-        <ActionModalProvider>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <SloOutdatedFilterCallout />
-            <SloManagementTable />
-          </EuiFlexGroup>
-        </ActionModalProvider>
-      </BulkOperationProvider>
+      <EuiTabs>
+        <EuiTab
+          isSelected={activeTab === 'slos'}
+          onClick={() => onTabChange('slos')}
+          data-test-subj="managementTabSlos"
+        >
+          {i18n.translate('xpack.slo.managementPage.tab.slos', {
+            defaultMessage: 'SLOs',
+          })}
+        </EuiTab>
+        <EuiTab
+          isSelected={activeTab === 'templates'}
+          onClick={() => onTabChange('templates')}
+          data-test-subj="managementTabTemplates"
+        >
+          {i18n.translate('xpack.slo.managementPage.tab.templates', {
+            defaultMessage: 'SLO Templates',
+          })}
+        </EuiTab>
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {activeTab === 'slos' && (
+        <BulkOperationProvider>
+          <ActionModalProvider>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <SloOutdatedFilterCallout />
+              <SloManagementTable />
+            </EuiFlexGroup>
+          </ActionModalProvider>
+        </BulkOperationProvider>
+      )}
+      {activeTab === 'templates' && <SloTemplatesTable />}
     </ObservabilityPageTemplate>
   );
 }
