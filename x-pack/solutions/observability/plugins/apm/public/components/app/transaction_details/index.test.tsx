@@ -25,6 +25,10 @@ jest.mock('../../../hooks/use_apm_router', () => ({
   useApmRouter: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_local_storage', () => ({
+  useLocalStorage: () => [true, jest.fn()],
+}));
+
 jest.mock('../../../hooks/use_time_range', () => ({
   useTimeRange: () => ({ start: '2024-01-01', end: '2024-01-02' }),
 }));
