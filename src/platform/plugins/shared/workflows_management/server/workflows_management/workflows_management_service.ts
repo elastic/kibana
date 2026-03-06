@@ -49,7 +49,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
 
-import { transformToWorkflowExecutionDetailDto } from './lib/get_workflow_execution';
+import { transformToWorkflowExecutionDetailDto } from './lib/transform_to_workflow_execution_detail_dto';
 
 import type {
   DeleteWorkflowsResponse,
