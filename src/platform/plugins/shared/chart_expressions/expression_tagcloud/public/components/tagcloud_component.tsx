@@ -134,17 +134,15 @@ export const TagCloudChart = ({
           ? { value: undefined, tag: 'all' }
           : { value: row[tagColumn], tag: row[tagColumn] };
 
-      const color = colorFromMappingFn
-        ? colorFromMappingFn(tagValue)
-        : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)';
-
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color,
+        color: colorFromMappingFn
+          ? colorFromMappingFn(tagValue)
+          : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
   }, [
