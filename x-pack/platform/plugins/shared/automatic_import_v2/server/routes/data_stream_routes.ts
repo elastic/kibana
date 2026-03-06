@@ -44,6 +44,7 @@ export const registerDataStreamRoutes = (
   updateDataStreamPipelineRoute(router, logger);
   getDataStreamResultsRoute(router, logger);
   reanalyzeDataStreamRoute(router, logger);
+  chatEditPipelineRoute(router, logger);
 };
 
 const UpdateDataStreamPipelineRequestBody = z
@@ -251,6 +252,93 @@ const getDataStreamResultsRoute = (
               ? 400
               : 500;
           return automaticImportResponse.error({ statusCode, body: err });
+        }
+      }
+    );
+
+const ChatEditPipelineRequestParams = z
+  .object({
+    integration_id: z.string(),
+    data_stream_id: z.string(),
+  })
+  .strict();
+
+const ChatEditPipelineRequestBody = z
+  .object({
+    connectorId: z.string(),
+    currentPipeline: z.record(z.unknown()),
+    userMessage: z.string(),
+    conversationHistory: z
+      .array(
+        z.object({
+          role: z.string(),
+          content: z.string(),
+        })
+      )
+      .default([]),
+  })
+  .strict();
+
+const chatEditPipelineRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .post({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}/chat-edit-pipeline',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(ChatEditPipelineRequestParams),
+            body: buildRouteValidationWithZod(ChatEditPipelineRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const { connectorId, currentPipeline, userMessage, conversationHistory } = request.body;
+
+          const model = await automaticImportv2.inference.getChatModel({
+            request,
+            connectorId,
+            chatModelOptions: {
+              temperature: 0.05,
+              maxRetries: 1,
+              disableStreaming: true,
+              telemetryMetadata: { pluginId: 'automatic_import_v2' },
+            },
+          });
+
+          const agentService = automaticImportv2.automaticImportService.getAgentService();
+          const result = await agentService.invokePipelineEditorAgent(
+            integrationId,
+            dataStreamId,
+            automaticImportv2.esClient,
+            model,
+            currentPipeline,
+            userMessage,
+            conversationHistory
+          );
+
+          return response.ok({ body: result });
+        } catch (err) {
+          logger.error(`chatEditPipelineRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err instanceof Error ? err.message : String(err),
+          });
         }
       }
     );
