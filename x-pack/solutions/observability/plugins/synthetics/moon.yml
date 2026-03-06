@@ -129,6 +129,8 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/scout-oblt'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
