@@ -12292,14 +12292,14 @@
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-2.11.0.tgz#948c556081c3db977dfa8433490cc2ff41f47203"
   integrity sha512-UlIrDWvuLaDly3QZhCPnwUSI/KYmV1N9LyhuH6EDKCRS1HWZhyTG3Ja46T3D0rYfqdltKYFXbJSSRPwZpwO0cQ==
 
-"@slack/webhook@7.0.6":
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-7.0.6.tgz#558dbd00e6400be0e339312a44b8104bf88884a4"
-  integrity sha512-RvNCcOjNbzl5uQ2TZsbTJ+A+5ptoWMwnyd/W4lKzeXFToIwebeaZiuntcP0usmhZHj1LH9H1T9WN6Bt1B/DLyg==
+"@slack/webhook@7.0.7":
+  version "7.0.7"
+  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-7.0.7.tgz#0f2569c4cadd2d39b1c4ca3b57b37dd3c89d3a75"
+  integrity sha512-u5gaCcx9cswjquQ6MVNs+GKff3TYi2H+JbCzkCItfXlJ7jW9UPySxTMtUe34WIFgE0+ojGw2h/4PRDzM2VUUSA==
   dependencies:
     "@slack/types" "^2.9.0"
     "@types/node" ">=18.0.0"
-    axios "^1.11.0"
+    axios "^1.13.5"
 
 "@smithy/abort-controller@^4.2.0":
   version "4.2.0"
@@ -16423,7 +16423,7 @@ axe-core@~4.11.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
   integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
 
-axios@1.13.5, axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
+axios@1.13.5, axios@^1.12.0, axios@^1.13.5, axios@^1.8.2:
   version "1.13.5"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.5.tgz#5e464688fa127e11a660a2c49441c009f6567a43"
   integrity sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==
