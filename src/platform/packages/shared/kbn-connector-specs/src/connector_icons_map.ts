@@ -121,4 +121,19 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.tavily',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+  ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
+  [
+    '.aws_lambda',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
+  ],
 ]);

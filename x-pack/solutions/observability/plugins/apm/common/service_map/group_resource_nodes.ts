@@ -117,7 +117,7 @@ function createIncomingGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
     type: 'default' as const,
     style: DEFAULT_EDGE_STYLE,
     markerEnd: createEdgeMarker(),
-    data: { isBidirectional: false },
+    data: { isBidirectional: false, isGrouped: true },
   }));
 }
 
@@ -149,7 +149,7 @@ function createOutgoingGroupedEdges(
           type: 'default' as const,
           style: DEFAULT_EDGE_STYLE,
           markerEnd: createEdgeMarker(),
-          data: { isBidirectional: false },
+          data: { isBidirectional: false, isGrouped: true },
         });
       }
     }
