@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -28,7 +28,7 @@ const OPEN_IN_DISCOVER_LABEL = i18n.translate('xpack.apm.openInDiscover.label', 
 
 interface OpenInDiscoverProps {
   dataTestSubj: string;
-  variant: 'button' | 'link';
+  variant: 'button' | 'outlinedButton' | 'link';
   indexType: 'traces' | 'error';
   rangeFrom: string;
   rangeTo: string;
@@ -65,6 +65,21 @@ export function OpenInDiscover({
   });
 
   const isDisabled = !esqlQuery || !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
+
+  if (variant === 'outlinedButton') {
+    return (
+      <EuiButton
+        data-test-subj={dataTestSubj}
+        aria-label={label}
+        isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+        isDisabled={isDisabled}
+        iconType="discoverApp"
+        href={discoverHref}
+      >
+        {label}
+      </EuiButton>
+    );
+  }
 
   if (variant === 'button') {
     return (
