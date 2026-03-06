@@ -21,14 +21,21 @@ export interface CloudConnectStatusWithDerived extends CloudConnectStatus {
 
 export type UseCloudConnectStatusHook = () => CloudConnectStatus;
 
+// Fallback when the cloudConnect plugin is not available
 const defaultCloudConnectStatusHook: UseCloudConnectStatusHook = () => ({
   isCloudConnected: false,
   isCloudConnectEisEnabled: false,
   isCloudConnectAutoopsEnabled: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 });
 
+// Accepts the UseCloudConnectStatusHook from the cloudConnect plugin via dependency injection.
+// This package can't access plugin start contracts directly (packages have no plugin lifecycle),
+// and cannot depend on x-pack plugins, so consumer plugins pass in cloudConnect?.hooks.useCloudConnectStatus.
+
+// This wrapper centralizes the default status and derives combined values like
+// isCloudConnectedWithEisEnabled to avoid repeating that logic across consumers.
 export const useCloudConnectStatus = (
   hook?: UseCloudConnectStatusHook
 ): CloudConnectStatusWithDerived => {
