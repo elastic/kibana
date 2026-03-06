@@ -45,7 +45,6 @@ dependsOn:
   - '@kbn/core-http-browser-internal'
   - '@kbn/core-http-browser'
   - '@kbn/discover-utils'
-  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
