@@ -979,6 +979,7 @@ export class WorkflowsService {
     const fields: (keyof EsWorkflowStepExecution)[] = [
       'id',
       'stepId',
+      'stepType',
       'status',
       'startedAt',
       'finishedAt',

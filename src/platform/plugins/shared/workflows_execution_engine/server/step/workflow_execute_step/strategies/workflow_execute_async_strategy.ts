@@ -56,12 +56,7 @@ export class WorkflowExecuteAsyncStrategy {
         new Set([workflowExecutionId]),
         spaceId
       );
-
-      if (!(workflowExecutionId in executions)) {
-        throw new Error(`Sub-workflow execution ${workflowExecutionId} not found`);
-      }
-
-      const execution = executions[workflowExecutionId];
+      const execution = executions[workflowExecutionId] ?? null;
       // Return step output for the impl to persist
       const stepOutput: Record<string, unknown> = {
         workflowId: workflow.id,
