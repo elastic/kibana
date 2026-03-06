@@ -796,7 +796,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
     ];
 
-    if (!this.dependencies.isServerless) {
+    if (this.dependencies.isWiredStreamViewsEnabled) {
       actions.push({
         type: 'upsert_esql_view',
         request: {
@@ -893,7 +893,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           definition: this._definition,
         }),
       });
-      if (!this.dependencies.isServerless) {
+      if (this.dependencies.isWiredStreamViewsEnabled) {
         actions.push({
           type: 'upsert_esql_view',
           request: {
@@ -1078,7 +1078,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
     ];
 
-    if (!this.dependencies.isServerless) {
+    if (this.dependencies.isWiredStreamViewsEnabled) {
       actions.push({
         type: 'delete_esql_view',
         request: {

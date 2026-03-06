@@ -88,14 +88,14 @@ async function getEnabledRootNames({
 export async function backfillWiredStreamViews({
   esClient,
   logger,
-  isServerless,
+  isWiredStreamViewsEnabled,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  isServerless: boolean;
+  isWiredStreamViewsEnabled: boolean;
 }): Promise<void> {
-  if (isServerless) {
-    logger.debug('ES|QL views are not supported in serverless mode, skipping view backfill.');
+  if (!isWiredStreamViewsEnabled) {
+    logger.debug('Wired stream views are disabled, skipping view backfill.');
     return;
   }
 

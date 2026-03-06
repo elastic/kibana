@@ -23,6 +23,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 import { truncateText } from '../../util/truncate_text';
 
@@ -227,16 +228,16 @@ export function DiscoverBadgeButton({
   indexMode?: IndicesIndexMode;
 }) {
   const {
-    isServerless,
     dependencies: {
       start: { share },
     },
   } = useKibana();
+  const { features } = useStreamsPrivileges();
   const esqlQuery = getDiscoverEsqlQuery({
     definition: stream,
     indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
     includeMetadata: Streams.WiredStream.Definition.is(stream),
-    useViews: !isServerless,
+    useViews: features.wiredStreamViews.enabled,
   });
   const useUrl = share.url.locators.useUrl;
 

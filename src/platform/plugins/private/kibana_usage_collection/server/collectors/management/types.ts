@@ -191,5 +191,6 @@ export interface UsageStats {
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
   'observability:streamsEnableQueryStreams': boolean;
+  'observability:streamsEnableWiredStreamViews': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
 }

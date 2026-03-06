@@ -735,6 +735,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Query streams in Streams',
     },
   },
+  'observability:streamsEnableWiredStreamViews': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable ES|QL views for wired streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {

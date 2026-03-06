@@ -31,6 +31,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 export interface StreamListItem {
   stream: Streams.all.Definition;
@@ -179,11 +180,11 @@ function StreamNode({
 }) {
   const router = useStreamsAppRouter();
   const {
-    isServerless,
     dependencies: {
       start: { share },
     },
   } = useKibana();
+  const { features } = useStreamsPrivileges();
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
     [share.url.locators]
@@ -194,11 +195,10 @@ function StreamNode({
       return undefined;
     }
 
-    // Use index_mode from data_stream (from listing data)
     const esqlQuery = getDiscoverEsqlQuery({
       definition: node.stream,
       indexMode: node.data_stream?.index_mode,
-      useViews: !isServerless,
+      useViews: features.wiredStreamViews.enabled,
     });
 
     if (!esqlQuery) {
@@ -210,7 +210,7 @@ function StreamNode({
         esql: esqlQuery,
       },
     });
-  }, [discoverLocator, node, isServerless]);
+  }, [discoverLocator, node, features.wiredStreamViews.enabled]);
 
   return (
     <EuiFlexGroup

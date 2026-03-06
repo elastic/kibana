@@ -38,6 +38,7 @@ describe('WiredStream', () => {
     ({
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       isServerless: false,
+      isWiredStreamViewsEnabled: true,
       isDev: false,
     } as unknown as StateDependencies);
 
@@ -383,6 +384,7 @@ describe('WiredStream', () => {
       ({
         logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
         isServerless: false,
+        isWiredStreamViewsEnabled: true,
         isDev: false,
         scopedClusterClient: {
           asCurrentUser: {
@@ -452,7 +454,7 @@ describe('WiredStream', () => {
       expect(viewAction?.request.query).toBe('FROM logs.otel.nginx');
     });
 
-    it('does not emit upsert_esql_view when isServerless is true', async () => {
+    it('does not emit upsert_esql_view when isWiredStreamViewsEnabled is false', async () => {
       const definition = createBaseWiredStreamDefinition({
         name: 'logs.otel',
         ingest: {
@@ -465,7 +467,7 @@ describe('WiredStream', () => {
       });
       const serverlessDeps = {
         ...createMockDependenciesWithEs(),
-        isServerless: true,
+        isWiredStreamViewsEnabled: false,
       } as unknown as StateDependencies;
       const stream = new WiredStream(definition, serverlessDeps);
       const desiredState = createMockState(new Map([['logs.otel', { definition }]]));
@@ -505,11 +507,11 @@ describe('WiredStream', () => {
       expect(viewAction?.request.name).toBe('$.logs.otel.nginx');
     });
 
-    it('does not emit delete_esql_view when isServerless is true', async () => {
+    it('does not emit delete_esql_view when isWiredStreamViewsEnabled is false', async () => {
       const definition = createBaseWiredStreamDefinition({ name: 'logs.otel' });
       const serverlessDeps = {
         ...createMockDependencies(),
-        isServerless: true,
+        isWiredStreamViewsEnabled: false,
       } as unknown as StateDependencies;
       const stream = new WiredStream(definition, serverlessDeps);
 
@@ -643,6 +645,7 @@ describe('WiredStream', () => {
       ({
         logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
         isServerless: false,
+        isWiredStreamViewsEnabled: true,
         isDev: false,
         scopedClusterClient: {
           asCurrentUser: {
