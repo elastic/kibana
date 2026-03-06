@@ -110,7 +110,12 @@ export const FullScreenWaterfall = ({
     // this style applies for 1 second to block animations
     const style = document.createElement('style');
     style.id = 'flyout-skip-open-animation';
-    style.textContent = `.euiFlyout { animation-duration: 0s !important; }`;
+    style.textContent = `
+      .euiFlyout[data-test-subj="traceWaterfallFlyout"],
+      .euiFlyout[data-test-subj="traceWaterfallDocumentFlyout"] {
+        animation-duration: 0s !important;
+      }
+    `;
     document.head.appendChild(style);
 
     const timerId = setTimeout(() => {
@@ -162,6 +167,7 @@ export const FullScreenWaterfall = ({
 
   return (
     <EuiFlyout
+      data-test-subj="traceWaterfallFlyout"
       session="start"
       size="m"
       onClose={onExitFullScreen}
@@ -206,6 +212,7 @@ export const FullScreenWaterfall = ({
           docIndex={docIndex}
           traceId={traceId}
           dataView={dataView}
+          dataTestSubj="traceWaterfallDocumentFlyout"
           onCloseFlyout={onCloseFlyout}
           activeSection={activeSection}
         />

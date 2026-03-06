@@ -11,7 +11,7 @@ import { EuiDelayRender } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
@@ -34,6 +34,7 @@ interface Props {
 }
 
 export interface TraceWaterfallRestorableState {
+  restoredTraceId: string | null;
   showFullScreenWaterfall: boolean;
   activeFlyoutType: DocumentType | null;
   activeSection: 'errors-table' | undefined;
@@ -61,14 +62,35 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
+
+  const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
+
+  const shouldIgnoreRestoredValue = useCallback(
+    () => restoredTraceId != null && restoredTraceId !== traceId,
+    [restoredTraceId, traceId]
+  );
+
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useRestorableState(
     'showFullScreenWaterfall',
-    false
+    false,
+    { shouldIgnoreRestoredValue }
   );
-  const [activeFlyoutType, setActiveFlyoutType] = useRestorableState('activeFlyoutType', null);
-  const [activeSection, setActiveSection] = useRestorableState('activeSection', undefined);
-  const [activeDocId, setActiveDocId] = useRestorableState('activeDocId', null);
-  const [activeDocIndex, setActiveDocIndex] = useRestorableState('activeDocIndex', undefined);
+  const [activeFlyoutType, setActiveFlyoutType] = useRestorableState('activeFlyoutType', null, {
+    shouldIgnoreRestoredValue,
+  });
+  const [activeSection, setActiveSection] = useRestorableState('activeSection', undefined, {
+    shouldIgnoreRestoredValue,
+  });
+  const [activeDocId, setActiveDocId] = useRestorableState('activeDocId', null, {
+    shouldIgnoreRestoredValue,
+  });
+  const [activeDocIndex, setActiveDocIndex] = useRestorableState('activeDocIndex', undefined, {
+    shouldIgnoreRestoredValue,
+  });
+
+  useEffect(() => {
+    setRestoredTraceId(traceId);
+  }, [traceId, setRestoredTraceId]);
 
   // Defer mounting FullScreenWaterfall by one render cycle when restoring state so the
   // parent flyout's EUI managed session (session="start") registers before the child's.
