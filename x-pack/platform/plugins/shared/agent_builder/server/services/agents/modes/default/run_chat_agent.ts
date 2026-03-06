@@ -19,6 +19,7 @@ import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-serv
 import type { ChatMessage, SerializedAttachment } from '@kbn/agent-builder-server';
 import {
   MAX_ATTACHMENT_DATA_CHARS,
+  MAX_ATTACHMENTS,
   MAX_CONVERSATION_HISTORY_CHARS,
   MAX_CONVERSATION_HISTORY_MESSAGES,
 } from '@kbn/workflows-extensions/common';
@@ -47,13 +48,29 @@ import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
+const TRUNCATE_SUFFIX = '...[truncated]';
+
+function truncateStr(str: string, maxChars: number, suffix: string): string {
+  if (str.length <= maxChars) return str;
+  return str.slice(0, maxChars - suffix.length) + suffix;
+}
 
 function buildConversationHistory(rounds: ProcessedConversationRound[]): ChatMessage[] {
   const messages: ChatMessage[] = [];
   for (const round of rounds) {
-    messages.push({ role: 'user', content: round.input.message ?? '' });
+    const userContent = truncateStr(
+      round.input.message ?? '',
+      MAX_CONVERSATION_HISTORY_CHARS,
+      TRUNCATE_SUFFIX
+    );
+    messages.push({ role: 'user', content: userContent });
     if (round.response?.message) {
-      messages.push({ role: 'assistant', content: round.response.message });
+      const assistantContent = truncateStr(
+        round.response.message,
+        MAX_CONVERSATION_HISTORY_CHARS,
+        TRUNCATE_SUFFIX
+      );
+      messages.push({ role: 'assistant', content: assistantContent });
     }
   }
   const windowed = messages.slice(-MAX_CONVERSATION_HISTORY_MESSAGES * 2);
@@ -69,23 +86,25 @@ function buildConversationHistory(rounds: ProcessedConversationRound[]): ChatMes
   return result;
 }
 
-function serializeAttachmentData(data: Record<string, unknown>): Record<string, unknown> {
-  const str = JSON.stringify(data);
-  if (str.length <= MAX_ATTACHMENT_DATA_CHARS) return data;
-  return { _truncated: true, _summary: `${str.slice(0, 200)}... [${str.length} chars total]` };
+function serializeAttachmentData(data: unknown): Record<string, unknown> {
+  const isPlainObject = typeof data === 'object' && data !== null && !Array.isArray(data);
+  const obj = isPlainObject ? (data as Record<string, unknown>) : { content: data };
+  const str = JSON.stringify(obj);
+  if (str.length <= MAX_ATTACHMENT_DATA_CHARS) return obj;
+  return {
+    _truncated: true,
+    _summary: str.slice(0, MAX_ATTACHMENT_DATA_CHARS) + TRUNCATE_SUFFIX,
+  };
 }
 
 function buildSerializedAttachments(
   processed: Array<{ attachment: { id?: string; type: string; data?: unknown; hidden?: boolean } }>
 ): SerializedAttachment[] {
-  return processed.map((p) => ({
+  const limited = processed.slice(0, MAX_ATTACHMENTS);
+  return limited.map((p) => ({
     id: p.attachment.id,
     type: p.attachment.type,
-    data: serializeAttachmentData(
-      (typeof p.attachment.data === 'object' && p.attachment.data !== null
-        ? p.attachment.data
-        : {}) as Record<string, unknown>
-    ),
+    data: serializeAttachmentData(p.attachment.data),
     ...(p.attachment.hidden !== undefined && { hidden: p.attachment.hidden }),
   }));
 }

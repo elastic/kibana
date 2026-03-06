@@ -40,7 +40,7 @@ export const InputSchema = z.object({
       z.object({
         id: z.string().optional(),
         type: z.string(),
-        data: z.record(z.string(), z.any()),
+        data: z.any(),
         hidden: z.boolean().optional(),
       })
     )
@@ -96,15 +96,24 @@ export const AiGuardrailsStepCommonDefinition: CommonStepDefinition<
 - name: check_guardrails
   type: ${AiGuardrailsStepTypeId}
   with:
-    message: "{{ workflow.input.prompt }}"
+    message: "{{ inputs.prompt }}"
 \`\`\``,
       `## With conversation history
 \`\`\`yaml
 - name: guardrails
   type: ${AiGuardrailsStepTypeId}
   with:
-    message: "{{ workflow.input.prompt }}"
-    conversation_history: "{{ workflow.input.conversation_history }}"
+    message: "{{ inputs.prompt }}"
+    conversation_history: "{{ inputs.conversation_history }}"
+\`\`\``,
+      `## Full context-aware guardrails
+\`\`\`yaml
+- name: guardrails
+  type: ${AiGuardrailsStepTypeId}
+  with:
+    message: "{{ inputs.prompt }}"
+    conversation_history: "{{ inputs.conversation_history }}"
+    attachments: "{{ inputs.attachments }}"
 \`\`\``,
     ],
   },
