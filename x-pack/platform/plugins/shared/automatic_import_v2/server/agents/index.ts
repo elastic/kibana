@@ -6,4 +6,3 @@
  */
 
 export { createAutomaticImportAgent } from './automatic_import_agent';
-export { createPipelineEditorAgent } from './pipeline_editor_agent';

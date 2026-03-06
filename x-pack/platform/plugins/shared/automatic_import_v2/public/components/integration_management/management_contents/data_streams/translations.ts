@@ -367,6 +367,9 @@ export const AI_CHAT_PANEL = Object.freeze({
   applyButton: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.applyButton', {
     defaultMessage: 'Apply pipeline',
   }),
+  appliedLabel: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.appliedLabel', {
+    defaultMessage: 'Applied',
+  }),
   errorTitle: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.errorTitle', {
     defaultMessage: 'AI edit failed',
   }),

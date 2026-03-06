@@ -35,6 +35,7 @@ interface ChatMessage {
   content: string;
   pipeline?: Record<string, unknown>;
   validationResults?: ChatEditPipelineResponse['validationResults'];
+  applied?: boolean;
 }
 
 interface PipelineChatPanelProps {
@@ -88,7 +89,10 @@ export const PipelineChatPanel: React.FC<PipelineChatPanelProps> = ({
 
     const conversationHistory = messages.map((m) => ({
       role: m.role,
-      content: m.content,
+      content:
+        m.role === 'assistant' && m.applied
+          ? '[Changes from this response have already been applied to the current pipeline.]'
+          : m.content,
     }));
 
     try {
@@ -140,8 +144,9 @@ export const PipelineChatPanel: React.FC<PipelineChatPanelProps> = ({
   );
 
   const handleApply = useCallback(
-    (pipeline: Record<string, unknown>) => {
+    (messageId: string, pipeline: Record<string, unknown>) => {
       onApplyPipeline(JSON.stringify(pipeline, null, 2));
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, applied: true } : m)));
     },
     [onApplyPipeline]
   );
@@ -223,11 +228,14 @@ export const PipelineChatPanel: React.FC<PipelineChatPanelProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           size="xs"
-                          iconType="check"
-                          onClick={() => handleApply(msg.pipeline!)}
+                          iconType={msg.applied ? 'checkInCircleFilled' : 'check'}
+                          onClick={() => handleApply(msg.id, msg.pipeline!)}
+                          disabled={msg.applied}
                           data-test-subj="chatApplyPipelineButton"
                         >
-                          {i18n.AI_CHAT_PANEL.applyButton}
+                          {msg.applied
+                            ? i18n.AI_CHAT_PANEL.appliedLabel
+                            : i18n.AI_CHAT_PANEL.applyButton}
                         </EuiButtonEmpty>
                       </EuiFlexItem>
                       {msg.validationResults && (

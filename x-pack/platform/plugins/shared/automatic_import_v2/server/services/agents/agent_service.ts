@@ -8,8 +8,9 @@
 import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import type { BaseMessage } from '@langchain/core/messages';
-import { createAutomaticImportAgent, createPipelineEditorAgent } from '../../agents';
+import type { estypes } from '@elastic/elasticsearch';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { createAutomaticImportAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
   createLogsAnalyzerAgent,
@@ -21,7 +22,7 @@ import {
   ingestPipelineValidatorTool,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
-import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
+import { INGEST_PIPELINE_GENERATOR_PROMPT, PIPELINE_EDITOR_PROMPT } from '../../agents/prompts';
 import type { LangSmithOptions } from '../../routes/types';
 
 export class AgentService {
@@ -132,18 +133,10 @@ export class AgentService {
   }
 
   /**
-   * Invokes the pipeline editor agent for interactive, chat-based pipeline editing.
-   * Runs synchronously (not via Task Manager) since this is an interactive request.
-   *
-   * @param integrationId - The integration ID
-   * @param dataStreamId - The data stream ID
-   * @param esClient - The Elasticsearch client
-   * @param model - The chat model to use
-   * @param currentPipeline - The current ingest pipeline JSON
-   * @param userMessage - The user's edit request
-   * @param conversationHistory - Prior conversation messages for context
+   * Single-call pipeline editor: sends the pipeline, samples, and user request to
+   * the LLM in one shot, then validates the result server-side via ES simulate.
    */
-  public async invokePipelineEditorAgent(
+  public async invokePipelineEditor(
     integrationId: string,
     dataStreamId: string,
     esClient: ElasticsearchClient,
@@ -153,66 +146,126 @@ export class AgentService {
     conversationHistory: Array<{ role: string; content: string }>
   ) {
     this.logger.debug(
-      `invokePipelineEditorAgent: Invoking pipeline editor for integration ${integrationId}, data stream ${dataStreamId}`
+      `invokePipelineEditor: Invoking pipeline editor for integration ${integrationId}, data stream ${dataStreamId}`
     );
 
-    const samples = await this.samplesIndexService.getSamplesForDataStream(
+    const allSamples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
       dataStreamId,
       esClient
     );
+    const samples = allSamples.slice(0, 3);
 
-    const fetchSamplesToolInstance = fetchSamplesTool(samples);
-    const validatorTool = ingestPipelineValidatorTool(esClient, samples);
+    const humanContent = [
+      `## Current pipeline\n\`\`\`json\n${JSON.stringify(currentPipeline, null, 2)}\n\`\`\``,
+      samples.length > 0
+        ? `## Log samples (${samples.length})\n${samples
+            .map((s, i) => `Sample ${i + 1}: ${s}`)
+            .join('\n')}`
+        : '',
+      `## User request\n${userMessage}`,
+    ]
+      .filter(Boolean)
+      .join('\n\n');
 
-    const agent = createPipelineEditorAgent({
-      model,
-      tools: [validatorTool, fetchSamplesToolInstance],
-    });
-
-    const messages: BaseMessage[] | Array<{ role: string; content: string }> = [
-      ...conversationHistory,
-      {
-        role: 'user',
-        content: `Here is the current ingest pipeline:\n\n\`\`\`json\n${JSON.stringify(
-          currentPipeline,
-          null,
-          2
-        )}\n\`\`\`\n\nUser request: ${userMessage}`,
-      },
+    const messages = [
+      new SystemMessage(PIPELINE_EDITOR_PROMPT),
+      ...conversationHistory.map((m) =>
+        m.role === 'user' ? new HumanMessage(m.content) : new SystemMessage(m.content)
+      ),
+      new HumanMessage(humanContent),
     ];
 
-    const result = await agent.invoke(
-      { messages },
-      {
-        runName: 'pipeline_editor_agent',
-        tags: ['pipeline_editor_agent'],
-      }
-    );
+    const result = await model.invoke(messages);
 
-    const lastMessage = result.messages[result.messages.length - 1];
     const responseText =
-      typeof lastMessage.content === 'string'
-        ? lastMessage.content
-        : JSON.stringify(lastMessage.content);
+      typeof result.content === 'string' ? result.content : JSON.stringify(result.content);
 
     const pipelineMatch = responseText.match(/```json\s*([\s\S]*?)```/);
-    const updatedPipeline = pipelineMatch ? JSON.parse(pipelineMatch[1].trim()) : currentPipeline;
+    let updatedPipeline: Record<string, unknown>;
+    try {
+      updatedPipeline = pipelineMatch ? JSON.parse(pipelineMatch[1].trim()) : currentPipeline;
+    } catch {
+      updatedPipeline = currentPipeline;
+    }
 
     const explanation = pipelineMatch
       ? responseText.replace(/```json\s*[\s\S]*?```/, '').trim()
       : responseText;
 
-    return {
+    const validationResults = await this.validatePipelineServerSide(
+      esClient,
       updatedPipeline,
-      explanation,
-      validationResults: result.pipeline_validation_results ?? {
-        success_rate: 0,
-        successful_samples: 0,
-        failed_samples: 0,
-        total_samples: 0,
-        failure_details: [],
-      },
+      allSamples
+    );
+
+    return { updatedPipeline, explanation, validationResults };
+  }
+
+  private async validatePipelineServerSide(
+    esClient: ElasticsearchClient,
+    pipeline: Record<string, unknown>,
+    samples: string[]
+  ) {
+    const empty = {
+      success_rate: 0,
+      successful_samples: 0,
+      failed_samples: 0,
+      total_samples: 0,
+      failure_details: [] as Array<{ error: string; sample: string }>,
+    };
+
+    if (!samples.length) return empty;
+
+    const docs = samples.map((s) => ({
+      _index: 'index',
+      _id: 'id',
+      _source: { message: s },
+    }));
+
+    let response: estypes.IngestSimulateResponse;
+    try {
+      response = await esClient.ingest.simulate({
+        docs,
+        pipeline: pipeline as estypes.IngestPipeline,
+      });
+    } catch (err) {
+      return {
+        ...empty,
+        failed_samples: samples.length,
+        total_samples: samples.length,
+        failure_details: [
+          { error: `Pipeline simulation failed: ${(err as Error).message}`, sample: '' },
+        ],
+      };
+    }
+
+    const failureDetails: Array<{ error: string; sample: string }> = [];
+    let successCount = 0;
+
+    response.docs.forEach((doc, idx) => {
+      if (!doc || doc.doc?._source?.error) {
+        const errorDetail = doc?.doc?._source?.error;
+        failureDetails.push({
+          sample: samples[idx],
+          error: !doc
+            ? 'Document was dropped by the pipeline'
+            : typeof errorDetail === 'string'
+            ? errorDetail
+            : JSON.stringify(errorDetail),
+        });
+      } else {
+        successCount++;
+      }
+    });
+
+    const total = samples.length;
+    return {
+      success_rate: total > 0 ? (successCount / total) * 100 : 0,
+      successful_samples: successCount,
+      failed_samples: failureDetails.length,
+      total_samples: total,
+      failure_details: failureDetails.slice(0, 100),
     };
   }
 }

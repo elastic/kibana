@@ -321,7 +321,7 @@ const chatEditPipelineRoute = (
           });
 
           const agentService = automaticImportv2.automaticImportService.getAgentService();
-          const result = await agentService.invokePipelineEditorAgent(
+          const result = await agentService.invokePipelineEditor(
             integrationId,
             dataStreamId,
             automaticImportv2.esClient,
