@@ -77,6 +77,7 @@ toc:
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
+          - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/jina-action-type.md
@@ -87,6 +88,7 @@ toc:
           - file: connectors-kibana/sharepoint-online-action-type.md
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
+          - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/zoom-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
