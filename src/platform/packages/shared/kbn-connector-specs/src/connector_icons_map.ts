@@ -90,4 +90,11 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
 ]);
