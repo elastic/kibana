@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,15 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
-import {
-  ESQL_VIEW_PREFIX,
-  Streams,
-  getSegments,
-  MAX_NESTING_LEVEL,
-  type SampleDocument,
-} from '@kbn/streams-schema';
+import { getSegments, MAX_NESTING_LEVEL, type SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
@@ -42,7 +35,8 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useQueryStreamHint } from '../../../hooks/use_query_stream_hint';
+import { QueryStreamHintCallout } from '../../query_streams/query_stream_hint_callout';
 import { RowSelectionContext } from '../shared/preview_table';
 import { useQueryStreamCreation } from './query_stream_creation_context';
 
@@ -365,52 +359,10 @@ const QueryStreamPreviewPanel = ({
   documentsError: Error | undefined;
   isLoading: boolean;
 }) => {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
   const hasDocuments = !isEmpty(documents);
-
-  const unknownIndexName = useMemo(() => {
-    if (!documentsError?.message) return undefined;
-    const match = documentsError.message.match(/Unknown index \[([^\]]+)\]/);
-    if (!match || match[1].startsWith(ESQL_VIEW_PREFIX)) return undefined;
-    return match[1];
-  }, [documentsError]);
-
-  const [confirmedQueryStreamName, setConfirmedQueryStreamName] = useState<string>();
-
-  useEffect(() => {
-    if (!unknownIndexName) {
-      setConfirmedQueryStreamName(undefined);
-      return;
-    }
-    const abortController = new AbortController();
-    streamsRepositoryClient
-      .fetch('GET /api/streams/{name} 2023-10-31', {
-        params: { path: { name: unknownIndexName } },
-        signal: abortController.signal,
-      })
-      .then((response) => {
-        if (!abortController.signal.aborted && Streams.QueryStream.Definition.is(response.stream)) {
-          setConfirmedQueryStreamName(unknownIndexName);
-        }
-      })
-      .catch(() => {
-        if (!abortController.signal.aborted) {
-          setConfirmedQueryStreamName(undefined);
-        }
-      });
-    return () => {
-      abortController.abort();
-    };
-  }, [unknownIndexName, streamsRepositoryClient]);
-
-  const queryStreamHint = confirmedQueryStreamName
-    ? {
-        indexName: confirmedQueryStreamName,
-        suggestedView: `${ESQL_VIEW_PREFIX}${confirmedQueryStreamName}`,
-      }
-    : undefined;
+  const queryStreamHint = useQueryStreamHint(documentsError);
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -464,27 +416,7 @@ const QueryStreamPreviewPanel = ({
             {queryStreamHint && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut
-                  announceOnMount
-                  title={i18n.translate('xpack.streams.streamDetail.preview.unknownIndexHint', {
-                    defaultMessage: '"{indexName}" is a query stream — use FROM {suggestedView}',
-                    values: {
-                      indexName: queryStreamHint.indexName,
-                      suggestedView: queryStreamHint.suggestedView,
-                    },
-                  })}
-                  color="warning"
-                  iconType="help"
-                  size="s"
-                >
-                  <p>
-                    {i18n.translate('xpack.streams.streamDetail.preview.unknownIndexExplanation', {
-                      defaultMessage:
-                        'Query streams use a {prefix} prefix for their ES|QL view names and must be referenced with it.',
-                      values: { prefix: ESQL_VIEW_PREFIX },
-                    })}
-                  </p>
-                </EuiCallOut>
+                <QueryStreamHintCallout hint={queryStreamHint} />
               </>
             )}
           </>
