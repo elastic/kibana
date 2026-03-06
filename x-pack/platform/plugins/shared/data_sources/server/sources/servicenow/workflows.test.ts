@@ -129,8 +129,9 @@ describe('servicenow workflows', () => {
       }
     };
 
-    transportRequestMock = fixture.dependencies.coreStart.elasticsearch.client.asScoped()
-      .asCurrentUser.transport.request as jest.Mock;
+    transportRequestMock = fixture.dependencies.coreStart.elasticsearch.client.asScoped(
+      fixture.fakeKibanaRequest
+    ).asCurrentUser.transport.request as jest.Mock;
 
     transportRequestMock.mockImplementation(
       async ({ path, body }: { path: string; body: Record<string, unknown> }) => {
