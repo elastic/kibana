@@ -21,7 +21,6 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from '../significant_events_discovery/utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
-import { ConditionDisplay } from '../data_management/shared/condition_display';
 
 export function SignificantEventsTable({
   definition,
@@ -80,24 +79,15 @@ export function SignificantEventsTable({
         defaultMessage: 'Query',
       }),
       render: (query: StreamQuery) => {
-        if (!query.kql.query) {
+        if (!query.esql.query) {
           return '--';
         }
 
-        return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
-      },
-    },
-    {
-      field: 'query',
-      name: i18n.translate('xpack.streams.significantEventsTable.additionalFilterColumnTitle', {
-        defaultMessage: 'Additional filter',
-      }),
-      render: (query: StreamQuery) => {
-        if (!query.feature?.filter) {
-          return '--';
-        }
-
-        return <ConditionDisplay condition={query.feature.filter} />;
+        return (
+          <EuiCodeBlock language="esql" paddingSize="none">
+            {query.esql.query}
+          </EuiCodeBlock>
+        );
       },
     },
     {

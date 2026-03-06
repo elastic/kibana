@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -18,6 +19,7 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { isEdge } from './utils';
 
@@ -28,7 +30,39 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
-export function EdgeContents({ selection, environment, start, end }: ContentsProps) {
+const DOCUMENTATION_LINK = 'https://ela.st/docs-service-map-no-metrics-available';
+
+function MessagingEdgeNoMetricsMessage() {
+  return (
+    <EuiText color="subdued" size="s" data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage">
+      <FormattedMessage
+        id="xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsMessage"
+        defaultMessage="No metrics available. See {documentation}."
+        values={{
+          documentation: (
+            <EuiLink
+              data-test-subj="apmServiceMapMessagingEdgeDocumentationLink"
+              href={DOCUMENTATION_LINK}
+              target="_blank"
+            >
+              {i18n.translate(
+                'xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsDocumentation',
+                { defaultMessage: 'documentation' }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
+  );
+}
+
+export function EdgeContents({
+  selection,
+  environment,
+  start,
+  end,
+}: Pick<ContentsProps, 'selection' | 'environment' | 'start' | 'end'>) {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
@@ -42,13 +76,15 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
   const sourceData = edgeSelectionData?.sourceData;
   const targetData = edgeSelectionData?.targetData;
   const dependencies = edgeSelectionData?.resources;
-
-  const sourceServiceName =
-    sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
   const dependencyName =
     targetData && SPAN_DESTINATION_SERVICE_RESOURCE in targetData
       ? targetData[SPAN_DESTINATION_SERVICE_RESOURCE]
       : undefined;
+
+  const sourceServiceName =
+    sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
+  // Message queue consumer edges (messaging dependency to service) are derived while transforming data into Service Map format, no metrics are available for these edges
+  const isMsgQueueConsumerEdge = isMessagingExitSpan(sourceData);
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -74,6 +110,14 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
 
   if (!isEdgeSelection) {
     return null;
+  }
+
+  if (isMsgQueueConsumerEdge || edgeSelectionData?.isGrouped) {
+    return (
+      <EuiFlexItem>
+        <MessagingEdgeNoMetricsMessage />
+      </EuiFlexItem>
+    );
   }
 
   return (

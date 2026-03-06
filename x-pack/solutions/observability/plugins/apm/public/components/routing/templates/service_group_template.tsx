@@ -76,7 +76,7 @@ export function ServiceGroupTemplate({
   );
 
   const tabs = useTabs(serviceGroupContextTab);
-  const selectedTab = tabs.find(({ isSelected }) => isSelected);
+  const selectedTab = tabs?.find(({ isSelected }) => isSelected);
 
   // this is only used for building the breadcrumbs for the service group page
   useBreadcrumb(
@@ -120,6 +120,13 @@ export function ServiceGroupTemplate({
     }
   );
 
+  const returnToServiceGroupsBreadcrumbLabel = i18n.translate(
+    'xpack.apm.serviceGroups.breadcrumb.return',
+    {
+      defaultMessage: 'Return to service groups',
+    }
+  );
+
   return (
     <ApmIndexSettingsContextProvider>
       <ApmMainTemplate
@@ -131,10 +138,12 @@ export function ServiceGroupTemplate({
                 {
                   text: (
                     <>
-                      <EuiIcon size="s" type="arrowLeft" />{' '}
-                      {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                        defaultMessage: 'Return to service groups',
-                      })}
+                      <EuiIcon
+                        aria-label={returnToServiceGroupsBreadcrumbLabel}
+                        size="s"
+                        type="arrowLeft"
+                      />{' '}
+                      {returnToServiceGroupsBreadcrumbLabel}
                     </>
                   ),
                   color: 'primary',
