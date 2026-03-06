@@ -217,7 +217,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
                 aria-label={i18n.translate(
                   'xpack.enterpriseSearch.searchApplications.list.searchBar.ariaLabel',
                   {
-                    defaultMessage: 'Locate a search application by name',
+                    defaultMessage: 'Find a search application by name',
                   }
                 )}
                 fullWidth
