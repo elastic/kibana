@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { defer, shareReplay } from 'rxjs';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
