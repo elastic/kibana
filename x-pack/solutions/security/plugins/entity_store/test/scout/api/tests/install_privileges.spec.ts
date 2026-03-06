@@ -16,8 +16,8 @@ import {
 } from '../../../../server/domain/constants';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getLatestEntitiesIndexName } from '../../../../server/domain/assets/latest_index';
-import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/assets/updates_data_stream';
+import { getLatestEntitiesIndexName } from '../../../../server/domain/asset_manager/latest_index';
+import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 
 apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_TAGS }, () => {
   const TARGET_INDEX_LATEST = getLatestEntitiesIndexName('default');
