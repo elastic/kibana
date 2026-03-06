@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/doc-links'
   - '@kbn/repo-packages'
+  - '@kbn/utils'
 tags:
   - shared-server
   - package
