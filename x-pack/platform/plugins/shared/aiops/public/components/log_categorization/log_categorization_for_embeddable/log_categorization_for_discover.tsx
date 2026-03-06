@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 
@@ -17,9 +17,10 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
@@ -31,7 +32,6 @@ import {
   getDefaultLogCategorizationAppState,
 } from '../../../application/url_state/log_pattern_analysis';
 import { useData } from '../../../hooks/use_data';
-import { useSearch } from '../../../hooks/use_search';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { useCategorizeRequest } from '../use_categorize_request';
@@ -47,6 +47,7 @@ import { createAdditionalConfigHash, createDocumentStatsHash } from '../utils';
 import { DiscoverTabs } from './discover_tabs';
 import { useRandomSamplerStorage } from '../sampling_menu';
 import { useActions } from '../category_table/use_actions';
+import { createFilter } from '../use_discover_links';
 
 export interface LogCategorizationEmbeddableProps {
   input: Readonly<EmbeddablePatternAnalysisInput>;
@@ -54,6 +55,19 @@ export interface LogCategorizationEmbeddableProps {
 }
 
 const BAR_TARGET = 20;
+
+const NOISY_FILTER_META_KEY = 'aiops-noisy-patterns';
+const NOISY_FILTER_ALIAS_REGEX = /^Noisy patterns \(\d+\)$/;
+
+function isNoisyFilter(f: Filter): boolean {
+  const meta = f.meta as { key?: string; alias?: string; negate?: boolean };
+  if (meta?.key === NOISY_FILTER_META_KEY) return true;
+  return (
+    meta?.negate === true &&
+    typeof meta?.alias === 'string' &&
+    NOISY_FILTER_ALIAS_REGEX.test(meta.alias)
+  );
+}
 
 export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = ({
   input,
@@ -66,10 +80,11 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     },
     uiSettings,
     embeddingOrigin,
+    http,
   } = useAiopsAppContext();
   const tablePadding = useEuiPaddingSize('xs');
 
-  const { dataView, savedSearch } = input;
+  const { dataView } = input;
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
@@ -79,7 +94,21 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     minimumTimeRangeOption,
     setMinimumTimeRangeOption,
   } = useMinimumTimeRange();
-  const { filters, query } = useMemo(() => getState(), [getState]);
+  // Use current filters and query from the query service so pattern analysis respects
+  // applied filters (e.g. after "Find important patterns" adds noise filters).
+  const queryState = getState();
+  const filters = queryState.filters ?? [];
+  const query = queryState.query;
+  const searchQuery = useMemo(
+    () =>
+      buildEsQuery(
+        dataView,
+        query ?? [],
+        filters,
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      ),
+    [dataView, query, filters, uiSettings]
+  );
 
   const isMounted = useMountedState();
   const randomSamplerStorage = useRandomSamplerStorage();
@@ -94,7 +123,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
       searchQuery: buildEsQuery(
         dataView,
         query ?? [],
-        filters ?? [],
+        filters,
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       ),
     })
@@ -120,7 +149,22 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  // Find important patterns (LLM refine): track excluded patterns and update single "Noisy" filter
+  const [excludedPatternKeys, setExcludedPatternKeys] = useState<Set<string>>(() => new Set());
+  const [excludedCategories, setExcludedCategories] = useState<Category[]>([]);
+  // Patterns we already sent to the LLM and were classified as important; skip them in the next batch
+  const [alreadyClassifiedAsImportantKeys, setAlreadyClassifiedAsImportantKeys] = useState<
+    Set<string>
+  >(() => new Set());
+  const [refiningLoading, setRefiningLoading] = useState<boolean>(false);
+  const [connectors, setConnectors] = useState<Array<{ connectorId: string; name: string }>>([]);
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
+
   const tableState = useTableState<Category>([], 'key');
+  const categoriesRef = useRef<Category[]>([]);
+  useEffect(() => {
+    categoriesRef.current = data?.categories ?? [];
+  }, [data?.categories]);
 
   useEffect(
     function initFields() {
@@ -147,12 +191,6 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
       };
     },
     [cancelRequest]
-  );
-
-  const { searchQuery } = useSearch(
-    { dataView, savedSearch: savedSearch ?? null },
-    stateFromUrl,
-    true
   );
 
   const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
@@ -203,6 +241,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
         setCurrentDocumentStatsHash(hash);
         setData(null);
         setFieldValidationResult(null);
+        setAlreadyClassifiedAsImportantKeys(new Set());
       }
     },
     [documentStats, previousDocumentStatsHash]
@@ -219,6 +258,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
         setCurrentAdditionalConfigsHash(hash);
         setData(null);
         setFieldValidationResult(null);
+        setAlreadyClassifiedAsImportantKeys(new Set());
       }
     },
     [minimumTimeRangeOption, previousAdditionalConfigsHash, selectedField]
@@ -245,6 +285,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     setLoading(true);
     setData(null);
     setFieldValidationResult(null);
+    setAlreadyClassifiedAsImportantKeys(new Set());
 
     const additionalFilter: CategorizationAdditionalFilter = {
       from: earliest,
@@ -379,13 +420,38 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
       loadCategories,
       randomSampler,
       previousDocumentStatsHash,
-      fieldValidationResult,
       currentDocumentStatsHash,
       currentAdditionalConfigsHash,
       documentStats.documentCountStats?.buckets,
       documentStats.totalCount,
       previousAdditionalConfigsHash,
     ]
+  );
+
+  useEffect(
+    function clearExcludedPatternsWhenFieldChanges() {
+      setExcludedPatternKeys(new Set());
+      setExcludedCategories([]);
+    },
+    [selectedField?.name]
+  );
+
+  useEffect(
+    function fetchConnectorsWhenPatternsLoaded() {
+      if (!data?.categories?.length) return;
+      http
+        .get<{ connectors: Array<{ connectorId: string; name: string }> }>(
+          '/internal/inference/connectors'
+        )
+        .then((res) => {
+          setConnectors(res.connectors ?? []);
+          if (res.connectors?.length) {
+            setSelectedConnectorId((prev) => prev || res.connectors![0].connectorId);
+          }
+        })
+        .catch(() => setConnectors([]));
+    },
+    [data?.categories?.length, http]
   );
 
   useEffect(
@@ -400,6 +466,100 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [input.lastReloadRequestTime]
   );
+
+  // Find important patterns: call refine API, then create or update the single "Noisy patterns (N)" filter
+  const onRefineWithAI = useCallback(
+    async (connectorId: string) => {
+      const categories = categoriesRef.current;
+      if (!categories.length || selectedField === null) return;
+      // Skip patterns we already sent and were classified as important so we make progress through the list
+      const notYetClassified = categories.filter(
+        (c) => !alreadyClassifiedAsImportantKeys.has(c.key)
+      );
+      const categoriesToSend = notYetClassified.slice(0, 100);
+      if (categoriesToSend.length === 0) {
+        return;
+      }
+      setRefiningLoading(true);
+      try {
+        const response = await http.post<{
+          classifications: Array<{ pattern_key: string; label: 'important' | 'noise' }>;
+        }>(AIOPS_API_ENDPOINT.LOG_CATEGORIZATION_REFINE_PATTERNS, {
+          body: JSON.stringify({
+            categories: categoriesToSend.map((c) => ({
+              key: c.key,
+              count: c.count,
+              examples: c.examples,
+            })),
+            connectorId,
+            fieldName: selectedField.name,
+          }),
+        });
+        const labelsMap = new Map(response.classifications.map((c) => [c.pattern_key, c.label]));
+        const importantKeysFromBatch = categoriesToSend
+          .filter((c) => labelsMap.get(c.key) === 'important')
+          .map((c) => c.key);
+        setAlreadyClassifiedAsImportantKeys(
+          (prev) => new Set([...prev, ...importantKeysFromBatch])
+        );
+        const noiseCategories = categoriesToSend.filter((c) => labelsMap.get(c.key) === 'noise');
+        const newNoiseCategories = noiseCategories.filter((c) => !excludedPatternKeys.has(c.key));
+        if (newNoiseCategories.length > 0) {
+          const mergedExcluded = (() => {
+            const byKey = new Map(excludedCategories.map((c) => [c.key, c]));
+            newNoiseCategories.forEach((c) => byKey.set(c.key, c));
+            return Array.from(byKey.values());
+          })();
+          const filter = createFilter(
+            dataView.id ?? '',
+            selectedField.name,
+            mergedExcluded,
+            QUERY_MODE.INCLUDE
+          );
+          const count = mergedExcluded.length;
+          filter.meta = {
+            ...filter.meta,
+            negate: true,
+            key: NOISY_FILTER_META_KEY,
+            alias: i18n.translate('xpack.aiops.logCategorization.noisyPatternsFilterAlias', {
+              defaultMessage: 'Noisy patterns ({count})',
+              values: { count },
+            }),
+          };
+          queueMicrotask(() => {
+            const current = filterManager.getFilters();
+            const withoutNoisy = current.filter((f) => !isNoisyFilter(f));
+            filterManager.setFilters([...withoutNoisy, filter]);
+            setExcludedCategories(mergedExcluded);
+            setExcludedPatternKeys(
+              (prev) => new Set([...prev, ...newNoiseCategories.map((c) => c.key)])
+            );
+          });
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          toasts.addError(err as Error, {
+            title: i18n.translate('xpack.aiops.logCategorization.findImportantPatternsError', {
+              defaultMessage: 'Find important patterns failed',
+            }),
+          });
+        }
+      } finally {
+        setRefiningLoading(false);
+      }
+    },
+    [
+      dataView.id,
+      selectedField,
+      alreadyClassifiedAsImportantKeys,
+      excludedPatternKeys,
+      excludedCategories,
+      http,
+      toasts,
+      filterManager,
+    ]
+  );
+
   const style = css({
     overflowY: 'auto',
   });
@@ -424,6 +584,11 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
         earliest={earliest}
         latest={latest}
         query={searchQuery}
+        refiningLoading={refiningLoading}
+        onRefineWithAI={onRefineWithAI}
+        connectors={connectors}
+        selectedConnectorId={selectedConnectorId}
+        setSelectedConnectorId={setSelectedConnectorId}
       />
 
       <EuiSpacer size="s" />

@@ -8,8 +8,9 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSelect } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
@@ -42,6 +43,11 @@ interface Props {
     displayExamples: boolean;
     totalCategories: number;
   } | null;
+  refiningLoading: boolean;
+  onRefineWithAI: (connectorId: string) => void;
+  connectors: Array<{ connectorId: string; name: string }>;
+  selectedConnectorId: string | null;
+  setSelectedConnectorId: (id: string | null) => void;
 }
 
 export const DiscoverTabs: FC<Props> = ({
@@ -60,27 +66,68 @@ export const DiscoverTabs: FC<Props> = ({
   earliest,
   latest,
   query,
+  refiningLoading,
+  onRefineWithAI,
+  connectors,
+  selectedConnectorId,
+  setSelectedConnectorId,
 }) => {
+  const canRefine =
+    (data?.categories?.length ?? 0) > 0 && connectors.length > 0 && selectedConnectorId !== null;
+
   return (
     <EuiFlexItem grow={false} className="unifiedDataTableToolbar" css={toolbarStyles.toolbar}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>{renderViewModeToggle(data?.categories.length)}</EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             {selectedCategories.length > 0 ? (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <SelectedPatterns openInDiscover={openInDiscover} />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem>
+            {canRefine ? (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    compressed
+                    options={connectors.map((c) => ({
+                      value: c.connectorId,
+                      text: c.name,
+                    }))}
+                    value={selectedConnectorId ?? ''}
+                    onChange={(e) => setSelectedConnectorId(e.target.value || null)}
+                    aria-label={i18n.translate(
+                      'xpack.aiops.logCategorization.connectorSelectAria',
+                      { defaultMessage: 'Inference connector' }
+                    )}
+                    data-test-subj="aiopsLogPatternsConnectorSelect"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    onClick={() => selectedConnectorId && onRefineWithAI(selectedConnectorId)}
+                    isLoading={refiningLoading}
+                    isDisabled={!selectedConnectorId}
+                    data-test-subj="aiopsLogPatternsFindImportantButton"
+                  >
+                    {i18n.translate('xpack.aiops.logCategorization.findImportantPatterns', {
+                      defaultMessage: 'Find important patterns',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </>
+            ) : null}
+            <EuiFlexItem grow={false}>
               <SelectedField
                 fields={fields}
                 setSelectedField={setSelectedField}
                 selectedField={selectedField}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <div className="unifiedDataTableToolbarControlGroup" css={toolbarStyles.controlGroup}>
                 <div
                   className="unifiedDataTableToolbarControlIconButton"

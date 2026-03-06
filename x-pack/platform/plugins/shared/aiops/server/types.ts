@@ -10,6 +10,7 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 export interface AiopsPluginSetupDeps {
   data: PluginSetup;
@@ -22,6 +23,7 @@ export interface AiopsPluginSetupDeps {
 export interface AiopsPluginStartDeps {
   data: PluginStart;
   licensing: LicensingPluginStart;
+  inference?: InferenceServerStart;
 }
 
 /**

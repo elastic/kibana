@@ -31,6 +31,7 @@ import type {
 import { defineRoute as defineLogRateAnalysisFieldCandidatesRoute } from './routes/log_rate_analysis_field_candidates/define_route';
 import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
 import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
+import { defineRefinePatternsRoute } from './routes/log_categorization_refine/define_route';
 import { registerCasesPersistableState } from './register_cases';
 import type { ConfigSchema } from './config_schema';
 import { setupCapabilities } from './lib/capabilities';
@@ -81,6 +82,7 @@ export class AiopsPlugin
       defineLogRateAnalysisFieldCandidatesRoute(router, aiopsLicense, coreStart, this.usageCounter);
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
       defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
+      defineRefinePatternsRoute(router, depsStart.inference, this.logger);
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
