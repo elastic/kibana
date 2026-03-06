@@ -48,7 +48,7 @@ import type {
 import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
 import { BulkOperationError } from '../errors';
-import { VERSION_FIELD, getSchemaKeys, type StorageSchemaVersioning } from '../schema_versioning';
+import { VERSION_FIELD, getSchemapaths, type StorageSchemaVersioning } from '../schema_versioning';
 
 function getAliasName(name: string) {
   return name;
@@ -66,6 +66,20 @@ function getIndexName(name: string, count: number) {
 
 function getIndexTemplateName(name: string) {
   return `${name}`;
+}
+
+function flattenMappingPaths(
+  mappings: Record<string, StorageMappingProperty>,
+  prefix: string = ''
+): string[] {
+  return Object.entries(mappings).flatMap(([key, value]) => {
+    const fullPath = prefix ? `${prefix}.${key}` : key;
+    const nested =
+      'properties' in value && value.properties
+        ? flattenMappingPaths(value.properties as Record<string, StorageMappingProperty>, fullPath)
+        : [];
+    return [fullPath, ...nested];
+  });
 }
 
 // TODO: this function is here to strip properties when we add back optional/multi-value
@@ -166,13 +180,13 @@ export class StorageIndexAdapter<
       );
     }
 
-    const schemaKeys = getSchemaKeys(versioning.latestSchema);
-    if (!schemaKeys) {
+    const schemaPaths = getSchemapaths(versioning.latestSchema);
+    if (!schemaPaths) {
       return;
     }
 
-    const mappingKeys = new Set(Object.keys(this.storage.schema.properties));
-    const missing = schemaKeys.filter((key) => !mappingKeys.has(key));
+    const mappingPaths = new Set(flattenMappingPaths(this.storage.schema.properties));
+    const missing = schemaPaths.filter((path) => !mappingPaths.has(path));
     if (missing.length > 0) {
       throw new Error(
         `Versioning schema properties [${missing.join(

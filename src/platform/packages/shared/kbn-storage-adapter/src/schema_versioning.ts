@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { isFunction } from 'lodash';
 
 /**
  * Reserved document field used to track the schema version of each persisted document.
@@ -19,22 +20,57 @@ type MaybePromise<T> = T | Promise<T>;
 
 interface VersionDefinition {
   version: number;
-  schema: z.ZodTypeAny;
+  schema: z.ZodType;
   migrate?: (input: unknown) => MaybePromise<unknown>;
 }
 
+interface JsonSchemaNode {
+  properties?: Record<string, JsonSchemaNode>;
+  allOf?: JsonSchemaNode[];
+  anyOf?: JsonSchemaNode[];
+  oneOf?: JsonSchemaNode[];
+}
+
 /**
- * Attempts to extract top-level keys from a Zod schema.
- * Returns `null` when the schema shape cannot be determined (non-object types).
+ * Collects all property paths from a JSON Schema node as flattened dotted strings
+ * (e.g. `['name', 'metadata.createdAt', 'metadata.tags']`), traversing
+ * `allOf`/`anyOf`/`oneOf` branches produced by Zod wrapper types.
  */
-export function getSchemaKeys(schema: z.ZodTypeAny): string[] | null {
-  if (schema instanceof z.ZodObject) {
-    return Object.keys(schema.shape);
+function collectPaths(node: JsonSchemaNode, prefix: string = ''): string[] {
+  const paths: string[] = [];
+
+  if (node.properties) {
+    for (const [key, child] of Object.entries(node.properties)) {
+      const fullPath = prefix ? `${prefix}.${key}` : key;
+      paths.push(fullPath);
+      paths.push(...collectPaths(child, fullPath));
+    }
   }
-  if (schema instanceof z.ZodEffects) {
-    return getSchemaKeys(schema.innerType());
+
+  for (const keyword of ['allOf', 'anyOf', 'oneOf'] as const) {
+    node[keyword]?.forEach((branch) => {
+      paths.push(...collectPaths(branch, prefix));
+    });
   }
-  return null;
+
+  return paths;
+}
+
+/**
+ * Extracts all property paths from a Zod schema as flattened dotted strings
+ * (e.g. `['name', 'metadata.createdAt']`). Handles all Zod wrapper types
+ * by delegating to `z.toJSONSchema()`.
+ *
+ * Returns `null` when the schema has no object properties (e.g. `z.string()`).
+ */
+export function getSchemapaths(schema: z.ZodType): string[] | null {
+  try {
+    const jsonSchema = z.toJSONSchema(schema) as JsonSchemaNode;
+    const paths = collectPaths(jsonSchema);
+    return paths.length > 0 ? paths : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -61,7 +97,7 @@ export class StorageSchemaVersioning<TLatest> {
           `Version definitions must be sequential: expected version ${expectedVersion}, got ${def.version}`
         );
       }
-      if (index > 0 && typeof def.migrate !== 'function') {
+      if (index > 0 && !isFunction(def.migrate)) {
         throw new Error(`Version ${def.version} must provide a migrate function`);
       }
     });
@@ -118,7 +154,7 @@ export interface VersioningBuilder<TLatestOutput> {
    *   into this version's shape. The input is strictly typed as the output of the
    *   previous version's schema. May return a value or a Promise.
    */
-  addVersion<TNextSchema extends z.ZodTypeAny>(options: {
+  addVersion<TNextSchema extends z.ZodType>(options: {
     schema: TNextSchema;
     migrate: (input: TLatestOutput) => MaybePromise<z.input<TNextSchema>>;
   }): VersioningBuilder<z.output<TNextSchema>>;
@@ -133,7 +169,7 @@ function createBuilder<TLatestOutput>(
   definitions: ReadonlyArray<VersionDefinition>
 ): VersioningBuilder<TLatestOutput> {
   return {
-    addVersion<TNextSchema extends z.ZodTypeAny>(options: {
+    addVersion<TNextSchema extends z.ZodType>(options: {
       schema: TNextSchema;
       migrate: (input: TLatestOutput) => MaybePromise<z.input<TNextSchema>>;
     }): VersioningBuilder<z.output<TNextSchema>> {
@@ -168,7 +204,7 @@ function createBuilder<TLatestOutput>(
  *   .build();
  * ```
  */
-export function defineVersioning<TSchema extends z.ZodTypeAny>(
+export function defineVersioning<TSchema extends z.ZodType>(
   initialSchema: TSchema
 ): VersioningBuilder<z.output<TSchema>> {
   return createBuilder<z.output<TSchema>>([{ version: 1, schema: initialSchema }]);
