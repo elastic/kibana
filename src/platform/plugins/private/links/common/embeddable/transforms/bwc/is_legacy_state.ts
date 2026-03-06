@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredLinksByValueState910 } from './types';
+import type { StoredLinksByValueState910, StoredLinksByValueState930, LegacyState } from './types';
 
-export function isLegacyState(state: object): state is StoredLinksByValueState910 {
+export function isLegacyState(state: object): state is LegacyState {
+  return is910State(state) || is930State(state);
+}
+
+export function is910State(state: object): state is StoredLinksByValueState910 {
   return 'attributes' in state;
+}
+
+export function is930State(state: object): state is StoredLinksByValueState930 {
+  if (!Array.isArray((state as StoredLinksByValueState930).links)) return false;
+  return Boolean((state as StoredLinksByValueState930).links?.some((link) => 'order' in link));
 }

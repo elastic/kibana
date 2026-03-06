@@ -55,7 +55,7 @@ export function itemToAttributes(state: LinksState): {
   return {
     attributes: {
       ...state,
-      links,
+      links: links?.map((link, order) => ({ ...link, order })),
     },
     references,
   };

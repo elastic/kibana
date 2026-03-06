@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { linksArraySchema, layoutSchema } from './content_management/schema/v1/cm_services';
+import { linksArraySchema, layoutSchema } from './content_management/schema/latest';
 
 // Links by-value state schema (contains layout and links)
 const linksByValueStateSchema = schema.object({

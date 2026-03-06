@@ -16,5 +16,5 @@ export type {
   LinksState,
   StoredDashboardLink,
   StoredLinksState,
-} from './schema/v1';
+} from './schema/latest';
 export { LinksStorage } from './links_storage';

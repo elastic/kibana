@@ -12,3 +12,7 @@ import type { StoredLinksState } from '../../../../server';
 export interface StoredLinksByValueState910 {
   attributes: StoredLinksState;
 }
+
+export type StoredLinksByValueState930 = StoredLinksState;
+
+export type LegacyState = StoredLinksByValueState910 | StoredLinksByValueState930;

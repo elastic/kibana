@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { memoize } from 'lodash';
 import type { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
@@ -15,26 +14,6 @@ import { validateUrl } from '../components/external_link/external_link_tools';
 import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tools';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { LinksStrings } from '../components/links_strings';
-
-export const getOrderedLinkList = (links: ResolvedLink[]): ResolvedLink[] => {
-  return [...links].sort((linkA, linkB) => {
-    return linkA.order - linkB.order;
-  });
-};
-
-/**
- * Memoizing this prevents the links panel editor from having to unnecessarily calculate this
- * a second time once the embeddable exists - after all, the links component should have already
- * calculated this so, we can get away with using the cached version in the editor
- */
-export const memoizedGetOrderedLinkList = memoize(
-  (links: ResolvedLink[]) => {
-    return getOrderedLinkList(links);
-  },
-  (links: ResolvedLink[]) => {
-    return links;
-  }
-);
 
 export function serializeResolvedLinks(resolvedLinks: ResolvedLink[]) {
   return resolvedLinks
@@ -54,7 +33,7 @@ export async function resolveLinks(links: Link[] = []) {
       return { ...link, ...(await resolveLinkInfo(link)) };
     })
   );
-  return getOrderedLinkList(resolvedLinkInfos);
+  return resolvedLinkInfos;
 }
 
 export async function resolveLinkInfo(
