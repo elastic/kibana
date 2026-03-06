@@ -17,11 +17,9 @@
     "@kbn/evals",
     "@kbn/tooling-log",
     "@kbn/core",
-    "@kbn/core-http-browser",
     "@kbn/alerting-plugin",
     "@kbn/scout",
     "@kbn/agent-builder-common",
     "@kbn/es-snapshot-loader",
-    "@kbn/inference-common"
   ]
 }
