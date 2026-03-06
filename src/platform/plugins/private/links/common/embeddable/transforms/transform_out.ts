@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
-import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
+import { type StoredLinksByValueState910, isLegacyState, transformLegacyStateOut } from './bwc';
 import { getOptions } from './get_options';
 import { injectReferences } from './references';
 
@@ -20,7 +20,7 @@ export function transformOut(
   references?: Reference[]
 ) {
   const latestState = isLegacyState(storedState)
-    ? transformLegacyState(storedState)
+    ? transformLegacyStateOut(storedState)
     : (storedState as StoredLinksEmbeddableState);
   const state = transformTitlesOut(latestState);
 
