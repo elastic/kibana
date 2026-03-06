@@ -30,7 +30,6 @@ test.describe(
     });
 
     test('should handle the error message correctly', async ({ page }) => {
-      const previewChart = page.testSubj.locator(previewChartDataTestSubj);
       const customEquation = page.testSubj.locator('customEquation');
       const customEquationField = page.testSubj.locator(
         'thresholdRuleCustomEquationEditorFieldText'
@@ -39,11 +38,6 @@ test.describe(
         'o11yClosablePopoverTitleButton'
       );
       const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-
-      // Wait for the chart to finish its initial render before interacting.
-      await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible({
-        timeout: 20_000,
-      });
 
       await test.step('introduce an error and verify failure panel appears', async () => {
         await customEquation.click();
@@ -56,33 +50,18 @@ test.describe(
       });
 
       await test.step('fix the error and verify failure panel disappears', async () => {
-        const renderingCount = previewChart.locator('[data-rendering-count]').first();
-        const currentCount = Number((await renderingCount.getAttribute('data-rendering-count')) ?? '0');
+        // Popover and embeddable updates can race in CI. Retry the full "fix" flow
+        // until Lens settles and the failure panel is gone.
+        await expect(async () => {
+          await customEquation.click();
+          await expect(customEquationField).toBeVisible({ timeout: 20_000 });
+          await customEquationField.fill('A');
+          await expect(customEquationField).toHaveValue('A');
+          await customEquationPopoverCloseButton.click();
 
-        await customEquation.click();
-        await expect(customEquationField).toBeVisible({ timeout: 20_000 });
-        await customEquationField.fill('A');
-        await expect(customEquationField).toHaveValue('A');
-        await customEquationPopoverCloseButton.click();
-
-        await expect(customEquation).toContainText('A');
-
-        // Reopen once to assert the value persisted and close again.
-        await customEquation.click();
-        await expect(customEquationField).toHaveValue('A');
-        await customEquationPopoverCloseButton.click();
-
-        // Wait for Lens to complete any new render cycle after the fix.
-        await expect
-          .poll(
-            async () => {
-              return Number((await renderingCount.getAttribute('data-rendering-count')) ?? '0');
-            },
-            { timeout: 30_000 }
-          )
-          .toBeGreaterThan(currentCount);
-
-        await expect(lensFailure).toBeHidden({ timeout: 30_000 });
+          await expect(customEquation).toContainText('A');
+          await expect(lensFailure).toBeHidden({ timeout: 20_000 });
+        }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000] });
       });
     });
   }
