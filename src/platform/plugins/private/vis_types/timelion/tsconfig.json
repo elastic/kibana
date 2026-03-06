@@ -35,8 +35,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
-    "@kbn/visualizations-common",
-    "@kbn/vis-type-timeseries-plugin",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",
