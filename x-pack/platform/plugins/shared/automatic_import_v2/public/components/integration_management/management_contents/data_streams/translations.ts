@@ -345,6 +345,44 @@ export const STATUS_LABELS = Object.freeze({
   }),
 });
 
+export const AI_CHAT_PANEL = Object.freeze({
+  toggleButton: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.toggleButton', {
+    defaultMessage: 'AI Editor',
+  }),
+  toggleButtonAriaLabel: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.aiChatPanel.toggleButtonAriaLabel',
+    {
+      defaultMessage: 'Toggle AI pipeline editor chat',
+    }
+  ),
+  title: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.title', {
+    defaultMessage: 'AI Pipeline Editor',
+  }),
+  placeholder: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.placeholder', {
+    defaultMessage: 'Ask the AI to edit your pipeline...',
+  }),
+  sendButton: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.sendButton', {
+    defaultMessage: 'Send',
+  }),
+  applyButton: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.applyButton', {
+    defaultMessage: 'Apply pipeline',
+  }),
+  errorTitle: i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.errorTitle', {
+    defaultMessage: 'AI edit failed',
+  }),
+  connectorRequired: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.aiChatPanel.connectorRequired',
+    {
+      defaultMessage: 'Select an AI connector to use the AI editor.',
+    }
+  ),
+  validationSuccess: (rate: number, total: number) =>
+    i18n.translate('xpack.automaticImportV2.dataStreams.aiChatPanel.validationSuccess', {
+      defaultMessage: 'Validation: {rate}% success ({total} samples)',
+      values: { rate: rate.toFixed(0), total },
+    }),
+});
+
 // Aria Labels
 export const ARIA_LABELS = Object.freeze({
   uploadLogFile: i18n.translate('xpack.automaticImportV2.dataStreams.ariaLabels.uploadLogFile', {
