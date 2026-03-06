@@ -7,30 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import {
+  ANALYTICS_SAVED_OBJECT_INDEX,
+  type SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { extractTabsBackfillFn } from '../../common/service/extract_tabs';
+import { get } from 'lodash';
+import { extractTabsBackfillFnV12 } from '../../common/service/extract_tabs';
 import { getAllMigrations } from './search_migrations';
 import { SavedSearchTypeDisplayName } from '../../common/constants';
 import {
   SCHEMA_SEARCH_V8_8_0,
-  SCHEMA_SEARCH_MODEL_VERSION_1,
-  SCHEMA_SEARCH_MODEL_VERSION_2,
-  SCHEMA_SEARCH_MODEL_VERSION_3,
-  SCHEMA_SEARCH_MODEL_VERSION_4,
-  SCHEMA_SEARCH_MODEL_VERSION_5,
-  SCHEMA_SEARCH_MODEL_VERSION_6,
-  SCHEMA_SEARCH_MODEL_VERSION_7,
-  SCHEMA_SEARCH_MODEL_VERSION_8,
-  SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND,
-  SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND,
-  SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND,
-} from './schema';
+  LEGACY_MODEL_VERSIONS,
+  LEGACY_MODEL_REMOVED_ATTRIBUTES,
+} from './schema_legacy';
+import { SCHEMA_DISCOVER_SESSION_V12 } from './schema';
 
 export function getSavedSearchObjectType(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ): SavedObjectsType {
+  const modelVersions: SavedObjectsModelVersionMap = {
+    ...LEGACY_MODEL_VERSIONS,
+    12: {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: extractTabsBackfillFnV12,
+        },
+        {
+          type: 'data_removal',
+          removedAttributePaths: LEGACY_MODEL_REMOVED_ATTRIBUTES,
+        },
+      ],
+      schemas: {
+        forwardCompatibility: SCHEMA_DISCOVER_SESSION_V12.extends({}, { unknowns: 'ignore' }),
+        create: SCHEMA_DISCOVER_SESSION_V12,
+      },
+    },
+  };
+
+  const latestModelVersion = Math.max(...Object.keys(modelVersions).map(Number));
+
   return {
     name: 'search',
     indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
@@ -52,99 +70,7 @@ export function getSavedSearchObjectType(
         };
       },
     },
-    modelVersions: {
-      1: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_1.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_1,
-        },
-      },
-      2: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_2.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_2,
-        },
-      },
-      3: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_3.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_3,
-        },
-      },
-      4: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_4.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_4,
-        },
-      },
-      5: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_5.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_5,
-        },
-      },
-      6: {
-        changes: [
-          {
-            type: 'data_backfill',
-            backfillFn: extractTabsBackfillFn,
-          },
-        ],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_6.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_6,
-        },
-      },
-      7: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_7.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_7,
-        },
-      },
-      8: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_8,
-        },
-      },
-      9: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND.extends(
-            {},
-            { unknowns: 'ignore' }
-          ),
-          create: SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND,
-        },
-      },
-      10: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND.extends(
-            {},
-            { unknowns: 'ignore' }
-          ),
-          create: SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND,
-        },
-      },
-      11: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND.extends(
-            {},
-            { unknowns: 'ignore' }
-          ),
-          create: SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND,
-        },
-      },
-    },
+    modelVersions,
     mappings: {
       dynamic: false,
       properties: {
@@ -156,5 +82,8 @@ export function getSavedSearchObjectType(
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
+    typeVersionGuesser: (doc) => {
+      return Array.isArray(get(doc.attributes, 'tabs')) ? latestModelVersion : 11;
+    },
   };
 }

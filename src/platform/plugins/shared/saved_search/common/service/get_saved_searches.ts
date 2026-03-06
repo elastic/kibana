@@ -14,7 +14,13 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import type { DataGridDensity } from '@kbn/discover-utils';
+import type {
+  SavedSearch,
+  SavedSearchAttributes,
+  SerializableSavedSearch,
+  SortOrder,
+} from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
@@ -122,10 +128,17 @@ export const getSavedSearch = async <
   serialized?: Serialized
 ): Promise<ReturnType> => {
   const so = await getSearchSavedObject(savedSearchId, deps);
+  const attributes = so.item.attributes;
+  const firstTabAttributes = attributes.tabs[0].attributes;
   const savedSearch = await convertToSavedSearch(
     {
       savedSearchId,
-      attributes: so.item.attributes,
+      attributes: {
+        ...attributes,
+        ...firstTabAttributes,
+        sort: firstTabAttributes.sort as SortOrder[],
+        density: firstTabAttributes.density as DataGridDensity,
+      },
       references: so.item.references,
       sharingSavedObjectProps: so.meta,
       managed: so.item.managed,

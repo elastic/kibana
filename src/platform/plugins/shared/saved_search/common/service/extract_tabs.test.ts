@@ -8,8 +8,8 @@
  */
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from '../../server/saved_objects/schema';
-import { extractTabs, extractTabsBackfillFn } from './extract_tabs';
+import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from '../../server/saved_objects/schema_legacy';
+import { extractTabs, extractTabsBackfillFnV6 } from './extract_tabs';
 import { SavedSearchType, VIEW_MODE } from '..';
 
 jest.mock('uuid', () => ({
@@ -150,7 +150,7 @@ describe('extractTabs', () => {
     });
   });
 
-  describe('extractTabsBackfillFn', () => {
+  describe('extractTabsBackfillFnV6', () => {
     it('should wrap the result of extractTabs in an object', () => {
       const attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5> = {
         kibanaSavedObjectMeta: {
@@ -170,7 +170,7 @@ describe('extractTabs', () => {
 
       const prevDoc = { id: '123', type: SavedSearchType, attributes };
 
-      const result = extractTabsBackfillFn(prevDoc, mockContext);
+      const result = extractTabsBackfillFnV6(prevDoc, mockContext);
 
       expect(result).toHaveProperty('attributes');
       expect(result).toMatchInlineSnapshot(`

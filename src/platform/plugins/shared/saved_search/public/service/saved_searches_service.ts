@@ -12,9 +12,10 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { DataGridDensity } from '@kbn/discover-utils';
 import { SavedSearchType } from '../../common';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import type { SavedSearch, SerializableSavedSearch } from '../../common/types';
+import type { SavedSearch, SerializableSavedSearch, SortOrder } from '../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import { getDiscoverSession } from '../../common/service/get_discover_session';
 import { getSavedSearch } from '../../common/service/get_saved_searches';
@@ -59,7 +60,21 @@ export class SavedSearchesService {
       contentTypeId: SavedSearchType,
       query: {},
     });
-    return result.hits;
+    const mappedHits = result.hits.map((hit) => {
+      const firstTabAttributes = hit.attributes.tabs[0].attributes;
+
+      return {
+        ...hit,
+        attributes: {
+          ...hit.attributes,
+          ...firstTabAttributes,
+          sort: firstTabAttributes.sort as SortOrder[],
+          density: firstTabAttributes.density as DataGridDensity,
+        },
+      };
+    });
+
+    return mappedHits;
   };
 
   find = async (search: string) => {
