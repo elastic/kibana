@@ -29,7 +29,7 @@ export function registerGetConnectorsTool(
 
 Returns connector instances with their ID and name, plus:
 - \`actionTypeId\`: the Kibana action type ID (e.g. ".slack")
-- \`stepType\`: the workflow step type prefix you use in YAML (e.g. "slack")
+- \`stepTypes\`: workflow step types this connector supports (e.g. ["inference.completion", "inference.rerank"] for sub-action connectors, or ["slack"] for simple connectors)
 
 The connector \`id\` is what you put in the \`connector-id\` field of a workflow step.`,
     schema: z.object({
@@ -37,14 +37,10 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
         .string()
         .optional()
         .describe('Filter by connector action type ID (e.g., ".slack", ".jira", ".webhook")'),
-      connectorType: z
-        .string()
-        .optional()
-        .describe('(Deprecated alias) Same as actionTypeId (e.g., ".slack")'),
       stepType: z
         .string()
         .optional()
-        .describe('Filter by workflow step type prefix (e.g., "slack", "jira")'),
+        .describe('Filter by workflow step type (e.g., "slack", "jira", "inference.completion")'),
       search: z.string().optional().describe('Search term to match against connector names'),
     }),
     tags: ['workflows', 'connectors'],
@@ -57,28 +53,35 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
       },
       cacheMode: 'space',
     },
-    handler: async ({ actionTypeId, connectorType, stepType, search }, { spaceId, request }) => {
+    handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {
       const { connectorsByType, totalConnectors } = await api.getAvailableConnectors(
         spaceId,
         request
       );
 
-      let connectors = Object.entries(connectorsByType).flatMap(([type, typeInfo]) =>
-        (typeInfo.instances ?? []).map((instance) => ({
+      const entries = actionTypeId
+        ? connectorsByType[actionTypeId]
+          ? [[actionTypeId, connectorsByType[actionTypeId]] as const]
+          : []
+        : Object.entries(connectorsByType);
+
+      let connectors = entries.flatMap(([type, typeInfo]) => {
+        const baseStepType = type.replace(/^\./, '');
+        const stepTypes =
+          typeInfo.subActions?.length > 0
+            ? typeInfo.subActions.map((sa) => `${baseStepType}.${sa.name}`)
+            : [baseStepType];
+
+        return (typeInfo.instances ?? []).map((instance) => ({
           id: instance.id,
           name: instance.name,
           actionTypeId: type,
-          stepType: type.replace(/^\./, ''),
-        }))
-      );
-
-      const effectiveActionTypeId = actionTypeId ?? connectorType;
-      if (effectiveActionTypeId) {
-        connectors = connectors.filter((c) => c.actionTypeId === effectiveActionTypeId);
-      }
+          stepTypes,
+        }));
+      });
 
       if (stepType) {
-        connectors = connectors.filter((c) => c.stepType === stepType);
+        connectors = connectors.filter((c) => c.stepTypes.includes(stepType));
       }
 
       if (search) {
@@ -87,7 +90,7 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
           (c) =>
             c.name.toLowerCase().includes(term) ||
             c.actionTypeId.toLowerCase().includes(term) ||
-            c.stepType.toLowerCase().includes(term)
+            c.stepTypes.some((st) => st.toLowerCase().includes(term))
         );
       }
 

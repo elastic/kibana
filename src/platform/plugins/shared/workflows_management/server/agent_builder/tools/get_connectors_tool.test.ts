@@ -18,14 +18,25 @@ const mockConnectorResponse = {
         { id: 'slack-1', name: 'Slack #general', isPreconfigured: false, isDeprecated: false },
         { id: 'slack-2', name: 'Slack #alerts', isPreconfigured: false, isDeprecated: false },
       ],
+      subActions: [],
     },
     '.jira': {
       instances: [
         { id: 'jira-1', name: 'Jira Project', isPreconfigured: false, isDeprecated: false },
       ],
+      subActions: [],
+    },
+    '.inference': {
+      instances: [
+        { id: 'inf-1', name: 'My Inference', isPreconfigured: false, isDeprecated: false },
+      ],
+      subActions: [
+        { name: 'completion', displayName: 'Completion' },
+        { name: 'rerank', displayName: 'Rerank' },
+      ],
     },
   },
-  totalConnectors: 3,
+  totalConnectors: 4,
 };
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -58,17 +69,9 @@ describe('registerGetConnectorsTool', () => {
   it('returns all connectors without filter', async () => {
     const result = await invokeHandler(registeredTool, {}, context);
     const data = result.results[0].data as any;
-    expect(data.count).toBe(3);
-    expect(data.totalAvailable).toBe(3);
-    expect(data.connectors).toHaveLength(3);
-  });
-
-  it('filters by connectorType', async () => {
-    const result = await invokeHandler(registeredTool, { connectorType: '.slack' }, context);
-    const data = result.results[0].data as any;
-    expect(data.count).toBe(2);
-    expect(data.connectors.every((c: any) => c.actionTypeId === '.slack')).toBe(true);
-    expect(data.connectors.every((c: any) => c.stepType === 'slack')).toBe(true);
+    expect(data.count).toBe(4);
+    expect(data.totalAvailable).toBe(4);
+    expect(data.connectors).toHaveLength(4);
   });
 
   it('filters by actionTypeId', async () => {
@@ -76,14 +79,38 @@ describe('registerGetConnectorsTool', () => {
     const data = result.results[0].data as any;
     expect(data.count).toBe(1);
     expect(data.connectors[0].actionTypeId).toBe('.jira');
-    expect(data.connectors[0].stepType).toBe('jira');
+    expect(data.connectors[0].stepTypes).toEqual(['jira']);
   });
 
-  it('filters by stepType', async () => {
+  it('filters by base stepType', async () => {
     const result = await invokeHandler(registeredTool, { stepType: 'slack' }, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(2);
-    expect(data.connectors.every((c: any) => c.stepType === 'slack')).toBe(true);
+    expect(data.connectors.every((c: any) => c.stepTypes.includes('slack'))).toBe(true);
+  });
+
+  it('filters by sub-action stepType', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { stepType: 'inference.completion' },
+      context
+    );
+    const data = result.results[0].data as any;
+    expect(data.count).toBe(1);
+    expect(data.connectors[0].actionTypeId).toBe('.inference');
+    expect(data.connectors[0].stepTypes).toContain('inference.completion');
+  });
+
+  it('returns stepTypes with sub-actions for V2 connectors', async () => {
+    const result = await invokeHandler(registeredTool, { actionTypeId: '.inference' }, context);
+    const data = result.results[0].data as any;
+    expect(data.connectors[0].stepTypes).toEqual(['inference.completion', 'inference.rerank']);
+  });
+
+  it('returns stepTypes with base type for V1 connectors', async () => {
+    const result = await invokeHandler(registeredTool, { actionTypeId: '.slack' }, context);
+    const data = result.results[0].data as any;
+    expect(data.connectors[0].stepTypes).toEqual(['slack']);
   });
 
   it('filters by search term', async () => {
@@ -102,7 +129,7 @@ describe('registerGetConnectorsTool', () => {
       expect(connector).toHaveProperty('id');
       expect(connector).toHaveProperty('name');
       expect(connector).toHaveProperty('actionTypeId');
-      expect(connector).toHaveProperty('stepType');
+      expect(connector).toHaveProperty('stepTypes');
     }
   });
 });
