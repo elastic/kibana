@@ -185,7 +185,7 @@ export function simulateRequest({
 
     const serviceNode = serviceGraph.services.find((s) => s.name === current);
     if (!serviceNode) {
-      return { errored: false, httpStatus: 200, docs: [] };
+      throw new Error(`simulateRequest: unknown service "${current}"`);
     }
 
     const svcSeed = deriveSeed(stableSeed, current);

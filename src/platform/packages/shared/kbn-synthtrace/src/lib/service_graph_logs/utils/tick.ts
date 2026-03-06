@@ -14,6 +14,7 @@ import type {
   ErrorType,
   FailureMap,
   FailuresOrFn,
+  InfraCategory,
   InfraDependency,
   NoiseConfig,
   ServiceFailure,
@@ -21,6 +22,7 @@ import type {
   ServiceNode,
 } from '../types';
 import { isInfraErrorType } from '../types';
+import { DEP_TO_CATEGORY } from '../constants';
 import { generateServiceDocs } from '../log_utils/service_logs';
 import { generateInfraDoc, generateHostSystemLog } from '../log_utils/infra_logs';
 import { generateNoiseDocs } from '../log_utils/noise_logs';
@@ -31,6 +33,12 @@ import { getOrBuildMetadata } from './metadata';
 import { mulberry32 } from '../placeholders';
 import { deriveSeed, probabilisticCount, resolveEffectiveSeed } from './seed';
 import { pickHealthyMessage } from './templates';
+
+/** Maps InfraErrorTypes that originate from a specific infra category to that category. */
+const INFRA_ERROR_CATEGORY: Partial<Record<ErrorType, InfraCategory>> = {
+  cache_failure: 'cache',
+  message_queue_failure: 'message_queue',
+};
 
 export interface GeneratorContext {
   serviceGraph: ServiceGraph;
@@ -278,11 +286,18 @@ export function collectInfraDocs({
   }
 
   const priorityPairs = allDeps.filter(({ svc, dep }) => {
+    if (failingDeps.has(dep)) {
+      return true;
+    }
     const svcErr = failingServiceErrors.get(svc.name);
-    return failingDeps.has(dep) || (svcErr !== undefined && isInfraErrorType(svcErr));
+    if (svcErr === undefined || !isInfraErrorType(svcErr)) {
+      return false;
+    }
+    const errorCategory = INFRA_ERROR_CATEGORY[svcErr];
+    return errorCategory !== undefined && DEP_TO_CATEGORY[dep] === errorCategory;
   });
-  const { svc, dep } = selectInfraPair(allDeps, priorityPairs, index);
 
+  const { svc, dep } = selectInfraPair(allDeps, priorityPairs, index);
   const result: Array<Partial<LogDocument>> = [];
 
   // Infra dependency logs — gated by every/rate/volume.
@@ -380,7 +395,7 @@ export function collectNoiseDocs({
       : baseRate * spikeMultiplier;
   const resolvedCount = Math.max(0, Math.round(jitteredRate));
 
-  const degraded = tickState.failingDeps.size > 0;
+  const degraded = tickState.failingDeps.size > 0 || tickState.failingServiceErrors.size > 0;
 
   return generateNoiseDocs({
     serviceGraph,

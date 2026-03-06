@@ -68,8 +68,10 @@ describe('buildLogsGenerator — volume consistency', () => {
     expect(count).toBeLessThanOrEqual(7);
   });
 
-  it('emits 12-13 docs per tick on the default claims graph and is stable across ticks', () => {
-    // 5 self + 5 outbound (5 edges × 1: result only) + 1 infra + 1 noise = 12, +1 if host log fires (probability 0.005)
+  it('emits 13-14 docs per tick on the default claims graph and is stable across ticks', () => {
+    // The CLAIMS graph has a diamond: claim-intake→policy-lookup and fraud-check→policy-lookup.
+    // Path-based DFS visits policy-lookup from both paths, so self docs = 6 (not 5).
+    // 6 self + 5 outbound + 1 infra + 1 host + 1 noise = 14; ambient 1% error may reduce count.
     const { generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
@@ -80,7 +82,7 @@ describe('buildLogsGenerator — volume consistency', () => {
     for (let i = 0; i <= 5; i++) {
       const count = generator(BASE_TS + i * ONE_MIN, i).length;
       expect(count).toBeGreaterThanOrEqual(12);
-      expect(count).toBeLessThanOrEqual(13);
+      expect(count).toBeLessThanOrEqual(14);
     }
   });
 
@@ -194,9 +196,9 @@ describe('buildLogsGenerator — volume consistency', () => {
     });
     const noFailuresCount = noFailuresGen(BASE_TS, 0).length;
     const withFailuresCount = withFailuresGen(BASE_TS, 0).length;
-    // 5 self + 5 outbound + 1 infra + 1 noise = 12, +1 optional host log
+    // 6 self (policy-lookup visited via two paths) + 5 outbound + 1 infra + 1 host + 1 noise = 14
     expect(noFailuresCount).toBeGreaterThanOrEqual(12);
-    expect(noFailuresCount).toBeLessThanOrEqual(13);
+    expect(noFailuresCount).toBeLessThanOrEqual(14);
     // With failures: DFS may short-circuit (fewer service docs), but warn docs may fire
     // on non-error ticks. Max: 10 service + 3 warn + 1 infra + 1 host + 1 noise = 16.
     expect(withFailuresCount).toBeGreaterThanOrEqual(3);

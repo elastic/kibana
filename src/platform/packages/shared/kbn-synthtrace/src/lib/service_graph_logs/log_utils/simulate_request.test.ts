@@ -186,9 +186,9 @@ describe('simulateRequest — stability contract', () => {
   });
 
   it('reqId in outbound message varies across tick indexes', () => {
-    const ids = [getOutboundDoc(0)?.reqId, getOutboundDoc(1)?.reqId, getOutboundDoc(2)?.reqId];
-    expect(ids[0]).toBeDefined();
-    expect(new Set(ids).size).toBeGreaterThan(1);
+    const ids = [0, 1, 2].map((i) => getOutboundDoc(i)?.reqId);
+    expect(ids.every((id) => id != null)).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 

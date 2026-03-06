@@ -52,7 +52,9 @@ describe('generateInfraNoiseLog', () => {
   });
 
   it('emits non-info level when degraded=true (warn or error per HEALTH_PROBS.failing)', () => {
-    const levels = [0, 1, 2, 3, 4].map((seed) => {
+    // HEALTH_PROBS.failing = { error: 0.15, warn: 0.65 } → ~80% non-info.
+    // With 20 seeds, expect at least 12/20 to be non-info (p≥0.5 threshold is robust).
+    const levels = Array.from({ length: 20 }, (_, seed) => {
       const doc = generateInfraNoiseLog({
         dep: 'postgres',
         seed,
@@ -63,7 +65,8 @@ describe('generateInfraNoiseLog', () => {
       expect(doc).not.toBeNull();
       return doc!['log.level'];
     });
-    expect(levels.every((l) => l === 'warn' || l === 'error')).toBe(true);
+    const nonInfoCount = levels.filter((l) => l === 'warn' || l === 'error').length;
+    expect(nonInfoCount).toBeGreaterThanOrEqual(12);
   });
 });
 
