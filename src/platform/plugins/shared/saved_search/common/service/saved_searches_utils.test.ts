@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_searches_utils';
-
+import {
+  fromDiscoverSessionAttributesToSavedSearch,
+  toSavedSearchAttributes,
+} from './saved_searches_utils';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-
 import type { SavedSearch, SavedSearchAttributes } from '../types';
 import type { DiscoverSessionTab } from '../../server';
 
 describe('saved_searches_utils', () => {
-  describe('fromSavedSearchAttributes', () => {
+  describe('fromDiscoverSessionAttributesToSavedSearch', () => {
     test('should convert attributes into SavedSearch', () => {
       const tabs: DiscoverSessionTab[] = [
         {
@@ -55,13 +56,11 @@ describe('saved_searches_utils', () => {
       };
 
       expect(
-        fromSavedSearchAttributes(
+        fromDiscoverSessionAttributesToSavedSearch(
           'id',
           attributes,
           ['tags-1', 'tags-2'],
-          [],
           createSearchSourceMock(),
-          {},
           false
         )
       ).toMatchInlineSnapshot(`

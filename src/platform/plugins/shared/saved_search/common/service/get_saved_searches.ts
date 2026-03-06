@@ -22,8 +22,8 @@ import type {
   SortOrder,
 } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
-import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
+import { fromDiscoverSessionAttributesToSavedSearch } from './saved_searches_utils';
 
 export interface GetSavedSearchDependencies {
   searchSourceCreate: ISearchStartSearchSource['create'];
@@ -105,15 +105,15 @@ export const convertToSavedSearch = async <
     ? searchSourceValues
     : await searchSourceCreate(searchSourceValues);
 
-  const returnVal = fromSavedSearchAttributes(
+  const returnVal = fromDiscoverSessionAttributesToSavedSearch(
     savedSearchId,
     attributes,
     tags,
-    references,
     searchSource,
-    sharingSavedObjectProps,
     Boolean(managed),
-    serialized
+    serialized,
+    sharingSavedObjectProps,
+    references
   );
 
   return returnVal as ReturnType;
