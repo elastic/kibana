@@ -188,3 +188,12 @@ export {
   type VersionedAttachment,
   type UpdateOriginResponse,
 } from './attachments';
+export {
+  type PluginManifestAuthor,
+  type PluginManifest,
+  type ParsedSkillMeta,
+  type ParsedSkillFile,
+  type ParsedSkillReferencedFile,
+  type UnmanagedPluginAssets,
+  type ParsedPluginArchive,
+} from './plugins';
