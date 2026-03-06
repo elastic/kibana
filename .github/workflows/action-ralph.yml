@@ -114,7 +114,7 @@ jobs:
             fi
           fi
           echo "command_mode=${COMMAND_MODE}" >> "$GITHUB_OUTPUT"
-          echo "default_branch=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
+          echo "default_branch=${{ github.event.repository.default_branch || 'main' }}" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
             echo "is_pr=true" >> "$GITHUB_OUTPUT"
             if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
@@ -325,10 +325,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch || 'main' }}
           fetch-depth: 1
           persist-credentials: false
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository || 'elastic/kibana' }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -713,10 +713,10 @@ jobs:
       - name: Checkout target
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch || 'main' }}
           fetch-depth: 1
           token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository || 'elastic/kibana' }}
 
       - name: Download agent changes
         uses: actions/download-artifact@v8
