@@ -102,6 +102,11 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+
+  [
+    '.firecrawl',
+    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
+  ],
   ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
     '.zendesk',
@@ -114,6 +119,17 @@ export const ConnectorIconsMap: Map<
         import(
           /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
         )
+    ),
+  ],
+  [
+    '.tavily',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+  ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
     ),
   ],
 ]);
