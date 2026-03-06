@@ -160,12 +160,12 @@ export const AssetInventoryDataTable = ({
 
   const openTableFlyout = (doc?: DataTableRecord | undefined) => {
     if (doc && doc.raw._source) {
-      const source = doc.raw._source as GenericEntityRecord;
+      const rawSource = doc.raw._source as GenericEntityRecord;
       setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
+        rawSource,
         entityDocId: doc.raw._id,
-        entityType: source.entity?.EngineMetadata?.Type,
-        entityName: source.entity?.name,
+        entityType: rawSource.entity?.EngineMetadata?.Type,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });

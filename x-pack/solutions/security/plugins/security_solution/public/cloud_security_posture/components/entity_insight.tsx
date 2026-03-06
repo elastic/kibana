@@ -51,7 +51,7 @@ export const EntityInsight = <T,>({
     buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
   );
 
-  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && 'host.name' in entityIdentifiers;
+  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && entityIdentifiers !== undefined;
 
   const { to, from } = useGlobalTime();
 

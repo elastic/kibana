@@ -112,3 +112,31 @@ export function getEuidDslFilterBasedOnDocument(
 
   return dsl;
 }
+
+/**
+ * Extracts entity identifiers (field name -> value) from a document following entity store EUID priority.
+ * Use this to obtain the key-value map expected by flyouts and other consumers of entityIdentifiers.
+ *
+ * Supports both nested and flattened document shapes. If the document has `_source`, it is unwrapped.
+ *
+ * @param entityType - The entity type (e.g. 'host', 'user', 'service', 'generic')
+ * @param doc - The document (raw hit or _source) to extract identifiers from
+ * @returns Key-value map of identity fields to values, or null if the document has no identifying information
+ */
+export function getEntityIdentifiersFromDocument(
+  entityType: EntityType,
+  doc: any
+): Record<string, string> | null {
+  if (!doc) {
+    return null;
+  }
+
+  doc = getDocument(doc);
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return null;
+  }
+
+  return fieldsToBeFilteredOn.values;
+}

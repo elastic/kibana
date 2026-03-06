@@ -21,11 +21,16 @@ import {
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
+import { getEntityIdentifiersFromSource } from '../utils/entity_identifiers_from_source';
+import type { GenericEntityRecord } from '../types/generic_entity_record';
 
 interface InventoryFlyoutProps {
+  /** Raw _source from the asset document (required for EUID extraction) */
+  rawSource: GenericEntityRecord | Record<string, unknown>;
+  /** Elasticsearch document _id (used for generic entity fetch) */
   entityDocId?: string;
+  /** Entity type from entity.EngineMetadata.Type; can be omitted and derived from rawSource */
   entityType?: string;
-  entityName?: string;
   scopeId?: string;
   contextId?: string;
 }
@@ -36,37 +41,46 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({
+    rawSource,
     entityDocId,
     entityType,
-    entityName,
     scopeId,
     contextId,
   }: InventoryFlyoutProps) => {
-    // User, Host, and Service entity flyouts rely on entity name to fetch required data
-    if (entityType && ['user', 'host', 'service'].includes(entityType) && !entityName) {
-      notifications.toasts.addDanger({
-        title: i18n.translate(
-          'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
-          { defaultMessage: 'Missing Entity Name' }
-        ),
-        text: i18n.translate(
-          'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameText',
-          { defaultMessage: 'Entity name is required for User, Host, and Service entities' }
-        ),
-      });
+    const entityIdentifiers = getEntityIdentifiersFromSource(rawSource, entityType);
 
-      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_ERROR);
-      onFlyoutClose();
-      return;
+    // User, Host, and Service entity flyouts require entityIdentifiers (EUID-derived)
+    if (entityType && ['user', 'host', 'service'].includes(entityType)) {
+      if (!entityIdentifiers || Object.keys(entityIdentifiers).length === 0) {
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
+            { defaultMessage: 'Missing Entity Name' }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameText',
+            { defaultMessage: 'Entity name is required for User, Host, and Service entities' }
+          ),
+        });
+
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_ERROR);
+        onFlyoutClose();
+        return;
+      }
     }
 
-    switch (entityType) {
+    const effectiveEntityType =
+      entityType ?? (rawSource as GenericEntityRecord).entity?.EngineMetadata?.Type;
+
+    const identifiers = entityIdentifiers ?? {};
+
+    switch (effectiveEntityType) {
       case 'user':
         openFlyout({
           right: {
             id: UserPanelKey,
             params: {
-              entityIdentifiers: { 'user.name': entityName },
+              entityIdentifiers: identifiers,
               scopeId,
               contextID: contextId,
             },
@@ -78,7 +92,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
           right: {
             id: HostPanelKey,
             params: {
-              entityIdentifiers: { 'host.name': entityName },
+              entityIdentifiers: identifiers,
               scopeId,
               contextID: contextId,
               isPreviewMode: false,
@@ -91,7 +105,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
           right: {
             id: ServicePanelKey,
             params: {
-              entityIdentifiers: { 'service.name': entityName },
+              entityIdentifiers: identifiers,
               scopeId,
               contextID: contextId,
             },
@@ -105,9 +119,10 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
             id: GenericEntityPanelKey,
             params: {
               entityDocId,
+              entityId: entityIdentifiers?.['related.entity'],
               scopeId,
               contextId,
-              isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
+              isEngineMetadataExist: Boolean(effectiveEntityType),
             },
           },
         });

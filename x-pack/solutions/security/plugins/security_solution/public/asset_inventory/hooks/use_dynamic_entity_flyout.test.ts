@@ -58,6 +58,9 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          entity: { id: 'entity-123', EngineMetadata: { Type: 'container' } },
+        } as never,
         entityDocId: '123',
         entityType: 'container',
         scopeId: 'scope1',
@@ -70,6 +73,7 @@ describe('useDynamicEntityFlyout', () => {
         id: GenericEntityPanelKey,
         params: {
           entityDocId: '123',
+          entityId: 'entity-123',
           scopeId: 'scope1',
           contextId: 'context1',
           isEngineMetadataExist: true,
@@ -85,8 +89,11 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          user: { name: 'testUser' },
+          entity: { EngineMetadata: { Type: 'user' } },
+        } as never,
         entityType: 'user',
-        entityName: 'testUser',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -104,6 +111,36 @@ describe('useDynamicEntityFlyout', () => {
     });
   });
 
+  it('should use EUID priority for user (user.entity.id over user.name) via entity store euid', () => {
+    const { result } = renderHook(() =>
+      useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
+    );
+
+    act(() => {
+      result.current.openDynamicFlyout({
+        rawSource: {
+          user: { name: 'testUser', entity: { id: 'user-euid-123' } },
+          entity: { EngineMetadata: { Type: 'user' } },
+        } as never,
+        entityType: 'user',
+        scopeId: 'scope1',
+        contextId: 'context1',
+      });
+    });
+
+    // Entity store euid.getEntityIdentifiersFromDocument returns first matching set only
+    expect(openFlyoutMock).toHaveBeenCalledWith({
+      right: {
+        id: UserPanelKey,
+        params: {
+          entityIdentifiers: { 'user.entity.id': 'user-euid-123' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+        },
+      },
+    });
+  });
+
   it('should open the flyout with correct params for a host entity', () => {
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
@@ -111,8 +148,8 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: { host: { name: 'testHost' }, entity: { EngineMetadata: { Type: 'host' } } } as never,
         entityType: 'host',
-        entityName: 'testHost',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -138,8 +175,11 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          service: { name: 'testService' },
+          entity: { EngineMetadata: { Type: 'service' } },
+        } as never,
         entityType: 'service',
-        entityName: 'testService',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -157,13 +197,18 @@ describe('useDynamicEntityFlyout', () => {
     });
   });
 
-  it('should show an error toast if entity name is missing for user, host, or service entities', () => {
+  it('should show an error toast if entityIdentifiers are missing for user, host, or service entities', () => {
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entityType: 'user' });
+      result.current.openDynamicFlyout({
+        rawSource: { entity: { EngineMetadata: { Type: 'user' } } } as never,
+        entityType: 'user',
+        scopeId: 'scope1',
+        contextId: 'context1',
+      });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalled();
