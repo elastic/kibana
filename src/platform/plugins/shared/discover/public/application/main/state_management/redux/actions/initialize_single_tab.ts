@@ -293,8 +293,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     // Set runtime state
     customizationService$.next(customizationService);
-
-    dataStateContainer$.getValue()?.cancel();
     dataStateContainer$.next(dataStateContainer);
 
     // Begin syncing the state and trigger the initial fetch
