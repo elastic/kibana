@@ -4,8 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, Page } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import type { Page } from '@elastic/synthetics';
+import { expect } from '@elastic/synthetics';
+
+export const byTestId = (testId: string) => {
+  return `[data-test-subj="${testId}"]`;
+};
+
+export async function waitForLoadingToFinish({ page }: { page: Page }) {
+  let retries = 50;
+  while (retries) {
+    retries--;
+    if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
+    await page.waitForTimeout(2 * 1000);
+  }
+  retries = 50;
+  while (retries) {
+    if ((await page.$(byTestId('globalLoadingIndicator'))) === null) break;
+    await page.waitForTimeout(2 * 1000);
+  }
+}
 
 export function utilsPageProvider({ page }: { page: Page }) {
   return {
