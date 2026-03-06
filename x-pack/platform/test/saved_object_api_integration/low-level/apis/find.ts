@@ -46,7 +46,10 @@ export default function ({ getService }: FtrProviderContext) {
           `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
         );
         expect(response.status).to.eql(200, JSON.stringify(response.body));
-        const savedObjects = JSON.parse(response.text).saved_objects;
+        // Sort by title to ensure deterministic ordering regardless of ES score tiebreaking
+        const savedObjects = JSON.parse(response.text).saved_objects.sort(
+          (a: any, b: any) => a.attributes.title.localeCompare(b.attributes.title)
+        );
         expect(savedObjects.length).to.be(2);
         expect(savedObjects[0].attributes.comments[0].user).to.be('bob');
         expect(savedObjects[1].attributes.comments[1].user).to.be('bob');
@@ -67,7 +70,10 @@ export default function ({ getService }: FtrProviderContext) {
           `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
         );
         expect(response.status).to.eql(200, JSON.stringify(response.body));
-        const savedObjects = JSON.parse(response.text).saved_objects;
+        // Sort by title to ensure deterministic ordering regardless of ES score tiebreaking
+        const savedObjects = JSON.parse(response.text).saved_objects.sort(
+          (a: any, b: any) => a.attributes.title.localeCompare(b.attributes.title)
+        );
         expect(savedObjects.length).to.be(2);
         expect(savedObjects[0].attributes.comments[1].message).to.contain('kibana');
         expect(savedObjects[1].attributes.title).to.be('kibana');
@@ -87,7 +93,10 @@ export default function ({ getService }: FtrProviderContext) {
           `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
         );
         expect(response.status).to.eql(200, JSON.stringify(response.body));
-        const savedObjects = JSON.parse(response.text).saved_objects;
+        // Sort by title to ensure deterministic ordering regardless of ES score tiebreaking
+        const savedObjects = JSON.parse(response.text).saved_objects.sort(
+          (a: any, b: any) => a.attributes.title.localeCompare(b.attributes.title)
+        );
         expect(savedObjects.length).to.be(2);
         expect(savedObjects[0].attributes.comments[0].user).to.be('charlie');
         expect(savedObjects[1].attributes.comments[1].message).to.contain('charlie');
