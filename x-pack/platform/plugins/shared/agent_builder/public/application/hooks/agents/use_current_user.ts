@@ -6,12 +6,11 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { useKibana } from '../use_kibana';
-import type { AgentBuilderCurrentUser } from '../../utils/agent_access';
 
 /**
  * Fetches the current user from Kibana's User Profile service.
- * Used for agent visibility checks (e.g. isOwner). Only runs when `enabled` is true.
  */
 export const useCurrentUser = ({ enabled }: { enabled: boolean }) => {
   const { services } = useKibana();
@@ -22,11 +21,11 @@ export const useCurrentUser = ({ enabled }: { enabled: boolean }) => {
     enabled,
   });
 
-  const currentUser: AgentBuilderCurrentUser | null =
+  const currentUser: UserIdAndName | null =
     data != null
       ? {
-          uid: data.uid,
-          user: { username: data.user.username, roles: data.user.roles },
+          id: data.uid,
+          username: data.user.username,
         }
       : null;
 

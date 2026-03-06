@@ -51,7 +51,7 @@ const VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE = 'agent_builder:agent_visibility_acc
  * Returns `true` only for users with wildcard Elasticsearch privileges (for example `superuser`).
  *
  * We intentionally check an application privilege name that is not registered by Kibana
- * (`agent_builder:visibility_access_override`). Because this privilege is unregistered, normal
+ * (`agent_builder:agent_visibility_access_override`). Because this privilege is unregistered, normal
  * roles fail this check, while wildcard roles (for example application/cluster `*`/`all`) pass.
  *
  * This is used as an internal visibility-access override, independent of feature/sub-feature

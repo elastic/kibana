@@ -53,8 +53,6 @@ import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useCurrentUser } from '../../../hooks/agents/use_current_user';
-import { canChangeAgentVisibility } from '../../../utils/agent_access';
 import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
 const BUTTON_IDS = {
@@ -82,9 +80,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
-  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.settings.client);
-  const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
+  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.uiSettings);
+  const { manageAgents } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -139,7 +136,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     isSubmitting,
     submit,
     tools,
-    owner,
     error,
   } = useAgentEdit({
     editingAgentId,
@@ -204,14 +200,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const isFormDisabled = isLoading || isSubmitting;
   const isSaveDisabled = isFormDisabled || hasErrors || (!isCreateMode && !isDirty);
-  const canChangeVisibility =
-    experimentalFeaturesEnabled &&
-    (isCreateMode ||
-      canChangeAgentVisibility({
-        owner,
-        currentUser,
-        hasAgentVisibilityAccessOverride,
-      }));
 
   const [isContextMenuOpen, setContextMenuOpen] = useState(false);
   const [isAdditionalActionsMenuOpen, setAdditionalActionsMenuOpen] = useState(false);
@@ -245,8 +233,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             formState={formState}
             isCreateMode={isCreateMode}
             isFormDisabled={isFormDisabled || !manageAgents}
-            showVisibilityControls={experimentalFeaturesEnabled}
-            canChangeVisibility={canChangeVisibility}
+            owner={agentState?.created_by}
           />
         ),
       },
@@ -287,8 +274,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       euiTheme,
       activeToolsCount,
       manageAgents,
-      canChangeVisibility,
-      experimentalFeaturesEnabled,
+      agentState?.created_by,
     ]
   );
 

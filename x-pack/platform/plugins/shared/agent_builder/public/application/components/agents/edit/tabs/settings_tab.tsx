@@ -14,7 +14,6 @@ import {
   EuiSuperSelect,
   EuiComboBox,
   EuiColorPicker,
-  EuiCallOut,
   EuiTitle,
   EuiSpacer,
   EuiText,
@@ -29,24 +28,29 @@ import { i18n } from '@kbn/i18n';
 import {
   AgentVisibility,
   VISIBILITY_ICON,
+  canChangeAgentVisibility,
   type AgentVisibilityIcon,
+  type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
+import { isExperimentalFeaturesEnabled } from '../../../../utils/is_experimental_features_enabled';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
+import { VISIBILITY_LABELS } from '../../../../utils/visibility_i18n';
 import type { AgentFormData } from '../agent_form';
 
-export interface AgentSettingsTabProps {
+interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
   formState: FormState<AgentFormData>;
   isCreateMode: boolean;
   isFormDisabled: boolean;
-  showVisibilityControls: boolean;
-  canChangeVisibility: boolean;
+  owner?: UserIdAndName;
 }
 
 export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
@@ -54,16 +58,31 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   formState,
   isCreateMode,
   isFormDisabled,
-  showVisibilityControls,
-  canChangeVisibility,
+  owner,
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
   const {
-    services: { settings },
+    services: { uiSettings },
   } = useKibana();
+  const experimentalFeaturesEnabled = useMemo(
+    () => isExperimentalFeaturesEnabled(uiSettings),
+    [uiSettings]
+  );
+
+  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
+  const { hasAgentVisibilityAccessOverride } = useUiPrivileges();
+  const canChangeVisibility =
+    experimentalFeaturesEnabled &&
+    (isCreateMode ||
+      canChangeAgentVisibility({
+        owner,
+        currentUser,
+        hasAgentVisibilityAccessOverride,
+      }));
+
   const showAgentWorkflowsSection = useMemo(() => {
-    return isPreExecutionWorkflowEnabled(settings.client);
-  }, [settings]);
+    return isPreExecutionWorkflowEnabled(uiSettings);
+  }, [uiSettings]);
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
   const formFlexColumnStyles = css`
@@ -88,27 +107,21 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       value: AgentVisibility.Public,
       inputDisplay: renderVisibilityOption({
         icon: VISIBILITY_ICON[AgentVisibility.Public],
-        label: i18n.translate('xpack.agentBuilder.agents.form.visibility.public', {
-          defaultMessage: 'Public',
-        }),
+        label: VISIBILITY_LABELS[AgentVisibility.Public],
       }),
     },
     {
       value: AgentVisibility.Shared,
       inputDisplay: renderVisibilityOption({
         icon: VISIBILITY_ICON[AgentVisibility.Shared],
-        label: i18n.translate('xpack.agentBuilder.agents.form.visibility.shared', {
-          defaultMessage: 'Shared',
-        }),
+        label: VISIBILITY_LABELS[AgentVisibility.Shared],
       }),
     },
     {
       value: AgentVisibility.Private,
       inputDisplay: renderVisibilityOption({
         icon: VISIBILITY_ICON[AgentVisibility.Private],
-        label: i18n.translate('xpack.agentBuilder.agents.form.visibility.private', {
-          defaultMessage: 'Private',
-        }),
+        label: VISIBILITY_LABELS[AgentVisibility.Private],
       }),
     },
   ];
@@ -261,12 +274,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               <EuiIcon type="tag" aria-hidden={true} />
               <EuiTitle size="xs">
                 <h2 id="organization-access-section-title">
-                  {i18n.translate(
-                    'xpack.agentBuilder.agents.form.settings.organizationAccessTitle',
-                    {
-                      defaultMessage: 'Organization',
-                    }
-                  )}
+                  {experimentalFeaturesEnabled
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.organizationAccessTitle',
+                        { defaultMessage: 'Organization' }
+                      )
+                    : i18n.translate('xpack.agentBuilder.agents.form.settings.labelsSectionTitle', {
+                        defaultMessage: 'Labels',
+                      })}
                 </h2>
               </EuiTitle>
             </EuiFlexGroup>
@@ -274,14 +289,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               {i18n.translate(
                 'xpack.agentBuilder.agents.form.settings.organizationAccessDescription',
                 {
-                  defaultMessage: showVisibilityControls
+                  defaultMessage: experimentalFeaturesEnabled
                     ? 'Use labels to organize agents and visibility to control who can view and edit.'
                     : 'Use labels to organize and filter agents.',
                 }
               )}
             </EuiText>
             <EuiSpacer size="s" />
-            {showVisibilityControls && (
+            {experimentalFeaturesEnabled && (
               <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
                 <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
                   <EuiTitle size="xxs">
@@ -327,7 +342,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                           'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedDescription',
                           {
                             defaultMessage:
-                              'Anyone can view. Only the owner or a superuser can edit.',
+                              'Anyone can view. Only the owner or an administrator can edit.',
                           }
                         )}
                       </EuiText>
@@ -345,7 +360,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                         {i18n.translate(
                           'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateDescription',
                           {
-                            defaultMessage: 'Only the owner or a superuser can view and edit.',
+                            defaultMessage: 'Only the owner or an administrator can view and edit.',
                           }
                         )}
                       </EuiText>
@@ -353,30 +368,6 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   </EuiFlexGroup>
                 </EuiFlexGroup>
               </EuiPanel>
-            )}
-            {!showVisibilityControls && (
-              <EuiCallOut
-                announceOnMount={false}
-                size="s"
-                iconType="beaker"
-                color="warning"
-                title={i18n.translate(
-                  'xpack.agentBuilder.agents.form.settings.visibilityExperimentalDisabledTitle',
-                  {
-                    defaultMessage: 'Visibility controls are unavailable.',
-                  }
-                )}
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.agentBuilder.agents.form.settings.visibilityExperimentalDisabledDescription',
-                    {
-                      defaultMessage:
-                        'Enable advanced setting "agentBuilder:experimentalFeatures" to configure visibility.',
-                    }
-                  )}
-                </p>
-              </EuiCallOut>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -424,7 +415,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             />
           </EuiFormRow>
 
-          {showVisibilityControls && (
+          {experimentalFeaturesEnabled && (
             <EuiFormRow
               label={i18n.translate('xpack.agentBuilder.agents.form.visibilityLabel', {
                 defaultMessage: 'Visibility',
@@ -432,7 +423,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               helpText={
                 !canChangeVisibility
                   ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDisabledReason', {
-                      defaultMessage: 'Only the owner or a superuser can change visibility.',
+                      defaultMessage: 'Only the owner or an administrator can change visibility.',
                     })
                   : undefined
               }

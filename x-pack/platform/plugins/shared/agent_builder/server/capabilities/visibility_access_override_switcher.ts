@@ -14,14 +14,11 @@ import { hasAgentVisibilityAccessOverrideFromRequest } from '../services/utils';
  * an unregistered ES application privilege (only wildcard roles get true).
  *
  * When does this switcher run?
- * - Only when capabilities are explicitly resolved for a request. There is no global HTTP
- *   middleware that runs the resolver on every request.
+ * - Only when capabilities are explicitly resolved for a request.
  * - The main trigger is POST /api/core/capabilities (called once by the browser at app load).
  * - Other triggers: route handlers or services that call
  *   coreStart.capabilities.resolveCapabilities(request, ...). When they request a narrow
- *   path (e.g. uptime.*), only switchers for that path run; agentBuilder.* is not run.
- * So this does not slow down "all APIs" — only capability resolutions (and only when the
- * requested capabilityPath intersects agentBuilder.*, e.g. '*' or 'agentBuilder.*').
+ *   path (e.g. uptime.*), only switchers for that path run;
  */
 export const createVisibilityAccessOverrideSwitcher = (
   getStartServices: CoreSetup['getStartServices'],
@@ -40,16 +37,16 @@ export const createVisibilityAccessOverrideSwitcher = (
       });
 
       if (hasAgentVisibilityAccessOverride) {
-        return {};
+        return {
+          agentBuilder: {
+            hasAgentVisibilityAccessOverride: true,
+          },
+        };
       }
 
-      return {
-        agentBuilder: {
-          hasAgentVisibilityAccessOverride: false,
-        },
-      };
+      return {};
     } catch (e) {
-      logger.debug(`Visibility access override capability switcher failed: ${e}`);
+      logger.debug(`Visibility access override capability switcher failed`, { error: e });
       return {
         agentBuilder: {
           hasAgentVisibilityAccessOverride: false,

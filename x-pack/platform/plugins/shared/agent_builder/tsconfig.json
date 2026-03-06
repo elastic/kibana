@@ -44,6 +44,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-application-common",
     "@kbn/core-application-browser",
+    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
     "@kbn/inference-tracing",

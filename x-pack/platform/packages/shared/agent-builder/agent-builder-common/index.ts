@@ -100,6 +100,7 @@ export {
   AgentVisibility,
   AgentVisibilityIcon,
   VISIBILITY_ICON,
+  VISIBILITY_BADGE_COLOR,
   AgentExecutionErrorCode,
   isAgentOwner,
   canChangeAgentVisibility,

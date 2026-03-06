@@ -106,7 +106,7 @@ export class AgentBuilderPlugin
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
     coreSetup.capabilities.registerProvider(() => ({
       agentBuilder: {
-        hasAgentVisibilityAccessOverride: true,
+        hasAgentVisibilityAccessOverride: false,
       },
     }));
 

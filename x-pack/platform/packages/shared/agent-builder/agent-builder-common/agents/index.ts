@@ -15,7 +15,12 @@ export {
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
-export { AgentVisibilityIcon, VISIBILITY_ICON, AgentVisibility } from './visibility';
+export {
+  AgentVisibilityIcon,
+  VISIBILITY_ICON,
+  VISIBILITY_BADGE_COLOR,
+  AgentVisibility,
+} from './visibility';
 export {
   isAgentOwner,
   canChangeAgentVisibility,

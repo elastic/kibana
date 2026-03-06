@@ -13,7 +13,6 @@ import type {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,25 +22,22 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentVisibility, VISIBILITY_ICON, type AgentDefinition } from '@kbn/agent-builder-common';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
+import { hasAgentWriteAccess, type AgentDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
-import { VISIBILITY_BADGE_COLOR } from '@kbn/agent-builder-common/agents/visibility';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
-import {
-  canEditAgentByVisibility,
-  type AgentBuilderCurrentUser,
-} from '../../../utils/agent_access';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentVisibilityBadge } from './agent_visibility_badge';
 import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
 const columnNames = {
@@ -69,78 +65,9 @@ const actionLabels = {
   deleteDescription: i18n.translate('xpack.agentBuilder.agents.actions.deleteDescription', {
     defaultMessage: 'Delete agent',
   }),
-};
-
-const visibilityBadgeLabels: Record<AgentVisibility, string> = {
-  [AgentVisibility.Private]: i18n.translate('xpack.agentBuilder.agents.visibility.private', {
-    defaultMessage: 'Private',
+  checkingPermissions: i18n.translate('xpack.agentBuilder.agents.actions.checkingPermissions', {
+    defaultMessage: 'Checking permissions…',
   }),
-  [AgentVisibility.Shared]: i18n.translate('xpack.agentBuilder.agents.visibility.shared', {
-    defaultMessage: 'Shared',
-  }),
-  [AgentVisibility.Public]: i18n.translate('xpack.agentBuilder.agents.visibility.public', {
-    defaultMessage: 'Public',
-  }),
-};
-
-const getVisibilityBadgeTooltipContent = (
-  visibility: NonNullable<AgentDefinition['visibility']>
-) => {
-  switch (visibility) {
-    case AgentVisibility.Private:
-      return i18n.translate('xpack.agentBuilder.agents.visibility.privateTooltip', {
-        defaultMessage: 'Only the owner or users with visibility override can view and edit.',
-      });
-    case AgentVisibility.Shared:
-      return i18n.translate('xpack.agentBuilder.agents.visibility.sharedTooltip', {
-        defaultMessage:
-          'Anyone can view. Only the owner or users with visibility override can edit.',
-      });
-    case AgentVisibility.Public:
-      return i18n.translate('xpack.agentBuilder.agents.visibility.publicTooltip', {
-        defaultMessage: 'Anyone can view and edit.',
-      });
-  }
-};
-
-const renderAgentVisibilityBadge = (agent: AgentDefinition) => {
-  if (agent.readonly) {
-    return (
-      <EuiToolTip
-        content={i18n.translate('xpack.agentBuilder.agents.visibility.readOnlyTooltip', {
-          defaultMessage: 'Built-in agents are read-only.',
-        })}
-      >
-        <EuiBadge
-          tabIndex={0}
-          color="accent"
-          data-test-subj="agentBuilderAgentsListVisibilityBuiltInBadge"
-        >
-          {i18n.translate('xpack.agentBuilder.agents.visibility.builtIn', {
-            defaultMessage: 'Read-only',
-          })}
-        </EuiBadge>
-      </EuiToolTip>
-    );
-  }
-
-  const visibility = agent.visibility ?? AgentVisibility.Public;
-  const visibilityLabel = visibilityBadgeLabels[visibility];
-  const visibilityColor = VISIBILITY_BADGE_COLOR[visibility];
-  const visibilityTooltip = getVisibilityBadgeTooltipContent(visibility);
-
-  return (
-    <EuiToolTip content={visibilityTooltip}>
-      <EuiBadge
-        tabIndex={0}
-        iconType={VISIBILITY_ICON[visibility]}
-        color={visibilityColor}
-        data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
-      >
-        {visibilityLabel}
-      </EuiBadge>
-    </EuiToolTip>
-  );
 };
 
 const canCurrentUserEditAgent = ({
@@ -149,14 +76,16 @@ const canCurrentUserEditAgent = ({
   experimentalFeaturesEnabled,
   currentUser,
   hasAgentVisibilityAccessOverride,
+  isCurrentUserLoading,
 }: {
   agent: AgentDefinition;
   manageAgents: boolean;
   experimentalFeaturesEnabled: boolean;
-  currentUser?: AgentBuilderCurrentUser | null;
+  currentUser?: UserIdAndName | null;
   hasAgentVisibilityAccessOverride: boolean;
+  isCurrentUserLoading: boolean;
 }) => {
-  if (agent.readonly || !manageAgents) {
+  if (agent.readonly || !manageAgents || isCurrentUserLoading) {
     return false;
   }
 
@@ -164,7 +93,7 @@ const canCurrentUserEditAgent = ({
     return true;
   }
 
-  return canEditAgentByVisibility({
+  return hasAgentWriteAccess({
     visibility: agent.visibility,
     owner: agent.created_by,
     currentUser,
@@ -175,11 +104,13 @@ const canCurrentUserEditAgent = ({
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { services } = useKibana();
-  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.settings.client);
+  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.uiSettings);
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
+  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser({
+    enabled: experimentalFeaturesEnabled,
+  });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
@@ -197,32 +128,44 @@ export const AgentsList: React.FC = () => {
         experimentalFeaturesEnabled,
         currentUser,
         hasAgentVisibilityAccessOverride,
+        isCurrentUserLoading,
       });
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
       field: 'name',
       name: columnNames.name,
-      render: (name: string, agent: AgentDefinition) => (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            {!canEditAgent(agent) ? (
-              <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
-                {name}
-              </EuiText>
-            ) : (
-              <EuiLink
-                data-test-subj="agentBuilderAgentsListName"
-                href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
-              >
-                {name}
-              </EuiLink>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{agent.description}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (name: string, agent: AgentDefinition) => {
+        const canEdit = canEditAgent(agent);
+        const showCheckingTooltip = !canEdit && experimentalFeaturesEnabled && isCurrentUserLoading;
+        const nameContent = !canEdit ? (
+          <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+            {name}
+          </EuiText>
+        ) : (
+          <EuiLink
+            data-test-subj="agentBuilderAgentsListName"
+            href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
+          >
+            {name}
+          </EuiLink>
+        );
+        return (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              {showCheckingTooltip ? (
+                <EuiToolTip content={actionLabels.checkingPermissions} position="top">
+                  <span tabIndex={0}>{nameContent}</span>
+                </EuiToolTip>
+              ) : (
+                nameContent
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{agent.description}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
       'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
@@ -241,7 +184,7 @@ export const AgentsList: React.FC = () => {
 
     const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
       name: columnNames.visibility,
-      render: renderAgentVisibilityBadge,
+      render: (agent) => <AgentVisibilityBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListVisibility',
     };
 
@@ -267,7 +210,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id })),
-          available: (agent) => canEditAgent(agent),
+          available: canEditAgent,
         },
         {
           type: 'icon',
@@ -301,7 +244,7 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          available: (agent) => canEditAgent(agent),
+          available: canEditAgent,
         },
       ],
     };
@@ -314,6 +257,7 @@ export const AgentsList: React.FC = () => {
     currentUser,
     deleteAgent,
     hasAgentVisibilityAccessOverride,
+    isCurrentUserLoading,
     manageAgents,
     experimentalFeaturesEnabled,
   ]);
@@ -341,9 +285,6 @@ export const AgentsList: React.FC = () => {
   return (
     <EuiInMemoryTable
       data-test-subj="agentBuilderAgentsListTable"
-      tableCaption={i18n.translate('xpack.agentBuilder.agents.listTableCaption', {
-        defaultMessage: 'List of agents',
-      })}
       rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
       items={agents}
       itemId={(agent) => agent.id}
