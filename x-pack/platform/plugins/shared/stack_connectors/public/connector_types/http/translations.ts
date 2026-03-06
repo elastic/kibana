@@ -76,14 +76,39 @@ export const PROXY_USERNAME_LABEL = i18n.translate(
   { defaultMessage: 'Username' }
 );
 
+export const PROXY_USERNAME_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.http.error.requiredProxyUsernameText',
+  { defaultMessage: 'Username is required.' }
+);
+
 export const PROXY_PASSWORD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.http.proxyPasswordLabel',
   { defaultMessage: 'Password' }
 );
 
-export const PROXY_SECTION_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.http.proxySectionTitle',
-  { defaultMessage: 'Proxy (optional)' }
+export const PROXY_PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.http.error.requiredProxyPasswordText',
+  { defaultMessage: 'Password is required.' }
+);
+
+export const PROXY_SWITCH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.http.proxySwitchLabel',
+  { defaultMessage: 'Proxy' }
+);
+
+export const PROXY_URL_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.http.error.requiredProxyUrlText',
+  { defaultMessage: 'Proxy URL is required.' }
+);
+
+export const PROXY_AUTH_NONE = i18n.translate(
+  'xpack.stackConnectors.components.http.proxyAuthNoneLabel',
+  { defaultMessage: 'None' }
+);
+
+export const PROXY_AUTH_BASIC = i18n.translate(
+  'xpack.stackConnectors.components.http.proxyAuthBasicLabel',
+  { defaultMessage: 'Basic authentication' }
 );
 
 export const PROXY_VERIFICATION_MODE_NONE = i18n.translate(

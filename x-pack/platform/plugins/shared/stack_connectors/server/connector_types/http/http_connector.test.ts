@@ -226,7 +226,7 @@ describe('secrets validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ proxyUsername and proxyPassword must both be provided, or neither"`
+      `"error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither"`
     );
   });
 
@@ -248,7 +248,7 @@ describe('secrets validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ proxyUsername and proxyPassword must both be provided, or neither"`
+      `"error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither"`
     );
   });
 
@@ -270,21 +270,23 @@ describe('secrets validation', () => {
 
 describe('config validation', () => {
   test('config validation passes when only required fields are provided', () => {
-    const config: Record<string, string | boolean | null> = {
+    const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       authType: AuthType.Basic,
       hasAuth: true,
       headers: null,
+      hasProxyAuth: false,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
   });
 
   test('config validation passes when a url is specified', () => {
-    const config: Record<string, string | boolean | null> = {
+    const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       authType: AuthType.Basic,
       hasAuth: true,
       headers: null,
+      hasProxyAuth: false,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
   });
@@ -302,8 +304,6 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid headers are provided', () => {
-    // any for testing
-
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       headers: {
@@ -311,6 +311,7 @@ describe('config validation', () => {
       },
       authType: AuthType.Basic,
       hasAuth: true,
+      hasProxyAuth: false,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
   });
@@ -329,8 +330,6 @@ describe('config validation', () => {
   });
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
-    // any for testing
-
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
@@ -338,6 +337,7 @@ describe('config validation', () => {
       },
       authType: AuthType.Basic,
       hasAuth: true,
+      hasProxyAuth: false,
     };
 
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
@@ -393,12 +393,13 @@ describe('config validation', () => {
   });
 
   describe('connector validation', () => {
-    test('returns error when proxyUsername is set but proxyUrl is missing', () => {
+    test('returns error when hasProxyAuth is true but proxyUrl is missing', () => {
       const config = {
         url: 'http://mylisteningserver.com:9200/endpoint',
         authType: AuthType.Basic,
         hasAuth: true,
         headers: null,
+        hasProxyAuth: true,
       };
       const secrets = {
         user: 'bob',
@@ -414,11 +415,63 @@ describe('config validation', () => {
       expect(() => {
         validateConnector(connectorType, { config, secrets });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type connector: proxyUrl is required when proxyUsername or proxyPassword is provided"`
+        `"error validating action type connector: proxyUrl is required when proxy authentication is enabled"`
       );
     });
 
-    test('succeeds when proxyUrl is set and proxy credentials are provided', () => {
+    test('returns error when hasProxyAuth is true but credentials are missing', () => {
+      const config = {
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.Basic,
+        hasAuth: true,
+        headers: null,
+        hasProxyAuth: true,
+        proxyUrl: 'http://proxy.example.com:8080',
+      };
+      const secrets = {
+        user: 'bob',
+        password: 'supersecret',
+        crt: null,
+        key: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        proxyUsername: null,
+        proxyPassword: null,
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: proxyUsername and proxyPassword are required when proxy authentication is enabled"`
+      );
+    });
+
+    test('succeeds when hasProxyAuth is true with proxyUrl and credentials', () => {
+      const config = {
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.Basic,
+        hasAuth: true,
+        headers: null,
+        hasProxyAuth: true,
+        proxyUrl: 'http://proxy.example.com:8080',
+      };
+      const secrets = {
+        user: 'bob',
+        password: 'supersecret',
+        crt: null,
+        key: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
+
+    test('succeeds when hasProxyAuth is false (no proxy auth)', () => {
       const config = {
         url: 'http://mylisteningserver.com:9200/endpoint',
         authType: AuthType.Basic,
@@ -434,8 +487,8 @@ describe('config validation', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
-        proxyUsername: 'proxyuser',
-        proxyPassword: 'proxypass',
+        proxyUsername: null,
+        proxyPassword: null,
       };
       expect(() => {
         validateConnector(connectorType, { config, secrets });
@@ -1341,7 +1394,7 @@ describe('execute()', () => {
     });
 
     expect(requestMock.mock.calls[0][0].proxySettings).toEqual({
-      proxyUrl: 'http://proxy.example.com:8080',
+      proxyUrl: 'http://proxy.example.com:8080/',
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       proxySSLSettings: { verificationMode: 'certificate' },
@@ -1353,6 +1406,7 @@ describe('execute()', () => {
       url: 'https://abc.def',
       authType: AuthType.Basic,
       hasAuth: true,
+      hasProxyAuth: true,
       proxyUrl: 'http://proxy.example.com:8080',
     } as ConnectorTypeConfigType;
     await connectorType.executor?.({

@@ -7,12 +7,14 @@
 
 import React from 'react';
 
-import { EuiAccordion, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
+  CardRadioGroupField,
   Field,
   PasswordField,
   SelectField,
+  ToggleField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
@@ -22,7 +24,7 @@ import {
 
 import * as i18n from './translations';
 
-const { urlField } = fieldValidators;
+const { urlField, emptyField } = fieldValidators;
 
 const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
 
@@ -32,12 +34,72 @@ const PROXY_VERIFICATION_MODE_OPTIONS = [
   { value: 'full', text: i18n.PROXY_VERIFICATION_MODE_FULL },
 ];
 
+const ProxyBasicAuthFields: React.FC<{ readOnly: boolean }> = ({ readOnly }) => (
+  <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="proxyBasicAuthFields">
+    <EuiFlexItem>
+      <UseField
+        path="secrets.proxyUsername"
+        config={{
+          label: i18n.PROXY_USERNAME_LABEL,
+          validations: [{ validator: emptyField(i18n.PROXY_USERNAME_REQUIRED) }],
+        }}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            readOnly,
+            'data-test-subj': 'httpProxyUsernameInput',
+            fullWidth: true,
+          },
+        }}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <UseField
+        path="secrets.proxyPassword"
+        config={{
+          label: i18n.PROXY_PASSWORD_LABEL,
+          validations: [{ validator: emptyField(i18n.PROXY_PASSWORD_REQUIRED) }],
+        }}
+        component={PasswordField}
+        componentProps={{
+          euiFieldProps: {
+            readOnly,
+            'data-test-subj': 'httpProxyPasswordInput',
+          },
+        }}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
+
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.hasProxyAuth', '__internal__.hasProxy'],
+  });
+
+  const hasProxy = __internal__?.hasProxy ?? false;
+  const hasProxyAuth = config?.hasProxyAuth ?? false;
+
+  const proxyAuthOptions = [
+    {
+      value: false,
+      label: i18n.PROXY_AUTH_NONE,
+      'data-test-subj': 'proxyAuthNone',
+    },
+    {
+      value: true,
+      label: i18n.PROXY_AUTH_BASIC,
+      children: hasProxyAuth && <ProxyBasicAuthFields readOnly={readOnly} />,
+      'data-test-subj': 'proxyAuthBasic',
+    },
+  ];
+
   return (
     <>
       <UseField
@@ -69,78 +131,73 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
         />
       </React.Suspense>
       <EuiSpacer size="m" />
-      <EuiAccordion
-        id="http-connector-proxy"
-        buttonContent={i18n.PROXY_SECTION_TITLE}
-        paddingSize="m"
-      >
-        <UseField
-          path="config.proxyUrl"
-          config={{
-            label: i18n.PROXY_URL_LABEL,
-            validations: [
-              {
-                validator: (arg) => {
-                  const value = arg.value;
-                  if (value == null || value === '') return;
-                  return urlField(i18n.PROXY_URL_INVALID)(arg);
-                },
+      <UseField
+        path="__internal__.hasProxy"
+        component={ToggleField}
+        config={{
+          defaultValue: false,
+          label: i18n.PROXY_SWITCH_LABEL,
+        }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'httpProxySwitch',
+          },
+        }}
+      />
+      {hasProxy && (
+        <>
+          <EuiSpacer size="s" />
+          <UseField
+            path="config.proxyUrl"
+            config={{
+              label: i18n.PROXY_URL_LABEL,
+              validations: [
+                { validator: emptyField(i18n.PROXY_URL_REQUIRED) },
+                { validator: urlField(i18n.PROXY_URL_INVALID) },
+              ],
+            }}
+            component={Field}
+            componentProps={{
+              euiFieldProps: {
+                readOnly,
+                'data-test-subj': 'httpProxyUrlText',
+                fullWidth: true,
+                placeholder: 'http://proxy:8080',
               },
-            ],
-          }}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'httpProxyUrlText',
-              fullWidth: true,
-              placeholder: 'http://proxy:8080',
-            },
-          }}
-        />
-        <EuiSpacer size="m" />
-        <UseField
-          path="config.proxyVerificationMode"
-          config={{
-            label: i18n.PROXY_VERIFICATION_MODE_LABEL,
-            defaultValue: 'full',
-          }}
-          component={SelectField}
-          componentProps={{
-            euiFieldProps: {
-              options: PROXY_VERIFICATION_MODE_OPTIONS,
-              fullWidth: true,
-              readOnly,
-              'data-test-subj': 'httpProxyVerificationModeSelect',
-            },
-          }}
-        />
-        <EuiSpacer size="m" />
-        <UseField
-          path="secrets.proxyUsername"
-          config={{ label: i18n.PROXY_USERNAME_LABEL }}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'httpProxyUsernameInput',
-              fullWidth: true,
-            },
-          }}
-        />
-        <EuiSpacer size="s" />
-        <UseField
-          path="secrets.proxyPassword"
-          config={{ label: i18n.PROXY_PASSWORD_LABEL }}
-          component={PasswordField}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'httpProxyPasswordInput',
-            },
-          }}
-        />
-      </EuiAccordion>
+            }}
+          />
+          <EuiSpacer size="m" />
+          <UseField
+            path="config.proxyVerificationMode"
+            config={{
+              label: i18n.PROXY_VERIFICATION_MODE_LABEL,
+              defaultValue: 'full',
+            }}
+            component={SelectField}
+            componentProps={{
+              euiFieldProps: {
+                options: PROXY_VERIFICATION_MODE_OPTIONS,
+                fullWidth: true,
+                readOnly,
+                'data-test-subj': 'httpProxyVerificationModeSelect',
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
+          <UseField
+            path="config.hasProxyAuth"
+            component={CardRadioGroupField}
+            config={{
+              label: i18n.PROXY_AUTH_LABEL,
+              defaultValue: false,
+            }}
+            componentProps={{
+              options: proxyAuthOptions,
+            }}
+          />
+        </>
+      )}
     </>
   );
 };

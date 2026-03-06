@@ -85,13 +85,16 @@ export const getConnectorType = (): HttpConnectorType => ({
       customValidator: (secrets) => {
         const { proxyUsername, proxyPassword } = secrets;
         if ((proxyUsername && !proxyPassword) || (!proxyUsername && proxyPassword)) {
-          throw new Error('proxyUrl is required when proxyUsername or proxyPassword is provided');
+          throw new Error('proxyUsername and proxyPassword must both be provided, or neither');
         }
       },
     },
     connector: (config, secrets) => {
-      if ((secrets.proxyUsername || secrets.proxyPassword) && !config.proxyUrl) {
-        return 'proxyUrl is required when proxyUsername or proxyPassword is provided';
+      if (config.hasProxyAuth && !config.proxyUrl) {
+        return 'proxyUrl is required when proxy authentication is enabled';
+      }
+      if (config.hasProxyAuth && (!secrets.proxyUsername || !secrets.proxyPassword)) {
+        return 'proxyUsername and proxyPassword are required when proxy authentication is enabled';
       }
       return null;
     },
@@ -231,7 +234,11 @@ export async function executor(
   let proxySettings: ProxySettings | undefined;
   if (config.proxyUrl) {
     const parsedUrl = new URL(config.proxyUrl);
-    if (execOptions.secrets.proxyUsername && execOptions.secrets.proxyPassword) {
+    if (
+      config.hasProxyAuth &&
+      execOptions.secrets.proxyUsername &&
+      execOptions.secrets.proxyPassword
+    ) {
       parsedUrl.username = execOptions.secrets.proxyUsername;
       parsedUrl.password = execOptions.secrets.proxyPassword;
     }

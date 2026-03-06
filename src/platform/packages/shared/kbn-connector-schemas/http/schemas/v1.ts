@@ -29,6 +29,7 @@ export const ConfigSchema = z
     additionalFields: AuthConfiguration.additionalFields,
     proxyUrl: z.string().url().optional(),
     proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
+    hasProxyAuth: z.boolean().default(false),
   })
   .strict();
 

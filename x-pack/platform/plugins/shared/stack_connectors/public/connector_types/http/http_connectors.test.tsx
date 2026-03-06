@@ -14,7 +14,6 @@ import { formSerializer, formDeserializer } from '../lib/http/form_serialization
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-// Avoid loading AuthConfig (and its useSecretHeaders/useQuery) in unit tests
 jest.mock('../../common/auth/auth_config', () => ({
   __esModule: true,
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
@@ -43,7 +42,7 @@ describe('HttpActionConnectorFields', () => {
     isDeprecated: false,
   };
 
-  it('renders base URL field and proxy section', async () => {
+  it('renders base URL field and proxy switch', async () => {
     render(
       <ConnectorFormTestProvider
         connector={connector}
@@ -62,10 +61,10 @@ describe('HttpActionConnectorFields', () => {
       expect(screen.getByTestId('httpUrlText')).toBeInTheDocument();
     });
 
-    expect(screen.getByRole('button', { name: /proxy/i })).toBeInTheDocument();
+    expect(screen.getByTestId('httpProxySwitch')).toBeInTheDocument();
   });
 
-  it('renders proxy fields when proxy accordion is opened', async () => {
+  it('renders proxy fields when proxy switch is toggled on', async () => {
     render(
       <ConnectorFormTestProvider
         connector={connector}
@@ -81,16 +80,79 @@ describe('HttpActionConnectorFields', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('httpUrlText')).toBeInTheDocument();
+      expect(screen.getByTestId('httpProxySwitch')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByRole('button', { name: /proxy/i }));
+    await userEvent.click(screen.getByTestId('httpProxySwitch'));
 
     await waitFor(() => {
       expect(screen.getByTestId('httpProxyUrlText')).toBeInTheDocument();
     });
     expect(screen.getByTestId('httpProxyVerificationModeSelect')).toBeInTheDocument();
-    expect(screen.getByTestId('httpProxyUsernameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('proxyAuthNone')).toBeInTheDocument();
+    expect(screen.getByTestId('proxyAuthBasic')).toBeInTheDocument();
+  });
+
+  it('renders proxy username/password fields when Basic auth is selected', async () => {
+    render(
+      <ConnectorFormTestProvider
+        connector={connector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpProxySwitch')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('httpProxySwitch'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('proxyAuthBasic')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('proxyAuthBasic'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpProxyUsernameInput')).toBeInTheDocument();
+    });
     expect(screen.getByTestId('httpProxyPasswordInput')).toBeInTheDocument();
+  });
+
+  it('shows proxy section when editing connector with proxyUrl', async () => {
+    const connectorWithProxy = {
+      ...connector,
+      config: {
+        ...connector.config,
+        proxyUrl: 'http://proxy:8080',
+        proxyVerificationMode: 'full',
+        hasProxyAuth: false,
+      },
+    };
+
+    render(
+      <ConnectorFormTestProvider
+        connector={connectorWithProxy}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={true}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpProxyUrlText')).toBeInTheDocument();
+    });
   });
 });
