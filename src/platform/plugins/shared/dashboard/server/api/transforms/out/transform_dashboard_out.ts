@@ -15,6 +15,7 @@ import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -55,7 +56,7 @@ export function transformDashboardOut(
   const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
 
   // try to maintain a consistent (alphabetical) order of keys
-  return {
+  const dashboardState = {
     ...(description && { description }),
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),
@@ -72,4 +73,7 @@ export function transformDashboardOut(
     ...(timeRange && { time_range: timeRange }),
     title: title ?? '',
   };
+
+  const dashboardStateSchema = getDashboardStateSchema(isDashboardAppRequest);
+  return dashboardStateSchema.validate(dashboardState);
 }
