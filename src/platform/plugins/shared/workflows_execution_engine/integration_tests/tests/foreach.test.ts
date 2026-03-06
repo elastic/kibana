@@ -177,10 +177,9 @@ steps:
           await workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
             'fake_workflow_execution_id'
           );
-        const error =
-          await workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
-            'fake_workflow_execution_id'
-          )?.error;
+        const error = await workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        )?.error;
         expect(error).toBeDefined();
         expect(workflowExecution?.status).toBe(ExecutionStatus.FAILED);
       });
