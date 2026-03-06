@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { evaluate as base, type EvaluationDataset, type Example } from '@kbn/evals';
+import {
+  evaluate as base,
+  createSpanLatencyEvaluator,
+  getCurrentTraceId,
+  type EvaluationDataset,
+  type Example,
+} from '@kbn/evals';
 import { AgentBuilderClient } from '../src/clients/chat/agent_builder_client';
 import type { ConverseAttachment } from '../src/clients/chat/types';
 import { createCriteriaEvaluator } from '../src/evaluate_dataset';
@@ -45,7 +51,7 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient }, use) => {
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(async ({ dataset: { name, description, examples } }) => {
         await executorClient.runExperiment(
           {
@@ -56,14 +62,23 @@ export const evaluate = base.extend<
                 attachments: input.attachments,
               });
 
+              const traceId = getCurrentTraceId();
+
               return {
                 errors: response.errors,
                 messages: response.messages,
                 steps: response.steps,
+                traceId,
               };
             },
           },
-          [createCriteriaEvaluator({ evaluators })]
+          [
+            createCriteriaEvaluator({ evaluators }),
+            evaluators.traceBasedEvaluators.inputTokens,
+            evaluators.traceBasedEvaluators.outputTokens,
+            evaluators.traceBasedEvaluators.cachedTokens,
+            createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+          ]
         );
       });
     },
