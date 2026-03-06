@@ -71,6 +71,7 @@ import {
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
+import { TabComment } from './tab_comment';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 
@@ -513,6 +514,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             }
             mainPanel={
               <div css={styles.dscPageContentWrapper}>
+                <TabComment />
                 {resultState === 'none' ? (
                   <>
                     {React.isValidElement(panelsToggle) ? (

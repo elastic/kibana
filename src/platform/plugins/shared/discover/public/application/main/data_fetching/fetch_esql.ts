@@ -50,6 +50,17 @@ export interface FetchEsqlParams {
   };
 }
 
+const MAX_MULTIPLIED_ROWS = 1_000_000;
+
+function getMultiplierFromESQLQuery(esql: string): number {
+  if (!esql) return 1;
+  const match = esql.match(/(?:\/\/|\/\*)\s*(\d+)\s*x\b/i);
+  if (!match) return 1;
+  const value = parseInt(match[1], 10);
+  if (!Number.isFinite(value) || value <= 0) return 1;
+  return value;
+}
+
 export function fetchEsql({
   query,
   inputQuery,
@@ -104,7 +115,30 @@ export function fetchEsql({
             const rows = table?.rows ?? [];
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
-            finalData = rows.map((row, idx) => {
+
+            const esqlString = 'esql' in query ? query.esql : '';
+            const multiplier = getMultiplierFromESQLQuery(esqlString);
+            const effectiveMultiplier =
+              multiplier > 1
+                ? Math.min(multiplier, Math.ceil(MAX_MULTIPLIED_ROWS / Math.max(rows.length, 1)))
+                : 1;
+            const expandedRows =
+              effectiveMultiplier > 1
+                ? Array.from({ length: effectiveMultiplier }, () =>
+                    rows.map((row) => structuredClone(row))
+                  ).flat()
+                : rows;
+
+            if (effectiveMultiplier > 1) {
+              expandedRows.forEach((row, idx) => {
+                row['@nr'] = idx + 1;
+              });
+              if (esqlQueryColumns && !esqlQueryColumns.some((c) => c.id === '@nr')) {
+                esqlQueryColumns = [{ id: '@nr', name: '@nr', meta: { type: 'number' } }, ...esqlQueryColumns];
+              }
+            }
+
+            finalData = expandedRows.map((row, idx) => {
               const record: DataTableRecord = {
                 id: String(idx),
                 raw: row,

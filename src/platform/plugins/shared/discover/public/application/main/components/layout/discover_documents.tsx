@@ -50,7 +50,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, type AggregateQuery } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
@@ -525,6 +525,13 @@ function DiscoverDocumentsComponent({
     viewModeToggle,
   ]);
 
+  const handleOpenInNewTab = useCallback(
+    (params: { appState?: { query?: AggregateQuery } }) => {
+      dispatch(internalStateActions.openInNewTab({ appState: params.appState }));
+    },
+    [dispatch]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -602,6 +609,7 @@ function DiscoverDocumentsComponent({
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}
+            onOpenInNewTab={handleOpenInNewTab}
             query={query}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}

@@ -32,6 +32,23 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
+const MAX_MULTIPLIED_ROWS = 1_000_000;
+
+/**
+ * Parses an ES|QL query for a row-multiplier comment such as `// 1000x` or `/* 500x *\/`.
+ * When present the caller can clone result rows client-side to simulate a larger dataset.
+ * Returns 1 (no-op) when no valid multiplier comment is found.
+ */
+export function getMultiplierFromESQLQuery(esql: string): number {
+  if (!esql) return 1;
+  const match = esql.match(/(?:\/\/|\/\*)\s*(\d+)\s*x\b/i);
+  if (!match) return 1;
+  const value = parseInt(match[1], 10);
+  if (!Number.isFinite(value) || value <= 0) return 1;
+  return value;
+}
+
+export { MAX_MULTIPLIED_ROWS };
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
