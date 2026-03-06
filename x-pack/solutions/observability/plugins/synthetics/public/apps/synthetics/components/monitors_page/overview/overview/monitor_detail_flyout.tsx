@@ -305,17 +305,10 @@ export function MonitorDetailFlyout(props: Props) {
         {
           type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
           data: {
-            ...(monitorName
-              ? {
-                  attachmentLabel: i18n.translate(
-                    'xpack.synthetics.monitorAttachment.attachmentLabel',
-                    {
-                      defaultMessage: '{monitorName} monitor',
-                      values: { monitorName },
-                    }
-                  ),
-                }
-              : {}),
+            attachmentLabel: i18n.translate('xpack.synthetics.monitorAttachment.attachmentLabel', {
+              defaultMessage: '{monitorName} monitor',
+              values: { monitorName },
+            }),
             configId,
             monitorName,
             monitorType: monitorType ?? 'unknown',
