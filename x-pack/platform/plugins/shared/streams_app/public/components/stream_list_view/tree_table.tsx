@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import type { SuggestionBulkStatusItem } from '@kbn/streams-plugin/common';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
@@ -48,6 +49,7 @@ import { RetentionColumn } from './retention_column';
 import { SuggestionStatusColumn } from './suggestion_status_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import { useKibana } from '../../hooks/use_kibana';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import {
   NAME_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
@@ -106,6 +108,9 @@ export function StreamsTreeTable({
     streams: { streamsRepositoryClient },
   } = useKibana().dependencies.start;
 
+  const aiFeatures = useAIFeatures();
+  const isAIEnabled = aiFeatures !== null && !aiFeatures.loading && aiFeatures.enabled;
+
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
@@ -127,11 +132,18 @@ export function StreamsTreeTable({
   const docCountsFetch = getStreamDocCounts();
 
   const suggestionStatusResult = useStreamsAppFetch(
-    ({ signal }) =>
-      streamsRepositoryClient.fetch('GET /internal/streams/_pipeline_suggestion/_bulk_status', {
-        signal,
-      }),
-    [streamsRepositoryClient],
+    ({ signal }) => {
+      if (!isAIEnabled) {
+        return Promise.resolve([] as SuggestionBulkStatusItem[]);
+      }
+      return streamsRepositoryClient.fetch(
+        'GET /internal/streams/_pipeline_suggestion/_bulk_status',
+        {
+          signal,
+        }
+      );
+    },
+    [streamsRepositoryClient, isAIEnabled],
     { disableToastOnError: true }
   );
 
@@ -567,23 +579,29 @@ export function StreamsTreeTable({
               '-'
             ),
         },
-        {
-          field: 'suggestion',
-          name: (
-            <span aria-label={SUGGESTION_COLUMN_HEADER_ARIA_LABEL}>{SUGGESTION_COLUMN_HEADER}</span>
-          ),
-          width: '130px',
-          sortable: false,
-          align: 'center',
-          render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
-              <SuggestionStatusColumn
-                streamName={item.stream.name}
-                status={suggestionStatusByStream[item.stream.name]}
-                isLoading={isSuggestionStatusInitialLoading}
-              />
-            ) : null,
-        },
+        ...(isAIEnabled
+          ? [
+              {
+                field: 'suggestion',
+                name: (
+                  <span aria-label={SUGGESTION_COLUMN_HEADER_ARIA_LABEL}>
+                    {SUGGESTION_COLUMN_HEADER}
+                  </span>
+                ),
+                width: '130px',
+                sortable: false,
+                align: 'center' as const,
+                render: (_: unknown, item: TableRow) =>
+                  item.data_stream ? (
+                    <SuggestionStatusColumn
+                      streamName={item.stream.name}
+                      status={suggestionStatusByStream[item.stream.name]}
+                      isLoading={isSuggestionStatusInitialLoading}
+                    />
+                  ) : null,
+              },
+            ]
+          : []),
         {
           field: 'retentionMs',
           name: (

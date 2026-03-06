@@ -7,6 +7,7 @@
 
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { useAbortController } from '@kbn/react-hooks';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useKibana } from './use_kibana';
 
 interface ExtractedPatterns {
@@ -40,25 +41,40 @@ export function usePipelineSuggestionApi(streamName: string) {
       documents: FlattenRecord[];
       extractedPatterns: ExtractedPatterns;
     }) => {
-      return streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/_pipeline_suggestion/_task',
-        {
-          signal,
-          params: {
-            path: { name: streamName },
-            body: {
-              action: 'schedule' as const,
-              connectorId: params.connectorId,
-              documents: params.documents,
-              extractedPatterns: params.extractedPatterns,
-            },
-          },
+      const maxRetries = 5;
+      const retryIntervalMs = 1000;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          return await streamsRepositoryClient.fetch(
+            'POST /internal/streams/{name}/_pipeline_suggestion/_task',
+            {
+              signal,
+              params: {
+                path: { name: streamName },
+                body: {
+                  action: 'schedule' as const,
+                  connectorId: params.connectorId,
+                  documents: params.documents,
+                  extractedPatterns: params.extractedPatterns,
+                },
+              },
+            }
+          );
+        } catch (error) {
+          const isCancellationInProgress =
+            isHttpFetchError(error) && error.response?.status === 409;
+          if (isCancellationInProgress && attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryIntervalMs));
+            continue;
+          }
+          throw error;
         }
-      );
+      }
     },
     getPipelineSuggestionTaskStatus: async () => {
       return streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+        'GET /internal/streams/{name}/_pipeline_suggestion/_status',
         {
           signal,
           params: {

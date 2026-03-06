@@ -19,6 +19,8 @@ export interface SuggestionBulkStatusItem {
   pipelineInProgressCount: number;
   /** Count of pipeline suggestions that failed to generate */
   pipelineFailedCount: number;
+  /** ISO timestamp when the pipeline suggestion task was created */
+  pipelineCreatedAt?: string;
   /** Count of feature identification/partitioning suggestions */
   featuresCount: number;
   /** Count of significant events suggestions */

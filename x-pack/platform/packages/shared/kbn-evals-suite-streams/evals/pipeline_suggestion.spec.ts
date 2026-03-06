@@ -167,7 +167,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
     while (true) {
       const statusResponse = await params.kbnClient.request({
-        method: 'POST',
+        method: 'GET',
         path: `/internal/streams/${params.streamName}/_pipeline_suggestion/_status`,
       });
 

@@ -29,6 +29,10 @@ export type PipelineSuggestionTaskResult = TaskResult<PipelineSuggestionTaskPayl
 /**
  * Helper to generate task ID for pipeline suggestion tasks.
  * Uses stream name to ensure one suggestion per stream.
+ *
+ * This means that in a multi-user environment, only one user can generate
+ * suggestions per stream at a time and results are shared (viewable) by
+ * all users. The task does not currently track which user initiated it.
  */
 function getPipelineSuggestionTaskId(streamName: string): string {
   return `${STREAMS_PIPELINE_SUGGESTION_TASK_TYPE}_${streamName}`;
@@ -159,7 +163,7 @@ const pipelineSuggestionTaskRoute = createServerRoute({
 });
 
 const pipelineSuggestionStatusRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+  endpoint: 'GET /internal/streams/{name}/_pipeline_suggestion/_status',
   options: {
     access: 'internal',
     summary: 'Get pipeline suggestion task status',
@@ -251,6 +255,7 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
       pipelineCount: number;
       pipelineInProgressCount: number;
       pipelineFailedCount: number;
+      pipelineCreatedAt?: string;
       featuresCount: number;
       significantEventsCount: number;
     }
@@ -287,11 +292,12 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
 
       const statusMap = await taskClient.getStatusesByType(taskType, taskIds);
 
-      for (const [taskId, { status, payload }] of statusMap.entries()) {
+      for (const [taskId, { status, payload, created_at }] of statusMap.entries()) {
         const extractedStreamName = extractStreamNameFromTaskId(taskId, taskType);
         const counts = getOrCreateCounts(extractedStreamName);
 
         if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
+          counts.pipelineCreatedAt = created_at;
           const hasEmptyPipeline =
             status === TaskStatus.Completed &&
             payload != null &&
@@ -299,7 +305,11 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
             payload.pipeline == null;
           if (status === TaskStatus.Completed && !hasEmptyPipeline) {
             counts.pipelineCount += 1;
-          } else if (status === TaskStatus.InProgress || status === TaskStatus.Stale) {
+          } else if (
+            status === TaskStatus.InProgress ||
+            status === TaskStatus.Stale ||
+            status === TaskStatus.BeingCanceled
+          ) {
             counts.pipelineInProgressCount += 1;
           } else if (status === TaskStatus.Failed || hasEmptyPipeline) {
             counts.pipelineFailedCount += 1;
@@ -327,6 +337,7 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
         pipelineCount: counts.pipelineCount,
         pipelineInProgressCount: counts.pipelineInProgressCount,
         pipelineFailedCount: counts.pipelineFailedCount,
+        pipelineCreatedAt: counts.pipelineCreatedAt,
         featuresCount: counts.featuresCount,
         significantEventsCount: counts.significantEventsCount,
       });

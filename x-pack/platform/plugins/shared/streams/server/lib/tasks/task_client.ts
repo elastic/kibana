@@ -74,21 +74,26 @@ export class TaskClient<TaskType extends string> {
     const task = await this.get<TParams, TPayload>(id);
 
     if (task.status === TaskStatus.InProgress) {
-      return isStale(task.created_at) ? { status: TaskStatus.Stale } : { status: task.status };
+      return isStale(task.created_at)
+        ? { status: TaskStatus.Stale, created_at: task.created_at }
+        : { status: task.status, created_at: task.created_at };
     } else if (task.status === TaskStatus.Failed) {
       return {
         status: TaskStatus.Failed,
         error: task.task.error,
+        created_at: task.created_at,
       };
     } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
       return {
         status: task.status,
+        created_at: task.created_at,
         ...task.task.payload,
       };
     }
 
     return {
       status: task.status,
+      created_at: task.created_at,
     };
   }
 
@@ -100,7 +105,7 @@ export class TaskClient<TaskType extends string> {
   public async getStatusesByType<TParams extends {} = {}, TPayload extends {} = {}>(
     taskType: TaskType,
     taskIds?: string[]
-  ): Promise<Map<string, { status: TaskStatus; payload?: TPayload }>> {
+  ): Promise<Map<string, { status: TaskStatus; payload?: TPayload; created_at: string }>> {
     const query: {
       bool: { filter: Array<{ term: { type: TaskType } } | { terms: { id: string[] } }> };
     } = {
@@ -119,7 +124,10 @@ export class TaskClient<TaskType extends string> {
       query,
     });
 
-    const results = new Map<string, { status: TaskStatus; payload?: TPayload }>();
+    const results = new Map<
+      string,
+      { status: TaskStatus; payload?: TPayload; created_at: string }
+    >();
 
     for (const hit of response.hits.hits) {
       const task = hit._source as PersistedTask<TParams, TPayload>;
@@ -136,7 +144,7 @@ export class TaskClient<TaskType extends string> {
           ? task.task.payload
           : undefined;
 
-      results.set(task.id, { status, payload });
+      results.set(task.id, { status, payload, created_at: task.created_at });
     }
 
     return results;

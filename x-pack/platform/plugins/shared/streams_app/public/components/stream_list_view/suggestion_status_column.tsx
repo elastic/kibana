@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionBulkStatusItem } from '@kbn/streams-plugin/common';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -107,6 +108,8 @@ export function SuggestionStatusColumn({
     return 'primary';
   };
 
+  const createdAt = status?.pipelineCreatedAt;
+
   const popoverContent = (
     <div style={{ maxWidth: 280 }}>
       <EuiTitle size="xxxs">
@@ -136,6 +139,13 @@ export function SuggestionStatusColumn({
               defaultMessage: 'Review new processing suggestion{count, plural, one {} other {s}}.',
               values: { count: availableCount },
             })}
+          </p>
+        )}
+        {createdAt && (
+          <p>
+            <EuiText size="xs" color="subdued">
+              <FormattedRelative value={new Date(createdAt)} />
+            </EuiText>
           </p>
         )}
       </EuiText>

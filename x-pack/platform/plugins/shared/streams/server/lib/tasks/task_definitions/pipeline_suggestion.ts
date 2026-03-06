@@ -240,6 +240,22 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
+                  if (runContext.abortController.signal.aborted) {
+                    // User-initiated cancellation: the cancellableTask wrapper
+                    // already transitions the task to Canceled via markCanceled().
+                    // Calling fail() here would race with that and incorrectly
+                    // overwrite the status.
+                    return;
+                  }
+                  // Not user-initiated (e.g. connector timeout) — fail the task
+                  logger.error(
+                    `Task ${runContext.taskInstance.id} failed with abort error: ${errorMessage}`
+                  );
+                  await taskClient.fail<PipelineSuggestionTaskParams>(
+                    _task,
+                    { connectorId, streamName, documents, extractedPatterns },
+                    errorMessage
+                  );
                   return;
                 }
 
