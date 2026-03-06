@@ -11,6 +11,7 @@ import type {
   ColumnState,
   GenericIndexPatternColumn,
   TextBasedLayerColumn,
+  DataType,
 } from '@kbn/lens-common';
 import { ACCESSOR } from './constants';
 import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
@@ -57,8 +58,6 @@ export function getAccessorName(
   return `${ACCESSOR}_${type}_${index}`;
 }
 
-type InferredDatatype = 'number' | 'string';
-
 /**
  * Infers the datatype from the color configuration.
  * - colorMapping → 'string'
@@ -67,8 +66,8 @@ type InferredDatatype = 'number' | 'string';
  */
 export function inferDatatypeFromColor(
   color: ColorByValueType | ColorMappingType | undefined,
-  defaultType: InferredDatatype
-): InferredDatatype {
+  defaultType: Extract<DataType, 'number' | 'string'>
+): Extract<DataType, 'number' | 'string'> {
   if (isColorByValueColor(color)) {
     return 'number';
   }
