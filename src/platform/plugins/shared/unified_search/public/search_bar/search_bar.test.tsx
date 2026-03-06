@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/esql/public/kibana_services', () => ({
+  getKibanaServices: jest.fn(() => ({})),
+  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
+}));
+
 import React from 'react';
 import type { SearchBarProps, SearchBarState } from './search_bar';
 import SearchBar, { SearchBarUI } from './search_bar';
