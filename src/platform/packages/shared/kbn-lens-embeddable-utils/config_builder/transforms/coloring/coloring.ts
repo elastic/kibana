@@ -301,7 +301,7 @@ export function fromColorMappingLensStateToAPI(
         values: fromRulesLensStateToAPI(rules),
       };
     }),
-    sort: (colorMapping.colorMode as GradientColorMode).sort ?? 'desc',
+    sort: (colorMapping.colorMode as GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
     ...unassignedColor,
   };
