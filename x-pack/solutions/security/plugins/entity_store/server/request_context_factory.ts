@@ -99,6 +99,7 @@ export async function createRequestHandlerContext({
       logsExtractionClient,
       security: startPlugins.security,
       analytics,
+      savedObjectsClient: core.savedObjects.client,
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,
