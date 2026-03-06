@@ -229,7 +229,7 @@ export const AnomalyTimeline: FC = () => {
           : {}),
         // For cases attachment, pass just the job IDs to maintain stale data
         jobIds: selectedJobs?.map((v) => v.id),
-        timeRange: globalTimeRange,
+        time_range: globalTimeRange,
         ...(isDefined(queryString) && queryString !== ''
           ? {
               query: {
