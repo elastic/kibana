@@ -212,6 +212,9 @@ export const ExportJobsFlyoutContent = ({
         hideCloseButton
         size="s"
         data-test-subj="mlJobMgmtExportJobsFlyout"
+        aria-label={i18n.translate('xpack.ml.importExport.exportFlyout.flyoutAriaLabel', {
+          defaultMessage: 'Export analytics jobs flyout',
+        })}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
