@@ -29,6 +29,7 @@ export const connectorToInference = (connector: RawConnector): InferenceConnecto
     type: connector.actionTypeId,
     config: connector.config ?? {},
     capabilities: {},
+    isInferenceEndpoint: false,
   };
 
   inferenceConnector.capabilities.contextWindowSize = getContextWindowSize(inferenceConnector);

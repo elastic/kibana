@@ -15,6 +15,7 @@ const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector
     name: 'connector',
     connectorId: 'connectorId',
     config: {},
+    isInferenceEndpoint: false,
     capabilities: {},
     ...parts,
   };

@@ -28,6 +28,7 @@ describe('getConnectorById', () => {
     name: 'Mock',
     type: InferenceConnectorType.OpenAI,
     config: {},
+    isInferenceEndpoint: false,
     capabilities: {},
     ...parts,
   });
