@@ -239,7 +239,6 @@ const mockCreatePointInTimeFinderAsInternalUser = (
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/256405
 describe('BackfillClient', () => {
   let backfillClient: BackfillClient;
   let isSystemAction: jest.Mock;
