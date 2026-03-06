@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, user, session, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, user, session, ...}`.
 
 ### Filters
 
@@ -71,6 +71,9 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | --- | --- |
 | `event.action` | Human readable standardized description of the action performed. Refer to [Available actions](#available-actions) for a list of possible values. |
 | `event.type` | Human readable standardized categorization of actions performed. |
+| `event.start` | (Optional) ISO8601 timestamp of the event start time. |
+| `event.end` | (Optional) ISO8601 timestamp of the event end time. |
+| `event.duration` | (Optional) Duration (in ns) between the event start and end timestamps. |
 
 ### Tracing fields
 
@@ -115,6 +118,17 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `object.name` | Target resource name. |
 | `object.type` | Target resource type of the action. |
 | `object.tags` | List of tags assigned to the target. |
+
+### Metadata fields
+
+| **Field** | **Description** |
+| --- | --- |
+| `metadata` | (Optional) Additional bucket of non standard metadata specific to the kibana usage log, with some standardized optional fields (in the following rows) for normalization purposes. |
+| `metadata.user_input.indices` | (Optional) Which indices are affected by the user action. |
+| `metadata.user_input.time.start` | (Optional) ISO timestamp of the start of the selected timerange in the date picker. |
+| `metadata.user_input.time.end` | (Optional) ISO timestamp of the end of the selected timerange in the date picker. |
+| `metadata.user_input.global_query` | (Optional) KQL/ES|QL query introduced by the user in the Global Query Bar. |
+| `metadata.user_input.filters` | (Optional) Array of non-indexed objects describing the filters configured by the user. |
 
 ### Service fields
 

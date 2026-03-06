@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
-import type { UserActivityActionId } from '@kbn/core-user-activity-server';
+import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
 import type { InternalUserActivityServiceSetup } from './types';
 
@@ -79,6 +79,37 @@ describe('UserActivityService', () => {
           },
         ],
       ]);
+    });
+
+    it('logs optional event timing fields and metadata', () => {
+      const params: TrackUserActionParams = {
+        message: 'Action with metadata',
+        event: {
+          action: TEST_ACTION,
+          type: 'change',
+          start: '2026-01-01T00:00:00.000Z',
+          end: '2026-01-01T00:00:00.250Z',
+          duration: 250000000,
+        },
+        object: { id: 'obj-meta', name: 'Object', type: 'dashboard', tags: [] },
+        metadata: {
+          user_input: {
+            indices: ['logs-*'],
+            time: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-02T00:00:00.000Z' },
+            global_query: 'response.status_code >= 500',
+            filters: [{ name: 'Only errors', dslQuery: { match_all: {} }, enabled: true }],
+          },
+        },
+      };
+
+      service.trackUserAction(params);
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls).toHaveLength(1);
+      expect(logCalls[0][0]).toBe('Action with metadata');
+      expect(logCalls[0][1]).toMatchObject({
+        ...params,
+      });
     });
 
     it('generates default message when not provided', () => {

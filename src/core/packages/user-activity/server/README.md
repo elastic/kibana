@@ -8,18 +8,34 @@ Use `trackUserAction` to record user actions:
 
 ```ts
 core.userActivity.trackUserAction({
-  event: { action: 'dashboard_created', type: 'creation' },
+  event: {
+    action: 'dashboard_created',
+    type: 'creation',
+    start: new Date().toISOString(),
+    end: new Date().toISOString(),
+    duration: 250000000, // 250ms in ns
+  },
   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: ['production'] },
 });
 ```
 
-You can optionally provide a custom message:
+You can optionally provide a custom message and metadata:
 
 ```ts
 core.userActivity.trackUserAction({
   message: 'User duplicated dashboard',
   event: { action: 'dashboard_copied', type: 'creation' },
   object: { id: 'dash-456', name: 'Copy of My Dashboard', type: 'dashboard', tags: [] },
+  metadata: {
+    user_input: {
+      indices: ['logs-*', 'metrics-*'],
+      time: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-02T00:00:00.000Z' },
+      global_query: 'host.name: "web-01"',
+      filters: [
+        { name: 'Environment', dslQuery: { term: { 'labels.env': 'prod' } }, enabled: true },
+      ],
+    },
+  },
 });
 ```
 
