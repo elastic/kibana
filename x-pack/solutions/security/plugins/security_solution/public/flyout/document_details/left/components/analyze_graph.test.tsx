@@ -12,12 +12,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
-import {
-  AnalyzeGraph,
-  ANALYZER_PREVIEW_BANNER,
-  DATA_VIEW_ERROR_TEST_ID,
-  DATA_VIEW_LOADING_TEST_ID,
-} from './analyze_graph';
+import { AnalyzeGraph, DATA_VIEW_ERROR_TEST_ID, DATA_VIEW_LOADING_TEST_ID } from './analyze_graph';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -29,6 +24,7 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { ANALYZER_PREVIEW_BANNER } from '../../../../resolver/view/resolver_without_providers';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
