@@ -57,6 +57,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
+    // ATTRIBUTES ------------------------------------------------------------
     collectValues({
       source: `${prefix}.attributes.watchlists`,
       destination: 'entity.attributes.watchlists',
@@ -81,6 +82,8 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
+
+    // LIFECYCLE ------------------------------------------------------------
     newestValue({
       source: `${prefix}.lifecycle.first_seen`,
       destination: 'entity.lifecycle.first_seen',
@@ -91,6 +94,11 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
     }),
+
+    // BEHAVIORS ------------------------------------------------------------
+    // Behaviors are reset periodically by the history snapshot feature
+    // The current reset implementation only resets lists and strings
+    // if we ever add a boolean, reset via snapshot needs to be updated
     collectValues({
       source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',
@@ -105,6 +113,8 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
+
+    // RELATIONSHIPS ------------------------------------------------------------
     collectValues({
       source: `${prefix}.relationships.communicates_with`,
       destination: 'entity.relationships.communicates_with',
