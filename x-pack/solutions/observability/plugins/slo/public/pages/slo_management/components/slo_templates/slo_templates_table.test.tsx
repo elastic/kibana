@@ -28,12 +28,14 @@ const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 const mockNavigateToUrl = jest.fn();
 const mockOnStateChange = jest.fn();
 
-const MockSearchBar = (props: Record<string, unknown>) => (
-  <div data-test-subj="sloTemplatesSearchBar">
-    <input data-test-subj="sloTemplatesSearchInput" />
-    {typeof props.renderQueryInputAppend === 'function' && props.renderQueryInputAppend()}
-  </div>
-);
+function MockSearchBar(props: Record<string, unknown>) {
+  return (
+    <div data-test-subj="sloTemplatesSearchBar">
+      <input data-test-subj="sloTemplatesSearchInput" />
+      {typeof props.renderQueryInputAppend === 'function' && props.renderQueryInputAppend()}
+    </div>
+  );
+}
 
 const defaultProps = {
   state: DEFAULT_STATE,

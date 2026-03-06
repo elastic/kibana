@@ -70,11 +70,13 @@ const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
 const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 
-const MockSearchBar = (props: Record<string, unknown>) => (
-  <div data-test-subj="sloTemplatesSearchBar">
-    {typeof props.renderQueryInputAppend === 'function' && props.renderQueryInputAppend()}
-  </div>
-);
+function MockSearchBar(props: Record<string, unknown>) {
+  return (
+    <div data-test-subj="sloTemplatesSearchBar">
+      {typeof props.renderQueryInputAppend === 'function' && props.renderQueryInputAppend()}
+    </div>
+  );
+}
 
 describe('SloManagementPage', () => {
   beforeEach(() => {
