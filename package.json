@@ -106,8 +106,7 @@
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.3",
-    "lodash": "4.17.23"
+    "globby/fast-glob": "3.3.3"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
@@ -137,7 +136,7 @@
     "@elastic/eui-theme-borealis": "6.1.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
-    "@elastic/monaco-esql": "3.1.18",
+    "@elastic/monaco-esql": "3.1.19",
     "@elastic/node-crypto": "1.2.3",
     "@elastic/numeral": "2.5.1",
     "@elastic/opentelemetry-node": "1.8.0",
@@ -975,7 +974,7 @@
     "@kbn/search-homepage": "link:x-pack/solutions/search/plugins/search_homepage",
     "@kbn/search-index-documents": "link:x-pack/platform/packages/shared/kbn-search-index-documents",
     "@kbn/search-indices": "link:x-pack/solutions/search/plugins/search_indices",
-    "@kbn/search-inference-endpoints": "link:x-pack/solutions/search/plugins/search_inference_endpoints",
+    "@kbn/search-inference-endpoints": "link:x-pack/platform/plugins/shared/search_inference_endpoints",
     "@kbn/search-navigation": "link:x-pack/solutions/search/plugins/search_navigation",
     "@kbn/search-notebooks": "link:x-pack/solutions/search/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/solutions/search/plugins/search_playground",
@@ -2135,7 +2134,7 @@
     "whatwg-fetch": "3.6.20",
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
-    "yaml-language-server": "1.19.2",
+    "yaml-language-server": "1.21.0",
     "yargs": "15.4.1",
     "yarn-deduplicate": "6.0.2"
   },
