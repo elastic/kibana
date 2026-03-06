@@ -18,7 +18,7 @@ describe('isoToEpoch', () => {
     expect(result).toBe(new Date('2022-05-20T08:10:15.000Z').getTime());
   });
 
-  it('converts another valid ISO date string', () => {
+  it('returns the expected epoch milliseconds for a known date', () => {
     const result = schema.parse('2000-01-01T00:00:00.000Z');
     expect(result).toBe(946684800000);
   });

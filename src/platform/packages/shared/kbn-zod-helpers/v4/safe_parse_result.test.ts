@@ -23,7 +23,7 @@ describe('safeParseResult', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns undefined for completely invalid input', () => {
+  it('returns undefined for invalid input (null)', () => {
     const result = safeParseResult(null, schema);
     expect(result).toBeUndefined();
   });
