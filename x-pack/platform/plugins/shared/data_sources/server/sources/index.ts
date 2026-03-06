@@ -7,6 +7,7 @@
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
+import { googleCalendarDataSource } from './google_calendar';
 import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
@@ -17,10 +18,12 @@ import { zoomDataSource } from './zoom';
 import { zendeskDataSource } from './zendesk';
 import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
+import { tavilyDataSource } from './tavily';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
+  dataCatalog.register(googleCalendarDataSource);
   dataCatalog.register(googleDriveDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(slackDataSource);
@@ -31,4 +34,5 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(zendeskDataSource);
   dataCatalog.register(servicenowDataSource);
   dataCatalog.register(pagerdutyDataSource);
+  dataCatalog.register(tavilyDataSource);
 }

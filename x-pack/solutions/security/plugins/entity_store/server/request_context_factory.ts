@@ -20,6 +20,7 @@ import {
   EntityStoreGlobalStateClient,
 } from './domain/definitions/saved_objects';
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
+import { HistorySnapshotClient } from './domain/history_snapshot_client';
 import { CRUDClient } from './domain/crud_client';
 import type { TelemetryReporter } from './telemetry/events';
 
@@ -80,6 +81,13 @@ export async function createRequestHandlerContext({
     ccsLogsExtractionClient,
   });
 
+  const historySnapshotClient = new HistorySnapshotClient({
+    logger,
+    esClient,
+    namespace,
+    globalStateClient,
+  });
+
   return {
     core,
     logger,
@@ -104,6 +112,7 @@ export async function createRequestHandlerContext({
     ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
+    historySnapshotClient,
     security: startPlugins.security,
     namespace,
   };
