@@ -11,6 +11,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
+import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
@@ -52,7 +53,6 @@ export async function identifyFeatures({
     inferenceClient.prompt({
       input: { sample_documents: JSON.stringify(formattedDocuments) },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
-      finalToolChoice: { function: 'finalize_features' },
       abortSignal: signal,
     })
   );
@@ -60,7 +60,13 @@ export async function identifyFeatures({
   const features = uniqBy(
     response.toolCalls
       .flatMap((toolCall) => toolCall.function.arguments.features)
-      .map((feature) => ({ ...feature, stream_name: streamName }))
+      .map((feature) => {
+        return {
+          ...feature,
+          stream_name: streamName,
+          filter: tryParseFilter(feature.filter),
+        };
+      })
       .filter((feature) => {
         const result = baseFeatureSchema.safeParse(feature);
         if (!result.success) {
@@ -77,4 +83,13 @@ export async function identifyFeatures({
     features,
     tokensUsed: sumTokens({ prompt: 0, completion: 0, total: 0, cached: 0 }, response.tokens),
   };
+}
+
+function tryParseFilter(maybeFilter: unknown): Condition | undefined {
+  if (!maybeFilter) {
+    return undefined;
+  }
+
+  const result = conditionSchema.safeParse(maybeFilter);
+  return result.success ? result.data : undefined;
 }
