@@ -148,7 +148,10 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
-        rawSource: { host: { name: 'testHost' }, entity: { EngineMetadata: { Type: 'host' } } } as never,
+        rawSource: {
+          host: { name: 'testHost' },
+          entity: { EngineMetadata: { Type: 'host' } },
+        } as never,
         entityType: 'host',
         scopeId: 'scope1',
         contextId: 'context1',
