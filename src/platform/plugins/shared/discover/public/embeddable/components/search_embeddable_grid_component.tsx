@@ -33,7 +33,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import { DiscoverGridEmbeddable, type InlineEditingProps } from './saved_search_grid';
+import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { useAdditionalCellActions } from '../../context_awareness';
@@ -49,7 +49,7 @@ interface SavedSearchEmbeddableComponentProps {
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
-  inlineEditing: InlineEditingProps;
+  inlineEditing: InlineEditing;
   stateManager: SearchEmbeddableStateManager;
 }
 

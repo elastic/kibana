@@ -24,12 +24,11 @@ import {
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
-import { InlineEditFooter } from './inline_edit_footer';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useProfileAccessor } from '../../context_awareness';
 
-export interface InlineEditingProps {
+export interface InlineEditing {
   isActive: boolean;
   hasPendingChanges: boolean;
   onApply: () => Promise<void>;
@@ -46,7 +45,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
   enableDocumentViewer: boolean;
-  inlineEditing: InlineEditingProps;
+  inlineEditing: InlineEditing;
 }
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
@@ -145,15 +144,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     gridProps.rowHeightState,
   ]);
 
-  const renderInlineEditFooter = () => <InlineEditFooter inlineEditing={inlineEditing} />;
-
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
-      append={inlineEditing.isActive ? renderInlineEditFooter() : undefined}
+      inlineEditing={inlineEditing}
     >
       <DiscoverGrid
         {...gridProps}

@@ -17,24 +17,17 @@ import {
   useBatchedPublishingSubjects,
   type ViewMode,
 } from '@kbn/presentation-publishing';
-import { isObject } from 'lodash';
-import type { InlineEditingProps } from './saved_search_grid';
-import { InlineEditFooter } from './inline_edit_footer';
+import type { InlineEditing } from './saved_search_grid';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
+import { apiPublishesIsEditableByUser } from '../utils/type_guards';
 
 interface SearchEmbeddableMissingDataViewPromptProps {
   api: { parentApi?: unknown };
   canShowDashboardWriteControls: boolean;
-  inlineEditing: InlineEditingProps;
+  inlineEditing: InlineEditing;
   isByReference: boolean;
   onEditInDiscover?: () => Promise<void>;
 }
-
-const apiPublishesIsEditableByUser = (
-  parentApi: unknown
-): parentApi is { isEditableByUser: boolean } =>
-  isObject(parentApi) &&
-  typeof (parentApi as { isEditableByUser?: boolean }).isEditableByUser === 'boolean';
 
 export const SearchEmbeddableMissingDataViewPrompt = ({
   api,
@@ -86,7 +79,12 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
   };
 
   const getBody = () => {
+    const byValueMessage =
+      "<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it.";
+
+    // View mode
     if (!isEditMode) {
+      // Read only permissions
       if (!canEditPanelInViewMode) {
         return (
           <p>
@@ -96,6 +94,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
             />
           </p>
         );
+        // Edit permissions
       } else {
         return isByReference ? (
           <p>
@@ -118,7 +117,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
           <p>
             <FormattedMessage
               id="discover.embeddable.missingDataView.viewModeWarningDescriptionEditableByValue"
-              defaultMessage="<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it."
+              defaultMessage={byValueMessage}
               values={{
                 EditInDiscoverLink: (chunks: React.ReactNode) => (
                   <EuiLink
@@ -135,6 +134,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
       }
     }
 
+    // Edit mode
     return isByReference ? (
       <p>
         <FormattedMessage
@@ -157,7 +157,7 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
       <p>
         <FormattedMessage
           id="discover.embeddable.missingDataView.editModeWarningDescriptionByValue"
-          defaultMessage="<EditInDiscoverLink>Edit the session's configuration</EditInDiscoverLink> to fix it."
+          defaultMessage={byValueMessage}
           values={{
             EditInDiscoverLink: (chunks: React.ReactNode) => (
               <EuiLink
@@ -175,10 +175,8 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
 
   return (
     <SavedSearchEmbeddableBase
-      append={
-        inlineEditing.isActive ? <InlineEditFooter inlineEditing={inlineEditing} /> : undefined
-      }
       dataTestSubj="embeddedSavedSearchDocTable"
+      inlineEditing={inlineEditing}
       isLoading={false}
     >
       <EuiFlexGroup

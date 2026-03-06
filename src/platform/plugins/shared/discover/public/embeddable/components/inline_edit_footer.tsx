@@ -17,10 +17,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InlineEditingProps } from './saved_search_grid';
+import type { InlineEditing } from './saved_search_grid';
 
 interface InlineEditFooterProps {
-  inlineEditing: InlineEditingProps;
+  inlineEditing: InlineEditing;
 }
 
 export const INLINE_EDIT_FOOTER_HELP_TEXT = htmlIdGenerator()('discoverInlineEditFooterHelp');

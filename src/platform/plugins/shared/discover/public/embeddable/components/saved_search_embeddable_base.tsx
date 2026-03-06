@@ -15,7 +15,9 @@ import {
   type SearchResponseWarning,
   SearchResponseWarningsBadge,
 } from '@kbn/search-response-warnings';
+import type { InlineEditing } from './saved_search_grid';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
+import { InlineEditFooter } from './inline_edit_footer';
 
 const containerStyles = css`
   width: 100%;
@@ -29,6 +31,7 @@ export interface SavedSearchEmbeddableBaseProps {
   append?: React.ReactElement;
   dataTestSubj?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  inlineEditing?: InlineEditing;
 }
 
 export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddableBaseProps>> = ({
@@ -38,6 +41,7 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
   append,
   dataTestSubj,
   interceptedWarnings,
+  inlineEditing,
   children,
 }) => {
   return (
@@ -74,6 +78,11 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
         <EuiFlexItem css={{ minHeight: 0 }}>{children}</EuiFlexItem>
 
         {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
+        {inlineEditing?.isActive && (
+          <EuiFlexItem grow={false}>
+            <InlineEditFooter inlineEditing={inlineEditing} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <SearchResponseWarningsBadge warnings={interceptedWarnings ?? []} />

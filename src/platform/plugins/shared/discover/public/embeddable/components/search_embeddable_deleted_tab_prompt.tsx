@@ -17,21 +17,14 @@ import {
   useBatchedPublishingSubjects,
   type ViewMode,
 } from '@kbn/presentation-publishing';
-import { isObject } from 'lodash';
-import type { InlineEditingProps } from './saved_search_grid';
-import { InlineEditFooter } from './inline_edit_footer';
+import type { InlineEditing } from './saved_search_grid';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
-
-const apiPublishesIsEditableByUser = (
-  parentApi: unknown
-): parentApi is { isEditableByUser: boolean } =>
-  isObject(parentApi) &&
-  typeof (parentApi as { isEditableByUser?: boolean }).isEditableByUser === 'boolean';
+import { apiPublishesIsEditableByUser } from '../utils/type_guards';
 
 interface SearchEmbeddableDeletedTabPromptProps {
   api: { parentApi?: unknown };
   canShowDashboardWriteControls: boolean;
-  inlineEditing: InlineEditingProps;
+  inlineEditing: InlineEditing;
 }
 
 export const SearchEmbeddableDeletedTabPrompt = ({
@@ -116,10 +109,8 @@ export const SearchEmbeddableDeletedTabPrompt = ({
 
   return (
     <SavedSearchEmbeddableBase
-      append={
-        inlineEditing.isActive ? <InlineEditFooter inlineEditing={inlineEditing} /> : undefined
-      }
       dataTestSubj="embeddedSavedSearchDocTable"
+      inlineEditing={inlineEditing}
       isLoading={false}
     >
       <EuiFlexGroup
