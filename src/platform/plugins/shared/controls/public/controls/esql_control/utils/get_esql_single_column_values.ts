@@ -16,6 +16,7 @@ import { coreServices } from '../../../services/kibana_services';
 
 export interface GetESQLSingleColumnValuesSuccess {
   values: string[];
+  columnType?: string;
 }
 
 export interface GetESQLSingleColumnValuesFailure {
@@ -25,12 +26,14 @@ export interface GetESQLSingleColumnValuesFailure {
 interface GetESQLSingleColumnValuesParams {
   query: string;
   search: ISearchGeneric;
+  signal?: AbortSignal;
   timeRange?: TimeRange;
   esqlVariables: ESQLControlVariable[];
 }
 export const getESQLSingleColumnValues = async ({
   query,
   search,
+  signal,
   timeRange,
   esqlVariables,
 }: GetESQLSingleColumnValuesParams): Promise<
@@ -41,7 +44,7 @@ export const getESQLSingleColumnValues = async ({
     const results = await getESQLResults({
       esqlQuery: query,
       search,
-      signal: undefined,
+      signal,
       filter: undefined,
       dropNullColumns: true,
       timeRange,
@@ -55,7 +58,8 @@ export const getESQLSingleColumnValues = async ({
         .map((value) => value[0])
         .filter(Boolean)
         .map((option) => String(option));
-      return { values };
+      const columnType = results.response.columns[0].type;
+      return { values, columnType };
     }
 
     return { errors: [new Error('Query must return a single column')] };

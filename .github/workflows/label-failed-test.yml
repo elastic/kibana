@@ -1,3 +1,5 @@
+name: Label failed-test issues
+
 on:
   issues:
     types:

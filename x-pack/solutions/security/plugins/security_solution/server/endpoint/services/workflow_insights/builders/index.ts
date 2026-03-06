@@ -31,11 +31,11 @@ export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
   switch (params.options.insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return buildIncompatibleAntivirusWorkflowInsights(params);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return buildCustomWorkflowInsights(params);
-    case DefendInsightType.Enum.custom:
+    case DefendInsightType.enum.custom:
       return buildCustomWorkflowInsights(params);
     default:
       throw new InvalidDefendInsightTypeError();

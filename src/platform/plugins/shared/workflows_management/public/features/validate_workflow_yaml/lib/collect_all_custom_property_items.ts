@@ -15,6 +15,7 @@ import {
   type StepPropertyHandler,
 } from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
+import { getValueFromValueNode } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { CustomPropertyItem } from '../model/types';
 
 export function collectAllCustomPropertyItems(
@@ -62,7 +63,7 @@ export function collectAllCustomPropertyItems(
               scope,
               stepType: step.stepType,
               propertyKey: key,
-              propertyValue: prop.valueNode.value,
+              propertyValue: getValueFromValueNode(prop.valueNode),
               selectionHandler: propertyHandler.selection,
               context,
               yamlPath: prop.path,

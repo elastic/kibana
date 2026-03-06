@@ -87,7 +87,7 @@ test.describe(
 
       const regenerateButton = page
         .getByTestId('streamsAppGenerateSuggestionButton')
-        .filter({ hasText: 'Regenerate' });
+        .filter({ hasText: 'Regenerate all' });
       await expect(regenerateButton).toBeVisible();
       await regenerateButton.click();
 

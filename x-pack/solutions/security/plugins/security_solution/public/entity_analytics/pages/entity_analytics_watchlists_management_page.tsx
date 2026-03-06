@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { i18n } from '@kbn/i18n';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { Watchlists } from '../components/watchlists';
 
 const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlistsManagement.pageTitle',
@@ -25,7 +26,11 @@ export const EntityAnalyticsWatchlistsManagementPage = () => {
     <>
       <SecuritySolutionPageWrapper data-test-subj="watchlistManagementPage">
         <HeaderPage title={PAGE_TITLE} />
-        <EuiFlexGroup direction="column" gutterSize="l" />
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexItem>
+            <Watchlists />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsWatchlists} />
     </>

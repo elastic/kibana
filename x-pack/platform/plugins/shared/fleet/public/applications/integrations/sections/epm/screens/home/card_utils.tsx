@@ -76,6 +76,8 @@ export interface IntegrationCardItem {
   url: string;
   version: string;
   type?: string;
+  supportsAgentless?: boolean;
+  signalTypes?: string[];
 }
 
 export const mapToCard = ({
@@ -161,6 +163,17 @@ export const mapToCard = ({
 
   if (item.type === 'integration') {
     cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  if ('supportsAgentless' in item && item.supportsAgentless) {
+    cardResult.supportsAgentless = true;
+  }
+
+  if ('data_streams' in item && Array.isArray(item.data_streams)) {
+    const types = [...new Set(item.data_streams.map((ds) => ds.type))];
+    if (types.length > 0) {
+      cardResult.signalTypes = types;
+    }
   }
 
   return cardResult;

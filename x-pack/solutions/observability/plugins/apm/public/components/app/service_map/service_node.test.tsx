@@ -11,51 +11,14 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR } from './constants';
+import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
-// Mock EUI theme
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          emptyShade: MOCK_EUI_THEME.colors.emptyShade,
-          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
-          primary: MOCK_EUI_THEME.colors.primary,
-          primaryText: MOCK_EUI_THEME.colors.primaryText,
-          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
-          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
-          text: MOCK_EUI_THEME.colors.text,
-          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
-          success: MOCK_EUI_THEME.colors.success,
-          warning: MOCK_EUI_THEME.colors.warning,
-          danger: MOCK_EUI_THEME.colors.danger,
-        },
-        size: {
-          xs: '4px',
-          s: '8px',
-          m: '12px',
-          l: '24px',
-        },
-        border: {
-          radius: {
-            small: '4px',
-            medium: '6px',
-          },
-          width: {
-            thin: '1px',
-            thick: '2px',
-          },
-        },
-        font: {
-          family: '"Inter", sans-serif',
-        },
-        animation: {
-          fast: '150ms',
-        },
-      },
+      euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
       colorMode: 'LIGHT',
     }),
   };

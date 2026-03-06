@@ -76,7 +76,8 @@ const createService = (serverBasePath: string = '') => {
 
   const spacesClientServiceStart = spacesClientService.start(
     coreStart,
-    featuresPluginMock.createStart()
+    featuresPluginMock.createStart(),
+    undefined
   );
 
   const spacesServiceStart = spacesService.start({

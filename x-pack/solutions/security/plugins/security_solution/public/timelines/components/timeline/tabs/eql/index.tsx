@@ -145,6 +145,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       skip: !canQueryTimeline(),
       startDate: start,
       timerangeKind,
+      dateRangeField: experimentalDataView?.getTimeField()?.name ?? '@timestamp',
     });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();

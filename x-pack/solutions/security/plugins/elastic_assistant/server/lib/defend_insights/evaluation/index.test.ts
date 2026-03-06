@@ -57,7 +57,7 @@ describe('evaluateDefendInsights', () => {
       {
         getDefaultDefendInsightsGraph: mockGetDefaultDefendInsightsGraph,
         graphType: 'defend-insights' as const,
-        insightType: DefendInsightType.Enum.incompatible_antivirus,
+        insightType: DefendInsightType.enum.incompatible_antivirus,
       },
     ];
 
@@ -123,7 +123,7 @@ describe('evaluateDefendInsights', () => {
     });
 
     expect(mockGetDefaultDefendInsightsGraph).toHaveBeenCalledWith({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: [],
       esClient: mockEsClient,
       llm: expect.any(Object),

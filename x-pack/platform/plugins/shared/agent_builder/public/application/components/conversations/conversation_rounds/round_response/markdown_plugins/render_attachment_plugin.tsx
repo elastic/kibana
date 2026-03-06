@@ -9,7 +9,9 @@ import React from 'react';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
+  ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   renderAttachmentElement,
   type RenderAttachmentElementAttributes,
@@ -42,6 +44,19 @@ export const renderAttachmentTagParser = createTagParser({
   }),
 });
 
+const getScreenContext = (
+  conversationAttachments?: VersionedAttachment[]
+): ScreenContextAttachmentData | undefined => {
+  const screenContextAttachment = conversationAttachments?.find(
+    (att) => att.type === AttachmentType.screenContext
+  );
+  if (!screenContextAttachment) {
+    return undefined;
+  }
+  const latest = getLatestVersion(screenContextAttachment);
+  return latest?.data as ScreenContextAttachmentData | undefined;
+};
+
 interface RenderAttachmentRendererProps {
   attachmentsService: AttachmentsService;
   conversationAttachments?: VersionedAttachment[];
@@ -59,6 +74,8 @@ export const createRenderAttachmentRenderer = ({
   conversationId,
   isSidebar,
 }: RenderAttachmentRendererProps) => {
+  const screenContext = getScreenContext(conversationAttachments);
+
   return (props: RenderAttachmentElementAttributes) => {
     const { attachmentId, version: explicitVersion } = props;
 
@@ -95,10 +112,12 @@ export const createRenderAttachmentRenderer = ({
           type: attachment.type,
           data: versionData.data,
           hidden: attachment.hidden,
+          origin: attachment.origin,
         }}
         conversationId={conversationId}
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
+        screenContext={screenContext}
       />
     );
   };

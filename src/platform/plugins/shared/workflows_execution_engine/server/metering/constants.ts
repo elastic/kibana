@@ -18,9 +18,3 @@ export const BUCKET_SIZE_MINUTES = 5;
 
 /** Duration normalization bucket size in milliseconds. */
 export const BUCKET_SIZE_MS = BUCKET_SIZE_MINUTES * 60 * 1000;
-
-/** Maximum number of retry attempts for sending usage records. */
-export const METERING_RETRY_ATTEMPTS = 3;
-
-/** Base delay between retries in milliseconds (exponential backoff applied). */
-export const METERING_RETRY_BASE_DELAY_MS = 1000;

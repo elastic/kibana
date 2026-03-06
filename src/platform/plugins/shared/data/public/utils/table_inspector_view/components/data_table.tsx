@@ -8,7 +8,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -60,14 +59,6 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes: Record<string, PropTypes.Validator<unknown>> = {
-    data: PropTypes.object.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    fieldFormats: PropTypes.object.isRequired,
-    uiActions: PropTypes.object.isRequired,
-    isFilterable: PropTypes.func.isRequired,
-  };
-
   csvSeparator = this.props.uiSettings.get('csv:separator', ',');
   quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;

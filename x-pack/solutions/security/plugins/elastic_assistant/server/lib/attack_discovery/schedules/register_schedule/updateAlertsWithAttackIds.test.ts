@@ -6,8 +6,8 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ALERT_ATTACK_IDS } from '@kbn/elastic-assistant-common';
 import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
-import { ALERT_ATTACK_IDS } from '../fields';
 
 describe('updateAlertsWithAttackIds', () => {
   const spaceId = 'default';

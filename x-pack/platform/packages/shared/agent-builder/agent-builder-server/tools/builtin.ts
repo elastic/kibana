@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
@@ -87,6 +87,13 @@ export interface BuiltInToolSpecificConfig {
    * Optional tool call policy to control tool call confirmation behavior
    */
   confirmation?: ToolConfirmationPolicy;
+  /**
+   * Optional function to summarize a tool return for conversation history.
+   * When provided, this function will be called when processing conversation history
+   * to replace large tool results with compact summaries.
+   * This helps prevent context bloat in long conversations.
+   */
+  summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
 /**
@@ -127,13 +134,6 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    * Refer to {@link ToolAvailabilityConfig}
    */
   availability?: ToolAvailabilityConfig;
-  /**
-   * Optional function to summarize a tool return for conversation history.
-   * When provided, this function will be called when processing conversation history
-   * to replace large tool results with compact summaries.
-   * This helps prevent context bloat in long conversations.
-   */
-  summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> &

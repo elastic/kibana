@@ -17,8 +17,7 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
-// Failing: See https://github.com/elastic/kibana/issues/254752
-spaceTest.describe.skip(
+spaceTest.describe(
   'Metrics in Discover - Grid',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
@@ -41,43 +40,45 @@ spaceTest.describe.skip(
     });
 
     spaceTest('should render metrics grid with cards', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
     });
 
     spaceTest('should render grid with WHERE filter', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(
+      await pageObjects.discover.writeAndSubmitEsqlQuery(
         `${testData.ESQL_QUERIES.TS} | WHERE @timestamp > "${DEFAULT_TIME_RANGE.from}" - 100 DAYS`
       );
       await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with LIMIT', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(`${testData.ESQL_QUERIES.TS} | LIMIT 5`);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(`${testData.ESQL_QUERIES.TS} | LIMIT 5`);
       await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with SORT', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(
+      await pageObjects.discover.writeAndSubmitEsqlQuery(
         `${testData.ESQL_QUERIES.TS} | SORT @timestamp DESC`
       );
       await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should not render grid with FROM command', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.FROM);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.FROM);
       await expect(pageObjects.metricsExperience.grid).toBeHidden();
     });
 
     spaceTest('should not render grid with STATS command', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(`${testData.ESQL_QUERIES.TS} | STATS count()`);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(
+        `${testData.ESQL_QUERIES.TS} | STATS count()`
+      );
       await expect(pageObjects.metricsExperience.grid).toBeHidden();
     });
 
     spaceTest('should persist grid when changing time range', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience, datePicker } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 

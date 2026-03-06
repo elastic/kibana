@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { filterQuery } from '../model/filter_query';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
@@ -14,7 +14,7 @@ import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
 export const networkTopCountriesSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip().optional(),
+  ip: z.ipv4().or(z.ipv6()).optional(),
   flowTarget,
   sort,
   filterQuery,

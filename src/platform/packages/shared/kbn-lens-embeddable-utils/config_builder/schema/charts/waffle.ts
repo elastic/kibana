@@ -128,7 +128,7 @@ export const waffleStateSchemaNoESQL = schema.object(
 /**
  * Waffle chart configuration for ES|QL queries
  */
-const waffleStateSchemaESQL = schema.object(
+export const waffleStateSchemaESQL = schema.object(
   {
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,

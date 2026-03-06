@@ -110,7 +110,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"url\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at url`,
             });
           });
       });
@@ -152,7 +152,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"email\": Required;\n [2]: Field \"token\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at email\n✖ Invalid input: expected string, received undefined\n  → at token`,
             });
           });
       });
@@ -230,7 +230,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"storyId\": Expected number, received nan)`,
+            service_message: `Request validation failed (✖ Invalid input: expected number, received NaN\n  → at storyId)`,
           });
         });
 
@@ -273,7 +273,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"webhook.storyId\": Expected number, received nan)`,
+            service_message: `Request validation failed (✖ Invalid input: expected number, received NaN\n  → at webhook.storyId)`,
           });
         });
 
@@ -296,7 +296,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"webhook.name\": Required)`,
+            service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at webhook.name)`,
           });
         });
       });

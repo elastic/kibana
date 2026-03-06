@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { findBackfillRoute } from './find_backfill_route';
+import { findBackfillRoute, findBackfillPublicRoute } from './find_backfill_route';
 import type { FindBackfillResult } from '../../../../application/backfill/methods/find/types';
 
 const rulesClient = rulesClientMock.create();
@@ -20,85 +20,85 @@ jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
+const mockFindOptions = {
+  page: 1,
+  per_page: 10,
+  rule_ids: 'abc',
+};
+
+const mockFindResult: FindBackfillResult = {
+  page: 0,
+  perPage: 10,
+  total: 1,
+  data: [
+    {
+      id: 'abc',
+      createdAt: '2024-01-30T00:00:00.000Z',
+      duration: '12h',
+      enabled: true,
+      initiator: 'user',
+      rule: {
+        name: 'my rule name',
+        tags: ['foo'],
+        alertTypeId: 'myType',
+        params: {},
+        actions: [],
+        apiKeyOwner: 'user',
+        apiKeyCreatedByUser: false,
+        consumer: 'myApp',
+        enabled: true,
+        schedule: { interval: '12h' },
+        createdBy: 'user',
+        updatedBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        revision: 0,
+        id: '1',
+      },
+      spaceId: 'default',
+      start: '2023-11-16T08:00:00.000Z',
+      status: 'pending',
+      schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
+    },
+    {
+      id: 'def',
+      createdAt: '2024-01-30T00:00:00.000Z',
+      duration: '12h',
+      enabled: true,
+      initiator: 'user',
+      rule: {
+        name: 'my rule name',
+        tags: ['foo'],
+        alertTypeId: 'myType',
+        params: {},
+        actions: [],
+        apiKeyOwner: 'user',
+        apiKeyCreatedByUser: false,
+        consumer: 'myApp',
+        enabled: true,
+        schedule: { interval: '12h' },
+        createdBy: 'user',
+        updatedBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        revision: 0,
+        id: '2',
+      },
+      spaceId: 'default',
+      start: '2023-11-16T08:00:00.000Z',
+      status: 'pending',
+      schedule: [
+        { runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' },
+        { runAt: '2023-11-17T08:00:00.000Z', interval: '12h', status: 'pending' },
+      ],
+    },
+  ],
+};
+
 describe('findBackfillRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-
-  const mockFindOptions = {
-    page: 1,
-    per_page: 10,
-    rule_ids: 'abc',
-  };
-
-  const mockFindResult: FindBackfillResult = {
-    page: 0,
-    perPage: 10,
-    total: 1,
-    data: [
-      {
-        id: 'abc',
-        createdAt: '2024-01-30T00:00:00.000Z',
-        duration: '12h',
-        enabled: true,
-        initiator: 'user',
-        rule: {
-          name: 'my rule name',
-          tags: ['foo'],
-          alertTypeId: 'myType',
-          params: {},
-          actions: [],
-          apiKeyOwner: 'user',
-          apiKeyCreatedByUser: false,
-          consumer: 'myApp',
-          enabled: true,
-          schedule: { interval: '12h' },
-          createdBy: 'user',
-          updatedBy: 'user',
-          createdAt: '2019-02-12T21:01:22.479Z',
-          updatedAt: '2019-02-12T21:01:22.479Z',
-          revision: 0,
-          id: '1',
-        },
-        spaceId: 'default',
-        start: '2023-11-16T08:00:00.000Z',
-        status: 'pending',
-        schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
-      },
-      {
-        id: 'def',
-        createdAt: '2024-01-30T00:00:00.000Z',
-        duration: '12h',
-        enabled: true,
-        initiator: 'user',
-        rule: {
-          name: 'my rule name',
-          tags: ['foo'],
-          alertTypeId: 'myType',
-          params: {},
-          actions: [],
-          apiKeyOwner: 'user',
-          apiKeyCreatedByUser: false,
-          consumer: 'myApp',
-          enabled: true,
-          schedule: { interval: '12h' },
-          createdBy: 'user',
-          updatedBy: 'user',
-          createdAt: '2019-02-12T21:01:22.479Z',
-          updatedAt: '2019-02-12T21:01:22.479Z',
-          revision: 0,
-          id: '2',
-        },
-        spaceId: 'default',
-        start: '2023-11-16T08:00:00.000Z',
-        status: 'pending',
-        schedule: [
-          { runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' },
-          { runAt: '2023-11-17T08:00:00.000Z', interval: '12h', status: 'pending' },
-        ],
-      },
-    ],
-  };
 
   test('should find backfills with the proper parameters', async () => {
     const licenseState = licenseStateMock.create();
@@ -145,5 +145,47 @@ describe('findBackfillRoute', () => {
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockFindOptions });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+});
+
+describe('findBackfillPublicRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('should register the public route with the correct path', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findBackfillPublicRoute(router, licenseState);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toEqual('/api/alerting/rules/backfill/_find');
+    expect(config.options).toEqual(
+      expect.objectContaining({
+        access: 'public',
+        summary: 'Find backfills for rules',
+        tags: ['oas-tag:alerting'],
+      })
+    );
+  });
+
+  test('should find backfills via the public route', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findBackfillPublicRoute(router, licenseState);
+
+    rulesClient.findBackfill.mockResolvedValueOnce(mockFindResult);
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { query: mockFindOptions });
+
+    await handler(context, req, res);
+
+    expect(rulesClient.findBackfill).toHaveBeenLastCalledWith(transformRequestV1(mockFindOptions));
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: transformResponseV1(mockFindResult),
+    });
   });
 });

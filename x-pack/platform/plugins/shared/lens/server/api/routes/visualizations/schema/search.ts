@@ -9,14 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { searchOptionsSchemas } from '@kbn/content-management-utils';
 
 import { lensCMSearchOptionsSchema } from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
 import { lensResponseItemSchema } from './common';
 
-// TODO cleanup and align search options types with client side options
-// TODO align defaults with cm and other schema definitions (i.e. searchOptionsSchemas)
-// TODO See if these should be in body or params?
 export const lensSearchRequestQuerySchema = schema.object({
-  ...lensCMSearchOptionsSchema.getPropSchemas(),
+  fields: lensCMSearchOptionsSchema.getPropSchemas().fields,
+  search_fields: lensCMSearchOptionsSchema.getPropSchemas().searchFields,
   query: schema.maybe(
     schema.string({
       meta: {
@@ -31,7 +28,7 @@ export const lensSearchRequestQuerySchema = schema.object({
     min: 1,
     defaultValue: 1,
   }),
-  perPage: schema.number({
+  per_page: schema.number({
     meta: {
       description: 'Maximum number of Lens visualizations included in a single response',
     },
@@ -43,7 +40,8 @@ export const lensSearchRequestQuerySchema = schema.object({
 
 const lensSearchResponseMetaSchema = schema.object(
   {
-    ...pickFromObjectSchema(searchOptionsSchemas, ['page', 'perPage']),
+    page: searchOptionsSchemas.page,
+    perPage: searchOptionsSchemas.perPage,
     total: schema.number(), // TODO use shared definition
   },
   { unknowns: 'forbid' }

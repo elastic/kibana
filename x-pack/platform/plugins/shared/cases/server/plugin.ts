@@ -55,6 +55,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { registerCaseWorkflowSteps } from './workflows';
 
 export class CasePlugin
   implements
@@ -207,6 +208,8 @@ export class CasePlugin
       getSpaceId,
       serverlessProjectType,
     });
+
+    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
 
     return {
       attachmentFramework: {

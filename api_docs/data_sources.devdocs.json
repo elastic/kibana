@@ -19,9 +19,183 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.BulkDeleteDataSourceResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkDeleteDataSourceResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dataSources",
+            "scope": "common",
+            "docId": "kibDataSourcesPluginApi",
+            "section": "def-common.BulkDeleteDataSourceResult",
+            "text": "BulkDeleteDataSourceResult"
+          },
+          " extends ",
+          {
+            "pluginId": "dataSources",
+            "scope": "common",
+            "docId": "kibDataSourcesPluginApi",
+            "section": "def-common.DeleteDataSourceAndRelatedResourcesResult",
+            "text": "DeleteDataSourceAndRelatedResourcesResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSources",
+            "id": "def-common.BulkDeleteDataSourceResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSources",
+            "id": "def-common.BulkDeleteDataSourceResult.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.BulkDeleteDataSourcesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkDeleteDataSourcesResponse",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSources",
+            "id": "def-common.BulkDeleteDataSourcesResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataSources",
+                "scope": "common",
+                "docId": "kibDataSourcesPluginApi",
+                "section": "def-common.BulkDeleteDataSourceResult",
+                "text": "BulkDeleteDataSourceResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.DeleteDataSourceAndRelatedResourcesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteDataSourceAndRelatedResourcesResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSources",
+            "id": "def-common.DeleteDataSourceAndRelatedResourcesResult.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSources",
+            "id": "def-common.DeleteDataSourceAndRelatedResourcesResult.fullyDeleted",
+            "type": "boolean",
+            "tags": [],
+            "label": "fullyDeleted",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSources",
+            "id": "def-common.DeleteDataSourceAndRelatedResourcesResult.remaining",
+            "type": "Object",
+            "tags": [],
+            "label": "remaining",
+            "description": [],
+            "signature": [
+              "{ kscIds: string[]; toolIds: string[]; workflowIds: string[]; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources/common/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.BULK_DELETE_API_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "BULK_DELETE_API_ROUTE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dataSources",
         "id": "def-common.DATA_SOURCES_FULL_TITLE",

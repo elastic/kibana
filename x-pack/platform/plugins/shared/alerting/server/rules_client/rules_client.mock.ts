@@ -23,6 +23,7 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { fieldsToExcludeFromPublicApi } from './rules_client';
 import type { RulesClientContext } from './types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const create = () => {
   const kibanaVersion = 'v8.17.0';
@@ -65,6 +66,8 @@ const create = () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     minimumScheduleIntervalInMs: 0,
     fieldsToExcludeFromPublicApi,
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
   };
 
   return rulesClientParams;

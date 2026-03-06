@@ -388,7 +388,7 @@
           "() => string[]"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-        "lineNumber": 68,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -417,7 +417,7 @@
           "; invalid: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -433,7 +433,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -475,7 +475,7 @@
           "{ readonly queryHistoryRework: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

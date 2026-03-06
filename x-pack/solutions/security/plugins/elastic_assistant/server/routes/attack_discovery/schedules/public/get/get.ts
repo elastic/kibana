@@ -8,7 +8,7 @@
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import {
   API_VERSIONS,

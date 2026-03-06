@@ -9,7 +9,12 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import {
+  buildDataTableRecord,
+  type DataTableRecord,
+  type EsHitRecord,
+  getFieldValue,
+} from '@kbn/discover-utils';
 import type { TimelineModel } from '../../../..';
 import { Flyouts } from '../../shared/constants/flyouts';
 import { timelineSelectors } from '../../../../timelines/store';
@@ -25,16 +30,15 @@ import type { Note } from '../../../../../common/api/timeline';
 import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import {
   fetchNotesByDocumentIds,
+  makeSelectNotesByDocumentId,
   ReqStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
-  makeSelectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { BasicAlertDataContext } from './investigation_guide_view';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
+import { AlertDataContext } from '../../../../flyout_v2/investigation_guide/components/investigation_guide_view';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.fetchNotesErrorLabel',
@@ -55,11 +59,8 @@ export const NO_NOTES = (isAlert: boolean) =>
 export const NotesDetails = memo(() => {
   const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
-  const { eventId, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
+  const { eventId, searchHit } = useDocumentDetailsContext();
   const { notesPrivileges } = useUserPrivileges();
-  const { basicAlertData: basicData } = useInvestigationGuide({
-    dataFormattedForFieldBrowser,
-  });
 
   const canCreateNotes = notesPrivileges.crud;
 
@@ -118,7 +119,14 @@ export const NotesDetails = memo(() => {
     }
   }, [addErrorToast, fetchError, fetchStatus]);
 
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as unknown as EsHitRecord),
+    [searchHit]
+  );
+  const isAlert = useMemo(
+    () => Boolean(getFieldValue(hit, 'kibana.alert.rule.uuid') as string),
+    [hit]
+  );
   const noNotesMessage = useMemo(
     () => (
       <EuiFlexGroup justifyContent="center">
@@ -131,7 +139,7 @@ export const NotesDetails = memo(() => {
   );
 
   return (
-    <BasicAlertDataContext.Provider value={basicData}>
+    <AlertDataContext.Provider value={hit}>
       {fetchStatus === ReqStatus.Loading && (
         <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
       )}
@@ -157,7 +165,7 @@ export const NotesDetails = memo(() => {
           </AddNote>
         </>
       )}
-    </BasicAlertDataContext.Provider>
+    </AlertDataContext.Provider>
   );
 });
 

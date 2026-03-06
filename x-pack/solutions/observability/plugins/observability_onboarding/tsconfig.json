@@ -47,9 +47,9 @@
     "@kbn/apm-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/streams-plugin",
+    "@kbn/data-views-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

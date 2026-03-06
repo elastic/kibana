@@ -17,6 +17,7 @@ export const TRACES = {
 };
 
 export const RICH_TRACE = {
+  SERVICE_NAME: 'synth-traces-frontend',
   TRANSACTION_NAME: 'GET /checkout',
   DB_SPAN_NAME: 'SELECT * FROM orders',
   INTERNAL_SPAN_NAME: 'Process order item',

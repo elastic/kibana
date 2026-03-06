@@ -68,9 +68,9 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'lookup_join',
   },
-  metricsinfo: {
+  metrics_info: {
     type: 'command',
-    name: 'metricsinfo',
+    name: 'metrics_info',
   },
   mmr: {
     type: 'command',
@@ -79,6 +79,10 @@ export const commandsMetadata: Record<string, unknown> = {
   mv_expand: {
     type: 'command',
     name: 'mv_expand',
+  },
+  registered_domain: {
+    type: 'command',
+    name: 'registered_domain',
   },
   rename: {
     type: 'command',
@@ -100,9 +104,9 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'stats',
   },
-  uriparts: {
+  uri_parts: {
     type: 'command',
-    name: 'uriparts',
+    name: 'uri_parts',
   },
   where: {
     type: 'command',
@@ -125,14 +129,15 @@ export enum EsqlCommandNames {
   LIMIT = 'limit',
   LOOKUP = 'lookup',
   LOOKUP_JOIN = 'lookup_join',
-  METRICSINFO = 'metricsinfo',
+  METRICS_INFO = 'metrics_info',
   MMR = 'mmr',
   MV_EXPAND = 'mv_expand',
+  REGISTERED_DOMAIN = 'registered_domain',
   RENAME = 'rename',
   RERANK = 'rerank',
   SAMPLE = 'sample',
   SORT = 'sort',
   STATS = 'stats',
-  URIPARTS = 'uriparts',
+  URI_PARTS = 'uri_parts',
   WHERE = 'where',
 }

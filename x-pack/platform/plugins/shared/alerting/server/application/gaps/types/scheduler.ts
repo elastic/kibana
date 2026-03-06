@@ -11,8 +11,10 @@ export type SchedulerSoAttributes = TypeOf<typeof rawGapAutoFillSchedulerSchemaV
 
 export const GAP_AUTO_FILL_SCHEDULER_TASK_TYPE = 'gap-auto-fill-scheduler-task' as const;
 
-export const DEFAULT_RULES_BATCH_SIZE = 100;
-export const DEFAULT_GAPS_PER_PAGE = 5000;
+// Keep small to limit peak memory: each rule may produce a large AdHocRunSO.
+export const DEFAULT_RULES_BATCH_SIZE = 10;
+// Fetch up to 50 gaps per rule in each page to stay proportional to the batch size.
+export const DEFAULT_GAPS_PER_PAGE = DEFAULT_RULES_BATCH_SIZE * 50;
 
 export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT = '60s' as const;
 

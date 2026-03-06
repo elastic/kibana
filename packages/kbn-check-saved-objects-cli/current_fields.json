@@ -96,6 +96,7 @@
     "ruleTypeId",
     "tags"
   ],
+  "anonymization-salt": [],
   "api_key_pending_invalidation": [
     "apiKeyId",
     "createdAt",
@@ -419,6 +420,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",
@@ -922,6 +924,11 @@
     "title",
     "uiStateJSON",
     "version"
+  ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],

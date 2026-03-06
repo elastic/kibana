@@ -15,6 +15,8 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
+import { Parser } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ISuggestionItem,
@@ -34,8 +36,6 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../commands/definitions/all_operators';
-import { Parser } from '../../parser';
-import type { ESQLAstAllCommands } from '../../types';
 import type {
   FunctionParameterType,
   FunctionReturnType,
@@ -359,8 +359,7 @@ export function getFunctionSignaturesByReturnType(
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_duration')) {
-    // return only singular
-    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
+    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`);
   }
   return [];
 }

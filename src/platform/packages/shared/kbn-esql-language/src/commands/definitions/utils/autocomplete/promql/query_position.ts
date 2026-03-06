@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../../../../ast/location';
+import { within } from '@elastic/esql';
 import type {
   PromQLAstQueryExpression,
   PromQLBinaryExpression,
   PromQLFunction,
   PromQLLabel,
   PromQLSelector,
-} from '../../../../../embedded_languages/promql/types';
+} from '@elastic/esql';
 import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {

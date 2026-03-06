@@ -6,6 +6,7 @@
  */
 
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 
 export type OverrideSettingsContext =
   | { type: 'removeDownsampleStep'; stepNumber: number }
@@ -16,6 +17,7 @@ export interface DslLifecycleSummaryUiState {
   isEditDslStepsFlyoutOpen: boolean;
   editFlyoutInitialSteps: IngestStreamLifecycleDSL | null;
   previewSteps: IngestStreamLifecycleDSL | null;
+  flyoutInvalidStepIndices: number[];
   selectedStepIndex: number | undefined;
   isSavingEditFlyout: boolean;
   pendingEditFlyoutSave: IngestStreamLifecycleDSL | null;
@@ -30,6 +32,7 @@ export type DslLifecycleSummaryUiAction =
     }
   | { type: 'closeEditFlyout' }
   | { type: 'setPreviewSteps'; payload: IngestStreamLifecycleDSL | null }
+  | { type: 'setFlyoutInvalidStepIndices'; payload: number[] }
   | { type: 'setSelectedStepIndex'; payload: number | undefined }
   | { type: 'setIsSavingEditFlyout'; payload: boolean }
   | { type: 'setPendingEditFlyoutSave'; payload: IngestStreamLifecycleDSL | null };
@@ -39,6 +42,7 @@ export const initialDslLifecycleSummaryUiState: DslLifecycleSummaryUiState = {
   isEditDslStepsFlyoutOpen: false,
   editFlyoutInitialSteps: null,
   previewSteps: null,
+  flyoutInvalidStepIndices: [],
   selectedStepIndex: undefined,
   isSavingEditFlyout: false,
   pendingEditFlyoutSave: null,
@@ -59,6 +63,7 @@ export const dslLifecycleSummaryUiReducer = (
         isEditDslStepsFlyoutOpen: true,
         editFlyoutInitialSteps: action.payload.initialSteps,
         previewSteps: null,
+        flyoutInvalidStepIndices: [],
         selectedStepIndex: action.payload.selectedStepIndex,
         pendingEditFlyoutSave: null,
       };
@@ -68,10 +73,15 @@ export const dslLifecycleSummaryUiReducer = (
         isEditDslStepsFlyoutOpen: false,
         editFlyoutInitialSteps: null,
         previewSteps: null,
+        flyoutInvalidStepIndices: [],
         selectedStepIndex: undefined,
       };
     case 'setPreviewSteps':
+      if (isEqual(state.previewSteps, action.payload)) return state;
       return { ...state, previewSteps: action.payload };
+    case 'setFlyoutInvalidStepIndices':
+      if (isEqual(state.flyoutInvalidStepIndices, action.payload)) return state;
+      return { ...state, flyoutInvalidStepIndices: action.payload };
     case 'setSelectedStepIndex':
       return { ...state, selectedStepIndex: action.payload };
     case 'setIsSavingEditFlyout':

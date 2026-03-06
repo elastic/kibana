@@ -42,7 +42,10 @@ export const createThresholdAlertType = (): SecurityAlertType<
       },
     },
     schemas: {
-      params: { type: 'zod', schema: ThresholdRuleParams },
+      params: {
+        type: 'zod',
+        schema: ThresholdRuleParams,
+      },
     },
     actionGroups: [
       {

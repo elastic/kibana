@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { riskScoreEntity, riskScoreEntityArray } from './model/risk_score_entity';

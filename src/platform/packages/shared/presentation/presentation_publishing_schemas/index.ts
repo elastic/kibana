@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { type SerializedTitles } from './src/types';
+export type { SerializedTimeRange, SerializedTitles } from './src/types';
+export { serializedTimeRangeSchema } from './src/time_range_schema';
 export { serializedTitlesSchema } from './src/titles_schema';

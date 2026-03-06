@@ -100,7 +100,7 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (1) Check if text matches a preset label (case insensitive)
 
   const matchedPreset = presets.find(
-    (preset) => preset.label.toLowerCase() === trimmed.toLowerCase()
+    (preset) => preset.label?.toLowerCase() === trimmed.toLowerCase()
   );
   if (matchedPreset) {
     return buildTimeRange({

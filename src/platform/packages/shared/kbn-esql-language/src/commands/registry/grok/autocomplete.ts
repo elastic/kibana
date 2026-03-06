@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { Parser } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import type { ISuggestionItem, ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
-import { Parser } from '../../../parser';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
 
 export async function autocomplete(

@@ -14,7 +14,8 @@ export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export {
   prepareAttachmentPresentation,
-  getAttachmentSystemPrompt,
+  getConversationAttachmentsSection,
+  getConversationAttachmentsSystemMessages,
   type AttachmentPresentation,
   type AttachmentPresentationMode,
   type AttachmentPresentationConfig,

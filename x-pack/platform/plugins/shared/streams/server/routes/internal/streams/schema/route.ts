@@ -6,13 +6,9 @@
  */
 import { getFlattenedObject } from '@kbn/std';
 import type { SampleDocument } from '@kbn/streams-schema';
-import {
-  fieldDefinitionConfigSchema,
-  isDescendantOf,
-  Streams,
-  LOGS_ROOT_STREAM_NAME,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { fieldDefinitionConfigSchema, isDescendantOf, Streams } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
+import { LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';

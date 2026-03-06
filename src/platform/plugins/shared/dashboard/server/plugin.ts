@@ -24,14 +24,12 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  RequestHandlerContext,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { registerAccessControl } from '@kbn/content-management-access-control-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -40,8 +38,6 @@ import {
 import { getUISettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
@@ -171,22 +167,6 @@ export class DashboardPlugin
     }
 
     return {
-      getDashboard: async (ctx: RequestHandlerContext, id: string) => {
-        const { core: coreCtx } = await ctx.resolve(['core']);
-        const soResponse =
-          await coreCtx.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-            DASHBOARD_SAVED_OBJECT_TYPE,
-            id
-          );
-        return {
-          id: soResponse.saved_object.id,
-          description: soResponse.saved_object.attributes.description,
-          tags: soResponse.saved_object.references
-            .filter(({ type }) => type === tagSavedObjectTypeName)
-            .map((ref) => ref.id),
-          title: soResponse.saved_object.attributes.title,
-        };
-      },
       scanDashboards,
       client: {
         create,

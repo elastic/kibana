@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-language';
-import { esqlCommandRegistry, Parser, type ESQLCommandSummary } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@elastic/esql/types';
+import { Parser } from '@elastic/esql';
+import { esqlCommandRegistry, type ESQLCommandSummary } from '@kbn/esql-language';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 
 function processCommand(

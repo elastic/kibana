@@ -19,3 +19,19 @@ export function isValidIndexName(name: string) {
 
   return !indexPatternInvalid;
 }
+
+export function generateRandomIndexName(
+  prefix: string = 'search-',
+  randomSuffixLength: number = 4
+) {
+  const suffixCharacters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const charsLength = suffixCharacters.length;
+  let result = prefix;
+
+  for (let i = 0; i < randomSuffixLength; i++) {
+    const idx = Math.floor(Math.random() * charsLength);
+    result += suffixCharacters.charAt(idx);
+  }
+
+  return result;
+}

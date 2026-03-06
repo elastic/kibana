@@ -35,8 +35,7 @@ export const GraphControls = React.memo(
   ({
     id,
     className,
-    isSplitPanel,
-    showPanelOnClick,
+    onShowPanel,
   }: {
     /**
      * Id that identify the scope of analyzer
@@ -47,13 +46,9 @@ export const GraphControls = React.memo(
      */
     className?: string;
     /**
-     * Indicate if the panel is displayed separately
+     * Callback for showing the analyzer details panel
      */
-    isSplitPanel?: boolean;
-    /**
-     * Callback for showing the panel when isSplitPanel is true
-     */
-    showPanelOnClick?: () => void;
+    onShowPanel: () => void;
   }) => {
     const dispatch = useDispatch();
     const scalingFactor = useSelector((state: State) =>
@@ -151,9 +146,7 @@ export const GraphControls = React.memo(
             isOpen={activePopover === 'datePicker'}
             setActivePopover={setActivePopover}
           />
-          {isSplitPanel && showPanelOnClick && (
-            <ShowPanelButton showPanelOnClick={showPanelOnClick} />
-          )}
+          <ShowPanelButton onClick={onShowPanel} />
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
           <EuiPanel className="panning-controls" paddingSize="none" hasBorder>

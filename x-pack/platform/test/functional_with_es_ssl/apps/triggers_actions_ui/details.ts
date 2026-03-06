@@ -370,6 +370,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
@@ -403,6 +405,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
@@ -415,6 +419,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
+        await actionsButton.click();
         await editButton.click();
 
         const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
@@ -477,6 +482,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
@@ -538,6 +545,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 

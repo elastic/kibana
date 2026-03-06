@@ -1721,7 +1721,7 @@
         "label": "types",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-        "lineNumber": 65,
+        "lineNumber": 66,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -1741,7 +1741,7 @@
               " & { ignore_above: 1024; } & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1758,7 +1758,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1782,7 +1782,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1799,7 +1799,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1823,7 +1823,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1840,7 +1840,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1864,7 +1864,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1881,7 +1881,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1905,7 +1905,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1922,7 +1922,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1946,7 +1946,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1963,7 +1963,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1985,7 +1985,7 @@
               " & { format: \"strict_date_optional_time\"; } & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2002,7 +2002,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2026,7 +2026,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2043,7 +2043,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2067,7 +2067,7 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2084,7 +2084,7 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2108,7 +2108,7 @@
               ", \"type\">> & Partial<StorageMappingPropertyObjectType> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2125,7 +2125,48 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/storage-adapter",
+            "id": "def-server.types.semantic_text",
+            "type": "Function",
+            "tags": [],
+            "label": "semantic_text",
+            "description": [],
+            "signature": [
+              "<TOverrides extends Partial<",
+              "MappingSemanticTextProperty",
+              "> | undefined>(overrides?: TOverrides | undefined) => ",
+              "MappingSemanticTextProperty",
+              " & Partial<",
+              "MappingSemanticTextProperty",
+              "> & Exclude<TOverrides, undefined>"
+            ],
+            "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.types.semantic_text.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "overrides",
+                "description": [],
+                "signature": [
+                  "TOverrides | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 45,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

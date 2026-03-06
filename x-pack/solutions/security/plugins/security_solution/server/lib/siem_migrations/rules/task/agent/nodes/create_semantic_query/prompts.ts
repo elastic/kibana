@@ -44,14 +44,13 @@ A: Please find the semantic_query keywords JSON object below:
 \`\`\`
 </example_response>`,
   ],
-  ['ai', 'Please find the semantic_query keywords JSON object below:'],
 ]);
 
 export const QRADAR_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages<{ nlQuery: string }>([
   [
     'system',
     `
-You are an agent expert in IBM Qradar SIEM platform. Below is a natural language description of a Qradar rule query. Don't worry about any dependencies you think are unresolved. 
+You are an agent expert in IBM Qradar SIEM platform. Below is a natural language description of a Qradar rule query. Don't worry about any dependencies you think are unresolved.
 
 Your task is to extract relevant keywords from the natural language description that can be used to create a semantic search query. The keywords should accurately represent the core concepts and intent of the rule query described.
 

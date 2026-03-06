@@ -18,7 +18,8 @@ import { transformPanelsOut } from './transform_panels_out';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[]
+  references?: SavedObjectReference[],
+  isDashboardAppRequest: boolean = false
 ): DashboardState | Partial<DashboardState> {
   const {
     pinned_panels,
@@ -59,7 +60,7 @@ export function transformDashboardOut(
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),
     ...((panelsJSON || sections) && {
-      panels: transformPanelsOut(panelsJSON, sections, references),
+      panels: transformPanelsOut(panelsJSON, sections, references, isDashboardAppRequest),
     }),
 
     ...(pinnedPanelsOut && { pinned_panels: pinnedPanelsOut }),

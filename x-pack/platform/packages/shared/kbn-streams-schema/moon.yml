@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/sse-utils'
   - '@kbn/streamlang'
-  - '@kbn/esql-language'
   - '@kbn/inference-common'
 tags:
   - shared-common

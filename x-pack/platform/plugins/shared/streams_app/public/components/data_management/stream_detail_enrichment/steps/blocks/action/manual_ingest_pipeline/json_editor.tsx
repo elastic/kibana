@@ -245,23 +245,13 @@ export const JsonEditor = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsHelpText"
-          defaultMessage={
-            'A JSON-encoded array of {ingestPipelineProcessors}. {conditions} defined in the processor JSON take precedence over conditions defined in "Advanced settings".'
-          }
+          defaultMessage={'A JSON-encoded array of {ingestPipelineProcessors}.'}
           values={{
             ingestPipelineProcessors: (
               <EuiLink href={docLinks.links.ingest.processors} target="_blank" external>
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsLabel',
                   { defaultMessage: 'ingest pipeline processors' }
-                )}
-              </EuiLink>
-            ),
-            conditions: (
-              <EuiLink href={docLinks.links.ingest.conditionalProcessor} target="_blank" external>
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsConditionallyLabel',
-                  { defaultMessage: 'Conditions' }
                 )}
               </EuiLink>
             ),

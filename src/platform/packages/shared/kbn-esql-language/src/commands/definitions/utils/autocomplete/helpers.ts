@@ -14,7 +14,8 @@ import type {
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isLiteral } from '../../../../ast/is';
+import { isLiteral } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type {
   GetColumnsByTypeFn,
   ICommandCallbacks,
@@ -22,7 +23,6 @@ import type {
   ISuggestionItem,
 } from '../../../registry/types';
 import { Location } from '../../../registry/types';
-import type { ESQLAstItem, ESQLFunction } from '../../../../types';
 import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';

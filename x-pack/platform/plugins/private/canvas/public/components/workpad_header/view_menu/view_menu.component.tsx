@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -296,22 +295,4 @@ export const ViewMenu: FunctionComponent<Props> = ({
       )}
     </Popover>
   );
-};
-
-ViewMenu.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  zoomScale: PropTypes.number.isRequired,
-  fitToWindow: PropTypes.func.isRequired,
-  setZoomScale: PropTypes.func.isRequired,
-  zoomIn: PropTypes.func.isRequired,
-  zoomOut: PropTypes.func.isRequired,
-  resetZoom: PropTypes.func.isRequired,
-  toggleWriteable: PropTypes.func.isRequired,
-  enterFullscreen: PropTypes.func.isRequired,
-  doRefresh: PropTypes.func.isRequired,
-  refreshInterval: PropTypes.number.isRequired,
-  setRefreshInterval: PropTypes.func.isRequired,
-  autoplayEnabled: PropTypes.bool.isRequired,
-  autoplayInterval: PropTypes.number.isRequired,
-  setAutoplayInterval: PropTypes.func.isRequired,
 };

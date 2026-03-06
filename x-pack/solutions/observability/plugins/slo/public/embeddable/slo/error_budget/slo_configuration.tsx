@@ -20,27 +20,30 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableSloProps } from './types';
+import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
 import { SloSelector } from '../alerts/slo_selector';
 
 interface SloConfigurationProps {
-  onCreate: (props: EmbeddableSloProps) => void;
+  onCreate: (props: ErrorBudgetCustomState) => void;
   onCancel: () => void;
 }
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
+  const [selectedSlo, setSelectedSlo] = useState<ErrorBudgetCustomState>();
   const [hasError, setHasError] = useState(false);
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'configurationFlyout',
   });
 
-  const onConfirmClick = () =>
-    onCreate({
-      sloId: selectedSlo?.sloId,
-      sloInstanceId: selectedSlo?.sloInstanceId,
-    });
+  const onConfirmClick = () => {
+    if (selectedSlo) {
+      onCreate({
+        slo_id: selectedSlo.slo_id,
+        slo_instance_id: selectedSlo.slo_instance_id,
+      });
+    }
+  };
 
   return (
     <EuiFlyout onClose={onCancel} css={{ minWidth: 550 }} aria-labelledby={flyoutTitleId}>
@@ -62,7 +65,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
               onSelected={(slo) => {
                 setHasError(slo === undefined);
                 if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                  setSelectedSlo({ slo_id: slo.id, slo_instance_id: slo.instanceId });
                 }
               }}
             />

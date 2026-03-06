@@ -13,7 +13,7 @@ import {
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS,
-} from '../../schedules/fields';
+} from '@kbn/elastic-assistant-common';
 
 const escapeQueryString = (str: string) => str.replace(/[+\-=&|><!(){}[\]^"~*?:\\/]/g, '\\$&'); // $& means the whole matched string
 

@@ -21,7 +21,7 @@ import {
   createPrompt,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import type {
   ChatCompleteApiWithCallback,
@@ -83,6 +83,7 @@ describe('createPromptApi', () => {
 
     const callbackApi = createChatCompleteCallbackApi({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
@@ -101,6 +102,7 @@ describe('createPromptApi', () => {
   it('initializes createChatCompleteCallbackApi with correct options', () => {
     expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),

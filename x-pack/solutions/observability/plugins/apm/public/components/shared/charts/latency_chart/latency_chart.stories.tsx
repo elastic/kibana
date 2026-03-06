@@ -14,6 +14,7 @@ import type { Props } from '.';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmIndexSettingsContext } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { MockTimeRangeContextProvider } from '../../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
@@ -88,19 +89,24 @@ const stories: Meta<Args> = {
                         transactionTypes: [],
                         fallbackToTransactions: false,
                         serviceAgentStatus: FETCH_STATUS.SUCCESS,
-                        indexSettings: [
-                          {
-                            configurationName: 'span',
-                            defaultValue: 'traces-*',
-                            savedValue: 'traces-*, apm-*',
-                          },
-                        ],
-                        indexSettingsStatus: FETCH_STATUS.SUCCESS,
                       }}
                     >
-                      <ChartPointerEventContextProvider>
-                        <StoryComponent />
-                      </ChartPointerEventContextProvider>
+                      <ApmIndexSettingsContext.Provider
+                        value={{
+                          indexSettings: [
+                            {
+                              configurationName: 'span',
+                              defaultValue: 'traces-*',
+                              savedValue: 'traces-*, apm-*',
+                            },
+                          ],
+                          indexSettingsStatus: FETCH_STATUS.SUCCESS,
+                        }}
+                      >
+                        <ChartPointerEventContextProvider>
+                          <StoryComponent />
+                        </ChartPointerEventContextProvider>
+                      </ApmIndexSettingsContext.Provider>
                     </APMServiceContext.Provider>
                   </ApmTimeRangeMetadataContextProvider>
                 </MockTimeRangeContextProvider>

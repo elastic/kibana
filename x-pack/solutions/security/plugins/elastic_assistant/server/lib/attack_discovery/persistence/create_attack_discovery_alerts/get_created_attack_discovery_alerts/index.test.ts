@@ -8,10 +8,10 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import * as transforms from '@kbn/elastic-assistant-common/impl/utils/transform_search_response_to_alerts';
 
 import { getCreatedAttackDiscoveryAlerts } from '.';
 import { getResponseMock } from '../../../../../__mocks__/attack_discovery_alert_document_response';
-import * as transforms from '../../transforms/transform_search_response_to_alerts';
 
 describe('getCreatedAttackDiscoveryAlerts', () => {
   const attackDiscoveryAlertsIndex = 'test-index';

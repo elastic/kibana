@@ -20,6 +20,13 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     );
   }
 
+  public getStepExecutionsByWorkflowExecution(
+    workflowExecutionId: string,
+    _stepExecutionIds?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    return this.searchStepExecutionsByExecutionId(workflowExecutionId);
+  }
+
   public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
     for (const stepExecution of stepExecutions) {
       if (!stepExecution.id) {

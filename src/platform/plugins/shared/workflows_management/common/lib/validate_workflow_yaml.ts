@@ -96,7 +96,7 @@ export function validateWorkflowYaml(
     }
   }
 
-  const liquidErrors = validateLiquidTemplate(yaml);
+  const liquidErrors = validateLiquidTemplate(yaml, parseResult.document);
   for (const liquidError of liquidErrors) {
     diagnostics.push({
       severity: 'error',

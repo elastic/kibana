@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
-export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);
+export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
 const mappingSchema = z.any();
 
@@ -22,7 +22,7 @@ const retentionOperationSchema = z.discriminatedUnion('operation', [
 
 const fieldSchema = z.object({
   allowAPIUpdate: z.optional(z.boolean()),
-  mapping: mappingSchema,
+  mapping: z.optional(mappingSchema),
   source: z.string(),
   destination: z.string(),
   retention: retentionOperationSchema,

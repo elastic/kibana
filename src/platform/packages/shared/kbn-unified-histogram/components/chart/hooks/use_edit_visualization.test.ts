@@ -46,7 +46,7 @@ describe('useEditVisualization', () => {
     hook.result.current!();
     expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
       id: '',
-      timeRange: relativeTimeRange,
+      time_range: relativeTimeRange,
       attributes: lensAttributes,
     });
   });

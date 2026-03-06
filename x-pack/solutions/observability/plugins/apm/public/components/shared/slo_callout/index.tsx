@@ -18,14 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import {
-  APM_SLO_INDICATOR_TYPES,
-  type ApmIndicatorType,
-} from '../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import illustrationSrc from './assets/illustration_slo_callout.svg';
+import { DEFAULT_INDICATOR_TYPE } from '../constants';
 
 interface Props {
   dismissCallout: () => void;
@@ -41,6 +40,8 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
 
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 
+  useTrackMetric({ app: 'apm', metric: 'slo_callout_shown', metricType: METRIC_TYPE.LOADED });
+
   const openCreateSloFlyout = useCallback(() => {
     setCreateSloFlyoutOpen(true);
   }, []);
@@ -50,14 +51,12 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
     dismissCallout();
   }, [dismissCallout]);
 
-  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
-
   const CreateSloFlyout = createSloFlyoutOpen
     ? sloPlugin?.getCreateSLOFormFlyout({
         initialValues: {
           name: `APM SLO for ${serviceName}`,
           indicator: {
-            type: defaultIndicatorType,
+            type: DEFAULT_INDICATOR_TYPE,
             params: {
               service: serviceName,
               environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,

@@ -11,7 +11,7 @@ import type {
   ESQLAstCompletionCommand,
   ESQLAstAllCommands,
   ESQLMessage,
-} from '../../../types';
+} from '@elastic/esql/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../definitions/utils/validation';

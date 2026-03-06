@@ -93,7 +93,7 @@
           " | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-        "lineNumber": 97,
+        "lineNumber": 98,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -111,7 +111,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-            "lineNumber": 111,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -137,7 +137,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-            "lineNumber": 112,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -170,7 +170,7 @@
           "[]"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -201,7 +201,7 @@
           "[] | undefined) => string[]"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-        "lineNumber": 123,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -219,7 +219,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-            "lineNumber": 137,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -245,7 +245,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
-            "lineNumber": 138,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

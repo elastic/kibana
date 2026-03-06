@@ -62,3 +62,34 @@ export const timeWindowButtonsTexts = {
     { defaultMessage: 'Cannot zoom in any further' }
   ),
 };
+
+export const dialogTexts = {
+  ariaLabel: i18n.translate('sharedUXPackages.dateRangePicker.dialog.ariaLabel', {
+    defaultMessage: 'Date range picker dialog',
+  }),
+};
+
+export const mainPanelTexts = {
+  presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
+    defaultMessage: 'Presets',
+  }),
+  recentLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.recentLabel', {
+    defaultMessage: 'Recent',
+  }),
+  calendarPanelTitle: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.calendarPanelTitle',
+    { defaultMessage: 'Calendar' }
+  ),
+  customTimeRangePanelTitle: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.customTimeRangePanelTitle',
+    { defaultMessage: 'Custom time range' }
+  ),
+  savePresetTooltip: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',
+    { defaultMessage: 'Save input range as preset and apply it' }
+  ),
+  deletePresetAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.deletePresetAriaLabel',
+    { defaultMessage: 'Delete preset' }
+  ),
+};

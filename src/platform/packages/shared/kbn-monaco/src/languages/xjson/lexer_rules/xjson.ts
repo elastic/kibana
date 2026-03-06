@@ -104,14 +104,15 @@ export const buildXjsonRules = (root: string = 'root') => {
     ],
   };
 };
-export const lexerRules: monaco.languages.IMonarchLanguage = {
-  ...(globals as any),
-
+// Monarch rules are written as array literals (e.g. [/regex/, action]) which TypeScript
+// infers as general arrays, not tuples. The IMonarchLanguageRule union requires tuples,
+// so the tokenizer shape cannot satisfy IMonarchLanguage without a type-level override.
+export const lexerRules = {
+  ...globals,
   defaultToken: 'invalid',
   tokenPostfix: '',
-
   tokenizer: { ...buildXjsonRules() },
-};
+} as monaco.languages.IMonarchLanguage;
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [

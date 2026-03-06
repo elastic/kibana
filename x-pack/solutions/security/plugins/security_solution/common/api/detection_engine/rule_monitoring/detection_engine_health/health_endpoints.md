@@ -570,7 +570,7 @@ Response:
       "top_warnings": [
         {
           "count": 2129,
-          "message": "This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching was found This warning will continue to appear until matching index is created or this rule is disabled"
+          "message": "Unable to find indices matching This warning will persist until one of the following occurs a matching index is created or the rule is disabled"
         }
       ],
       "frozen_indices_queried_max_count": 0
@@ -897,7 +897,7 @@ Response:
       "top_warnings": [
         {
           "count": 240,
-          "message": "This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching filebeat logs-aws was found This warning will continue to appear until matching index is created or this rule is disabled"
+          "message": "Unable to find indices matching filebeat logs-aws This warning will persist until one of the following occurs a matching index is created or the rule is disabled"
         }
       ],
       "frozen_indices_queried_max_count": 0
@@ -1848,8 +1848,8 @@ In the response you will find something like that:
                   "buckets": [
                     {
                       "doc_count": 3154,
-                      "key": "This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching was found This warning will continue to appear until matching index is created or this rule is disabled",
-                      "regex": ".*?This.+?rule.+?is.+?attempting.+?to.+?query.+?data.+?from.+?Elasticsearch.+?indices.+?listed.+?in.+?the.+?Index.+?pattern.+?section.+?of.+?the.+?rule.+?definition.+?however.+?no.+?index.+?matching.+?was.+?found.+?This.+?warning.+?will.+?continue.+?to.+?appear.+?until.+?matching.+?index.+?is.+?created.+?or.+?this.+?rule.+?is.+?disabled.*?",
+                      "key": "Unable to find indices matching This warning will persist until one of the following occurs a matching index is created or the rule is disabled",
+                      "regex": ".*?Unable.+?to.+?find.+?indices.+?matching.+?This.+?warning.+?will.+?persist.+?until.+?one.+?of.+?the.+?following.+?occurs.+?a.+?matching.+?index.+?is.+?created.+?or.+?the.+?rule.+?is.+?disabled.*?",
                       "max_matching_length": 342
                     }
                   ]

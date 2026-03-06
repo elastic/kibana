@@ -24,9 +24,13 @@ const APIS_ALLOWING_STREAMING = new Set<string>([
  *
  * The stream parameter is only accepted in the Chat API, the Completion API
  * and the Completions Extensions API
+ *
+ * When defaultModel is provided and the body does not already specify a model,
+ * it is injected into the body. This is required for Azure API Management (APIM)
+ * or proxy endpoints that do not infer the model from the deployment URL.
  */
-export const sanitizeRequest = (url: string, body: string): string => {
-  return getRequestWithStreamOption(url, body, false);
+export const sanitizeRequest = (url: string, body: string, defaultModel?: string): string => {
+  return getRequestWithStreamOption(url, body, false, defaultModel);
 };
 
 /**
@@ -34,8 +38,17 @@ export const sanitizeRequest = (url: string, body: string): string => {
  *
  * The stream parameter is only accepted in the Chat API, the Completion API
  * and the Completions Extensions API
+ *
+ * When defaultModel is provided and the body does not already specify a model,
+ * it is injected into the body. This is required for Azure API Management (APIM)
+ * or proxy endpoints that do not infer the model from the deployment URL.
  */
-export const getRequestWithStreamOption = (url: string, body: string, stream: boolean): string => {
+export const getRequestWithStreamOption = (
+  url: string,
+  body: string,
+  stream: boolean,
+  defaultModel?: string
+): string => {
   if (
     !Array.from(APIS_ALLOWING_STREAMING)
       .map((apiUrl: string) => transformApiUrlToRegex(apiUrl))
@@ -52,6 +65,9 @@ export const getRequestWithStreamOption = (url: string, body: string, stream: bo
         jsonBody.stream_options = {
           include_usage: true,
         };
+      }
+      if (defaultModel && !jsonBody.model) {
+        jsonBody.model = defaultModel;
       }
     }
 

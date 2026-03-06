@@ -52,7 +52,7 @@ const AnomalyChartsCaseAttachment = ({
     const initialState: AnomalyChartsAttachmentState = rawState ?? {};
     const filters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters ?? []);
     const query$ = new BehaviorSubject<Query | undefined>(initialState.query ?? undefined);
-    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.time_range);
 
     const chartsManager = initializeAnomalyChartsControls(initialState);
     const combined: AnomalyChartsAttachmentApi = {
@@ -118,7 +118,7 @@ export const initializeAnomalyChartsAttachment = memoize(
             },
           ];
 
-          if (isValidTimeRange(inputProps.timeRange)) {
+          if (isValidTimeRange(inputProps.time_range)) {
             listItems.push({
               title: (
                 <FormattedMessage
@@ -127,8 +127,8 @@ export const initializeAnomalyChartsAttachment = memoize(
                 />
               ),
               description: `${dataFormatter.convert(
-                inputProps.timeRange.from
-              )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+                inputProps.time_range.from
+              )} - ${dataFormatter.convert(inputProps.time_range.to)}`,
             });
           }
 
@@ -149,8 +149,8 @@ export const initializeAnomalyChartsAttachment = memoize(
           dataFormatter,
           inputProps.jobIds,
           inputProps.query?.query,
-          inputProps.timeRange?.from,
-          inputProps.timeRange?.to,
+          inputProps.time_range?.from,
+          inputProps.time_range?.to,
         ]);
         return (
           <>

@@ -7,6 +7,7 @@
 
 import {
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
+  INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
 } from '@kbn/alerting-plugin/common';
@@ -14,6 +15,27 @@ import type { GapAutoFillSchedulerResponseBodyV1 } from '@kbn/alerting-plugin/co
 import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX } from '@kbn/security-solution-plugin/public/detection_engine/rule_gaps/constants';
 import { rootRequest } from './common';
 import { getSpaceUrl } from '../space';
+
+export const interceptGetRulesWithGaps = () => {
+  cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH}*`, {
+    statusCode: 200,
+    body: {
+      rule_ids: ['rule-1'],
+      total: 1,
+      summary: {
+        total_unfilled_duration_ms: 86400000,
+        total_in_progress_duration_ms: 43200000,
+        total_filled_duration_ms: 43200000,
+        total_duration_ms: 172800000,
+        rules_by_gap_fill_status: {
+          unfilled: 1,
+          in_progress: 1,
+          filled: 1,
+        },
+      },
+    },
+  }).as('getRulesWithGaps');
+};
 
 export const interceptGetRuleGapsNoData = () => {
   cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}*`, {

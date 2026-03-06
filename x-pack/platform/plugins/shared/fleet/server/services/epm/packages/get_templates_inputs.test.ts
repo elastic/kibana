@@ -384,4 +384,85 @@ describe('Fleet - getTemplateInputs', () => {
 
     expect(template).toMatchSnapshot();
   });
+
+  it('should inject wired streams routing processor for log streams when enabled', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      true // injectWiredStreamsRouting
+    );
+
+    const logInput = template.inputs.find((input) => input.type === 'logfile');
+    expect(logInput).toBeDefined();
+    if (logInput && logInput.streams) {
+      for (const stream of logInput.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<{ add_fields?: { target: string; fields: { raw_index: string } } }>;
+      }>) {
+        if (stream.data_stream?.type === 'logs') {
+          expect(stream.processors).toBeDefined();
+          expect(stream.processors![0]).toEqual({
+            add_fields: {
+              target: '@metadata',
+              fields: { raw_index: 'logs.ecs' },
+            },
+          });
+        }
+      }
+    }
+  });
+
+  it('should NOT inject wired streams routing processor when disabled', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const templateWithRouting = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
+    const templateWithoutRouting = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      false
+    );
+
+    // With routing should have the processor
+    const logInputWithRouting = templateWithRouting.inputs.find(
+      (input) => input.type === 'logfile'
+    );
+    const logInputWithoutRouting = templateWithoutRouting.inputs.find(
+      (input) => input.type === 'logfile'
+    );
+
+    if (logInputWithRouting?.streams && logInputWithoutRouting?.streams) {
+      const streamWithRouting = (
+        logInputWithRouting.streams as Array<{ processors?: unknown[] }>
+      )[0];
+      const streamWithoutRouting = (
+        logInputWithoutRouting.streams as Array<{ processors?: unknown[] }>
+      )[0];
+
+      const routingProcessorCount = streamWithRouting.processors?.length ?? 0;
+      const noRoutingProcessorCount = streamWithoutRouting.processors?.length ?? 0;
+
+      expect(routingProcessorCount).toBe(noRoutingProcessorCount + 1);
+    }
+  });
 });

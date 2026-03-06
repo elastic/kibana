@@ -57,8 +57,21 @@ export const getRuleIdsWithGapBodySchema = schema.object(
   }
 );
 
+export const gapsSummarySchema = schema.object({
+  total_unfilled_duration_ms: schema.number(),
+  total_in_progress_duration_ms: schema.number(),
+  total_filled_duration_ms: schema.number(),
+  total_duration_ms: schema.number(),
+  rules_by_gap_fill_status: schema.object({
+    unfilled: schema.number(),
+    in_progress: schema.number(),
+    filled: schema.number(),
+  }),
+});
+
 export const getRuleIdsWithGapResponseSchema = schema.object({
   total: schema.number(),
   rule_ids: schema.arrayOf(schema.string()),
   latest_gap_timestamp: schema.maybe(schema.number()),
+  summary: gapsSummarySchema,
 });

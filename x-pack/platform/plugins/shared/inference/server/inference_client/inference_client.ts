@@ -8,10 +8,13 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { BoundOptions, InferenceClient } from '@kbn/inference-common';
-import type { AnonymizationRule } from '@kbn/inference-common';
+import type {
+  BoundOptions,
+  InferenceClient,
+  AnonymizationRule,
+  InferenceCallbacks,
+} from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -20,34 +23,49 @@ import { createPromptApi } from '../prompt';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { createCallbackManager } from './callback_manager';
+import type { InferenceAnonymizationOptions } from './anonymization_options';
 
 export function createInferenceClient({
   request,
+  namespace,
   actions,
   logger,
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  replacementsEsClient,
   callbacks,
+  anonymization,
 }: {
   request: KibanaRequest;
+  namespace: string;
   logger: Logger;
   actions: ActionsPluginStart;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  replacementsEsClient?: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
+  anonymization?: InferenceAnonymizationOptions;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
   const callbackApi = createChatCompleteCallbackApi({
     request,
+    namespace,
     actions,
     logger,
     anonymizationRulesPromise,
     regexWorker,
     esClient,
     callbackManager,
+    anonymization: {
+      ...anonymization,
+      replacements: {
+        ...anonymization?.replacements,
+        ...(replacementsEsClient ? { esClient: replacementsEsClient } : {}),
+      },
+    },
   });
 
   const chatComplete = createChatCompleteApi({

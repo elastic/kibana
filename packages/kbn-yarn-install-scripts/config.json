@@ -40,7 +40,7 @@
       "path": "esbuild",
       "lifecycle": "postinstall",
       "required": true,
-      "reason": "Configures esbuild. Used by @elastic/synthetics"
+      "reason": "Downloads platform-specific esbuild binary. Transitive dependency of Storybook via esbuild-register"
     },
     {
       "path": "geckodriver",

@@ -106,6 +106,8 @@ export interface AttachmentStateManager {
   permanentDelete(id: string): boolean;
   /** Update description without creating new version */
   rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
+  /** Update the origin reference for an attachment */
+  updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): Promise<boolean>;
 
   /** Get all attachment version refs that were accessed during this round */
   getAccessedRefs(): AttachmentVersionRef[];
@@ -457,6 +459,33 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     attachment.description = description;
+    this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
+    return true;
+  }
+
+  async updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): Promise<boolean> {
+    const attachment = this.attachments.get(id);
+    if (!attachment) {
+      return false;
+    }
+
+    if (attachment.active === false) {
+      return false;
+    }
+
+    // Validate origin using the type definition (same pattern as add())
+    const typeDefinition = this.options.getTypeDefinition(attachment.type);
+    let validatedOrigin: unknown = origin;
+    if (typeDefinition?.validateOrigin) {
+      const originResult = await typeDefinition.validateOrigin(origin);
+      if (!originResult.valid) {
+        throw new Error(`Invalid origin data for type "${attachment.type}": ${originResult.error}`);
+      }
+      validatedOrigin = originResult.data;
+    }
+
+    attachment.origin = validatedOrigin;
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;

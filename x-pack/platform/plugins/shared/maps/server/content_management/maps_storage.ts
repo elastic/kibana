@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import type {
   SavedObject,
@@ -69,20 +68,6 @@ const searchArgsToSOFindOptions = (
 };
 
 export class MapsStorage {
-  constructor({
-    logger,
-    throwOnResultValidationError,
-  }: {
-    logger: Logger;
-    throwOnResultValidationError: boolean;
-  }) {
-    this.logger = logger;
-    this.throwOnResultValidationError = throwOnResultValidationError ?? false;
-  }
-
-  private logger: Logger;
-  private throwOnResultValidationError: boolean;
-
   async get(ctx: StorageContext, id: string): Promise<MapsGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
@@ -102,11 +87,7 @@ export class MapsStorage {
 
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
+      throw Boom.badRequest(`Invalid response. ${validationError.message}`);
     }
     const { value, error: resultError } = transforms.get.out.result.down<MapsGetOut, MapsGetOut>(
       // @ts-expect-error - fix type error
@@ -173,11 +154,7 @@ export class MapsStorage {
 
     const validationError = transforms.create.out.result.validate({ item });
     if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
+      throw Boom.badRequest(`Invalid response. ${validationError.message}`);
     }
 
     // Validate DB response and DOWN transform to the request version
@@ -242,11 +219,7 @@ export class MapsStorage {
 
     const validationError = transforms.update.out.result.validate({ item });
     if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
+      throw Boom.badRequest(`Invalid response. ${validationError.message}`);
     }
 
     // Validate DB response and DOWN transform to the request version
@@ -315,11 +288,7 @@ export class MapsStorage {
 
     const validationError = transforms.search.out.result.validate(response);
     if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
+      throw Boom.badRequest(`Invalid response. ${validationError.message}`);
     }
 
     const { value, error: resultError } = transforms.search.out.result.down<
@@ -341,11 +310,7 @@ export class MapsStorage {
 
       const validationError = transforms.mSearch.out.result.validate(contentItem);
       if (validationError) {
-        if (this.throwOnResultValidationError) {
-          throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-        } else {
-          this.logger.warn(`Invalid response. ${validationError.message}`);
-        }
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       }
 
       // Validate DB response and DOWN transform to the request version

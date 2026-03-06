@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { IdentifierType, EntityRiskScoreRecord } from '../common/common.gen';
 

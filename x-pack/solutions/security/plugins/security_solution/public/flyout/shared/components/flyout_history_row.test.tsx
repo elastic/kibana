@@ -20,6 +20,7 @@ import {
   type FlyoutPanelHistory,
   useExpandableFlyoutApi,
 } from '@kbn/expandable-flyout';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
@@ -27,6 +28,7 @@ import { DocumentDetailsRightPanelKey } from '../../document_details/shared/cons
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
 import {
+  ATTACK_DETAILS_HISTORY_ROW_TEST_ID,
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
   HISTORY_ROW_LOADING_TEST_ID,
@@ -38,6 +40,7 @@ import {
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { IOCRightPanelKey } from '../../ioc_details/constants/panel_keys';
+import { AttackDetailsRightPanelKey } from '../../attack_details/constants/panel_keys';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -46,6 +49,9 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
+jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+  useFindAttackDiscoveries: jest.fn(),
+}));
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
 jest.mock('../../rule_details/hooks/use_rule_details');
@@ -102,6 +108,13 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
       params: { id: 'iocId' },
     },
   },
+  attack: {
+    lastOpen: Date.now(),
+    panel: {
+      id: AttackDetailsRightPanelKey,
+      params: { attackId: 'attack-1', indexName: '.alerts-security.alerts-default' },
+    },
+  },
   unsupported: {
     lastOpen: Date.now(),
     panel: {
@@ -132,6 +145,10 @@ describe('FlyoutHistoryRow', () => {
       loading: false,
     });
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      data: { data: [{ title: 'Attack title' }], total: 1 },
+      isLoading: false,
+    });
   });
 
   it('should render document details history row when key is alert', () => {
@@ -195,6 +212,18 @@ describe('FlyoutHistoryRow', () => {
     );
     expect(getByTestId(`${5}-${IOC_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
     expect(getByTestId(`${5}-${IOC_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Document: Indicator');
+  });
+
+  it('should render attack details history row when key is attack', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutHistoryRow item={rowItems.attack} index={6} />
+      </TestProviders>
+    );
+    expect(getByTestId(`${6}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
+    expect(getByTestId(`${6}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toHaveTextContent(
+      'Attack: Attack title'
+    );
   });
 
   it('should render null when key is not supported', () => {

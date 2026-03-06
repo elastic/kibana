@@ -9,9 +9,11 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { useGetAllIntegrations, useGetIntegrationById } from './common';
+import type { useGetAllIntegrations } from './common/hooks/use_get_all_integrations';
+import type { useGetIntegrationById } from './common/hooks/use_get_integration_by_id';
 import type { CreateIntegrationComponent } from './components/create_integration/types';
 import type { CreateIntegrationSideCardButtonComponent } from './components/create_integration_card_button/types';
+import type { DataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AutomaticImportV2PluginSetup {}
@@ -30,6 +32,10 @@ export interface AutomaticImportV2PluginStart {
      * Component that links the user to the create integration component.
      */
     CreateIntegrationSideCardButton: CreateIntegrationSideCardButtonComponent;
+    /**
+     * Flyout to review data stream results and edit ingest pipeline.
+     */
+    DataStreamResultsFlyout: DataStreamResultsFlyoutComponent;
   };
 }
 

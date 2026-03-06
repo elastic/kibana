@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { EsqlQuery } from '../../composer';
-import { type ESQLSource } from '../../types';
+import { EsqlQuery } from '@elastic/esql';
+import type { ESQLSource } from '@elastic/esql/types';
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,

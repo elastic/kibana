@@ -10,6 +10,7 @@
 import { Agent } from 'undici';
 
 import {
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
@@ -71,6 +72,35 @@ interface PersistableUser {
     created: string;
     last_modified: string;
   };
+}
+
+/**
+ * Api key data structure for seeding.
+ */
+export interface TestApiKeyData {
+  creator: string;
+  organizationId: string;
+}
+
+/**
+ * PersistableApiKey structure matching the Cosmos DB schema
+ */
+interface PersistableApiKey {
+  id: string;
+  hash: string;
+  creator: string;
+  organization_id: string;
+  expiration: string;
+  role_assignments: {
+    organization: Array<{ organization_id: string; application_roles: string[]; role_id: string }>;
+    deployment: unknown[];
+    project: unknown[];
+    cloud_connected_resource: unknown[];
+  };
+  internal: boolean;
+  revoked: boolean;
+  description?: string;
+  metadata: { created: string; last_modified: string };
 }
 
 /**
@@ -247,6 +277,167 @@ export async function updateTestUser(
     return {
       success: false,
       message: `✗ Error updating test user: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+const API_KEY_ID = '72kse5wBzbyj5dh9Iz13';
+
+/**
+ * Create an api key document matching PersistableApiKey structure.
+ */
+function createApiKeyDocument(apiKeyData: TestApiKeyData): PersistableApiKey {
+  const currentTime = new Date().toISOString();
+  return {
+    // Hash for API key value "n2-RiRLS2gNSwXSR0pc2tg" is generated with the following snippet:
+    // python3 -c 'import os, hashlib, base64; pwd=b"n2-RiRLS2gNSwXSR0pc2tg"; salt=os.urandom(32); h=hashlib.sha256(salt + pwd).digest(); print(f"{{SSHA-256}}${base64.b64encode(salt).decode()}${base64.b64encode(h).decode()}")'
+    // Corresponds to: essu_dev_TnpKcmMyVTFkMEo2WW5scU5XUm9PVWw2TVRNNmJqSXRVbWxTVEZNeVowNVRkMWhUVWpCd1l6SjBadz09AAAAAN10T0s=
+    id: API_KEY_ID,
+    hash: '{SSHA-256}$yY06GoiBnlS/V2kNqWOTlh7OplBxIayo9C5wa5J5FxM=$OdktViokHd1IPPxULCSW4WEuxsY1ploVNbDsISwrLyk=',
+    creator: apiKeyData.creator,
+    organization_id: apiKeyData.organizationId,
+    // Set expiration to 1 year in the future for testing purposes.
+    expiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    role_assignments: {
+      organization: [
+        {
+          role_id: 'organization-admin',
+          organization_id: apiKeyData.organizationId,
+          application_roles: ['admin'],
+        },
+      ],
+      deployment: [],
+      project: [],
+      cloud_connected_resource: [],
+    },
+    internal: false,
+    revoked: false,
+    description: 'test UIAM API key',
+    metadata: { created: currentTime, last_modified: currentTime },
+  };
+}
+
+/**
+ * Seed a test Api Key in Cosmos DB
+ *
+ * @param apiKeyData - Api key data to seed.
+ * @returns Promise that resolves when api key is created or already exists
+ *
+ * @example
+ * ```ts
+ * await seedTestApiKey({
+ *   creator: '12345',
+ *   organizationId: '1234567890'
+ * });
+ * ```
+ */
+export async function seedTestApiKey(
+  apiKeyData: TestApiKeyData
+): Promise<{ success: boolean; message: string; response?: any }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}/docs`,
+      {
+        method: 'POST',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'POST',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([API_KEY_ID]),
+        },
+        body: JSON.stringify(createApiKeyDocument(apiKeyData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    const responseData = await response.json();
+    if (response.status === 201) {
+      return {
+        success: true,
+        message: `✓ Test API key created successfully: ${apiKeyData.creator}`,
+        response: responseData,
+      };
+    }
+
+    if (response.status === 409) {
+      // API key already exists, update it instead.
+      return await updateTestApiKey(apiKeyData);
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to create test API key (HTTP ${response.status})`,
+      response: responseData,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error creating test API key: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+/**
+ * Update an existing API key in Cosmos DB.
+ *
+ * @param apiKeyData - API key data to update
+ * @returns Promise that resolves when API key is updated
+ *
+ * @example
+ * ```ts
+ * await updateTestApiKey({
+ *   creator: '12345',
+ *   organizationId: '1234567890'
+ * });
+ * ```
+ */
+export async function updateTestApiKey(
+  apiKeyData: TestApiKeyData
+): Promise<{ success: boolean; message: string; response?: any }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}/docs/${API_KEY_ID}`,
+      {
+        method: 'PUT',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'PUT',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}/docs/${API_KEY_ID}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([API_KEY_ID]),
+        },
+        body: JSON.stringify(createApiKeyDocument(apiKeyData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    const responseData = await response.json();
+    if (response.status === 200) {
+      return {
+        success: true,
+        message: `✓ Test API key updated successfully: ${apiKeyData.creator}`,
+        response: responseData,
+      };
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to update test API key (HTTP ${response.status})`,
+      response: responseData,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error updating test API key: ${
         error instanceof Error ? error.message : String(error)
       }`,
     };

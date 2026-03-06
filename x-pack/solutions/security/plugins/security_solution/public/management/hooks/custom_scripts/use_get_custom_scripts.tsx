@@ -33,25 +33,25 @@ export interface CustomScriptsErrorType {
  * @returns Query result containing custom scripts data
  */
 
-export const useGetCustomScripts = (
+export const useGetCustomScripts = <TMeta extends {} = {}>(
   agentType: CustomScriptsRequestQueryParams['agentType'],
   query: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {},
   options: Omit<
     UseQueryOptions<
-      ResponseActionScriptsApiResponse['data'],
+      ResponseActionScriptsApiResponse<TMeta>['data'],
       IHttpFetchError<CustomScriptsErrorType>
     >,
     'queryKey' | 'queryFn'
   > = {}
-): UseQueryResult<ResponseActionScript[], IHttpFetchError<CustomScriptsErrorType>> => {
+): UseQueryResult<ResponseActionScript<TMeta>[], IHttpFetchError<CustomScriptsErrorType>> => {
   const http = useHttp();
 
-  return useQuery<ResponseActionScript[], IHttpFetchError<CustomScriptsErrorType>>({
+  return useQuery<ResponseActionScript<TMeta>[], IHttpFetchError<CustomScriptsErrorType>>({
     ...options,
-    queryKey: ['get-custom-scripts', agentType],
+    queryKey: ['get-custom-scripts', agentType, query],
     queryFn: () => {
       return http
-        .get<ResponseActionScriptsApiResponse>(CUSTOM_SCRIPTS_ROUTE, {
+        .get<ResponseActionScriptsApiResponse<TMeta>>(CUSTOM_SCRIPTS_ROUTE, {
           version: '1',
           query: {
             agentType,

@@ -1,0 +1,74 @@
+version: "1"
+name: "sources.zoom.list"
+description: "List Zoom resources. Actions and inputs: listUpcomingMeetings — list scheduled/upcoming meetings for a user (optional user_id, optional type, optional page_size, optional next_page_token); listUserRecordings — list cloud recordings for a user in a date range (optional user_id, optional from, optional to, optional page_size, optional next_page_token)."
+tags: ["agent-builder-tool"]
+enabled: true
+triggers:
+  - type: "manual"
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "listUpcomingMeetings"
+      - "listUserRecordings"
+    required: true
+  - name: user_id
+    type: string
+    required: false
+    default: "me"
+    description: "User ID or email address. Defaults to 'me' for the authenticated user."
+  - name: type
+    type: string
+    required: false
+    default: "upcoming"
+    description: "Meeting type filter for listUpcomingMeetings. Valid values: scheduled, live, upcoming, upcoming_meetings, previous_meetings."
+  - name: from
+    type: string
+    required: false
+    description: "Start date in YYYY-MM-DD format for listUserRecordings. Defaults to current date."
+  - name: to
+    type: string
+    required: false
+    description: "End date in YYYY-MM-DD format for listUserRecordings. Range cannot exceed 1 month."
+  - name: page_size
+    type: number
+    required: false
+    default: 20
+    description: "Number of results per page (1-300)."
+  - name: next_page_token
+    type: string
+    required: false
+    description: "Pagination token from a previous response."
+steps:
+  - name: list-upcoming-meetings
+    type: zoom.listMeetings
+    if: "${{ inputs.list_action == 'listUpcomingMeetings' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      userId: "${{inputs.user_id}}"
+      type: "${{inputs.type}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
+  - name: list-user-recordings
+    type: zoom.listUserRecordings
+    if: "${{ inputs.list_action == 'listUserRecordings' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      userId: "${{inputs.user_id}}"
+      from: "${{inputs.from}}"
+      to: "${{inputs.to}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
+  - name: set-list-result
+    type: if
+    condition: "${{ inputs.list_action == 'listUpcomingMeetings' }}"
+    steps:
+      - name: set-meetings-output
+        type: data.set
+        with:
+          result: "${{ steps.list-upcoming-meetings.output }}"
+    else:
+      - name: set-recordings-output
+        type: data.set
+        with:
+          result: "${{ steps.list-user-recordings.output }}"

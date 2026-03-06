@@ -76,7 +76,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
-import { AlertingPage } from './alerting';
+import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -288,6 +288,10 @@ export function Detail() {
     !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
     packageInfo &&
     hasDocumentation({ packageInfo, integration });
+
+  const showAlertingTab = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(type)
+  );
 
   // Track install status state
   useEffect(() => {
@@ -705,7 +709,7 @@ export function Detail() {
       });
     }
 
-    if (isInstalled && packageInfo.type === 'integration') {
+    if (isInstalled && showAlertingTab) {
       tabs.push({
         id: 'alerting',
         name: (
@@ -796,6 +800,7 @@ export function Detail() {
     showCustomTab,
     showDocumentationTab,
     numOfDeferredInstallations,
+    showAlertingTab,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (

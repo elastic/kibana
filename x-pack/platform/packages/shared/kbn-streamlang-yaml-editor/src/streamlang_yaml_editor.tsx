@@ -37,6 +37,8 @@ const defaultMonacoYamlOptions: Partial<MonacoYamlOptions> = {
   validate: true, // Keep validation enabled
 };
 
+const debounceOptions = { wait: 300 };
+
 export const StreamlangYamlEditor = ({
   dsl,
   onDslChange,
@@ -155,31 +157,28 @@ export const StreamlangYamlEditor = ({
   // Single debounced handler for all post-change processing:
   // - Update YAML line map (for step actions, decorations, etc.)
   // - Parse YAML and notify parent if valid
-  const { run: processChanges } = useDebounceFn(
-    (value: string) => {
-      setIsTyping(false);
+  const { run: processChanges } = useDebounceFn((value: string) => {
+    setIsTyping(false);
 
-      // Update YAML line map
-      if (value) {
-        const lineMap = mapStepsToYamlLines(value);
-        setYamlLineMap(lineMap);
-      } else {
-        setYamlLineMap(undefined);
-      }
+    // Update YAML line map
+    if (value) {
+      const lineMap = mapStepsToYamlLines(value);
+      setYamlLineMap(lineMap);
+    } else {
+      setYamlLineMap(undefined);
+    }
 
-      // Parse YAML and notify parent if parsable and changed
-      if (value && value !== lastNotifiedValueRef.current && onDslChange) {
-        try {
-          const parsedDsl = yaml.parse(value);
-          lastNotifiedValueRef.current = value;
-          onDslChange(parsedDsl, value);
-        } catch {
-          // YAML isn't parsable.
-        }
+    // Parse YAML and notify parent if parsable and changed
+    if (value && value !== lastNotifiedValueRef.current && onDslChange) {
+      try {
+        const parsedDsl = yaml.parse(value);
+        lastNotifiedValueRef.current = value;
+        onDslChange(parsedDsl, value);
+      } catch {
+        // YAML isn't parsable.
       }
-    },
-    { wait: 300 }
-  );
+    }
+  }, debounceOptions);
 
   // For performance reasons we maintain an internal value, rather than waiting for round trips,
   // and various levels of processing / validation to complete. This effect keeps the internal values in

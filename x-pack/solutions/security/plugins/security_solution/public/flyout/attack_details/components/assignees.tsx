@@ -81,6 +81,7 @@ export const Assignees = memo(() => {
     attacksWithAssignees,
     closePopover,
     onSuccess,
+    telemetrySource: 'attacks_page_flyout_header',
   });
 
   const uids = useMemo(() => new Set(assignees), [assignees]);

@@ -109,6 +109,35 @@ jest.mock('../../../hooks', () => {
                 package: 'nginx',
                 path: 'access',
               },
+              {
+                type: 'logs',
+                dataset: 'nginx.error',
+                title: 'Nginx error logs',
+                release: 'experimental',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'logfile',
+                    vars: [
+                      {
+                        name: 'paths',
+                        type: 'text',
+                        title: 'Paths',
+                        multi: true,
+                        required: true,
+                        show_user: true,
+                        default: ['/var/log/nginx/error.log*'],
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    title: 'Nginx error logs',
+                    description: 'Collect Nginx error logs',
+                    enabled: true,
+                  },
+                ],
+                package: 'nginx',
+                path: 'error',
+              },
             ],
             latestVersion: version,
             keepPoliciesUpToDate: false,
@@ -214,6 +243,13 @@ const mockPackagePolicy = {
           data_stream: { type: 'logs', dataset: 'nginx.access' },
           vars: {
             paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'nginx.error' },
+          vars: {
+            paths: { value: ['/var/log/nginx/error.log*'], type: 'text' },
           },
         },
       ],
@@ -354,6 +390,10 @@ describe('edit package policy page', () => {
             streams: [
               {
                 ...mockPackagePolicy.inputs[0].streams[0],
+                enabled: false,
+              },
+              {
+                ...mockPackagePolicy.inputs[0].streams[1],
                 enabled: false,
               },
             ],

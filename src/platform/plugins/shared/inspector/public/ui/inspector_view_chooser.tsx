@@ -9,7 +9,6 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -30,12 +29,6 @@ interface State {
 }
 
 export class InspectorViewChooser extends Component<Props, State> {
-  static propTypes = {
-    views: PropTypes.array.isRequired,
-    onViewSelected: PropTypes.func.isRequired,
-    selectedView: PropTypes.object.isRequired,
-  };
-
   state: State = {
     isSelectorOpen: false,
   };

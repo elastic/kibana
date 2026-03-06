@@ -56,6 +56,8 @@ export const isFilestoreTool = (toolName: string) =>
 export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isFilestoreTool(toolName);
 
+export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
+
 /**
  * List of tool types which can be created / edited by a user.
  */

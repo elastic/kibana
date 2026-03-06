@@ -31,6 +31,7 @@ import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../../lib/rule_gaps/update/update_gaps', () => ({
   updateGaps: jest.fn(),
@@ -75,6 +76,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const fakeRuleName = 'fakeRuleName';

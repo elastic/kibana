@@ -119,7 +119,7 @@ function getDefaultQuery({
   const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
   const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
   if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
-    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView, true) };
+    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
 
   // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();

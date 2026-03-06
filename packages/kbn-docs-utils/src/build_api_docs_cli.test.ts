@@ -82,11 +82,13 @@ describe('build_api_docs_cli', () => {
   });
 
   it('runs build flow when stats are not provided', async () => {
+    const mockPlugins = [
+      { id: 'p1', manifest: { owner: { name: 'team' }, serviceFolders: [] }, isPlugin: true },
+    ];
     const setupResult = {
       project: {},
-      plugins: [
-        { id: 'p1', manifest: { owner: { name: 'team' }, serviceFolders: [] }, isPlugin: true },
-      ],
+      plugins: mockPlugins,
+      allPlugins: mockPlugins,
     };
     const apiMapResult = {
       pluginApiMap: {},
@@ -107,6 +109,7 @@ describe('build_api_docs_cli', () => {
     expect(buildApiMap).toHaveBeenCalledWith(
       setupResult.project,
       setupResult.plugins,
+      setupResult.allPlugins,
       log,
       mockTx,
       { stats: undefined, collectReferences: false }

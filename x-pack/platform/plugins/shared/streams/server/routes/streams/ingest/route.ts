@@ -6,7 +6,7 @@
  */
 
 import { badData, badRequest } from '@hapi/boom';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';

@@ -18,9 +18,9 @@ import type {
   CreateSkillResponse,
   UpdateSkillResponse,
 } from '../../common/http_api/skills';
-import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { internalToPublicDefinition } from '../services/skills/utils';
+import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from './route_security';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -112,9 +112,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .get({
       path: `${publicApiPath}/skills`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List skills',
       description: 'List all available skills (built-in and user-created).',
@@ -147,9 +145,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .get({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a skill by id',
       description: 'Get a specific skill by ID.',
@@ -186,9 +182,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .post({
       path: `${publicApiPath}/skills`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a skill',
       description: 'Create a new user-defined skill.',
@@ -224,9 +218,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .put({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a skill',
       description: 'Update an existing user-created skill.',
@@ -264,9 +256,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .delete({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a skill',
       description: 'Delete a user-created skill by ID. This action cannot be undone.',

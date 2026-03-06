@@ -203,7 +203,7 @@
               "Event type {@link UserActivityEventType}."
             ],
             "signature": [
-              "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"indicator\" | \"allowed\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
+              "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"allowed\" | \"indicator\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
             "lineNumber": 58,
@@ -449,7 +449,7 @@
           "\nEvent type following ECS (Elastic Common Schema) allowed values."
         ],
         "signature": [
-          "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"indicator\" | \"allowed\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
+          "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"allowed\" | \"indicator\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
         ],
         "path": "src/core/packages/user-activity/server/src/types.ts",
         "lineNumber": 27,

@@ -12,6 +12,8 @@ import { load } from 'js-yaml';
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { allowedExperimentalValues } from '../../../../../../../../common/experimental_features';
 
 import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
@@ -412,6 +414,471 @@ describe('StepConfigurePackage', () => {
       expect(
         await renderResult.findByText('Collect logs from Nginx instances')
       ).toBeInTheDocument();
+    });
+  });
+});
+
+describe('isSingleInputAndStreams behavior', () => {
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  const singleInputPackageInfo: PackageInfo = {
+    name: 'simple_pkg',
+    title: 'Simple Package',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'A simple single-input package',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'simple',
+        title: 'Simple template',
+        description: 'Simple single-input template',
+        inputs: [
+          {
+            type: 'logfile',
+            title: 'Collect logs',
+            description: 'Collect logs from instances',
+          },
+        ],
+        multiple: true,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'simple_pkg.logs',
+        title: 'Simple logs',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/*.log'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Simple logs',
+            description: 'Collect simple logs',
+            enabled: true,
+          },
+        ],
+        package: 'simple_pkg',
+        path: 'logs',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const singleInputPackagePolicy: NewPackagePolicy = {
+    name: 'simple-1',
+    description: 'desc',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    supports_agentless: false,
+    inputs: [
+      {
+        type: 'logfile',
+        policy_template: 'simple',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'simple_pkg.logs' },
+            vars: {
+              paths: { value: ['/var/log/*.log'], type: 'text' },
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  it('should render title without toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const validationResults = validatePackagePolicy(
+      singleInputPackagePolicy,
+      singleInputPackageInfo,
+      load
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={singleInputPackageInfo}
+        packagePolicy={singleInputPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')).toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('should render toggle switch when feature flag is off', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: false,
+    });
+
+    const validationResults = validatePackagePolicy(
+      singleInputPackagePolicy,
+      singleInputPackageInfo,
+      load
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={singleInputPackageInfo}
+        packagePolicy={singleInputPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should render toggle switch when there are multiple inputs', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const multiInputPackageInfo: PackageInfo = {
+      ...singleInputPackageInfo,
+      policy_templates: [
+        {
+          name: 'multi',
+          title: 'Multi input template',
+          description: 'Template with multiple inputs',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs',
+              description: 'Collect logs from instances',
+            },
+            {
+              type: 'httpjson',
+              title: 'Collect via HTTP',
+              description: 'Collect via HTTP endpoint',
+            },
+          ],
+          multiple: true,
+        },
+      ],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'simple_pkg.logs',
+          title: 'Simple logs',
+          release: 'ga',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'logfile',
+              vars: [
+                {
+                  name: 'paths',
+                  type: 'text',
+                  title: 'Paths',
+                  multi: true,
+                  required: true,
+                  show_user: true,
+                  default: ['/var/log/*.log'],
+                },
+              ],
+              template_path: 'stream.yml.hbs',
+              title: 'Logs stream',
+              description: 'Collect logs',
+              enabled: true,
+            },
+          ],
+          package: 'simple_pkg',
+          path: 'logs',
+        },
+        {
+          type: 'logs',
+          dataset: 'simple_pkg.http',
+          title: 'HTTP logs',
+          release: 'ga',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'httpjson',
+              vars: [
+                {
+                  name: 'url',
+                  type: 'text',
+                  title: 'URL',
+                  required: true,
+                  show_user: true,
+                },
+              ],
+              template_path: 'stream.yml.hbs',
+              title: 'HTTP stream',
+              description: 'Collect via HTTP',
+              enabled: true,
+            },
+          ],
+          package: 'simple_pkg',
+          path: 'http',
+        },
+      ],
+    };
+
+    const multiInputPolicy: NewPackagePolicy = {
+      ...singleInputPackagePolicy,
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'multi',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.logs' },
+              vars: {
+                paths: { value: ['/var/log/*.log'], type: 'text' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'httpjson',
+          policy_template: 'multi',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.http' },
+              vars: {
+                url: { value: 'http://localhost', type: 'text' },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, load);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={multiInputPackageInfo}
+        packagePolicy={multiInputPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it('should render toggle switch when there are multiple policy templates', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const multiTemplatePackageInfo: PackageInfo = {
+      ...singleInputPackageInfo,
+      policy_templates: [
+        {
+          name: 'template_a',
+          title: 'Template A',
+          description: 'First template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs A',
+              description: 'Collect logs from A',
+            },
+          ],
+          multiple: true,
+        },
+        {
+          name: 'template_b',
+          title: 'Template B',
+          description: 'Second template',
+          inputs: [
+            {
+              type: 'httpjson',
+              title: 'Collect logs B',
+              description: 'Collect logs from B',
+            },
+          ],
+          multiple: true,
+        },
+      ],
+      data_streams: [
+        ...singleInputPackageInfo.data_streams!,
+        {
+          type: 'logs',
+          dataset: 'simple_pkg.http',
+          title: 'HTTP logs',
+          release: 'ga',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'httpjson',
+              vars: [
+                {
+                  name: 'url',
+                  type: 'text',
+                  title: 'URL',
+                  required: true,
+                  show_user: true,
+                },
+              ],
+              template_path: 'stream.yml.hbs',
+              title: 'HTTP stream',
+              description: 'Collect via HTTP',
+              enabled: true,
+            },
+          ],
+          package: 'simple_pkg',
+          path: 'http',
+        },
+      ],
+    };
+
+    const multiTemplatePolicy: NewPackagePolicy = {
+      ...singleInputPackagePolicy,
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'template_a',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.logs' },
+              vars: {
+                paths: { value: ['/var/log/*.log'], type: 'text' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'httpjson',
+          policy_template: 'template_b',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.http' },
+              vars: {
+                url: { value: 'http://localhost', type: 'text' },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const validationResults = validatePackagePolicy(
+      multiTemplatePolicy,
+      multiTemplatePackageInfo,
+      load
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={multiTemplatePackageInfo}
+        packagePolicy={multiTemplatePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it('should show deprecated policy template callout on edit page', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const deprecatedTemplatePackageInfo: PackageInfo = {
+      ...singleInputPackageInfo,
+      policy_templates: [
+        {
+          name: 'simple',
+          title: 'Deprecated template',
+          description: 'A deprecated template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs',
+              description: 'Collect logs from instances',
+            },
+          ],
+          multiple: true,
+          deprecated: {
+            description: 'This template is deprecated. Use the new template instead.',
+          },
+        },
+      ],
+    };
+
+    const validationResults = validatePackagePolicy(
+      singleInputPackagePolicy,
+      deprecatedTemplatePackageInfo,
+      load
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={deprecatedTemplatePackageInfo}
+        packagePolicy={singleInputPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('deprecatedPolicyTemplateCallout')).toBeInTheDocument();
     });
   });
 });

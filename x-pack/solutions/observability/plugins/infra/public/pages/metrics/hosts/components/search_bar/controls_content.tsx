@@ -16,7 +16,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import type { DataControlApi } from '@kbn/controls-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
@@ -63,30 +63,14 @@ export const ControlsContent = ({
     return { initialState: initialInput };
   }, [controlPanels]);
 
-  useEffect(() => {
-    const current = controlGroupAPI.current;
-    if (!current || !controlConfigs.replace) {
-      return;
-    }
-
-    Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
-      current.replacePanel(key, {
-        panelType: replaceable.control.type,
-        maybePanelId: replaceable.key,
-        serializedState: {
-          id: replaceable.key,
-          ...replaceable.control,
-          dataViewId: dataView?.id,
-        },
-      });
-    });
-  }, [schema, controlConfigs, dataView?.id]);
-
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupRendererApi) => {
       if (!controlGroup) return;
 
       controlGroupAPI.current = controlGroup;
+
+      subscriptions.current.unsubscribe();
+      subscriptions.current = new Subscription();
 
       subscriptions.current.add(
         controlGroup.children$.subscribe((children) => {
@@ -116,10 +100,8 @@ export const ControlsContent = ({
   );
 
   useEffect(() => {
-    const currentSubscriptions = subscriptions.current;
-
     return () => {
-      currentSubscriptions.unsubscribe();
+      subscriptions.current.unsubscribe();
     };
   }, []);
 
@@ -130,6 +112,7 @@ export const ControlsContent = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
+        key={schema ?? 'default'}
         getCreationOptions={getInitialInput}
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}

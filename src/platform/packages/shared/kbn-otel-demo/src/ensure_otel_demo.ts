@@ -213,8 +213,8 @@ export async function ensureOtelDemo({
   // Generate OTel Collector configuration
   const collectorConfig = getFullOtelCollectorConfig({
     elasticsearchEndpoint: elasticsearchHost,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
     logsIndex,
     namespace: demoConfig.namespace,
   });

@@ -192,6 +192,62 @@ steps:
 
       expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
     });
+
+    it('should not flag liquid expressions inside YAML comment lines', () => {
+      const yaml = `
+version: '1'
+name: Comment Liquid Test
+# This comment has {{ steps.foo.output | json }}
+triggers:
+  - type: manual
+steps:
+  # {{ some_commented_variable }}
+  - name: step1
+    type: console
+    with:
+      message: "Hello world"
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
+    });
+
+    it('should not flag invalid liquid inside YAML comment lines', () => {
+      const yaml = `
+version: '1'
+name: Comment Invalid Liquid Test
+# {{ unclosed
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "Hello world"
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
+    });
+
+    it('should not flag liquid expressions inside inline YAML comments', () => {
+      const yaml = `
+version: '1'
+name: Inline Comment Liquid Test
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console  # was {{ steps.old.output | unknownFilter }}
+    with:
+      message: "Hello world" # {{ unclosed
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
+    });
   });
 
   describe('trigger validation', () => {

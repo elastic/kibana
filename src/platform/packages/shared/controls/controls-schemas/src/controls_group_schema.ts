@@ -78,6 +78,7 @@ export const controlsGroupSchema = schema.arrayOf(
   ]),
   {
     defaultValue: [],
+    maxSize: 100,
     meta: { description: 'An array of control panels and their state in the control group.' },
   }
 );

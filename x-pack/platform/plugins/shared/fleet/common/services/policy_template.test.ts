@@ -14,12 +14,15 @@ import type {
   RegistryDataStream,
 } from '../types';
 
+import type { NewPackagePolicy } from '../types';
+
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -374,7 +377,7 @@ describe('getNormalizedDataStreams', () => {
     const useApmVar = vars?.find((v) => v.name === 'use_apm');
     expect(useApmVar).toBeDefined();
     expect(useApmVar?.default).toEqual(true);
-    expect(useApmVar?.title).toEqual('Use Elastic APM');
+    expect(useApmVar?.title).toEqual('Enable Elastic APM Enrichment');
   });
 });
 
@@ -497,5 +500,57 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
       },
     ]);
+  });
+});
+
+describe('hasMultipleEnabledPolicyTemplates', () => {
+  const makePackagePolicy = (
+    inputs: Array<{ type: string; policy_template?: string; enabled: boolean }>
+  ): NewPackagePolicy => ({
+    name: 'test-policy',
+    namespace: 'default',
+    enabled: true,
+    policy_ids: ['policy-1'],
+    inputs: inputs.map((input) => ({
+      ...input,
+      streams: [],
+    })),
+  });
+
+  it('should return false when all enabled inputs belong to a single policy template', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'metrics', policy_template: 'template_a', enabled: true },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return true when enabled inputs span multiple policy templates', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'httpjson', policy_template: 'template_b', enabled: true },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(true);
+  });
+
+  it('should return false when inputs span multiple templates but only one template is enabled', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'httpjson', policy_template: 'template_b', enabled: false },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return false when there is a single enabled input with no policy_template', () => {
+    const packagePolicy = makePackagePolicy([{ type: 'logfile', enabled: true }]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return false when there are no enabled inputs', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: false },
+      { type: 'httpjson', policy_template: 'template_b', enabled: false },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
   });
 });

@@ -13,6 +13,7 @@ import {
   combineLatest,
   debounceTime,
   filter,
+  from,
   map,
   merge,
   of,
@@ -42,6 +43,7 @@ import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import { castESQLValue } from './utils/esql_type_utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -99,6 +101,7 @@ export function initializeESQLControlManager(
     (initialState.control_type as EsqlControlType) ?? ''
   );
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esql_query ?? '');
+  let valuesColumnType: string | undefined;
   const totalCardinality$ = new BehaviorSubject<number>(
     initialState.available_options?.length ?? 0
   );
@@ -146,6 +149,7 @@ export function initializeESQLControlManager(
   let previousESQLVariables: ESQLControlVariable[] = [];
   let previousTimeRange: TimeRange | undefined;
   let hasInitialFetch = false;
+  let fetchAbortController = new AbortController();
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
@@ -178,21 +182,29 @@ export function initializeESQLControlManager(
 
         return shouldFetch;
       }),
-      switchMap(async ({ timeRange, esqlVariables }) => {
+      switchMap(({ timeRange, esqlVariables }) => {
+        fetchAbortController.abort();
+        fetchAbortController = new AbortController();
+        const { signal } = fetchAbortController;
+
         setDataLoading(true);
         const variablesInParent = esqlVariables || [];
 
-        return await getESQLSingleColumnValues({
-          query: esqlQuery$.getValue(),
-          search: dataService.search.search,
-          timeRange,
-          esqlVariables: variablesInParent,
-        });
+        return from(
+          getESQLSingleColumnValues({
+            query: esqlQuery$.getValue(),
+            search: dataService.search.search,
+            signal,
+            timeRange,
+            esqlVariables: variablesInParent,
+          })
+        );
       })
     )
     .subscribe((result) => {
       setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
+        valuesColumnType = result.columnType;
         const newAvailableOptions = result.values.map((value) => value);
         availableOptions$.next(newAvailableOptions);
 
@@ -227,6 +239,8 @@ export function initializeESQLControlManager(
   const getEsqlVariable = (sectionId?: string) => {
     const isSingleSelect = singleSelect$.value;
     const selectedValues = selectedOptions$.value;
+    const columnType =
+      controlType$.value === EsqlControlType.VALUES_FROM_QUERY ? valuesColumnType : undefined;
 
     // For single select, return the first value; for multi-select, return the array
     let value: ESQLControlVariable['value'];
@@ -235,13 +249,13 @@ export function initializeESQLControlManager(
       // Single select: return the first value or empty string if none selected
       const firstValue = selectedValues[0];
       if (firstValue !== undefined) {
-        value = isNaN(Number(firstValue)) ? firstValue : Number(firstValue);
+        value = castESQLValue(firstValue, columnType);
       } else {
         value = '';
       }
     } else {
-      // Multi-select: return array of all selected values
-      value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
+      // Multi select: return array with numbers converted from strings when possible
+      value = selectedValues.map((val) => castESQLValue(val, columnType));
     }
 
     return {
@@ -274,6 +288,7 @@ export function initializeESQLControlManager(
 
   return {
     cleanup: () => {
+      fetchAbortController.abort();
       variableSubscriptions.unsubscribe();
       fetchSubscription.unsubscribe();
       availableOptionsSearchSubscription.unsubscribe();
@@ -300,6 +315,7 @@ export function initializeESQLControlManager(
       variableType$.next((lastSaved?.variable_type as ESQLVariableType) ?? ESQLVariableType.VALUES);
       if (lastSaved?.control_type) controlType$.next(lastSaved?.control_type as EsqlControlType);
       esqlQuery$.next(lastSaved?.esql_query ?? '');
+      valuesColumnType = undefined;
       temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
       previousTimeRange = undefined;

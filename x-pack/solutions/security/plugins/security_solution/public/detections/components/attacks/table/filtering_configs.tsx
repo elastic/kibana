@@ -5,8 +5,9 @@
  * 2.0.
  */
 import type { Filter } from '@kbn/es-query';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 
-export function buildConnectorIdFilter(connectorNames: string[]): Filter[] {
+export const buildConnectorIdFilter = (connectorNames: string[]): Filter[] => {
   if (!connectorNames.length) return [];
 
   return [
@@ -24,4 +25,24 @@ export function buildConnectorIdFilter(connectorNames: string[]): Filter[] {
       },
     },
   ];
-}
+};
+
+export const buildAttacksOnlyFilter = (): Filter[] => {
+  return [
+    {
+      query: {
+        exists: {
+          field: ALERT_ATTACK_IDS,
+        },
+      },
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        key: ALERT_ATTACK_IDS,
+        type: 'exists',
+        value: 'exists',
+      },
+    },
+  ];
+};

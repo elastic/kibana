@@ -26,6 +26,7 @@ import type { AdoptionTrackedAPIStats } from './types';
 export function getPluginApiMap(
   project: Project,
   plugins: PluginOrPackage[],
+  allPlugins: PluginOrPackage[],
   log: ToolingLog,
   { collectReferences, pluginFilter }: { collectReferences: boolean; pluginFilter?: string[] }
 ): {
@@ -43,7 +44,15 @@ export function getPluginApiMap(
   plugins.forEach((plugin) => {
     const captureReferences =
       collectReferences && (!pluginFilter || pluginFilter.indexOf(plugin.id) >= 0);
-    const { pluginApi, warnings } = getPluginApi(project, plugin, plugins, log, captureReferences);
+
+    // Pass allPlugins for cross-reference resolution (links to other packages)
+    const { pluginApi, warnings } = getPluginApi(
+      project,
+      plugin,
+      allPlugins,
+      log,
+      captureReferences
+    );
     pluginApiMap[plugin.id] = pluginApi;
     if (warnings.unnamedExports.length > 0) {
       unnamedExports[plugin.id] = warnings.unnamedExports;

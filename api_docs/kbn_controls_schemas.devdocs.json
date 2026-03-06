@@ -182,7 +182,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; } & {}>>"
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
         "lineNumber": 32,

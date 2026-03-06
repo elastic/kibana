@@ -18,6 +18,7 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cps-utils
 dependsOn:
+  - '@kbn/cps-common'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/es-query'

@@ -11,21 +11,32 @@ import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const ecsData = mockDataAsNestedObject;
 const rawEventData = mockSearchHit;
 
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../management/hooks/response_actions/use_get_automated_action_list');
 
+const useGetAutomatedActionListMock = useGetAutomatedActionList as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
 describe('useResponseActionsView', () => {
-  it('should return the normal component', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useGetAutomatedActionList as jest.Mock).mockReturnValue({
+  beforeEach(() => {
+    useGetAutomatedActionListMock.mockImplementationOnce(() => ({
       data: [],
       isFetched: true,
-    });
+    }));
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return the normal component', () => {
     const { result } = renderHook(() =>
       useResponseActionsView({
         ecsData,
@@ -40,12 +51,6 @@ describe('useResponseActionsView', () => {
   });
 
   it('returns early return if rawEventData is undefined', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useGetAutomatedActionList as jest.Mock).mockReturnValue({
-      data: [],
-      isFetched: true,
-    });
-
     const { result } = renderHook(() =>
       useResponseActionsView({
         ecsData,
@@ -57,5 +62,29 @@ describe('useResponseActionsView', () => {
     expect(result.current.name).toEqual('Response Results');
     expect(result.current.append).not.toBeDefined();
     expect(result.current.content).toBeDefined();
+  });
+
+  it('does not get data with `useGetAutomatedActionList` if feature is enabled but user does not have privileges', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canAccessEndpointActionsLogManagement: false,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useResponseActionsView({
+        ecsData,
+        rawEventData,
+      })
+    );
+
+    expect(useGetAutomatedActionListMock).toHaveBeenCalledWith(
+      {
+        alertIds: [rawEventData._id],
+      },
+      { enabled: false, isLive: false }
+    );
+
+    expect(result.current.content).toMatchSnapshot();
   });
 });

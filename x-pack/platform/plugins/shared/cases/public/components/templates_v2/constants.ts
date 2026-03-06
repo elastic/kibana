@@ -25,3 +25,7 @@ export const DEFAULT_QUERY_PARAMS: TemplatesFindRequest = {
 };
 
 export const LINE_CLAMP = 3;
+
+export const MAX_TEMPLATES_PER_FILE = 100;
+
+export const MAX_TOTAL_IMPORT_TEMPLATES = 100;

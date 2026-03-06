@@ -6,11 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 
@@ -40,19 +36,19 @@ describe('executeDashboardOperations', () => {
       ],
     };
 
-    const generatedPanel: LensAttachmentPanel = {
+    const attachmentPanel: AttachmentPanel = {
       type: 'lens',
-      panelId: 'generated-panel',
+      panelId: 'from-attachment-panel',
       visualization: { type: 'xy' },
-      title: 'Generated panel',
+      title: 'From attachment',
     };
 
     const operations: DashboardOperation[] = [
       { operation: 'set_metadata', title: 'Updated title' },
       { operation: 'remove_panels', panelIds: ['existing-panel'] },
       {
-        operation: 'add_generated_panels',
-        items: [{ query: 'Show request count over time' }],
+        operation: 'add_panels_from_attachments',
+        items: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       },
       {
         operation: 'upsert_markdown',
@@ -64,14 +60,7 @@ describe('executeDashboardOperations', () => {
       dashboardData: baseDashboardData,
       operations,
       logger,
-      generatePanels: async (_items, onPanelCreated) => {
-        onPanelCreated?.(generatedPanel);
-        return {
-          panels: [generatedPanel],
-          failures: [],
-        };
-      },
-      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      resolvePanelsFromAttachments: async () => ({ panels: [attachmentPanel], failures: [] }),
       onPanelsAdded: (panels) => {
         for (const panel of panels) {
           events.push(`added:${panel.panelId}`);
@@ -86,8 +75,12 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
+        grid: expect.objectContaining({ w: 48 }),
       }),
-      expect.objectContaining({ panelId: 'generated-panel' }),
+      expect.objectContaining({
+        panelId: 'from-attachment-panel',
+        grid: { x: 0, y: 0, w: 24, h: 9 },
+      }),
     ]);
 
     expect(events).toHaveLength(3);
@@ -97,12 +90,7 @@ describe('executeDashboardOperations', () => {
     expect(events.filter((event) => event.startsWith('added:'))).toHaveLength(2);
   });
 
-  it('aggregates failures for generated and attachment-based adds', async () => {
-    const generatedPanel: LensAttachmentPanel = {
-      type: 'lens',
-      panelId: 'generated-1',
-      visualization: { type: 'xy' },
-    };
+  it('aggregates failures for attachment-based adds', async () => {
     const attachmentPanel: AttachmentPanel = {
       type: 'lens',
       panelId: 'from-attachment',
@@ -117,51 +105,44 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_generated_panels',
-          items: [{ query: 'Show traffic over time' }, { query: 'Show error rate over time' }],
+          operation: 'add_panels_from_attachments',
+          items: [
+            { attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } },
+            { attachmentId: 'missing-viz-1', grid: { x: 24, y: 0, w: 24, h: 9 } },
+          ],
         },
         {
           operation: 'add_panels_from_attachments',
-          attachmentIds: ['viz-1', 'missing-viz'],
+          items: [{ attachmentId: 'missing-viz-2', grid: { x: 0, y: 9, w: 12, h: 5 } }],
         },
       ],
       logger,
-      generatePanels: async (_items, onPanelCreated) => {
-        onPanelCreated?.(generatedPanel);
-        return {
-          panels: [generatedPanel],
-          failures: [
-            {
-              type: 'generated_visualization',
-              identifier: 'Show error rate over time',
-              error: 'Field not found',
-            },
-          ],
-        };
-      },
-      resolvePanelsFromAttachments: async () => ({
-        panels: [attachmentPanel],
-        failures: [
-          {
+      resolvePanelsFromAttachments: async (attachmentIds) => {
+        const panels = attachmentIds.includes('viz-1') ? [attachmentPanel] : [];
+        const failures = attachmentIds
+          .filter((attachmentId) => attachmentId.startsWith('missing-viz'))
+          .map((missingAttachmentId) => ({
             type: 'attachment_panels',
-            identifier: 'missing-viz',
+            identifier: missingAttachmentId,
             error: 'Attachment not found',
-          },
-        ],
-      }),
+          }));
+        return { panels, failures };
+      },
       onPanelsAdded: () => {},
       onPanelsRemoved: () => {},
     });
 
-    expect(result.dashboardData.panels).toHaveLength(2);
+    expect(result.dashboardData.panels).toEqual([
+      expect.objectContaining({ panelId: 'from-attachment' }),
+    ]);
     expect(result.failures).toEqual([
       expect.objectContaining({
-        type: 'generated_visualization',
-        identifier: 'Show error rate over time',
+        type: 'attachment_panels',
+        identifier: 'missing-viz-1',
       }),
       expect.objectContaining({
         type: 'attachment_panels',
-        identifier: 'missing-viz',
+        identifier: 'missing-viz-2',
       }),
     ]);
   });
@@ -182,22 +163,21 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_generated_panels',
-          items: [{ query: 'Show count as metric' }],
+          operation: 'add_panels_from_attachments',
+          items: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 12, h: 5 } }],
         },
       ],
       logger,
-      generatePanels: async () => ({
+      resolvePanelsFromAttachments: async () => ({
         panels: [
           {
             type: 'lens',
-            panelId: 'generated-panel-1',
+            panelId: 'from-attachment-1',
             visualization: { type: 'metric' },
           },
         ],
         failures: [],
       }),
-      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: () => {},
     });

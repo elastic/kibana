@@ -81,6 +81,13 @@ export default function ({ getService }: FtrProviderContext) {
       return `${baseApiUrl}/${type}/${id}?${typesQuery}`;
     };
 
+    const sortRelations = <TRelation extends { relationship: string; type: string; id: string }>(
+      relations: TRelation[]
+    ) =>
+      [...relations].sort((a, b) =>
+        `${a.relationship}:${a.type}:${a.id}`.localeCompare(`${b.relationship}:${b.type}:${b.id}`)
+      );
+
     describe('validate response schema', () => {
       it('search', async () => {
         const resp = await supertestWithoutAuth
@@ -146,45 +153,48 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
-        expect(resp.body.relations).to.eql([
-          {
-            id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            type: 'index-pattern',
-            relationship: 'child',
-            meta: {
-              title: 'saved_objects*',
-              icon: 'indexPatternApp',
-              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
-              inAppUrl: {
-                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.indexPatterns',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: '8963ca30-3224-11e8-a572-ffca06da1357',
+              type: 'index-pattern',
+              relationship: 'child',
+              meta: {
+                title: 'saved_objects*',
+                icon: 'indexPatternApp',
+                editUrl:
+                  '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
+                inAppUrl: {
+                  path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'management.kibana.indexPatterns',
+                },
+                namespaceType: 'multiple',
+                hiddenType: false,
               },
-              namespaceType: 'multiple',
-              hiddenType: false,
+              managed: false,
+              references: [],
             },
-            managed: false,
-            references: [],
-          },
-          {
-            id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            relationship: 'parent',
-            meta: {
-              title: 'VisualizationFromSavedSearch',
-              icon: 'visualizeApp',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
-            },
-            managed: false,
-            references: [
-              {
-                id: '960372e0-3224-11e8-a572-ffca06da1357',
-                name: 'search_0',
-                type: 'search',
+            {
+              id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              relationship: 'parent',
+              meta: {
+                title: 'VisualizationFromSavedSearch',
+                icon: 'visualizeApp',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-        ]);
+              managed: false,
+              references: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  name: 'search_0',
+                  type: 'search',
+                },
+              ],
+            },
+          ])
+        );
       });
       it('for dashboards', async () => {
         const resp = await supertestWithoutAuth
@@ -192,46 +202,48 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
-        expect(resp.body.relations).to.eql([
-          {
-            id: 'add810b0-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            relationship: 'child',
-            meta: {
-              icon: 'visualizeApp',
-              title: 'Visualization',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
-            },
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: 'add810b0-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              relationship: 'child',
+              meta: {
+                icon: 'visualizeApp',
+                title: 'Visualization',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-          {
-            id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            relationship: 'child',
-            meta: {
-              icon: 'visualizeApp',
-              title: 'VisualizationFromSavedSearch',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            managed: false,
-            references: [
-              {
-                id: '960372e0-3224-11e8-a572-ffca06da1357',
-                name: 'search_0',
-                type: 'search',
+            {
+              id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              relationship: 'child',
+              meta: {
+                icon: 'visualizeApp',
+                title: 'VisualizationFromSavedSearch',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-        ]);
+              managed: false,
+              references: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  name: 'search_0',
+                  type: 'search',
+                },
+              ],
+            },
+          ])
+        );
       });
       it('for visualizations', async () => {
         const resp = await supertestWithoutAuth
@@ -240,59 +252,61 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
-          {
-            id: '960372e0-3224-11e8-a572-ffca06da1357',
-            type: 'search',
-            relationship: 'child',
-            meta: {
-              icon: 'discoverApp',
-              title: 'OneRecord',
-              inAppUrl: {
-                path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'discover_v2.show',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: '960372e0-3224-11e8-a572-ffca06da1357',
+              type: 'search',
+              relationship: 'child',
+              meta: {
+                icon: 'discoverApp',
+                title: 'OneRecord',
+                inAppUrl: {
+                  path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'discover_v2.show',
+                },
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
+            {
+              id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
+              type: 'dashboard',
+              relationship: 'parent',
+              meta: {
+                icon: 'dashboardApp',
+                title: 'Dashboard',
+                inAppUrl: {
+                  path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'dashboard_v2.show',
+                },
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-          {
-            id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
-            type: 'dashboard',
-            relationship: 'parent',
-            meta: {
-              icon: 'dashboardApp',
-              title: 'Dashboard',
-              inAppUrl: {
-                path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'dashboard_v2.show',
-              },
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              managed: false,
+              references: [
+                {
+                  id: 'add810b0-3224-11e8-a572-ffca06da1357',
+                  name: 'panel_0',
+                  type: 'visualization',
+                },
+                {
+                  id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                  name: 'panel_1',
+                  type: 'visualization',
+                },
+              ],
             },
-            managed: false,
-            references: [
-              {
-                id: 'add810b0-3224-11e8-a572-ffca06da1357',
-                name: 'panel_0',
-                type: 'visualization',
-              },
-              {
-                id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-                name: 'panel_1',
-                type: 'visualization',
-              },
-            ],
-          },
-        ]);
+          ])
+        );
       });
       it('for index patterns', async () => {
         const resp = await supertestWithoutAuth
@@ -301,50 +315,52 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
-          {
-            id: '960372e0-3224-11e8-a572-ffca06da1357',
-            type: 'search',
-            relationship: 'parent',
-            meta: {
-              icon: 'discoverApp',
-              title: 'OneRecord',
-              inAppUrl: {
-                path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'discover_v2.show',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: '960372e0-3224-11e8-a572-ffca06da1357',
+              type: 'search',
+              relationship: 'parent',
+              meta: {
+                icon: 'discoverApp',
+                title: 'OneRecord',
+                inAppUrl: {
+                  path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'discover_v2.show',
+                },
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
+            {
+              id: 'add810b0-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              relationship: 'parent',
+              meta: {
+                icon: 'visualizeApp',
+                title: 'Visualization',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-          {
-            id: 'add810b0-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            relationship: 'parent',
-            meta: {
-              icon: 'visualizeApp',
-              title: 'Visualization',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
-              },
-            ],
-          },
-        ]);
+          ])
+        );
       });
     });
 
@@ -358,45 +374,48 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
-          {
-            id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            type: 'index-pattern',
-            meta: {
-              icon: 'indexPatternApp',
-              title: 'saved_objects*',
-              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
-              inAppUrl: {
-                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.indexPatterns',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: '8963ca30-3224-11e8-a572-ffca06da1357',
+              type: 'index-pattern',
+              meta: {
+                icon: 'indexPatternApp',
+                title: 'saved_objects*',
+                editUrl:
+                  '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
+                inAppUrl: {
+                  path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'management.kibana.indexPatterns',
+                },
+                namespaceType: 'multiple',
+                hiddenType: false,
               },
-              namespaceType: 'multiple',
-              hiddenType: false,
+              relationship: 'child',
+              managed: false,
+              references: [],
             },
-            relationship: 'child',
-            managed: false,
-            references: [],
-          },
-          {
-            id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            meta: {
-              icon: 'visualizeApp',
-              title: 'VisualizationFromSavedSearch',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
-            },
-            relationship: 'parent',
-            managed: false,
-            references: [
-              {
-                id: '960372e0-3224-11e8-a572-ffca06da1357',
-                name: 'search_0',
-                type: 'search',
+            {
+              id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              meta: {
+                icon: 'visualizeApp',
+                title: 'VisualizationFromSavedSearch',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-        ]);
+              relationship: 'parent',
+              managed: false,
+              references: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  name: 'search_0',
+                  type: 'search',
+                },
+              ],
+            },
+          ])
+        );
       });
       it('dashboard', async () => {
         const resp = await supertestWithoutAuth
@@ -405,46 +424,48 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
-          {
-            id: 'add810b0-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            meta: {
-              icon: 'visualizeApp',
-              title: 'Visualization',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
-            },
-            relationship: 'child',
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: 'add810b0-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              meta: {
+                icon: 'visualizeApp',
+                title: 'Visualization',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-          {
-            id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-            meta: {
-              icon: 'visualizeApp',
-              title: 'VisualizationFromSavedSearch',
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              relationship: 'child',
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            relationship: 'child',
-            managed: false,
-            references: [
-              {
-                id: '960372e0-3224-11e8-a572-ffca06da1357',
-                name: 'search_0',
-                type: 'search',
+            {
+              id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+              type: 'visualization',
+              meta: {
+                icon: 'visualizeApp',
+                title: 'VisualizationFromSavedSearch',
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-            ],
-          },
-        ]);
+              relationship: 'child',
+              managed: false,
+              references: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  name: 'search_0',
+                  type: 'search',
+                },
+              ],
+            },
+          ])
+        );
       });
       it('visualization', async () => {
         const resp = await supertestWithoutAuth
@@ -455,31 +476,33 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
-          {
-            id: '960372e0-3224-11e8-a572-ffca06da1357',
-            type: 'search',
-            meta: {
-              icon: 'discoverApp',
-              title: 'OneRecord',
-              inAppUrl: {
-                path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'discover_v2.show',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: '960372e0-3224-11e8-a572-ffca06da1357',
+              type: 'search',
+              meta: {
+                icon: 'discoverApp',
+                title: 'OneRecord',
+                inAppUrl: {
+                  path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'discover_v2.show',
+                },
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              relationship: 'child',
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            relationship: 'child',
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
-              },
-            ],
-          },
-        ]);
+          ])
+        );
       });
       it('index-pattern', async () => {
         const resp = await supertestWithoutAuth
@@ -490,31 +513,33 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
-          {
-            id: '960372e0-3224-11e8-a572-ffca06da1357',
-            type: 'search',
-            meta: {
-              icon: 'discoverApp',
-              title: 'OneRecord',
-              inAppUrl: {
-                path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'discover_v2.show',
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
+            {
+              id: '960372e0-3224-11e8-a572-ffca06da1357',
+              type: 'search',
+              meta: {
+                icon: 'discoverApp',
+                title: 'OneRecord',
+                inAppUrl: {
+                  path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
+                  uiCapabilitiesPath: 'discover_v2.show',
+                },
+                namespaceType: 'multiple-isolated',
+                hiddenType: false,
               },
-              namespaceType: 'multiple-isolated',
-              hiddenType: false,
+              relationship: 'parent',
+              managed: false,
+              references: [
+                {
+                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                },
+              ],
             },
-            relationship: 'parent',
-            managed: false,
-            references: [
-              {
-                id: '8963ca30-3224-11e8-a572-ffca06da1357',
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
-              },
-            ],
-          },
-        ]);
+          ])
+        );
       });
     });
 
@@ -557,16 +582,17 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
-        expect(resp.body).to.eql({
-          invalidRelations: [
-            {
-              error: 'Saved object [visualization/invalid-vis] not found',
-              id: 'invalid-vis',
-              relationship: 'child',
-              type: 'visualization',
-            },
-          ],
-          relations: [
+        expect(resp.body.invalidRelations).to.eql([
+          {
+            error: 'Saved object [visualization/invalid-vis] not found',
+            id: 'invalid-vis',
+            relationship: 'child',
+            type: 'visualization',
+          },
+        ]);
+
+        expect(sortRelations(resp.body.relations)).to.eql(
+          sortRelations([
             {
               id: 'add810b0-3224-11e8-a572-ffca06da1357',
               meta: {
@@ -586,8 +612,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
-          ],
-        });
+          ])
+        );
       });
     });
   });

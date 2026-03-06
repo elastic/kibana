@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_INTERNAL_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return error if body is empty', async () => {
       const id = '71c9c185-3e6d-49d0-b7e5-f966eaf51625'; // known id
       const response = await supertest
-        .put(`${LENS_VIS_API_PATH}/${id}`)
+        .put(`${LENS_INTERNAL_VIS_API_PATH}/${id}`)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send({});

@@ -10,7 +10,7 @@
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import path from 'path';
 
-import json5 from 'json5';
+import { parse } from 'hjson';
 import _ from 'lodash';
 
 import jsYaml from 'js-yaml';
@@ -25,7 +25,7 @@ export function readJsonWithComments(filePath: string) {
   let file;
   try {
     file = readFile(filePath);
-    return json5.parse(file);
+    return parse(file);
   } catch (e) {
     e.message = `${e.message}\n in ${filePath}\n\n${file}`;
     throw e;

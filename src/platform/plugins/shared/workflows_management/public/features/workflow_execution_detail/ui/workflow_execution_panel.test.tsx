@@ -11,14 +11,17 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { mockCapabilities } from '../../../hooks/__mocks__/use_capabilities';
-import { useCapabilities } from '../../../hooks/use_capabilities';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
-jest.mock('../../../hooks/use_capabilities');
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
+}));
 
 // Mock child components
 jest.mock('./cancel_execution_button', () => ({
@@ -109,7 +112,9 @@ describe('WorkflowExecutionPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStore = undefined;
-    jest.mocked(useCapabilities).mockReturnValue(mockCapabilities);
+    jest
+      .mocked(useWorkflowsCapabilities)
+      .mockReturnValue({ ...mockWorkflowsManagementCapabilities });
   });
 
   const renderComponent = (props = {}, store?: any) => {
@@ -337,8 +342,8 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should disable replay button when user lacks execute capability', () => {
-      jest.mocked(useCapabilities).mockReturnValue({
-        ...mockCapabilities,
+      jest.mocked(useWorkflowsCapabilities).mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
         canExecuteWorkflow: false,
       });
 

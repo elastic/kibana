@@ -26,8 +26,9 @@ import type {
   MappingVersionProperty,
   MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
+
 import { recursiveRecord } from '../shared/record_types';
 
 export const FIELD_DEFINITION_TYPES = [
@@ -69,7 +70,7 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format'
 >;
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
+export const fieldDefinitionConfigSchema = z.intersection(
   recursiveRecord,
   z.union([
     z.object({
@@ -130,7 +131,10 @@ export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> 
   z.string(),
   z.intersection(
     fieldDefinitionConfigSchema,
-    z.object({ from: NonEmptyString, alias_for: z.optional(NonEmptyString) })
+    z.object({
+      from: NonEmptyString,
+      alias_for: z.optional(NonEmptyString),
+    })
   )
 );
 

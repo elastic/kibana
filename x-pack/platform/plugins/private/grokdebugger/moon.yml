@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/plugins/private/grokdebugger
 dependsOn:
   - '@kbn/core'
+  - '@kbn/dev-tools-plugin'
   - '@kbn/home-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/es-ui-shared-plugin'
@@ -27,6 +28,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
 tags:
   - plugin

@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Update Evaluation Dataset Example API endpoint
+  version: '1'
+paths:
+  /internal/evals/datasets/{datasetId}/examples/{exampleId}:
+    put:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: UpdateEvaluationDatasetExample
+      description: Update a single example in an evaluation dataset
+      summary: Update evaluation dataset example
+      tags:
+        - Evals API
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: exampleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExamplePayload'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  dataset_id:
+                    type: string
+                  input:
+                    type: object
+                    additionalProperties: true
+                  output:
+                    type: object
+                    additionalProperties: true
+                  metadata:
+                    type: object
+                    additionalProperties: true
+                  created_at:
+                    type: string
+                  updated_at:
+                    type: string
+                required:
+                  - id
+                  - dataset_id
+                  - created_at
+                  - updated_at
+        '404':
+          description: Dataset or example not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    UpdateExamplePayload:
+      type: object
+      properties:
+        input:
+          type: object
+          additionalProperties: true
+        output:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true

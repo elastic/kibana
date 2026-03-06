@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_ATTACK_IDS } from '../fields';
+import { ALERT_ATTACK_IDS } from '@kbn/elastic-assistant-common';
 
 export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
 

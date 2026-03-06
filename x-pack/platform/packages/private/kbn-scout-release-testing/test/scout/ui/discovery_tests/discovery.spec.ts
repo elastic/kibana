@@ -219,7 +219,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
 
   test('type a search query and execute a search', async ({ pageObjects }) => {
     const filteredHitCount = 12891;
-    await pageObjects.discover.writeSearchQuery('response:200');
+    await pageObjects.discover.writeAndSubmitKqlQuery('response:200');
     await expect
       .poll(async () => await pageObjects.discover.getHitCountInt())
       .toBe(filteredHitCount);

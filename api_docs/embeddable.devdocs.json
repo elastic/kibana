@@ -3556,7 +3556,7 @@
           "section": "def-server.EmbeddableStateWithType",
           "text": "EmbeddableStateWithType"
         },
-        "> & { getAllEmbeddableSchemas: () => ",
+        "> & { getAllEmbeddableSchemas: () => { [key: string]: ",
         {
           "pluginId": "@kbn/config-schema",
           "scope": "common",
@@ -3564,7 +3564,7 @@
           "section": "def-common.ObjectType",
           "text": "ObjectType"
         },
-        "<any>[]; getTransforms: (type: string) => (",
+        "<any>; }; getTransforms: (type: string) => (",
         {
           "pluginId": "embeddable",
           "scope": "server",

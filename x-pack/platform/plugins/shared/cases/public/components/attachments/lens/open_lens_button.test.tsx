@@ -54,10 +54,13 @@ describe('OpenLensButton', () => {
 
     await userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
 
+    const { timeRange, ...rest } = lensVisualization;
+
     expect(navigateToPrefilledEditor).toBeCalledWith(
       {
         id: props.attachmentId,
-        ...lensVisualization,
+        ...rest,
+        time_range: timeRange,
       },
       { openInNewTab: true }
     );

@@ -8,6 +8,7 @@
 import type { StructuredTool } from '@langchain/core/tools';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
+import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
 
 export interface ToolManagerParams {
@@ -83,4 +84,10 @@ export interface ToolManager {
    * @returns array of internal tool IDs
    */
   getDynamicToolIds(): string[];
+
+  /**
+   * Gets the summarizer function for a tool by its internal tool ID.
+   * Returns undefined if the tool is not found or has no summarizer.
+   */
+  getSummarizer(toolId: string): ToolReturnSummarizerFn | undefined;
 }

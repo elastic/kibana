@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';

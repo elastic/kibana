@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ZodType } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
 
 import type { GraphInsightTypes } from '../../../../graphs';
 import { addTrailingBackticksIfNecessary } from '../add_trailing_backticks_if_necessary';

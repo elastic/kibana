@@ -44,6 +44,8 @@
     "@kbn/security-plugin-types-server",
     "@kbn/connector-specs",
     "@kbn/es-errors",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-common",
     "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]

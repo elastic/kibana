@@ -36,6 +36,7 @@ describe('getAttacksListAggregations', () => {
             },
           },
           attackRelatedAlerts: { filter: dsl.isNotAttack() },
+          alertsSeverities: { terms: { field: 'kibana.alert.severity' } },
         },
       },
       total_attacks: {

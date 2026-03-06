@@ -106,5 +106,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.verifyNoRenderErrors();
       expect(await dataGrid.getDocCount()).to.be(1000);
     });
+
+    it('switches to Discover mode if search is saved as new', async () => {
+      await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveAsSearch('ES|QL Discover Session Saved As');
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Discover')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('ES|QL Discover Session Saved As')
+          ),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
+      ]);
+    });
   });
 }

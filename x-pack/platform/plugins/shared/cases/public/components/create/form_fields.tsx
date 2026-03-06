@@ -26,7 +26,7 @@ import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../c
 import { removeEmptyFields } from '../utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { TemplateSelector } from './templates';
-import { getInitialCaseValue } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';

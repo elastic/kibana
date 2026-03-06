@@ -12,6 +12,7 @@ import type { DashboardState } from '../../types';
 
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
+  hidePanelBorders: 'hide_panel_borders',
   useMargins: 'use_margins',
   syncColors: 'sync_colors',
   syncTooltips: 'sync_tooltips',

@@ -9,6 +9,7 @@
 
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { z } from '@kbn/zod/v4';
+import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
 import {
   getCachedOption,
@@ -37,73 +38,71 @@ function getPropertySchema(
   return result.schema;
 }
 
+function shouldValidateProperty(item: CustomPropertyItem): boolean {
+  const { propertyValue, context } = item;
+  const { stepType, scope, propertyKey } = context;
+
+  if (typeof propertyValue === 'string' && isTemplateReference(propertyValue)) {
+    return false;
+  }
+  if (propertyValue === null || propertyValue === undefined) {
+    return false;
+  }
+  const propertySchema = getPropertySchema(stepType, scope, propertyKey);
+  if (!propertySchema) {
+    return false;
+  }
+  const validationResult = propertySchema.safeParse(propertyValue);
+  return validationResult.success;
+}
+
 export async function validateCustomProperties(
   customPropertyItems: CustomPropertyItem[]
 ): Promise<CustomPropertyValidationResult[]> {
   const validationResultsPromises: Promise<CustomPropertyValidationResult>[] = [];
   for (const customPropertyItem of customPropertyItems) {
-    const { selectionHandler, propertyValue, context } = customPropertyItem;
-    const { stepType, scope, propertyKey } = context;
+    if (shouldValidateProperty(customPropertyItem)) {
+      const { selectionHandler, propertyValue, context } = customPropertyItem;
+      const { stepType, scope, propertyKey } = context;
 
-    const propertySchema = getPropertySchema(stepType, scope, propertyKey);
-    if (propertySchema && propertyValue !== null && propertyValue !== undefined) {
-      const validationResult = propertySchema.safeParse(propertyValue);
-      if (validationResult.success) {
-        // Only run custom validation if the value is valid according to the schema
-        validationResultsPromises.push(
-          (async (): Promise<CustomPropertyValidationResult> => {
-            const cacheKey = getCacheKeyForValue(stepType, scope, propertyKey, propertyValue);
+      validationResultsPromises.push(
+        (async (): Promise<CustomPropertyValidationResult> => {
+          const cacheKey = getCacheKeyForValue(stepType, scope, propertyKey, propertyValue);
 
-            let resolvedOption = getCachedOption(cacheKey);
-            if (!resolvedOption) {
-              resolvedOption = getCachedSearchOption(stepType, scope, propertyKey, propertyValue);
+          let resolvedOption = getCachedOption(cacheKey);
+          if (!resolvedOption) {
+            resolvedOption = getCachedSearchOption(stepType, scope, propertyKey, propertyValue);
+          }
+          if (!resolvedOption && propertyValue !== null && propertyValue !== undefined) {
+            resolvedOption = await selectionHandler.resolve(propertyValue, context);
+            if (resolvedOption) {
+              setCachedOption(cacheKey, resolvedOption);
             }
-            if (!resolvedOption && propertyValue !== null && propertyValue !== undefined) {
-              resolvedOption = await selectionHandler.resolve(propertyValue, context);
-              if (resolvedOption) {
-                setCachedOption(cacheKey, resolvedOption);
-              }
-            }
+          }
 
-            const input = String(propertyValue);
-            const details = await selectionHandler.getDetails(input, context, resolvedOption);
+          const input = String(propertyValue);
+          const details = await selectionHandler.getDetails(input, context, resolvedOption);
 
-            const hasError =
-              !resolvedOption && propertyValue !== null && propertyValue !== undefined;
+          const hasError = !resolvedOption && propertyValue !== null && propertyValue !== undefined;
 
-            const hoverParts: string[] = [];
-            if (details.message) {
-              hoverParts.push(details.message);
-            }
-            if (details.links && details.links.length > 0) {
-              hoverParts.push(
-                details.links.map((link) => `[${link.text}](${link.path})`).join(' | ')
-              );
-            }
-            const hoverMessage = hoverParts.length > 0 ? hoverParts.join('\n\n') : null;
+          const hoverParts: string[] = [];
+          if (details.message) {
+            hoverParts.push(details.message);
+          }
+          if (details.links && details.links.length > 0) {
+            hoverParts.push(
+              details.links.map((link) => `[${link.text}](${link.path})`).join(' | ')
+            );
+          }
+          const hoverMessage = hoverParts.length > 0 ? hoverParts.join('\n\n') : null;
 
-            const beforeMessage = resolvedOption ? `✓ ${resolvedOption.label}` : undefined;
+          const beforeMessage = resolvedOption ? `✓ ${resolvedOption.label}` : undefined;
 
-            if (hasError) {
-              return {
-                id: customPropertyItem.id,
-                severity: 'error' as const,
-                message: details.message,
-                beforeMessage,
-                afterMessage: null,
-                hoverMessage,
-                startLineNumber: customPropertyItem.startLineNumber,
-                startColumn: customPropertyItem.startColumn,
-                endLineNumber: customPropertyItem.endLineNumber,
-                endColumn: customPropertyItem.endColumn,
-                owner: 'custom-property-validation' as const,
-              };
-            }
-
+          if (hasError) {
             return {
               id: customPropertyItem.id,
-              severity: null,
-              message: null,
+              severity: 'error' as const,
+              message: details.message,
               beforeMessage,
               afterMessage: null,
               hoverMessage,
@@ -113,9 +112,23 @@ export async function validateCustomProperties(
               endColumn: customPropertyItem.endColumn,
               owner: 'custom-property-validation' as const,
             };
-          })()
-        );
-      }
+          }
+
+          return {
+            id: customPropertyItem.id,
+            severity: null,
+            message: null,
+            beforeMessage,
+            afterMessage: null,
+            hoverMessage,
+            startLineNumber: customPropertyItem.startLineNumber,
+            startColumn: customPropertyItem.startColumn,
+            endLineNumber: customPropertyItem.endLineNumber,
+            endColumn: customPropertyItem.endColumn,
+            owner: 'custom-property-validation' as const,
+          };
+        })()
+      );
     }
   }
   return Promise.all(validationResultsPromises);

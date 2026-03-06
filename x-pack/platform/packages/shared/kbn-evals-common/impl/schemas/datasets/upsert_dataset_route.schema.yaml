@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Upsert Evaluation Dataset API endpoint
+  version: '1'
+paths:
+  /internal/evals/datasets/_upsert:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: UpsertEvaluationDataset
+      description: Create or sync an evaluation dataset from code
+      summary: Upsert evaluation dataset
+      tags:
+        - Evals API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                examples:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/UpsertDatasetExamplePayload'
+              required:
+                - name
+                - description
+                - examples
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataset_id:
+                    type: string
+                  added:
+                    type: integer
+                  removed:
+                    type: integer
+                  unchanged:
+                    type: integer
+                required:
+                  - dataset_id
+                  - added
+                  - removed
+                  - unchanged
+
+components:
+  schemas:
+    UpsertDatasetExamplePayload:
+      type: object
+      properties:
+        input:
+          type: object
+          additionalProperties: true
+        output:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true

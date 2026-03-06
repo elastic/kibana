@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
 import type { ESQLPolicy, ISuggestionItem } from '../types';
 import { getSafeInsertText } from '../../definitions/utils/autocomplete/helpers';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';

@@ -49,26 +49,18 @@ const buildScreenContextData = async ({
 }): Promise<ScreenContextAttachmentData | undefined> => {
   const url = window.location.href;
   const app = await firstValueFrom(services.application.currentAppId$);
-  const additionalData: Record<string, string> = {};
-
   const timefilter = services.plugins.data?.query.timefilter.timefilter;
-  if (timefilter) {
-    const time = timefilter.getTime();
-    if (time?.from) {
-      additionalData.time_from = String(time.from);
-    }
-    if (time?.to) {
-      additionalData.time_to = String(time.to);
-    }
-  }
+  const time = timefilter?.getTime();
+  const timeRange =
+    time?.from && time?.to ? { from: String(time.from), to: String(time.to) } : undefined;
 
   const data: ScreenContextAttachmentData = {
     ...(url ? { url } : {}),
     ...(app ? { app } : {}),
-    ...(Object.keys(additionalData).length > 0 ? { additional_data: additionalData } : {}),
+    ...(timeRange ? { time_range: timeRange } : {}),
   };
 
-  if (!data.url && !data.app && !data.additional_data) {
+  if (!data.url && !data.app && !data.time_range) {
     return undefined;
   }
 

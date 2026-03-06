@@ -87,8 +87,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id
-    // manually checking object until we have a snapshot matcher
+    // it's deterministic because of the MD5 id;
     expect(entities.hits.hits).toMatchObject(expectedHostEntities);
   });
 
@@ -226,9 +225,11 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(beforeSubType.hits.hits[0]._version).toBe(1);
     expect(beforeSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:00:00.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+      },
     });
 
     // Add sub_type to the document
@@ -258,11 +259,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(afterSubType.hits.hits[0]._version).toBe(2);
     expect(afterSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:01:00.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
-      'entity.sub_type': 'Sub Type 1',
-      'user.hash': ['hash-1', 'hash-2'],
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+        sub_type: 'Sub Type 1',
+      },
+      user: { hash: ['hash-1', 'hash-2'] },
     });
 
     // Update sub_type in between documents with null values
@@ -324,11 +327,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(updatedSubType.hits.hits[0]._version).toBe(3);
     expect(updatedSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:02:04.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
-      'entity.sub_type': 'Sub Type 3',
-      'user.hash': ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'],
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+        sub_type: 'Sub Type 3',
+      },
+      user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -356,23 +361,63 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(updatedLatestDomain.hits.hits[0]._version).toBe(4);
     expect(updatedLatestDomain.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:03:00.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
-      'entity.sub_type': 'Sub Type 3',
-      'user.hash': [
-        'hash-1',
-        'hash-10',
-        'hash-11',
-        'hash-3',
-        'hash-4',
-        'hash-5',
-        'hash-6',
-        'hash-7',
-        'hash-8',
-        'hash-2',
-      ],
-      'user.domain': 'example.com',
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+        sub_type: 'Sub Type 3',
+      },
+      user: {
+        hash: [
+          'hash-1',
+          'hash-10',
+          'hash-11',
+          'hash-3',
+          'hash-4',
+          'hash-5',
+          'hash-6',
+          'hash-7',
+          'hash-8',
+          'hash-2',
+        ],
+        domain: 'example.com',
+      },
     });
   });
+
+  apiTest(
+    'Should store _source as nested objects after ingest pipeline',
+    async ({ apiClient, esClient }) => {
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: '2026-01-20T11:00:00Z',
+            toDateISO: '2026-01-20T13:00:00Z',
+          },
+        }
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body.success).toBe(true);
+
+      const entities = await esClient.search({
+        index: '.entities.v2.latest.security_default',
+        query: { bool: { filter: { term: { 'entity.EngineMetadata.Type': 'host' } } } },
+        size: 5,
+      });
+
+      expect(entities.hits.hits.length).toBeGreaterThan(0);
+      for (const hit of entities.hits.hits) {
+        const source = hit._source as Record<string, unknown>;
+        expect(source).toBeDefined();
+        expect(source.entity).toBeDefined();
+        expect(typeof source.entity).toBe('object');
+        const topLevelKeys = Object.keys(source);
+        const dottedKeys = topLevelKeys.filter((k) => k.includes('.'));
+        expect(dottedKeys).toHaveLength(0);
+      }
+    }
+  );
 });

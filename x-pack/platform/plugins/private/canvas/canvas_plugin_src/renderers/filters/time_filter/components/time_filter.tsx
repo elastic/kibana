@@ -8,7 +8,6 @@
 import type { OnTimeChangeProps, EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter';
 import { UnitStrings } from '../../../../../i18n/units';
@@ -77,17 +76,4 @@ export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = []
       />
     </div>
   );
-};
-
-TimeFilter.propTypes = {
-  filter: PropTypes.string.isRequired,
-  commit: PropTypes.func.isRequired, // Canvas filter
-  dateFormat: PropTypes.string,
-  commonlyUsedRanges: PropTypes.arrayOf(
-    PropTypes.shape({
-      start: PropTypes.string.isRequired,
-      end: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-    })
-  ),
 };

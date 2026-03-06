@@ -86,7 +86,7 @@ Inside the new file, create a `ToolDefinition` object. This object will contain 
 **Example:** `src/platform/packages/shared/kbn-mcp-dev-server/src/tools/my_new_tool.ts`
 
 ```typescript
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolDefinition } from '@kbn/mcp-server-common';
 
 // Define the input schema for your tool using Zod
@@ -150,4 +150,3 @@ The following tools are available in the MCP Dev Server.
 For semantic code search, please use the [semantic-code-search-mcp-server](https://github.com/elastic/semantic-code-search-mcp-server). This server provides a suite of tools for exploring and understanding the Kibana codebase.
 
 Contact @simianhacker for details on how to get started.
-

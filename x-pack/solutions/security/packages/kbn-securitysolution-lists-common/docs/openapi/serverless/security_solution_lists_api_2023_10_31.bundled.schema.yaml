@@ -385,27 +385,20 @@ paths:
               keyword_custom_format:
                 value:
                   description: This parses the first found ipv4 only
-                  deserializer: '{{value}}'
                   id: keyword_custom_format_list
                   name: Simple list with a keyword using a custom format
-                  serializer: >-
-                    (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                   type: keyword
             schema:
               type: object
               properties:
                 description:
                   $ref: '#/components/schemas/ListDescription'
-                deserializer:
-                  $ref: '#/components/schemas/ListDeserializer'
                 id:
                   $ref: '#/components/schemas/ListId'
                 meta:
                   $ref: '#/components/schemas/ListMetadata'
                 name:
                   $ref: '#/components/schemas/ListName'
-                serializer:
-                  $ref: '#/components/schemas/ListSerializer'
                 type:
                   $ref: '#/components/schemas/ListType'
                 version:
@@ -475,12 +468,9 @@ paths:
                     created_at: 2025-01-09T18:25:39.604Z
                     created_by: elastic
                     description: This parses the first found ipv4 only
-                    deserializer: '{{value}}'
                     id: keyword_custom_format_list
                     immutable: false
                     name: Simple list with a keyword using a custom format
-                    serializer: >-
-                      (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
                     updated_at: 2025-01-09T18:25:39.604Z
@@ -2073,43 +2063,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-        - description: >
-            Determines how uploaded list item values are parsed. By default,
-            list items are parsed using these named regex groups:
-
-
-            - `(?<value>.+)` - Single value item types, such as ip, long, date,
-            keyword, and text.
-
-            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types,
-            such as `date_range`, `ip_range`, `double_range`, `float_range`,
-            `integer_range`, and `long_range`.
-          in: query
-          name: serializer
-          required: false
-          schema:
-            example: >-
-              (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-            type: string
-        - description: >
-            Determines how retrieved list item values are presented. By default
-            list items are presented using these Handelbar expressions:
-
-
-            - `{{{value}}}` - Single value item types, such as `ip`, `long`,
-            `date`, `keyword`, and `text`.
-
-            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as
-            `ip_range`, `double_range`, `float_range`, `integer_range`, and
-            `long_range`.
-
-            - `{{{gte}}},{{{lte}}}` - Date range values.
-          in: query
-          name: deserializer
-          required: false
-          schema:
-            example: '{{value}}'
-            type: string
         - description: >-
             Determines when changes made by the request are made visible to
             search.
@@ -2420,8 +2373,6 @@ components:
           type: string
         description:
           $ref: '#/components/schemas/ListDescription'
-        deserializer:
-          $ref: '#/components/schemas/ListDeserializer'
         id:
           $ref: '#/components/schemas/ListId'
         immutable:
@@ -2430,8 +2381,6 @@ components:
           $ref: '#/components/schemas/ListMetadata'
         name:
           $ref: '#/components/schemas/ListName'
-        serializer:
-          $ref: '#/components/schemas/ListSerializer'
         tie_breaker_id:
           description: >-
             Field used in search to ensure all containers are sorted and
@@ -2468,21 +2417,6 @@ components:
       format: nonempty
       minLength: 1
       type: string
-    ListDeserializer:
-      description: >
-        Determines how retrieved list item values are presented. By default list
-        items are presented using these Handelbar expressions:
-
-
-        - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`,
-        `keyword`, and `text`.
-
-        - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`,
-        `double_range`, `float_range`, `integer_range`, and `long_range`.
-
-        - `{{{gte}}},{{{lte}}}` - Date range values.
-      example: '{{value}}'
-      type: string
     ListId:
       description: Value list's identifier.
       example: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -2507,16 +2441,12 @@ components:
           description: Autogenerated value - user that created object.
           example: elastic
           type: string
-        deserializer:
-          $ref: '#/components/schemas/ListDeserializer'
         id:
           $ref: '#/components/schemas/ListItemId'
         list_id:
           $ref: '#/components/schemas/ListId'
         meta:
           $ref: '#/components/schemas/ListItemMetadata'
-        serializer:
-          $ref: '#/components/schemas/ListSerializer'
         tie_breaker_id:
           description: >-
             Field used in search to ensure all containers are sorted and
@@ -2625,21 +2555,6 @@ components:
         - cluster
         - index
         - application
-    ListSerializer:
-      description: >
-        Determines how uploaded list item values are parsed. By default, list
-        items are parsed using these named regex groups:
-
-
-        - `(?<value>.+)` - Single value item types, such as ip, long, date,
-        keyword, and text.
-
-        - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as
-        `date_range`, `ip_range`, `double_range`, `float_range`,
-        `integer_range`, and `long_range`.
-      example: >-
-        (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-      type: string
     ListType:
       description: >
         Specifies the Elasticsearch data type of excludes the list container

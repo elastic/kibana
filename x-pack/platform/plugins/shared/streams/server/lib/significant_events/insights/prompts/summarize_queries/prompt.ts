@@ -6,10 +6,10 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import systemPromptTemplate from './system_prompt.text';
 import userPromptTemplate from './user_prompt.text';
-import { insightsSchema, SUBMIT_INSIGHTS_TOOL_NAME } from '../../schema';
+import { insightsSchema, SUBMIT_INSIGHTS_TOOL_NAME } from '../../client/insight_tool';
 
 export const SummarizeQueriesPrompt = createPrompt({
   name: 'summarize_queries',

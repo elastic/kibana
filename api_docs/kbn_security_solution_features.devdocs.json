@@ -115,7 +115,7 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
               "AppCategory",
               "; app: readonly string[]; privileges: { all: ",
               {
@@ -421,7 +421,7 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
           "AppCategory",
           "; app: readonly string[]; privileges: { all: ",
           {

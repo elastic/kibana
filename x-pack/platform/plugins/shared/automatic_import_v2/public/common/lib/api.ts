@@ -205,3 +205,27 @@ export const getDataStreamResults = async ({
       signal: abortSignal,
     }
   );
+
+export interface UpdateDataStreamPipelineRequest {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+}
+
+export const updateDataStreamPipeline = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  ingestPipeline,
+}: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
+  http.patch<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
+      body: JSON.stringify({ ingest_pipeline: ingestPipeline }),
+      signal: abortSignal,
+    }
+  );

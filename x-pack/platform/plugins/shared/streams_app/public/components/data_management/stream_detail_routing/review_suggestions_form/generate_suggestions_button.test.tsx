@@ -10,9 +10,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   GenerateSuggestionButton,
-  AdditionalChargesCallout,
   type GenerateSuggestionButtonProps,
 } from './generate_suggestions_button';
+import { AdditionalChargesCallout } from '../../shared/additional_charges_callout';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import type { UseGenAIConnectorsResult, Connector } from '../../../../hooks/use_genai_connectors';
 

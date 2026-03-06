@@ -12,7 +12,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ExecutorType } from '../types';
 import type { ExecutorParams, SubActionConnectorType } from './types';
-import { formatZodError } from '../lib';
+import { formatZodV3Error } from '../lib';
 
 const isFunction = (v: unknown): v is Function => {
   return typeof v === 'function';
@@ -96,7 +96,7 @@ export const buildExecutor = <
       } catch (reqValidationError) {
         let errMessage = reqValidationError.message;
         if (reqValidationError instanceof z3.ZodError) {
-          errMessage = formatZodError(reqValidationError);
+          errMessage = formatZodV3Error(reqValidationError);
         } else if (reqValidationError instanceof z4.ZodError) {
           errMessage = z4.prettifyError(reqValidationError);
         }

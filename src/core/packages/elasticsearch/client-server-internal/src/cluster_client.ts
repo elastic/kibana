@@ -142,6 +142,9 @@ export class ClusterClient implements ICustomClusterClient {
         ),
       });
 
+      // TODO: callers who pass { Transport: CustomTransport } to child() bypass our
+      // onRequest handler and lose CPS routing. Consider intercepting child() to extend
+      // any custom Transport with our onRequest so routing is always preserved.
       return this.rootScopedClient.child({
         headers: scopedHeaders,
         Transport: transportClass,

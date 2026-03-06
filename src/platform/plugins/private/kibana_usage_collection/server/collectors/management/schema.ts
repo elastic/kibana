@@ -145,10 +145,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableCcsWarning': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableVisualizationsInFlyout': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -532,7 +528,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'workflows:ui:enabled': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
+  },
+  'workflows:aiAgent:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether AI-powered workflow authoring assistance is enabled.' },
   },
   'banners:placement': {
     type: 'keyword',

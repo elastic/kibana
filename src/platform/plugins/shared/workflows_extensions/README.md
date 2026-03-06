@@ -42,6 +42,8 @@ This separation ensures that:
 - UI definition is available directly to client-side code without HTTP requests
 - Type safety is maintained between server and client registries via step type IDs
 
+**Async registration (public only):** The public step registry accepts either a definition or a **loader function** `() => Promise<PublicStepDefinition>`. Using a loader (e.g. `() => import('./my_step').then(m => m.myStepDefinition)`) allows step modules—and heavy dependencies like zod—to be loaded asynchronously, keeping them out of your plugin’s main bundle. The registry resolves loaders in the background; the workflows app awaits `workflowsExtensions.isReady()` before rendering so definitions are ready when needed.
+
 ## Architecture
 
 ```
@@ -528,10 +530,11 @@ export class MyPlugin implements Plugin {
 
 **Public-side** (`public/plugin.ts`):
 
+Register the public step definition using either a **direct definition** or an **async loader**. Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin’s main bundle:
+
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { myStepDefinition } from './workflows/step_types/my_step';
 
 export interface MyPluginPublicSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -539,11 +542,19 @@ export interface MyPluginPublicSetupDeps {
 
 export class MyPlugin implements Plugin {
   public setup(_core: CoreSetup, plugins: MyPluginPublicSetupDeps) {
-    // Register public-side step definitions
-    plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+    // Recommended: register via async loader to keep step module + zod out of main bundle
+    plugins.workflowsExtensions.registerStepDefinition(() =>
+      import('./workflows/step_types/my_step').then((m) => m.myStepDefinition)
+    );
+
+    // Alternatively: sync registration (pulls step module into main bundle)
+    // import { myStepDefinition } from './workflows/step_types/my_step';
+    // plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
   }
 }
 ```
+
+Loaders are resolved in the background after setup. The workflows app waits for `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
 
 ### Step 5: Get Approval
 
@@ -581,6 +592,8 @@ function MyComponent() {
   }
 }
 ```
+
+**Waiting for async step definitions:** If your app mounts before step definitions are needed, you can await `workflowsExtensions.isReady()` before rendering. That ensures all step definitions registered via async loaders have resolved. The workflows app does this in its mount so the step registry is ready when the UI runs.
 
 ## Step Type Requirements
 

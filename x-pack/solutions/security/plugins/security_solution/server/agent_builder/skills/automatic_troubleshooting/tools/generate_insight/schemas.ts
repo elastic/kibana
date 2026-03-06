@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { PROMPTS } from './prompts';
 
 export function getDefendInsightsOutputSchema({ type }: { type: DefendInsightType }) {
   switch (type) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       const antivirusPrompts = PROMPTS.INCOMPATIBLE_ANTIVIRUS;
       return z.object({
         insights: z.array(
@@ -29,7 +29,7 @@ export function getDefendInsightsOutputSchema({ type }: { type: DefendInsightTyp
           })
         ),
       });
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       const policyResponsePrompts = PROMPTS.POLICY_RESPONSE_FAILURE;
       return z.object({
         insights: z.array(

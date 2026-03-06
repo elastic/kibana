@@ -11,7 +11,7 @@ import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manag
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { loggerMock } from '@kbn/logging-mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Mock dependencies
 jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
@@ -755,6 +755,78 @@ describe('ToolManager', () => {
       });
 
       expect(toolManager.list().length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getSummarizer', () => {
+    it('returns undefined when no tools are added', () => {
+      expect(toolManager.getSummarizer('non-existent')).toBeUndefined();
+    });
+
+    it('returns undefined for a tool without summarizeToolReturn', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getSummarizer('tool-1')).toBeUndefined();
+    });
+
+    it('returns the summarizer for a tool with summarizeToolReturn', async () => {
+      const summarizer = jest.fn();
+      const tool: ExecutableTool = {
+        ...createMockExecutableTool('tool-with-summarizer'),
+        summarizeToolReturn: summarizer,
+      };
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getSummarizer('tool-with-summarizer')).toBe(summarizer);
+    });
+
+    it('returns undefined for browser tools', async () => {
+      const tool = createMockBrowserTool('browser-tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.browser,
+        tools: tool,
+      });
+
+      expect(toolManager.getSummarizer('browser-tool-1')).toBeUndefined();
+    });
+
+    it('returns the latest summarizer when a tool is re-added', async () => {
+      const summarizer1 = jest.fn();
+      const summarizer2 = jest.fn();
+      const tool1: ExecutableTool = {
+        ...createMockExecutableTool('tool-1'),
+        summarizeToolReturn: summarizer1,
+      };
+      const tool2: ExecutableTool = {
+        ...createMockExecutableTool('tool-1'),
+        summarizeToolReturn: summarizer2,
+      };
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool1,
+        logger: mockLogger,
+      });
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool2,
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getSummarizer('tool-1')).toBe(summarizer2);
     });
   });
 });

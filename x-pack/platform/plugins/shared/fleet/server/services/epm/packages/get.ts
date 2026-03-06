@@ -7,7 +7,8 @@
 
 import { load } from 'js-yaml';
 import pMap from 'p-map';
-import minimatch from 'minimatch';
+import type { MMRegExp } from 'minimatch';
+import { minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -469,7 +470,7 @@ function getInstalledPackageSavedObjectDataStreams(
         const patternRegex = new minimatch.Minimatch(stream.name, {
           noglobstar: true,
           nonegate: true,
-        }).makeRe();
+        }).makeRe() as MMRegExp;
 
         return filterActiveDatastreamsName.some((dataStreamName) =>
           dataStreamName.match(patternRegex)

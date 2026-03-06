@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+import type { PhaseName } from '@kbn/streams-schema';
 import { DataLifecycleTimeline } from './data_lifecycle_timeline';
 import {
   buildDslSegments,
@@ -54,6 +55,8 @@ export interface DataLifecycleSummaryDownsamplingActions {
 export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  invalidPhases?: PhaseName[];
+  invalidStepIndices?: number[];
 }
 
 interface DataLifecycleSummaryProps {
@@ -77,7 +80,12 @@ export const DataLifecycleSummary = ({
 }: DataLifecycleSummaryProps) => {
   const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
   const { canManageLifecycle } = capabilities;
-  const { editedPhaseName, isEditLifecycleFlyoutOpen = false } = uiState ?? {};
+  const {
+    editedPhaseName,
+    isEditLifecycleFlyoutOpen = false,
+    invalidPhases,
+    invalidStepIndices,
+  } = uiState ?? {};
 
   const showPhaseActions =
     phaseActions?.showPhaseActions ??
@@ -165,6 +173,8 @@ export const DataLifecycleSummary = ({
                   isRetentionInfinite={isRetentionInfinite}
                   timelineSegments={timelineSegments}
                   gridTemplateColumns={gridTemplateColumns}
+                  invalidPhases={invalidPhases}
+                  invalidStepIndices={invalidStepIndices}
                 />
               </EuiFlexItem>
             )}

@@ -2621,7 +2621,7 @@
         "label": "EventKind",
         "description": [],
         "signature": [
-          "\"event\" | \"signal\""
+          "\"signal\" | \"event\""
         ],
         "path": "x-pack/solutions/security/plugins/session_view/common/types/v1.ts",
         "lineNumber": 23,

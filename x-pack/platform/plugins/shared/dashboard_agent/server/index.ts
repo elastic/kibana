@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { DashboardAgentPlugin } from './plugin';
 
-export const plugin = (context: PluginInitializerContext) => new DashboardAgentPlugin(context);
+export const plugin = (context: PluginInitializerContext) => new DashboardAgentPlugin();
 
 export type { DashboardAgentPluginSetup, DashboardAgentPluginStart } from './types';

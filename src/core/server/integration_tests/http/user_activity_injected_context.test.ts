@@ -41,6 +41,7 @@ describe('user activity injected context', () => {
       new BehaviorSubject({
         enabled: true,
         appenders: new Map([['console', { type: 'console', layout: { type: 'json' } }]]),
+        filters: [],
       })
     );
     const loggingService = loggingServiceMock.createInternalSetupContract();

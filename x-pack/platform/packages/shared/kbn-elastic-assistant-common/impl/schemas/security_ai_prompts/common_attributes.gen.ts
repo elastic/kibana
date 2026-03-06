@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type PromptItem = z.infer<typeof PromptItem>;
 export const PromptItem = z.object({

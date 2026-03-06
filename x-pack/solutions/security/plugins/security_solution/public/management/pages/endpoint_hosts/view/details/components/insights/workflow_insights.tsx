@@ -57,13 +57,13 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   };
 
   const insightTypes = useMemo<DefendInsightType[]>(() => {
-    const typesToQuery: DefendInsightType[] = [DefendInsightType.Enum.incompatible_antivirus];
+    const typesToQuery: DefendInsightType[] = [DefendInsightType.enum.incompatible_antivirus];
     if (
       defendInsightsPolicyResponseFailureEnabled &&
       // we only want to run `policy_response_failure` type with KB
       (kbStatus?.defend_insights_exists || kbStatus?.is_setup_in_progress)
     ) {
-      typesToQuery.push(DefendInsightType.Enum.policy_response_failure);
+      typesToQuery.push(DefendInsightType.enum.policy_response_failure);
     }
     return typesToQuery;
   }, [defendInsightsPolicyResponseFailureEnabled, kbStatus]);

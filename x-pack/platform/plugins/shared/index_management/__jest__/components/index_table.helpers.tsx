@@ -17,6 +17,7 @@ import {
   executionContextServiceMock,
   chromeServiceMock,
 } from '@kbn/core/public/mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { AppDependencies } from '../../public/application/app_context';
 import { AppContextProvider } from '../../public/application/app_context';
 import type { Index } from '../../common';
@@ -211,6 +212,7 @@ export const renderIndexApp = async (options?: {
       enableIndexActions: true,
       enableIndexStats: true,
     },
+    settings: settingsServiceMock.createStartContract(),
     privs: {
       monitor: true,
       manageEnrich: true,

@@ -109,6 +109,8 @@ const externals = {
   numeral: '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
+  '@elastic/esql': '__kbnSharedDeps__.ElasticEsql',
+  '@elastic/esql/types': '__kbnSharedDeps__.ElasticEsqlTypes',
   '@kbn/datemath': '__kbnSharedDeps__.KbnDatemath',
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/components/provider/nested':

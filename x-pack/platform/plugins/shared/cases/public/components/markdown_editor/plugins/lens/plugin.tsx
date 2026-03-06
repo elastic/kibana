@@ -169,7 +169,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         lensAttributes || node?.attributes
           ? {
               id: '',
-              timeRange,
+              time_range: timeRange,
               attributes: (lensAttributes || node?.attributes) as LensSavedObjectAttributes,
             }
           : undefined,

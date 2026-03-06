@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
 import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
-import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../restore/repository';
+import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
 import { reindexAllIndices } from './reindex';

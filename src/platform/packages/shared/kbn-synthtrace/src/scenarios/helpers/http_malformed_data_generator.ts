@@ -14,6 +14,7 @@
 
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { getRandomItem } from './http_field_generators';
+import { random } from './http_random';
 
 /**
  * Types of data malformations.
@@ -50,7 +51,7 @@ export const MALFORMATION_RATES = {
  * Check if a log should be malformed based on global rate (5%).
  */
 export function shouldApplyMalformation(): boolean {
-  return Math.random() < 0.05;
+  return random() < 0.05;
 }
 
 /**
@@ -60,13 +61,11 @@ export function selectMalformationType(): MalformationType {
   // Calculate total weight
   const totalWeight = Object.values(MALFORMATION_RATES).reduce((sum, rate) => sum + rate, 0);
 
-  // Generate random number between 0 and totalWeight
-  let random = Math.random() * totalWeight;
+  let r = random() * totalWeight;
 
-  // Select type based on weighted probability
   for (const [type, rate] of Object.entries(MALFORMATION_RATES)) {
-    random -= rate;
-    if (random <= 0) {
+    r -= rate;
+    if (r <= 0) {
       return type as MalformationType;
     }
   }
@@ -83,22 +82,18 @@ export function applyInvalidJSON(logData: Partial<LogDocument>): Partial<LogDocu
 
   // Corrupt message field
   if (corrupted.message) {
-    const corruptionType = Math.floor(Math.random() * 4);
+    const corruptionType = Math.floor(random() * 4);
     switch (corruptionType) {
       case 0:
-        // Missing closing brace
         corrupted.message = corrupted.message.replace(/}$/, '');
         break;
       case 1:
-        // Unescaped quotes
         corrupted.message = corrupted.message.replace(/"([^"]+)":/g, '$1:');
         break;
       case 2:
-        // Trailing comma
         corrupted.message = corrupted.message.replace(/}$/, ',}');
         break;
       case 3:
-        // Invalid characters
         corrupted.message = corrupted.message + '\x00\x01\x02';
         break;
     }
@@ -120,7 +115,7 @@ export function applyTruncation(logData: Partial<LogDocument>): Partial<LogDocum
 
   if (corrupted.message && corrupted.message.length > 50) {
     // Truncate at random point (50-90% of original length)
-    const truncateAt = Math.floor(corrupted.message.length * (0.5 + Math.random() * 0.4));
+    const truncateAt = Math.floor(corrupted.message.length * (0.5 + random() * 0.4));
     corrupted.message = corrupted.message.substring(0, truncateAt) + '...TRUNCATED';
   }
 
@@ -139,7 +134,7 @@ export function applyLongValues(logData: Partial<LogDocument>): Partial<LogDocum
   const corrupted = { ...logData };
 
   // Generate extremely long string (10KB - 100KB)
-  const longStringLength = Math.floor(Math.random() * 90000) + 10000;
+  const longStringLength = Math.floor(random() * 90000) + 10000;
   const longString = 'A'.repeat(longStringLength);
 
   // Apply to random field
@@ -179,7 +174,7 @@ export function applyLongValues(logData: Partial<LogDocument>): Partial<LogDocum
 export function applyInvalidFields(logData: Partial<LogDocument>): Partial<LogDocument> {
   const corrupted = { ...logData };
 
-  const corruptionType = Math.floor(Math.random() * 5);
+  const corruptionType = Math.floor(random() * 5);
 
   switch (corruptionType) {
     case 0:
@@ -269,25 +264,23 @@ export function applySpecialChars(logData: Partial<LogDocument>): Partial<LogDoc
  */
 export function applyTimestampAnomaly(logData: Partial<LogDocument>): Partial<LogDocument> {
   const corrupted = { ...logData };
+  const baseTimestamp =
+    typeof corrupted['@timestamp'] === 'number' ? corrupted['@timestamp'] : 1700000000000;
 
-  const anomalyType = Math.floor(Math.random() * 4);
+  const anomalyType = Math.floor(random() * 4);
 
   switch (anomalyType) {
     case 0:
-      // Very old timestamp (10 years ago)
-      corrupted['@timestamp'] = Date.now() - 10 * 365 * 24 * 60 * 60 * 1000;
+      corrupted['@timestamp'] = baseTimestamp - 10 * 365 * 24 * 60 * 60 * 1000;
       break;
     case 1:
-      // Future timestamp (1 year ahead)
-      corrupted['@timestamp'] = Date.now() + 365 * 24 * 60 * 60 * 1000;
+      corrupted['@timestamp'] = baseTimestamp + 365 * 24 * 60 * 60 * 1000;
       break;
     case 2:
-      // Unix epoch (1970-01-01)
       corrupted['@timestamp'] = 0;
       break;
     case 3:
-      // Millisecond precision issues (microseconds added)
-      corrupted['@timestamp'] = Date.now() + Math.random();
+      corrupted['@timestamp'] = baseTimestamp + random();
       break;
   }
 

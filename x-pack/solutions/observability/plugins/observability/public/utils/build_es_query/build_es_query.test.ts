@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from './build_es_query';
 
 describe('buildEsQuery', () => {
@@ -56,4 +57,67 @@ describe('buildEsQuery', () => {
       expect(buildEsQuery({ timeRange, kuery, filters })).toMatchSnapshot();
     }
   );
+
+  test('should use wildcard query instead of query_string for keyword fields when indexPattern is provided', () => {
+    const indexPattern: DataViewBase = {
+      title: '.alerts-*',
+      fields: [
+        {
+          name: 'kibana.alert.rule.name',
+          type: 'string',
+          esTypes: ['keyword'],
+        },
+      ],
+    };
+
+    const result = buildEsQuery({
+      timeRange: defaultTimeRange,
+      kuery: 'kibana.alert.rule.name: *threshold rule',
+      indexPattern,
+      config: { allowLeadingWildcards: true },
+    });
+
+    const filterClauses = result.bool.filter;
+    const kueryClause = filterClauses.find((clause) => clause && !('range' in clause));
+
+    expect(kueryClause).toEqual({
+      bool: {
+        should: [
+          {
+            wildcard: {
+              'kibana.alert.rule.name': {
+                value: '*threshold rule',
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  test('should use query_string for wildcard values when no indexPattern is provided', () => {
+    const result = buildEsQuery({
+      timeRange: defaultTimeRange,
+      kuery: 'kibana.alert.rule.name: *threshold rule',
+      config: { allowLeadingWildcards: true },
+    });
+
+    const filterClauses = result.bool.filter;
+    const kueryClause = filterClauses.find((clause) => clause && !('range' in clause));
+
+    expect(kueryClause).toEqual({
+      bool: {
+        should: [
+          {
+            query_string: {
+              fields: ['kibana.alert.rule.name'],
+              query: '*threshold rule',
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
 });

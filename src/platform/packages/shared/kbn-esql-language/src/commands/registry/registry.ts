@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../../types';
+import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,

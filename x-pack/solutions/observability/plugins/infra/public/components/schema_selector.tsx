@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormPrepend,
+  EuiFormLabel,
   EuiFormRow,
   EuiLink,
-  EuiPopover,
   EuiSuperSelect,
   EuiText,
   EuiToken,
   EuiToolTip,
   useEuiFontSize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,6 +25,7 @@ import {
 } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+import { Popover } from './popover';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
@@ -34,48 +33,39 @@ const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvail
 
 const SCHEMA_DOCUMENTATION_LINK = 'https://ela.st/docs-otel-schema-selector-hosts';
 
-const PrependLabel = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+const SCHEMA_LABEL = i18n.translate('xpack.infra.schemaSelector.label', {
+  defaultMessage: 'Schema',
+});
 
+const PrependLabel = () => {
   return (
-    <EuiPopover
-      button={
-        <EuiFormPrepend
-          element="button"
-          iconRight="question"
-          label={i18n.translate('xpack.infra.schemaSelector.label', {
-            defaultMessage: 'Schema',
-          })}
-          aria-label={i18n.translate('xpack.infra.schemaSelector.helpButton.ariaLabel', {
-            defaultMessage: 'See schema documentation',
-          })}
-          onClick={() => setIsPopoverOpen((popoverValue) => !popoverValue)}
-          data-test-subj="infraSchemaSelectorHelpButton"
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="rightCenter"
-    >
-      <FormattedMessage
-        id="xpack.infra.schemaSelector.description"
-        defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
-        values={{
-          nextLine: <br />,
-          documentation: (
-            <EuiLink
-              data-test-subj="infraSchemaSelectorDocumentationLink"
-              href={SCHEMA_DOCUMENTATION_LINK}
-              target="_blank"
-            >
-              {i18n.translate('xpack.infra.schemaSelector.documentation', {
-                defaultMessage: 'documentation',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiPopover>
+    <EuiFormLabel>
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>{SCHEMA_LABEL}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Popover buttonAriaLabelText={SCHEMA_LABEL}>
+            <FormattedMessage
+              id="xpack.infra.schemaSelector.description"
+              defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
+              values={{
+                nextLine: <br />,
+                documentation: (
+                  <EuiLink
+                    data-test-subj="infraSchemaSelectorDocumentationLink"
+                    href={SCHEMA_DOCUMENTATION_LINK}
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.infra.schemaSelector.documentation', {
+                      defaultMessage: 'documentation',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </Popover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormLabel>
   );
 };
 
@@ -154,7 +144,6 @@ export const SchemaSelector = ({
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const { euiTheme } = useEuiTheme();
   const options = useMemo(
     () =>
       schemas.map((schema) => ({
@@ -243,8 +232,7 @@ export const SchemaSelector = ({
             isLoading={isLoading}
             fullWidth
             css={{
-              fontSize: useEuiFontSize('xs').fontSize,
-              fontWeight: euiTheme.font.weight.medium,
+              fontSize: useEuiFontSize('s').fontSize,
             }}
             prepend={<PrependLabel />}
           />

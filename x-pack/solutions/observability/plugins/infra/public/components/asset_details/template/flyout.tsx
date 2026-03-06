@@ -13,6 +13,7 @@ import { Content } from '../content/content';
 import { FlyoutHeader } from '../header/flyout_header';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
+import { useHostAttachmentConfig } from '../hooks/use_host_attachment_config';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
@@ -29,6 +30,9 @@ export const Flyout = ({
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+
+  // Configure agent builder global flyout with the host attachment
+  useHostAttachmentConfig();
 
   useEffect(() => {
     if (!loading) {

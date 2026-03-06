@@ -14,26 +14,50 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type SuperTest from 'supertest';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export const setAdvancedSettings = async (
-  supertest: SuperTest.Agent,
-  settings: Record<string, string[] | string | number | boolean | object>
-) => {
-  return supertest
-    .post('/internal/kibana/settings')
+export const setAiAnonymizationSettings = async (supertest: SuperTest.Agent, rules: object) => {
+  const globalTargetId = '__kbn_global_anonymization_profile__';
+
+  const findResponse = await supertest
+    .get(`/internal/anonymization/profiles/_find?target_type=index&target_id=${globalTargetId}`)
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
     .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .send({ changes: settings })
     .expect(200);
-};
 
-export const setAiAnonymizationSettings = async (supertest: SuperTest.Agent, rules: object) => {
-  return setAdvancedSettings(supertest, {
-    [aiAnonymizationSettings]: JSON.stringify(rules, null, 2),
-  });
+  const profileId = findResponse.body?.data?.[0]?.id as string | undefined;
+  if (!profileId) {
+    throw new Error('Global anonymization profile was not found/created in FTR setup');
+  }
+
+  const inputRules = ((rules as { rules?: Array<Record<string, unknown>> })?.rules ?? []).filter(
+    (rule) => {
+      const type = String(rule.type ?? '').toLowerCase();
+      return type === 'regexp' || type === 'regex';
+    }
+  );
+
+  const regexRules = inputRules.map((rule, index) => ({
+    id: `ftr-global-regex-${index}`,
+    type: 'regex',
+    entityClass: rule.entityClass,
+    pattern: rule.pattern,
+    enabled: rule.enabled ?? true,
+  }));
+
+  return supertest
+    .put(`/internal/anonymization/profiles/${profileId}`)
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+    .send({
+      rules: {
+        fieldRules: [],
+        regexRules,
+      },
+    })
+    .expect(200);
 };
 
 const emailRule = {

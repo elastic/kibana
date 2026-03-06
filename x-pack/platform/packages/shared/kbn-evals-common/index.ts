@@ -10,6 +10,8 @@ export * from './constants';
 export { buildRouteValidationWithZod } from './impl/schemas/common';
 export {
   buildRunFilterQuery,
+  buildExampleScoresQuery,
+  buildDatasetExampleScoresQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,

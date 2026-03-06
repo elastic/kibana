@@ -82,6 +82,7 @@ describe('initializeSettingsManager', () => {
           Object {
             "options": Object {
               "auto_apply_filters": true,
+              "hide_panel_borders": false,
               "hide_panel_titles": true,
               "sync_colors": false,
               "sync_cursor": true,

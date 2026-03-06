@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
+import { isColumn } from '@elastic/esql';
 import {
   columnExists as _columnExists,
   getFragmentData,
@@ -27,7 +28,6 @@ import {
   rightAfterColumn,
   sortModifierSuggestions,
 } from './utils';
-import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,

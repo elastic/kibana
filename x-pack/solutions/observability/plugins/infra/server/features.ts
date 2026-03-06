@@ -65,6 +65,9 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
         alerting: {
           rule: {
             all: metricAlertingFeatures,
+            enable: metricAlertingFeatures,
+            manual_run: metricAlertingFeatures,
+            manage_rule_settings: metricAlertingFeatures,
           },
           alert: {
             all: metricAlertingFeatures,

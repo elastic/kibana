@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 
 import { useBulkAttackWorkflowStatusItems } from '../bulk_action_items/use_bulk_attack_workflow_status_items';
-import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
 import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
+import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
 import type {
   BaseAttackContextMenuItemsProps,
   AttackWithWorkflowStatus,
@@ -34,6 +34,7 @@ export const useAttackWorkflowStatusContextMenuItems = ({
   setIsLoading,
   onSuccess,
   refresh,
+  telemetrySource,
 }: UseAttackWorkflowStatusContextMenuItemsProps): BulkAttackContextMenuItems => {
   // Use the workflow status of the first attack in the array
   const currentStatus = useMemo(() => {
@@ -43,6 +44,7 @@ export const useAttackWorkflowStatusContextMenuItems = ({
   const bulkActionItems = useBulkAttackWorkflowStatusItems({
     onWorkflowStatusUpdate: onSuccess,
     currentStatus,
+    telemetrySource,
   });
 
   const alertItems = useMemo(() => {

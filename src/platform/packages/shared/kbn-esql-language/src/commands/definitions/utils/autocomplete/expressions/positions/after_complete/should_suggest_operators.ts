@@ -19,6 +19,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../../../../all_operators';
+import { normalizePreferredExpressionTypes } from '../../utils';
 
 export interface OperatorRuleContext {
   expressionType: SupportedDataType | 'unknown';
@@ -62,10 +63,20 @@ const rules: Rule[] = [
   (ctx) => {
     if (!ctx.functionParameterContext) {
       const { expressionType } = ctx;
-      const preferredType = ctx.ctx.options.preferredExpressionType;
+      const preferredTypes = normalizePreferredExpressionTypes(
+        ctx.ctx.options.preferredExpressionType
+      );
 
       if (expressionType === 'text' || expressionType === 'keyword') {
-        const isBooleanContext = preferredType === 'boolean' || preferredType === 'any';
+        const isBooleanContext =
+          preferredTypes.includes('boolean') || preferredTypes.includes('any');
+
+        if (!isBooleanContext && preferredTypes.length > 0) {
+          return {
+            shouldSuggest: false,
+            reason: 'Strict type context - no operators for text/keyword (all produce boolean)',
+          };
+        }
 
         const stringOperators = [
           ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),

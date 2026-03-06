@@ -16,6 +16,7 @@ import type {
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
 
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../../common/components/assignees/constants';
 import { BulkAlertAssigneesPanel } from '../../../../../common/components/toolbar/bulk_actions/alert_bulk_assignees';
@@ -30,6 +31,8 @@ export interface UseBulkAttackAssigneesItemsProps {
   onAssigneesUpdate?: () => void;
   /** Current alert assignments */
   alertAssignments?: string[];
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -40,6 +43,7 @@ export interface UseBulkAttackAssigneesItemsProps {
 export const useBulkAttackAssigneesItems = ({
   onAssigneesUpdate,
   alertAssignments,
+  telemetrySource,
 }: UseBulkAttackAssigneesItemsProps = {}): BulkAttackActionItems => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
@@ -71,9 +75,10 @@ export const useBulkAttackAssigneesItems = ({
         relatedAlertIds,
         setIsLoading,
         onSuccess: onAssigneesUpdate,
+        telemetrySource,
       });
     },
-    [applyAssignees, onAssigneesUpdate]
+    [applyAssignees, onAssigneesUpdate, telemetrySource]
   );
 
   const attackAssigneesItems: BulkActionsConfig[] = useMemo(() => {
@@ -151,12 +156,13 @@ export const useBulkAttackAssigneesItems = ({
               relatedAlertIds,
               setIsLoading,
               onSuccess: onSuccessCallback,
+              telemetrySource,
             });
           }}
         />
       );
     },
-    [onAssigneesUpdate, applyAssignees]
+    [onAssigneesUpdate, applyAssignees, telemetrySource]
   );
 
   const attackAssigneesPanels: AttackContentPanelConfig[] = useMemo(

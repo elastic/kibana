@@ -6,14 +6,11 @@
  */
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-  systemSchema,
-  type Streams,
+  TaskStatus,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
@@ -32,31 +29,17 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 const dateFromString = z.string().transform((input) => new Date(input));
 
 /**
- * Back-fills `esql.query` on task results for legacy tasks that were completed
- * before the `esql.query` property was introduced. Without this, the client
- * would receive queries without the required `esql.query` field.
+ * Guards against stale task results from a previous Kibana version that stored
+ * queries with `kql`/`feature` but without the now-required `esql.query` field.
+ * Returns a failed status instead of letting the malformed payload reach the client.
  */
-const ensureEsqlQuery = (
-  result: SignificantEventsQueriesGenerationTaskResult,
-  definition: Streams.all.Definition
+const sanitizeTaskResult = (
+  result: SignificantEventsQueriesGenerationTaskResult
 ): SignificantEventsQueriesGenerationTaskResult => {
-  if (!('queries' in result)) {
-    return result;
+  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+    return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
   }
-
-  const indices = getIndexPatternsForStream(definition);
-  return {
-    ...result,
-    queries: result.queries.map((query) => ({
-      ...query,
-      esql: query.esql ?? {
-        query: buildEsqlQuery(indices, {
-          kql: { query: query.kql },
-          feature: query.feature,
-        }),
-      },
-    })),
-  };
+  return result;
 };
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
@@ -81,21 +64,20 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-    const definition = await streamsClient.getStream(name);
 
     const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
 
-    return ensureEsqlQuery(result, definition);
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -112,13 +94,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      sampleDocsSize: z
-        .number()
-        .optional()
-        .describe(
-          'Number of sample documents to use for generation from the current data of stream'
-        ),
-      systems: z.array(systemSchema).optional().describe('Optional array of systems'),
     }),
   }),
   options: {
@@ -146,7 +121,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-    const definition = await streamsClient.getStream(name);
+    await streamsClient.getStream(name);
     const { body } = params;
     const taskId = getSignificantEventsQueriesGenerationTaskId(name);
 
@@ -167,8 +142,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
-                  systems: body.systems,
-                  sampleDocsSize: body.sampleDocsSize,
                   streamName: name,
                 };
               })(),
@@ -186,7 +159,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       ...actionParams,
     });
 
-    return ensureEsqlQuery(result, definition);
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -199,10 +172,8 @@ const readAllSignificantEventsRoute = createServerRoute({
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .union([z.string().transform((val) => [val]), z.array(z.string())])
+        .optional()
         .describe('Stream names to filter significant events'),
     }),
   }),

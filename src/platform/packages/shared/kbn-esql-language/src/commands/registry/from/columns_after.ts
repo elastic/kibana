@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
+import { isSubQuery } from '@elastic/esql';
+import type { ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '..';
-import { isSubQuery } from '../../../ast/is';
-import { type ESQLCommand, type ESQLAstQueryExpression } from '../../../types';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';

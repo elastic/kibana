@@ -88,7 +88,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
+            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 m, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
           },
         ]
       : []),

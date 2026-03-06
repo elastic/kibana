@@ -114,7 +114,7 @@ export const useActions = ({
     navigateToPrefilledEditor(
       {
         id: '',
-        timeRange,
+        time_range: timeRange,
         attributes,
       },
       {

@@ -8,7 +8,6 @@
 import { sortBy } from 'lodash';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
@@ -223,10 +222,4 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       {isSavedElementsModalVisible ? <SavedElementsModal onClose={hideSavedElementsModal} /> : null}
     </>
   );
-};
-
-ElementMenu.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  elements: PropTypes.object,
-  addElement: PropTypes.func.isRequired,
 };

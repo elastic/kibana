@@ -22,7 +22,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';

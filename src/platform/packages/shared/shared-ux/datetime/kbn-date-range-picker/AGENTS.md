@@ -11,6 +11,8 @@ This is a UI component. It's a date range picker with a "smart input".
 ## Commands
 
 Run from Kibana root directory.
+Before running `node`/`yarn` commands in agent shells, load nvm in the same command:
+- `[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm use --silent`
 
 ```bash
 # Unit tests

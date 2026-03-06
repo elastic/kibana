@@ -83,6 +83,7 @@ const defaultContext = {
   browserFields: {},
   getFieldsData: jest.fn(),
   dataFormattedForFieldBrowser: [],
+  scopeId: 'test-scope-id',
 } as ReturnType<typeof useAttackDetailsContext>;
 
 const defaultHeaderData = {
@@ -132,6 +133,7 @@ describe('Assignees', () => {
             assignees: ['uid-1'],
           },
         ],
+        telemetrySource: 'attacks_page_flyout_header',
       })
     );
     const call = mockUseAttackAssigneesContextMenuItems.mock.calls[0][0];

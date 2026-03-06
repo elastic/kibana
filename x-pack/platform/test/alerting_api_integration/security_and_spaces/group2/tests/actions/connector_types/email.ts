@@ -276,7 +276,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating connector type config: Field \"from\": Required`,
+            message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at from`,
           });
         });
     });

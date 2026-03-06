@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installResponse.body).toEqual({
         statusCode: 400,
         error: 'Bad Request',
-        message: '[request body]: Expected object, received null',
+        message: '[request body]: Invalid input: expected object, received null',
       });
     });
   });

@@ -221,6 +221,7 @@ export function generateLayer(
       mappings: {
         dynamic: false,
         properties: mappingProperties,
+        ...(isEcsStream && { subobjects: false as const }),
       },
     },
     version: ASSET_VERSION,

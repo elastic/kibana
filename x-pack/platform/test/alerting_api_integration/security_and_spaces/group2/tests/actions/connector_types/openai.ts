@@ -147,7 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: 2 errors:\n [1]: Field \"apiProvider\": Required, Required, Required;\n [2]: Field \"defaultModel\": Required`,
+              message: `error validating connector type config: ✖ Invalid or missing apiProvider: expected one of "Azure OpenAI", "OpenAI", or "Other"\n  → at apiProvider`,
             });
           });
       });
@@ -167,7 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiProvider\": Invalid enum value. Expected 'Azure OpenAI', received 'OpenAI', Invalid enum value. Expected 'Other', received 'OpenAI';\n [2]: Field \"apiUrl\": Required, Required, Required;\n [3]: Field \"defaultModel\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -383,6 +383,47 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         expect(body.status).to.equal('ok');
         expect(body.connector_id).to.equal(createdAction.id);
       });
+
+      it('should return 200 when creating an Azure connector with defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+              defaultModel: 'gpt-4o',
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config.defaultModel).to.equal('gpt-4o');
+      });
+
+      it('should return 200 when creating an Azure connector without defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config).to.not.have.property('defaultModel');
+      });
     });
 
     describe('executor', () => {
@@ -415,7 +456,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: genAiActionId,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -646,7 +687,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: genAiActionId,
-              message: `error validating action params: Field \"subAction\": Required`,
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

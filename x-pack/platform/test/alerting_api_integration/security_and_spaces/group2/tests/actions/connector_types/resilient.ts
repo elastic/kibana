@@ -129,7 +129,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -148,7 +148,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"orgId\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at orgId`,
             });
           });
       });
@@ -194,7 +194,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"apiKeyId\": Required;\n [2]: Field \"apiKeySecret\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiKeyId\n✖ Invalid input: expected string, received undefined\n  → at apiKeySecret`,
             });
           });
       });
@@ -272,7 +272,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                service_message: `Request validation failed (Field \"incident\": Required)`,
+                service_message: `Request validation failed (✖ Invalid input: expected object, received undefined\n  → at incident)`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -300,7 +300,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"incident.name\": Required)`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at incident.name)`,
               });
             });
         });
@@ -328,7 +328,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"comments.0.commentId\": Required)`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at comments[0].commentId)`,
               });
             });
         });
@@ -356,7 +356,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"comments.0.comment\": Required)`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at comments[0].comment)`,
               });
             });
         });

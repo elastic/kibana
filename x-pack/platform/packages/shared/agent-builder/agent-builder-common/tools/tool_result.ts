@@ -114,6 +114,11 @@ export enum SupportedChartType {
   XY = 'xy',
   RegionMap = 'region_map',
   Heatmap = 'heatmap',
+  Datatable = 'datatable',
+  Pie = 'pie',
+  Treemap = 'treemap',
+  Waffle = 'waffle',
+  Mosaic = 'mosaic',
 }
 
 export interface VisualizationResultData {

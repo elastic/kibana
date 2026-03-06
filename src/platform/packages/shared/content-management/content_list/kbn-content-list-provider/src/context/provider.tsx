@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
+import { ContentManagementTagsProvider } from '@kbn/content-management-tags';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
@@ -31,6 +32,8 @@ export type ContentListProviderContextValue = Omit<
   features: ContentListFeatures;
   /** Resolved feature support flags. */
   supports: ContentListSupports;
+  /** Services provided to the provider. */
+  services?: ContentListServices;
 };
 
 /**
@@ -54,12 +57,17 @@ export type ContentListProviderProps = ContentListConfig & {
 
 /**
  * Main provider component for content list functionality, including data fetching
- * (via React Query), sorting, and search.
+ * (via React Query), sorting, search, and tags filtering.
  *
- * Props like `dataSource` and `features` should be stable references to avoid
- * unnecessary re-renders. Configuration from `features.sorting` and `features.search`
- * is read once at mount; use a `key` prop to remount if you need to change initial
- * state dynamically.
+ * Props like `dataSource`, `features`, and `services` should be stable references to avoid
+ * unnecessary re-renders. Configuration from `features.sorting`, `features.pagination`, and
+ * `features.search` is read once at mount; use a `key` prop to remount if you need to change
+ * initial state dynamically.
+ *
+ * When `services.tags` is provided (and `features.tags` is not `false`), the provider
+ * automatically wraps children with the tags service context, enabling tag display
+ * and filtering in child components. The tags service's `parseSearchQuery` (if present)
+ * is passed through to support extracting tag filters from the search bar query text.
  */
 export const ContentListProvider = ({
   children,
@@ -70,10 +78,16 @@ export const ContentListProvider = ({
   id,
   queryKeyScope: queryKeyScopeProp,
   features = {},
+  services,
 }: ContentListProviderProps): JSX.Element => {
   // Derive queryKeyScope: explicit prop takes priority, otherwise derive from id.
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
+
+  const { tags: tagsService } = services ?? {};
+
+  // Service-dependent features: enabled by default when service exists, unless explicitly disabled.
+  const supportsTags = features.tags !== false && !!tagsService;
 
   // Resolve feature support flags.
   // Selection is disabled when explicitly set to `false` or when the list is read-only.
@@ -83,8 +97,16 @@ export const ContentListProvider = ({
       pagination: features.pagination !== false,
       search: features.search !== false,
       selection: features.selection !== false && !isReadOnly,
+      tags: supportsTags,
     }),
-    [features.sorting, features.pagination, features.search, features.selection, isReadOnly]
+    [
+      features.sorting,
+      features.pagination,
+      features.search,
+      features.selection,
+      isReadOnly,
+      supportsTags,
+    ]
   );
 
   // Create context value.
@@ -98,17 +120,31 @@ export const ContentListProvider = ({
       dataSource,
       features,
       supports,
+      services,
     }),
-    [labels, item, isReadOnly, id, queryKeyScope, dataSource, features, supports]
+    [labels, item, isReadOnly, id, queryKeyScope, dataSource, features, supports, services]
   );
 
-  return (
-    <QueryClientProvider client={contentListQueryClient}>
-      <ContentListContext.Provider value={value}>
-        <ContentListStateProvider>{children}</ContentListStateProvider>
-      </ContentListContext.Provider>
-    </QueryClientProvider>
+  // Build provider tree conditionally based on service availability.
+  let content: React.ReactNode = (
+    <ContentListContext.Provider value={value}>
+      <ContentListStateProvider>{children}</ContentListStateProvider>
+    </ContentListContext.Provider>
   );
+
+  // Wrap with tags provider when tags service is available.
+  if (supportsTags && tagsService) {
+    content = (
+      <ContentManagementTagsProvider
+        getTagList={tagsService.getTagList}
+        parseSearchQuery={tagsService.parseSearchQuery}
+      >
+        {content}
+      </ContentManagementTagsProvider>
+    );
+  }
+
+  return <QueryClientProvider client={contentListQueryClient}>{content}</QueryClientProvider>;
 };
 
 /**

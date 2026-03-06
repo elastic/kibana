@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
@@ -35,11 +35,30 @@ export const EntitiesDetails: React.FC = () => {
         <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
           {showUserDetails && (
             <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
+                    defaultMessage="User"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <UserDetails userName={userName} timestamp={timestamp} scopeId={scopeId} />
             </EuiFlexItem>
           )}
           {showHostDetails && (
             <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+                    defaultMessage="Host"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+
               <HostDetails hostName={hostName} timestamp={timestamp} scopeId={scopeId} />
             </EuiFlexItem>
           )}

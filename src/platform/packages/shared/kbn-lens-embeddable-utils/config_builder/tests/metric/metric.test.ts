@@ -8,12 +8,15 @@
  */
 
 import { metricStateSchema } from '../../schema/charts/metric';
+import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   simpleMetricAttributes,
   breakdownMetricAttributes,
   complexMetricAttributes,
   breakdownMetricWithFormulaRefColumnsAttributes,
+  selectorColorByValueAttributes,
+  defaultColorByValueAttributes,
 } from './lens_state_config.mock';
 import {
   simpleMetricAPIAttributes,
@@ -35,6 +38,14 @@ describe('Metric', () => {
 
     it('should convert a breakdown-by metric', () => {
       validateConverter(breakdownMetricAttributes, metricStateSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, metricStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, metricStateSchema);
     });
   });
   describe('validateAPIConverter', () => {
@@ -61,5 +72,9 @@ describe('Metric', () => {
 
   it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
     validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricStateSchema);
+  });
+
+  it('should convert a dynamic colors metric', () => {
+    validateConverter(dynamicColorsMetricAttributes, metricStateSchema);
   });
 });

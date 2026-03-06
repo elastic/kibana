@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { PromptsConfigAttributes } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { StatusError } from '../../../../lib/streams/errors/status_error';

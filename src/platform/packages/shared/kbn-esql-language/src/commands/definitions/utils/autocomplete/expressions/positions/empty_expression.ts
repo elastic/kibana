@@ -9,7 +9,7 @@
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import { matchesSpecialFunction } from '../utils';
+import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
@@ -256,9 +256,16 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
   const suggestFields = options.suggestFields ?? true;
   const suggestFunctions = options.suggestFunctions ?? true;
   const controlType = options.controlType ?? ESQLVariableType.FIELDS;
+  const preferredTypes = normalizePreferredExpressionTypes(options.preferredExpressionType);
 
   const suggestions: ISuggestionItem[] = [];
-  const acceptedTypes: FunctionParameterType[] = ['any'];
+  // Keep boolean/any contexts permissive at expression start:
+  // boolean expressions are often built from non-boolean operands (e.g. field > 10).
+  const isStrictPreferredType =
+    preferredTypes.length > 0 &&
+    !preferredTypes.includes('boolean') &&
+    !preferredTypes.includes('any');
+  const acceptedTypes: FunctionParameterType[] = isStrictPreferredType ? preferredTypes : ['any'];
 
   // Suggest fields/columns and functions using SuggestionBuilder
   if (suggestFields || suggestFunctions) {

@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Update Evaluation Dataset API endpoint
+  version: '1'
+paths:
+  /internal/evals/datasets/{datasetId}:
+    put:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: UpdateEvaluationDataset
+      description: Update evaluation dataset metadata
+      summary: Update evaluation dataset
+      tags:
+        - Evals API
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+              required:
+                - description
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  created_at:
+                    type: string
+                  updated_at:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - description
+                  - created_at
+                  - updated_at
+        '404':
+          description: Dataset not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

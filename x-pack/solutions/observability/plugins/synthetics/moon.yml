@@ -86,7 +86,6 @@ dependsOn:
   - '@kbn/securitysolution-io-ts-types'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/serverless'
-  - '@kbn/repo-info'
   - '@kbn/index-management-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/react-kibana-mount'
@@ -129,6 +128,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -142,6 +142,7 @@ fileGroups:
     - scripts/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

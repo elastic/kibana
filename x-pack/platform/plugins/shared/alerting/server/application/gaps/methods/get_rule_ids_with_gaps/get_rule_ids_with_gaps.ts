@@ -18,7 +18,14 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { hasMatchedGapFillStatus, RULE_GAP_AGGREGATIONS, type GapDurationBucket } from '../utils';
+import {
+  hasMatchedGapFillStatus,
+  RULE_GAP_AGGREGATIONS,
+  extractGapDurationSums,
+  calculateHighestPriorityGapFillStatus,
+  type GapDurationBucket,
+} from '../utils';
+import { gapFillStatus } from '../../../../../common';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
@@ -141,12 +148,43 @@ export async function getRuleIdsWithGaps(
 
     const ruleIds: string[] = [];
 
+    // Initialize summary totals
+    const summary = {
+      totalUnfilledDurationMs: 0,
+      totalInProgressDurationMs: 0,
+      totalFilledDurationMs: 0,
+      totalDurationMs: 0,
+      rulesByGapFillStatus: {
+        unfilled: 0,
+        inProgress: 0,
+        filled: 0,
+      },
+    };
+
     for (const b of buckets) {
+      const sums = extractGapDurationSums(b);
+      const ruleGapFillStatus = calculateHighestPriorityGapFillStatus(sums);
+
       if (
         highestPriorityGapFillStatuses.length === 0 ||
         hasMatchedGapFillStatus(b, highestPriorityGapFillStatuses)
       ) {
         ruleIds.push(b.key);
+
+        // Aggregate durations for summary
+        summary.totalUnfilledDurationMs += sums.totalUnfilledDurationMs;
+        summary.totalInProgressDurationMs += sums.totalInProgressDurationMs;
+        summary.totalFilledDurationMs += sums.totalFilledDurationMs;
+        summary.totalDurationMs += sums.totalDurationMs;
+
+        // Count rules by gap fill status
+        if (ruleGapFillStatus === gapFillStatus.UNFILLED) {
+          summary.rulesByGapFillStatus.unfilled++;
+        } else if (ruleGapFillStatus === gapFillStatus.IN_PROGRESS) {
+          summary.rulesByGapFillStatus.inProgress++;
+        } else if (ruleGapFillStatus === gapFillStatus.FILLED) {
+          summary.rulesByGapFillStatus.filled++;
+        }
       }
     }
 
@@ -156,6 +194,7 @@ export async function getRuleIdsWithGaps(
       total: ruleIds.length,
       ruleIds,
       latestGapTimestamp: latestGapTimestampAgg.value ?? undefined,
+      summary,
     };
     return result;
   } catch (err) {

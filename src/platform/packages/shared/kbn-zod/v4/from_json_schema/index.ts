@@ -52,33 +52,44 @@ function parseJsonSchema(schema: JsonSchema): z.ZodType {
 }
 
 function parseSchemaByType(schema: JsonSchema): z.ZodType {
+  let zodSchema: z.ZodType;
+
   if (schema.anyOf || schema.oneOf) {
-    return parseUnion(schema, parseJsonSchema);
+    zodSchema = parseUnion(schema, parseJsonSchema);
+  } else if ('const' in schema) {
+    zodSchema = parseLiteral(schema);
+  } else if (schema.enum) {
+    zodSchema = parseEnum(schema);
+  } else {
+    switch (schema.type) {
+      case 'string':
+        zodSchema = parseString(schema);
+        break;
+      case 'number':
+      case 'integer':
+        zodSchema = parseNumber(schema);
+        break;
+      case 'boolean':
+        zodSchema = parseBoolean();
+        break;
+      case 'object':
+        zodSchema = parseObject(schema, parseJsonSchema);
+        break;
+      case 'array':
+        zodSchema = parseArray(schema, parseJsonSchema);
+        break;
+      case 'null':
+        zodSchema = z.null();
+        break;
+      default:
+        zodSchema = z.unknown();
+    }
   }
 
-  if ('const' in schema) {
-    return parseLiteral(schema);
+  // JSON Schema nullable: true means the value can be null
+  if (schema.nullable === true) {
+    return z.union([zodSchema, z.null()]);
   }
 
-  if (schema.enum) {
-    return parseEnum(schema);
-  }
-
-  switch (schema.type) {
-    case 'string':
-      return parseString(schema);
-    case 'number':
-    case 'integer':
-      return parseNumber(schema);
-    case 'boolean':
-      return parseBoolean();
-    case 'object':
-      return parseObject(schema, parseJsonSchema);
-    case 'array':
-      return parseArray(schema, parseJsonSchema);
-    case 'null':
-      return z.null();
-    default:
-      return z.unknown();
-  }
+  return zodSchema;
 }

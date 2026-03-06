@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -13,19 +14,22 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiPageSection,
   EuiCallOut,
   EuiSpacer,
-  EuiButtonEmpty,
   EuiButton,
   EuiIcon,
   EuiLink,
   EuiIconTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import {
+  type RuleExecutionStatuses,
+  RuleExecutionStatusErrorReasons,
+  parseDuration,
+} from '@kbn/alerting-plugin/common';
 import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -52,6 +56,7 @@ import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { ViewLinkedObject } from './view_linked_object';
 import { routeToHome } from '../../../constants';
+import { RuleSnoozeModal } from '../../rules_list/components/rule_snooze_modal';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -112,6 +117,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+  const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState<boolean>(false);
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
@@ -267,29 +273,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
-  const editButton = hasEditButton ? (
-    <>
-      <EuiButtonEmpty
-        aria-label={i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel',
-          {
-            defaultMessage: 'Edit',
-          }
-        )}
-        data-test-subj="openEditRuleFlyoutButton"
-        iconType="pencil"
-        onClick={onEditRuleClick}
-        name="edit"
-        disabled={!ruleType.enabledInLicense}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-          defaultMessage="Edit"
-        />
-      </EuiButtonEmpty>
-    </>
-  ) : null;
-
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
   const { showToast } = useBulkOperationToast({});
 
@@ -385,27 +368,16 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         description={
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
-                        defaultMessage="Type"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
+                {rule.executionStatus.status.charAt(0).toUpperCase() +
+                  rule.executionStatus.status.slice(1)}
+              </EuiBadge>
             </EuiFlexItem>
             {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s">
+                    <EuiText size="xs" color="subdued">
                       <p>
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
@@ -415,7 +387,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                    <EuiText size="xs" color="subdued" data-test-subj="apiKeyOwnerLabel">
                       <b>{rule.apiKeyOwner}</b>
                       {rule.apiKeyCreatedByUser ? (
                         <>
@@ -436,6 +408,30 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.createdAt"
+                  defaultMessage="Created by {creator} on {createdAt}"
+                  values={{
+                    creator: <strong>{rule.createdBy}</strong>,
+                    createdAt: moment(rule.createdAt).format('ll'),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.updatedAt"
+                  defaultMessage="Last updated by {updater} on {updatedAt}"
+                  values={{
+                    updater: <strong>{rule.updatedBy}</strong>,
+                    updatedAt: moment(rule.updatedAt).format('ll'),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         rightSideItems={[
@@ -450,29 +446,18 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 setRulesToUpdateAPIKey([ruleId]);
               }}
               onEnableDisable={onEnableDisable}
+              onSnooze={() => {
+                setIsSnoozeModalOpen(true);
+              }}
               onRunRule={onRunRule}
+              onEdit={() => {
+                onEditRuleClick();
+              }}
+              canEdit={hasEditButton}
+              isEditDisabled={!ruleType.enabledInLicense}
               isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
-          editButton,
-          <EuiButtonEmpty
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
-              {
-                defaultMessage: 'Refresh',
-              }
-            )}
-            data-test-subj="refreshRulesButton"
-            iconType="refresh"
-            onClick={requestRefresh}
-            name="refresh"
-            color="primary"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
-              defaultMessage="Refresh"
-            />
-          </EuiButtonEmpty>,
           useUnifiedRulesPage ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
         ]}
       />
@@ -572,9 +557,34 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isSnoozeModalOpen ? (
+          <RuleSnoozeModal
+            rule={rule}
+            onClose={() => setIsSnoozeModalOpen(false)}
+            onRuleChanged={requestRefresh}
+            onLoading={() => {}}
+          />
+        ) : null}
       </EuiPageSection>
     </>
   );
 };
+
+export function getHealthColor(status: RuleExecutionStatuses) {
+  switch (status) {
+    case 'active':
+      return 'success';
+    case 'error':
+      return 'danger';
+    case 'ok':
+      return 'primary';
+    case 'pending':
+      return 'accent';
+    case 'warning':
+      return 'warning';
+    default:
+      return 'subdued';
+  }
+}
 
 export const RuleDetailsWithApi = withBulkRuleOperations(RuleDetails);

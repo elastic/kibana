@@ -6,7 +6,12 @@
  */
 
 export type { StreamlangDSL, StreamType, StreamlangConditionBlock } from './types/streamlang';
-export { streamlangDSLSchema, isActionBlock, isConditionBlock } from './types/streamlang';
+export {
+  streamlangDSLSchema,
+  streamlangDSLSchemaStrict,
+  isActionBlock,
+  isConditionBlock,
+} from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export {
   transpile as transpileEsql,
@@ -22,7 +27,10 @@ export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
 export * from './src/utilities';
 export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
-export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';
+export {
+  getJsonSchemaFromStreamlangSchema,
+  getConditionMonacoSchemaConfig,
+} from './src/schema/get_json_schema_from_streamlang_schema';
 export * from './src/validation';
 export {
   validateMathExpression,

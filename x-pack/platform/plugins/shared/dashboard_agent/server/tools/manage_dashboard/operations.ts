@@ -5,26 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import { z } from '@kbn/zod/v4';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { getRemovedPanels, upsertMarkdownPanel, type VisualizationFailure } from './utils';
-import type { VisualizationQueryInput } from './visualization_generation';
-
-export const visualizationQueryInputSchema = z.object({
-  query: z.string().describe('A natural language query describing the desired visualization.'),
-  index: z.string().optional().describe('(optional) Index, alias, or datastream to target.'),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe('(optional) The type of chart to create.'),
-  esql: z.string().optional().describe('(optional) An ES|QL query to use for the visualization.'),
-}) satisfies z.ZodType<VisualizationQueryInput>;
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
@@ -37,20 +22,19 @@ export const upsertMarkdownOperationSchema = z.object({
   markdownContent: z.string().describe('Markdown content for the dashboard summary panel.'),
 });
 
-export const addGeneratedPanelsOperationSchema = z.object({
-  operation: z.literal('add_generated_panels'),
-  items: z
-    .array(visualizationQueryInputSchema)
-    .min(1)
-    .describe('Visualization generation requests to execute in order.'),
+const attachmentWithGridSchema = z.object({
+  attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
+  ),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({
   operation: z.literal('add_panels_from_attachments'),
-  attachmentIds: z
-    .array(z.string())
+  items: z
+    .array(attachmentWithGridSchema)
     .min(1)
-    .describe('Attachment ids to resolve into dashboard panels.'),
+    .describe('Visualization attachments to add, each with its dashboard grid layout.'),
 });
 
 export const removePanelsOperationSchema = z.object({
@@ -61,7 +45,6 @@ export const removePanelsOperationSchema = z.object({
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
   upsertMarkdownOperationSchema,
-  addGeneratedPanelsOperationSchema,
   addPanelsFromAttachmentsOperationSchema,
   removePanelsOperationSchema,
 ]);
@@ -72,10 +55,6 @@ interface ExecuteDashboardOperationsParams {
   dashboardData: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
-  generatePanels: (
-    items: VisualizationQueryInput[],
-    onPanelCreated?: (panel: LensAttachmentPanel) => void
-  ) => Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }>;
   resolvePanelsFromAttachments: (
     attachmentIds: string[]
   ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
@@ -87,7 +66,6 @@ export const executeDashboardOperations = async ({
   dashboardData,
   operations,
   logger,
-  generatePanels,
   resolvePanelsFromAttachments,
   onPanelsAdded,
   onPanelsRemoved,
@@ -133,31 +111,22 @@ export const executeDashboardOperations = async ({
         break;
       }
 
-      case 'add_generated_panels': {
-        const generatedPanels = await generatePanels(operation.items, (panel) => {
-          onPanelsAdded([panel]);
-        });
-        if (generatedPanels.panels.length > 0) {
-          nextDashboardData = {
-            ...nextDashboardData,
-            panels: [...nextDashboardData.panels, ...generatedPanels.panels],
-          };
-        }
-
-        failures.push(...generatedPanels.failures);
-        break;
-      }
-
       case 'add_panels_from_attachments': {
-        const attachmentPanels = await resolvePanelsFromAttachments(operation.attachmentIds);
-        if (attachmentPanels.panels.length > 0) {
-          nextDashboardData = {
-            ...nextDashboardData,
-            panels: [...nextDashboardData.panels, ...attachmentPanels.panels],
-          };
-          onPanelsAdded(attachmentPanels.panels);
+        for (const item of operation.items) {
+          const result = await resolvePanelsFromAttachments([item.attachmentId]);
+          const panelsWithGrid: AttachmentPanel[] = result.panels.map((panel) => ({
+            ...panel,
+            grid: item.grid,
+          }));
+          if (panelsWithGrid.length > 0) {
+            nextDashboardData = {
+              ...nextDashboardData,
+              panels: [...nextDashboardData.panels, ...panelsWithGrid],
+            };
+            onPanelsAdded(panelsWithGrid);
+          }
+          failures.push(...result.failures);
         }
-        failures.push(...attachmentPanels.failures);
         break;
       }
 

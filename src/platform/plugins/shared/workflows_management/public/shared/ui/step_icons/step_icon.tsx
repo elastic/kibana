@@ -47,20 +47,20 @@ export const StepIcon = React.memo(
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
     } else {
-      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
-      if (actionTypeIcon) {
-        return (
-          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={actionTypeIcon} size="m" aria-hidden={true} />
-          </Suspense>
-        );
-      }
-
       const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
       if (stepDefinition?.icon) {
         return (
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={stepDefinition.icon} size="m" aria-hidden={true} />
+          </Suspense>
+        );
+      }
+
+      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+      if (actionTypeIcon) {
+        return (
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={actionTypeIcon} size="m" aria-hidden={true} />
           </Suspense>
         );
       }

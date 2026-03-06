@@ -109,7 +109,10 @@ export function ESQLMenu({
               iconType="clockCounter"
               size="xs"
               aria-label={historyLabel}
-              onClick={onToggleHistory}
+              onClick={(e: React.MouseEvent) => {
+                onToggleHistory?.();
+                (e.currentTarget as HTMLElement).blur();
+              }}
               isDisabled={!onToggleHistory}
               data-test-subj="ESQLEditor-toggle-query-history-icon"
               color="text"

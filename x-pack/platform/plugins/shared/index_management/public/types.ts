@@ -13,6 +13,7 @@ import type {
   UserProfileService,
 } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -44,6 +45,7 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   cloud?: CloudSetup;
+  cloudConnect?: CloudConnectedPluginStart;
   console?: ConsolePluginStart;
   share: SharePluginStart;
   fleet?: unknown;

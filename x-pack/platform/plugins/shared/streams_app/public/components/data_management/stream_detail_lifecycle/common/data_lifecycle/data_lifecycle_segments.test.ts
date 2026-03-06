@@ -175,6 +175,33 @@ describe('Segment Utilities', () => {
       expect(result.timelineSegments[3].isDelete).toBe(true);
     });
 
+    it('should preserve downsample step array order even when a later step starts at 0d', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d' },
+        { grow: false, min_age: '60d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '10d', fixed_interval: '1h' },
+        { after: '0d', fixed_interval: '1d' },
+        { after: '30d', fixed_interval: '2d' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      // The "0d" step is second in the array; it must not be moved to the first boundary.
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual([
+        '0d',
+        '10d',
+        '0d',
+        '30d',
+        '60d',
+      ]);
+      const stepIndicesInOrder = result.downsamplingSegments
+        .filter((s) => s.stepIndex !== undefined)
+        .map((s) => s.stepIndex);
+      expect(stepIndicesInOrder).toEqual([0, 1, 2]);
+    });
+
     it('should filter out downsample steps after retention', () => {
       const phases: SegmentPhase[] = [
         { grow: true, min_age: '0d' },

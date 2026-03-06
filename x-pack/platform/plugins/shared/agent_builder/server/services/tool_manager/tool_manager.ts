@@ -9,7 +9,8 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { createToolIdMappings, toolToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { LRUCache } from 'lru-cache';
-import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
+import type { AgentEventEmitterFn, ExecutableTool } from '@kbn/agent-builder-server';
+import type { ToolReturnSummarizerFn } from '@kbn/agent-builder-server/tools/builtin';
 import type {
   ToolManager as IToolManager,
   ToolManagerParams,
@@ -36,6 +37,7 @@ export class ToolManager implements IToolManager {
   private staticTools: Map<ToolName, StructuredTool> = new Map<ToolName, StructuredTool>();
   private dynamicTools: LRUCache<ToolName, StructuredTool>;
   private toolIdMappings: Map<string, string>;
+  private executableTools: Map<string, ExecutableTool> = new Map<string, ExecutableTool>();
   private eventEmitter?: AgentEventEmitterFn;
 
   constructor(params: ToolManagerParams) {
@@ -63,8 +65,11 @@ export class ToolManager implements IToolManager {
 
     if (input.type === 'executable') {
       const tools = Array.isArray(input.tools) ? input.tools : [input.tools];
-      const toolIdMapping = createToolIdMappings(tools);
+      for (const tool of tools) {
+        this.executableTools.set(tool.id, tool);
+      }
 
+      const toolIdMapping = createToolIdMappings(tools);
       langchainTools = await Promise.all(
         tools.map((tool) =>
           toolToLangchain({
@@ -131,6 +136,14 @@ export class ToolManager implements IToolManager {
    */
   public getToolIdMapping(): Map<string, string> {
     return this.toolIdMappings;
+  }
+
+  /**
+   * Gets the summarizer function for a tool by its internal tool ID.
+   * Returns undefined if the tool is not found or has no summarizer.
+   */
+  public getSummarizer(toolId: string): ToolReturnSummarizerFn | undefined {
+    return this.executableTools.get(toolId)?.summarizeToolReturn;
   }
 
   /**

@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
+import { UnifiedHistoryTable } from '../../../actions/unified_history_table';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
@@ -45,7 +46,7 @@ const HistoryPageComponent = () => {
     return (
       <div css={fullWidthContentCss}>
         <EuiSpacer size="l" />
-        <ActionsTable />
+        <UnifiedHistoryTable />
       </div>
     );
   }

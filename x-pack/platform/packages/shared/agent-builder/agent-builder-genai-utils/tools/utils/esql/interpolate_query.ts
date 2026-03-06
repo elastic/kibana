@@ -6,7 +6,7 @@
  */
 
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
-import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@kbn/esql-language';
+import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@elastic/esql';
 
 const defaultPrintOpts: WrappingPrettyPrinterOptions = {
   wrap: 80,

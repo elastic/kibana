@@ -62,7 +62,7 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
     '@timestamp': moment(),
     message: 'This is a test message',
     category: Category.Endpoint,
-    type: DefendInsightType.Enum.incompatible_antivirus,
+    type: DefendInsightType.enum.incompatible_antivirus,
     source: {
       type: SourceType.LlmConnector,
       id: 'openai-connector-id',
@@ -402,7 +402,7 @@ describe('helpers', () => {
       };
 
       const insight = getDefaultInsight({
-        type: DefendInsightType.Enum.incompatible_antivirus,
+        type: DefendInsightType.enum.incompatible_antivirus,
         remediation: {
           exception_list_items: [
             {
@@ -457,7 +457,7 @@ describe('helpers', () => {
 
       // Here the entry field is not valid, so generateTrustedAppsFilter returns an empty string.
       const insight = getDefaultInsight({
-        type: DefendInsightType.Enum.incompatible_antivirus,
+        type: DefendInsightType.enum.incompatible_antivirus,
         remediation: {
           exception_list_items: [
             {

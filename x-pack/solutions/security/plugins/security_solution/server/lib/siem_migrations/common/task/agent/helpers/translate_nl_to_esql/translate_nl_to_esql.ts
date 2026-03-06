@@ -19,6 +19,7 @@ export interface GetNLToESQLQueryParams {
 export interface NLToESQLQueryInput {
   query: string;
   indexPattern?: string;
+  fieldsMetadata?: object;
 }
 
 export interface NLToESQLQueryOutput {
@@ -37,22 +38,27 @@ export const getNLToESQLQuery: NodeHelperCreator<
     });
     const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
       index_pattern: input.indexPattern,
+      fields_metadata: JSON.stringify(input.fieldsMetadata ?? {}),
     });
     const response = await esqlKnowledgeBase.translate(
       input.indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
     );
 
+    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
+
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
+
     if (!esqlQuery) {
       logger.warn('Failed to extract ESQL query from translation response');
       const comment =
         '## Translation Summary\n\nFailed to extract ESQL query from translation response';
       return {
-        comments: [generateAssistantComment(comment)],
+        comments: [
+          generateAssistantComment(cleanMarkdown(translationSummary)),
+          generateAssistantComment(comment),
+        ],
       };
     }
-
-    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
 
     return {
       esqlQuery,

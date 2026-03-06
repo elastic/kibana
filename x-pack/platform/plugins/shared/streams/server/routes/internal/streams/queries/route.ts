@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { QueriesGetResponse, QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
 import { sortForQueriesTable } from '../../../../lib/significant_events/utils';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 
 const dateFromString = z.string().transform((input) => new Date(input));
@@ -21,7 +22,8 @@ const requestParamsSchema = z.object({
   bucketSize: z.string().describe('Size of time buckets for aggregation'),
   query: z.string().optional().describe('Query string to filter significant events queries'),
   streamNames: z
-    .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()).optional())
+    .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
+    .optional()
     .describe('Stream names to filter significant events'),
 });
 
@@ -133,6 +135,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         .max(1000)
         .optional()
         .describe('Number of items per page'),
+      status: queryStatusSchema,
     }),
   }),
   options: {
@@ -153,7 +156,16 @@ const getDiscoveryQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames, page = 1, perPage = 10 } = params.query;
+    const {
+      from,
+      to,
+      bucketSize,
+      query,
+      streamNames,
+      page = 1,
+      perPage = 10,
+      status,
+    } = params.query;
 
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
@@ -162,6 +174,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
       },
       { queryClient, scopedClusterClient }
     );

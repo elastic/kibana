@@ -27,6 +27,7 @@ import type {
 import {
   ClusterClient,
   AgentManager,
+  getRequestHandlerFactory,
   type OnRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 
@@ -47,7 +48,6 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
-import { getRequestHandlerFactory } from './cps_request_handler_factory';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;

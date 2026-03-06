@@ -67,6 +67,14 @@
               "path": "x-pack/platform/plugins/private/cross_cluster_replication/public/plugin.ts"
             },
             {
+              "plugin": "grokdebugger",
+              "path": "x-pack/platform/plugins/private/grokdebugger/public/plugin.ts"
+            },
+            {
+              "plugin": "grokdebugger",
+              "path": "x-pack/platform/plugins/private/grokdebugger/public/plugin.ts"
+            },
+            {
               "plugin": "logstash",
               "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
             },
@@ -770,6 +778,10 @@
             {
               "plugin": "graph",
               "path": "x-pack/platform/plugins/private/graph/server/plugin.ts"
+            },
+            {
+              "plugin": "grokdebugger",
+              "path": "x-pack/platform/plugins/private/grokdebugger/server/plugin.ts"
             },
             {
               "plugin": "indexLifecycleManagement",

@@ -475,7 +475,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         size="m"
                         isDisabled={isSaveDisabled}
                         display="fill"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
                       />
                     }

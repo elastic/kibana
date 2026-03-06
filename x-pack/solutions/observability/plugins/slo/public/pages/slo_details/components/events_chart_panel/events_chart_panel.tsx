@@ -58,8 +58,21 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
   }
 
   function getChart() {
+    const chartHeight = 200;
+
     if (isLoading) {
-      return <EuiLoadingChart size="m" data-test-subj="eventsLoadingChart" />;
+      return (
+        <div
+          css={{
+            height: chartHeight,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <EuiLoadingChart size="m" data-test-subj="eventsLoadingChart" />
+        </div>
+      );
     }
 
     switch (slo.indicator.type) {

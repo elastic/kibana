@@ -86,11 +86,11 @@ describe('ActionsContextMenu', () => {
     expect(screen.getByTestId('testMenuGroup-slos')).toHaveTextContent('SLOs');
   });
 
-  it('does not render group label when groupLabel is undefined', () => {
+  it('does not render group label when groupLabel is undefined nor it renders action item', () => {
     const actions: ActionGroups = [
       {
         id: 'noLabel',
-        actions: [{ id: 'action1', name: 'Action 1' }],
+        actions: [{ id: 'action1', name: 'Action 1', onClick: () => {} }],
       },
     ];
 
@@ -104,7 +104,7 @@ describe('ActionsContextMenu', () => {
 
     fireEvent.click(screen.getByTestId('triggerButton'));
     expect(screen.queryByTestId('testMenuGroup-noLabel')).not.toBeInTheDocument();
-    expect(screen.getByTestId('testMenuItem-action1')).toBeInTheDocument();
+    expect(screen.queryByTestId('testMenuItem-action1')).toBeInTheDocument();
   });
 
   it('renders all action items in the main panel', () => {
@@ -166,7 +166,7 @@ describe('ActionsContextMenu', () => {
 
   it('uses default prefix when dataTestSubjPrefix is not specified', () => {
     const actions: ActionGroups = [
-      { id: 'g', groupLabel: 'Group', actions: [{ id: 'a', name: 'A' }] },
+      { id: 'g', groupLabel: 'Group', actions: [{ id: 'a', name: 'A', onClick: () => {} }] },
     ];
     render(
       <ActionsContextMenu actions={actions} button={<button data-test-subj="btn">Open</button>} />

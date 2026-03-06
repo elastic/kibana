@@ -17,12 +17,13 @@ import {
   EuiToolTip,
   euiDragDropReorder,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
@@ -40,8 +41,10 @@ import {
 import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
+import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
+import { BulkCreateStreamsConfirmationModal } from './review_suggestions_form/bulk_create_streams_confirmation_modal';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
@@ -167,12 +170,32 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     fetchSuggestions,
     isLoadingSuggestions,
     suggestions,
+    suggestionReason,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
     rejectSuggestion,
     updateSuggestion,
+    selectedSuggestionNames,
+    toggleSuggestionSelection,
+    isSuggestionSelected,
+    bulkAcceptSuggestions,
+    selectAllSuggestions,
+    clearSuggestionSelection,
   } = useReviewSuggestionsForm();
+
+  const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
+  const { acknowledgeBulkFork } = useStreamRoutingEvents();
+  const isBulkForkComplete = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: { bulkForking: 'complete' } } })
+  );
+  const bulkForkResults = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.bulkFork?.results
+  );
+
+  const handleBulkAccept = () => {
+    setShowBulkAcceptModal(true);
+  };
 
   const currentRuleId = useStreamsRoutingSelector((snapshot) => snapshot.context.currentRuleId);
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
@@ -196,6 +219,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 
   // This isRefreshing tracks async gap between operation completion and server data arrival
   const isRefreshing = useStreamsRoutingSelector((snapshot) => snapshot.context.isRefreshing);
+
+  const showAdditionalChargesCallout =
+    !!aiFeatures?.isManagedAIConnector && !aiFeatures?.hasAcknowledgedAdditionalCharges;
 
   const hasData = routing.length > 0 || (aiFeatures?.enabled && suggestions);
 
@@ -230,17 +256,24 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           wrap
         >
           {aiFeatures?.enabled && !isLoadingSuggestions && !suggestions && (
-            <EuiFlexItem grow={false}>
-              <GenerateSuggestionButton
-                size="s"
-                onClick={getSuggestionsForStream}
-                isLoading={isLoadingSuggestions}
-                isDisabled={isEditingOrReorderingStreams}
-                aiFeatures={aiFeatures}
-              >
-                {suggestPartitionsWithAIText}
-              </GenerateSuggestionButton>
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <GenerateSuggestionButton
+                  size="s"
+                  onClick={getSuggestionsForStream}
+                  isLoading={isLoadingSuggestions}
+                  isDisabled={isEditingOrReorderingStreams}
+                  aiFeatures={aiFeatures}
+                >
+                  {suggestPartitionsWithAIText}
+                </GenerateSuggestionButton>
+              </EuiFlexItem>
+              {showAdditionalChargesCallout && (
+                <EuiFlexItem grow={false}>
+                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
+                </EuiFlexItem>
+              )}
+            </>
           )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
@@ -262,6 +295,28 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     );
   };
 
+  const handleBulkAcceptSuccess = useCallback(
+    (successfulNames: string[]) => {
+      bulkAcceptSuggestions(successfulNames);
+      setShowBulkAcceptModal(false);
+    },
+    [bulkAcceptSuggestions]
+  );
+
+  useEffect(() => {
+    if (isBulkForkComplete && !showBulkAcceptModal && bulkForkResults) {
+      const successfulNames = bulkForkResults.filter((r) => r.success).map((r) => r.name);
+      bulkAcceptSuggestions(successfulNames);
+      acknowledgeBulkFork();
+    }
+  }, [
+    isBulkForkComplete,
+    showBulkAcceptModal,
+    bulkForkResults,
+    bulkAcceptSuggestions,
+    acknowledgeBulkFork,
+  ]);
+
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
     <NoDataEmptyPrompt
       createNewRule={createNewRule}
@@ -269,19 +324,35 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
       isAiEnabled={!!aiFeatures?.enabled}
     >
       {aiFeatures?.enabled && (
-        <GenerateSuggestionButton
-          size="s"
-          onClick={getSuggestionsForStream}
-          isLoading={isLoadingSuggestions}
-          isDisabled={isEditingOrReorderingStreams}
-          aiFeatures={aiFeatures}
-        >
-          {suggestPartitionsWithAIText}
-        </GenerateSuggestionButton>
+        <>
+          <GenerateSuggestionButton
+            size="s"
+            onClick={getSuggestionsForStream}
+            isLoading={isLoadingSuggestions}
+            isDisabled={isEditingOrReorderingStreams}
+            aiFeatures={aiFeatures}
+          >
+            {suggestPartitionsWithAIText}
+          </GenerateSuggestionButton>
+          {showAdditionalChargesCallout && (
+            <>
+              <EuiSpacer size="s" />
+              <AdditionalChargesCallout aiFeatures={aiFeatures} />
+            </>
+          )}
+        </>
       )}
     </NoDataEmptyPrompt>
   ) : (
     <>
+      {showBulkAcceptModal && suggestions && (
+        <BulkCreateStreamsConfirmationModal
+          suggestions={suggestions}
+          selectedNames={selectedSuggestionNames}
+          onClose={() => setShowBulkAcceptModal(false)}
+          onSuccess={handleBulkAcceptSuccess}
+        />
+      )}
       {/* Scrollable routing rules container */}
       <EuiFlexItem
         grow={false}
@@ -356,6 +427,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   onDismiss={resetForm}
                   onRegenerate={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
+                  reason={suggestionReason}
                 />
               ) : (
                 <ReviewSuggestionsForm
@@ -369,6 +441,12 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   resetForm={resetForm}
                   suggestions={suggestions}
                   updateSuggestion={updateSuggestion}
+                  selectedSuggestionNames={selectedSuggestionNames}
+                  toggleSuggestionSelection={toggleSuggestionSelection}
+                  isSuggestionSelected={isSuggestionSelected}
+                  onBulkAccept={handleBulkAccept}
+                  selectAllSuggestions={selectAllSuggestions}
+                  clearSuggestionSelection={clearSuggestionSelection}
                 />
               )
             ) : null}
@@ -405,6 +483,18 @@ function QueryModeChildrenList() {
         overflow: auto;
       `}
     >
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          <p>
+            {i18n.translate('xpack.streams.queryModeChildrenList.isolationGuidance', {
+              defaultMessage:
+                'Query streams have their own data, separate from this stream. Select one below or open it in Discover to view its data.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
       {/* Scrollable query streams container */}
       <EuiFlexItem
         grow={false}
@@ -436,7 +526,6 @@ function QueryModeChildrenList() {
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-
       {/* Create button */}
       {!isCreating && (
         <EuiFlexItem grow={false}>

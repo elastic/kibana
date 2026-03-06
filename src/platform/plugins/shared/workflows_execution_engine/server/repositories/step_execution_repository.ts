@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export class StepExecutionRepository {
@@ -35,6 +36,23 @@ export class StepExecutionRepository {
     });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+  }
+
+  /**
+   * Fetches all step executions for a workflow execution.
+   * Uses mget (real-time, O(1)) when stepExecutionIds are available,
+   * falls back to search for backward compatibility with older executions.
+   */
+  public async getStepExecutionsByWorkflowExecution(
+    workflowExecutionId: string,
+    stepExecutionIds?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    return getStepExecutionsByWorkflowExecutionShared({
+      esClient: this.esClient,
+      stepsExecutionIndex: this.indexName,
+      workflowExecutionId,
+      stepExecutionIds,
+    });
   }
 
   public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {

@@ -154,7 +154,7 @@
                 "TOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-              "lineNumber": 78,
+              "lineNumber": 79,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1649,7 +1649,7 @@
         "\nSetup contract of the inference plugin."
       ],
       "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-      "lineNumber": 32,
+      "lineNumber": 38,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1667,7 +1667,7 @@
         "\nStart contract of the inference plugin, exposing APIs to interact with LLMs."
       ],
       "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-      "lineNumber": 68,
+      "lineNumber": 74,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1704,7 +1704,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-          "lineNumber": 72,
+          "lineNumber": 78,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1720,7 +1720,7 @@
                 "T"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-              "lineNumber": 104,
+              "lineNumber": 110,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -1752,7 +1752,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-          "lineNumber": 107,
+          "lineNumber": 113,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1768,7 +1768,7 @@
                 "CreateChatModelOptions"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-              "lineNumber": 121,
+              "lineNumber": 127,
               "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
@@ -1800,7 +1800,7 @@
             "[]>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-          "lineNumber": 123,
+          "lineNumber": 129,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1819,7 +1819,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-              "lineNumber": 129,
+              "lineNumber": 135,
               "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
@@ -1853,7 +1853,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-          "lineNumber": 131,
+          "lineNumber": 137,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1872,7 +1872,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-              "lineNumber": 137,
+              "lineNumber": 143,
               "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,
@@ -1908,7 +1908,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-          "lineNumber": 139,
+          "lineNumber": 145,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1926,7 +1926,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-              "lineNumber": 147,
+              "lineNumber": 153,
               "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
@@ -1946,7 +1946,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
-              "lineNumber": 147,
+              "lineNumber": 153,
               "columnNumber": 34,
               "deprecated": false,
               "trackAdoption": false,

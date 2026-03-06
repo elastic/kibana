@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Services skeleton for content list provider.
- *
- * This file establishes the pattern for service adapters that will
- * integrate Kibana services with the content list provider.
- */
+import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 
-// Placeholder export to establish the module.
-export {};
+/**
+ * Services provided to the content list provider to enable additional capabilities.
+ *
+ * Each service follows a pattern where providing the service enables the corresponding
+ * feature by default. Features can be explicitly disabled via the `features` prop
+ * even when the service is present.
+ */
+export interface ContentListServices {
+  /**
+   * Tags service for tag-based filtering and display.
+   *
+   * Uses the standard `ContentManagementTagsServices` interface from `@kbn/content-management-tags`.
+   * Provides `getTagList` for listing available tags and optionally `parseSearchQuery`
+   * for extracting tag filters from the search bar query text.
+   */
+  tags?: ContentManagementTagsServices;
+}

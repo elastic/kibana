@@ -3240,7 +3240,7 @@
                 "section": "def-common.Page",
                 "text": "Page"
               },
-              " | undefined; result?: string | undefined; sampled: boolean; span_count?: { started?: number | undefined; dropped?: number | undefined; } | undefined; type: string; custom?: Record<string, unknown> | undefined; message?: { queue?: { name: string; } | undefined; age?: { ms: number; } | undefined; body?: string | undefined; headers?: Record<string, unknown> | undefined; } | undefined; }"
+              " | undefined; result?: string | undefined; sampled?: boolean | undefined; span_count?: { started?: number | undefined; dropped?: number | undefined; } | undefined; type: string; custom?: Record<string, unknown> | undefined; message?: { queue?: { name: string; } | undefined; age?: { ms: number; } | undefined; body?: string | undefined; headers?: Record<string, unknown> | undefined; } | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/transaction_raw.ts",
             "lineNumber": 36,

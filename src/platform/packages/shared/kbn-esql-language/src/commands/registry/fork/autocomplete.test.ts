@@ -30,7 +30,7 @@ import {
   ESQL_NUMBER_TYPES,
 } from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const allEvalFnsForWhere = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,

@@ -62,6 +62,8 @@ jest.mock('./lookup_join', () => {
   };
 });
 
+window.performance.mark = jest.fn();
+
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {

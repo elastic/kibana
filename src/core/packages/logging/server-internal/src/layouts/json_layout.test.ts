@@ -8,6 +8,7 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
+import { test as fcTest, fc } from '@fast-check/jest';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
@@ -554,6 +555,167 @@ test('format() correctly serializes meta.error after calling meta.toJSON() if me
     },
     process: {
       pid: 5355,
+      uptime: 10,
+    },
+  });
+});
+
+const nonObjectMetaArb = fc.oneof(
+  fc.string(),
+  fc.boolean(),
+  fc.integer(),
+  fc.float({ noNaN: false, noDefaultInfinity: true }),
+  fc.array(fc.string(), { maxLength: 20 })
+);
+
+fcTest.prop([nonObjectMetaArb])(
+  'format() serializes non-object meta as plain string in error',
+  (meta) => {
+    const layout = new JsonLayout();
+
+    expect(
+      JSON.parse(
+        layout.format({
+          message: 'foo',
+          timestamp,
+          level: LogLevel.Debug,
+          context: 'bar',
+          pid: 3,
+          // @ts-expect-error validating defensive runtime behavior
+          meta,
+        })
+      )
+    ).toStrictEqual({
+      ecs: { version: expect.any(String) },
+      '@timestamp': '2012-02-01T09:30:22.011-05:00',
+      message: 'foo',
+      log: {
+        level: 'DEBUG',
+        logger: 'bar',
+      },
+      error: String(meta),
+      process: {
+        pid: 3,
+        uptime: 10,
+      },
+    });
+  }
+);
+
+test('format() does not add error when meta is null', () => {
+  const layout = new JsonLayout();
+
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        // @ts-expect-error validating defensive runtime behavior
+        meta: null,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+      uptime: 10,
+    },
+  });
+});
+
+const nonObjectToJsonReturnArb = fc.oneof(
+  fc.string(),
+  fc.boolean(),
+  fc.integer(),
+  fc.constant(null),
+  fc.constant(undefined),
+  fc.array(fc.string(), { maxLength: 20 })
+);
+
+fcTest.prop([nonObjectToJsonReturnArb])(
+  'format() serializes non-object meta.toJSON() output as string in error',
+  (toJsonValue) => {
+    const layout = new JsonLayout();
+
+    expect(
+      JSON.parse(
+        layout.format({
+          message: 'foo',
+          timestamp,
+          level: LogLevel.Debug,
+          context: 'bar',
+          pid: 3,
+          meta: {
+            // @ts-expect-error validating defensive runtime behavior
+            toJSON() {
+              return toJsonValue;
+            },
+          },
+        })
+      )
+    ).toStrictEqual({
+      ecs: { version: expect.any(String) },
+      '@timestamp': '2012-02-01T09:30:22.011-05:00',
+      message: 'foo',
+      log: {
+        level: 'DEBUG',
+        logger: 'bar',
+      },
+      error: String(toJsonValue),
+      process: {
+        pid: 3,
+        uptime: 10,
+      },
+    });
+  }
+);
+
+test('format() serializes Error from meta.toJSON()', () => {
+  const layout = new JsonLayout();
+  const metaError = new Error('boom');
+  metaError.name = 'BoomError';
+  metaError.stack = 'BoomStack';
+
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          // @ts-expect-error validating defensive runtime behavior
+          toJSON() {
+            return { error: metaError };
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    error: {
+      message: metaError.message,
+      type: metaError.name,
+      stack_trace: metaError.stack,
+    },
+    process: {
+      pid: 3,
       uptime: 10,
     },
   });

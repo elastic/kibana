@@ -17,7 +17,7 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { wrapAsyncSearchClient } from '@kbn/alerting-plugin/server/lib';
 import {

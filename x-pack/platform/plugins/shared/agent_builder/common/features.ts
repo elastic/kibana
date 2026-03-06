@@ -19,13 +19,24 @@ export const AGENT_BUILDER_SHORT_TITLE = i18n.translate('xpack.agentBuilder.app.
 });
 
 export const uiPrivileges = {
+  /** Read access: view Agent Builder and read-only actions */
   show: 'show',
-  showManagement: 'showManagement',
-  manageTools: 'manageTools',
+  /** Create/update/delete for areas not covered by sub-features. */
+  write: 'write',
   manageAgents: 'manageAgents',
+  manageTools: 'manageTools',
 };
 
 export const apiPrivileges = {
-  readAgentBuilder: 'read_agent_builder',
-  manageAgentBuilder: 'manage_agent_builder',
+  /** Access to GET APIs for areas not covered by sub-features. */
+  readAgentBuilder: `${AGENTBUILDER_FEATURE_ID}:read`,
+  /** Access to POST/PUT/DELETE APIs for areas not covered by sub-features. */
+  writeAgentBuilder: `${AGENTBUILDER_FEATURE_ID}:write`,
+  manageAgents: `${AGENTBUILDER_FEATURE_ID}:manageAgents`,
+  manageTools: `${AGENTBUILDER_FEATURE_ID}:manageTools`,
 };
+
+export const subFeaturePrivilegeIds = {
+  manageAgents: 'manage_agents',
+  manageTools: 'manage_tools',
+} as const;

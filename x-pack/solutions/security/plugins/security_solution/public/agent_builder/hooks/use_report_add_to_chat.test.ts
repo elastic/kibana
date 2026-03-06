@@ -31,7 +31,7 @@ describe('useReportAddToChat', () => {
     });
 
     const payload: AgentBuilderAddToChatTelemetry = {
-      pathway: 'rules_table',
+      pathway: 'rule_creation',
       attachments: ['rule'],
     };
 

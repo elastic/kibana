@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { EuiStepStatus } from '@elastic/eui';
+import { getTemplate } from '../api/api';
+
 export const stringToInteger = (value?: string | number): number | undefined => {
   const num = Number(value);
 
@@ -22,4 +25,23 @@ export const stringToIntegerWithDefault = (
   const valueAsInteger = stringToInteger(value);
 
   return valueAsInteger && valueAsInteger > 0 ? valueAsInteger : defaultValue;
+};
+
+export const getStepStatus = (step: number, currentStep: number): EuiStepStatus => {
+  if (step === currentStep) {
+    return 'current';
+  }
+  if (step < currentStep) {
+    return 'complete';
+  }
+  return 'incomplete';
+};
+
+export const checkTemplateExists = async (templateId: string): Promise<boolean> => {
+  try {
+    await getTemplate({ templateId });
+    return true;
+  } catch {
+    return false;
+  }
 };

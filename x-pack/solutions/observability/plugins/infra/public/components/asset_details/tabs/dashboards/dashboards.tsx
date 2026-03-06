@@ -168,8 +168,8 @@ export function Dashboards() {
 
       return {
         assetDetails: { ...urlState, dashboardId: params.dashboardId },
-        assetType: entity.type,
-        assetId: entity.id,
+        entityType: entity.type,
+        entityId: entity.id,
         ...flyoutParams,
       };
     },

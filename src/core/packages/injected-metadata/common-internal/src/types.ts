@@ -64,6 +64,7 @@ export interface InjectedMetadata {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
     airgapped: boolean;
+    isCoreRenderingInReactConcurrentMode: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;

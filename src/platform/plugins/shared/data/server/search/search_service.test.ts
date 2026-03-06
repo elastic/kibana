@@ -128,6 +128,67 @@ describe('Search service', () => {
       mockScopedClient = searchPluginStart.asScoped(r);
     });
 
+    describe('asScoped with opts', () => {
+      it('calls elasticsearch.client.asScoped with only request when opts is omitted', () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = {} as any;
+        searchPluginStart.asScoped(request);
+
+        expect(asScopedSpy).toHaveBeenCalledTimes(1);
+        expect(asScopedSpy).toHaveBeenCalledWith(request);
+      });
+
+      it('calls elasticsearch.client.asScoped with request and projectRouting: "space" when opts.projectRouting is "space"', () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = { url: new URL('https://kibana/s/my-space') } as any;
+        searchPluginStart.asScoped(request, { projectRouting: 'space' });
+
+        expect(asScopedSpy).toHaveBeenCalledTimes(1);
+        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+      });
+
+      it('calls elasticsearch.client.asScoped with request and projectRouting: "all" when opts.projectRouting is "all"', () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = {} as any;
+        searchPluginStart.asScoped(request, { projectRouting: 'all' });
+
+        expect(asScopedSpy).toHaveBeenCalledTimes(1);
+        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'all' });
+      });
+
+      it('calls elasticsearch.client.asScoped with request and projectRouting: "origin-only" when opts.projectRouting is "origin-only"', () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = {} as any;
+        searchPluginStart.asScoped(request, { projectRouting: 'origin-only' });
+
+        expect(asScopedSpy).toHaveBeenCalledTimes(1);
+        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'origin-only' });
+      });
+
+      it('returns a scoped client that can search when called with opts', async () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = {} as any;
+        const scopedClient = searchPluginStart.asScoped(request, {
+          projectRouting: 'origin-only',
+        });
+
+        expect(scopedClient).toHaveProperty('search');
+        expect(scopedClient).toHaveProperty('cancel');
+        const res = await lastValueFrom(scopedClient.search({ params: {} }));
+        expect(res).toBeDefined();
+      });
+    });
+
     describe('search', () => {
       it('searches using the original request if not restoring, trackId is not called if there is no id in the response', async () => {
         const searchRequest = { params: {} };

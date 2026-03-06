@@ -1,0 +1,28 @@
+version: '1'
+name: 'sources.salesforce.list_records'
+description: 'List record IDs for a Salesforce sobject. Prefer limit 10-20; use nextRecordsUrl for more (max 2000).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sobject_name
+    type: string
+    description: "Salesforce object API name (standard or custom), e.g. Account, Contact, or MyCustomObject__c"
+  - name: limit
+    type: number
+    required: false
+    default: 10
+    description: "Max records (default 10, max 2000). Prefer 10-20 to keep context small."
+  - name: next_records_url
+    type: string
+    required: false
+    description: "Pagination URL from previous response's nextRecordsUrl"
+steps:
+  - name: list-records
+    type: salesforce.list_records
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      sobjectName: "${{inputs.sobject_name}}"
+      limit: ${{inputs.limit}}
+      nextRecordsUrl: "${{inputs.next_records_url}}"

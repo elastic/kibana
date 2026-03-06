@@ -23,7 +23,7 @@ const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, ti
     navigateToPrefilledEditor(
       {
         id: attachmentId,
-        timeRange,
+        time_range: timeRange,
         attributes,
       },
       {

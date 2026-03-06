@@ -90,7 +90,7 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
       ? { collapseFn: layer.breakdown_by.collapse_by }
       : {}),
     ...(layer.breakdown_by && 'color' in layer.breakdown_by
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.breakdown_by.color) }
+      ? { ...fromColorMappingAPIToLensState(layer.breakdown_by.color) }
       : {}),
   };
 }
