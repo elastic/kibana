@@ -34,7 +34,7 @@ test.describe('Page Views Chart', { tag: tags.stateful.classic }, () => {
     await test.step('Navigate to exploratory view', async () => {
       await page.testSubj
         .locator('uxPageViewsChart')
-        .locator('[data-testid="echLegendItemLabel"]', { hasText: 'Firefox' })
+        .locator('.echLegendItem__label, [data-testid="echLegendItemLabel"]', { hasText: 'Firefox' })
         .hover();
       await pageObjects.uxDashboard.embeddablePanelMenuIcon().click();
       await page.testSubj.click('embeddablePanelAction-expViewExplore');
