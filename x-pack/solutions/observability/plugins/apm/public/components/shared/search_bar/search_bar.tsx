@@ -118,6 +118,7 @@ export function SearchBar({
                 pendingKuery={pendingKuery}
                 submitActionRef={submitActionRef}
                 updateButtonProps={{
+                  fill: false,
                   'data-test-subj': 'querySubmitButton',
                   ...(isQueryDirty && { needsUpdate: true, showTooltip: false }),
                 }}
