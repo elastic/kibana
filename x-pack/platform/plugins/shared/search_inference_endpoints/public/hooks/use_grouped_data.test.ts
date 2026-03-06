@@ -22,7 +22,7 @@ describe('useGroupedData', () => {
     expect(result.current).toMatchSnapshot();
   });
 
-  it('should return empty object when no endpoints provided', () => {
+  it('should return empty array when no endpoints provided', () => {
     const { result } = renderHook(() =>
       useGroupedData([], GroupByOptions.Model, { provider: [], type: [] }, '')
     );
