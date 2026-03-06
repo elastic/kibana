@@ -5,23 +5,96 @@
  * 2.0.
  */
 
-export const SOFT_DELETE_COMPLIANCE_SYSTEM_PROMPT = `You are an automated quality-assurance LLM evaluating feature extraction from log streams.
+import { createPrompt } from '@kbn/inference-common';
+import { z } from '@kbn/zod/v4';
+import systemPromptText from './features_soft_delete_evaluator_system_prompt.text';
+import userPromptText from './features_soft_delete_evaluator_user_prompt.text';
 
-You are given two lists:
-1. **deleted_features**: features that were explicitly soft-deleted by the user. The LLM was instructed NOT to regenerate any feature that represents the same real-world component as a deleted feature.
-2. **follow_up_runs**: features produced in subsequent identification runs (with the deleted list provided to the LLM), grouped by run index.
-
-Your task: determine whether any follow-up feature is **the exact same real-world component** as a deleted feature, even if its id or wording differs slightly. A violation means the LLM failed to respect the soft-delete instruction.
-
-**Strict rules — read carefully:**
-- A violation occurs ONLY when a follow-up feature and a deleted feature describe the **identical real-world component**. You must be able to say "these two features are interchangeable — knowing one tells you everything knowing the other would."
-- Features with different \`type\` values (e.g. infrastructure vs entity) are virtually never duplicates.
-- A feature that merely *runs on*, *relates to*, or *is associated with* a deleted feature is NOT a duplicate. For example, a service that runs on Windows is not a duplicate of "Windows OS"; a log file produced by a system is not a duplicate of that system.
-- Features in the same domain but describing genuinely different components are NOT violations (e.g. two different services are not duplicates).
-- Features that share a naming pattern but have different identifiers (e.g. "host-8" vs "host-81", "service-a" vs "service-b") are distinct components and are NOT violations.
-- When in doubt, it is NOT a violation. Only flag violations you are 100% confident about.
-
-Method:
-1. For each deleted feature, scan all follow-up features across all runs for semantic matches.
-2. Apply the strict rules above before flagging any violation.
-3. Include the run_index in each violation so it can be traced back to the specific run.`;
+export const SoftDeleteCompliancePrompt = createPrompt({
+  name: 'soft_delete_compliance_analysis',
+  description:
+    'Evaluate whether soft-deleted features were incorrectly regenerated in follow-up identification runs',
+  input: z.object({
+    deleted_features: z.string(),
+    follow_up_runs: z.string(),
+  }),
+})
+  .version({
+    system: {
+      mustache: {
+        template: systemPromptText,
+      },
+    },
+    template: {
+      mustache: {
+        template: userPromptText,
+      },
+    },
+    tools: {
+      analyze: {
+        description:
+          'Return the list of soft-delete compliance violations found across follow-up runs',
+        schema: {
+          type: 'object',
+          properties: {
+            violations: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  run_index: {
+                    type: 'number',
+                    description:
+                      'The zero-based index of the follow-up run where the violation occurred',
+                  },
+                  deleted_feature: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', description: 'The id of the deleted feature' },
+                      title: { type: 'string', description: 'The title of the deleted feature' },
+                      type: { type: 'string', description: 'The type of the deleted feature' },
+                      subtype: {
+                        type: 'string',
+                        description: 'The subtype of the deleted feature',
+                      },
+                    },
+                    required: ['id', 'title', 'type', 'subtype'],
+                  },
+                  regenerated_feature: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', description: 'The id of the regenerated feature' },
+                      title: {
+                        type: 'string',
+                        description: 'The title of the regenerated feature',
+                      },
+                      type: { type: 'string', description: 'The type of the regenerated feature' },
+                      subtype: {
+                        type: 'string',
+                        description: 'The subtype of the regenerated feature',
+                      },
+                    },
+                    required: ['id', 'title', 'type', 'subtype'],
+                  },
+                  reason: {
+                    type: 'string',
+                    description:
+                      'One sentence explaining why the regenerated feature is semantically the same as the deleted one',
+                  },
+                },
+                required: ['run_index', 'deleted_feature', 'regenerated_feature', 'reason'],
+              },
+              description:
+                'Features from follow-up runs that semantically match a deleted feature. Empty if the LLM fully respected the soft-delete list.',
+            },
+            explanation: {
+              type: 'string',
+              description: 'Brief summary of your analysis',
+            },
+          },
+          required: ['violations', 'explanation'],
+        },
+      },
+    },
+  } as const)
+  .get();
