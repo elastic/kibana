@@ -15,6 +15,7 @@ describe('#standardDiffDocCalculation', () => {
       expect(result).toEqual({
         stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
         fieldChanges: [],
+        ignored: [],
         oldvalues: {},
         newvalues: {},
       });
@@ -27,6 +28,7 @@ describe('#standardDiffDocCalculation', () => {
       expect(result).toEqual({
         stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
         fieldChanges: [],
+        ignored: [],
         oldvalues: {},
         newvalues: {},
       });
@@ -39,6 +41,7 @@ describe('#standardDiffDocCalculation', () => {
       expect(result).toEqual({
         stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
         fieldChanges: [],
+        ignored: [],
         oldvalues: {},
         newvalues: {},
       });
@@ -431,6 +434,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.ignored.sort()).toEqual(['description', 'type'].sort());
       expect(result.fieldChanges).toEqual(['title']);
       expect(result.newvalues).toEqual({ title: 'New Title' });
     });
@@ -455,6 +459,9 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.ignored.sort()).toEqual(
+        ['config.layout', 'metadata.author', 'metadata.version'].sort()
+      );
       expect(result.fieldChanges).toEqual(['config.theme']);
     });
 
@@ -470,6 +477,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 0,
       });
+      expect(result.ignored).toEqual(['title']);
     });
 
     it('should handle filter with multiple properties', () => {
@@ -494,6 +502,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 2,
       });
+      expect(result.ignored.sort()).toEqual(['description', 'version'].sort());
       expect(result.fieldChanges.sort()).toEqual(['author', 'title'].sort());
     });
 
@@ -507,6 +516,7 @@ describe('#standardDiffDocCalculation', () => {
       const ignoreFields = { config: { theme: true } };
       const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
+      expect(result.ignored).toEqual(['config.theme']);
       expect(result.fieldChanges).toContain('config.layout.columns');
     });
   });
@@ -733,7 +743,7 @@ describe('#standardDiffDocCalculation', () => {
 });
 
 describe('#maskSensitiveFields', () => {
-  const maskedValuePattern = /^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*[a-f0-9]{12}$/;
+  const maskedValuePattern = /^[\*]{16}[a-f0-9]{12}$/;
 
   describe('when maskFields is not provided', () => {
     it('should return snapshot unchanged and empty masked array', () => {

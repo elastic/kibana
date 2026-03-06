@@ -22,6 +22,9 @@ dependsOn:
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
   - '@kbn/logging'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
 tags:
   - shared-common
   - package
