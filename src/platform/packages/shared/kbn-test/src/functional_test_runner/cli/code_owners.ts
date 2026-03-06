@@ -90,7 +90,7 @@ export async function checkTestCodeOwnersCLI() {
       log.info(`Checked ${totalFiles} test files in ${process.uptime().toFixed(2)}s`);
 
       if (allMissing.length === 0) {
-        log.success('All test files have a code owner');
+        log.success('All test files have a code owner 🥳');
         return;
       }
 
