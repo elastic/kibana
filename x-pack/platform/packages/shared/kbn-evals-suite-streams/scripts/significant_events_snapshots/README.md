@@ -22,7 +22,7 @@ The per-scenario deploy/teardown + data cleanup is intentional as each snapshot 
 
 ### Prerequisites
 
-- **minikube** + **kubectl**
+- **minikube** + **kubectl** — the script will automatically start minikube if it is not already running, using `--cpus=4 --memory=8g`. Ensure your system can spare these resources before running the script.
 - Local **Elasticsearch** running with access to GCS credentials: `yarn es snapshot --license trial --secure-files gcs.client.default.credentials_file=/path/to/creds.json`
 - Local **Kibana** running
 - GCS repository access configured in Elasticsearch (so ES can write snapshots to the bucket)
