@@ -862,10 +862,6 @@
                 "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
               },
               {
-                "plugin": "streams",
-                "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
-              },
-              {
                 "plugin": "datasetQuality",
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
               },
@@ -1940,10 +1936,6 @@
               {
                 "plugin": "datasetQuality",
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "streams",
-                "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.test.ts"
               },
               {
                 "plugin": "streams",
