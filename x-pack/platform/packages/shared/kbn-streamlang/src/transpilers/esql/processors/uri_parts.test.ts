@@ -82,4 +82,3 @@ describe('convertUriPartsProcessorToESQL', () => {
     expect(result).not.toContain('`url.original`');
   });
 });
-

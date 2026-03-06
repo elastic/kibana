@@ -10,11 +10,10 @@ import type { StreamlangDSL, UriPartsProcessor } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-apiTest.describe(
-  'Cross-compatibility - Uri Parts Processor',
-  { tag: ['@ess', '@svlOblt'] },
-  () => {
-    apiTest('should produce consistent outputs in ingest pipelines and ES|QL', async ({ testBed, esql }) => {
+apiTest.describe('Cross-compatibility - Uri Parts Processor', { tag: ['@ess', '@svlOblt'] }, () => {
+  apiTest(
+    'should produce consistent outputs in ingest pipelines and ES|QL',
+    async ({ testBed, esql }) => {
       const indexNameIngest = 'ingest-uri-parts';
       const indexNameEsql = 'esql-uri-parts';
       const uri =
@@ -41,7 +40,6 @@ apiTest.describe(
       const esqlResult = await esql.queryOnIndex(indexNameEsql, query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
-    });
-  }
-);
-
+    }
+  );
+});

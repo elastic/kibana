@@ -642,7 +642,8 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'URI parts',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.description', {
-      defaultMessage: 'Parse a URI string into structured parts (scheme, domain, path, query, etc.)',
+      defaultMessage:
+        'Parse a URI string into structured parts (scheme, domain, path, query, etc.)',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.uriParts.usage', {
       defaultMessage:

@@ -78,35 +78,37 @@ apiTest.describe(
       expect(source?.parts).toBeUndefined();
     });
 
-    apiTest('should remove the source field when remove_if_successful is true', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-uri-parts-remove-source';
-      const uri = 'https://www.example.com:8080';
+    apiTest(
+      'should remove the source field when remove_if_successful is true',
+      async ({ testBed }) => {
+        const indexName = 'stream-e2e-test-uri-parts-remove-source';
+        const uri = 'https://www.example.com:8080';
 
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'uri_parts',
-            from: 'uri',
-            to: 'parts',
-            remove_if_successful: true,
-          } as UriPartsProcessor,
-        ],
-      };
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'uri_parts',
+              from: 'uri',
+              to: 'parts',
+              remove_if_successful: true,
+            } as UriPartsProcessor,
+          ],
+        };
 
-      const { processors } = transpile(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
 
-      const docs = [{ uri }];
-      await testBed.ingest(indexName, docs, processors);
+        const docs = [{ uri }];
+        await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs).toHaveLength(1);
+        const source = ingestedDocs[0];
 
-      expect(source?.uri).toBeUndefined();
-      expect(source?.parts?.domain).toBe('www.example.com');
-      expect(source?.parts?.scheme).toBe('https');
-      expect(source?.parts?.port).toBe(8080);
-    });
+        expect(source?.uri).toBeUndefined();
+        expect(source?.parts?.domain).toBe('www.example.com');
+        expect(source?.parts?.scheme).toBe('https');
+        expect(source?.parts?.port).toBe(8080);
+      }
+    );
   }
 );
-
