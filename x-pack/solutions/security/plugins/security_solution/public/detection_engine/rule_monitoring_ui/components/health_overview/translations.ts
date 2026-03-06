@@ -187,6 +187,60 @@ export const NO_WARNINGS_RECORDED = i18n.translate(
 );
 
 // ---------------------------------------------------------------------------
+// Top Rules by Performance
+// ---------------------------------------------------------------------------
+
+export const TOP_RULES_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesSectionTitle',
+  { defaultMessage: 'Rule performance (p95)' }
+);
+
+export const TOP_RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesTableCaption',
+  { defaultMessage: 'Top rules by performance metric' }
+);
+
+export const TOP_RULES_TAB_EXECUTION_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesTabExecutionDuration',
+  { defaultMessage: 'Execution Duration' }
+);
+
+export const TOP_RULES_TAB_SCHEDULE_DELAY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesTabScheduleDelay',
+  { defaultMessage: 'Schedule Delay' }
+);
+
+export const TOP_RULES_TAB_SEARCH_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesTabSearchDuration',
+  { defaultMessage: 'Search Duration' }
+);
+
+export const TOP_RULES_TAB_INDEXING_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesTabIndexingDuration',
+  { defaultMessage: 'Indexing Duration' }
+);
+
+export const TOP_RULES_TAB_ENRICHMENT_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesTabEnrichmentDuration',
+  { defaultMessage: 'Enrichment Duration' }
+);
+
+export const TOP_RULES_RULE_NAME_COLUMN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesRuleNameColumn',
+  { defaultMessage: 'Rule Name' }
+);
+
+export const TOP_RULES_RULE_TYPE_COLUMN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesRuleTypeColumn',
+  { defaultMessage: 'Rule Type' }
+);
+
+export const TOP_RULES_NO_DATA = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topRulesNoData',
+  { defaultMessage: 'No rule data available for this metric.' }
+);
+
+// ---------------------------------------------------------------------------
 // Historical Trends
 // ---------------------------------------------------------------------------
 
