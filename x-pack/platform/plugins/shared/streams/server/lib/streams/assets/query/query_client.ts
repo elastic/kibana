@@ -514,6 +514,8 @@ export class QueryClient {
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
       } else if (!currentLink.rule_backed) {
+        // Unbacked queries have no rule, so breaking-change handling doesn't apply.
+        // Preserve the link as-is and update only the query content.
         allNextQueryLinks.push({ ...currentLink, query });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
@@ -526,6 +528,7 @@ export class QueryClient {
       }
     }
 
+    // Only delete rule-backed queries that are no longer in the input list.
     const currentQueriesToDelete = currentQueryLinks.filter(
       (link) => link.rule_backed && !nextIds.has(link.query.id)
     );
