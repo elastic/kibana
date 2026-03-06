@@ -239,11 +239,16 @@ export class InferencePlugin
 
       getConnectorList: async (request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
-        return getConnectorList({ actions: pluginsStart.actions, request, esClient });
+        return getConnectorList({
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
       },
       getDefaultConnector: async (request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
-        return loadDefaultConnector({ actions: pluginsStart.actions, request, esClient });
+        return loadDefaultConnector({ actions: pluginsStart.actions, request, esClient, logger: this.logger });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
@@ -252,6 +257,7 @@ export class InferencePlugin
           actions: pluginsStart.actions,
           request,
           esClient,
+          logger: this.logger,
         });
       },
 

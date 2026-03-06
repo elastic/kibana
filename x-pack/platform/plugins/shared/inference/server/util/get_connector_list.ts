@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
+import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import {
@@ -19,25 +19,38 @@ export const getConnectorList = async ({
   actions,
   request,
   esClient,
+  logger
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<InferenceConnector[]> => {
-  const [connectors, endpoints] = await Promise.all([
+  const [connectorsResult, endpointsResult] = await Promise.allSettled([
     getStackConnectors({ actions, request }),
     getInferenceEndpoints({ esClient, taskType: 'chat_completion' }),
   ]);
 
-  const connectorInferenceIds = new Set(
-    connectors
-      .filter((c) => c.type === InferenceConnectorType.Inference)
-      .map((c) => c.config?.inferenceId as string)
-      .filter(Boolean)
-  );
+  if (connectorsResult.status === 'rejected' && endpointsResult.status === 'rejected') {
+    throw new Error(
+      `Failed to retrieve connectors and inference endpoints: ${connectorsResult.reason}, ${endpointsResult.reason}`
+    )
+  }
+
+  if (connectorsResult.status === 'rejected') {
+    // Log the error but continue, as we may still have inference endpoints to return
+    logger.debug(`Failed to retrieve connectors: ${connectorsResult.reason}`);
+  }
+
+  if (endpointsResult.status === 'rejected') {
+    // Log the error but continue, as we may still have connectors to return
+    logger.debug(`Failed to retrieve inference endpoints: ${endpointsResult.reason}`);
+  }
+
+  const connectors = connectorsResult.status === 'fulfilled' ? connectorsResult.value : [];
+  const endpoints = endpointsResult.status === 'fulfilled' ? endpointsResult.value : [];
 
   const inferenceEndpointConnectors: InferenceConnector[] = endpoints
-    .filter((ep) => !connectorInferenceIds.has(ep.inferenceId))
     .map((ep) => ({
       type: InferenceConnectorType.Inference,
       name: ep.inferenceId,
@@ -62,13 +75,13 @@ const getStackConnectors = async ({
   actions: ActionsPluginStart;
   request: KibanaRequest;
 }): Promise<InferenceConnector[]> => {
-  const actionClient = await actions.getActionsClientWithRequest(request);
+    const actionClient = await actions.getActionsClientWithRequest(request);
 
-  const allConnectors = await actionClient.getAll({
-    includeSystemActions: false,
-  });
+    const allConnectors = await actionClient.getAll({
+      includeSystemActions: false,
+    });
 
-  return allConnectors
-    .filter((connector) => isSupportedConnector(connector))
-    .map(connectorToInference);
+    return allConnectors
+      .filter((connector) => isSupportedConnector(connector))
+      .map(connectorToInference);
 };

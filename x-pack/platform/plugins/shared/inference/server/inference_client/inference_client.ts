@@ -89,10 +89,10 @@ export function createInferenceClient({
     output,
     prompt,
     listConnectors: async () => {
-      return await getConnectorList({ actions, request, esClient });
+      return await getConnectorList({ actions, request, esClient, logger });
     },
     getConnectorById: async (connectorId: string) => {
-      return await getConnectorById({ connectorId, actions, request, esClient });
+      return await getConnectorById({ connectorId, actions, request, esClient, logger });
     },
     bindTo: (options: BoundOptions) => {
       return bindClient(client, options);

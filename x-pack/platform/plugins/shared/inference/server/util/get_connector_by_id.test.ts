@@ -10,6 +10,7 @@ import { getConnectorById } from './get_connector_by_id';
 import { getConnectorList } from './get_connector_list';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('./get_connector_list');
 
@@ -33,6 +34,8 @@ describe('getConnectorById', () => {
     ...parts,
   });
 
+  const logger = loggerMock.create();
+
   beforeEach(() => {
     actions = actionsMock.createStart();
     request = httpServerMock.createKibanaRequest();
@@ -55,7 +58,7 @@ describe('getConnectorById', () => {
       expected,
     ]);
 
-    const result = await getConnectorById({ actions, request, connectorId, esClient });
+    const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
 
     expect(result).toEqual(expected);
   });
@@ -74,6 +77,7 @@ describe('getConnectorById', () => {
       request,
       connectorId: 'my-endpoint',
       esClient,
+      logger,
     });
 
     expect(result).toEqual(expected);
@@ -84,7 +88,7 @@ describe('getConnectorById', () => {
       createMockInferenceConnector({ connectorId: 'other' }),
     ]);
 
-    await expect(getConnectorById({ actions, request, connectorId, esClient })).rejects.toThrow(
+    await expect(getConnectorById({ actions, request, connectorId, esClient, logger })).rejects.toThrow(
       "No connector or inference endpoint found for id 'my-connector-id'"
     );
   });
@@ -92,7 +96,7 @@ describe('getConnectorById', () => {
   it('throws if the connector list is empty', async () => {
     getConnectorListMock.mockResolvedValue([]);
 
-    await expect(getConnectorById({ actions, request, connectorId, esClient })).rejects.toThrow(
+    await expect(getConnectorById({ actions, request, connectorId, esClient, logger })).rejects.toThrow(
       "No connector or inference endpoint found for id 'my-connector-id'"
     );
   });

@@ -6,7 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
+import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
 import { getConnectorList } from './get_connector_list';
 
@@ -18,13 +18,15 @@ export const getConnectorById = async ({
   actions,
   request,
   esClient,
+  logger,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
   connectorId: string;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<InferenceConnector> => {
-  const connectors = await getConnectorList({ actions, request, esClient });
+  const connectors = await getConnectorList({ actions, request, esClient, logger });
   const match = connectors.find((c) => c.connectorId === connectorId);
 
   if (!match) {
