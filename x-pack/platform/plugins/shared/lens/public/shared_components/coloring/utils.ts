@@ -96,7 +96,7 @@ export function getAccessorType(
   }
 
   const operation = datasource.getOperationForColumnId(accessor);
-  const isTextBased = datasource.isTextBasedLanguage?.();
+  const isTextBased = datasource.isTextBasedLanguage();
 
   return getAccessorTypeFromOperation(operation, dataTypeFallback, isTextBased);
 }
