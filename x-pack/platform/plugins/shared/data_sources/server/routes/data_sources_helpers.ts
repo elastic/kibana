@@ -32,6 +32,8 @@ import type {
   DataSourcesServerStartDependencies,
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
+import type { DeleteDataSourceAndRelatedResourcesResult } from '../../common';
+import { getWorkflowPrefix, getToolPrefix } from '../../common';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -45,15 +47,6 @@ interface CreateDataSourceAndResourcesParams {
   actions: DataSourcesServerStartDependencies['actions'];
   dataSource: DataSource;
   agentBuilder: DataSourcesServerStartDependencies['agentBuilder'];
-}
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize('NFD') // split accented characters
-    .replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
-    .replace(/^-+|-+$/g, ''); // trim leading/trailing -
 }
 
 /**
@@ -171,7 +164,7 @@ export async function createDataSourceAndRelatedResources(
         finalStackConnectorId,
         stackConnectorConfig.importedTools,
         name,
-        `${type}.${slugify(name)}`,
+        getToolPrefix(name, type),
         logger
       );
       toolIds.push(...importedToolIds);
@@ -189,10 +182,11 @@ export async function createDataSourceAndRelatedResources(
 
   const workflowAndToolResults = await Promise.all(
     workflowInfos.map(async (workflowInfo) => {
-      // Extract original workflow name from YAML and prefix it with the data source name
+      // Extract workflow name from YAML; use convention source.<type>.<action> to avoid collisions
       const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
       const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
-      const prefixedName = `${slugify(name)}.${originalName}`;
+      const workflowBaseName = originalName.split('.').pop() || originalName;
+      const prefixedName = `${getWorkflowPrefix(name, type)}.${workflowBaseName}`;
       const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
 
       const workflow = await workflowManagement.management.createWorkflow(
@@ -211,12 +205,8 @@ export async function createDataSourceAndRelatedResources(
             ? parsedWorkflow.description
             : `Workflow tool for ${type} data source`;
 
-        // e.g., "sources.github.search_issues" -> "search_issues"
-        const workflowBaseName = originalName.split('.').pop() || originalName;
-
-        // Tool ID structure: type.data_source_name.workflow_base_name
         const tool = await toolRegistry.create({
-          id: `${type}.${slugify(name)}.${workflowBaseName}`,
+          id: `${getToolPrefix(name, type)}.source.${workflowBaseName}`,
           type: ToolType.workflow,
           description: workflowDescription,
           tags: ['data-source', type],
@@ -440,16 +430,6 @@ interface DeleteDataSourceAndRelatedResourcesParams {
   workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
   request: KibanaRequest;
   logger: Logger;
-}
-
-interface DeleteDataSourceAndRelatedResourcesResult {
-  success: boolean;
-  fullyDeleted: boolean;
-  remaining?: {
-    kscIds: string[];
-    toolIds: string[];
-    workflowIds: string[];
-  };
 }
 
 /**
