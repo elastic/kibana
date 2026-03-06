@@ -8,7 +8,7 @@
  */
 
 import * as http from 'http';
-import * as net from 'net';
+import type * as net from 'net';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Root } from '@kbn/core-root-server-internal';
 import {
