@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { createUpdateCaseStepDefinition } from './update_case';
+import { updateCaseStepDefinition } from './update_case';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 describe('createUpdateCaseStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
-    const definition = createUpdateCaseStepDefinition();
-
-    expect(definition.id).toBe('cases.updateCase');
-    expect(definition.category).toBe('kibana');
-    expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
+    expect(updateCaseStepDefinition.id).toBe('cases.updateCase');
+    expect(updateCaseStepDefinition.category).toBe('kibana');
+    expect(updateCaseStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 
   // TODO: enable one case_id can be a template AND an inputHandler
