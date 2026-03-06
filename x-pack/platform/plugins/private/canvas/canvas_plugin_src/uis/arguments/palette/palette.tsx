@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
@@ -93,14 +92,6 @@ export const StopsPaletteArgInput: FC<Props> = (props) => (
     }}
   />
 );
-
-PaletteArgInput.propTypes = {
-  argId: PropTypes.string,
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.any.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  renderError: PropTypes.func,
-};
 
 const defaultPaletteOptions = {
   default:
