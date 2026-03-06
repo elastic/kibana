@@ -36,7 +36,7 @@ export const QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE = i18n.translate(
 );
 
 export const QUICK_PROMPT_TABLE_CAPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompt.tableCaption',
+  'xpack.elasticAssistant.assistant.quickPromptTableCaption',
   {
     defaultMessage: 'Quick Prompt',
   }

@@ -28,7 +28,7 @@ export const SYSTEM_PROMPTS_TABLE_COLUMN_DATE_UPDATED = i18n.translate(
 );
 
 export const SYSTEM_PROMPTS_TABLE_CAPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptsTable.tableCaption',
+  'xpack.elasticAssistant.assistant.promptsTableCaption',
   {
     defaultMessage: 'System Prompts',
   }
