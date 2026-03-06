@@ -21,7 +21,6 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
-import pRetry from 'p-retry';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
@@ -299,46 +298,34 @@ export class StreamsPlugin
             esClientAsInternalUser: esClient,
           });
 
-          await pRetry(
-            async () => {
-              await streamsClient.enableStreams();
+          await streamsClient.enableStreams();
 
-              await streamsClient.bulkUpsert(
-                this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
-                  name,
-                  request: Streams.all.UpsertRequest.parse(
-                    ROOT_STREAM_NAMES.includes(name)
-                      ? {
-                          ...definition,
-                          stream: {
-                            ...definition.stream,
-                            ingest: {
-                              ...definition.stream.ingest,
-                              wired: {
-                                ...definition.stream.ingest.wired,
-                                fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
-                              },
-                            },
+          await streamsClient.bulkUpsert(
+            this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+              name,
+              request: Streams.all.UpsertRequest.parse(
+                ROOT_STREAM_NAMES.includes(name)
+                  ? {
+                      ...definition,
+                      stream: {
+                        ...definition.stream,
+                        ingest: {
+                          ...definition.stream.ingest,
+                          wired: {
+                            ...definition.stream.ingest.wired,
+                            fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
                           },
-                        }
-                      : definition
-                  ),
-                }))
-              );
-            },
-            {
-              retries: 5,
-              onFailedAttempt: (error) => {
-                this.logger.warn(
-                  `Attempt ${error.attemptNumber} to preconfigure streams failed: ${error}`
-                );
-              },
-            }
+                        },
+                      },
+                    }
+                  : definition
+              ),
+            }))
           );
           this.logger.info('Streams preconfigured successfully');
         })
         .catch((error) => {
-          this.logger.error(`Failed to preconfigure streams: ${error}`);
+          this.logger.error(`Error preconfiguring streams: ${error}`);
         });
     }
 
