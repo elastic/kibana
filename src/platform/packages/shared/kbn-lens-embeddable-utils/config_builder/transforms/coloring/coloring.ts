@@ -412,7 +412,7 @@ export function fromColorMappingAPIToLensState(
             ...step,
             touched: false,
           })),
-          sort: colorMapping.sort ?? 'desc',
+          sort: colorMapping.sort ?? 'asc',
         };
 
   return {
