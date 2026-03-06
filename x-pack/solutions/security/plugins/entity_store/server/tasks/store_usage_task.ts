@@ -17,7 +17,7 @@ import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
-import { getLatestEntitiesIndexName } from '../domain/assets/latest_index';
+import { getLatestEntitiesIndexName } from '../domain/asset_manager/latest_index';
 import {
   ENTITY_STORE_USAGE_EVENT,
   createReportEvent,
