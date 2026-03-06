@@ -1,0 +1,47 @@
+graph TB
+    subgraph "Data Sources"
+        A[Security Alerts]
+        B["Log Sources<br/>(filebeat, auditbeat, etc.)"]
+        C["User Input<br/>(CSV Upload, API)"]
+    end
+
+    subgraph "Entity Analytics Engine"
+        D[Entity Store]
+        E[Risk Engine]
+        F[Asset Criticality]
+        G[Privilege Monitoring]
+    end
+
+    subgraph "Elasticsearch Resources"
+        H["Entity Indices<br/>(.entities.*)"]
+        I["Risk Score Indices<br/>(risk-score.*)"]
+        J[Asset Criticality Index]
+        K[Transforms]
+        L[Enrich Policies]
+        M[Ingest Pipelines]
+    end
+
+    subgraph "Consumers"
+        N[Security Dashboards]
+        O[Entity Flyouts]
+        P[Detection Rules]
+        Q[AI Assistant]
+    end
+
+    B --> D
+    A --> E
+    C --> F
+    D --> H
+    E --> I
+    F --> J
+    F -->|modifies scores| E
+    G -->|modifies scores| E
+    D --> K
+    D --> L
+    E --> K
+    H --> N
+    I --> N
+    H --> O
+    I --> O
+    I --> P
+    I --> Q

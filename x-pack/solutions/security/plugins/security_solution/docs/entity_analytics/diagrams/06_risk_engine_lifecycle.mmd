@@ -1,0 +1,11 @@
+stateDiagram-v2
+    [*] --> NotInstalled
+    NotInstalled --> Initializing: POST /init
+    Initializing --> Disabled: Resources created
+    Disabled --> Enabled: POST /enable
+    Enabled --> Disabled: POST /disable
+    Enabled --> Enabled: Scoring task runs (1h)
+    Enabled --> Enabled: POST /schedule_now
+    Enabled --> Deleting: POST /dangerously_delete_data
+    Disabled --> Deleting: POST /dangerously_delete_data
+    Deleting --> NotInstalled: All data removed

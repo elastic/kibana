@@ -1,0 +1,24 @@
+graph TB
+    subgraph "Input"
+        A["Security Alerts Index<br/>(.alerts-security.alerts-*)"]
+    end
+
+    subgraph "Calculation"
+        A -->|ESQL aggregation| B["Per-Entity Score<br/>(Riemann zeta weighted sum)"]
+        B --> C{Modifiers}
+        C -->|Asset Criticality| D["Criticality Modifier<br/>(Bayesian update)"]
+        C -->|Privilege Monitoring| E[Privmon Modifier]
+        D --> F[Final Risk Score]
+        E --> F
+    end
+
+    subgraph "Persistence"
+        F -->|Bulk index| G["Risk Score Data Stream<br/>(risk-score.risk-score-NAMESPACE)"]
+        G -->|Latest Transform| H["Risk Score Latest<br/>(risk-score.risk-score-latest-NAMESPACE)"]
+    end
+
+    subgraph "Output"
+        H --> I[Entity Flyouts]
+        H --> J[Dashboards]
+        H --> K[AI Assistant]
+    end

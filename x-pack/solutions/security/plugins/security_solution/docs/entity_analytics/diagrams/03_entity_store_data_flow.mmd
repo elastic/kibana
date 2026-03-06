@@ -1,0 +1,31 @@
+graph TB
+    subgraph "Entity Store Plugin (v2)"
+        direction TB
+
+        subgraph "Log Extraction"
+            A["Log Sources<br/>(Security data view)"] -->|ESQL Query| B[Extract Entity Task]
+            R["Remote Indices<br/>(CCS)"] -->|CCS Extraction| U["Updates Data Stream<br/>(.entities.v2.updates.*)"]
+        end
+
+        subgraph "Direct Ingest"
+            B -->|"ingestEntities()"| D["Latest Entity Index<br/>(.entities.v2.latest.*)"]
+            U -->|Merge| D
+        end
+
+        subgraph "CRUD Operations"
+            C1["Single Upsert"] -->|"esClient.update()"| D
+            C2["Bulk Upsert"] -->|"esClient.bulk()"| U
+            C3["Delete"] -->|"esClient.delete()"| D
+        end
+
+        subgraph "Index Pipeline"
+            D -->|Default Pipeline| P["Ingest Pipeline<br/>(dot expander)"]
+            P --> D
+        end
+    end
+
+    subgraph "Consumers"
+        D --> G[Entity Flyouts]
+        D --> H[Risk Engine]
+        D --> I[Dashboards]
+    end

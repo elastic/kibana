@@ -1,0 +1,12 @@
+stateDiagram-v2
+    [*] --> NotInstalled
+    NotInstalled --> Installing: POST /enable or /init
+    Installing --> Started: Resources created
+    Started --> Stopped: POST /stop
+    Stopped --> Started: POST /start
+    Started --> Started: Running (tasks active)
+    Started --> Error: Resource failure
+    Error --> Started: Auto-recovery / manual restart
+    Started --> Deleting: DELETE /engines
+    Stopped --> Deleting: DELETE /engines
+    Deleting --> NotInstalled: Cleanup complete
