@@ -870,7 +870,7 @@ describe('Color util transforms', () => {
           { type: 'colorCode', value: '#ff0000' },
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
-        sort: 'desc',
+        sort: 'asc',
         unassignedColor: { type: 'from_palette', palette: 'kibana_palette', index: 2 },
       };
 
