@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiAvatar,
   EuiCallOut,
+  EuiCopy,
   EuiDescriptionList,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,7 +36,11 @@ const GOOGLE_SCOPES = [
   'email',
   'profile',
   'https://www.googleapis.com/auth/drive.metadata.readonly',
+  'https://www.googleapis.com/auth/gmail.readonly',
 ];
+
+/** Opaque state for EARS OAuth round-trip (required by EARS). */
+const EARS_TEST_STATE = 'workplace_ai_ears_test';
 
 function getEARSAuthUrl(
   config: WorkplaceAIClientConfig,
@@ -46,10 +51,12 @@ function getEARSAuthUrl(
   }
 
   const earsUrl = config.ears.url;
+  const callbackUri = `${kibanaBasePath}/app/workplace_ai`;
 
   const params = new URLSearchParams();
-  GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
-  params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
+  params.set('callback_uri', callbackUri);
+  params.set('state', EARS_TEST_STATE);
+  params.set('scope', GOOGLE_SCOPES.join(','));
 
   const authUrl = earsUrl
     ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
@@ -156,6 +163,16 @@ export const EarsConnectionsSection: React.FC = () => {
   };
 
   const revokeTokensMutation = useRevokeToken();
+
+  const handleReset = () => {
+    setAccessToken(null);
+    setRefreshToken(null);
+    setUserInfo(null);
+    setUserInfoError(null);
+    setEarsError(null);
+    const base = basePath ? basePath.replace(/\/$/, '') : window.location.origin;
+    window.location.assign(`${base}/app/workplace_ai`);
+  };
 
   const handleRevokeToken = async () => {
     if (!accessToken) return;
@@ -294,24 +311,46 @@ export const EarsConnectionsSection: React.FC = () => {
                 {accessToken && (
                   <EuiFlexItem>
                     <EuiCallOut
+                      announceOnMount={false}
                       title={
                         <FormattedMessage
                           id="xpack.workplaceai.gettingStarted.earsSection.gotAccessToken"
-                          defaultMessage="Got a token: ...{tokenSuffix}"
-                          values={{ tokenSuffix: accessToken.slice(-10) }}
+                          defaultMessage="Got a token"
                         />
                       }
                       color="success"
                       iconType="check"
-                    />
+                    >
+                      <EuiFlexGroup alignItems="center" gutterSize="m">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            {accessToken.length > 24
+                              ? `${accessToken.slice(0, 24)}...`
+                              : accessToken}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiCopy textToCopy={accessToken}>
+                            {(copy) => (
+                              <EuiButton size="s" onClick={copy} iconType="copy">
+                                <FormattedMessage
+                                  id="xpack.workplaceai.gettingStarted.earsSection.copyToken"
+                                  defaultMessage="Copy"
+                                />
+                              </EuiButton>
+                            )}
+                          </EuiCopy>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiCallOut>
                   </EuiFlexItem>
                 )}
-                {refreshToken && (
+                {(code || accessToken) && (
                   <EuiFlexItem>
-                    <EuiButton color="primary" onClick={handleRefreshToken} isLoading={earsLoading}>
+                    <EuiButton color="text" onClick={handleReset} isDisabled={earsLoading}>
                       <FormattedMessage
-                        id="xpack.workplaceai.gettingStarted.earsSection.refreshTokenButton"
-                        defaultMessage="Refresh Token"
+                        id="xpack.workplaceai.gettingStarted.earsSection.resetButton"
+                        defaultMessage="Reset"
                       />
                     </EuiButton>
                   </EuiFlexItem>

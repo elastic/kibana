@@ -76,7 +76,7 @@ telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.slack_api', '.jira', '.jira-cloud', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference', '.mcp', '.notion', '.github', '.google_drive', '.sharepoint-online']
+  ['.email', '.index', '.slack', '.slack_api', '.jira', '.jira-cloud', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference', '.mcp', '.notion', '.github', '.gmail', '.google_drive', '.google_calendar', '.sharepoint-online']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
@@ -114,6 +114,9 @@ xpack.searchQueryRules.enabled: true
 
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false
+
+## OAuth with Elastic-owned apps
+xpack.actions.ears.url: https://elastic-auth-redirect-service.eu-west-1.aws.svc.qa.elastic.cloud
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
