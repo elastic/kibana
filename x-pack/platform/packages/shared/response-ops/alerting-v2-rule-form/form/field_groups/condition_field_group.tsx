@@ -9,15 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
-import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
 import { WhereClauseEditor } from '../fields/where_clause_editor';
 import { EvaluationQueryField } from '../fields/evaluation_query_field';
 
 interface ConditionFieldGroupProps {
-  /** Search service for fetching available columns from the query */
-  search: ISearchStart['search'];
   /**
    * Whether to include the editable base query field.
    * When true, shows an editable ES|QL editor for the base query.
@@ -37,7 +34,6 @@ interface ConditionFieldGroupProps {
  * condition field defines the threshold or filter that triggers alerts.
  */
 export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
-  search,
   includeBase = false,
 }) => {
   const { control } = useFormContext<FormValues>();
@@ -100,7 +96,6 @@ export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
               })
             : undefined
         }
-        services={{ search }}
         baseQuery={baseQuery || ''}
         disabled={!baseQuery}
         fullWidth={true}

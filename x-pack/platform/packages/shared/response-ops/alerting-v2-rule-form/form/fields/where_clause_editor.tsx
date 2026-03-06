@@ -12,11 +12,11 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
 import { suggest, validateQuery } from '@kbn/esql-language';
 import { getEsqlColumns } from '@kbn/esql-utils';
-import type { ISearchStart } from '@kbn/data-plugin/public';
 import { monaco } from '@kbn/monaco';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useDebounceFn } from '@kbn/react-hooks';
 import type { FormValues } from '../types';
+import { useRuleFormServices } from '../contexts';
 
 // Visible prefix in the editor (non-deletable) - includes pipe for ES|QL autocomplete context
 const EDITOR_PREFIX = '| WHERE ';
@@ -41,9 +41,6 @@ export interface WhereClauseEditorProps {
   rules?: {
     required?: string;
     validate?: (value: string | undefined) => string | boolean | Promise<string | boolean>;
-  };
-  services: {
-    search: ISearchStart['search'];
   };
 }
 
@@ -371,11 +368,12 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
   dataTestSubj = 'whereClauseEditor',
   disabled = false,
   isOptional = true,
-  services: { search },
   baseQuery = '',
   rules,
 }) => {
   const { control } = useFormContext<FormValues>();
+  const { data } = useRuleFormServices();
+  const search = data.search.search;
 
   // Create ES|QL callbacks internally using the search service
   const queryCallbacks = useMemo(() => {

@@ -15,7 +15,6 @@ import { ConditionFieldGroup } from './field_groups/condition_field_group';
 import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RULE_FORM_ID } from './constants';
-import { useRuleFormServices } from './contexts';
 
 export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
@@ -39,14 +38,13 @@ export const GuiRuleForm: React.FC<GuiRuleFormProps> = ({
   includeQueryEditor = true,
 }) => {
   const { handleSubmit } = useFormContext<FormValues>();
-  const { data } = useRuleFormServices();
 
   return (
     <EuiForm id={RULE_FORM_ID} component="form" onSubmit={handleSubmit(onSubmit)}>
       <ErrorCallOut />
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
-      <ConditionFieldGroup includeBase={includeQueryEditor} search={data.search.search} />
+      <ConditionFieldGroup includeBase={includeQueryEditor} />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
       <EuiSpacer size="m" />
