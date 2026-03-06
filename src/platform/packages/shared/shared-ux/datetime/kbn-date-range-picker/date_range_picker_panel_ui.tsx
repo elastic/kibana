@@ -92,11 +92,17 @@ export const SubPanelHeading = ({ className, children }: PanelCommonProps) => {
  * Scrollable body section of a panel. Sits between `PanelHeader` and `PanelFooter`.
  * Will fill the vertical space (flew-grow: 1), and can scroll.
  */
-export const PanelBody = ({ className, children }: PanelCommonProps) => {
+export const PanelBody = ({
+  spacingSide = 'inline',
+  className,
+  children,
+}: PanelSpacingProps & PanelCommonProps) => {
   const euiThemeContext = useEuiTheme();
+  const styles = panelBodyStyles(euiThemeContext);
+  const spacing = panelSpacingStyles(euiThemeContext);
 
   return (
-    <div css={panelBodyStyles(euiThemeContext).root} className={className}>
+    <div css={[styles.root, spacing[spacingSide]]} className={className}>
       {children}
     </div>
   );
