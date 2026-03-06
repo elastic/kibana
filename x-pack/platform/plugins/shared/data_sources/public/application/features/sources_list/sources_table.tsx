@@ -30,8 +30,25 @@ import {
   PAGINATION_ITEMS_PER_PAGE_OPTIONS,
 } from '../../../../common/constants';
 import { getConnectorIcon } from '../../../utils';
+import { getWorkflowPrefix, getToolPrefix } from '../../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { SourcesUtilityBar } from './sources_utility_bar';
+
+const getWorkflowQuery = (source: ActiveSource): string => {
+  try {
+    return getWorkflowPrefix(source.name, source.type);
+  } catch {
+    return source.name;
+  }
+};
+
+const getToolQuery = (source: ActiveSource): string => {
+  try {
+    return getToolPrefix(source.name, source.type);
+  } catch {
+    return source.name;
+  }
+};
 
 interface SourcesTableProps {
   sources: ActiveSource[];
@@ -246,7 +263,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         }),
         align: 'center',
         render: (workflows: string[], source: ActiveSource) => {
-          const path = `?query=${encodeURIComponent(source.name)}`;
+          const path = `?query=${encodeURIComponent(getWorkflowQuery(source))}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return workflows.length > 0 ? (
             <EuiLink href={workflowsUrl} data-test-subj={`workflowsLink-${source.id}`}>
@@ -264,7 +281,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         }),
         align: 'center',
         render: (agentTools: string[], source: ActiveSource) => {
-          const path = `/tools?search=${encodeURIComponent(source.type)}`;
+          const path = `/tools?search=${encodeURIComponent(getToolQuery(source))}`;
           const toolsUrl = application.getUrlForApp(AGENT_BUILDER_APP_ID, { path });
           return agentTools.length > 0 ? (
             <EuiLink href={toolsUrl} data-test-subj={`toolsLink-${source.id}`}>
@@ -282,7 +299,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         width: '120px',
         align: 'right',
         render: (source: ActiveSource) => {
-          const path = `?query=${encodeURIComponent(source.name)}`;
+          const path = `?query=${encodeURIComponent(getWorkflowQuery(source))}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return (
             <ActionsCell
